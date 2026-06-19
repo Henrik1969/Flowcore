@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 3.16)
+project(flowparse VERSION 0.1.0 LANGUAGES CXX)
+add_executable(flowparse src/flowparse.cpp)
+target_compile_features(flowparse PRIVATE cxx_std_17)
+target_compile_options(flowparse PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wshadow)

@@ -1,0 +1,15 @@
+module annotations_demo
+
+// !!!emit stderr entering @file at line @linenr
+§ x:int = 10
+
+// !!!emit stream declared x at @file:@linenr:@column
+§ total:int =
+    x
+    + 20
+
+// ordinary comment: ignored
+total
+    => print()
+
+// !!!emit stdout finished lexing source @sourceid near line @line

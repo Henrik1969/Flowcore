@@ -1,0 +1,16 @@
+{"type":"GHOST_SOURCE_BEGIN","ghost":true,"source_id":2,"file":"examples/multiline.flow","origin":"fixture"}
+{"type":"DECLARE","lexeme":"§","line":1,"column":1}
+{"type":"IDENTIFIER","lexeme":"total","line":1,"column":3}
+{"type":"COLON","lexeme":":","line":1,"column":8}
+{"type":"IDENTIFIER","lexeme":"int","line":1,"column":9}
+{"type":"ASSIGN","lexeme":"=","line":1,"column":13}
+{"type":"NEWLINE","lexeme":"\\n","line":1,"column":14}
+{"type":"IDENTIFIER","lexeme":"price","line":2,"column":5}
+{"type":"NEWLINE","lexeme":"\\n","line":2,"column":10}
+{"type":"PLUS","lexeme":"+","line":3,"column":5}
+{"type":"IDENTIFIER","lexeme":"freight","line":3,"column":7}
+{"type":"NEWLINE","lexeme":"\\n","line":3,"column":14}
+{"type":"PLUS","lexeme":"+","line":4,"column":5}
+{"type":"IDENTIFIER","lexeme":"tax","line":4,"column":7}
+{"type":"NEWLINE","lexeme":"\\n","line":4,"column":10}
+{"type":"EOF","lexeme":"","line":5,"column":1}

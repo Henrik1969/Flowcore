@@ -1,0 +1,62 @@
+// TOKEN_NAME | ECMAScript regex | action
+// Longest match wins. File order breaks ties.
+
+// Layout and comments
+HORIZONTAL_SPACE | [ \t\f\v]+ | skip
+NEWLINE | \r?\n | newline
+ANNOTATION | //[ \t]*!!!emit[ \t]+(stream|stdout|stderr)[ \t]*[^\r\n]* | annotation
+LINE_COMMENT | //[^\r\n]* | skip
+BLOCK_COMMENT | /\*([^*]|\*+[^*/])*\*+/ | skip
+
+// Declaration marker
+DECLARE | § | emit
+
+// Multi-character operators
+PIPE | => | emit
+GRAPH_ARROW | -> | emit
+LOGICAL_AND | && | emit
+LOGICAL_OR | \|\| | emit
+SHIFT_LEFT | << | emit
+SHIFT_RIGHT | >> | emit
+LESS_EQUAL | <= | emit
+GREATER_EQUAL | >= | emit
+EQUAL_EQUAL | == | emit
+BANG_EQUAL | != | emit
+RANGE | \.\. | emit
+
+// Literals
+FLOAT_LITERAL | ([0-9][0-9_]*\.[0-9][0-9_]*([eE][+-]?[0-9][0-9_]*)?)|([0-9][0-9_]*[eE][+-]?[0-9][0-9_]*) | emit
+INTEGER_LITERAL | 0[xX][0-9a-fA-F_]+|0[bB][01_]+|0[oO][0-7_]+|[0-9][0-9_]* | emit
+STRING_LITERAL | "([^"\\\r\n]|\\.)*" | emit
+CHAR_LITERAL | '([^'\\\r\n]|\\.)' | emit
+
+// Identifiers
+IDENTIFIER | [A-Za-z_][A-Za-z0-9_]* | identifier
+
+// Single-character punctuation and operators
+COLON | : | emit
+ASSIGN | = | emit
+DOT | \. | emit
+AT | @ | emit
+DEREFERENCE | # | emit
+COMMA | , | emit
+SEMICOLON | ; | emit
+LEFT_PAREN | \( | emit
+RIGHT_PAREN | \) | emit
+LEFT_BRACE | \{ | emit
+RIGHT_BRACE | \} | emit
+LEFT_BRACKET | \[ | emit
+RIGHT_BRACKET | \] | emit
+QUESTION | \? | emit
+PLUS | \+ | emit
+MINUS | - | emit
+STAR | \* | emit
+SLASH | / | emit
+PERCENT | % | emit
+BANG | ! | emit
+TILDE | ~ | emit
+BIT_AND | & | emit
+BIT_OR | \| | emit
+XOR | \^ | emit
+LESS | < | emit
+GREATER | > | emit

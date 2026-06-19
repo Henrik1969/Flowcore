@@ -1,0 +1,21 @@
+module demo
+
+§ Handler:type = (event:ref<Event>):bool
+§ handlers:table<EventType, Handler>
+§ accepted:bool = false
+
+event
+    => handlers[event.kind]()
+    => accepted
+
+flow Demo {
+    src.out -> sink.in
+}
+
+// Boolean and bitwise examples
+§ condition:bool = !(a ^ b) || (c ^ a)
+§ mask:uint32 = (1 << 4) | 0x03
+
+for(§ index:int = 0; index < 10; index = index + 1) {
+    values[index] => process()
+}
