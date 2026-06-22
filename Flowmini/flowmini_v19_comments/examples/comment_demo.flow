@@ -1,0 +1,30 @@
+module comment_demo
+
+/*
+    This whole block is ignored.
+
+    main {
+        bad : int(999)
+        print bad
+    }
+
+    /*
+        Nested comment also ignored.
+    */
+*/
+
+main {
+    // inline comment before code
+    x : int(40) // declaration comment
+    y : int(2)
+
+    /*
+        Temporarily disabled:
+        x + y + y -> x
+
+        /* nested disabled experiment */
+    */
+
+    x + y -> x
+    print x // expected 42
+}

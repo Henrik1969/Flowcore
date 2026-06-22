@@ -1,0 +1,40 @@
+module factorial_general
+
+producer stdin : stdin.text
+node parse : parse.int.to_record
+node one : const.int
+node acc : const.int
+node check : int.gt
+node route : route.bool
+node mul : int.mul
+node dec : int.sub
+node print : stdout.int_line
+sink halt : halt.record
+
+policy parse.out = "n"
+policy one.out = "one"
+policy one.value = 1
+policy acc.out = "acc"
+policy acc.value = 1
+policy check.lhs = "n"
+policy check.rhs = "one"
+policy check.out = "cond"
+policy route.path = "cond"
+policy mul.lhs = "acc"
+policy mul.rhs = "n"
+policy mul.out = "acc"
+policy dec.lhs = "n"
+policy dec.rhs = "one"
+policy dec.out = "n"
+policy print.path = "acc"
+
+wire stdin.out => parse.in
+wire parse.out => one.in
+wire one.out => acc.in
+wire acc.out => check.in
+wire check.out => route.in
+wire route.true => mul.in
+wire mul.out => dec.in
+wire dec.out => check.in
+wire route.false => print.in
+wire print.out => halt.in

@@ -1,0 +1,20 @@
+import "../std/math.flow"
+import "../std/collatz.flow"
+
+module import_demo
+
+main {
+    three  : int(3)
+    four   : int(4)
+    five   : int(5)
+    result : int(0)
+
+    factorial(five) -> result
+    print result
+
+    square(add(three, four)) -> result
+    print result
+
+    collatz_next(five) -> result
+    print result
+}

@@ -1,0 +1,22 @@
+module collatz
+
+producer stdin : stdin.text
+node parse : parse.int
+node require-positive : int.require_positive
+node print : stdout.int_line.legacy
+node check-one : int.eq_one
+node parity : int.is_even
+node even-step : int.half
+node odd-step : int.three_n_plus_one
+sink halt : halt
+
+wire stdin.out => parse.in
+wire parse.out => require-positive.in
+wire require-positive.out => print.in
+wire print.out => check-one.in
+wire check-one.true => halt.in
+wire check-one.false => parity.in
+wire parity.true => even-step.in
+wire parity.false => odd-step.in
+wire even-step.out => print.in
+wire odd-step.out => print.in

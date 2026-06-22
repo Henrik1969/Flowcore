@@ -1,0 +1,8 @@
+import "../std/main_bad.flow"
+
+module bad_import_main
+
+main {
+    one : int(1)
+    print one
+}

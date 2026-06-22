@@ -1,0 +1,32 @@
+module fn_forwarding_demo
+
+fn identity(x : int): int {
+    x -> return
+}
+
+fn square(n : int): int {
+    n * n -> return
+}
+
+fn square_identity(v : int): int {
+    identity(v) -> return
+}
+
+fn add(a : int, b : int): int {
+    a + b -> return
+}
+
+fn add_square(a : int, b : int): int {
+    sum : int(0)
+    add(a, b) -> sum
+    square(sum) -> return
+}
+
+main {
+    x : int(3)
+    y : int(4)
+    result : int(0)
+
+    add_square(x, y) -> result
+    print result
+}

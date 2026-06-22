@@ -1,0 +1,41 @@
+0. Comments
+   done: // line comments
+   done: nested /* block comments */
+   done: comments ignored outside strings only
+   pending with Text: expression-level string concatenation across commented line breaks
+
+1. Internal Bool / Predicate result
+   done in v20
+   postponed: and/or short-circuit predicate grammar
+
+2. Internal Text / String value
+   next candidate: Text type, Text literals, Text + Text concat, print Text
+
+3. Broader field access inside expressions
+   mostly present; still needs wider stress testing
+
+4. Record printing / debug output
+   pending
+
+5. Type-bound functions without method sugar
+   pending
+
+6. Public/private
+   pending
+
+7. receiver.method() sugar
+   pending
+
+Additional backlog:
+   storage primitives: bit/byte/i16/u16/i32/u32/i64/u64/f32/f64
+   Real/f64 numeric family
+   checked casts/conversions
+   ABI error/failure flow
+   ABI output pointer/buffer contracts
+   safe opaque handles and lifetimes
+   internal/ABI record bridge conversions
+   effects enforcement and scheduling policy
+   short-circuit predicate lowering
+   type-bound functions and method visibility
+
+   rm -rf build && cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug && cmake --build build -j$(nproc)

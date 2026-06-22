@@ -1,0 +1,5 @@
+module bad_uninitialized_structured
+
+main {
+    one : int
+}

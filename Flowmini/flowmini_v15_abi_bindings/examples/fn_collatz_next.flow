@@ -1,0 +1,29 @@
+module fn_collatz_next
+
+fn collatz_next(n : int): int {
+    zero  : int(0)
+    two   : int(2)
+    three : int(3)
+    one   : int(1)
+    rem   : int(0)
+
+    n % two -> rem
+
+    if rem == zero {
+        n / two -> return
+    } else {
+        n * three + one -> return
+    }
+}
+
+main {
+    n   : int(stdin.int())
+    one : int(1)
+
+    while n > one {
+        print n
+        collatz_next(n) -> n
+    }
+
+    print n
+}

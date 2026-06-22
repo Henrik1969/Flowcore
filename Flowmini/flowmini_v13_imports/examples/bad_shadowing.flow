@@ -1,0 +1,10 @@
+module bad_shadowing
+
+main {
+    person : int(30)
+
+    while person > 0 {
+        person : int(12)
+        print person
+    }
+}

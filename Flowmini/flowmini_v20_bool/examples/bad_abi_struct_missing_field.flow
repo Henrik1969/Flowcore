@@ -1,0 +1,10 @@
+import "../std/abi/testabi.flow"
+
+module bad_abi_struct_missing_field
+
+main {
+    p : Point({x:10})
+    result : c_int(0)
+    point_sum(p) -> result
+    print result
+}

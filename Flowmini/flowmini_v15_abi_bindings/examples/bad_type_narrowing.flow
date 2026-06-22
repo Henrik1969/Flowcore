@@ -1,0 +1,11 @@
+import "../std/numbers.flow"
+
+module bad_type_narrowing
+
+main {
+    ordinary : Integer(5)
+    positive : PositiveInteger(1)
+
+    ordinary -> positive
+    print positive
+}

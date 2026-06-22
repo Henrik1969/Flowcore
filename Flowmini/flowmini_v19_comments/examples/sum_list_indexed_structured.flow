@@ -1,0 +1,19 @@
+module sum_list_indexed_structured
+
+main {
+    arr     : list<int>([1,9,3,5,8,2,2,6,4])
+    len     : int(length(arr))
+    zero    : int(0)
+    one     : int(1)
+    i       : int(0)
+    current : int(0)
+    sum     : int(0)
+
+    while i < len {
+        arr[i] -> current
+        sum + current -> sum
+        i + one -> i
+    }
+
+    print sum
+}

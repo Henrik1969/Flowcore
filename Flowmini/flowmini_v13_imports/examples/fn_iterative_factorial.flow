@@ -1,0 +1,21 @@
+module fn_iterative_factorial
+
+fn factorial(n : int): int {
+    one : int(1)
+    acc : int(1)
+
+    while n > one {
+        acc * n -> acc
+        n - one -> n
+    }
+
+    acc -> return
+}
+
+main {
+    n      : int(stdin.int())
+    result : int(0)
+
+    factorial(n) -> result
+    print result
+}

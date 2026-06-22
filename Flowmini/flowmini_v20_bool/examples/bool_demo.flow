@@ -1,0 +1,33 @@
+module bool_demo
+
+main {
+    zero : int(0)
+    one  : int(1)
+    two  : int(2)
+    out  : int(0)
+
+    less  : Bool(false)
+    equal : Bool(false)
+    same  : Bool(false)
+    inv   : Bool(false)
+
+    one < two -> less
+    print less
+
+    one == two -> equal
+    print equal
+
+    not equal -> inv
+    print inv
+
+    less == inv -> same
+    print same
+
+    if less {
+        one -> out
+    } else {
+        zero -> out
+    }
+
+    print out
+}

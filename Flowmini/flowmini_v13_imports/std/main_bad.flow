@@ -1,0 +1,6 @@
+module std_main_bad
+
+main {
+    one : int(1)
+    print one
+}

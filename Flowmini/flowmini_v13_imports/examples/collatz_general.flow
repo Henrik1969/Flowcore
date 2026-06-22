@@ -1,0 +1,73 @@
+module collatz_general
+
+producer stdin : stdin.text
+node parse : parse.int.to_record
+node zero : const.int
+node one : const.int
+node two : const.int
+node three : const.int
+node print : stdout.int_line
+node eq_one : int.eq
+node route_done : route.bool
+node mod_two : int.mod
+node eq_zero : int.eq
+node route_even : route.bool
+node div_two : int.div
+node mul_three : int.mul
+node add_one : int.add
+sink halt : halt.record
+
+policy parse.out = "n"
+
+policy zero.out = "zero"
+policy zero.value = 0
+policy one.out = "one"
+policy one.value = 1
+policy two.out = "two"
+policy two.value = 2
+policy three.out = "three"
+policy three.value = 3
+
+policy print.path = "n"
+
+policy eq_one.lhs = "n"
+policy eq_one.rhs = "one"
+policy eq_one.out = "done"
+policy route_done.path = "done"
+
+policy mod_two.lhs = "n"
+policy mod_two.rhs = "two"
+policy mod_two.out = "remainder"
+policy eq_zero.lhs = "remainder"
+policy eq_zero.rhs = "zero"
+policy eq_zero.out = "even"
+policy route_even.path = "even"
+
+policy div_two.lhs = "n"
+policy div_two.rhs = "two"
+policy div_two.out = "n"
+
+policy mul_three.lhs = "n"
+policy mul_three.rhs = "three"
+policy mul_three.out = "n"
+policy add_one.lhs = "n"
+policy add_one.rhs = "one"
+policy add_one.out = "n"
+
+wire stdin.out => parse.in
+wire parse.out => zero.in
+wire zero.out => one.in
+wire one.out => two.in
+wire two.out => three.in
+wire three.out => print.in
+wire print.out => eq_one.in
+wire eq_one.out => route_done.in
+wire route_done.true => halt.in
+wire route_done.false => mod_two.in
+wire mod_two.out => eq_zero.in
+wire eq_zero.out => route_even.in
+wire route_even.true => div_two.in
+wire div_two.out => print.in
+wire route_even.false => mul_three.in
+wire mul_three.out => add_one.in
+wire add_one.out => print.in

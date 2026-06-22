@@ -1,0 +1,15 @@
+module countdown
+
+producer stdin : stdin.text
+node parse : parse.int
+node check : int.gt_zero
+node print : stdout.int_line.legacy
+node dec : int.dec
+sink halt : halt
+
+wire stdin.out => parse.in
+wire parse.out => check.in
+wire check.true => print.in
+wire print.out => dec.in
+wire dec.out => check.in
+wire check.false => halt.in

@@ -1,0 +1,30 @@
+import "../std/numbers.flow"
+import "../std/numeric_math.flow"
+
+module type_contracts_demo
+
+main {
+    zero : ZeroInteger(0)
+    five : PositiveInteger(5)
+    port : PortNumber(443)
+    load : Percent(87)
+    integer : Integer(0)
+
+    five -> integer
+    print integer
+
+    port -> integer
+    print integer
+
+    load -> integer
+    print integer
+
+    square_integer(five) -> integer
+    print integer
+
+    factorial_integer(five) -> integer
+    print integer
+
+    zero -> integer
+    print integer
+}

@@ -1,0 +1,58 @@
+# Build directories
+build/
+cmake-build-*/
+out/
+bin/
+obj/
+
+# CMake
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+CTestTestfile.cmake
+DartConfiguration.tcl
+Makefile
+build.ninja
+rules.ninja
+.ninja_deps
+.ninja_log
+install_manifest.txt
+compile_commands.json
+
+# Compiled objects / libraries / binaries
+*.o
+*.obj
+*.a
+*.so
+*.so.*
+*.dll
+*.dylib
+*.exe
+*.out
+*.app
+
+# Generated / temporary files
+*.log
+*.tmp
+*.bak
+*.orig
+*.rej
+*~
+core
+core.*
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+Session.vim
+
+# OS / file manager junk
+.DS_Store
+Thumbs.db
+
+# Local project scratch / private config
+.local/
+tmp/
+scratch/

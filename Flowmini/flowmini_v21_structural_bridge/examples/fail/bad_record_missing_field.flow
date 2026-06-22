@@ -1,0 +1,11 @@
+module bad_record_missing_field
+
+type Point {
+    field x : int
+    field y : int
+}
+
+main {
+    p : Point({x:10})
+    print 1
+}

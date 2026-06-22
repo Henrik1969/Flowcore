@@ -1,0 +1,35 @@
+module std_abi_libc
+
+abi libc {
+    library "libc.so.6"
+    convention c
+
+    type c_string {
+        repr "const char*"
+        ownership borrowed
+        access read
+        lifetime call
+        nullable false
+        terminator nul
+    }
+
+    extern fn strlen(text : c_string): c_size_t {
+        symbol "strlen"
+        effect pure
+    }
+
+    extern fn abs(value : c_int): c_int {
+        symbol "abs"
+        effect pure
+    }
+
+    extern fn labs(value : c_long): c_long {
+        symbol "labs"
+        effect pure
+    }
+
+    extern fn puts(text : c_string): c_int {
+        symbol "puts"
+        effect io
+    }
+}

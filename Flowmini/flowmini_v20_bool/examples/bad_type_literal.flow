@@ -1,0 +1,8 @@
+import "../std/numbers.flow"
+
+module bad_type_literal
+
+main {
+    impossible : PositiveInteger(0)
+    print impossible
+}

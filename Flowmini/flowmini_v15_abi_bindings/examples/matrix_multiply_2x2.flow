@@ -1,0 +1,35 @@
+module matrix_multiply_2x2
+
+main {
+    a    : array<int>[2, 2]([1,2,3,4])
+    b    : array<int>[2, 2]([5,6,7,8])
+    c    : array<int>[2, 2]([0,0,0,0])
+    zero : int(0)
+    one  : int(1)
+    two  : int(2)
+    i    : int(0)
+    j    : int(0)
+    k    : int(0)
+    sum  : int(0)
+
+    while i < two {
+        zero -> j
+
+        while j < two {
+            zero -> k
+            zero -> sum
+
+            while k < two {
+                sum + a[i, k] * b[k, j] -> sum
+                k + one -> k
+            }
+
+            sum -> c[i, j]
+            j + one -> j
+        }
+
+        i + one -> i
+    }
+
+    print c
+}

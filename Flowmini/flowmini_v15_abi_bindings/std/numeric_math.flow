@@ -1,0 +1,24 @@
+import "numbers.flow"
+
+module std_numeric_math
+
+fn inc(n : Integer): Integer {
+    one : Integer(1)
+    n + one -> return
+}
+
+fn square_integer(n : Integer): Integer {
+    n * n -> return
+}
+
+fn factorial_integer(n : Integer): Integer {
+    one : Integer(1)
+    acc : Integer(1)
+
+    while n > one {
+        acc * n -> acc
+        n - one -> n
+    }
+
+    acc -> return
+}

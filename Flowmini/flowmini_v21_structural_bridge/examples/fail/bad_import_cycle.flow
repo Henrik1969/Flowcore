@@ -1,0 +1,8 @@
+import "../std/cycle_a.flow"
+
+module bad_import_cycle
+
+main {
+    one : int(1)
+    print one
+}

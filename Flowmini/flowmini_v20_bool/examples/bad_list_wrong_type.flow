@@ -1,0 +1,8 @@
+module bad_list_wrong_type
+
+main {
+    arr : list<int>([1,2,3])
+    i   : int(0)
+
+    arr -> arr[i]
+}

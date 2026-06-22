@@ -1,0 +1,11 @@
+module bad_if_shadowing
+
+main {
+    person : int(30)
+    zero   : int(0)
+
+    if person > zero {
+        person : int(12)
+        print person
+    }
+}

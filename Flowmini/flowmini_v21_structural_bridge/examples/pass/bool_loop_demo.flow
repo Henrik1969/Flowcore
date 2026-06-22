@@ -1,0 +1,14 @@
+module bool_loop_demo
+
+main {
+    i    : int(0)
+    five : int(5)
+    one  : int(1)
+    keep_going : Bool(true)
+
+    while keep_going {
+        print i
+        i + one -> i
+        i < five -> keep_going
+    }
+}

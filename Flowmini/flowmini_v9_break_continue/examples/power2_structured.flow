@@ -1,0 +1,16 @@
+module power2_structured
+
+main {
+    exp  : int(stdin.int())
+    zero : int(0)
+    one  : int(1)
+    base : int(2)
+    acc  : int(1)
+
+    while exp > zero {
+        acc * base -> acc
+        exp - one -> exp
+    }
+
+    print acc
+}

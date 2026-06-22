@@ -1,0 +1,9 @@
+import "../std/math.flow"
+import "../std/other_math.flow"
+
+module bad_import_duplicate_fn
+
+main {
+    one : int(1)
+    print one
+}

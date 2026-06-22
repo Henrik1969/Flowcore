@@ -1,0 +1,4 @@
+module bad_uninitialized
+
+stdin : stdin.text()
+one : int

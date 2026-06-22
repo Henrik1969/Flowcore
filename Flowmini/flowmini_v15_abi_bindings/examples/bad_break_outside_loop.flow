@@ -1,0 +1,7 @@
+module bad_break_outside_loop
+
+main {
+    zero : int(0)
+    break
+    print zero
+}

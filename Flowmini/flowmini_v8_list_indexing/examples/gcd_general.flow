@@ -1,0 +1,43 @@
+module gcd_general
+
+producer stdin : stdin.text
+node parse : parse.int.to_record
+node b : const.int
+node zero : const.int
+node check : int.eq
+node route : route.bool
+node mod : int.mod
+node copy_b_to_a : record.copy
+node copy_r_to_b : record.copy
+node print : stdout.int_line
+sink halt : halt.record
+
+policy parse.out = "a"
+policy b.out = "b"
+policy b.value = 1071
+policy zero.out = "zero"
+policy zero.value = 0
+policy check.lhs = "b"
+policy check.rhs = "zero"
+policy check.out = "done"
+policy route.path = "done"
+policy mod.lhs = "a"
+policy mod.rhs = "b"
+policy mod.out = "r"
+policy copy_b_to_a.from = "b"
+policy copy_b_to_a.to = "a"
+policy copy_r_to_b.from = "r"
+policy copy_r_to_b.to = "b"
+policy print.path = "a"
+
+wire stdin.out => parse.in
+wire parse.out => b.in
+wire b.out => zero.in
+wire zero.out => check.in
+wire check.out => route.in
+wire route.true => print.in
+wire print.out => halt.in
+wire route.false => mod.in
+wire mod.out => copy_b_to_a.in
+wire copy_b_to_a.out => copy_r_to_b.in
+wire copy_r_to_b.out => check.in

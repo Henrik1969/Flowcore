@@ -1,0 +1,21 @@
+import "../std/numbers.flow"
+import "../std/numeric_math.flow"
+import "../std/collatz.flow"
+
+module capable_typed_imported
+
+main {
+    three  : PositiveInteger(3)
+    four   : PositiveInteger(4)
+    five   : PositiveInteger(5)
+    result : Integer(0)
+
+    factorial_integer(five) -> result
+    print result
+
+    square_integer(three + four) -> result
+    print result
+
+    collatz_next(five) -> result
+    print result
+}

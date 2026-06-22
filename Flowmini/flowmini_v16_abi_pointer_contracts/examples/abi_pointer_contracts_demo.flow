@@ -1,0 +1,15 @@
+import "../std/abi/libc.flow"
+
+module abi_pointer_contracts_demo
+
+main {
+    text   : c_string("Flowmini pointer contracts")
+    len    : c_size_t(0)
+    status : c_int(0)
+
+    strlen(text) -> len
+    print len
+
+    puts(text) -> status
+    print status
+}

@@ -1,0 +1,17 @@
+module list_print
+
+producer stdin : stdin.text
+node parse : parse.int.to_record
+node arr : list.from_ints
+node print : list.print_int_lines
+sink halt : halt.record
+
+policy parse.out = "dummy"
+policy arr.out = "arr"
+policy arr.values = "1,9,3,5,8,2,2,6,4"
+policy print.list = "arr"
+
+wire stdin.out => parse.in
+wire parse.out => arr.in
+wire arr.out => print.in
+wire print.out => halt.in

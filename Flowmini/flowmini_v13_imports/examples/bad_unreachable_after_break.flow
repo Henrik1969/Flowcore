@@ -1,0 +1,11 @@
+module bad_unreachable_after_break
+
+main {
+    zero : int(0)
+    one  : int(1)
+
+    while zero < one {
+        break
+        print zero
+    }
+}

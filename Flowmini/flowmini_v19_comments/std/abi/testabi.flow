@@ -1,0 +1,21 @@
+module std_abi_testabi
+
+abi testabi {
+    library "./build/libflowmini_testabi.so"
+    convention c
+
+    struct Point {
+        x : c_int
+        y : c_int
+    }
+
+    extern fn point_sum(p : Point): c_int {
+        symbol "point_sum"
+        effect pure
+    }
+
+    extern fn point_weighted_sum(p : Point): c_int {
+        symbol "point_weighted_sum"
+        effect pure
+    }
+}
