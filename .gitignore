@@ -60,3 +60,7 @@ scratch/
 # Flowmini test reports
 test-report/
 **/test-report/
+
+# Flowmini generated test reports
+test-report/
+**/test-report/
