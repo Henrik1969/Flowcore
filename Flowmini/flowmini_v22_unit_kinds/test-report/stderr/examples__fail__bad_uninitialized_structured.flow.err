@@ -1,0 +1,1 @@
+fatal in parser: declaration of 'one' requires initializer at line 5, column 14 near '\n'

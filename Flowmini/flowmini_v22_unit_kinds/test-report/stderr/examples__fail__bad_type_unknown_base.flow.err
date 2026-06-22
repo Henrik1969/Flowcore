@@ -1,0 +1,1 @@
+fatal in parser: type 'Thing' refines unknown base type 'UnknownBase' at line 4, column 6 near 'Thing'

@@ -1,0 +1,35 @@
+unit countdown_general
+
+producer stdin : stdin.text
+node parse : parse.int.to_record
+node zero : const.int
+node gt : int.gt
+node route : route.bool
+node print : stdout.int_line
+node one : const.int
+node dec : int.sub
+sink halt : halt.record
+
+policy parse.out = "n"
+policy zero.out = "zero"
+policy zero.value = 0
+policy gt.lhs = "n"
+policy gt.rhs = "zero"
+policy gt.out = "cond"
+policy route.path = "cond"
+policy print.path = "n"
+policy one.out = "one"
+policy one.value = 1
+policy dec.lhs = "n"
+policy dec.rhs = "one"
+policy dec.out = "n"
+
+wire stdin.out => parse.in
+wire parse.out => zero.in
+wire zero.out => gt.in
+wire gt.out => route.in
+wire route.true => print.in
+wire print.out => one.in
+wire one.out => dec.in
+wire dec.out => gt.in
+wire route.false => halt.in

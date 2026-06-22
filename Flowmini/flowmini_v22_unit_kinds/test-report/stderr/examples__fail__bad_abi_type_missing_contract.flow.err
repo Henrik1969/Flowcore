@@ -1,0 +1,1 @@
+fatal in parser: ABI type 'c_bad_pointer' requires lifetime at line 8, column 10 near 'c_bad_pointer'

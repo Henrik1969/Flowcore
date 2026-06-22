@@ -1,0 +1,1 @@
+fatal in parser: ABI pointer-shaped type 'c_buffer_read' is sealed; normal Flowmini code may not declare or construct it directly at line 36, column 11 near 'c_buffer_read'
