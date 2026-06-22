@@ -1,1 +1,0 @@
-fatal in parser: ABI struct initializer for 'p' is missing field 'y' at line 26, column 5 near 'p'

@@ -1,1 +1,0 @@
-fatal in parser: declaration of 'person' conflicts with visible symbol 'bad_if_shadowing::main::person'; implicit shadowing is forbidden at line 9, column 9 near 'person'

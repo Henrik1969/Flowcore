@@ -1,1 +1,0 @@
-fatal in parser: record type 'Point' has no field 'z' at line 10, column 28 near 'z'

@@ -1,1 +1,0 @@
-fatal in lowerer: field 'p' of record type 'Box' expects Point but got int
