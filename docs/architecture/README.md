@@ -40,3 +40,5 @@ Planned architecture topics:
 - runtime backends
 - bytecode
 - effects and failure-flow
+
+- [Flowcore core promise](flowcore-core-promise.md)

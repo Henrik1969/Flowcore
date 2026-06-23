@@ -2,6 +2,15 @@
 
 This repository is organized as a lab notebook with project islands.
 
+
+## Flowcore's core promise: 
+
+> source-level architecture becomes compiler-visible graph structure.
+> The core philosophy is semantic clarity: meaning must be explicit, understandable, and checkable.
+> Syntax is subordinate to semantics.
+
+This is the soul of Flowcore.
+
 ## Main areas
 
 - [Flowmini](../Flowmini/README.md)
