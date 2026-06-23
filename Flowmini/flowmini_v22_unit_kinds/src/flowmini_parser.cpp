@@ -133,12 +133,12 @@ struct Target {
 class Parser {
 public:
     explicit Parser(const std::vector<Token>& tokens) : tokens_(tokens) {
-        types_.emplace("int", TypeDef{"int", "", {}});
-        types_.emplace("Bool", TypeDef{"Bool", "", {}});
-        types_.emplace("c_int", TypeDef{"c_int", "int", {}});
-        types_.emplace("c_long", TypeDef{"c_long", "int", {}});
-        types_.emplace("c_size_t", TypeDef{"c_size_t", "int", {{TokenKind::GreaterEqual, 0}}});
-        types_.emplace("c_string", TypeDef{"c_string", "", {}});
+        types_.emplace("int", TypeDef{"int", "", {}, {}});
+        types_.emplace("Bool", TypeDef{"Bool", "", {}, {}});
+        types_.emplace("c_int", TypeDef{"c_int", "int", {}, {}});
+        types_.emplace("c_long", TypeDef{"c_long", "int", {}, {}});
+        types_.emplace("c_size_t", TypeDef{"c_size_t", "int", {{TokenKind::GreaterEqual, 0}}, {}});
+        types_.emplace("c_string", TypeDef{"c_string", "", {}, {}});
         abiTypes_.emplace("c_string", AbiTypeDef{"c_string", "const char*", "borrowed", "read", "call", "false", "nul", false});
     }
 
@@ -1173,7 +1173,7 @@ private:
         if (def.lifetime.empty()) { fail(nameToken, "ABI type '" + def.name + "' requires lifetime"); }
         if (def.nullable.empty()) { def.nullable = "false"; }
         abiTypes_[def.name] = std::move(def);
-        if (!typeExists(nameToken.text)) { types_.emplace(nameToken.text, TypeDef{nameToken.text, "", {}}); }
+        if (!typeExists(nameToken.text)) { types_.emplace(nameToken.text, TypeDef{nameToken.text, "", {}, {}}); }
     }
 
     void parseAbiStructDecl(const std::string&) {
@@ -1200,7 +1200,7 @@ private:
         expect(TokenKind::RightBrace, "expected '}' after abi struct body");
         if (def.fields.empty()) { fail(nameToken, "ABI struct '" + def.name + "' must have at least one field"); }
         abiStructs_[def.name] = def;
-        types_.emplace(def.name, TypeDef{def.name, "", {}});
+        types_.emplace(def.name, TypeDef{def.name, "", {}, {}});
     }
 
     void parseExternFunctionDecl(const std::string& abiName, const std::string& library, const std::string& convention) {

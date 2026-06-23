@@ -899,7 +899,7 @@ public:
         if (recordPath.empty() || fields.empty()) {
             throw flow::DiagnosticError{"record.field.get", "missing record or fields policy"};
         }
-        const Value& root = getPathValue(payload, recordPath, "record.field.get");
+        const Value root = getPathValue(payload, recordPath, "record.field.get");
         setPathValue(payload, out, getNestedRecordField(root, fields, "record.field.get"), "record.field.get");
         return {Route{"out", std::move(env)}};
     }
@@ -1015,7 +1015,7 @@ public:
             struct Point { int x; int y; };
             using Fn = int (*)(Point);
             auto fn = reinterpret_cast<Fn>(raw);
-            const AbiStruct& arg = getPathAbiStruct(record, argPaths[0], "abi.call");
+            const AbiStruct arg = getPathAbiStruct(record, argPaths[0], "abi.call");
             if (arg.typeName != "Point") { throw flow::DiagnosticError{"abi.call", "expected ABI struct Point, got " + arg.typeName}; }
             const auto xIt = arg.fields.find("x");
             const auto yIt = arg.fields.find("y");

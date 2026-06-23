@@ -208,16 +208,6 @@ enum class SourceUnitKind { None, LegacyModule, Program, Unit };
     return SourceUnitKind::None;
 }
 
-[[nodiscard]] const char* unitKindName(SourceUnitKind kind) {
-    switch (kind) {
-        case SourceUnitKind::Program: return "program";
-        case SourceUnitKind::Unit: return "unit";
-        case SourceUnitKind::LegacyModule: return "module";
-        case SourceUnitKind::None: return "none";
-    }
-    return "none";
-}
-
 struct ImportExpander {
     std::map<std::string, ImportState> states;
     std::vector<std::string> stack;
