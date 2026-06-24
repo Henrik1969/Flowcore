@@ -1,0 +1,3 @@
+imported file defines main
+only unit files may be imported
+std/main_bad.flow
