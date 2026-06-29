@@ -1,5 +1,0 @@
-unit std_other_math
-
-fn square(n : int): int {
-    n -> return
-}

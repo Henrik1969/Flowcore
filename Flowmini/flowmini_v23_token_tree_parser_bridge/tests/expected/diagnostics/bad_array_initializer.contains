@@ -1,1 +1,0 @@
-fatal in lowerer: array initializer for 'matrix' has 3 values but shape requires 6

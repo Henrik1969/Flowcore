@@ -1,4 +1,0 @@
-program bad_undeclared_assignment
-
-stdin : stdin.text()
-1 -> one

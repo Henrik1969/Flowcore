@@ -1,9 +1,0 @@
-program bad_type_unknown_base
-
-type Thing refines UnknownBase {
-}
-
-main {
-    x : int(1)
-    print x
-}

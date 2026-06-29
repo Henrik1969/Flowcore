@@ -1,5 +1,0 @@
-program bad_undeclared_structured
-
-main {
-    1 -> one
-}

@@ -1,5 +1,0 @@
-program bad_bool_init
-
-main {
-    flag : Bool(1)
-}

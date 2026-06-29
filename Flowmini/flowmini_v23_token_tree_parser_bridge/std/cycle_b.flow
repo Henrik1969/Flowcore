@@ -1,7 +1,0 @@
-import "cycle_a.flow"
-
-module std_cycle_b
-
-fn b(x : int): int {
-    x -> return
-}

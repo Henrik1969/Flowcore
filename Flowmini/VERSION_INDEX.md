@@ -22,5 +22,6 @@ The numbered directories are standalone historical snapshots.
 | v20 | `flowmini_v20_bool` | Bool / predicate results |
 | v21 | `flowmini_v21_structural_bridge` | TokenTree + SymbolTable structural bridge |
 | v22 | `flowmini_v22_unit_kinds` | `program`/`unit`, categorized examples, expected suite |
+| v23 | `flowmini_v23_token_tree_bridge | Bridging the Token tree | 
 
 Missing version numbers are historical gaps or discarded intermediate experiments.

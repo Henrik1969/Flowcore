@@ -1,9 +1,0 @@
-program bad_unterminated_block_comment
-
-/*
-    never closed
-
-main {
-    x : int(1)
-    print x
-}

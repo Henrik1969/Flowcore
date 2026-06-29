@@ -3,7 +3,7 @@
 Current active version:
 
 ```text
-flowmini_v22_unit_kinds
+flowmini_v23_tokentree_bridge
 ```
 
 Status:
