@@ -1,0 +1,11 @@
+import "../../std/abi/libc.flow"
+
+program comment_markers_inside_string
+
+main {
+    len : c_size_t(0)
+
+    // These markers are string payload, not comments.
+    strlen("/* not a comment */ // also not a comment") -> len
+    print len
+}

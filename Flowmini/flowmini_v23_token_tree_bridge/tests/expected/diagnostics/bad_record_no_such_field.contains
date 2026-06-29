@@ -1,0 +1,1 @@
+fatal in lowerer: type 'Point' has no field 'z'

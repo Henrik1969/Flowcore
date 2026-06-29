@@ -1,0 +1,9 @@
+program bad_if_empty
+
+main {
+    n    : int(stdin.int())
+    zero : int(0)
+
+    if n > zero {
+    }
+}

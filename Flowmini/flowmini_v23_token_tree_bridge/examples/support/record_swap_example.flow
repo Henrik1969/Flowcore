@@ -1,0 +1,28 @@
+unit record_swap_example
+
+producer stdin : stdin.text
+node parse : parse.int.to_record
+node a : const.int
+node b : const.int
+node swap : record.swap
+node p0 : stdout.int_line
+node p1 : stdout.int_line
+sink halt : halt.record
+
+policy parse.out = "input"
+policy a.out = "a"
+policy a.value = 10
+policy b.out = "b"
+policy b.value = 20
+policy swap.a = "a"
+policy swap.b = "b"
+policy p0.path = "a"
+policy p1.path = "b"
+
+wire stdin.out => parse.in
+wire parse.out => a.in
+wire a.out => b.in
+wire b.out => swap.in
+wire swap.out => p0.in
+wire p0.out => p1.in
+wire p1.out => halt.in
