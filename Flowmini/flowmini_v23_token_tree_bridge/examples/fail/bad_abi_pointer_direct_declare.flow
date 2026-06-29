@@ -1,0 +1,8 @@
+import "../../std/abi/pointers.flow"
+
+program bad_abi_pointer_direct_declare
+
+main {
+    buf : c_buffer_read(0)
+    print 0
+}

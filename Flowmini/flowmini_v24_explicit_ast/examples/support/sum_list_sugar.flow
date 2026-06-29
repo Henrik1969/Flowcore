@@ -1,0 +1,21 @@
+unit sum_list_sugar
+
+stdin : stdin.text()
+parse : parse.int.to_record(out="input")
+arr : list<int>([1,9,3,5,8,2,2,6,4])
+zero : int(0)
+one : int(1)
+i_init : const.int(out="i", value=0)
+sum_init : const.int(out="sum", value=0)
+len : list.length(list="arr", out="len")
+check : int.lt(lhs="i", rhs="len", out="cond")
+route : route.bool(path="cond")
+get : list.get(list="arr", index="i", out="current")
+add : int.add(lhs="sum", rhs="current", out="sum")
+inc : int.add(lhs="i", rhs="one", out="i")
+print : stdout.int_line(path="sum")
+halt : halt.record()
+
+stdin => parse => arr => zero => one => i_init => sum_init => len => check => route
+route.true => get => add => inc => check
+route.false => print => halt

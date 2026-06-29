@@ -1,0 +1,11 @@
+program compound_expression_demo
+
+main {
+    n     : int(stdin.int())
+    one   : int(1)
+    three : int(3)
+    result: int(0)
+
+    n * three + one -> result
+    print result
+}
