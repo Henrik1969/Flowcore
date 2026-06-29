@@ -26,6 +26,8 @@ add_executable(flowmini
     src/flowmini_structural.cpp
     src/flowmini_token_tree_bridge.cpp
     src/main.cpp
+        include/flowmini_ast.h
+        src/flowmini_ast.cpp
 )
 target_include_directories(flowmini PRIVATE include)
 
@@ -97,4 +99,15 @@ add_custom_target(flowmini_dump_token_tree_json
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
         COMMENT "Dumping Flowmini TokenTree bridge JSON view"
         VERBATIM
+)
+
+add_custom_target(flowmini_dump_ast
+    COMMAND
+        $<TARGET_FILE:flowmini>
+        --dump-ast
+        examples/pass/fn_demo.flow
+    DEPENDS flowmini
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    COMMENT "Dumping Flowmini AST JSON view"
+    VERBATIM
 )

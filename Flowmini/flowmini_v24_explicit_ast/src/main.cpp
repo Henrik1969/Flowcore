@@ -1,6 +1,7 @@
 #include "flow_common.h"
 #include "flowmini_lexer.h"
 #include "flowmini_parser.h"
+#include "flowmini_ast.h"
 #include "flowmini_runtime.h"
 #include "flowmini_structural.h"
 #include "flowmini_token_tree_bridge.h"
@@ -28,7 +29,7 @@ namespace {
 }
 
 
-[[nodiscard]] std::string trimCopy(std::string value) {
+[[nodiscard]] auto trimCopy(const std::string value) -> std::string {
     const auto first = value.find_first_not_of(" \t\r\n");
     if (first == std::string::npos) { return {}; }
     const auto last = value.find_last_not_of(" \t\r\n");
@@ -282,7 +283,7 @@ struct ImportExpander {
 
             std::ostringstream cycle;
             cycle << "import cycle detected: ";
-            const auto pos = std::find(stack.begin(), stack.end(), key);
+            const auto pos = std::ranges::find(stack, key);
             if (pos != stack.end()) {
                 for (auto it = pos; it != stack.end(); ++it) { cycle << *it << " -> "; }
             }
@@ -405,10 +406,12 @@ int main(int argc, char** argv) {
         std::string sourcePath;
         std::string emitFlowIrPath;
         std::string dumpTokenTreePath;
+
         bool dumpTokenTreeBridge = false;
+        bool dumpAst = false;
+
         flowmini::TokenTreeBridgeDumpFormat dumpTokenTreeBridgeFormat = flowmini::TokenTreeBridgeDumpFormat::Json;
         std::string dumpSymbolsPath;
-
         for (int i = 1; i < argc; ++i) {
             const std::string arg = argv[i];
 
@@ -419,6 +422,11 @@ int main(int argc, char** argv) {
 
             if (arg == "--trace") {
                 ctx.policies.set("runtime.trace", flow::parseBool(flow::requireArgValue(argc, argv, i, arg)));
+                continue;
+            }
+
+            if (arg == "--dump-ast") {
+                dumpAst = true;
                 continue;
             }
 
@@ -449,12 +457,14 @@ int main(int argc, char** argv) {
                 continue;
             }
 
+
             if (!sourcePath.empty()) {
                 throw flow::DiagnosticError{"cli", "unexpected extra argument: " + arg};
             }
 
             sourcePath = arg;
         }
+
 
         if (sourcePath.empty()) {
             printUsage(std::cerr);
@@ -464,6 +474,12 @@ int main(int argc, char** argv) {
         const std::filesystem::path inputPath{sourcePath};
         const std::string source = (inputPath.extension() == ".flowir") ? readFile(sourcePath) : expandImports(sourcePath);
         const auto tokens = flowmini::lexSource(source);
+
+        if (dumpAst) {
+            const auto module = flowmini::ast::make_empty_ast_module();
+            flowmini::ast::dump_ast_json(std::cout, module);
+            return 0;
+        }
 
         if (!dumpTokenTreePath.empty()) {
             if (dumpTokenTreePath == "-") {
