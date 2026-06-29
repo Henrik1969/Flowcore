@@ -15,6 +15,8 @@
 #include <string>
 #include <vector>
 
+#include "flowmini_ast_builder.h"
+
 namespace {
 
 [[nodiscard]] std::string readFile(const std::string& path) {
@@ -476,7 +478,7 @@ int main(int argc, char** argv) {
         const auto tokens = flowmini::lexSource(source);
 
         if (dumpAst) {
-            const auto module = flowmini::ast::make_empty_ast_module();
+            const auto module = flowmini::ast::build_source_header_ast(tokens);
             flowmini::ast::dump_ast_json(std::cout, module);
             return 0;
         }

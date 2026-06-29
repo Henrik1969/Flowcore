@@ -28,6 +28,8 @@ add_executable(flowmini
     src/main.cpp
         include/flowmini_ast.h
         src/flowmini_ast.cpp
+        src/flowmini_ast_builder.cpp
+        include/flowmini_ast_builder.h
 )
 target_include_directories(flowmini PRIVATE include)
 
