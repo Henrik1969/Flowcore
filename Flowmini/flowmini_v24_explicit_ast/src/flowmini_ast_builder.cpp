@@ -318,6 +318,33 @@ namespace flowmini::ast {
             return i;
         }
 
+
+        std::size_t skip_nonsemantic_separators(const std::vector<flowmini::Token>& tokens,
+                                                std::size_t i) {
+            while (i < tokens.size() &&
+                   (tokens[i].kind == flowmini::TokenKind::Newline ||
+                    tokens[i].kind == flowmini::TokenKind::Comma)) {
+                ++i;
+            }
+
+            return i;
+        }
+
+        std::size_t mark_body_container(const std::vector<flowmini::Token>& tokens,
+                                        std::size_t i,
+                                        bool& hasBody,
+                                        SourceLocation& bodyLocation) {
+            i = skip_nonsemantic_separators(tokens, i);
+
+            if (i < tokens.size() && tokens[i].kind == flowmini::TokenKind::LeftBrace) {
+                hasBody = true;
+                bodyLocation = location_from_token(tokens[i]);
+                return skip_group(tokens, i, flowmini::TokenKind::LeftBrace, flowmini::TokenKind::RightBrace);
+            }
+
+            return i;
+        }
+
         std::size_t skip_until_next_top_levelish_token(const std::vector<flowmini::Token>& tokens,std::size_t i) {
             while (i < tokens.size() && !is_end_token(tokens[i])) {
                 if (tokens[i].kind == flowmini::TokenKind::LeftParen) {
@@ -414,6 +441,7 @@ namespace flowmini::ast {
                 }
 
                 i = parse_function_signature(tokens, i, fn);
+                i = mark_body_container(tokens, i, fn.has_body, fn.body_location);
 
                 module.source_unit.declarations.emplace_back(std::move(fn));
                 i = skip_until_next_top_levelish_token(tokens, i);
@@ -424,9 +452,11 @@ namespace flowmini::ast {
                 MainBlock mainBlock;
                 mainBlock.location = location_from_token(tokens[i]);
 
+                ++i;
+                i = mark_body_container(tokens, i, mainBlock.has_body, mainBlock.body_location);
+
                 module.source_unit.declarations.emplace_back(std::move(mainBlock));
 
-                ++i;
                 i = skip_until_next_top_levelish_token(tokens, i);
                 continue;
             }

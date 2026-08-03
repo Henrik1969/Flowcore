@@ -105,9 +105,15 @@ namespace flowmini::ast {
                 out << ",\n";
 
                 dump_indent(out, indent + 2);
+                out << "\"has_body\": " << (functionDecl->has_body ? "true" : "false") << ",\n";
+
+                dump_indent(out, indent + 2);
                 out << "\"body_statement_count\": " << functionDecl->body.size() << "\n";
             } else if (const auto* mainBlock = std::get_if<MainBlock>(&decl)) {
                 out << ",\n";
+                dump_indent(out, indent + 2);
+                out << "\"has_body\": " << (mainBlock->has_body ? "true" : "false") << ",\n";
+
                 dump_indent(out, indent + 2);
                 out << "\"body_statement_count\": " << mainBlock->body.size() << "\n";
             } else if (const auto* recordDecl = std::get_if<RecordDecl>(&decl)) {

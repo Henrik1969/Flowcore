@@ -63,8 +63,33 @@ enum class ExpressionKind {
     Unknown
 };
 
+enum class TypeRefKind {
+    Named,
+    Generic,
+    Array,
+    Pointer,
+    Reference,
+    Unknown
+};
+
 struct TypeRef {
+    TypeRefKind kind = TypeRefKind::Unknown;
+
+    // For simple current types:
+    //     int
+    //     Bool
+    //     c_string
     std::string name;
+
+    // Preserves source spelling while parser support is incomplete:
+    //     array<int>[2, 3]
+    //     list<int>
+    std::string raw_text;
+
+    // Future semantic structure:
+    std::vector<TypeRef> arguments;
+    std::vector<std::string> dimensions;
+
     SourceLocation location;
 };
 
@@ -132,6 +157,13 @@ struct FunctionDecl {
     TypeRef return_type;
     std::vector<Statement> body;
     SourceLocation location;
+
+    bool has_body = false;
+    SourceLocation body_location;
+
+    bool is_extern = false;
+    bool is_imported = false;
+    std::string origin_module;
 };
 
 struct ImportDecl {
@@ -160,6 +192,9 @@ struct TypeAliasDecl {
 struct MainBlock {
     std::vector<Statement> body;
     SourceLocation location;
+
+    bool has_body = false;
+    SourceLocation body_location;
 };
 
 using TopLevelDecl = std::variant<
@@ -186,10 +221,11 @@ const char* to_string(SourceUnitKind kind);
 const char* to_string(TopLevelKind kind);
 const char* to_string(StatementKind kind);
 const char* to_string(ExpressionKind kind);
+const char* to_string(TypeRefKind kind);
 
 TopLevelKind top_level_kind(const TopLevelDecl& decl);
 
-    void dump_ast_json(std::ostream& out, const AstModule& module);
+void dump_ast_json(std::ostream& out, const AstModule& module);
 
 AstModule make_empty_ast_module();
 
