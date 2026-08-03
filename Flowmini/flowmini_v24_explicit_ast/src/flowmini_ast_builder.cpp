@@ -3,7 +3,94 @@
 
 namespace flowmini::ast {
 
+    SourceLocation location_from_token(const flowmini::Token& token) {
+        const auto line = token.line < 0 ? 0 : token.line;
+        const auto column = token.column < 0 ? 0 : token.column;
+
+        return SourceLocation{
+            static_cast<std::size_t>(line),
+            static_cast<std::size_t>(column)
+        };
+    }
+
     namespace {
+        bool is_end_token(const flowmini::Token& token);
+
+
+
+
+        TypeRef make_named_type_ref(const flowmini::Token& token) {
+            TypeRef type;
+            type.kind = TypeRefKind::Named;
+            type.name = token.text;
+            type.raw_text = token.text;
+            type.location = location_from_token(token);
+            return type;
+        }
+
+        bool is_identifier_like_type_token(const flowmini::Token& token) {
+            return token.kind == flowmini::TokenKind::Identifier;
+        }
+
+        std::size_t parse_function_signature(const std::vector<flowmini::Token>& tokens,
+                                             std::size_t i,
+                                             FunctionDecl& fn) {
+            if (i >= tokens.size() || tokens[i].kind != flowmini::TokenKind::LeftParen) {
+                return i;
+            }
+
+            ++i; // consume '('
+
+            while (i < tokens.size() &&
+                   tokens[i].kind != flowmini::TokenKind::RightParen &&
+                   !is_end_token(tokens[i])) {
+                if (tokens[i].kind == flowmini::TokenKind::Newline ||
+                    tokens[i].kind == flowmini::TokenKind::Comma) {
+                    ++i;
+                    continue;
+                }
+
+                if (tokens[i].kind != flowmini::TokenKind::Identifier) {
+                    ++i;
+                    continue;
+                }
+
+                Parameter param;
+                param.name = tokens[i].text;
+                param.location = location_from_token(tokens[i]);
+                ++i;
+
+                if (i < tokens.size() && tokens[i].kind == flowmini::TokenKind::Colon) {
+                    ++i;
+
+                    if (i < tokens.size() && is_identifier_like_type_token(tokens[i])) {
+                        param.type = make_named_type_ref(tokens[i]);
+                        ++i;
+                    }
+                }
+
+                fn.parameters.push_back(std::move(param));
+
+                if (i < tokens.size() && tokens[i].kind == flowmini::TokenKind::Comma) {
+                    ++i;
+                }
+            }
+
+            if (i < tokens.size() && tokens[i].kind == flowmini::TokenKind::RightParen) {
+                ++i; // consume ')'
+            }
+
+            if (i < tokens.size() && tokens[i].kind == flowmini::TokenKind::Colon) {
+                ++i;
+
+                if (i < tokens.size() && is_identifier_like_type_token(tokens[i])) {
+                    fn.return_type = make_named_type_ref(tokens[i]);
+                    ++i;
+                }
+            }
+
+            return i;
+        }
 
         bool is_main_token(const flowmini::Token& token) {
             return token.kind == TokenKind::KeywordMain ||
@@ -14,15 +101,7 @@ namespace flowmini::ast {
             return token.kind == flowmini::TokenKind::Newline;
         }
 
-        SourceLocation location_from_token(const flowmini::Token& token) {
-            const auto line = token.line < 0 ? 0 : token.line;
-            const auto column = token.column < 0 ? 0 : token.column;
 
-            return SourceLocation{
-                static_cast<std::size_t>(line),
-                static_cast<std::size_t>(column)
-            };
-        }
 
         bool is_end_token(const flowmini::Token& token) {
             return token.kind == flowmini::TokenKind::End;
@@ -118,11 +197,11 @@ namespace flowmini::ast {
             module.source_unit.kind = SourceUnitKind::Unit;
         } else {
             module.source_unit.kind = SourceUnitKind::Unknown;
-            module.source_unit.location = location_from_token(kindToken);
+            module.source_unit.location = location_from_token(tokens[i]);
             return module;
         }
 
-        module.source_unit.location = location_from_token(kindToken);
+        module.source_unit.location = location_from_token(tokens[i]) ;
 
         ++i;
 
@@ -153,8 +232,10 @@ namespace flowmini::ast {
                     ++i;
                 }
 
+                i = parse_function_signature(tokens, i, fn);
+
                 module.source_unit.declarations.emplace_back(std::move(fn));
-                i = skip_until_next_top_levelish_token(tokens,i);
+                i = skip_until_next_top_levelish_token(tokens, i);
                 continue;
             }
 

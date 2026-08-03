@@ -1,7 +1,7 @@
 #include "flowmini_token_tree_bridge.h"
 
 #include "tokentree.h"
-
+#include <cstdint>
 #include <ostream>
 #include <stdexcept>
 #include <string>

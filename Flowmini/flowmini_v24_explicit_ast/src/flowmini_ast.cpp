@@ -63,6 +63,43 @@ namespace flowmini::ast {
                 out << "\"parameter_count\": " << functionDecl->parameters.size() << ",\n";
 
                 dump_indent(out, indent + 2);
+                out << "\"parameters\": [";
+
+                if (!functionDecl->parameters.empty()) {
+                    out << "\n";
+
+                    for (std::size_t i = 0; i < functionDecl->parameters.size(); ++i) {
+                        const auto& parameter = functionDecl->parameters[i];
+
+                        dump_indent(out, indent + 4);
+                        out << "{\n";
+
+                        dump_indent(out, indent + 6);
+                        out << "\"name\": ";
+                        dump_json_string(out, parameter.name);
+                        out << ",\n";
+
+                        dump_indent(out, indent + 6);
+                        out << "\"type\": ";
+                        dump_json_string(out, parameter.type.name);
+                        out << "\n";
+
+                        dump_indent(out, indent + 4);
+                        out << "}";
+
+                        if (i + 1 < functionDecl->parameters.size()) {
+                            out << ",";
+                        }
+
+                        out << "\n";
+                    }
+
+                    dump_indent(out, indent + 2);
+                }
+
+                out << "],\n";
+
+                dump_indent(out, indent + 2);
                 out << "\"return_type\": ";
                 dump_json_string(out, functionDecl->return_type.name);
                 out << ",\n";
