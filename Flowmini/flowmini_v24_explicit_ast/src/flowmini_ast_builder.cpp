@@ -402,6 +402,67 @@ namespace flowmini::ast {
             return i;
         }
 
+
+        bool is_if_token(const flowmini::Token& token) {
+            return token.kind == flowmini::TokenKind::KeywordIf ||
+                   is_identifier_text(token, "if");
+        }
+
+        bool is_while_token(const flowmini::Token& token) {
+            return token.kind == flowmini::TokenKind::KeywordWhile ||
+                   is_identifier_text(token, "while");
+        }
+
+        std::size_t skip_until_body_block_or_line_end(const std::vector<flowmini::Token>& tokens,
+                                                      std::size_t i) {
+            while (i < tokens.size() &&
+                   !is_end_token(tokens[i]) &&
+                   tokens[i].kind != flowmini::TokenKind::LeftBrace &&
+                   tokens[i].kind != flowmini::TokenKind::Newline) {
+                ++i;
+            }
+
+            return i;
+        }
+
+        std::size_t parse_if_statement_shell(const std::vector<flowmini::Token>& tokens,
+                                             std::size_t i,
+                                             std::vector<Statement>& body) {
+            Statement statement;
+            statement.kind = StatementKind::If;
+            statement.location = location_from_token(tokens[i]);
+
+            ++i; // consume if
+
+            i = skip_until_body_block_or_line_end(tokens, i);
+
+            if (i < tokens.size() && tokens[i].kind == flowmini::TokenKind::LeftBrace) {
+                i = skip_group(tokens, i, flowmini::TokenKind::LeftBrace, flowmini::TokenKind::RightBrace);
+            }
+
+            body.push_back(std::move(statement));
+            return i;
+        }
+
+        std::size_t parse_while_statement_shell(const std::vector<flowmini::Token>& tokens,
+                                                std::size_t i,
+                                                std::vector<Statement>& body) {
+            Statement statement;
+            statement.kind = StatementKind::While;
+            statement.location = location_from_token(tokens[i]);
+
+            ++i; // consume while
+
+            i = skip_until_body_block_or_line_end(tokens, i);
+
+            if (i < tokens.size() && tokens[i].kind == flowmini::TokenKind::LeftBrace) {
+                i = skip_group(tokens, i, flowmini::TokenKind::LeftBrace, flowmini::TokenKind::RightBrace);
+            }
+
+            body.push_back(std::move(statement));
+            return i;
+        }
+
         std::size_t mark_body_container(const std::vector<flowmini::Token>& tokens,
                                         std::size_t i,
                                         bool& hasBody,
@@ -440,6 +501,16 @@ namespace flowmini::ast {
                 if (braceDepth == 1) {
                     if (is_typed_binding_start(tokens, i)) {
                         i = parse_typed_binding_statement_shell(tokens, i, body);
+                        continue;
+                    }
+
+                    if (is_if_token(tokens[i])) {
+                        i = parse_if_statement_shell(tokens, i, body);
+                        continue;
+                    }
+
+                    if (is_while_token(tokens[i])) {
+                        i = parse_while_statement_shell(tokens, i, body);
                         continue;
                     }
 
