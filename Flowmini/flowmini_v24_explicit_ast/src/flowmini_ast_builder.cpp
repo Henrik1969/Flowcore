@@ -380,6 +380,28 @@ namespace flowmini::ast {
             return i;
         }
 
+
+        bool is_plain_assignment_start(const std::vector<flowmini::Token>& tokens,
+                                       const std::size_t i) {
+            return i + 1 < tokens.size() &&
+                   tokens[i].kind == flowmini::TokenKind::Identifier &&
+                   tokens[i + 1].kind == flowmini::TokenKind::Equals;
+        }
+
+        std::size_t parse_plain_assignment_statement_shell(const std::vector<flowmini::Token>& tokens,
+                                                           std::size_t i,
+                                                           std::vector<Statement>& body) {
+            Statement statement;
+            statement.kind = StatementKind::Assignment;
+            statement.location = location_from_token(tokens[i]);
+            statement.name = tokens[i].text;
+
+            i += 2; // consume name and '='
+
+            body.push_back(std::move(statement));
+            return i;
+        }
+
         std::size_t mark_body_container(const std::vector<flowmini::Token>& tokens,
                                         std::size_t i,
                                         bool& hasBody,
@@ -418,6 +440,11 @@ namespace flowmini::ast {
                 if (braceDepth == 1) {
                     if (is_typed_binding_start(tokens, i)) {
                         i = parse_typed_binding_statement_shell(tokens, i, body);
+                        continue;
+                    }
+
+                    if (is_plain_assignment_start(tokens, i)) {
+                        i = parse_plain_assignment_statement_shell(tokens, i, body);
                         continue;
                     }
 
