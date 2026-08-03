@@ -118,7 +118,44 @@ namespace flowmini::ast {
                 out << ",\n";
 
                 dump_indent(out, indent + 2);
-                out << "\"field_count\": " << recordDecl->fields.size() << "\n";
+                out << "\"field_count\": " << recordDecl->fields.size() << ",\n";
+
+                dump_indent(out, indent + 2);
+                out << "\"fields\": [";
+
+                if (!recordDecl->fields.empty()) {
+                    out << "\n";
+
+                    for (std::size_t i = 0; i < recordDecl->fields.size(); ++i) {
+                        const auto& field = recordDecl->fields[i];
+
+                        dump_indent(out, indent + 4);
+                        out << "{\n";
+
+                        dump_indent(out, indent + 6);
+                        out << "\"name\": ";
+                        dump_json_string(out, field.name);
+                        out << ",\n";
+
+                        dump_indent(out, indent + 6);
+                        out << "\"type\": ";
+                        dump_json_string(out, field.type.name);
+                        out << "\n";
+
+                        dump_indent(out, indent + 4);
+                        out << "}";
+
+                        if (i + 1 < recordDecl->fields.size()) {
+                            out << ",";
+                        }
+
+                        out << "\n";
+                    }
+
+                    dump_indent(out, indent + 2);
+                }
+
+                out << "]\n";
             } else if (const auto* typeAliasDecl = std::get_if<TypeAliasDecl>(&decl)) {
                 out << ",\n";
                 dump_indent(out, indent + 2);

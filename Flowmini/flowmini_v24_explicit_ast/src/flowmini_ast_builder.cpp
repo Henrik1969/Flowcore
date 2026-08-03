@@ -92,6 +92,177 @@ namespace flowmini::ast {
             return i;
         }
 
+
+        bool is_identifier_text(const flowmini::Token& token, const std::string& text) {
+            return token.kind == flowmini::TokenKind::Identifier && token.text == text;
+        }
+
+        bool is_import_token(const flowmini::Token& token) {
+            return is_identifier_text(token, "import");
+        }
+
+        bool is_type_token(const flowmini::Token& token) {
+            return is_identifier_text(token, "type");
+        }
+
+        bool is_field_token(const flowmini::Token& token) {
+            return is_identifier_text(token, "field");
+        }
+
+        bool is_refines_token(const flowmini::Token& token) {
+            return is_identifier_text(token, "refines");
+        }
+
+        std::size_t skip_until_line_end(const std::vector<flowmini::Token>& tokens,
+                                        std::size_t i) {
+            while (i < tokens.size() &&
+                   !is_end_token(tokens[i]) &&
+                   tokens[i].kind != flowmini::TokenKind::Newline) {
+                ++i;
+            }
+            return i;
+        }
+
+        std::size_t skip_balanced_brace_group(const std::vector<flowmini::Token>& tokens,
+                                              std::size_t i) {
+            if (i >= tokens.size() || tokens[i].kind != flowmini::TokenKind::LeftBrace) {
+                return i;
+            }
+
+            std::size_t depth = 0;
+            while (i < tokens.size() && !is_end_token(tokens[i])) {
+                if (tokens[i].kind == flowmini::TokenKind::LeftBrace) {
+                    ++depth;
+                } else if (tokens[i].kind == flowmini::TokenKind::RightBrace) {
+                    if (depth == 0) {
+                        return i;
+                    }
+
+                    --depth;
+                    if (depth == 0) {
+                        return i + 1;
+                    }
+                }
+
+                ++i;
+            }
+
+            return i;
+        }
+
+        std::size_t parse_import_declaration(const std::vector<flowmini::Token>& tokens,
+                                             std::size_t i,
+                                             AstModule& module) {
+            ImportDecl importDecl;
+            importDecl.location = location_from_token(tokens[i]);
+            ++i; // consume import
+
+            if (i < tokens.size() && tokens[i].kind == flowmini::TokenKind::String) {
+                importDecl.module_name = tokens[i].text;
+                ++i;
+            }
+
+            module.source_unit.declarations.emplace_back(std::move(importDecl));
+            return skip_until_line_end(tokens, i);
+        }
+
+        std::size_t parse_record_fields(const std::vector<flowmini::Token>& tokens,
+                                        std::size_t i,
+                                        RecordDecl& recordDecl) {
+            if (i >= tokens.size() || tokens[i].kind != flowmini::TokenKind::LeftBrace) {
+                return i;
+            }
+
+            ++i; // consume '{'
+
+            while (i < tokens.size() &&
+                   tokens[i].kind != flowmini::TokenKind::RightBrace &&
+                   !is_end_token(tokens[i])) {
+                if (tokens[i].kind == flowmini::TokenKind::Newline ||
+                    tokens[i].kind == flowmini::TokenKind::Comma) {
+                    ++i;
+                    continue;
+                }
+
+                if (!is_field_token(tokens[i])) {
+                    ++i;
+                    continue;
+                }
+
+                RecordField field;
+                field.location = location_from_token(tokens[i]);
+                ++i; // consume field
+
+                if (i < tokens.size() && tokens[i].kind == flowmini::TokenKind::Identifier) {
+                    field.name = tokens[i].text;
+                    ++i;
+                }
+
+                if (i < tokens.size() && tokens[i].kind == flowmini::TokenKind::Colon) {
+                    ++i;
+
+                    if (i < tokens.size() && is_identifier_like_type_token(tokens[i])) {
+                        field.type = make_named_type_ref(tokens[i]);
+                        ++i;
+                    }
+                }
+
+                recordDecl.fields.push_back(std::move(field));
+            }
+
+            if (i < tokens.size() && tokens[i].kind == flowmini::TokenKind::RightBrace) {
+                ++i;
+            }
+
+            return i;
+        }
+
+        std::size_t parse_type_declaration(const std::vector<flowmini::Token>& tokens,
+                                           std::size_t i,
+                                           AstModule& module) {
+            const SourceLocation typeLocation = location_from_token(tokens[i]);
+            ++i; // consume type
+
+            if (i >= tokens.size() || tokens[i].kind != flowmini::TokenKind::Identifier) {
+                return skip_until_line_end(tokens, i);
+            }
+
+            const std::string typeName = tokens[i].text;
+            const SourceLocation nameLocation = location_from_token(tokens[i]);
+            ++i;
+
+            if (i < tokens.size() && is_refines_token(tokens[i])) {
+                TypeAliasDecl aliasDecl;
+                aliasDecl.name = typeName;
+                aliasDecl.location = typeLocation;
+                ++i; // consume refines
+
+                if (i < tokens.size() && is_identifier_like_type_token(tokens[i])) {
+                    aliasDecl.target = make_named_type_ref(tokens[i]);
+                    ++i;
+                }
+
+                module.source_unit.declarations.emplace_back(std::move(aliasDecl));
+
+                if (i < tokens.size() && tokens[i].kind == flowmini::TokenKind::LeftBrace) {
+                    return skip_balanced_brace_group(tokens, i);
+                }
+
+                return skip_until_line_end(tokens, i);
+            }
+
+            RecordDecl recordDecl;
+            recordDecl.name = typeName;
+            recordDecl.location = nameLocation;
+
+            if (i < tokens.size() && tokens[i].kind == flowmini::TokenKind::LeftBrace) {
+                i = parse_record_fields(tokens, i, recordDecl);
+            }
+
+            module.source_unit.declarations.emplace_back(std::move(recordDecl));
+            return i;
+        }
+
         bool is_main_token(const flowmini::Token& token) {
             return token.kind == TokenKind::KeywordMain ||
                    (token.kind == flowmini::TokenKind::Identifier && token.text == "main");
@@ -218,6 +389,16 @@ namespace flowmini::ast {
         while (i<tokens.size() && !is_end_token(tokens[i])) {
             if (is_newline_token(tokens[i])) {
                 ++i;
+                continue;
+            }
+
+            if (is_import_token(tokens[i])) {
+                i = parse_import_declaration(tokens, i, module);
+                continue;
+            }
+
+            if (is_type_token(tokens[i])) {
+                i = parse_type_declaration(tokens, i, module);
                 continue;
             }
 
