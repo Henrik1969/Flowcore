@@ -145,8 +145,14 @@ struct Statement {
     StatementKind kind = StatementKind::Unknown;
     SourceLocation location;
 
-    // For v24 step 1 this is intentionally skeletal.
-    // The parser will start populating these in later steps.
+    // Statement-shell metadata.
+    // For typed bindings:
+    //     name : Type(...)
+    std::string name;
+    TypeRef type;
+
+    // For v24 this remains intentionally skeletal.
+    // Expressions and nested statement bodies are populated in later steps.
     std::vector<std::size_t> child_statements;
     std::vector<std::size_t> expressions;
 };

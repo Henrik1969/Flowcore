@@ -37,6 +37,58 @@ namespace flowmini::ast {
             out << '"';
         }
 
+
+        void dump_statement_array_json(std::ostream& out,
+                                       const std::vector<Statement>& statements,
+                                       const unsigned indent) {
+            out << "[";
+
+            if (!statements.empty()) {
+                out << "\n";
+
+                for (std::size_t i = 0; i < statements.size(); ++i) {
+                    const auto& statement = statements[i];
+
+                    dump_indent(out, indent + 2);
+                    out << "{\n";
+
+                    dump_indent(out, indent + 4);
+                    out << "\"kind\": ";
+                    dump_json_string(out, to_string(statement.kind));
+
+                    if (!statement.name.empty()) {
+                        out << ",\n";
+                        dump_indent(out, indent + 4);
+                        out << "\"name\": ";
+                        dump_json_string(out, statement.name);
+                    }
+
+                    if (!statement.type.name.empty()) {
+                        out << ",\n";
+                        dump_indent(out, indent + 4);
+                        out << "\"type\": ";
+                        dump_json_string(out, statement.type.name);
+                    }
+
+                    out << "\n";
+
+                    dump_indent(out, indent + 2);
+                    out << "}";
+
+                    if (i + 1 < statements.size()) {
+                        out << ",";
+                    }
+
+                    out << "\n";
+                }
+
+                dump_indent(out, indent);
+            }
+
+            out << "]";
+        }
+
+
         void dump_top_level_decl_json(std::ostream& out, const TopLevelDecl& decl, std::size_t indent) {
             dump_indent(out, indent);
             out << "{\n";
@@ -108,14 +160,24 @@ namespace flowmini::ast {
                 out << "\"has_body\": " << (functionDecl->has_body ? "true" : "false") << ",\n";
 
                 dump_indent(out, indent + 2);
-                out << "\"body_statement_count\": " << functionDecl->body.size() << "\n";
+                out << "\"body_statement_count\": " << functionDecl->body.size() << ",\n";
+
+                dump_indent(out, indent + 2);
+                out << "\"body_statements\": ";
+                dump_statement_array_json(out, functionDecl->body, indent + 2);
+                out << "\n";
             } else if (const auto* mainBlock = std::get_if<MainBlock>(&decl)) {
                 out << ",\n";
                 dump_indent(out, indent + 2);
                 out << "\"has_body\": " << (mainBlock->has_body ? "true" : "false") << ",\n";
 
                 dump_indent(out, indent + 2);
-                out << "\"body_statement_count\": " << mainBlock->body.size() << "\n";
+                out << "\"body_statement_count\": " << mainBlock->body.size() << ",\n";
+
+                dump_indent(out, indent + 2);
+                out << "\"body_statements\": ";
+                dump_statement_array_json(out, mainBlock->body, indent + 2);
+                out << "\n";
             } else if (const auto* recordDecl = std::get_if<RecordDecl>(&decl)) {
                 out << ",\n";
                 dump_indent(out, indent + 2);

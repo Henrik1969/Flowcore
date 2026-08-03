@@ -330,16 +330,117 @@ namespace flowmini::ast {
             return i;
         }
 
+
+        bool is_return_token(const flowmini::Token& token) {
+            return token.kind == flowmini::TokenKind::Identifier && token.text == "return";
+        }
+
+        bool is_break_token(const flowmini::Token& token) {
+            return token.kind == flowmini::TokenKind::KeywordBreak ||
+                   is_identifier_text(token, "break");
+        }
+
+        bool is_continue_token(const flowmini::Token& token) {
+            return token.kind == flowmini::TokenKind::KeywordContinue ||
+                   is_identifier_text(token, "continue");
+        }
+
+        Statement make_statement_shell(StatementKind kind, const flowmini::Token& token) {
+            Statement statement;
+            statement.kind = kind;
+            statement.location = location_from_token(token);
+            return statement;
+        }
+
+
+        bool is_typed_binding_start(const std::vector<flowmini::Token>& tokens,
+                                    const std::size_t i) {
+            return i + 2 < tokens.size() &&
+                   tokens[i].kind == flowmini::TokenKind::Identifier &&
+                   tokens[i + 1].kind == flowmini::TokenKind::Colon &&
+                   is_identifier_like_type_token(tokens[i + 2]);
+        }
+
+        std::size_t parse_typed_binding_statement_shell(const std::vector<flowmini::Token>& tokens,
+                                                        std::size_t i,
+                                                        std::vector<Statement>& body) {
+            Statement statement;
+            statement.kind = StatementKind::Let;
+            statement.location = location_from_token(tokens[i]);
+            statement.name = tokens[i].text;
+
+            i += 2; // consume name and ':'
+
+            if (i < tokens.size() && is_identifier_like_type_token(tokens[i])) {
+                statement.type = make_named_type_ref(tokens[i]);
+                ++i;
+            }
+
+            body.push_back(std::move(statement));
+            return i;
+        }
+
         std::size_t mark_body_container(const std::vector<flowmini::Token>& tokens,
                                         std::size_t i,
                                         bool& hasBody,
-                                        SourceLocation& bodyLocation) {
+                                        SourceLocation& bodyLocation,
+                                        std::vector<Statement>& body) {
             i = skip_nonsemantic_separators(tokens, i);
 
-            if (i < tokens.size() && tokens[i].kind == flowmini::TokenKind::LeftBrace) {
-                hasBody = true;
-                bodyLocation = location_from_token(tokens[i]);
-                return skip_group(tokens, i, flowmini::TokenKind::LeftBrace, flowmini::TokenKind::RightBrace);
+            if (i >= tokens.size() || tokens[i].kind != flowmini::TokenKind::LeftBrace) {
+                return i;
+            }
+
+            hasBody = true;
+            bodyLocation = location_from_token(tokens[i]);
+
+            ++i; // consume '{'
+            std::size_t braceDepth = 1;
+
+            while (i < tokens.size() && !is_end_token(tokens[i])) {
+                if (tokens[i].kind == flowmini::TokenKind::LeftBrace) {
+                    ++braceDepth;
+                    ++i;
+                    continue;
+                }
+
+                if (tokens[i].kind == flowmini::TokenKind::RightBrace) {
+                    --braceDepth;
+                    ++i;
+
+                    if (braceDepth == 0) {
+                        return i;
+                    }
+
+                    continue;
+                }
+
+                if (braceDepth == 1) {
+                    if (is_typed_binding_start(tokens, i)) {
+                        i = parse_typed_binding_statement_shell(tokens, i, body);
+                        continue;
+                    }
+
+                    if (is_return_token(tokens[i])) {
+                        body.push_back(make_statement_shell(StatementKind::Return, tokens[i]));
+                        ++i;
+                        continue;
+                    }
+
+                    if (is_break_token(tokens[i])) {
+                        body.push_back(make_statement_shell(StatementKind::Break, tokens[i]));
+                        ++i;
+                        continue;
+                    }
+
+                    if (is_continue_token(tokens[i])) {
+                        body.push_back(make_statement_shell(StatementKind::Continue, tokens[i]));
+                        ++i;
+                        continue;
+                    }
+                }
+
+                ++i;
             }
 
             return i;
@@ -441,7 +542,7 @@ namespace flowmini::ast {
                 }
 
                 i = parse_function_signature(tokens, i, fn);
-                i = mark_body_container(tokens, i, fn.has_body, fn.body_location);
+                i = mark_body_container(tokens, i, fn.has_body, fn.body_location, fn.body);
 
                 module.source_unit.declarations.emplace_back(std::move(fn));
                 i = skip_until_next_top_levelish_token(tokens, i);
@@ -453,7 +554,7 @@ namespace flowmini::ast {
                 mainBlock.location = location_from_token(tokens[i]);
 
                 ++i;
-                i = mark_body_container(tokens, i, mainBlock.has_body, mainBlock.body_location);
+                i = mark_body_container(tokens, i, mainBlock.has_body, mainBlock.body_location, mainBlock.body);
 
                 module.source_unit.declarations.emplace_back(std::move(mainBlock));
 
