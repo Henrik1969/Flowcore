@@ -96,6 +96,9 @@ struct TypeRef {
 struct Parameter {
     std::string name;
     TypeRef type;
+
+    bool has_body = false;
+    SourceLocation body_location;
     SourceLocation location;
 };
 
@@ -150,6 +153,11 @@ struct Statement {
     //     name : Type(...)
     std::string name;
     TypeRef type;
+
+    bool has_body = false;
+    SourceLocation body_location;
+
+    std::vector<Statement> body;
 
     // For v24 this remains intentionally skeletal.
     // Expressions and nested statement bodies are populated in later steps.

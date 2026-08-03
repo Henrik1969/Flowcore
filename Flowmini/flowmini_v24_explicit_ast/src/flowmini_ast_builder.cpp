@@ -425,6 +425,10 @@ namespace flowmini::ast {
             return i;
         }
 
+        std::size_t parse_body_statement_shells(const std::vector<flowmini::Token>& tokens,
+                                                std::size_t i,
+                                                std::vector<Statement>& body);
+
         std::size_t parse_if_statement_shell(const std::vector<flowmini::Token>& tokens,
                                              std::size_t i,
                                              std::vector<Statement>& body) {
@@ -437,7 +441,9 @@ namespace flowmini::ast {
             i = skip_until_body_block_or_line_end(tokens, i);
 
             if (i < tokens.size() && tokens[i].kind == flowmini::TokenKind::LeftBrace) {
-                i = skip_group(tokens, i, flowmini::TokenKind::LeftBrace, flowmini::TokenKind::RightBrace);
+                statement.has_body = true;
+                statement.body_location = location_from_token(tokens[i]);
+                i = parse_body_statement_shells(tokens, i, statement.body);
             }
 
             body.push_back(std::move(statement));
@@ -456,10 +462,78 @@ namespace flowmini::ast {
             i = skip_until_body_block_or_line_end(tokens, i);
 
             if (i < tokens.size() && tokens[i].kind == flowmini::TokenKind::LeftBrace) {
-                i = skip_group(tokens, i, flowmini::TokenKind::LeftBrace, flowmini::TokenKind::RightBrace);
+                statement.has_body = true;
+                statement.body_location = location_from_token(tokens[i]);
+                i = parse_body_statement_shells(tokens, i, statement.body);
             }
 
             body.push_back(std::move(statement));
+            return i;
+        }
+
+        std::size_t parse_body_statement_shells(const std::vector<flowmini::Token>& tokens,
+                                                std::size_t i,
+                                                std::vector<Statement>& body) {
+            i = skip_nonsemantic_separators(tokens, i);
+
+            if (i >= tokens.size() || tokens[i].kind != flowmini::TokenKind::LeftBrace) {
+                return i;
+            }
+
+            ++i; // consume '{'
+
+            while (i < tokens.size() && !is_end_token(tokens[i])) {
+                if (tokens[i].kind == flowmini::TokenKind::RightBrace) {
+                    ++i;
+                    return i;
+                }
+
+                if (tokens[i].kind == flowmini::TokenKind::LeftBrace) {
+                    i = skip_group(tokens, i, flowmini::TokenKind::LeftBrace, flowmini::TokenKind::RightBrace);
+                    continue;
+                }
+
+                if (is_typed_binding_start(tokens, i)) {
+                    i = parse_typed_binding_statement_shell(tokens, i, body);
+                    continue;
+                }
+
+                if (is_if_token(tokens[i])) {
+                    i = parse_if_statement_shell(tokens, i, body);
+                    continue;
+                }
+
+                if (is_while_token(tokens[i])) {
+                    i = parse_while_statement_shell(tokens, i, body);
+                    continue;
+                }
+
+                if (is_plain_assignment_start(tokens, i)) {
+                    i = parse_plain_assignment_statement_shell(tokens, i, body);
+                    continue;
+                }
+
+                if (is_return_token(tokens[i])) {
+                    body.push_back(make_statement_shell(StatementKind::Return, tokens[i]));
+                    ++i;
+                    continue;
+                }
+
+                if (is_break_token(tokens[i])) {
+                    body.push_back(make_statement_shell(StatementKind::Break, tokens[i]));
+                    ++i;
+                    continue;
+                }
+
+                if (is_continue_token(tokens[i])) {
+                    body.push_back(make_statement_shell(StatementKind::Continue, tokens[i]));
+                    ++i;
+                    continue;
+                }
+
+                ++i;
+            }
+
             return i;
         }
 

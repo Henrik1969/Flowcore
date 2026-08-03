@@ -70,6 +70,21 @@ namespace flowmini::ast {
                         dump_json_string(out, statement.type.name);
                     }
 
+                    if (statement.has_body) {
+                        out << ",\n";
+                        dump_indent(out, indent + 4);
+                        out << "\"has_body\": true";
+
+                        out << ",\n";
+                        dump_indent(out, indent + 4);
+                        out << "\"body_statement_count\": " << statement.body.size();
+
+                        out << ",\n";
+                        dump_indent(out, indent + 4);
+                        out << "\"body_statements\": ";
+                        dump_statement_array_json(out, statement.body, indent + 4);
+                    }
+
                     out << "\n";
 
                     dump_indent(out, indent + 2);
