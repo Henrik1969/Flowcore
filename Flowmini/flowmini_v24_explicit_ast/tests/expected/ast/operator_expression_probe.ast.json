@@ -1,0 +1,174 @@
+{
+    "format": "flowmini.ast.v1",
+    "source_unit": {
+        "kind": "program",
+        "name": "operator_expression_probe",
+        "declaration_count": 2,
+        "declarations": [
+            {
+                "kind": "function",
+                "name": "square",
+                "parameter_count": 1,
+                "parameters": [
+                    {
+                        "name": "n",
+                        "type": "int"
+                    }
+                ],
+                "return_type": "",
+                "has_body": false,
+                "body_statement_count": 0,
+                "body_statements": []
+            },
+            {
+                "kind": "main_block",
+                "has_body": true,
+                "body_statement_count": 8,
+                "body_statements": [
+                    {
+                        "kind": "let",
+                        "name": "x",
+                        "type": "int",
+                        "has_initializer": true,
+                        "expression_ids": [
+                            0
+                        ]
+                    },
+                    {
+                        "kind": "let",
+                        "name": "y",
+                        "type": "int",
+                        "has_initializer": true,
+                        "expression_ids": [
+                            1
+                        ]
+                    },
+                    {
+                        "kind": "let",
+                        "name": "z",
+                        "type": "int",
+                        "has_initializer": true,
+                        "expression_ids": [
+                            2
+                        ]
+                    },
+                    {
+                        "kind": "assignment",
+                        "name": "x",
+                        "has_value": true,
+                        "expression_ids": [
+                            3
+                        ]
+                    },
+                    {
+                        "kind": "assignment",
+                        "name": "y",
+                        "has_value": true,
+                        "expression_ids": [
+                            4
+                        ]
+                    },
+                    {
+                        "kind": "assignment",
+                        "name": "z",
+                        "has_value": true,
+                        "expression_ids": [
+                            5
+                        ]
+                    },
+                    {
+                        "kind": "while",
+                        "has_condition": true,
+                        "expression_ids": [
+                            6
+                        ],
+                        "has_body": true,
+                        "body_statement_count": 1,
+                        "body_statements": [
+                            {
+                                "kind": "assignment",
+                                "name": "x",
+                                "has_value": true,
+                                "expression_ids": [
+                                    7
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "kind": "if",
+                        "has_condition": true,
+                        "expression_ids": [
+                            8
+                        ],
+                        "has_body": true,
+                        "body_statement_count": 1,
+                        "body_statements": [
+                            {
+                                "kind": "assignment",
+                                "name": "y",
+                                "has_value": true,
+                                "expression_ids": [
+                                    9
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    "expression_pool_size": 10,
+    "expression_pool": [
+        {
+            "id": 0,
+            "kind": "integer_literal",
+            "text": "1"
+        },
+        {
+            "id": 1,
+            "kind": "integer_literal",
+            "text": "2"
+        },
+        {
+            "id": 2,
+            "kind": "call",
+            "text": "square"
+        },
+        {
+            "id": 3,
+            "kind": "identifier",
+            "text": "y"
+        },
+        {
+            "id": 4,
+            "kind": "binary",
+            "text": "+"
+        },
+        {
+            "id": 5,
+            "kind": "call",
+            "text": "square"
+        },
+        {
+            "id": 6,
+            "kind": "binary",
+            "text": "<"
+        },
+        {
+            "id": 7,
+            "kind": "binary",
+            "text": "+"
+        },
+        {
+            "id": 8,
+            "kind": "binary",
+            "text": "=="
+        },
+        {
+            "id": 9,
+            "kind": "binary",
+            "text": "-"
+        }
+    ]
+}

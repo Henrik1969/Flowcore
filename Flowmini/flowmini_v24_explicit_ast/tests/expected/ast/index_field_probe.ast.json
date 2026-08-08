@@ -1,0 +1,165 @@
+{
+    "format": "flowmini.ast.v1",
+    "source_unit": {
+        "kind": "program",
+        "name": "index_field_probe",
+        "declaration_count": 1,
+        "declarations": [
+            {
+                "kind": "main_block",
+                "has_body": true,
+                "body_statement_count": 9,
+                "body_statements": [
+                    {
+                        "kind": "let",
+                        "name": "arr",
+                        "type": "list"
+                    },
+                    {
+                        "kind": "let",
+                        "name": "i",
+                        "type": "int",
+                        "has_initializer": true,
+                        "expression_ids": [
+                            0
+                        ]
+                    },
+                    {
+                        "kind": "let",
+                        "name": "value",
+                        "type": "int",
+                        "has_initializer": true,
+                        "expression_ids": [
+                            1
+                        ]
+                    },
+                    {
+                        "kind": "let",
+                        "name": "p",
+                        "type": "Point",
+                        "has_initializer": true,
+                        "expression_ids": [
+                            2
+                        ]
+                    },
+                    {
+                        "kind": "let",
+                        "name": "xvalue",
+                        "type": "int",
+                        "has_initializer": true,
+                        "expression_ids": [
+                            3
+                        ]
+                    },
+                    {
+                        "kind": "assignment",
+                        "name": "value",
+                        "has_value": true,
+                        "expression_ids": [
+                            4
+                        ]
+                    },
+                    {
+                        "kind": "assignment",
+                        "name": "xvalue",
+                        "has_value": true,
+                        "expression_ids": [
+                            5
+                        ]
+                    },
+                    {
+                        "kind": "while",
+                        "has_condition": true,
+                        "expression_ids": [
+                            6
+                        ],
+                        "has_body": true,
+                        "body_statement_count": 1,
+                        "body_statements": [
+                            {
+                                "kind": "assignment",
+                                "name": "value",
+                                "has_value": true,
+                                "expression_ids": [
+                                    7
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "kind": "if",
+                        "has_condition": true,
+                        "expression_ids": [
+                            8
+                        ],
+                        "has_body": true,
+                        "body_statement_count": 1,
+                        "body_statements": [
+                            {
+                                "kind": "assignment",
+                                "name": "xvalue",
+                                "has_value": true,
+                                "expression_ids": [
+                                    9
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    "expression_pool_size": 10,
+    "expression_pool": [
+        {
+            "id": 0,
+            "kind": "integer_literal",
+            "text": "0"
+        },
+        {
+            "id": 1,
+            "kind": "index",
+            "text": "arr"
+        },
+        {
+            "id": 2,
+            "kind": "record_literal",
+            "text": "{"
+        },
+        {
+            "id": 3,
+            "kind": "field_access",
+            "text": "p.x"
+        },
+        {
+            "id": 4,
+            "kind": "index",
+            "text": "arr"
+        },
+        {
+            "id": 5,
+            "kind": "field_access",
+            "text": "p.y"
+        },
+        {
+            "id": 6,
+            "kind": "binary",
+            "text": "<"
+        },
+        {
+            "id": 7,
+            "kind": "index",
+            "text": "arr"
+        },
+        {
+            "id": 8,
+            "kind": "binary",
+            "text": "=="
+        },
+        {
+            "id": 9,
+            "kind": "field_access",
+            "text": "p.y"
+        }
+    ]
+}

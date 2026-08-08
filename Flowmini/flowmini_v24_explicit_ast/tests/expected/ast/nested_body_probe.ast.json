@@ -1,0 +1,106 @@
+{
+    "format": "flowmini.ast.v1",
+    "source_unit": {
+        "kind": "program",
+        "name": "nested_body_probe",
+        "declaration_count": 1,
+        "declarations": [
+            {
+                "kind": "main_block",
+                "has_body": true,
+                "body_statement_count": 3,
+                "body_statements": [
+                    {
+                        "kind": "let",
+                        "name": "x",
+                        "type": "int",
+                        "has_initializer": true,
+                        "expression_ids": [
+                            0
+                        ]
+                    },
+                    {
+                        "kind": "while",
+                        "has_condition": true,
+                        "expression_ids": [
+                            1
+                        ],
+                        "has_body": true,
+                        "body_statement_count": 1,
+                        "body_statements": [
+                            {
+                                "kind": "assignment",
+                                "name": "x",
+                                "has_value": true,
+                                "expression_ids": [
+                                    2
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "kind": "if",
+                        "has_condition": true,
+                        "expression_ids": [
+                            3
+                        ],
+                        "has_body": true,
+                        "body_statement_count": 2,
+                        "body_statements": [
+                            {
+                                "kind": "let",
+                                "name": "y",
+                                "type": "int",
+                                "has_initializer": true,
+                                "expression_ids": [
+                                    4
+                                ]
+                            },
+                            {
+                                "kind": "assignment",
+                                "name": "y",
+                                "has_value": true,
+                                "expression_ids": [
+                                    5
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    "expression_pool_size": 6,
+    "expression_pool": [
+        {
+            "id": 0,
+            "kind": "integer_literal",
+            "text": "0"
+        },
+        {
+            "id": 1,
+            "kind": "binary",
+            "text": "<"
+        },
+        {
+            "id": 2,
+            "kind": "binary",
+            "text": "+"
+        },
+        {
+            "id": 3,
+            "kind": "binary",
+            "text": "=="
+        },
+        {
+            "id": 4,
+            "kind": "integer_literal",
+            "text": "1"
+        },
+        {
+            "id": 5,
+            "kind": "integer_literal",
+            "text": "2"
+        }
+    ]
+}

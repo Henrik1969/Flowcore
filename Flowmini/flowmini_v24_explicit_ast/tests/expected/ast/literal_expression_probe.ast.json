@@ -1,0 +1,65 @@
+{
+    "format": "flowmini.ast.v1",
+    "source_unit": {
+        "kind": "program",
+        "name": "literal_expression_probe",
+        "declaration_count": 1,
+        "declarations": [
+            {
+                "kind": "main_block",
+                "has_body": true,
+                "body_statement_count": 4,
+                "body_statements": [
+                    {
+                        "kind": "let",
+                        "name": "xs",
+                        "type": "list"
+                    },
+                    {
+                        "kind": "let",
+                        "name": "p",
+                        "type": "Point",
+                        "has_initializer": true,
+                        "expression_ids": [
+                            0
+                        ]
+                    },
+                    {
+                        "kind": "assignment",
+                        "name": "xs",
+                        "has_value": true,
+                        "expression_ids": [
+                            1
+                        ]
+                    },
+                    {
+                        "kind": "assignment",
+                        "name": "p",
+                        "has_value": true,
+                        "expression_ids": [
+                            2
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    "expression_pool_size": 3,
+    "expression_pool": [
+        {
+            "id": 0,
+            "kind": "record_literal",
+            "text": "{"
+        },
+        {
+            "id": 1,
+            "kind": "list_literal",
+            "text": "["
+        },
+        {
+            "id": 2,
+            "kind": "record_literal",
+            "text": "{"
+        }
+    ]
+}
