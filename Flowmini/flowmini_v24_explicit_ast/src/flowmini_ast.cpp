@@ -155,6 +155,14 @@ namespace flowmini::ast {
                     dump_indent(out, indent + 4);
                     out << "\"kind\": ";
                     dump_json_string(out, to_string(expression.kind));
+
+                    if (!expression.text.empty()) {
+                        out << ",\n";
+                        dump_indent(out, indent + 4);
+                        out << "\"text\": ";
+                        dump_json_string(out, expression.text);
+                    }
+
                     out << "\n";
 
                     dump_indent(out, indent + 2);

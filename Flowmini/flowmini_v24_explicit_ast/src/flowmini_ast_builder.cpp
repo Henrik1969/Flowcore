@@ -355,12 +355,46 @@ namespace flowmini::ast {
 
 
 
+
+        bool token_text_contains(const flowmini::Token& token, const char needle) {
+            return token.text.find(needle) != std::string::npos;
+        }
+
+        ExpressionKind classify_expression_token(const flowmini::Token& token) {
+            switch (token.kind) {
+                case flowmini::TokenKind::Identifier:
+                    return ExpressionKind::Identifier;
+
+                case flowmini::TokenKind::Number:
+                    return token_text_contains(token, '.')
+                        ? ExpressionKind::FloatLiteral
+                        : ExpressionKind::IntegerLiteral;
+
+                case flowmini::TokenKind::String:
+                    return ExpressionKind::StringLiteral;
+
+                case flowmini::TokenKind::KeywordTrue:
+                case flowmini::TokenKind::KeywordFalse:
+                    return ExpressionKind::BoolLiteral;
+
+                default:
+                    break;
+            }
+
+            if (token.text == "true" || token.text == "false") {
+                return ExpressionKind::BoolLiteral;
+            }
+
+            return ExpressionKind::Unknown;
+        }
+
         std::size_t add_expression_placeholder(std::vector<Expression>& expressionPool,
                                                Statement& statement,
                                                const flowmini::Token& token) {
             Expression expression;
-            expression.kind = ExpressionKind::Unknown;
+            expression.kind = classify_expression_token(token);
             expression.location = location_from_token(token);
+            expression.text = token.text;
 
             expressionPool.push_back(std::move(expression));
             const auto expressionId = expressionPool.size() - 1;
@@ -429,7 +463,13 @@ namespace flowmini::ast {
                 i < tokens.size() && tokens[i].kind == flowmini::TokenKind::LeftParen;
 
             if (statement.has_initializer) {
-                add_expression_placeholder(expressionPool, statement, tokens[i]);
+                const auto expressionStart = i + 1;
+                if (expressionStart < tokens.size() &&
+                    tokens[expressionStart].kind != flowmini::TokenKind::RightParen) {
+                    add_expression_placeholder(expressionPool, statement, tokens[expressionStart]);
+                } else {
+                    add_expression_placeholder(expressionPool, statement, tokens[i]);
+                }
             }
 
             body.push_back(std::move(statement));

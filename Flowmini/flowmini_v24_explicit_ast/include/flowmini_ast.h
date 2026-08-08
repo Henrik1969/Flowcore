@@ -106,6 +106,7 @@ struct Expression;
 
 struct IdentifierExpr {
     std::string name;
+    std::string text;
 };
 
 struct LiteralExpr {
@@ -129,6 +130,7 @@ struct CallExpr {
 };
 
 struct Expression {
+    std::string text;
     ExpressionKind kind = ExpressionKind::Unknown;
     SourceLocation location;
 
