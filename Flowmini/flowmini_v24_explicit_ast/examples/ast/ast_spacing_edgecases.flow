@@ -1,3 +1,13 @@
+/*
+AST edgecase specimen: not part of the v0.24 golden AST regression gate.
+
+This file may fail in v0.24 because root programs currently allow exactly
+one root main block. Multiple root main blocks are intentionally rejected.
+
+Future language direction for multiple runnable products is named target
+scopes, documented in docs/language/named-targets.md.
+*/
+
 program ast_spacing_edgecases
 
 fn compact(a:int,b:int):int {
