@@ -154,6 +154,10 @@ struct Statement {
     std::string name;
     TypeRef type;
 
+    bool has_initializer = false;
+    bool has_value = false;
+    bool has_condition = false;
+
     bool has_body = false;
     SourceLocation body_location;
 

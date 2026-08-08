@@ -70,6 +70,24 @@ namespace flowmini::ast {
                         dump_json_string(out, statement.type.name);
                     }
 
+                    if (statement.has_initializer) {
+                        out << ",\n";
+                        dump_indent(out, indent + 4);
+                        out << "\"has_initializer\": true";
+                    }
+
+                    if (statement.has_value) {
+                        out << ",\n";
+                        dump_indent(out, indent + 4);
+                        out << "\"has_value\": true";
+                    }
+
+                    if (statement.has_condition) {
+                        out << ",\n";
+                        dump_indent(out, indent + 4);
+                        out << "\"has_condition\": true";
+                    }
+
                     if (statement.has_body) {
                         out << ",\n";
                         dump_indent(out, indent + 4);

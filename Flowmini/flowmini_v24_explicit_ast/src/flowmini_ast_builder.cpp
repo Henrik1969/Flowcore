@@ -353,6 +353,40 @@ namespace flowmini::ast {
         }
 
 
+
+        bool has_expression_until_body_or_line_end(const std::vector<flowmini::Token>& tokens,
+                                                   std::size_t i) {
+            while (i < tokens.size() &&
+                   !is_end_token(tokens[i]) &&
+                   tokens[i].kind != flowmini::TokenKind::LeftBrace &&
+                   tokens[i].kind != flowmini::TokenKind::RightBrace &&
+                   tokens[i].kind != flowmini::TokenKind::Newline) {
+                if (tokens[i].kind != flowmini::TokenKind::Comma) {
+                    return true;
+                }
+
+                ++i;
+            }
+
+            return false;
+        }
+
+        bool has_expression_until_statement_boundary(const std::vector<flowmini::Token>& tokens,
+                                                     std::size_t i) {
+            while (i < tokens.size() &&
+                   !is_end_token(tokens[i]) &&
+                   tokens[i].kind != flowmini::TokenKind::Newline &&
+                   tokens[i].kind != flowmini::TokenKind::RightBrace) {
+                if (tokens[i].kind != flowmini::TokenKind::Comma) {
+                    return true;
+                }
+
+                ++i;
+            }
+
+            return false;
+        }
+
         bool is_typed_binding_start(const std::vector<flowmini::Token>& tokens,
                                     const std::size_t i) {
             return i + 2 < tokens.size() &&
@@ -376,6 +410,9 @@ namespace flowmini::ast {
                 ++i;
             }
 
+            statement.has_initializer =
+                i < tokens.size() && tokens[i].kind == flowmini::TokenKind::LeftParen;
+
             body.push_back(std::move(statement));
             return i;
         }
@@ -397,6 +434,8 @@ namespace flowmini::ast {
             statement.name = tokens[i].text;
 
             i += 2; // consume name and '='
+
+            statement.has_value = has_expression_until_statement_boundary(tokens, i);
 
             body.push_back(std::move(statement));
             return i;
@@ -438,6 +477,7 @@ namespace flowmini::ast {
 
             ++i; // consume if
 
+            statement.has_condition = has_expression_until_body_or_line_end(tokens, i);
             i = skip_until_body_block_or_line_end(tokens, i);
 
             if (i < tokens.size() && tokens[i].kind == flowmini::TokenKind::LeftBrace) {
@@ -459,6 +499,7 @@ namespace flowmini::ast {
 
             ++i; // consume while
 
+            statement.has_condition = has_expression_until_body_or_line_end(tokens, i);
             i = skip_until_body_block_or_line_end(tokens, i);
 
             if (i < tokens.size() && tokens[i].kind == flowmini::TokenKind::LeftBrace) {
@@ -514,7 +555,9 @@ namespace flowmini::ast {
                 }
 
                 if (is_return_token(tokens[i])) {
-                    body.push_back(make_statement_shell(StatementKind::Return, tokens[i]));
+                    Statement statement = make_statement_shell(StatementKind::Return, tokens[i]);
+                    statement.has_value = has_expression_until_statement_boundary(tokens, i + 1);
+                    body.push_back(std::move(statement));
                     ++i;
                     continue;
                 }
