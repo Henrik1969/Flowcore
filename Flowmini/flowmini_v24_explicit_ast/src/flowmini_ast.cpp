@@ -88,6 +88,19 @@ namespace flowmini::ast {
                         out << "\"has_condition\": true";
                     }
 
+                    if (!statement.expressions.empty()) {
+                        out << ",\n";
+                        dump_indent(out, indent + 4);
+                        out << "\"expression_ids\": [";
+                        for (std::size_t exprIndex = 0; exprIndex < statement.expressions.size(); ++exprIndex) {
+                            if (exprIndex > 0) {
+                                out << ", ";
+                            }
+                            out << statement.expressions[exprIndex];
+                        }
+                        out << "]";
+                    }
+
                     if (statement.has_body) {
                         out << ",\n";
                         dump_indent(out, indent + 4);
