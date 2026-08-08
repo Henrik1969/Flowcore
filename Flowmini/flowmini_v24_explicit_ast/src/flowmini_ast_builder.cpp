@@ -492,6 +492,35 @@ namespace flowmini::ast {
                    tokens[i].kind == flowmini::TokenKind::Minus;
         }
 
+
+        bool expression_starts_index_access(const std::vector<flowmini::Token>& tokens,
+                                            const std::size_t i) {
+            return i + 1 < tokens.size() &&
+                   tokens[i].kind == flowmini::TokenKind::Identifier &&
+                   tokens[i + 1].kind == flowmini::TokenKind::LeftBracket;
+        }
+
+        bool expression_starts_field_access(const std::vector<flowmini::Token>& tokens,
+                                            const std::size_t i) {
+            return i + 2 < tokens.size() &&
+                   tokens[i].kind == flowmini::TokenKind::Identifier &&
+                   tokens[i + 1].kind == flowmini::TokenKind::Dot &&
+                   tokens[i + 2].kind == flowmini::TokenKind::Identifier;
+        }
+
+        std::string field_access_text(const std::vector<flowmini::Token>& tokens,
+                                      const std::size_t i) {
+            if (expression_starts_field_access(tokens, i)) {
+                return tokens[i].text + "." + tokens[i + 2].text;
+            }
+
+            if (i < tokens.size()) {
+                return tokens[i].text;
+            }
+
+            return {};
+        }
+
         bool expression_starts_call(const std::vector<flowmini::Token>& tokens,
                                     const std::size_t i) {
             return i + 1 < tokens.size() &&
@@ -526,6 +555,12 @@ namespace flowmini::ast {
             } else if (expression_starts_call(tokens, i)) {
                 expression.kind = ExpressionKind::Call;
                 expression.text = token.text;
+            } else if (expression_starts_index_access(tokens, i)) {
+                expression.kind = ExpressionKind::Index;
+                expression.text = token.text;
+            } else if (expression_starts_field_access(tokens, i)) {
+                expression.kind = ExpressionKind::FieldAccess;
+                expression.text = field_access_text(tokens, i);
             } else {
                 expression.kind = classify_expression_token(token);
                 expression.text = token.text;
