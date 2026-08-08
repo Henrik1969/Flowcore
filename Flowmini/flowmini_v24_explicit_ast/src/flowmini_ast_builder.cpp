@@ -402,6 +402,39 @@ namespace flowmini::ast {
             return expressionId;
         }
 
+
+        bool expression_starts_call(const std::vector<flowmini::Token>& tokens,
+                                    const std::size_t i) {
+            return i + 1 < tokens.size() &&
+                   tokens[i].kind == flowmini::TokenKind::Identifier &&
+                   tokens[i + 1].kind == flowmini::TokenKind::LeftParen;
+        }
+
+        std::size_t add_expression_placeholder_at(std::vector<Expression>& expressionPool,
+                                                  Statement& statement,
+                                                  const std::vector<flowmini::Token>& tokens,
+                                                  const std::size_t i) {
+            if (i >= tokens.size()) {
+                return add_expression_placeholder(expressionPool, statement, tokens.back());
+            }
+
+            const auto& token = tokens[i];
+
+            Expression expression;
+            expression.kind = expression_starts_call(tokens, i)
+                ? ExpressionKind::Call
+                : classify_expression_token(token);
+            expression.location = location_from_token(token);
+            expression.text = token.text;
+
+            expressionPool.push_back(std::move(expression));
+            const auto expressionId = expressionPool.size() - 1;
+            statement.expressions.push_back(expressionId);
+            return expressionId;
+        }
+
+
+
         bool has_expression_until_body_or_line_end(const std::vector<flowmini::Token>& tokens,
                                                    std::size_t i) {
             while (i < tokens.size() &&
@@ -466,9 +499,9 @@ namespace flowmini::ast {
                 const auto expressionStart = i + 1;
                 if (expressionStart < tokens.size() &&
                     tokens[expressionStart].kind != flowmini::TokenKind::RightParen) {
-                    add_expression_placeholder(expressionPool, statement, tokens[expressionStart]);
+                    add_expression_placeholder_at(expressionPool, statement, tokens, expressionStart);
                 } else {
-                    add_expression_placeholder(expressionPool, statement, tokens[i]);
+                    add_expression_placeholder_at(expressionPool, statement, tokens, i);
                 }
             }
 
@@ -498,7 +531,7 @@ namespace flowmini::ast {
             statement.has_value = has_expression_until_statement_boundary(tokens, i);
 
             if (statement.has_value && i < tokens.size()) {
-                add_expression_placeholder(expressionPool, statement, tokens[i]);
+                add_expression_placeholder_at(expressionPool, statement, tokens, i);
             }
 
             body.push_back(std::move(statement));
@@ -545,7 +578,7 @@ namespace flowmini::ast {
 
             statement.has_condition = has_expression_until_body_or_line_end(tokens, i);
             if (statement.has_condition && i < tokens.size()) {
-                add_expression_placeholder(expressionPool, statement, tokens[i]);
+                add_expression_placeholder_at(expressionPool, statement, tokens, i);
             }
             i = skip_until_body_block_or_line_end(tokens, i);
 
@@ -571,7 +604,7 @@ namespace flowmini::ast {
 
             statement.has_condition = has_expression_until_body_or_line_end(tokens, i);
             if (statement.has_condition && i < tokens.size()) {
-                add_expression_placeholder(expressionPool, statement, tokens[i]);
+                add_expression_placeholder_at(expressionPool, statement, tokens, i);
             }
             i = skip_until_body_block_or_line_end(tokens, i);
 
@@ -632,7 +665,7 @@ namespace flowmini::ast {
                     Statement statement = make_statement_shell(StatementKind::Return, tokens[i]);
                     statement.has_value = has_expression_until_statement_boundary(tokens, i + 1);
                     if (statement.has_value && i + 1 < tokens.size()) {
-                        add_expression_placeholder(expressionPool, statement, tokens[i + 1]);
+                        add_expression_placeholder_at(expressionPool, statement, tokens, i + 1);
                     }
                     body.push_back(std::move(statement));
                     ++i;
