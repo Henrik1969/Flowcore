@@ -30,7 +30,7 @@ namespace {
         return buffer.str();
     }
 
-    [[nodiscard]] auto trimCopy(const std::string value) -> std::string {
+    [[nodiscard]] auto trimCopy(const std::string& value) -> std::string {
         const auto first = value.find_first_not_of(" \t\r\n");
         if (first == std::string::npos) { return {}; }
         const auto last = value.find_last_not_of(" \t\r\n");
@@ -123,7 +123,7 @@ namespace {
                 continue;
             }
 
-            if (mode == Mode::BlockComment) {
+            //if (mode == Mode::BlockComment) {
                 if (c == '/' && next == '*') {
                     ++depth;
                     out.append("  ");
@@ -149,8 +149,8 @@ namespace {
                 out.push_back(' ');
                 ++i;
                 ++column;
-                continue;
-            }
+              //  continue;
+            //}
         }
 
         if (mode == Mode::BlockComment) {

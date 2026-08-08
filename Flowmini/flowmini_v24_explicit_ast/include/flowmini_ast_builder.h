@@ -12,7 +12,8 @@
 
 namespace flowmini::ast {
 
-AstModule build_source_header_ast(const std::vector<flowmini::Token>& tokens);
+    AstModule build_source_header_ast(const std::vector<flowmini::Token>& tokens);
+    SourceLocation location_from_token(const flowmini::Token & token);
 
 } // namespace flowmini::ast
 
