@@ -1,0 +1,24 @@
+program call_expression_probe
+
+fn square(n : int) -> int {
+    return n * n
+}
+
+fn is_ready() -> Bool {
+    return true
+}
+
+main {
+    x : int(1)
+    y : int(square(x))
+
+    x = square(y)
+
+    while is_ready() {
+        x = square(x)
+    }
+
+    if is_ready() {
+        y = square(x)
+    }
+}

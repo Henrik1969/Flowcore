@@ -1,0 +1,23 @@
+program operator_expression_probe
+
+fn square(n : int) -> int {
+    return n * n
+}
+
+main {
+    x : int(1)
+    y : int(2)
+    z : int(square(x))
+
+    x = y
+    y = x + 1
+    z = square(y)
+
+    while x < 10 {
+        x = x + 1
+    }
+
+    if x == 10 {
+        y = y - 1
+    }
+}
