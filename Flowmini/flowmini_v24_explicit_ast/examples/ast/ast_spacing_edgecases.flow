@@ -1,0 +1,47 @@
+program ast_spacing_edgecases
+
+fn compact(a:int,b:int):int {
+    a + b -> return
+}
+
+fn spaced (
+    a : int,
+    b : int
+) : int {
+    a + b -> return
+}
+
+main {
+    one : int(1)
+    two : int(2)
+    out : int(0)
+
+    compact(one, two) -> out
+    print out
+
+    spaced(one, two) -> out
+    print out
+}program ast_spacing_edgecases
+
+fn compact(a:int,b:int):int {
+    a + b -> return
+    }
+
+    fn spaced (
+        a : int,
+	    b : int
+	    ) : int {
+	        a + b -> return
+		}
+
+		main {
+		    one : int(1)
+		        two : int(2)
+			    out : int(0)
+
+			        compact(one, two) -> out
+				    print out
+
+				        spaced(one, two) -> out
+					    print out
+					    }

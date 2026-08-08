@@ -1,0 +1,33 @@
+program function_signature_gallery
+
+fn no_args(): int {
+    zero : int(0)
+    zero -> return
+}
+
+fn one_arg(x : int): int {
+    x -> return
+}
+
+fn two_args(a : int, b : int): int {
+    a + b -> return
+}
+
+fn bool_arg(flag : Bool): Bool {
+    flag -> return
+}
+
+fn many_args(a : int, b : int, c : int, d : int): int {
+    a + b + c + d -> return
+}
+
+main {
+    one : int(1)
+    two : int(2)
+    three : int(3)
+    four : int(4)
+    out : int(0)
+
+    many_args(one, two, three, four) -> out
+    print out
+}
