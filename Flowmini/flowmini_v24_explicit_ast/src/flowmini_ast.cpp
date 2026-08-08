@@ -135,6 +135,44 @@ namespace flowmini::ast {
         }
 
 
+        void dump_expression_pool_json(std::ostream& out,
+                                       const std::vector<Expression>& expressions,
+                                       const unsigned indent) {
+            out << "[";
+
+            if (!expressions.empty()) {
+                out << "\n";
+
+                for (std::size_t i = 0; i < expressions.size(); ++i) {
+                    const auto& expression = expressions[i];
+
+                    dump_indent(out, indent + 2);
+                    out << "{\n";
+
+                    dump_indent(out, indent + 4);
+                    out << "\"id\": " << i << ",\n";
+
+                    dump_indent(out, indent + 4);
+                    out << "\"kind\": ";
+                    dump_json_string(out, to_string(expression.kind));
+                    out << "\n";
+
+                    dump_indent(out, indent + 2);
+                    out << "}";
+
+                    if (i + 1 < expressions.size()) {
+                        out << ",";
+                    }
+
+                    out << "\n";
+                }
+
+                dump_indent(out, indent);
+            }
+
+            out << "]";
+        }
+
         void dump_top_level_decl_json(std::ostream& out, const TopLevelDecl& decl, std::size_t indent) {
             dump_indent(out, indent);
             out << "{\n";
@@ -386,8 +424,11 @@ namespace flowmini::ast {
         out << "    ]\n";
 
         out << "  },\n";
-        out << "  \"expression_pool_size\": " << module.expression_pool.size() << "\n";
-        out << "}\n";
+        out << "  \"expression_pool_size\": " << module.expression_pool.size() << ",\n";
+    out << "  \"expression_pool\": ";
+    dump_expression_pool_json(out, module.expression_pool, 2);
+    out << "\n";
+    out << "}\n";
     }
 
 } // namespace flowmini::ast
