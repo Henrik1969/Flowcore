@@ -156,3 +156,15 @@ add_custom_target(flowmini_dump_ast
         COMMENT "Dumping Flowmini AST JSON view"
         VERBATIM
 )
+
+add_custom_target(flowmini_ast_golden_tests
+    COMMAND
+        ${CMAKE_COMMAND} -E env
+        FLOWMINI_BIN=$<TARGET_FILE:flowmini>
+        ${CMAKE_SOURCE_DIR}/tools/run-flowmini-ast-golden-tests.sh
+    DEPENDS flowmini
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    COMMENT "Running Flowmini AST golden regression tests"
+    VERBATIM
+)
+
