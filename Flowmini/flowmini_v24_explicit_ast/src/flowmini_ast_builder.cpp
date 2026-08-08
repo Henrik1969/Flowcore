@@ -493,6 +493,19 @@ namespace flowmini::ast {
         }
 
 
+
+        bool expression_starts_list_literal(const std::vector<flowmini::Token>& tokens,
+                                            const std::size_t i) {
+            return i < tokens.size() &&
+                   tokens[i].kind == flowmini::TokenKind::LeftBracket;
+        }
+
+        bool expression_starts_record_literal(const std::vector<flowmini::Token>& tokens,
+                                              const std::size_t i) {
+            return i < tokens.size() &&
+                   tokens[i].kind == flowmini::TokenKind::LeftBrace;
+        }
+
         bool expression_starts_index_access(const std::vector<flowmini::Token>& tokens,
                                             const std::size_t i) {
             return i + 1 < tokens.size() &&
@@ -561,6 +574,12 @@ namespace flowmini::ast {
             } else if (expression_starts_field_access(tokens, i)) {
                 expression.kind = ExpressionKind::FieldAccess;
                 expression.text = field_access_text(tokens, i);
+            } else if (expression_starts_list_literal(tokens, i)) {
+                expression.kind = ExpressionKind::ListLiteral;
+                expression.text = token.text;
+            } else if (expression_starts_record_literal(tokens, i)) {
+                expression.kind = ExpressionKind::RecordLiteral;
+                expression.text = token.text;
             } else {
                 expression.kind = classify_expression_token(token);
                 expression.text = token.text;
