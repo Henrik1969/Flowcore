@@ -121,6 +121,7 @@
                         "kind": "assignment",
                         "name": "result",
                         "has_value": true,
+                        "value_expression_id": 9,
                         "expression_ids": [
                             9
                         ]
@@ -129,6 +130,7 @@
                         "kind": "assignment",
                         "name": "arr",
                         "has_value": true,
+                        "value_expression_id": 18,
                         "expression_ids": [
                             18
                         ]
@@ -137,6 +139,7 @@
                         "kind": "assignment",
                         "name": "point",
                         "has_value": true,
+                        "value_expression_id": 26,
                         "expression_ids": [
                             26
                         ]

@@ -75,6 +75,7 @@
                         "kind": "assignment",
                         "name": "xs",
                         "has_value": true,
+                        "value_expression_id": 7,
                         "expression_ids": [
                             7
                         ]
@@ -83,6 +84,7 @@
                         "kind": "assignment",
                         "name": "p",
                         "has_value": true,
+                        "value_expression_id": 11,
                         "expression_ids": [
                             11
                         ]

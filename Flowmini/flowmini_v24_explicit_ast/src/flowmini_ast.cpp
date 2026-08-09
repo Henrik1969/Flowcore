@@ -314,10 +314,11 @@ namespace flowmini::ast {
                     const bool hasInitializer =
                         hasCanonicalInitializer || statement.has_initializer;
 
-                    const bool hasCanonicalReturnValue =
-                        statement.kind == StatementKind::Return &&
+                    const bool hasCanonicalValue =
+                        (statement.kind == StatementKind::Return ||
+                         statement.kind == StatementKind::Assignment) &&
                         statement.value_expression.has_value();
-                    const bool hasValue = hasCanonicalReturnValue || statement.has_value;
+                    const bool hasValue = hasCanonicalValue || statement.has_value;
 
                     std::vector<std::size_t> projectedExpressionIds = statement.expressions;
                     if (statement.kind == StatementKind::Let) {
@@ -325,7 +326,8 @@ namespace flowmini::ast {
                         if (statement.initializer_expression) {
                             projectedExpressionIds.push_back(*statement.initializer_expression);
                         }
-                    } else if (statement.kind == StatementKind::Return) {
+                    } else if (statement.kind == StatementKind::Return ||
+                               statement.kind == StatementKind::Assignment) {
                         projectedExpressionIds.clear();
                         if (statement.value_expression) {
                             projectedExpressionIds.push_back(*statement.value_expression);
@@ -376,7 +378,7 @@ namespace flowmini::ast {
                         out << "\"has_value\": true";
                     }
 
-                    if (hasCanonicalReturnValue) {
+                    if (hasCanonicalValue) {
                         out << ",\n";
                         dump_indent(out, indent + 4);
                         out << "\"value_expression_id\": " << *statement.value_expression;

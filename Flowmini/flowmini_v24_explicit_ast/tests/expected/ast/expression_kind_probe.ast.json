@@ -179,6 +179,7 @@
                         "kind": "assignment",
                         "name": "a",
                         "has_value": true,
+                        "value_expression_id": 8,
                         "expression_ids": [
                             8
                         ]
@@ -196,6 +197,7 @@
                                 "kind": "assignment",
                                 "name": "a",
                                 "has_value": true,
+                                "value_expression_id": 12,
                                 "expression_ids": [
                                     12
                                 ]
@@ -215,6 +217,7 @@
                                 "kind": "assignment",
                                 "name": "b",
                                 "has_value": true,
+                                "value_expression_id": 16,
                                 "expression_ids": [
                                     16
                                 ]

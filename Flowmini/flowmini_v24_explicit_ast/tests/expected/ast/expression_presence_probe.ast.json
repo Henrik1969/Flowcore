@@ -110,6 +110,7 @@
                         "kind": "assignment",
                         "name": "x",
                         "has_value": true,
+                        "value_expression_id": 5,
                         "expression_ids": [
                             5
                         ]
@@ -127,6 +128,7 @@
                                 "kind": "assignment",
                                 "name": "x",
                                 "has_value": true,
+                                "value_expression_id": 9,
                                 "expression_ids": [
                                     9
                                 ]
@@ -146,6 +148,7 @@
                                 "kind": "assignment",
                                 "name": "y",
                                 "has_value": true,
+                                "value_expression_id": 15,
                                 "expression_ids": [
                                     15
                                 ]

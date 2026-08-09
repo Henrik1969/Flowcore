@@ -1911,10 +1911,11 @@ namespace flowmini::ast {
 
             i += 2; // consume name and '='
 
-            statement.has_value = has_expression_until_statement_boundary(tokens, i);
+            const bool hasValue = has_expression_until_statement_boundary(tokens, i);
 
-            if (statement.has_value && i < tokens.size()) {
-                add_expression_placeholder_at(expressionPool, statement, tokens, i);
+            if (hasValue && i < tokens.size()) {
+                statement.value_expression = add_expression_placeholder_at(
+                    expressionPool, statement, tokens, i, false);
             }
 
             body.push_back(std::move(statement));

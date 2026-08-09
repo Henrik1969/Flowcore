@@ -223,8 +223,10 @@ struct Statement {
 
     // C5 canonical statement expression roles.
     // Let owns initializer_expression when initializer syntax contains a value
-    // expression. Return owns value_expression. expression_ids remains a
-    // derived JSON compatibility projection while C5 migration is in progress.
+    // expression. Return and plain-name Assignment own value_expression.
+    // expression_ids remains a derived JSON compatibility projection while C5
+    // migration is in progress. Assignment target generalization is deferred;
+    // the current Assignment name remains the canonical plain identifier target.
     std::optional<std::size_t> initializer_expression;
     std::optional<std::size_t> value_expression;
 

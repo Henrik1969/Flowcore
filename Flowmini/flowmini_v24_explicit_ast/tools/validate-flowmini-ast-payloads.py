@@ -184,25 +184,31 @@ def validate_statement_types(statements: object, context: str, expression_count:
                         f"{statement_context}: initializer does not match expression_ids projection"
                     )
 
-        if statement.get("kind") == "return":
+        if statement.get("kind") in {"return", "assignment"}:
+            value_role = statement["kind"]
             value_expression_id = statement.get("value_expression_id")
             if value_expression_id is None:
                 if statement.get("has_value") is True or expression_ids:
                     raise ValueError(
-                        f"{statement_context}: valueless return disagrees with compatibility projection"
+                        f"{statement_context}: valueless {value_role} disagrees with "
+                        "compatibility projection"
                     )
             else:
                 if not isinstance(value_expression_id, int):
                     raise TypeError(f"{statement_context}: value_expression_id must be an integer")
                 if value_expression_id < 0 or value_expression_id >= expression_count:
                     raise ValueError(
-                        f"{statement_context}: dangling return value expression id {value_expression_id}"
+                        f"{statement_context}: dangling {value_role} value expression id "
+                        f"{value_expression_id}"
                     )
                 if statement.get("has_value") is not True:
-                    raise ValueError(f"{statement_context}: return value requires has_value projection")
+                    raise ValueError(
+                        f"{statement_context}: {value_role} value requires has_value projection"
+                    )
                 if expression_ids != [value_expression_id]:
                     raise ValueError(
-                        f"{statement_context}: return value does not match expression_ids projection"
+                        f"{statement_context}: {value_role} value does not match "
+                        "expression_ids projection"
                     )
 
         if "type" in statement or "type_ref" in statement:
