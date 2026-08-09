@@ -157,6 +157,33 @@ def validate_statement_types(statements: object, context: str, expression_count:
             if expression_id < 0 or expression_id >= expression_count:
                 raise ValueError(f"{statement_context}: dangling statement expression id {expression_id}")
 
+        if statement.get("kind") == "let":
+            initializer_expression_id = statement.get("initializer_expression_id")
+            if initializer_expression_id is None:
+                if expression_ids:
+                    raise ValueError(
+                        f"{statement_context}: let expression_ids require canonical initializer ownership"
+                    )
+            else:
+                if not isinstance(initializer_expression_id, int):
+                    raise TypeError(
+                        f"{statement_context}: initializer_expression_id must be an integer"
+                    )
+                if initializer_expression_id < 0 or initializer_expression_id >= expression_count:
+                    raise ValueError(
+                        f"{statement_context}: dangling initializer expression id "
+                        f"{initializer_expression_id}"
+                    )
+                if statement.get("has_initializer") is not True:
+                    raise ValueError(
+                        f"{statement_context}: initializer expression requires "
+                        "has_initializer projection"
+                    )
+                if expression_ids != [initializer_expression_id]:
+                    raise ValueError(
+                        f"{statement_context}: initializer does not match expression_ids projection"
+                    )
+
         if statement.get("kind") == "return":
             value_expression_id = statement.get("value_expression_id")
             if value_expression_id is None:

@@ -110,6 +110,7 @@
                             }
                         },
                         "has_initializer": true,
+                        "initializer_expression_id": 4,
                         "expression_ids": [
                             4
                         ]
@@ -132,6 +133,7 @@
                             }
                         },
                         "has_initializer": true,
+                        "initializer_expression_id": 5,
                         "expression_ids": [
                             5
                         ]

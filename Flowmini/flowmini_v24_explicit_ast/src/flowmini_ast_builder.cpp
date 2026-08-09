@@ -1879,9 +1879,12 @@ namespace flowmini::ast {
                 const auto expressionStart = i + 1;
                 if (expressionStart < tokens.size() &&
                     tokens[expressionStart].kind != flowmini::TokenKind::RightParen) {
-                    add_expression_placeholder_at(expressionPool, statement, tokens, expressionStart);
-                } else {
-                    add_expression_placeholder_at(expressionPool, statement, tokens, i);
+                    statement.initializer_expression = add_expression_placeholder_at(
+                        expressionPool,
+                        statement,
+                        tokens,
+                        expressionStart,
+                        false);
                 }
             }
 

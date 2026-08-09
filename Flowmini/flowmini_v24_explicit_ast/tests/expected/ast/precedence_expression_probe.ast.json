@@ -28,6 +28,7 @@
                             }
                         },
                         "has_initializer": true,
+                        "initializer_expression_id": 0,
                         "expression_ids": [
                             0
                         ]
@@ -50,6 +51,7 @@
                             }
                         },
                         "has_initializer": true,
+                        "initializer_expression_id": 1,
                         "expression_ids": [
                             1
                         ]
@@ -72,6 +74,7 @@
                             }
                         },
                         "has_initializer": true,
+                        "initializer_expression_id": 2,
                         "expression_ids": [
                             2
                         ]
@@ -94,6 +97,7 @@
                             }
                         },
                         "has_initializer": true,
+                        "initializer_expression_id": 3,
                         "expression_ids": [
                             3
                         ]
@@ -116,6 +120,7 @@
                             }
                         },
                         "has_initializer": true,
+                        "initializer_expression_id": 4,
                         "expression_ids": [
                             4
                         ]

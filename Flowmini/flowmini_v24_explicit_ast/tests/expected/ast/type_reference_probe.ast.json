@@ -341,6 +341,7 @@
                             }
                         },
                         "has_initializer": true,
+                        "initializer_expression_id": 0,
                         "expression_ids": [
                             0
                         ]
@@ -389,6 +390,7 @@
                             }
                         },
                         "has_initializer": true,
+                        "initializer_expression_id": 4,
                         "expression_ids": [
                             4
                         ]
@@ -442,6 +444,7 @@
                             }
                         },
                         "has_initializer": true,
+                        "initializer_expression_id": 10,
                         "expression_ids": [
                             10
                         ]

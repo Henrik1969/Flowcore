@@ -308,13 +308,24 @@ namespace flowmini::ast {
                 for (std::size_t i = 0; i < statements.size(); ++i) {
                     const auto& statement = statements[i];
 
+                    const bool hasCanonicalInitializer =
+                        statement.kind == StatementKind::Let &&
+                        statement.initializer_expression.has_value();
+                    const bool hasInitializer =
+                        hasCanonicalInitializer || statement.has_initializer;
+
                     const bool hasCanonicalReturnValue =
                         statement.kind == StatementKind::Return &&
                         statement.value_expression.has_value();
                     const bool hasValue = hasCanonicalReturnValue || statement.has_value;
 
                     std::vector<std::size_t> projectedExpressionIds = statement.expressions;
-                    if (statement.kind == StatementKind::Return) {
+                    if (statement.kind == StatementKind::Let) {
+                        projectedExpressionIds.clear();
+                        if (statement.initializer_expression) {
+                            projectedExpressionIds.push_back(*statement.initializer_expression);
+                        }
+                    } else if (statement.kind == StatementKind::Return) {
                         projectedExpressionIds.clear();
                         if (statement.value_expression) {
                             projectedExpressionIds.push_back(*statement.value_expression);
@@ -346,10 +357,17 @@ namespace flowmini::ast {
                         dump_type_ref_json(out, statement.type);
                     }
 
-                    if (statement.has_initializer) {
+                    if (hasInitializer) {
                         out << ",\n";
                         dump_indent(out, indent + 4);
                         out << "\"has_initializer\": true";
+                    }
+
+                    if (hasCanonicalInitializer) {
+                        out << ",\n";
+                        dump_indent(out, indent + 4);
+                        out << "\"initializer_expression_id\": "
+                            << *statement.initializer_expression;
                     }
 
                     if (hasValue) {

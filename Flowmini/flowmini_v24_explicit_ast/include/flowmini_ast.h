@@ -221,9 +221,11 @@ struct Statement {
     bool has_value = false;
     bool has_condition = false;
 
-    // C5 statement-role deepening starts with Return.
-    // For Return this is canonical ownership; expression_ids remains a
-    // derived JSON compatibility projection.
+    // C5 canonical statement expression roles.
+    // Let owns initializer_expression when initializer syntax contains a value
+    // expression. Return owns value_expression. expression_ids remains a
+    // derived JSON compatibility projection while C5 migration is in progress.
+    std::optional<std::size_t> initializer_expression;
     std::optional<std::size_t> value_expression;
 
     bool has_body = false;
