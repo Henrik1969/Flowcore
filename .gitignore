@@ -68,3 +68,16 @@ test-report/
 # Flowmini generated test reports
 test-report/
 **/test-report/
+
+# Local build/test/IDE artifacts
+build/
+cmake-build-*/
+test-report/
+.idea/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+compile_commands.json
+*.tmp
+tempresult*.txt
+_local_archive/
