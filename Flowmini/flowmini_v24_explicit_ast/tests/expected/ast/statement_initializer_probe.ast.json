@@ -126,6 +126,7 @@
                     {
                         "kind": "if",
                         "has_condition": true,
+                        "condition_expression_id": 9,
                         "expression_ids": [
                             9
                         ],

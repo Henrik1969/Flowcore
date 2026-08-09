@@ -320,6 +320,13 @@ namespace flowmini::ast {
                         statement.value_expression.has_value();
                     const bool hasValue = hasCanonicalValue || statement.has_value;
 
+                    const bool hasCanonicalCondition =
+                        (statement.kind == StatementKind::If ||
+                         statement.kind == StatementKind::While) &&
+                        statement.condition_expression.has_value();
+                    const bool hasCondition =
+                        hasCanonicalCondition || statement.has_condition;
+
                     std::vector<std::size_t> projectedExpressionIds = statement.expressions;
                     if (statement.kind == StatementKind::Let) {
                         projectedExpressionIds.clear();
@@ -331,6 +338,12 @@ namespace flowmini::ast {
                         projectedExpressionIds.clear();
                         if (statement.value_expression) {
                             projectedExpressionIds.push_back(*statement.value_expression);
+                        }
+                    } else if (statement.kind == StatementKind::If ||
+                               statement.kind == StatementKind::While) {
+                        projectedExpressionIds.clear();
+                        if (statement.condition_expression) {
+                            projectedExpressionIds.push_back(*statement.condition_expression);
                         }
                     }
 
@@ -384,10 +397,17 @@ namespace flowmini::ast {
                         out << "\"value_expression_id\": " << *statement.value_expression;
                     }
 
-                    if (statement.has_condition) {
+                    if (hasCondition) {
                         out << ",\n";
                         dump_indent(out, indent + 4);
                         out << "\"has_condition\": true";
+                    }
+
+                    if (hasCanonicalCondition) {
+                        out << ",\n";
+                        dump_indent(out, indent + 4);
+                        out << "\"condition_expression_id\": "
+                            << *statement.condition_expression;
                     }
 
                     if (!projectedExpressionIds.empty()) {

@@ -211,6 +211,36 @@ def validate_statement_types(statements: object, context: str, expression_count:
                         "expression_ids projection"
                     )
 
+        if statement.get("kind") in {"if", "while"}:
+            condition_role = statement["kind"]
+            condition_expression_id = statement.get("condition_expression_id")
+            if condition_expression_id is None:
+                if statement.get("has_condition") is True or expression_ids:
+                    raise ValueError(
+                        f"{statement_context}: conditionless {condition_role} disagrees with "
+                        "compatibility projection"
+                    )
+            else:
+                if not isinstance(condition_expression_id, int):
+                    raise TypeError(
+                        f"{statement_context}: condition_expression_id must be an integer"
+                    )
+                if condition_expression_id < 0 or condition_expression_id >= expression_count:
+                    raise ValueError(
+                        f"{statement_context}: dangling {condition_role} condition expression id "
+                        f"{condition_expression_id}"
+                    )
+                if statement.get("has_condition") is not True:
+                    raise ValueError(
+                        f"{statement_context}: {condition_role} condition requires "
+                        "has_condition projection"
+                    )
+                if expression_ids != [condition_expression_id]:
+                    raise ValueError(
+                        f"{statement_context}: {condition_role} condition does not match "
+                        "expression_ids projection"
+                    )
+
         if "type" in statement or "type_ref" in statement:
             canonical = validate_type_ref(statement.get("type_ref"), statement_context)
             if statement.get("type") != canonical:

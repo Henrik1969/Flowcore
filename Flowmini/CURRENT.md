@@ -14,13 +14,14 @@ Road C5 statement deepening in progress
 C5.1 return expression ownership complete
 C5.2 typed-binding initializer ownership complete
 C5.3 plain-assignment value ownership complete
+C5.4 if/while condition ownership complete
 ```
 
 ## Status
 
 ```text
 build: PASS
-AST golden tests: PASS (14)
+AST golden tests: PASS (15)
 suite: PASS (76 / 76)
 bad: 0
 ```
@@ -28,9 +29,9 @@ bad: 0
 Flowmini is still experimental and unfinished.
 
 The current v0.24 line provides an observable, regression-guarded AST with
-canonical expression payloads, canonical type-reference payloads, and three
-canonical statement-expression roles: return value ownership, typed-binding
-initializer ownership, and plain-assignment value ownership.
+canonical expression payloads, canonical type-reference payloads, and canonical
+statement-expression roles for return values, typed-binding initializers,
+plain-assignment values, and if/while conditions.
 
 ## Run the current build
 
@@ -53,7 +54,7 @@ cmake --build cmake-build-debug --target flowmini_suite
 Expected result:
 
 ```text
-AST golden tests: PASS (14)
+AST golden tests: PASS (15)
 
 total: 76
 pass:  76
@@ -88,7 +89,7 @@ docs/language/named-targets.md
 The following are still future or incomplete work:
 
 ```text
-remaining statement-role ownership beyond return, typed-binding initializer, and plain assignment
+remaining statement structure beyond the migrated expression-owning statement roles
 else blocks
 semantic validation of type references
 generic value arguments

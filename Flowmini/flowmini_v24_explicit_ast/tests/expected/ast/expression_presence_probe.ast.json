@@ -118,6 +118,7 @@
                     {
                         "kind": "while",
                         "has_condition": true,
+                        "condition_expression_id": 6,
                         "expression_ids": [
                             6
                         ],
@@ -138,6 +139,7 @@
                     {
                         "kind": "if",
                         "has_condition": true,
+                        "condition_expression_id": 12,
                         "expression_ids": [
                             12
                         ],

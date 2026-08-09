@@ -1989,9 +1989,10 @@ namespace flowmini::ast {
 
             ++i; // consume if
 
-            statement.has_condition = has_expression_until_body_or_line_end(tokens, i);
-            if (statement.has_condition && i < tokens.size()) {
-                add_expression_placeholder_at(expressionPool, statement, tokens, i);
+            const bool hasCondition = has_expression_until_body_or_line_end(tokens, i);
+            if (hasCondition && i < tokens.size()) {
+                statement.condition_expression = add_expression_placeholder_at(
+                    expressionPool, statement, tokens, i, false);
             }
             i = skip_until_body_block_or_line_end(tokens, i);
 
@@ -2015,9 +2016,10 @@ namespace flowmini::ast {
 
             ++i; // consume while
 
-            statement.has_condition = has_expression_until_body_or_line_end(tokens, i);
-            if (statement.has_condition && i < tokens.size()) {
-                add_expression_placeholder_at(expressionPool, statement, tokens, i);
+            const bool hasCondition = has_expression_until_body_or_line_end(tokens, i);
+            if (hasCondition && i < tokens.size()) {
+                statement.condition_expression = add_expression_placeholder_at(
+                    expressionPool, statement, tokens, i, false);
             }
             i = skip_until_body_block_or_line_end(tokens, i);
 
