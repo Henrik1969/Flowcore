@@ -81,3 +81,5 @@ compile_commands.json
 *.tmp
 tempresult*.txt
 _local_archive/
+__pycache__/
+*.py[cod]
