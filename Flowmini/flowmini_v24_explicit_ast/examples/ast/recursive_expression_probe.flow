@@ -1,0 +1,17 @@
+program recursive_expression_probe
+
+record Point {
+    x : int
+    y : int
+}
+
+main {
+    arr : list<int>([1, 2, 3])
+    i : int(0)
+    point : Point({x: 10, y: 20})
+    result : int(0)
+
+    result = outer(inner(1 + arr[i]))
+    arr = [arr[i], leaf(point.x)]
+    point = {x: leaf(arr[i]), y: -point.y}
+}

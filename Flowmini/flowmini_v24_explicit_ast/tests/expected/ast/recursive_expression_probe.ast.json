@@ -2,13 +2,13 @@
     "format": "flowmini.ast.v1",
     "source_unit": {
         "kind": "program",
-        "name": "index_field_probe",
+        "name": "recursive_expression_probe",
         "declaration_count": 1,
         "declarations": [
             {
                 "kind": "main_block",
                 "has_body": true,
-                "body_statement_count": 9,
+                "body_statement_count": 7,
                 "body_statements": [
                     {
                         "kind": "let",
@@ -26,8 +26,8 @@
                     },
                     {
                         "kind": "let",
-                        "name": "value",
-                        "type": "int",
+                        "name": "point",
+                        "type": "Point",
                         "has_initializer": true,
                         "expression_ids": [
                             1
@@ -35,81 +35,42 @@
                     },
                     {
                         "kind": "let",
-                        "name": "p",
-                        "type": "Point",
+                        "name": "result",
+                        "type": "int",
                         "has_initializer": true,
                         "expression_ids": [
                             4
                         ]
                     },
                     {
-                        "kind": "let",
-                        "name": "xvalue",
-                        "type": "int",
-                        "has_initializer": true,
-                        "expression_ids": [
-                            7
-                        ]
-                    },
-                    {
                         "kind": "assignment",
-                        "name": "value",
+                        "name": "result",
                         "has_value": true,
                         "expression_ids": [
-                            9
+                            5
                         ]
                     },
                     {
                         "kind": "assignment",
-                        "name": "xvalue",
+                        "name": "arr",
                         "has_value": true,
                         "expression_ids": [
                             12
                         ]
                     },
                     {
-                        "kind": "while",
-                        "has_condition": true,
+                        "kind": "assignment",
+                        "name": "point",
+                        "has_value": true,
                         "expression_ids": [
-                            14
-                        ],
-                        "has_body": true,
-                        "body_statement_count": 1,
-                        "body_statements": [
-                            {
-                                "kind": "assignment",
-                                "name": "value",
-                                "has_value": true,
-                                "expression_ids": [
-                                    19
-                                ]
-                            }
-                        ]
-                    },
-                    {
-                        "kind": "if",
-                        "has_condition": true,
-                        "expression_ids": [
-                            22
-                        ],
-                        "has_body": true,
-                        "body_statement_count": 1,
-                        "body_statements": [
-                            {
-                                "kind": "assignment",
-                                "name": "xvalue",
-                                "has_value": true,
-                                "expression_ids": [
-                                    26
-                                ]
-                            }
+                            19
                         ]
                     }
                 ]
             }
         ]
     },
-    "expression_pool_size": 28,
+    "expression_pool_size": 27,
     "expression_pool": [
         {
             "id": 0,
@@ -119,8 +80,8 @@
         },
         {
             "id": 1,
-            "kind": "index",
-            "text": "arr",
+            "kind": "record_literal",
+            "text": "{",
             "child_expressions": [
                 2,
                 3
@@ -128,49 +89,51 @@
         },
         {
             "id": 2,
-            "kind": "identifier",
-            "text": "arr",
-            "child_expressions": []
-        },
-        {
-            "id": 3,
-            "kind": "identifier",
-            "text": "i",
-            "child_expressions": []
-        },
-        {
-            "id": 4,
-            "kind": "record_literal",
-            "text": "{",
-            "child_expressions": [
-                5,
-                6
-            ]
-        },
-        {
-            "id": 5,
             "kind": "integer_literal",
             "text": "10",
             "child_expressions": []
         },
         {
-            "id": 6,
+            "id": 3,
             "kind": "integer_literal",
             "text": "20",
             "child_expressions": []
         },
         {
-            "id": 7,
-            "kind": "field_access",
-            "text": "p.x",
+            "id": 4,
+            "kind": "integer_literal",
+            "text": "0",
+            "child_expressions": []
+        },
+        {
+            "id": 5,
+            "kind": "call",
+            "text": "outer",
             "child_expressions": [
-                8
+                6
+            ]
+        },
+        {
+            "id": 6,
+            "kind": "call",
+            "text": "inner",
+            "child_expressions": [
+                7
+            ]
+        },
+        {
+            "id": 7,
+            "kind": "binary",
+            "text": "+",
+            "child_expressions": [
+                8,
+                9
             ]
         },
         {
             "id": 8,
-            "kind": "identifier",
-            "text": "p",
+            "kind": "integer_literal",
+            "text": "1",
             "child_expressions": []
         },
         {
@@ -196,116 +159,114 @@
         },
         {
             "id": 12,
-            "kind": "field_access",
-            "text": "p.y",
+            "kind": "list_literal",
+            "text": "[",
             "child_expressions": [
-                13
+                13,
+                16
             ]
         },
         {
             "id": 13,
-            "kind": "identifier",
-            "text": "p",
-            "child_expressions": []
-        },
-        {
-            "id": 14,
-            "kind": "binary",
-            "text": "<",
-            "child_expressions": [
-                15,
-                18
-            ]
-        },
-        {
-            "id": 15,
             "kind": "index",
             "text": "arr",
             "child_expressions": [
-                16,
+                14,
+                15
+            ]
+        },
+        {
+            "id": 14,
+            "kind": "identifier",
+            "text": "arr",
+            "child_expressions": []
+        },
+        {
+            "id": 15,
+            "kind": "identifier",
+            "text": "i",
+            "child_expressions": []
+        },
+        {
+            "id": 16,
+            "kind": "call",
+            "text": "leaf",
+            "child_expressions": [
                 17
             ]
         },
         {
-            "id": 16,
-            "kind": "identifier",
-            "text": "arr",
-            "child_expressions": []
-        },
-        {
             "id": 17,
-            "kind": "identifier",
-            "text": "i",
-            "child_expressions": []
+            "kind": "field_access",
+            "text": "point.x",
+            "child_expressions": [
+                18
+            ]
         },
         {
             "id": 18,
-            "kind": "integer_literal",
-            "text": "10",
+            "kind": "identifier",
+            "text": "point",
             "child_expressions": []
         },
         {
             "id": 19,
-            "kind": "index",
-            "text": "arr",
+            "kind": "record_literal",
+            "text": "{",
             "child_expressions": [
                 20,
-                21
+                24
             ]
         },
         {
             "id": 20,
+            "kind": "call",
+            "text": "leaf",
+            "child_expressions": [
+                21
+            ]
+        },
+        {
+            "id": 21,
+            "kind": "index",
+            "text": "arr",
+            "child_expressions": [
+                22,
+                23
+            ]
+        },
+        {
+            "id": 22,
             "kind": "identifier",
             "text": "arr",
             "child_expressions": []
         },
         {
-            "id": 21,
+            "id": 23,
             "kind": "identifier",
             "text": "i",
             "child_expressions": []
         },
         {
-            "id": 22,
-            "kind": "binary",
-            "text": "==",
+            "id": 24,
+            "kind": "unary",
+            "text": "-",
             "child_expressions": [
-                23,
                 25
             ]
         },
         {
-            "id": 23,
-            "kind": "field_access",
-            "text": "p.x",
-            "child_expressions": [
-                24
-            ]
-        },
-        {
-            "id": 24,
-            "kind": "identifier",
-            "text": "p",
-            "child_expressions": []
-        },
-        {
             "id": 25,
-            "kind": "integer_literal",
-            "text": "10",
-            "child_expressions": []
+            "kind": "field_access",
+            "text": "point.y",
+            "child_expressions": [
+                26
+            ]
         },
         {
             "id": 26,
-            "kind": "field_access",
-            "text": "p.y",
-            "child_expressions": [
-                27
-            ]
-        },
-        {
-            "id": 27,
             "kind": "identifier",
-            "text": "p",
+            "text": "point",
             "child_expressions": []
         }
     ]
