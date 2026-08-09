@@ -108,37 +108,44 @@
         {
             "id": 0,
             "kind": "integer_literal",
-            "text": "1"
+            "text": "1",
+            "child_expressions": []
         },
         {
             "id": 1,
             "kind": "call",
-            "text": "square"
+            "text": "square",
+            "child_expressions": []
         },
         {
             "id": 2,
             "kind": "call",
-            "text": "square"
+            "text": "square",
+            "child_expressions": []
         },
         {
             "id": 3,
             "kind": "call",
-            "text": "is_ready"
+            "text": "is_ready",
+            "child_expressions": []
         },
         {
             "id": 4,
             "kind": "call",
-            "text": "square"
+            "text": "square",
+            "child_expressions": []
         },
         {
             "id": 5,
             "kind": "call",
-            "text": "is_ready"
+            "text": "is_ready",
+            "child_expressions": []
         },
         {
             "id": 6,
             "kind": "call",
-            "text": "square"
+            "text": "square",
+            "child_expressions": []
         }
     ]
 }

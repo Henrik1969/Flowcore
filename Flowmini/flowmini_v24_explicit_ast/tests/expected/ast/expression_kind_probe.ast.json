@@ -125,52 +125,62 @@
         {
             "id": 0,
             "kind": "integer_literal",
-            "text": "1"
+            "text": "1",
+            "child_expressions": []
         },
         {
             "id": 1,
             "kind": "integer_literal",
-            "text": "2"
+            "text": "2",
+            "child_expressions": []
         },
         {
             "id": 2,
             "kind": "integer_literal",
-            "text": "3"
+            "text": "3",
+            "child_expressions": []
         },
         {
             "id": 3,
             "kind": "string_literal",
-            "text": "hello"
+            "text": "hello",
+            "child_expressions": []
         },
         {
             "id": 4,
             "kind": "bool_literal",
-            "text": "true"
+            "text": "true",
+            "child_expressions": []
         },
         {
             "id": 5,
             "kind": "identifier",
-            "text": "b"
+            "text": "b",
+            "child_expressions": []
         },
         {
             "id": 6,
             "kind": "binary",
-            "text": "<"
+            "text": "<",
+            "child_expressions": []
         },
         {
             "id": 7,
             "kind": "binary",
-            "text": "+"
+            "text": "+",
+            "child_expressions": []
         },
         {
             "id": 8,
             "kind": "identifier",
-            "text": "flag"
+            "text": "flag",
+            "child_expressions": []
         },
         {
             "id": 9,
             "kind": "identifier",
-            "text": "a"
+            "text": "a",
+            "child_expressions": []
         }
     ]
 }

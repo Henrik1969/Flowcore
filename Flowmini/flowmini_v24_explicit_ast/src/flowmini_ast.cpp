@@ -165,6 +165,17 @@ namespace flowmini::ast {
 
                     out << "\n";
 
+                out << ",\n";
+                dump_indent(out, indent + 4);
+                out << "\"child_expressions\": [";
+                for (std::size_t child_index = 0; child_index < expression.child_expressions.size(); ++child_index) {
+                    if (child_index != 0) {
+                        out << ", ";
+                    }
+                    out << expression.child_expressions[child_index];
+                }
+                out << "]\n";
+
                     dump_indent(out, indent + 2);
                     out << "}";
 

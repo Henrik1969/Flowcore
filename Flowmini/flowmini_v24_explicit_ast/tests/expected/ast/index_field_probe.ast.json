@@ -114,52 +114,62 @@
         {
             "id": 0,
             "kind": "integer_literal",
-            "text": "0"
+            "text": "0",
+            "child_expressions": []
         },
         {
             "id": 1,
             "kind": "index",
-            "text": "arr"
+            "text": "arr",
+            "child_expressions": []
         },
         {
             "id": 2,
             "kind": "record_literal",
-            "text": "{"
+            "text": "{",
+            "child_expressions": []
         },
         {
             "id": 3,
             "kind": "field_access",
-            "text": "p.x"
+            "text": "p.x",
+            "child_expressions": []
         },
         {
             "id": 4,
             "kind": "index",
-            "text": "arr"
+            "text": "arr",
+            "child_expressions": []
         },
         {
             "id": 5,
             "kind": "field_access",
-            "text": "p.y"
+            "text": "p.y",
+            "child_expressions": []
         },
         {
             "id": 6,
             "kind": "binary",
-            "text": "<"
+            "text": "<",
+            "child_expressions": []
         },
         {
             "id": 7,
             "kind": "index",
-            "text": "arr"
+            "text": "arr",
+            "child_expressions": []
         },
         {
             "id": 8,
             "kind": "binary",
-            "text": "=="
+            "text": "==",
+            "child_expressions": []
         },
         {
             "id": 9,
             "kind": "field_access",
-            "text": "p.y"
+            "text": "p.y",
+            "child_expressions": []
         }
     ]
 }

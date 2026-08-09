@@ -133,6 +133,7 @@ struct Expression {
     std::string text;
     ExpressionKind kind = ExpressionKind::Unknown;
     SourceLocation location;
+    std::vector<std::size_t> child_expressions;
 
     using Payload = std::variant<
         std::monostate,

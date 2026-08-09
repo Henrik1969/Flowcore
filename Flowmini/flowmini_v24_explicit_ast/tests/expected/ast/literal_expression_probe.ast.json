@@ -49,17 +49,20 @@
         {
             "id": 0,
             "kind": "record_literal",
-            "text": "{"
+            "text": "{",
+            "child_expressions": []
         },
         {
             "id": 1,
             "kind": "list_literal",
-            "text": "["
+            "text": "[",
+            "child_expressions": []
         },
         {
             "id": 2,
             "kind": "record_literal",
-            "text": "{"
+            "text": "{",
+            "child_expressions": []
         }
     ]
 }

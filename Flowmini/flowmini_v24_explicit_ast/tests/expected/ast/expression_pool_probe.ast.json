@@ -98,37 +98,44 @@
         {
             "id": 0,
             "kind": "integer_literal",
-            "text": "1"
+            "text": "1",
+            "child_expressions": []
         },
         {
             "id": 1,
             "kind": "integer_literal",
-            "text": "2"
+            "text": "2",
+            "child_expressions": []
         },
         {
             "id": 2,
             "kind": "identifier",
-            "text": "y"
+            "text": "y",
+            "child_expressions": []
         },
         {
             "id": 3,
             "kind": "binary",
-            "text": "<"
+            "text": "<",
+            "child_expressions": []
         },
         {
             "id": 4,
             "kind": "binary",
-            "text": "+"
+            "text": "+",
+            "child_expressions": []
         },
         {
             "id": 5,
             "kind": "binary",
-            "text": "=="
+            "text": "==",
+            "child_expressions": []
         },
         {
             "id": 6,
             "kind": "identifier",
-            "text": "x"
+            "text": "x",
+            "child_expressions": []
         }
     ]
 }

@@ -75,32 +75,38 @@
         {
             "id": 0,
             "kind": "integer_literal",
-            "text": "0"
+            "text": "0",
+            "child_expressions": []
         },
         {
             "id": 1,
             "kind": "binary",
-            "text": "<"
+            "text": "<",
+            "child_expressions": []
         },
         {
             "id": 2,
             "kind": "binary",
-            "text": "+"
+            "text": "+",
+            "child_expressions": []
         },
         {
             "id": 3,
             "kind": "binary",
-            "text": "=="
+            "text": "==",
+            "child_expressions": []
         },
         {
             "id": 4,
             "kind": "integer_literal",
-            "text": "1"
+            "text": "1",
+            "child_expressions": []
         },
         {
             "id": 5,
             "kind": "integer_literal",
-            "text": "2"
+            "text": "2",
+            "child_expressions": []
         }
     ]
 }
