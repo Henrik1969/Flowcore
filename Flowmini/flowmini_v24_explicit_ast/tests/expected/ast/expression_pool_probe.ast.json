@@ -65,7 +65,7 @@
                                 "name": "x",
                                 "has_value": true,
                                 "expression_ids": [
-                                    4
+                                    6
                                 ]
                             }
                         ]
@@ -74,7 +74,7 @@
                         "kind": "if",
                         "has_condition": true,
                         "expression_ids": [
-                            5
+                            9
                         ],
                         "has_body": true,
                         "body_statement_count": 1,
@@ -84,7 +84,7 @@
                                 "name": "y",
                                 "has_value": true,
                                 "expression_ids": [
-                                    6
+                                    12
                                 ]
                             }
                         ]
@@ -93,7 +93,7 @@
             }
         ]
     },
-    "expression_pool_size": 7,
+    "expression_pool_size": 13,
     "expression_pool": [
         {
             "id": 0,
@@ -117,22 +117,67 @@
             "id": 3,
             "kind": "binary",
             "text": "<",
-            "child_expressions": []
+            "child_expressions": [
+                4,
+                5
+            ]
         },
         {
             "id": 4,
-            "kind": "binary",
-            "text": "+",
+            "kind": "identifier",
+            "text": "x",
             "child_expressions": []
         },
         {
             "id": 5,
-            "kind": "binary",
-            "text": "==",
+            "kind": "integer_literal",
+            "text": "10",
             "child_expressions": []
         },
         {
             "id": 6,
+            "kind": "binary",
+            "text": "+",
+            "child_expressions": [
+                7,
+                8
+            ]
+        },
+        {
+            "id": 7,
+            "kind": "identifier",
+            "text": "x",
+            "child_expressions": []
+        },
+        {
+            "id": 8,
+            "kind": "integer_literal",
+            "text": "1",
+            "child_expressions": []
+        },
+        {
+            "id": 9,
+            "kind": "binary",
+            "text": "==",
+            "child_expressions": [
+                10,
+                11
+            ]
+        },
+        {
+            "id": 10,
+            "kind": "identifier",
+            "text": "x",
+            "child_expressions": []
+        },
+        {
+            "id": 11,
+            "kind": "integer_literal",
+            "text": "10",
+            "child_expressions": []
+        },
+        {
+            "id": 12,
             "kind": "identifier",
             "text": "x",
             "child_expressions": []
