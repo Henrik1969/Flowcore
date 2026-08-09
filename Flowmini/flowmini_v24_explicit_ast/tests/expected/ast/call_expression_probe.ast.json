@@ -58,14 +58,14 @@
                         "name": "x",
                         "has_value": true,
                         "expression_ids": [
-                            3
+                            4
                         ]
                     },
                     {
                         "kind": "while",
                         "has_condition": true,
                         "expression_ids": [
-                            5
+                            7
                         ],
                         "has_body": true,
                         "body_statement_count": 1,
@@ -75,7 +75,7 @@
                                 "name": "x",
                                 "has_value": true,
                                 "expression_ids": [
-                                    6
+                                    9
                                 ]
                             }
                         ]
@@ -84,7 +84,7 @@
                         "kind": "if",
                         "has_condition": true,
                         "expression_ids": [
-                            8
+                            12
                         ],
                         "has_body": true,
                         "body_statement_count": 1,
@@ -94,7 +94,7 @@
                                 "name": "y",
                                 "has_value": true,
                                 "expression_ids": [
-                                    9
+                                    14
                                 ]
                             }
                         ]
@@ -103,7 +103,7 @@
             }
         ]
     },
-    "expression_pool_size": 11,
+    "expression_pool_size": 17,
     "expression_pool": [
         {
             "id": 0,
@@ -116,52 +116,54 @@
             "kind": "call",
             "text": "square",
             "child_expressions": [
-                2
+                2,
+                3
             ]
         },
         {
             "id": 2,
             "kind": "identifier",
-            "text": "x",
+            "text": "square",
             "child_expressions": []
         },
         {
             "id": 3,
-            "kind": "call",
-            "text": "square",
-            "child_expressions": [
-                4
-            ]
+            "kind": "identifier",
+            "text": "x",
+            "child_expressions": []
         },
         {
             "id": 4,
+            "kind": "call",
+            "text": "square",
+            "child_expressions": [
+                5,
+                6
+            ]
+        },
+        {
+            "id": 5,
+            "kind": "identifier",
+            "text": "square",
+            "child_expressions": []
+        },
+        {
+            "id": 6,
             "kind": "identifier",
             "text": "y",
             "child_expressions": []
         },
         {
-            "id": 5,
+            "id": 7,
             "kind": "call",
             "text": "is_ready",
-            "child_expressions": []
-        },
-        {
-            "id": 6,
-            "kind": "call",
-            "text": "square",
             "child_expressions": [
-                7
+                8
             ]
         },
         {
-            "id": 7,
-            "kind": "identifier",
-            "text": "x",
-            "child_expressions": []
-        },
-        {
             "id": 8,
-            "kind": "call",
+            "kind": "identifier",
             "text": "is_ready",
             "child_expressions": []
         },
@@ -170,11 +172,53 @@
             "kind": "call",
             "text": "square",
             "child_expressions": [
-                10
+                10,
+                11
             ]
         },
         {
             "id": 10,
+            "kind": "identifier",
+            "text": "square",
+            "child_expressions": []
+        },
+        {
+            "id": 11,
+            "kind": "identifier",
+            "text": "x",
+            "child_expressions": []
+        },
+        {
+            "id": 12,
+            "kind": "call",
+            "text": "is_ready",
+            "child_expressions": [
+                13
+            ]
+        },
+        {
+            "id": 13,
+            "kind": "identifier",
+            "text": "is_ready",
+            "child_expressions": []
+        },
+        {
+            "id": 14,
+            "kind": "call",
+            "text": "square",
+            "child_expressions": [
+                15,
+                16
+            ]
+        },
+        {
+            "id": 15,
+            "kind": "identifier",
+            "text": "square",
+            "child_expressions": []
+        },
+        {
+            "id": 16,
             "kind": "identifier",
             "text": "x",
             "child_expressions": []

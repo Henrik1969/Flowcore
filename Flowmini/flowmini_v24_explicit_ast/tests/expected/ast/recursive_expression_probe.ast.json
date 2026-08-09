@@ -55,7 +55,7 @@
                         "name": "arr",
                         "has_value": true,
                         "expression_ids": [
-                            12
+                            14
                         ]
                     },
                     {
@@ -63,14 +63,14 @@
                         "name": "point",
                         "has_value": true,
                         "expression_ids": [
-                            19
+                            22
                         ]
                     }
                 ]
             }
         ]
     },
-    "expression_pool_size": 27,
+    "expression_pool_size": 31,
     "expression_pool": [
         {
             "id": 0,
@@ -110,21 +110,20 @@
             "kind": "call",
             "text": "outer",
             "child_expressions": [
-                6
-            ]
-        },
-        {
-            "id": 6,
-            "kind": "call",
-            "text": "inner",
-            "child_expressions": [
+                6,
                 7
             ]
         },
         {
+            "id": 6,
+            "kind": "identifier",
+            "text": "outer",
+            "child_expressions": []
+        },
+        {
             "id": 7,
-            "kind": "binary",
-            "text": "+",
+            "kind": "call",
+            "text": "inner",
             "child_expressions": [
                 8,
                 9
@@ -132,14 +131,14 @@
         },
         {
             "id": 8,
-            "kind": "integer_literal",
-            "text": "1",
+            "kind": "identifier",
+            "text": "inner",
             "child_expressions": []
         },
         {
             "id": 9,
-            "kind": "index",
-            "text": "arr",
+            "kind": "binary",
+            "text": "+",
             "child_expressions": [
                 10,
                 11
@@ -147,124 +146,153 @@
         },
         {
             "id": 10,
-            "kind": "identifier",
-            "text": "arr",
+            "kind": "integer_literal",
+            "text": "1",
             "child_expressions": []
         },
         {
             "id": 11,
-            "kind": "identifier",
-            "text": "i",
-            "child_expressions": []
-        },
-        {
-            "id": 12,
-            "kind": "list_literal",
-            "text": "[",
-            "child_expressions": [
-                13,
-                16
-            ]
-        },
-        {
-            "id": 13,
             "kind": "index",
             "text": "arr",
             "child_expressions": [
-                14,
-                15
+                12,
+                13
             ]
         },
         {
-            "id": 14,
+            "id": 12,
             "kind": "identifier",
             "text": "arr",
             "child_expressions": []
         },
         {
-            "id": 15,
+            "id": 13,
             "kind": "identifier",
             "text": "i",
             "child_expressions": []
         },
         {
-            "id": 16,
-            "kind": "call",
-            "text": "leaf",
+            "id": 14,
+            "kind": "list_literal",
+            "text": "[",
             "child_expressions": [
-                17
-            ]
-        },
-        {
-            "id": 17,
-            "kind": "field_access",
-            "text": "point.x",
-            "child_expressions": [
+                15,
                 18
             ]
         },
         {
-            "id": 18,
-            "kind": "identifier",
-            "text": "point",
-            "child_expressions": []
-        },
-        {
-            "id": 19,
-            "kind": "record_literal",
-            "text": "{",
+            "id": 15,
+            "kind": "index",
+            "text": "arr",
             "child_expressions": [
-                20,
-                24
+                16,
+                17
             ]
         },
         {
-            "id": 20,
+            "id": 16,
+            "kind": "identifier",
+            "text": "arr",
+            "child_expressions": []
+        },
+        {
+            "id": 17,
+            "kind": "identifier",
+            "text": "i",
+            "child_expressions": []
+        },
+        {
+            "id": 18,
             "kind": "call",
             "text": "leaf",
+            "child_expressions": [
+                19,
+                20
+            ]
+        },
+        {
+            "id": 19,
+            "kind": "identifier",
+            "text": "leaf",
+            "child_expressions": []
+        },
+        {
+            "id": 20,
+            "kind": "field_access",
+            "text": "point.x",
             "child_expressions": [
                 21
             ]
         },
         {
             "id": 21,
-            "kind": "index",
-            "text": "arr",
-            "child_expressions": [
-                22,
-                23
-            ]
+            "kind": "identifier",
+            "text": "point",
+            "child_expressions": []
         },
         {
             "id": 22,
+            "kind": "record_literal",
+            "text": "{",
+            "child_expressions": [
+                23,
+                28
+            ]
+        },
+        {
+            "id": 23,
+            "kind": "call",
+            "text": "leaf",
+            "child_expressions": [
+                24,
+                25
+            ]
+        },
+        {
+            "id": 24,
+            "kind": "identifier",
+            "text": "leaf",
+            "child_expressions": []
+        },
+        {
+            "id": 25,
+            "kind": "index",
+            "text": "arr",
+            "child_expressions": [
+                26,
+                27
+            ]
+        },
+        {
+            "id": 26,
             "kind": "identifier",
             "text": "arr",
             "child_expressions": []
         },
         {
-            "id": 23,
+            "id": 27,
             "kind": "identifier",
             "text": "i",
             "child_expressions": []
         },
         {
-            "id": 24,
+            "id": 28,
             "kind": "unary",
             "text": "-",
             "child_expressions": [
-                25
+                29
             ]
         },
         {
-            "id": 25,
+            "id": 29,
             "kind": "field_access",
             "text": "point.y",
             "child_expressions": [
-                26
+                30
             ]
         },
         {
-            "id": 26,
+            "id": 30,
             "kind": "identifier",
             "text": "point",
             "child_expressions": []

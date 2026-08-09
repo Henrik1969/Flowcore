@@ -43,6 +43,7 @@ operator_expression_probe.flow
 index_field_probe.flow
 literal_expression_probe.flow
 recursive_expression_probe.flow
+precedence_expression_probe.flow
 
 These files define the v0.24 AST golden regression gate.
 

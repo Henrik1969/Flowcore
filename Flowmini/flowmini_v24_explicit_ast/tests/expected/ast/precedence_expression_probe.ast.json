@@ -1,0 +1,1071 @@
+{
+    "format": "flowmini.ast.v1",
+    "source_unit": {
+        "kind": "program",
+        "name": "precedence_expression_probe",
+        "declaration_count": 1,
+        "declarations": [
+            {
+                "kind": "main_block",
+                "has_body": true,
+                "body_statement_count": 25,
+                "body_statements": [
+                    {
+                        "kind": "let",
+                        "name": "a",
+                        "type": "int",
+                        "has_initializer": true,
+                        "expression_ids": [
+                            0
+                        ]
+                    },
+                    {
+                        "kind": "let",
+                        "name": "b",
+                        "type": "int",
+                        "has_initializer": true,
+                        "expression_ids": [
+                            1
+                        ]
+                    },
+                    {
+                        "kind": "let",
+                        "name": "c",
+                        "type": "int",
+                        "has_initializer": true,
+                        "expression_ids": [
+                            2
+                        ]
+                    },
+                    {
+                        "kind": "let",
+                        "name": "d",
+                        "type": "int",
+                        "has_initializer": true,
+                        "expression_ids": [
+                            3
+                        ]
+                    },
+                    {
+                        "kind": "let",
+                        "name": "result",
+                        "type": "int",
+                        "has_initializer": true,
+                        "expression_ids": [
+                            4
+                        ]
+                    },
+                    {
+                        "kind": "assignment",
+                        "name": "result",
+                        "has_value": true,
+                        "expression_ids": [
+                            5
+                        ]
+                    },
+                    {
+                        "kind": "assignment",
+                        "name": "result",
+                        "has_value": true,
+                        "expression_ids": [
+                            10
+                        ]
+                    },
+                    {
+                        "kind": "assignment",
+                        "name": "result",
+                        "has_value": true,
+                        "expression_ids": [
+                            15
+                        ]
+                    },
+                    {
+                        "kind": "assignment",
+                        "name": "result",
+                        "has_value": true,
+                        "expression_ids": [
+                            20
+                        ]
+                    },
+                    {
+                        "kind": "assignment",
+                        "name": "result",
+                        "has_value": true,
+                        "expression_ids": [
+                            25
+                        ]
+                    },
+                    {
+                        "kind": "assignment",
+                        "name": "result",
+                        "has_value": true,
+                        "expression_ids": [
+                            30
+                        ]
+                    },
+                    {
+                        "kind": "assignment",
+                        "name": "result",
+                        "has_value": true,
+                        "expression_ids": [
+                            35
+                        ]
+                    },
+                    {
+                        "kind": "assignment",
+                        "name": "result",
+                        "has_value": true,
+                        "expression_ids": [
+                            40
+                        ]
+                    },
+                    {
+                        "kind": "assignment",
+                        "name": "result",
+                        "has_value": true,
+                        "expression_ids": [
+                            44
+                        ]
+                    },
+                    {
+                        "kind": "assignment",
+                        "name": "result",
+                        "has_value": true,
+                        "expression_ids": [
+                            48
+                        ]
+                    },
+                    {
+                        "kind": "assignment",
+                        "name": "result",
+                        "has_value": true,
+                        "expression_ids": [
+                            52
+                        ]
+                    },
+                    {
+                        "kind": "assignment",
+                        "name": "result",
+                        "has_value": true,
+                        "expression_ids": [
+                            55
+                        ]
+                    },
+                    {
+                        "kind": "assignment",
+                        "name": "result",
+                        "has_value": true,
+                        "expression_ids": [
+                            62
+                        ]
+                    },
+                    {
+                        "kind": "assignment",
+                        "name": "result",
+                        "has_value": true,
+                        "expression_ids": [
+                            69
+                        ]
+                    },
+                    {
+                        "kind": "assignment",
+                        "name": "result",
+                        "has_value": true,
+                        "expression_ids": [
+                            75
+                        ]
+                    },
+                    {
+                        "kind": "assignment",
+                        "name": "result",
+                        "has_value": true,
+                        "expression_ids": [
+                            81
+                        ]
+                    },
+                    {
+                        "kind": "assignment",
+                        "name": "result",
+                        "has_value": true,
+                        "expression_ids": [
+                            87
+                        ]
+                    },
+                    {
+                        "kind": "assignment",
+                        "name": "result",
+                        "has_value": true,
+                        "expression_ids": [
+                            91
+                        ]
+                    },
+                    {
+                        "kind": "assignment",
+                        "name": "result",
+                        "has_value": true,
+                        "expression_ids": [
+                            96
+                        ]
+                    },
+                    {
+                        "kind": "if",
+                        "has_condition": true,
+                        "expression_ids": [
+                            104
+                        ],
+                        "has_body": true,
+                        "body_statement_count": 1,
+                        "body_statements": [
+                            {
+                                "kind": "assignment",
+                                "name": "result",
+                                "has_value": true,
+                                "expression_ids": [
+                                    113
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    "expression_pool_size": 116,
+    "expression_pool": [
+        {
+            "id": 0,
+            "kind": "integer_literal",
+            "text": "12",
+            "child_expressions": []
+        },
+        {
+            "id": 1,
+            "kind": "integer_literal",
+            "text": "3",
+            "child_expressions": []
+        },
+        {
+            "id": 2,
+            "kind": "integer_literal",
+            "text": "2",
+            "child_expressions": []
+        },
+        {
+            "id": 3,
+            "kind": "integer_literal",
+            "text": "20",
+            "child_expressions": []
+        },
+        {
+            "id": 4,
+            "kind": "integer_literal",
+            "text": "0",
+            "child_expressions": []
+        },
+        {
+            "id": 5,
+            "kind": "binary",
+            "text": "+",
+            "child_expressions": [
+                6,
+                7
+            ]
+        },
+        {
+            "id": 6,
+            "kind": "identifier",
+            "text": "a",
+            "child_expressions": []
+        },
+        {
+            "id": 7,
+            "kind": "binary",
+            "text": "*",
+            "child_expressions": [
+                8,
+                9
+            ]
+        },
+        {
+            "id": 8,
+            "kind": "identifier",
+            "text": "b",
+            "child_expressions": []
+        },
+        {
+            "id": 9,
+            "kind": "identifier",
+            "text": "c",
+            "child_expressions": []
+        },
+        {
+            "id": 10,
+            "kind": "binary",
+            "text": "+",
+            "child_expressions": [
+                11,
+                14
+            ]
+        },
+        {
+            "id": 11,
+            "kind": "binary",
+            "text": "*",
+            "child_expressions": [
+                12,
+                13
+            ]
+        },
+        {
+            "id": 12,
+            "kind": "identifier",
+            "text": "a",
+            "child_expressions": []
+        },
+        {
+            "id": 13,
+            "kind": "identifier",
+            "text": "b",
+            "child_expressions": []
+        },
+        {
+            "id": 14,
+            "kind": "identifier",
+            "text": "c",
+            "child_expressions": []
+        },
+        {
+            "id": 15,
+            "kind": "binary",
+            "text": "-",
+            "child_expressions": [
+                16,
+                19
+            ]
+        },
+        {
+            "id": 16,
+            "kind": "binary",
+            "text": "-",
+            "child_expressions": [
+                17,
+                18
+            ]
+        },
+        {
+            "id": 17,
+            "kind": "identifier",
+            "text": "a",
+            "child_expressions": []
+        },
+        {
+            "id": 18,
+            "kind": "identifier",
+            "text": "b",
+            "child_expressions": []
+        },
+        {
+            "id": 19,
+            "kind": "identifier",
+            "text": "c",
+            "child_expressions": []
+        },
+        {
+            "id": 20,
+            "kind": "binary",
+            "text": "*",
+            "child_expressions": [
+                21,
+                24
+            ]
+        },
+        {
+            "id": 21,
+            "kind": "binary",
+            "text": "/",
+            "child_expressions": [
+                22,
+                23
+            ]
+        },
+        {
+            "id": 22,
+            "kind": "identifier",
+            "text": "a",
+            "child_expressions": []
+        },
+        {
+            "id": 23,
+            "kind": "identifier",
+            "text": "b",
+            "child_expressions": []
+        },
+        {
+            "id": 24,
+            "kind": "identifier",
+            "text": "c",
+            "child_expressions": []
+        },
+        {
+            "id": 25,
+            "kind": "binary",
+            "text": "*",
+            "child_expressions": [
+                26,
+                29
+            ]
+        },
+        {
+            "id": 26,
+            "kind": "binary",
+            "text": "+",
+            "child_expressions": [
+                27,
+                28
+            ]
+        },
+        {
+            "id": 27,
+            "kind": "identifier",
+            "text": "a",
+            "child_expressions": []
+        },
+        {
+            "id": 28,
+            "kind": "identifier",
+            "text": "b",
+            "child_expressions": []
+        },
+        {
+            "id": 29,
+            "kind": "identifier",
+            "text": "c",
+            "child_expressions": []
+        },
+        {
+            "id": 30,
+            "kind": "binary",
+            "text": "*",
+            "child_expressions": [
+                31,
+                32
+            ]
+        },
+        {
+            "id": 31,
+            "kind": "identifier",
+            "text": "a",
+            "child_expressions": []
+        },
+        {
+            "id": 32,
+            "kind": "binary",
+            "text": "+",
+            "child_expressions": [
+                33,
+                34
+            ]
+        },
+        {
+            "id": 33,
+            "kind": "identifier",
+            "text": "b",
+            "child_expressions": []
+        },
+        {
+            "id": 34,
+            "kind": "identifier",
+            "text": "c",
+            "child_expressions": []
+        },
+        {
+            "id": 35,
+            "kind": "binary",
+            "text": "-",
+            "child_expressions": [
+                36,
+                37
+            ]
+        },
+        {
+            "id": 36,
+            "kind": "identifier",
+            "text": "a",
+            "child_expressions": []
+        },
+        {
+            "id": 37,
+            "kind": "binary",
+            "text": "-",
+            "child_expressions": [
+                38,
+                39
+            ]
+        },
+        {
+            "id": 38,
+            "kind": "identifier",
+            "text": "b",
+            "child_expressions": []
+        },
+        {
+            "id": 39,
+            "kind": "identifier",
+            "text": "c",
+            "child_expressions": []
+        },
+        {
+            "id": 40,
+            "kind": "binary",
+            "text": "*",
+            "child_expressions": [
+                41,
+                43
+            ]
+        },
+        {
+            "id": 41,
+            "kind": "unary",
+            "text": "-",
+            "child_expressions": [
+                42
+            ]
+        },
+        {
+            "id": 42,
+            "kind": "identifier",
+            "text": "a",
+            "child_expressions": []
+        },
+        {
+            "id": 43,
+            "kind": "identifier",
+            "text": "b",
+            "child_expressions": []
+        },
+        {
+            "id": 44,
+            "kind": "binary",
+            "text": "*",
+            "child_expressions": [
+                45,
+                46
+            ]
+        },
+        {
+            "id": 45,
+            "kind": "identifier",
+            "text": "a",
+            "child_expressions": []
+        },
+        {
+            "id": 46,
+            "kind": "unary",
+            "text": "-",
+            "child_expressions": [
+                47
+            ]
+        },
+        {
+            "id": 47,
+            "kind": "identifier",
+            "text": "b",
+            "child_expressions": []
+        },
+        {
+            "id": 48,
+            "kind": "unary",
+            "text": "-",
+            "child_expressions": [
+                49
+            ]
+        },
+        {
+            "id": 49,
+            "kind": "binary",
+            "text": "+",
+            "child_expressions": [
+                50,
+                51
+            ]
+        },
+        {
+            "id": 50,
+            "kind": "identifier",
+            "text": "a",
+            "child_expressions": []
+        },
+        {
+            "id": 51,
+            "kind": "identifier",
+            "text": "b",
+            "child_expressions": []
+        },
+        {
+            "id": 52,
+            "kind": "unary",
+            "text": "-",
+            "child_expressions": [
+                53
+            ]
+        },
+        {
+            "id": 53,
+            "kind": "unary",
+            "text": "-",
+            "child_expressions": [
+                54
+            ]
+        },
+        {
+            "id": 54,
+            "kind": "identifier",
+            "text": "a",
+            "child_expressions": []
+        },
+        {
+            "id": 55,
+            "kind": "binary",
+            "text": "*",
+            "child_expressions": [
+                56,
+                61
+            ]
+        },
+        {
+            "id": 56,
+            "kind": "call",
+            "text": "square",
+            "child_expressions": [
+                57,
+                58
+            ]
+        },
+        {
+            "id": 57,
+            "kind": "identifier",
+            "text": "square",
+            "child_expressions": []
+        },
+        {
+            "id": 58,
+            "kind": "binary",
+            "text": "+",
+            "child_expressions": [
+                59,
+                60
+            ]
+        },
+        {
+            "id": 59,
+            "kind": "identifier",
+            "text": "a",
+            "child_expressions": []
+        },
+        {
+            "id": 60,
+            "kind": "identifier",
+            "text": "b",
+            "child_expressions": []
+        },
+        {
+            "id": 61,
+            "kind": "identifier",
+            "text": "c",
+            "child_expressions": []
+        },
+        {
+            "id": 62,
+            "kind": "binary",
+            "text": "+",
+            "child_expressions": [
+                63,
+                68
+            ]
+        },
+        {
+            "id": 63,
+            "kind": "index",
+            "text": "values",
+            "child_expressions": [
+                64,
+                65
+            ]
+        },
+        {
+            "id": 64,
+            "kind": "identifier",
+            "text": "values",
+            "child_expressions": []
+        },
+        {
+            "id": 65,
+            "kind": "binary",
+            "text": "+",
+            "child_expressions": [
+                66,
+                67
+            ]
+        },
+        {
+            "id": 66,
+            "kind": "identifier",
+            "text": "a",
+            "child_expressions": []
+        },
+        {
+            "id": 67,
+            "kind": "identifier",
+            "text": "b",
+            "child_expressions": []
+        },
+        {
+            "id": 68,
+            "kind": "identifier",
+            "text": "c",
+            "child_expressions": []
+        },
+        {
+            "id": 69,
+            "kind": "binary",
+            "text": "+",
+            "child_expressions": [
+                70,
+                72
+            ]
+        },
+        {
+            "id": 70,
+            "kind": "field_access",
+            "text": "point.x",
+            "child_expressions": [
+                71
+            ]
+        },
+        {
+            "id": 71,
+            "kind": "identifier",
+            "text": "point",
+            "child_expressions": []
+        },
+        {
+            "id": 72,
+            "kind": "binary",
+            "text": "*",
+            "child_expressions": [
+                73,
+                74
+            ]
+        },
+        {
+            "id": 73,
+            "kind": "identifier",
+            "text": "a",
+            "child_expressions": []
+        },
+        {
+            "id": 74,
+            "kind": "identifier",
+            "text": "b",
+            "child_expressions": []
+        },
+        {
+            "id": 75,
+            "kind": "call",
+            "text": "a.b[c]",
+            "child_expressions": [
+                76,
+                80
+            ]
+        },
+        {
+            "id": 76,
+            "kind": "index",
+            "text": "a.b",
+            "child_expressions": [
+                77,
+                79
+            ]
+        },
+        {
+            "id": 77,
+            "kind": "field_access",
+            "text": "a.b",
+            "child_expressions": [
+                78
+            ]
+        },
+        {
+            "id": 78,
+            "kind": "identifier",
+            "text": "a",
+            "child_expressions": []
+        },
+        {
+            "id": 79,
+            "kind": "identifier",
+            "text": "c",
+            "child_expressions": []
+        },
+        {
+            "id": 80,
+            "kind": "identifier",
+            "text": "d",
+            "child_expressions": []
+        },
+        {
+            "id": 81,
+            "kind": "index",
+            "text": "make(a).b",
+            "child_expressions": [
+                82,
+                86
+            ]
+        },
+        {
+            "id": 82,
+            "kind": "field_access",
+            "text": "make(a).b",
+            "child_expressions": [
+                83
+            ]
+        },
+        {
+            "id": 83,
+            "kind": "call",
+            "text": "make",
+            "child_expressions": [
+                84,
+                85
+            ]
+        },
+        {
+            "id": 84,
+            "kind": "identifier",
+            "text": "make",
+            "child_expressions": []
+        },
+        {
+            "id": 85,
+            "kind": "identifier",
+            "text": "a",
+            "child_expressions": []
+        },
+        {
+            "id": 86,
+            "kind": "identifier",
+            "text": "c",
+            "child_expressions": []
+        },
+        {
+            "id": 87,
+            "kind": "field_access",
+            "text": "(a+b).c",
+            "child_expressions": [
+                88
+            ]
+        },
+        {
+            "id": 88,
+            "kind": "binary",
+            "text": "+",
+            "child_expressions": [
+                89,
+                90
+            ]
+        },
+        {
+            "id": 89,
+            "kind": "identifier",
+            "text": "a",
+            "child_expressions": []
+        },
+        {
+            "id": 90,
+            "kind": "identifier",
+            "text": "b",
+            "child_expressions": []
+        },
+        {
+            "id": 91,
+            "kind": "call",
+            "text": "a(b)",
+            "child_expressions": [
+                92,
+                95
+            ]
+        },
+        {
+            "id": 92,
+            "kind": "call",
+            "text": "a",
+            "child_expressions": [
+                93,
+                94
+            ]
+        },
+        {
+            "id": 93,
+            "kind": "identifier",
+            "text": "a",
+            "child_expressions": []
+        },
+        {
+            "id": 94,
+            "kind": "identifier",
+            "text": "b",
+            "child_expressions": []
+        },
+        {
+            "id": 95,
+            "kind": "identifier",
+            "text": "c",
+            "child_expressions": []
+        },
+        {
+            "id": 96,
+            "kind": "index",
+            "text": "grid",
+            "child_expressions": [
+                97,
+                98,
+                101
+            ]
+        },
+        {
+            "id": 97,
+            "kind": "identifier",
+            "text": "grid",
+            "child_expressions": []
+        },
+        {
+            "id": 98,
+            "kind": "binary",
+            "text": "+",
+            "child_expressions": [
+                99,
+                100
+            ]
+        },
+        {
+            "id": 99,
+            "kind": "identifier",
+            "text": "a",
+            "child_expressions": []
+        },
+        {
+            "id": 100,
+            "kind": "identifier",
+            "text": "b",
+            "child_expressions": []
+        },
+        {
+            "id": 101,
+            "kind": "binary",
+            "text": "*",
+            "child_expressions": [
+                102,
+                103
+            ]
+        },
+        {
+            "id": 102,
+            "kind": "identifier",
+            "text": "c",
+            "child_expressions": []
+        },
+        {
+            "id": 103,
+            "kind": "identifier",
+            "text": "d",
+            "child_expressions": []
+        },
+        {
+            "id": 104,
+            "kind": "binary",
+            "text": "<",
+            "child_expressions": [
+                105,
+                110
+            ]
+        },
+        {
+            "id": 105,
+            "kind": "binary",
+            "text": "+",
+            "child_expressions": [
+                106,
+                107
+            ]
+        },
+        {
+            "id": 106,
+            "kind": "identifier",
+            "text": "a",
+            "child_expressions": []
+        },
+        {
+            "id": 107,
+            "kind": "binary",
+            "text": "*",
+            "child_expressions": [
+                108,
+                109
+            ]
+        },
+        {
+            "id": 108,
+            "kind": "identifier",
+            "text": "b",
+            "child_expressions": []
+        },
+        {
+            "id": 109,
+            "kind": "identifier",
+            "text": "c",
+            "child_expressions": []
+        },
+        {
+            "id": 110,
+            "kind": "binary",
+            "text": "-",
+            "child_expressions": [
+                111,
+                112
+            ]
+        },
+        {
+            "id": 111,
+            "kind": "identifier",
+            "text": "d",
+            "child_expressions": []
+        },
+        {
+            "id": 112,
+            "kind": "integer_literal",
+            "text": "1",
+            "child_expressions": []
+        },
+        {
+            "id": 113,
+            "kind": "binary",
+            "text": "+",
+            "child_expressions": [
+                114,
+                115
+            ]
+        },
+        {
+            "id": 114,
+            "kind": "identifier",
+            "text": "result",
+            "child_expressions": []
+        },
+        {
+            "id": 115,
+            "kind": "integer_literal",
+            "text": "1",
+            "child_expressions": []
+        }
+    ]
+}
