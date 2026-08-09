@@ -2,7 +2,7 @@
 
 Flowmini is the executable prototype language used to test and harden Flowcore ideas.
 
-It is not the final Flowcore language. It is the laboratory where syntax, AST structure, semantic rules, lowering ideas, and tooling are made visible before they become larger Flowcore architecture.
+It is not the final Flowcore language. It is the laboratory where syntax, AST structure, semantic rules, lowering ideas, diagnostics, and tooling are made visible before they become larger Flowcore architecture.
 
 ## Current active stage
 
@@ -20,8 +20,6 @@ The v0.24 line focuses on making the AST explicit, observable, regression-tested
 Current status
 
 Flowmini is experimental and unfinished.
-
-Current status:
 
 lexer/token groundwork             usable
 TokenTree/source structure          observable
@@ -43,6 +41,25 @@ list literals
 record literals
 
 This is still not a complete expression parser. Recursive expression population, precedence, associativity, and semantic analysis are future work.
+
+Why does this look ordinary?
+
+At the surface, early Flowmini examples may look like a small conventional programming language.
+
+That is intentional.
+
+The current goal is not novelty syntax first. The current goal is to make the language pipeline visible and testable:
+
+source text
+    -> tokens
+    -> source structure
+    -> explicit AST
+    -> semantic facts
+    -> contracts/scopes
+    -> graph-shaped IR
+    -> executable system projection
+
+Flowmini v0.24 is focused on the explicit AST layer.
 
 Build quickstart
 
@@ -133,6 +150,7 @@ Documentation map
 Recommended reading order:
 
 Flowmini/README.md
+Flowmini/CURRENT.md
 Flowmini/flowmini_v24_explicit_ast/docs/v0.24-explicit-ast-status.md
 Flowmini/flowmini_v24_explicit_ast/docs/v0.24-shallow-expression-ast-sitrep.md
 Flowmini/flowmini_v24_explicit_ast/examples/ast/README.md
