@@ -434,6 +434,8 @@ namespace flowmini::ast {
 
         std::size_t find_shallow_binary_operator(const std::vector<flowmini::Token>& tokens,
                                                  std::size_t i) {
+            const auto expressionStart = i;
+
             std::size_t parenDepth = 0;
             std::size_t bracketDepth = 0;
 
@@ -472,6 +474,11 @@ namespace flowmini::ast {
                     }
 
                     --bracketDepth;
+                    ++i;
+                    continue;
+                }
+
+                if (i == expressionStart && token.kind == flowmini::TokenKind::Minus) {
                     ++i;
                     continue;
                 }

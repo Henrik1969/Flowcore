@@ -165,7 +165,7 @@
         },
         {
             "id": 4,
-            "kind": "binary",
+            "kind": "unary",
             "text": "-",
             "child_expressions": []
         },
@@ -197,7 +197,7 @@
         },
         {
             "id": 9,
-            "kind": "binary",
+            "kind": "unary",
             "text": "-",
             "child_expressions": []
         },
