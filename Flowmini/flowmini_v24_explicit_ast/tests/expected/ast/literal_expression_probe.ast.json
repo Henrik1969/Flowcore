@@ -29,7 +29,7 @@
                         "name": "xs",
                         "has_value": true,
                         "expression_ids": [
-                            1
+                            3
                         ]
                     },
                     {
@@ -37,53 +37,83 @@
                         "name": "p",
                         "has_value": true,
                         "expression_ids": [
-                            5
+                            7
                         ]
                     }
                 ]
             }
         ]
     },
-    "expression_pool_size": 6,
+    "expression_pool_size": 10,
     "expression_pool": [
         {
             "id": 0,
             "kind": "record_literal",
             "text": "{",
-            "child_expressions": []
-        },
-        {
-            "id": 1,
-            "kind": "list_literal",
-            "text": "[",
             "child_expressions": [
-                2,
-                3,
-                4
+                1,
+                2
             ]
         },
         {
+            "id": 1,
+            "kind": "integer_literal",
+            "text": "10",
+            "child_expressions": []
+        },
+        {
             "id": 2,
+            "kind": "integer_literal",
+            "text": "20",
+            "child_expressions": []
+        },
+        {
+            "id": 3,
+            "kind": "list_literal",
+            "text": "[",
+            "child_expressions": [
+                4,
+                5,
+                6
+            ]
+        },
+        {
+            "id": 4,
             "kind": "integer_literal",
             "text": "4",
             "child_expressions": []
         },
         {
-            "id": 3,
+            "id": 5,
             "kind": "integer_literal",
             "text": "5",
             "child_expressions": []
         },
         {
-            "id": 4,
+            "id": 6,
             "kind": "integer_literal",
             "text": "6",
             "child_expressions": []
         },
         {
-            "id": 5,
+            "id": 7,
             "kind": "record_literal",
             "text": "{",
+            "child_expressions": [
+                8,
+                9
+            ]
+        },
+        {
+            "id": 8,
+            "kind": "integer_literal",
+            "text": "30",
+            "child_expressions": []
+        },
+        {
+            "id": 9,
+            "kind": "integer_literal",
+            "text": "40",
             "child_expressions": []
         }
     ]

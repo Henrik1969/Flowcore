@@ -48,7 +48,7 @@
                         "type": "int",
                         "has_initializer": true,
                         "expression_ids": [
-                            5
+                            7
                         ]
                     },
                     {
@@ -56,7 +56,7 @@
                         "name": "value",
                         "has_value": true,
                         "expression_ids": [
-                            7
+                            9
                         ]
                     },
                     {
@@ -64,14 +64,14 @@
                         "name": "xvalue",
                         "has_value": true,
                         "expression_ids": [
-                            10
+                            12
                         ]
                     },
                     {
                         "kind": "while",
                         "has_condition": true,
                         "expression_ids": [
-                            12
+                            14
                         ],
                         "has_body": true,
                         "body_statement_count": 1,
@@ -81,7 +81,7 @@
                                 "name": "value",
                                 "has_value": true,
                                 "expression_ids": [
-                                    15
+                                    17
                                 ]
                             }
                         ]
@@ -90,7 +90,7 @@
                         "kind": "if",
                         "has_condition": true,
                         "expression_ids": [
-                            18
+                            20
                         ],
                         "has_body": true,
                         "body_statement_count": 1,
@@ -100,7 +100,7 @@
                                 "name": "xvalue",
                                 "has_value": true,
                                 "expression_ids": [
-                                    21
+                                    23
                                 ]
                             }
                         ]
@@ -109,7 +109,7 @@
             }
         ]
     },
-    "expression_pool_size": 23,
+    "expression_pool_size": 25,
     "expression_pool": [
         {
             "id": 0,
@@ -142,130 +142,145 @@
             "id": 4,
             "kind": "record_literal",
             "text": "{",
-            "child_expressions": []
-        },
-        {
-            "id": 5,
-            "kind": "field_access",
-            "text": "p.x",
             "child_expressions": [
+                5,
                 6
             ]
         },
         {
+            "id": 5,
+            "kind": "integer_literal",
+            "text": "10",
+            "child_expressions": []
+        },
+        {
             "id": 6,
-            "kind": "identifier",
-            "text": "p",
+            "kind": "integer_literal",
+            "text": "20",
             "child_expressions": []
         },
         {
             "id": 7,
-            "kind": "index",
-            "text": "arr",
+            "kind": "field_access",
+            "text": "p.x",
             "child_expressions": [
-                8,
-                9
+                8
             ]
         },
         {
             "id": 8,
             "kind": "identifier",
-            "text": "arr",
+            "text": "p",
             "child_expressions": []
         },
         {
             "id": 9,
+            "kind": "index",
+            "text": "arr",
+            "child_expressions": [
+                10,
+                11
+            ]
+        },
+        {
+            "id": 10,
+            "kind": "identifier",
+            "text": "arr",
+            "child_expressions": []
+        },
+        {
+            "id": 11,
             "kind": "identifier",
             "text": "i",
             "child_expressions": []
         },
         {
-            "id": 10,
+            "id": 12,
             "kind": "field_access",
             "text": "p.y",
             "child_expressions": [
-                11
+                13
             ]
         },
         {
-            "id": 11,
+            "id": 13,
             "kind": "identifier",
             "text": "p",
             "child_expressions": []
         },
         {
-            "id": 12,
+            "id": 14,
             "kind": "binary",
             "text": "<",
             "child_expressions": [
-                13,
-                14
+                15,
+                16
             ]
-        },
-        {
-            "id": 13,
-            "kind": "index",
-            "text": "arr",
-            "child_expressions": []
-        },
-        {
-            "id": 14,
-            "kind": "integer_literal",
-            "text": "10",
-            "child_expressions": []
         },
         {
             "id": 15,
             "kind": "index",
             "text": "arr",
-            "child_expressions": [
-                16,
-                17
-            ]
+            "child_expressions": []
         },
         {
             "id": 16,
-            "kind": "identifier",
-            "text": "arr",
-            "child_expressions": []
-        },
-        {
-            "id": 17,
-            "kind": "identifier",
-            "text": "i",
-            "child_expressions": []
-        },
-        {
-            "id": 18,
-            "kind": "binary",
-            "text": "==",
-            "child_expressions": [
-                19,
-                20
-            ]
-        },
-        {
-            "id": 19,
-            "kind": "field_access",
-            "text": "p.x",
-            "child_expressions": []
-        },
-        {
-            "id": 20,
             "kind": "integer_literal",
             "text": "10",
             "child_expressions": []
         },
         {
-            "id": 21,
-            "kind": "field_access",
-            "text": "p.y",
+            "id": 17,
+            "kind": "index",
+            "text": "arr",
             "child_expressions": [
+                18,
+                19
+            ]
+        },
+        {
+            "id": 18,
+            "kind": "identifier",
+            "text": "arr",
+            "child_expressions": []
+        },
+        {
+            "id": 19,
+            "kind": "identifier",
+            "text": "i",
+            "child_expressions": []
+        },
+        {
+            "id": 20,
+            "kind": "binary",
+            "text": "==",
+            "child_expressions": [
+                21,
                 22
             ]
         },
         {
+            "id": 21,
+            "kind": "field_access",
+            "text": "p.x",
+            "child_expressions": []
+        },
+        {
             "id": 22,
+            "kind": "integer_literal",
+            "text": "10",
+            "child_expressions": []
+        },
+        {
+            "id": 23,
+            "kind": "field_access",
+            "text": "p.y",
+            "child_expressions": [
+                24
+            ]
+        },
+        {
+            "id": 24,
             "kind": "identifier",
             "text": "p",
             "child_expressions": []
