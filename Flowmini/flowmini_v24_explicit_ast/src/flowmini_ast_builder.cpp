@@ -947,6 +947,26 @@ namespace flowmini::ast {
                            rightBracketIndex);
     }
 
+
+    void populate_field_access_children(std::vector<Expression>& expressionPool,
+                                        const std::size_t fieldExpressionId,
+                                        const std::vector<flowmini::Token>& tokens,
+                                        const std::size_t expressionStart) {
+        if (!expression_starts_field_access(tokens, expressionStart)) {
+            return;
+        }
+
+        Expression base;
+        base.kind = ExpressionKind::Identifier;
+        base.text = tokens[expressionStart].text;
+        base.location = location_from_token(tokens[expressionStart]);
+
+        expressionPool.push_back(std::move(base));
+        const auto baseId = expressionPool.size() - 1;
+
+        expressionPool[fieldExpressionId].child_expressions.push_back(baseId);
+    }
+
     std::size_t add_expression_placeholder_at(std::vector<Expression>& expressionPool,
                                                   Statement& statement,
                                                   const std::vector<flowmini::Token>& tokens,
@@ -994,6 +1014,10 @@ namespace flowmini::ast {
             expressionPool.push_back(std::move(expression));
             const auto expressionId = expressionPool.size() - 1;
             statement.expressions.push_back(expressionId);
+
+        if (expressionPool[expressionId].kind == ExpressionKind::FieldAccess) {
+            populate_field_access_children(expressionPool, expressionId, tokens, i);
+        }
 
         if (expressionPool[expressionId].kind == ExpressionKind::Index) {
             populate_index_expression_children(expressionPool, expressionId, tokens, i);
