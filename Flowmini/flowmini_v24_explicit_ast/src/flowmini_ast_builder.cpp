@@ -1,4 +1,5 @@
 #include <cstddef>
+#include <memory>
 #include "flowmini_ast_builder.h"
 
 namespace flowmini::ast {
@@ -21,17 +22,160 @@ namespace flowmini::ast {
 
 
 
-        TypeRef make_named_type_ref(const flowmini::Token& token) {
-            TypeRef type;
-            type.kind = TypeRefKind::Named;
-            type.name = token.text;
-            type.raw_text = token.text;
-            type.location = location_from_token(token);
-            return type;
-        }
-
         bool is_identifier_like_type_token(const flowmini::Token& token) {
             return token.kind == flowmini::TokenKind::Identifier;
+        }
+
+        std::vector<std::string> parse_qualified_type_name(
+            const std::vector<flowmini::Token>& tokens,
+            std::size_t& i) {
+            std::vector<std::string> segments;
+            if (i >= tokens.size() || !is_identifier_like_type_token(tokens[i])) {
+                return segments;
+            }
+
+            segments.push_back(tokens[i].text);
+            ++i;
+            while (i + 1 < tokens.size() &&
+                   tokens[i].kind == flowmini::TokenKind::Dot &&
+                   is_identifier_like_type_token(tokens[i + 1])) {
+                segments.push_back(tokens[i + 1].text);
+                i += 2;
+            }
+            return segments;
+        }
+
+        std::string render_token_slice(const std::vector<flowmini::Token>& tokens,
+                                       const std::size_t begin,
+                                       const std::size_t end) {
+            std::string text;
+            for (std::size_t i = begin; i < end; ++i) {
+                text += tokens[i].text;
+            }
+            return text;
+        }
+
+        std::string consume_type_ref_spelling(const std::vector<flowmini::Token>& tokens,
+                                              std::size_t& i) {
+            const auto begin = i;
+            parse_qualified_type_name(tokens, i);
+
+            if (i < tokens.size() && tokens[i].kind == flowmini::TokenKind::Less) {
+                std::size_t angleDepth = 0;
+                do {
+                    if (tokens[i].kind == flowmini::TokenKind::Less) {
+                        ++angleDepth;
+                    } else if (tokens[i].kind == flowmini::TokenKind::Greater) {
+                        --angleDepth;
+                    }
+                    ++i;
+                } while (i < tokens.size() && angleDepth > 0 && !is_end_token(tokens[i]));
+            }
+
+            if (i < tokens.size() && tokens[i].kind == flowmini::TokenKind::LeftBracket) {
+                std::size_t bracketDepth = 0;
+                do {
+                    if (tokens[i].kind == flowmini::TokenKind::LeftBracket) {
+                        ++bracketDepth;
+                    } else if (tokens[i].kind == flowmini::TokenKind::RightBracket) {
+                        --bracketDepth;
+                    }
+                    ++i;
+                } while (i < tokens.size() && bracketDepth > 0 && !is_end_token(tokens[i]));
+            }
+
+            return render_token_slice(tokens, begin, i);
+        }
+
+        TypeRef parse_type_ref(const std::vector<flowmini::Token>& tokens,
+                               std::size_t& i,
+                               const std::size_t depth = 0) {
+            TypeRef type;
+            if (i >= tokens.size() || !is_identifier_like_type_token(tokens[i])) {
+                return type;
+            }
+
+            type.location = location_from_token(tokens[i]);
+            if (depth >= 64) {
+                type.payload = UnknownTypeRef{consume_type_ref_spelling(tokens, i)};
+                return type;
+            }
+            const auto nameSegments = parse_qualified_type_name(tokens, i);
+            if (i >= tokens.size() || tokens[i].kind != flowmini::TokenKind::Less) {
+                type.payload = NamedTypeRef{nameSegments};
+                return type;
+            }
+
+            ++i; // consume '<'
+            std::vector<TypeRef> arguments;
+            while (i < tokens.size() &&
+                   tokens[i].kind != flowmini::TokenKind::Greater &&
+                   !is_end_token(tokens[i])) {
+                if (tokens[i].kind == flowmini::TokenKind::Comma ||
+                    tokens[i].kind == flowmini::TokenKind::Newline) {
+                    ++i;
+                    continue;
+                }
+
+                if (!is_identifier_like_type_token(tokens[i])) {
+                    ++i;
+                    continue;
+                }
+
+                arguments.push_back(parse_type_ref(tokens, i, depth + 1));
+            }
+            if (i < tokens.size() && tokens[i].kind == flowmini::TokenKind::Greater) {
+                ++i;
+            }
+
+            const bool isArray = nameSegments.size() == 1 &&
+                                 nameSegments.front() == "array" &&
+                                 arguments.size() == 1;
+            if (!isArray) {
+                type.payload = GenericTypeRef{nameSegments, std::move(arguments)};
+                return type;
+            }
+
+            ArrayTypeRef array;
+            array.element_type = std::make_shared<const TypeRef>(std::move(arguments.front()));
+            if (i < tokens.size() && tokens[i].kind == flowmini::TokenKind::LeftBracket) {
+                ++i; // consume '['
+                while (i < tokens.size() &&
+                       tokens[i].kind != flowmini::TokenKind::RightBracket &&
+                       !is_end_token(tokens[i])) {
+                    if (tokens[i].kind == flowmini::TokenKind::Comma ||
+                        tokens[i].kind == flowmini::TokenKind::Newline) {
+                        ++i;
+                        continue;
+                    }
+
+                    const auto extentStart = i;
+                    const auto extentLocation = location_from_token(tokens[i]);
+                    std::size_t parenDepth = 0;
+                    while (i < tokens.size() && !is_end_token(tokens[i])) {
+                        if (tokens[i].kind == flowmini::TokenKind::LeftParen) {
+                            ++parenDepth;
+                        } else if (tokens[i].kind == flowmini::TokenKind::RightParen && parenDepth > 0) {
+                            --parenDepth;
+                        } else if (parenDepth == 0 &&
+                                   (tokens[i].kind == flowmini::TokenKind::Comma ||
+                                    tokens[i].kind == flowmini::TokenKind::RightBracket)) {
+                            break;
+                        }
+                        ++i;
+                    }
+
+                    array.extents.push_back(ArrayExtent{
+                        render_token_slice(tokens, extentStart, i),
+                        extentLocation
+                    });
+                }
+                if (i < tokens.size() && tokens[i].kind == flowmini::TokenKind::RightBracket) {
+                    ++i;
+                }
+            }
+            type.payload = std::move(array);
+            return type;
         }
 
         std::size_t parse_function_signature(const std::vector<flowmini::Token>& tokens,
@@ -66,8 +210,7 @@ namespace flowmini::ast {
                     ++i;
 
                     if (i < tokens.size() && is_identifier_like_type_token(tokens[i])) {
-                        param.type = make_named_type_ref(tokens[i]);
-                        ++i;
+                        param.type = parse_type_ref(tokens, i);
                     }
                 }
 
@@ -82,12 +225,13 @@ namespace flowmini::ast {
                 ++i; // consume ')'
             }
 
-            if (i < tokens.size() && tokens[i].kind == flowmini::TokenKind::Colon) {
+            if (i < tokens.size() &&
+                (tokens[i].kind == flowmini::TokenKind::Colon ||
+                 tokens[i].kind == flowmini::TokenKind::PlaceArrow)) {
                 ++i;
 
                 if (i < tokens.size() && is_identifier_like_type_token(tokens[i])) {
-                    fn.return_type = make_named_type_ref(tokens[i]);
-                    ++i;
+                    fn.return_type = parse_type_ref(tokens, i);
                 }
             }
 
@@ -204,8 +348,7 @@ namespace flowmini::ast {
                     ++i;
 
                     if (i < tokens.size() && is_identifier_like_type_token(tokens[i])) {
-                        field.type = make_named_type_ref(tokens[i]);
-                        ++i;
+                        field.type = parse_type_ref(tokens, i);
                     }
                 }
 
@@ -240,8 +383,7 @@ namespace flowmini::ast {
                 ++i; // consume refines
 
                 if (i < tokens.size() && is_identifier_like_type_token(tokens[i])) {
-                    aliasDecl.target = make_named_type_ref(tokens[i]);
-                    ++i;
+                    aliasDecl.target = parse_type_ref(tokens, i);
                 }
 
                 module.source_unit.declarations.emplace_back(std::move(aliasDecl));
@@ -1719,8 +1861,7 @@ namespace flowmini::ast {
             i += 2; // consume name and ':'
 
             if (i < tokens.size() && is_identifier_like_type_token(tokens[i])) {
-                statement.type = make_named_type_ref(tokens[i]);
-                ++i;
+                statement.type = parse_type_ref(tokens, i);
             }
 
             statement.has_initializer =

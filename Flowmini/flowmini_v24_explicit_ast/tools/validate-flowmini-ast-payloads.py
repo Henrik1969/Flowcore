@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-"""Validate canonical Flowmini expression payloads and compatibility projections."""
+"""Validate canonical Flowmini AST payloads and compatibility projections."""
 
 import json
 import sys
@@ -74,9 +74,133 @@ def payload_children(kind: str, payload: dict) -> list[int]:
     raise ValueError(f"unsupported expression kind {kind!r}")
 
 
+def location(value: object, context: str) -> None:
+    if not isinstance(value, dict) or not all(
+        isinstance(value.get(component), int) for component in ("line", "column")
+    ):
+        raise TypeError(f"{context} requires a line/column location")
+
+
+def string_segments(payload: dict, name: str) -> list[str]:
+    value = payload.get(name)
+    if not isinstance(value, list) or not value or not all(
+        isinstance(segment, str) and segment for segment in value
+    ):
+        raise TypeError(f"type payload field {name!r} must be a non-empty string array")
+    return value
+
+
+def validate_type_ref(type_ref: object, context: str) -> str:
+    if not isinstance(type_ref, dict):
+        raise TypeError(f"{context}: canonical type_ref object is required")
+
+    kind = type_ref.get("kind")
+    text = type_ref.get("text")
+    payload = type_ref.get("payload")
+    if not isinstance(kind, str) or not isinstance(text, str) or not isinstance(payload, dict):
+        raise TypeError(f"{context}: type_ref requires kind, text, and payload")
+    location(type_ref.get("location"), f"{context}: type_ref")
+
+    if kind == "unknown":
+        canonical = payload.get("text")
+        if not isinstance(canonical, str):
+            raise TypeError(f"{context}: unknown type payload requires text")
+    elif kind == "named":
+        canonical = ".".join(string_segments(payload, "name_segments"))
+    elif kind == "generic":
+        constructor = ".".join(string_segments(payload, "constructor_segments"))
+        arguments = payload.get("arguments")
+        if not isinstance(arguments, list) or not arguments:
+            raise TypeError(f"{context}: generic type requires one or more arguments")
+        canonical = constructor + "<" + ",".join(
+            validate_type_ref(argument, f"{context}: generic argument {index}")
+            for index, argument in enumerate(arguments)
+        ) + ">"
+    elif kind == "array":
+        element = payload.get("element_type")
+        if element is None:
+            raise TypeError(f"{context}: array type requires an element_type")
+        canonical = "array<" + validate_type_ref(element, f"{context}: array element") + ">"
+        extents = payload.get("extents")
+        if not isinstance(extents, list):
+            raise TypeError(f"{context}: array extents must be an array")
+        extent_texts: list[str] = []
+        for index, extent in enumerate(extents):
+            if not isinstance(extent, dict) or not isinstance(extent.get("text"), str) or not extent["text"]:
+                raise TypeError(f"{context}: array extent {index} requires non-empty text")
+            location(extent.get("location"), f"{context}: array extent {index}")
+            extent_texts.append(extent["text"])
+        if extent_texts:
+            canonical += "[" + ",".join(extent_texts) + "]"
+    else:
+        raise ValueError(f"{context}: unsupported type_ref kind {kind!r}")
+
+    if canonical != text:
+        raise ValueError(f"{context}: canonical type text {canonical!r} != projection {text!r}")
+    return canonical
+
+
+def validate_statement_types(statements: object, context: str) -> None:
+    if not isinstance(statements, list):
+        raise TypeError(f"{context}: body_statements must be an array")
+    for index, statement in enumerate(statements):
+        statement_context = f"{context}: statement {index}"
+        if not isinstance(statement, dict):
+            raise TypeError(f"{statement_context} must be an object")
+        if "type" in statement or "type_ref" in statement:
+            canonical = validate_type_ref(statement.get("type_ref"), statement_context)
+            if statement.get("type") != canonical:
+                raise ValueError(f"{statement_context}: type string disagrees with canonical type_ref")
+        if "body_statements" in statement:
+            validate_statement_types(statement["body_statements"], statement_context)
+
+
+def validate_declaration_types(document: dict, path: Path) -> None:
+    source_unit = document.get("source_unit")
+    declarations = source_unit.get("declarations") if isinstance(source_unit, dict) else None
+    if not isinstance(declarations, list):
+        raise TypeError(f"{path}: source_unit declarations must be an array")
+
+    for index, declaration in enumerate(declarations):
+        context = f"{path}: declaration {index}"
+        if not isinstance(declaration, dict):
+            raise TypeError(f"{context} must be an object")
+        kind = declaration.get("kind")
+        if kind == "function":
+            parameters = declaration.get("parameters")
+            if not isinstance(parameters, list):
+                raise TypeError(f"{context}: function parameters must be an array")
+            for parameter_index, parameter in enumerate(parameters):
+                parameter_context = f"{context}: parameter {parameter_index}"
+                canonical = validate_type_ref(parameter.get("type_ref"), parameter_context)
+                if parameter.get("type") != canonical:
+                    raise ValueError(f"{parameter_context}: type string disagrees with canonical type_ref")
+            return_type = validate_type_ref(declaration.get("return_type_ref"), f"{context}: return type")
+            if declaration.get("return_type") != return_type:
+                raise ValueError(f"{context}: return_type string disagrees with canonical type_ref")
+            validate_statement_types(declaration.get("body_statements"), context)
+        elif kind == "record":
+            fields = declaration.get("fields")
+            if not isinstance(fields, list):
+                raise TypeError(f"{context}: record fields must be an array")
+            for field_index, field in enumerate(fields):
+                field_context = f"{context}: field {field_index}"
+                canonical = validate_type_ref(field.get("type_ref"), field_context)
+                if field.get("type") != canonical:
+                    raise ValueError(f"{field_context}: type string disagrees with canonical type_ref")
+        elif kind == "type_alias":
+            canonical = validate_type_ref(declaration.get("target_type_ref"), f"{context}: alias target")
+            if declaration.get("target") != canonical:
+                raise ValueError(f"{context}: target string disagrees with canonical type_ref")
+        elif kind == "main_block":
+            validate_statement_types(declaration.get("body_statements"), context)
+
+
 def validate(path: Path) -> None:
     with path.open(encoding="utf-8") as stream:
         document = json.load(stream)
+
+    validate_declaration_types(document, path)
 
     expressions = document.get("expression_pool")
     if not isinstance(expressions, list):

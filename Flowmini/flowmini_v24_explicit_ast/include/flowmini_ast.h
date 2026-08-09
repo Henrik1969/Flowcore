@@ -6,6 +6,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <memory>
 #include <optional>
 #include <string>
 #include <ostream>
@@ -68,30 +69,45 @@ enum class TypeRefKind {
     Named,
     Generic,
     Array,
-    Pointer,
-    Reference,
     Unknown
 };
 
-struct TypeRef {
-    TypeRefKind kind = TypeRefKind::Unknown;
+struct TypeRef;
 
-    // For simple current types:
-    //     int
-    //     Bool
-    //     c_string
-    std::string name;
+struct UnknownTypeRef {
+    std::string text;
+};
 
-    // Preserves source spelling while parser support is incomplete:
-    //     array<int>[2, 3]
-    //     list<int>
-    std::string raw_text;
+struct NamedTypeRef {
+    std::vector<std::string> name_segments;
+};
 
-    // Future semantic structure:
+struct GenericTypeRef {
+    std::vector<std::string> constructor_segments;
     std::vector<TypeRef> arguments;
-    std::vector<std::string> dimensions;
+};
 
+struct ArrayExtent {
+    std::string text;
     SourceLocation location;
+};
+
+struct ArrayTypeRef {
+    std::shared_ptr<const TypeRef> element_type;
+    std::vector<ArrayExtent> extents;
+};
+
+struct TypeRef {
+    SourceLocation location;
+
+    using Payload = std::variant<
+        UnknownTypeRef,
+        NamedTypeRef,
+        GenericTypeRef,
+        ArrayTypeRef
+    >;
+
+    Payload payload = UnknownTypeRef{};
 };
 
 struct Parameter {
@@ -287,6 +303,9 @@ const char* to_string(TopLevelKind kind);
 const char* to_string(StatementKind kind);
 const char* to_string(ExpressionKind kind);
 const char* to_string(TypeRefKind kind);
+
+TypeRefKind type_ref_kind(const TypeRef& type);
+std::string type_ref_text(const TypeRef& type);
 
 ExpressionKind expression_kind(const Expression& expression);
 std::string expression_text(const Expression& expression,

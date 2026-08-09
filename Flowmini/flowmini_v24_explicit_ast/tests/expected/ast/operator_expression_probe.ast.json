@@ -12,13 +12,43 @@
                 "parameters": [
                     {
                         "name": "n",
-                        "type": "int"
+                        "type": "int",
+                        "type_ref": {
+                            "kind": "named",
+                            "text": "int",
+                            "payload": {
+                                "name_segments": [
+                                    "int"
+                                ]
+                            },
+                            "location": {
+                                "line": 4,
+                                "column": 15
+                            }
+                        }
                     }
                 ],
-                "return_type": "",
-                "has_body": false,
-                "body_statement_count": 0,
-                "body_statements": []
+                "return_type": "int",
+                "return_type_ref": {
+                    "kind": "named",
+                    "text": "int",
+                    "payload": {
+                        "name_segments": [
+                            "int"
+                        ]
+                    },
+                    "location": {
+                        "line": 4,
+                        "column": 23
+                    }
+                },
+                "has_body": true,
+                "body_statement_count": 1,
+                "body_statements": [
+                    {
+                        "kind": "return"
+                    }
+                ]
             },
             {
                 "kind": "main_block",
@@ -29,6 +59,19 @@
                         "kind": "let",
                         "name": "x",
                         "type": "int",
+                        "type_ref": {
+                            "kind": "named",
+                            "text": "int",
+                            "payload": {
+                                "name_segments": [
+                                    "int"
+                                ]
+                            },
+                            "location": {
+                                "line": 9,
+                                "column": 9
+                            }
+                        },
                         "has_initializer": true,
                         "expression_ids": [
                             0
@@ -38,6 +81,19 @@
                         "kind": "let",
                         "name": "y",
                         "type": "int",
+                        "type_ref": {
+                            "kind": "named",
+                            "text": "int",
+                            "payload": {
+                                "name_segments": [
+                                    "int"
+                                ]
+                            },
+                            "location": {
+                                "line": 10,
+                                "column": 9
+                            }
+                        },
                         "has_initializer": true,
                         "expression_ids": [
                             1
@@ -47,6 +103,19 @@
                         "kind": "let",
                         "name": "z",
                         "type": "int",
+                        "type_ref": {
+                            "kind": "named",
+                            "text": "int",
+                            "payload": {
+                                "name_segments": [
+                                    "int"
+                                ]
+                            },
+                            "location": {
+                                "line": 11,
+                                "column": 9
+                            }
+                        },
                         "has_initializer": true,
                         "expression_ids": [
                             2
@@ -56,6 +125,19 @@
                         "kind": "let",
                         "name": "negative",
                         "type": "int",
+                        "type_ref": {
+                            "kind": "named",
+                            "text": "int",
+                            "payload": {
+                                "name_segments": [
+                                    "int"
+                                ]
+                            },
+                            "location": {
+                                "line": 12,
+                                "column": 16
+                            }
+                        },
                         "has_initializer": true,
                         "expression_ids": [
                             5

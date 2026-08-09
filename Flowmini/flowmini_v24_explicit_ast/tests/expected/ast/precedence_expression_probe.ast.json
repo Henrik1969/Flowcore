@@ -14,6 +14,19 @@
                         "kind": "let",
                         "name": "a",
                         "type": "int",
+                        "type_ref": {
+                            "kind": "named",
+                            "text": "int",
+                            "payload": {
+                                "name_segments": [
+                                    "int"
+                                ]
+                            },
+                            "location": {
+                                "line": 5,
+                                "column": 9
+                            }
+                        },
                         "has_initializer": true,
                         "expression_ids": [
                             0
@@ -23,6 +36,19 @@
                         "kind": "let",
                         "name": "b",
                         "type": "int",
+                        "type_ref": {
+                            "kind": "named",
+                            "text": "int",
+                            "payload": {
+                                "name_segments": [
+                                    "int"
+                                ]
+                            },
+                            "location": {
+                                "line": 6,
+                                "column": 9
+                            }
+                        },
                         "has_initializer": true,
                         "expression_ids": [
                             1
@@ -32,6 +58,19 @@
                         "kind": "let",
                         "name": "c",
                         "type": "int",
+                        "type_ref": {
+                            "kind": "named",
+                            "text": "int",
+                            "payload": {
+                                "name_segments": [
+                                    "int"
+                                ]
+                            },
+                            "location": {
+                                "line": 7,
+                                "column": 9
+                            }
+                        },
                         "has_initializer": true,
                         "expression_ids": [
                             2
@@ -41,6 +80,19 @@
                         "kind": "let",
                         "name": "d",
                         "type": "int",
+                        "type_ref": {
+                            "kind": "named",
+                            "text": "int",
+                            "payload": {
+                                "name_segments": [
+                                    "int"
+                                ]
+                            },
+                            "location": {
+                                "line": 8,
+                                "column": 9
+                            }
+                        },
                         "has_initializer": true,
                         "expression_ids": [
                             3
@@ -50,6 +102,19 @@
                         "kind": "let",
                         "name": "result",
                         "type": "int",
+                        "type_ref": {
+                            "kind": "named",
+                            "text": "int",
+                            "payload": {
+                                "name_segments": [
+                                    "int"
+                                ]
+                            },
+                            "location": {
+                                "line": 9,
+                                "column": 14
+                            }
+                        },
                         "has_initializer": true,
                         "expression_ids": [
                             4

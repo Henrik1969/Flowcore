@@ -13,12 +13,35 @@
                     {
                         "kind": "let",
                         "name": "arr",
-                        "type": "list"
-                    },
-                    {
-                        "kind": "let",
-                        "name": "i",
-                        "type": "int",
+                        "type": "list<int>",
+                        "type_ref": {
+                            "kind": "generic",
+                            "text": "list<int>",
+                            "payload": {
+                                "constructor_segments": [
+                                    "list"
+                                ],
+                                "arguments": [
+                                    {
+                                        "kind": "named",
+                                        "text": "int",
+                                        "payload": {
+                                            "name_segments": [
+                                                "int"
+                                            ]
+                                        },
+                                        "location": {
+                                            "line": 10,
+                                            "column": 16
+                                        }
+                                    }
+                                ]
+                            },
+                            "location": {
+                                "line": 10,
+                                "column": 11
+                            }
+                        },
                         "has_initializer": true,
                         "expression_ids": [
                             0
@@ -26,20 +49,68 @@
                     },
                     {
                         "kind": "let",
-                        "name": "point",
-                        "type": "Point",
+                        "name": "i",
+                        "type": "int",
+                        "type_ref": {
+                            "kind": "named",
+                            "text": "int",
+                            "payload": {
+                                "name_segments": [
+                                    "int"
+                                ]
+                            },
+                            "location": {
+                                "line": 11,
+                                "column": 9
+                            }
+                        },
                         "has_initializer": true,
                         "expression_ids": [
-                            1
+                            4
+                        ]
+                    },
+                    {
+                        "kind": "let",
+                        "name": "point",
+                        "type": "Point",
+                        "type_ref": {
+                            "kind": "named",
+                            "text": "Point",
+                            "payload": {
+                                "name_segments": [
+                                    "Point"
+                                ]
+                            },
+                            "location": {
+                                "line": 12,
+                                "column": 13
+                            }
+                        },
+                        "has_initializer": true,
+                        "expression_ids": [
+                            5
                         ]
                     },
                     {
                         "kind": "let",
                         "name": "result",
                         "type": "int",
+                        "type_ref": {
+                            "kind": "named",
+                            "text": "int",
+                            "payload": {
+                                "name_segments": [
+                                    "int"
+                                ]
+                            },
+                            "location": {
+                                "line": 13,
+                                "column": 14
+                            }
+                        },
                         "has_initializer": true,
                         "expression_ids": [
-                            4
+                            8
                         ]
                     },
                     {
@@ -47,7 +118,7 @@
                         "name": "result",
                         "has_value": true,
                         "expression_ids": [
-                            5
+                            9
                         ]
                     },
                     {
@@ -55,7 +126,7 @@
                         "name": "arr",
                         "has_value": true,
                         "expression_ids": [
-                            14
+                            18
                         ]
                     },
                     {
@@ -63,68 +134,56 @@
                         "name": "point",
                         "has_value": true,
                         "expression_ids": [
-                            22
+                            26
                         ]
                     }
                 ]
             }
         ]
     },
-    "expression_pool_size": 31,
+    "expression_pool_size": 35,
     "expression_pool": [
         {
             "id": 0,
-            "kind": "integer_literal",
-            "text": "0",
+            "kind": "list_literal",
+            "text": "[",
             "payload": {
-                "value_text": "0"
-            },
-            "child_expressions": []
-        },
-        {
-            "id": 1,
-            "kind": "record_literal",
-            "text": "{",
-            "payload": {
-                "fields": [
-                    {
-                        "name": "x",
-                        "value": 2,
-                        "location": {
-                            "line": 12,
-                            "column": 20
-                        }
-                    },
-                    {
-                        "name": "y",
-                        "value": 3,
-                        "location": {
-                            "line": 12,
-                            "column": 27
-                        }
-                    }
+                "elements": [
+                    1,
+                    2,
+                    3
                 ]
             },
             "child_expressions": [
+                1,
                 2,
                 3
             ]
         },
         {
+            "id": 1,
+            "kind": "integer_literal",
+            "text": "1",
+            "payload": {
+                "value_text": "1"
+            },
+            "child_expressions": []
+        },
+        {
             "id": 2,
             "kind": "integer_literal",
-            "text": "10",
+            "text": "2",
             "payload": {
-                "value_text": "10"
+                "value_text": "2"
             },
             "child_expressions": []
         },
         {
             "id": 3,
             "kind": "integer_literal",
-            "text": "20",
+            "text": "3",
             "payload": {
-                "value_text": "20"
+                "value_text": "3"
             },
             "child_expressions": []
         },
@@ -139,12 +198,26 @@
         },
         {
             "id": 5,
-            "kind": "call",
-            "text": "outer",
+            "kind": "record_literal",
+            "text": "{",
             "payload": {
-                "base": 6,
-                "arguments": [
-                    7
+                "fields": [
+                    {
+                        "name": "x",
+                        "value": 6,
+                        "location": {
+                            "line": 12,
+                            "column": 20
+                        }
+                    },
+                    {
+                        "name": "y",
+                        "value": 7,
+                        "location": {
+                            "line": 12,
+                            "column": 27
+                        }
+                    }
                 ]
             },
             "child_expressions": [
@@ -154,45 +227,40 @@
         },
         {
             "id": 6,
-            "kind": "identifier",
-            "text": "outer",
+            "kind": "integer_literal",
+            "text": "10",
             "payload": {
-                "name": "outer"
+                "value_text": "10"
             },
             "child_expressions": []
         },
         {
             "id": 7,
-            "kind": "call",
-            "text": "inner",
+            "kind": "integer_literal",
+            "text": "20",
             "payload": {
-                "base": 8,
-                "arguments": [
-                    9
-                ]
+                "value_text": "20"
             },
-            "child_expressions": [
-                8,
-                9
-            ]
+            "child_expressions": []
         },
         {
             "id": 8,
-            "kind": "identifier",
-            "text": "inner",
+            "kind": "integer_literal",
+            "text": "0",
             "payload": {
-                "name": "inner"
+                "value_text": "0"
             },
             "child_expressions": []
         },
         {
             "id": 9,
-            "kind": "binary",
-            "text": "+",
+            "kind": "call",
+            "text": "outer",
             "payload": {
-                "operator": "+",
-                "left": 10,
-                "right": 11
+                "base": 10,
+                "arguments": [
+                    11
+                ]
             },
             "child_expressions": [
                 10,
@@ -201,20 +269,20 @@
         },
         {
             "id": 10,
-            "kind": "integer_literal",
-            "text": "1",
+            "kind": "identifier",
+            "text": "outer",
             "payload": {
-                "value_text": "1"
+                "name": "outer"
             },
             "child_expressions": []
         },
         {
             "id": 11,
-            "kind": "index",
-            "text": "arr",
+            "kind": "call",
+            "text": "inner",
             "payload": {
                 "base": 12,
-                "indexes": [
+                "arguments": [
                     13
                 ]
             },
@@ -226,35 +294,34 @@
         {
             "id": 12,
             "kind": "identifier",
-            "text": "arr",
+            "text": "inner",
             "payload": {
-                "name": "arr"
+                "name": "inner"
             },
             "child_expressions": []
         },
         {
             "id": 13,
-            "kind": "identifier",
-            "text": "i",
+            "kind": "binary",
+            "text": "+",
             "payload": {
-                "name": "i"
+                "operator": "+",
+                "left": 14,
+                "right": 15
             },
-            "child_expressions": []
+            "child_expressions": [
+                14,
+                15
+            ]
         },
         {
             "id": 14,
-            "kind": "list_literal",
-            "text": "[",
+            "kind": "integer_literal",
+            "text": "1",
             "payload": {
-                "elements": [
-                    15,
-                    18
-                ]
+                "value_text": "1"
             },
-            "child_expressions": [
-                15,
-                18
-            ]
+            "child_expressions": []
         },
         {
             "id": 15,
@@ -291,119 +358,36 @@
         },
         {
             "id": 18,
-            "kind": "call",
-            "text": "leaf",
+            "kind": "list_literal",
+            "text": "[",
             "payload": {
-                "base": 19,
-                "arguments": [
-                    20
+                "elements": [
+                    19,
+                    22
                 ]
             },
             "child_expressions": [
                 19,
-                20
+                22
             ]
         },
         {
             "id": 19,
-            "kind": "identifier",
-            "text": "leaf",
+            "kind": "index",
+            "text": "arr",
             "payload": {
-                "name": "leaf"
-            },
-            "child_expressions": []
-        },
-        {
-            "id": 20,
-            "kind": "field_access",
-            "text": "point.x",
-            "payload": {
-                "base": 21,
-                "field": "x"
+                "base": 20,
+                "indexes": [
+                    21
+                ]
             },
             "child_expressions": [
+                20,
                 21
             ]
         },
         {
-            "id": 21,
-            "kind": "identifier",
-            "text": "point",
-            "payload": {
-                "name": "point"
-            },
-            "child_expressions": []
-        },
-        {
-            "id": 22,
-            "kind": "record_literal",
-            "text": "{",
-            "payload": {
-                "fields": [
-                    {
-                        "name": "x",
-                        "value": 23,
-                        "location": {
-                            "line": 17,
-                            "column": 14
-                        }
-                    },
-                    {
-                        "name": "y",
-                        "value": 28,
-                        "location": {
-                            "line": 17,
-                            "column": 31
-                        }
-                    }
-                ]
-            },
-            "child_expressions": [
-                23,
-                28
-            ]
-        },
-        {
-            "id": 23,
-            "kind": "call",
-            "text": "leaf",
-            "payload": {
-                "base": 24,
-                "arguments": [
-                    25
-                ]
-            },
-            "child_expressions": [
-                24,
-                25
-            ]
-        },
-        {
-            "id": 24,
-            "kind": "identifier",
-            "text": "leaf",
-            "payload": {
-                "name": "leaf"
-            },
-            "child_expressions": []
-        },
-        {
-            "id": 25,
-            "kind": "index",
-            "text": "arr",
-            "payload": {
-                "base": 26,
-                "indexes": [
-                    27
-                ]
-            },
-            "child_expressions": [
-                26,
-                27
-            ]
-        },
-        {
-            "id": 26,
+            "id": 20,
             "kind": "identifier",
             "text": "arr",
             "payload": {
@@ -412,7 +396,7 @@
             "child_expressions": []
         },
         {
-            "id": 27,
+            "id": 21,
             "kind": "identifier",
             "text": "i",
             "payload": {
@@ -421,31 +405,162 @@
             "child_expressions": []
         },
         {
-            "id": 28,
-            "kind": "unary",
-            "text": "-",
+            "id": 22,
+            "kind": "call",
+            "text": "leaf",
             "payload": {
-                "operator": "-",
-                "operand": 29
+                "base": 23,
+                "arguments": [
+                    24
+                ]
             },
             "child_expressions": [
+                23,
+                24
+            ]
+        },
+        {
+            "id": 23,
+            "kind": "identifier",
+            "text": "leaf",
+            "payload": {
+                "name": "leaf"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 24,
+            "kind": "field_access",
+            "text": "point.x",
+            "payload": {
+                "base": 25,
+                "field": "x"
+            },
+            "child_expressions": [
+                25
+            ]
+        },
+        {
+            "id": 25,
+            "kind": "identifier",
+            "text": "point",
+            "payload": {
+                "name": "point"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 26,
+            "kind": "record_literal",
+            "text": "{",
+            "payload": {
+                "fields": [
+                    {
+                        "name": "x",
+                        "value": 27,
+                        "location": {
+                            "line": 17,
+                            "column": 14
+                        }
+                    },
+                    {
+                        "name": "y",
+                        "value": 32,
+                        "location": {
+                            "line": 17,
+                            "column": 31
+                        }
+                    }
+                ]
+            },
+            "child_expressions": [
+                27,
+                32
+            ]
+        },
+        {
+            "id": 27,
+            "kind": "call",
+            "text": "leaf",
+            "payload": {
+                "base": 28,
+                "arguments": [
+                    29
+                ]
+            },
+            "child_expressions": [
+                28,
                 29
             ]
         },
         {
+            "id": 28,
+            "kind": "identifier",
+            "text": "leaf",
+            "payload": {
+                "name": "leaf"
+            },
+            "child_expressions": []
+        },
+        {
             "id": 29,
-            "kind": "field_access",
-            "text": "point.y",
+            "kind": "index",
+            "text": "arr",
             "payload": {
                 "base": 30,
-                "field": "y"
+                "indexes": [
+                    31
+                ]
             },
             "child_expressions": [
-                30
+                30,
+                31
             ]
         },
         {
             "id": 30,
+            "kind": "identifier",
+            "text": "arr",
+            "payload": {
+                "name": "arr"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 31,
+            "kind": "identifier",
+            "text": "i",
+            "payload": {
+                "name": "i"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 32,
+            "kind": "unary",
+            "text": "-",
+            "payload": {
+                "operator": "-",
+                "operand": 33
+            },
+            "child_expressions": [
+                33
+            ]
+        },
+        {
+            "id": 33,
+            "kind": "field_access",
+            "text": "point.y",
+            "payload": {
+                "base": 34,
+                "field": "y"
+            },
+            "child_expressions": [
+                34
+            ]
+        },
+        {
+            "id": 34,
             "kind": "identifier",
             "text": "point",
             "payload": {

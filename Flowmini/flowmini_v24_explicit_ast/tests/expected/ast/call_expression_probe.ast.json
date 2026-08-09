@@ -12,23 +12,70 @@
                 "parameters": [
                     {
                         "name": "n",
-                        "type": "int"
+                        "type": "int",
+                        "type_ref": {
+                            "kind": "named",
+                            "text": "int",
+                            "payload": {
+                                "name_segments": [
+                                    "int"
+                                ]
+                            },
+                            "location": {
+                                "line": 4,
+                                "column": 15
+                            }
+                        }
                     }
                 ],
-                "return_type": "",
-                "has_body": false,
-                "body_statement_count": 0,
-                "body_statements": []
+                "return_type": "int",
+                "return_type_ref": {
+                    "kind": "named",
+                    "text": "int",
+                    "payload": {
+                        "name_segments": [
+                            "int"
+                        ]
+                    },
+                    "location": {
+                        "line": 4,
+                        "column": 23
+                    }
+                },
+                "has_body": true,
+                "body_statement_count": 1,
+                "body_statements": [
+                    {
+                        "kind": "return"
+                    }
+                ]
             },
             {
                 "kind": "function",
                 "name": "is_ready",
                 "parameter_count": 0,
                 "parameters": [],
-                "return_type": "",
-                "has_body": false,
-                "body_statement_count": 0,
-                "body_statements": []
+                "return_type": "Bool",
+                "return_type_ref": {
+                    "kind": "named",
+                    "text": "Bool",
+                    "payload": {
+                        "name_segments": [
+                            "Bool"
+                        ]
+                    },
+                    "location": {
+                        "line": 8,
+                        "column": 18
+                    }
+                },
+                "has_body": true,
+                "body_statement_count": 1,
+                "body_statements": [
+                    {
+                        "kind": "return"
+                    }
+                ]
             },
             {
                 "kind": "main_block",
@@ -39,6 +86,19 @@
                         "kind": "let",
                         "name": "x",
                         "type": "int",
+                        "type_ref": {
+                            "kind": "named",
+                            "text": "int",
+                            "payload": {
+                                "name_segments": [
+                                    "int"
+                                ]
+                            },
+                            "location": {
+                                "line": 13,
+                                "column": 9
+                            }
+                        },
                         "has_initializer": true,
                         "expression_ids": [
                             0
@@ -48,6 +108,19 @@
                         "kind": "let",
                         "name": "y",
                         "type": "int",
+                        "type_ref": {
+                            "kind": "named",
+                            "text": "int",
+                            "payload": {
+                                "name_segments": [
+                                    "int"
+                                ]
+                            },
+                            "location": {
+                                "line": 14,
+                                "column": 9
+                            }
+                        },
                         "has_initializer": true,
                         "expression_ids": [
                             1

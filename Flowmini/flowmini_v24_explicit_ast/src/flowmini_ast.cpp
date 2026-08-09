@@ -37,6 +37,109 @@ namespace flowmini::ast {
             out << '"';
         }
 
+        void dump_string_array(std::ostream& out, const std::vector<std::string>& values) {
+            out << "[";
+            for (std::size_t i = 0; i < values.size(); ++i) {
+                if (i != 0) { out << ", "; }
+                dump_json_string(out, values[i]);
+            }
+            out << "]";
+        }
+
+        std::string render_qualified_name(const std::vector<std::string>& segments) {
+            std::string result;
+            for (std::size_t i = 0; i < segments.size(); ++i) {
+                if (i != 0) { result += "."; }
+                result += segments[i];
+            }
+            return result;
+        }
+
+        std::string render_type_ref(const TypeRef& type, const std::size_t depth = 0) {
+            if (depth > 64) { return {}; }
+            if (const auto* value = std::get_if<UnknownTypeRef>(&type.payload)) {
+                return value->text;
+            }
+            if (const auto* value = std::get_if<NamedTypeRef>(&type.payload)) {
+                return render_qualified_name(value->name_segments);
+            }
+            if (const auto* value = std::get_if<GenericTypeRef>(&type.payload)) {
+                std::string result = render_qualified_name(value->constructor_segments) + "<";
+                for (std::size_t i = 0; i < value->arguments.size(); ++i) {
+                    if (i != 0) { result += ","; }
+                    result += render_type_ref(value->arguments[i], depth + 1);
+                }
+                return result + ">";
+            }
+            if (const auto* value = std::get_if<ArrayTypeRef>(&type.payload)) {
+                std::string result = "array<";
+                if (value->element_type) {
+                    result += render_type_ref(*value->element_type, depth + 1);
+                }
+                result += ">";
+                if (!value->extents.empty()) {
+                    result += "[";
+                    for (std::size_t i = 0; i < value->extents.size(); ++i) {
+                        if (i != 0) { result += ","; }
+                        result += value->extents[i].text;
+                    }
+                    result += "]";
+                }
+                return result;
+            }
+            return {};
+        }
+
+        void dump_type_ref_json(std::ostream& out, const TypeRef& type);
+
+        void dump_type_ref_payload_json(std::ostream& out, const TypeRef& type) {
+            out << "{";
+            if (const auto* value = std::get_if<UnknownTypeRef>(&type.payload)) {
+                out << "\"text\": ";
+                dump_json_string(out, value->text);
+            } else if (const auto* value = std::get_if<NamedTypeRef>(&type.payload)) {
+                out << "\"name_segments\": ";
+                dump_string_array(out, value->name_segments);
+            } else if (const auto* value = std::get_if<GenericTypeRef>(&type.payload)) {
+                out << "\"constructor_segments\": ";
+                dump_string_array(out, value->constructor_segments);
+                out << ", \"arguments\": [";
+                for (std::size_t i = 0; i < value->arguments.size(); ++i) {
+                    if (i != 0) { out << ", "; }
+                    dump_type_ref_json(out, value->arguments[i]);
+                }
+                out << "]";
+            } else if (const auto* value = std::get_if<ArrayTypeRef>(&type.payload)) {
+                out << "\"element_type\": ";
+                if (value->element_type) {
+                    dump_type_ref_json(out, *value->element_type);
+                } else {
+                    out << "null";
+                }
+                out << ", \"extents\": [";
+                for (std::size_t i = 0; i < value->extents.size(); ++i) {
+                    if (i != 0) { out << ", "; }
+                    out << "{\"text\": ";
+                    dump_json_string(out, value->extents[i].text);
+                    out << ", \"location\": {\"line\": " << value->extents[i].location.line
+                        << ", \"column\": " << value->extents[i].location.column << "}}";
+                }
+                out << "]";
+            }
+            out << "}";
+        }
+
+        void dump_type_ref_json(std::ostream& out, const TypeRef& type) {
+            out << "{\"kind\": ";
+            dump_json_string(out, to_string(type_ref_kind(type)));
+            out << ", \"text\": ";
+            dump_json_string(out, type_ref_text(type));
+            out << ", \"payload\": ";
+            dump_type_ref_payload_json(out, type);
+            out << ", \"location\": {\"line\": " << type.location.line
+                << ", \"column\": " << type.location.column << "}}";
+        }
+
         std::string render_expression_full(const std::size_t expression_id,
                                            const std::vector<Expression>& expressions,
                                            const std::size_t depth = 0) {
@@ -219,11 +322,15 @@ namespace flowmini::ast {
                         dump_json_string(out, statement.name);
                     }
 
-                    if (!statement.type.name.empty()) {
+                    if (type_ref_kind(statement.type) != TypeRefKind::Unknown) {
                         out << ",\n";
                         dump_indent(out, indent + 4);
                         out << "\"type\": ";
-                        dump_json_string(out, statement.type.name);
+                        dump_json_string(out, type_ref_text(statement.type));
+                        out << ",\n";
+                        dump_indent(out, indent + 4);
+                        out << "\"type_ref\": ";
+                        dump_type_ref_json(out, statement.type);
                     }
 
                     if (statement.has_initializer) {
@@ -391,7 +498,12 @@ namespace flowmini::ast {
 
                         dump_indent(out, indent + 6);
                         out << "\"type\": ";
-                        dump_json_string(out, parameter.type.name);
+                        dump_json_string(out, type_ref_text(parameter.type));
+                        out << ",\n";
+
+                        dump_indent(out, indent + 6);
+                        out << "\"type_ref\": ";
+                        dump_type_ref_json(out, parameter.type);
                         out << "\n";
 
                         dump_indent(out, indent + 4);
@@ -411,7 +523,12 @@ namespace flowmini::ast {
 
                 dump_indent(out, indent + 2);
                 out << "\"return_type\": ";
-                dump_json_string(out, functionDecl->return_type.name);
+                dump_json_string(out, type_ref_text(functionDecl->return_type));
+                out << ",\n";
+
+                dump_indent(out, indent + 2);
+                out << "\"return_type_ref\": ";
+                dump_type_ref_json(out, functionDecl->return_type);
                 out << ",\n";
 
                 dump_indent(out, indent + 2);
@@ -465,7 +582,12 @@ namespace flowmini::ast {
 
                         dump_indent(out, indent + 6);
                         out << "\"type\": ";
-                        dump_json_string(out, field.type.name);
+                        dump_json_string(out, type_ref_text(field.type));
+                        out << ",\n";
+
+                        dump_indent(out, indent + 6);
+                        out << "\"type_ref\": ";
+                        dump_type_ref_json(out, field.type);
                         out << "\n";
 
                         dump_indent(out, indent + 4);
@@ -491,7 +613,12 @@ namespace flowmini::ast {
 
                 dump_indent(out, indent + 2);
                 out << "\"target\": ";
-                dump_json_string(out, typeAliasDecl->target.name);
+                dump_json_string(out, type_ref_text(typeAliasDecl->target));
+                out << ",\n";
+
+                dump_indent(out, indent + 2);
+                out << "\"target_type_ref\": ";
+                dump_type_ref_json(out, typeAliasDecl->target);
                 out << "\n";
             } else {
                 out << "\n";
@@ -557,6 +684,27 @@ namespace flowmini::ast {
             case ExpressionKind::Unknown:           return "unknown";
         }
         return "unknown";
+    }
+
+    const char* to_string(TypeRefKind kind) {
+        switch (kind) {
+            case TypeRefKind::Named:   return "named";
+            case TypeRefKind::Generic: return "generic";
+            case TypeRefKind::Array:   return "array";
+            case TypeRefKind::Unknown: return "unknown";
+        }
+        return "unknown";
+    }
+
+    TypeRefKind type_ref_kind(const TypeRef& type) {
+        if (std::holds_alternative<NamedTypeRef>(type.payload))   { return TypeRefKind::Named; }
+        if (std::holds_alternative<GenericTypeRef>(type.payload)) { return TypeRefKind::Generic; }
+        if (std::holds_alternative<ArrayTypeRef>(type.payload))   { return TypeRefKind::Array; }
+        return TypeRefKind::Unknown;
+    }
+
+    std::string type_ref_text(const TypeRef& type) {
+        return render_type_ref(type);
     }
 
     ExpressionKind expression_kind(const Expression& expression) {

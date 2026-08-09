@@ -14,6 +14,19 @@
                         "kind": "let",
                         "name": "x",
                         "type": "int",
+                        "type_ref": {
+                            "kind": "named",
+                            "text": "int",
+                            "payload": {
+                                "name_segments": [
+                                    "int"
+                                ]
+                            },
+                            "location": {
+                                "line": 5,
+                                "column": 9
+                            }
+                        },
                         "has_initializer": true,
                         "expression_ids": [
                             0
@@ -51,6 +64,19 @@
                                 "kind": "let",
                                 "name": "y",
                                 "type": "int",
+                                "type_ref": {
+                                    "kind": "named",
+                                    "text": "int",
+                                    "payload": {
+                                        "name_segments": [
+                                            "int"
+                                        ]
+                                    },
+                                    "location": {
+                                        "line": 12,
+                                        "column": 13
+                                    }
+                                },
                                 "has_initializer": true,
                                 "expression_ids": [
                                     10
