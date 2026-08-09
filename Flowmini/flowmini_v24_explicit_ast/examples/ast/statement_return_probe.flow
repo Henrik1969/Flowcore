@@ -1,0 +1,15 @@
+program statement_return_probe
+
+fn direct(x : int) -> int {
+    return x + 1
+}
+
+fn nested(x : int, ready : bool) -> int {
+    if ready {
+        return x + 1
+    }
+    return x
+}
+
+main {
+}

@@ -221,13 +221,18 @@ struct Statement {
     bool has_value = false;
     bool has_condition = false;
 
+    // C5 statement-role deepening starts with Return.
+    // For Return this is canonical ownership; expression_ids remains a
+    // derived JSON compatibility projection.
+    std::optional<std::size_t> value_expression;
+
     bool has_body = false;
     SourceLocation body_location;
 
     std::vector<Statement> body;
 
-    // For v24 this remains intentionally skeletal.
-    // Expressions and nested statement bodies are populated in later steps.
+    // Legacy statement-expression storage retained while the remaining
+    // statement kinds migrate to explicit semantic roles during C5.
     std::vector<std::size_t> child_statements;
     std::vector<std::size_t> expressions;
 };

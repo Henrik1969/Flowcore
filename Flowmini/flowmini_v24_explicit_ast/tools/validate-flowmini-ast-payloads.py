@@ -140,22 +140,55 @@ def validate_type_ref(type_ref: object, context: str) -> str:
     return canonical
 
 
-def validate_statement_types(statements: object, context: str) -> None:
+def validate_statement_types(statements: object, context: str, expression_count: int) -> None:
     if not isinstance(statements, list):
         raise TypeError(f"{context}: body_statements must be an array")
     for index, statement in enumerate(statements):
         statement_context = f"{context}: statement {index}"
         if not isinstance(statement, dict):
             raise TypeError(f"{statement_context} must be an object")
+
+        expression_ids = statement.get("expression_ids", [])
+        if not isinstance(expression_ids, list) or not all(
+            isinstance(expression_id, int) for expression_id in expression_ids
+        ):
+            raise TypeError(f"{statement_context}: expression_ids must be an integer array")
+        for expression_id in expression_ids:
+            if expression_id < 0 or expression_id >= expression_count:
+                raise ValueError(f"{statement_context}: dangling statement expression id {expression_id}")
+
+        if statement.get("kind") == "return":
+            value_expression_id = statement.get("value_expression_id")
+            if value_expression_id is None:
+                if statement.get("has_value") is True or expression_ids:
+                    raise ValueError(
+                        f"{statement_context}: valueless return disagrees with compatibility projection"
+                    )
+            else:
+                if not isinstance(value_expression_id, int):
+                    raise TypeError(f"{statement_context}: value_expression_id must be an integer")
+                if value_expression_id < 0 or value_expression_id >= expression_count:
+                    raise ValueError(
+                        f"{statement_context}: dangling return value expression id {value_expression_id}"
+                    )
+                if statement.get("has_value") is not True:
+                    raise ValueError(f"{statement_context}: return value requires has_value projection")
+                if expression_ids != [value_expression_id]:
+                    raise ValueError(
+                        f"{statement_context}: return value does not match expression_ids projection"
+                    )
+
         if "type" in statement or "type_ref" in statement:
             canonical = validate_type_ref(statement.get("type_ref"), statement_context)
             if statement.get("type") != canonical:
                 raise ValueError(f"{statement_context}: type string disagrees with canonical type_ref")
         if "body_statements" in statement:
-            validate_statement_types(statement["body_statements"], statement_context)
+            validate_statement_types(
+                statement["body_statements"], statement_context, expression_count
+            )
 
 
-def validate_declaration_types(document: dict, path: Path) -> None:
+def validate_declaration_types(document: dict, path: Path, expression_count: int) -> None:
     source_unit = document.get("source_unit")
     declarations = source_unit.get("declarations") if isinstance(source_unit, dict) else None
     if not isinstance(declarations, list):
@@ -178,7 +211,9 @@ def validate_declaration_types(document: dict, path: Path) -> None:
             return_type = validate_type_ref(declaration.get("return_type_ref"), f"{context}: return type")
             if declaration.get("return_type") != return_type:
                 raise ValueError(f"{context}: return_type string disagrees with canonical type_ref")
-            validate_statement_types(declaration.get("body_statements"), context)
+            validate_statement_types(
+                declaration.get("body_statements"), context, expression_count
+            )
         elif kind == "record":
             fields = declaration.get("fields")
             if not isinstance(fields, list):
@@ -193,20 +228,22 @@ def validate_declaration_types(document: dict, path: Path) -> None:
             if declaration.get("target") != canonical:
                 raise ValueError(f"{context}: target string disagrees with canonical type_ref")
         elif kind == "main_block":
-            validate_statement_types(declaration.get("body_statements"), context)
+            validate_statement_types(
+                declaration.get("body_statements"), context, expression_count
+            )
 
 
 def validate(path: Path) -> None:
     with path.open(encoding="utf-8") as stream:
         document = json.load(stream)
 
-    validate_declaration_types(document, path)
-
     expressions = document.get("expression_pool")
     if not isinstance(expressions, list):
         raise TypeError(f"{path}: expression_pool must be an array")
     if document.get("expression_pool_size") != len(expressions):
         raise ValueError(f"{path}: expression_pool_size does not match expression_pool")
+
+    validate_declaration_types(document, path, len(expressions))
 
     for expected_id, expression in enumerate(expressions):
         if expression.get("id") != expected_id:

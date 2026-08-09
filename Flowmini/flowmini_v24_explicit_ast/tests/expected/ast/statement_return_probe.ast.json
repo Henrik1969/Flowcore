@@ -2,16 +2,16 @@
     "format": "flowmini.ast.v1",
     "source_unit": {
         "kind": "program",
-        "name": "expression_pool_probe",
-        "declaration_count": 2,
+        "name": "statement_return_probe",
+        "declaration_count": 3,
         "declarations": [
             {
                 "kind": "function",
-                "name": "square",
+                "name": "direct",
                 "parameter_count": 1,
                 "parameters": [
                     {
-                        "name": "n",
+                        "name": "x",
                         "type": "int",
                         "type_ref": {
                             "kind": "named",
@@ -56,112 +56,107 @@
                 ]
             },
             {
-                "kind": "main_block",
+                "kind": "function",
+                "name": "nested",
+                "parameter_count": 2,
+                "parameters": [
+                    {
+                        "name": "x",
+                        "type": "int",
+                        "type_ref": {
+                            "kind": "named",
+                            "text": "int",
+                            "payload": {
+                                "name_segments": [
+                                    "int"
+                                ]
+                            },
+                            "location": {
+                                "line": 8,
+                                "column": 15
+                            }
+                        }
+                    },
+                    {
+                        "name": "ready",
+                        "type": "bool",
+                        "type_ref": {
+                            "kind": "named",
+                            "text": "bool",
+                            "payload": {
+                                "name_segments": [
+                                    "bool"
+                                ]
+                            },
+                            "location": {
+                                "line": 8,
+                                "column": 28
+                            }
+                        }
+                    }
+                ],
+                "return_type": "int",
+                "return_type_ref": {
+                    "kind": "named",
+                    "text": "int",
+                    "payload": {
+                        "name_segments": [
+                            "int"
+                        ]
+                    },
+                    "location": {
+                        "line": 8,
+                        "column": 37
+                    }
+                },
                 "has_body": true,
-                "body_statement_count": 5,
+                "body_statement_count": 2,
                 "body_statements": [
-                    {
-                        "kind": "let",
-                        "name": "x",
-                        "type": "int",
-                        "type_ref": {
-                            "kind": "named",
-                            "text": "int",
-                            "payload": {
-                                "name_segments": [
-                                    "int"
-                                ]
-                            },
-                            "location": {
-                                "line": 9,
-                                "column": 9
-                            }
-                        },
-                        "has_initializer": true,
-                        "expression_ids": [
-                            3
-                        ]
-                    },
-                    {
-                        "kind": "let",
-                        "name": "y",
-                        "type": "int",
-                        "type_ref": {
-                            "kind": "named",
-                            "text": "int",
-                            "payload": {
-                                "name_segments": [
-                                    "int"
-                                ]
-                            },
-                            "location": {
-                                "line": 10,
-                                "column": 9
-                            }
-                        },
-                        "has_initializer": true,
-                        "expression_ids": [
-                            4
-                        ]
-                    },
-                    {
-                        "kind": "assignment",
-                        "name": "x",
-                        "has_value": true,
-                        "expression_ids": [
-                            5
-                        ]
-                    },
-                    {
-                        "kind": "while",
-                        "has_condition": true,
-                        "expression_ids": [
-                            6
-                        ],
-                        "has_body": true,
-                        "body_statement_count": 1,
-                        "body_statements": [
-                            {
-                                "kind": "assignment",
-                                "name": "x",
-                                "has_value": true,
-                                "expression_ids": [
-                                    9
-                                ]
-                            }
-                        ]
-                    },
                     {
                         "kind": "if",
                         "has_condition": true,
                         "expression_ids": [
-                            12
+                            3
                         ],
                         "has_body": true,
                         "body_statement_count": 1,
                         "body_statements": [
                             {
-                                "kind": "assignment",
-                                "name": "y",
+                                "kind": "return",
                                 "has_value": true,
+                                "value_expression_id": 4,
                                 "expression_ids": [
-                                    15
+                                    4
                                 ]
                             }
                         ]
+                    },
+                    {
+                        "kind": "return",
+                        "has_value": true,
+                        "value_expression_id": 7,
+                        "expression_ids": [
+                            7
+                        ]
                     }
                 ]
+            },
+            {
+                "kind": "main_block",
+                "has_body": true,
+                "body_statement_count": 0,
+                "body_statements": []
             }
         ]
     },
-    "expression_pool_size": 16,
+    "expression_pool_size": 8,
     "expression_pool": [
         {
             "id": 0,
             "kind": "binary",
-            "text": "*",
+            "text": "+",
             "payload": {
-                "operator": "*",
+                "operator": "+",
                 "left": 1,
                 "right": 2
             },
@@ -173,105 +168,55 @@
         {
             "id": 1,
             "kind": "identifier",
-            "text": "n",
+            "text": "x",
             "payload": {
-                "name": "n"
+                "name": "x"
             },
             "child_expressions": []
         },
         {
             "id": 2,
-            "kind": "identifier",
-            "text": "n",
+            "kind": "integer_literal",
+            "text": "1",
             "payload": {
-                "name": "n"
+                "value_text": "1"
             },
             "child_expressions": []
         },
         {
             "id": 3,
-            "kind": "integer_literal",
-            "text": "1",
+            "kind": "identifier",
+            "text": "ready",
             "payload": {
-                "value_text": "1"
+                "name": "ready"
             },
             "child_expressions": []
         },
         {
             "id": 4,
-            "kind": "integer_literal",
-            "text": "2",
+            "kind": "binary",
+            "text": "+",
             "payload": {
-                "value_text": "2"
+                "operator": "+",
+                "left": 5,
+                "right": 6
             },
-            "child_expressions": []
+            "child_expressions": [
+                5,
+                6
+            ]
         },
         {
             "id": 5,
             "kind": "identifier",
-            "text": "y",
+            "text": "x",
             "payload": {
-                "name": "y"
+                "name": "x"
             },
             "child_expressions": []
         },
         {
             "id": 6,
-            "kind": "binary",
-            "text": "<",
-            "payload": {
-                "operator": "<",
-                "left": 7,
-                "right": 8
-            },
-            "child_expressions": [
-                7,
-                8
-            ]
-        },
-        {
-            "id": 7,
-            "kind": "identifier",
-            "text": "x",
-            "payload": {
-                "name": "x"
-            },
-            "child_expressions": []
-        },
-        {
-            "id": 8,
-            "kind": "integer_literal",
-            "text": "10",
-            "payload": {
-                "value_text": "10"
-            },
-            "child_expressions": []
-        },
-        {
-            "id": 9,
-            "kind": "binary",
-            "text": "+",
-            "payload": {
-                "operator": "+",
-                "left": 10,
-                "right": 11
-            },
-            "child_expressions": [
-                10,
-                11
-            ]
-        },
-        {
-            "id": 10,
-            "kind": "identifier",
-            "text": "x",
-            "payload": {
-                "name": "x"
-            },
-            "child_expressions": []
-        },
-        {
-            "id": 11,
             "kind": "integer_literal",
             "text": "1",
             "payload": {
@@ -280,39 +225,7 @@
             "child_expressions": []
         },
         {
-            "id": 12,
-            "kind": "binary",
-            "text": "==",
-            "payload": {
-                "operator": "==",
-                "left": 13,
-                "right": 14
-            },
-            "child_expressions": [
-                13,
-                14
-            ]
-        },
-        {
-            "id": 13,
-            "kind": "identifier",
-            "text": "x",
-            "payload": {
-                "name": "x"
-            },
-            "child_expressions": []
-        },
-        {
-            "id": 14,
-            "kind": "integer_literal",
-            "text": "10",
-            "payload": {
-                "value_text": "10"
-            },
-            "child_expressions": []
-        },
-        {
-            "id": 15,
+            "id": 7,
             "kind": "identifier",
             "text": "x",
             "payload": {

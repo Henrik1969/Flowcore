@@ -9,33 +9,34 @@ flowmini_v24_explicit_ast
 Current milestone:
 
 ```text
-Flowmini v0.24 explicit AST
-shallow expression AST checkpoint
+Flowmini v0.24 explicit AST stabilization
+Road C5 statement deepening in progress
+C5.1 return expression ownership complete
 ```
 
 ## Status
 
 ```text
-build: expected OK
-AST golden tests: PASS (8)
+build: PASS
+AST golden tests: PASS (12)
 suite: PASS (76 / 76)
 bad: 0
 ```
 
 Flowmini is still experimental and unfinished.
 
-The current v0.24 line provides an observable, regression-guarded AST with a first shallow expression graph pass.
+The current v0.24 line provides an observable, regression-guarded AST with
+canonical expression payloads, canonical type-reference payloads, and the
+first canonical statement-expression role: return value ownership.
 
 ## Run the current build
 
 ```bash
 cd Flowmini/flowmini_v24_explicit_ast
 
-cmake -S . -B cmake-build-debug
-cmake --build cmake-build-debug -j20
+cmake -S . -B cmake-build-debug -G Ninja -DCMAKE_BUILD_TYPE=Debug
+cmake --build cmake-build-debug -j"$(nproc)"
 ```
-
-Adjust `-j20` to match your machine.
 
 ## Run the current tests
 
@@ -49,7 +50,7 @@ cmake --build cmake-build-debug --target flowmini_suite
 Expected result:
 
 ```text
-AST golden tests: PASS (8)
+AST golden tests: PASS (12)
 
 total: 76
 pass:  76
@@ -84,10 +85,11 @@ docs/language/named-targets.md
 The following are still future or incomplete work:
 
 ```text
-recursive expression population
-operator precedence and associativity
+remaining statement-role ownership beyond return
 else blocks
-full type-reference parsing
+semantic validation of type references
+generic value arguments
+pointer/reference source semantics if adopted
 semantic name resolution
 symbol table integration
 type checking

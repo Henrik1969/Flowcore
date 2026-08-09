@@ -308,6 +308,19 @@ namespace flowmini::ast {
                 for (std::size_t i = 0; i < statements.size(); ++i) {
                     const auto& statement = statements[i];
 
+                    const bool hasCanonicalReturnValue =
+                        statement.kind == StatementKind::Return &&
+                        statement.value_expression.has_value();
+                    const bool hasValue = hasCanonicalReturnValue || statement.has_value;
+
+                    std::vector<std::size_t> projectedExpressionIds = statement.expressions;
+                    if (statement.kind == StatementKind::Return) {
+                        projectedExpressionIds.clear();
+                        if (statement.value_expression) {
+                            projectedExpressionIds.push_back(*statement.value_expression);
+                        }
+                    }
+
                     dump_indent(out, indent + 2);
                     out << "{\n";
 
@@ -339,10 +352,16 @@ namespace flowmini::ast {
                         out << "\"has_initializer\": true";
                     }
 
-                    if (statement.has_value) {
+                    if (hasValue) {
                         out << ",\n";
                         dump_indent(out, indent + 4);
                         out << "\"has_value\": true";
+                    }
+
+                    if (hasCanonicalReturnValue) {
+                        out << ",\n";
+                        dump_indent(out, indent + 4);
+                        out << "\"value_expression_id\": " << *statement.value_expression;
                     }
 
                     if (statement.has_condition) {
@@ -351,15 +370,15 @@ namespace flowmini::ast {
                         out << "\"has_condition\": true";
                     }
 
-                    if (!statement.expressions.empty()) {
+                    if (!projectedExpressionIds.empty()) {
                         out << ",\n";
                         dump_indent(out, indent + 4);
                         out << "\"expression_ids\": [";
-                        for (std::size_t exprIndex = 0; exprIndex < statement.expressions.size(); ++exprIndex) {
+                        for (std::size_t exprIndex = 0; exprIndex < projectedExpressionIds.size(); ++exprIndex) {
                             if (exprIndex > 0) {
                                 out << ", ";
                             }
-                            out << statement.expressions[exprIndex];
+                            out << projectedExpressionIds[exprIndex];
                         }
                         out << "]";
                     }
