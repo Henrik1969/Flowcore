@@ -2002,6 +2002,25 @@ namespace flowmini::ast {
                 i = parse_body_statement_shells(tokens, i, statement.body, expressionPool);
             }
 
+            // Historical Flowmini law retained: `else` is optional and belongs
+            // to the immediately preceding If. No synthetic else branch exists
+            // when the source omits it. `else if` sugar is deliberately not
+            // recognized here; an else branch must currently be a block.
+            const auto elseIndex = skip_nonsemantic_separators(tokens, i);
+            if (elseIndex < tokens.size() &&
+                tokens[elseIndex].kind == flowmini::TokenKind::KeywordElse) {
+                const auto elseBodyIndex =
+                    skip_nonsemantic_separators(tokens, elseIndex + 1);
+                if (elseBodyIndex < tokens.size() &&
+                    tokens[elseBodyIndex].kind == flowmini::TokenKind::LeftBrace) {
+                    statement.else_location = location_from_token(tokens[elseIndex]);
+                    statement.else_body_location =
+                        location_from_token(tokens[elseBodyIndex]);
+                    i = parse_body_statement_shells(
+                        tokens, elseBodyIndex, statement.else_body, expressionPool);
+                }
+            }
+
             body.push_back(std::move(statement));
             return i;
         }

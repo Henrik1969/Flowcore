@@ -327,6 +327,10 @@ namespace flowmini::ast {
                     const bool hasCondition =
                         hasCanonicalCondition || statement.has_condition;
 
+                    const bool hasElse =
+                        statement.kind == StatementKind::If &&
+                        statement.else_location.has_value();
+
                     std::vector<std::size_t> projectedExpressionIds = statement.expressions;
                     if (statement.kind == StatementKind::Let) {
                         projectedExpressionIds.clear();
@@ -436,6 +440,22 @@ namespace flowmini::ast {
                         dump_indent(out, indent + 4);
                         out << "\"body_statements\": ";
                         dump_statement_array_json(out, statement.body, indent + 4);
+                    }
+
+                    if (hasElse) {
+                        out << ",\n";
+                        dump_indent(out, indent + 4);
+                        out << "\"has_else\": true";
+
+                        out << ",\n";
+                        dump_indent(out, indent + 4);
+                        out << "\"else_body_statement_count\": "
+                            << statement.else_body.size();
+
+                        out << ",\n";
+                        dump_indent(out, indent + 4);
+                        out << "\"else_body_statements\": ";
+                        dump_statement_array_json(out, statement.else_body, indent + 4);
                     }
 
                     out << "\n";

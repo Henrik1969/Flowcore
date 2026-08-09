@@ -241,6 +241,36 @@ def validate_statement_types(statements: object, context: str, expression_count:
                         "expression_ids projection"
                     )
 
+        has_else = statement.get("has_else") is True
+        has_else_fields = (
+            "else_body_statement_count" in statement or
+            "else_body_statements" in statement
+        )
+        if statement.get("kind") == "if":
+            if has_else:
+                else_body = statement.get("else_body_statements")
+                else_count = statement.get("else_body_statement_count")
+                if not isinstance(else_body, list):
+                    raise TypeError(
+                        f"{statement_context}: has_else requires else_body_statements"
+                    )
+                if not isinstance(else_count, int) or else_count != len(else_body):
+                    raise ValueError(
+                        f"{statement_context}: else_body_statement_count does not match "
+                        "else_body_statements"
+                    )
+                validate_statement_types(
+                    else_body, f"{statement_context}: else", expression_count
+                )
+            elif has_else_fields:
+                raise ValueError(
+                    f"{statement_context}: else body fields require has_else projection"
+                )
+        elif has_else or has_else_fields:
+            raise ValueError(
+                f"{statement_context}: else branch is only valid on an if statement"
+            )
+
         if "type" in statement or "type_ref" in statement:
             canonical = validate_type_ref(statement.get("type_ref"), statement_context)
             if statement.get("type") != canonical:

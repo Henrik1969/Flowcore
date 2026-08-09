@@ -237,6 +237,13 @@ struct Statement {
 
     std::vector<Statement> body;
 
+    // C5.5: `else` is an optional branch owned by If, not a standalone
+    // statement. Presence is canonical in else_location; has_else in JSON is
+    // derived. body remains the true branch for If and the loop body for While.
+    std::optional<SourceLocation> else_location;
+    SourceLocation else_body_location;
+    std::vector<Statement> else_body;
+
     // Legacy statement-expression storage retained while the remaining
     // statement kinds migrate to explicit semantic roles during C5.
     std::vector<std::size_t> child_statements;
