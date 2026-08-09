@@ -57,7 +57,7 @@
                         "name": "x",
                         "has_value": true,
                         "expression_ids": [
-                            3
+                            4
                         ]
                     },
                     {
@@ -65,7 +65,7 @@
                         "name": "y",
                         "has_value": true,
                         "expression_ids": [
-                            4
+                            5
                         ]
                     },
                     {
@@ -73,30 +73,11 @@
                         "name": "z",
                         "has_value": true,
                         "expression_ids": [
-                            5
+                            6
                         ]
                     },
                     {
                         "kind": "while",
-                        "has_condition": true,
-                        "expression_ids": [
-                            6
-                        ],
-                        "has_body": true,
-                        "body_statement_count": 1,
-                        "body_statements": [
-                            {
-                                "kind": "assignment",
-                                "name": "x",
-                                "has_value": true,
-                                "expression_ids": [
-                                    7
-                                ]
-                            }
-                        ]
-                    },
-                    {
-                        "kind": "if",
                         "has_condition": true,
                         "expression_ids": [
                             8
@@ -106,10 +87,29 @@
                         "body_statements": [
                             {
                                 "kind": "assignment",
-                                "name": "y",
+                                "name": "x",
                                 "has_value": true,
                                 "expression_ids": [
                                     9
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "kind": "if",
+                        "has_condition": true,
+                        "expression_ids": [
+                            10
+                        ],
+                        "has_body": true,
+                        "body_statement_count": 1,
+                        "body_statements": [
+                            {
+                                "kind": "assignment",
+                                "name": "y",
+                                "has_value": true,
+                                "expression_ids": [
+                                    11
                                 ]
                             }
                         ]
@@ -118,7 +118,7 @@
             }
         ]
     },
-    "expression_pool_size": 10,
+    "expression_pool_size": 12,
     "expression_pool": [
         {
             "id": 0,
@@ -136,46 +136,62 @@
             "id": 2,
             "kind": "call",
             "text": "square",
-            "child_expressions": []
+            "child_expressions": [
+                3
+            ]
         },
         {
             "id": 3,
+            "kind": "identifier",
+            "text": "x",
+            "child_expressions": []
+        },
+        {
+            "id": 4,
             "kind": "identifier",
             "text": "y",
             "child_expressions": []
         },
         {
-            "id": 4,
+            "id": 5,
             "kind": "binary",
             "text": "+",
-            "child_expressions": []
-        },
-        {
-            "id": 5,
-            "kind": "call",
-            "text": "square",
             "child_expressions": []
         },
         {
             "id": 6,
-            "kind": "binary",
-            "text": "<",
-            "child_expressions": []
+            "kind": "call",
+            "text": "square",
+            "child_expressions": [
+                7
+            ]
         },
         {
             "id": 7,
-            "kind": "binary",
-            "text": "+",
+            "kind": "identifier",
+            "text": "y",
             "child_expressions": []
         },
         {
             "id": 8,
             "kind": "binary",
-            "text": "==",
+            "text": "<",
             "child_expressions": []
         },
         {
             "id": 9,
+            "kind": "binary",
+            "text": "+",
+            "child_expressions": []
+        },
+        {
+            "id": 10,
+            "kind": "binary",
+            "text": "==",
+            "child_expressions": []
+        },
+        {
+            "id": 11,
             "kind": "binary",
             "text": "-",
             "child_expressions": []

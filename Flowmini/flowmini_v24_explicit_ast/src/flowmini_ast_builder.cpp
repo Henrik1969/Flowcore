@@ -541,6 +541,204 @@ namespace flowmini::ast {
                    tokens[i + 1].kind == flowmini::TokenKind::LeftParen;
         }
 
+    std::size_t find_matching_right_paren(const std::vector<flowmini::Token>& tokens,
+                                          const std::size_t leftParenIndex) {
+        if (leftParenIndex >= tokens.size() ||
+            tokens[leftParenIndex].kind != flowmini::TokenKind::LeftParen) {
+            return tokens.size();
+        }
+
+        std::size_t depth = 0;
+
+        for (std::size_t i = leftParenIndex; i < tokens.size(); ++i) {
+            if (tokens[i].kind == flowmini::TokenKind::LeftParen) {
+                ++depth;
+                continue;
+            }
+
+            if (tokens[i].kind == flowmini::TokenKind::RightParen) {
+                if (depth == 0) {
+                    return tokens.size();
+                }
+
+                --depth;
+
+                if (depth == 0) {
+                    return i;
+                }
+            }
+
+            if (is_end_token(tokens[i]) || tokens[i].kind == flowmini::TokenKind::Newline) {
+                return tokens.size();
+            }
+        }
+
+        return tokens.size();
+    }
+
+    bool is_expression_separator_token(const flowmini::Token& token) {
+        return token.kind == flowmini::TokenKind::Comma ||
+               token.kind == flowmini::TokenKind::Newline;
+    }
+
+    std::size_t first_argument_token(const std::vector<flowmini::Token>& tokens,
+                                     std::size_t begin,
+                                     const std::size_t end) {
+        while (begin < end && is_expression_separator_token(tokens[begin])) {
+            ++begin;
+        }
+
+        return begin;
+    }
+
+    Expression make_shallow_expression_from_tokens(const std::vector<flowmini::Token>& tokens,
+                                                   const std::size_t i) {
+        Expression expression;
+
+        if (tokens.empty() || i >= tokens.size()) {
+            return expression;
+        }
+
+        const auto& token = tokens[i];
+        expression.location = location_from_token(token);
+
+        const auto binaryOperatorIndex = find_shallow_binary_operator(tokens, i);
+        if (binaryOperatorIndex < tokens.size()) {
+            expression.kind = ExpressionKind::Binary;
+            expression.text = tokens[binaryOperatorIndex].text;
+        } else if (expression_starts_unary(tokens, i)) {
+            expression.kind = ExpressionKind::Unary;
+            expression.text = token.text;
+        } else if (expression_starts_call(tokens, i)) {
+            expression.kind = ExpressionKind::Call;
+            expression.text = token.text;
+        } else if (expression_starts_index_access(tokens, i)) {
+            expression.kind = ExpressionKind::Index;
+            expression.text = token.text;
+        } else if (expression_starts_field_access(tokens, i)) {
+            expression.kind = ExpressionKind::FieldAccess;
+            expression.text = field_access_text(tokens, i);
+        } else if (expression_starts_list_literal(tokens, i)) {
+            expression.kind = ExpressionKind::ListLiteral;
+            expression.text = token.text;
+        } else if (expression_starts_record_literal(tokens, i)) {
+            expression.kind = ExpressionKind::RecordLiteral;
+            expression.text = token.text;
+        } else {
+            expression.kind = classify_expression_token(token);
+            expression.text = token.text;
+        }
+
+        return expression;
+    }
+
+    void append_call_argument_child(std::vector<Expression>& expressionPool,
+                                    const std::size_t callExpressionId,
+                                    const std::vector<flowmini::Token>& tokens,
+                                    const std::size_t begin,
+                                    const std::size_t end) {
+        const auto argStart = first_argument_token(tokens, begin, end);
+        if (argStart >= end) {
+            return;
+        }
+
+        std::vector<flowmini::Token> argumentTokens;
+        argumentTokens.reserve(end - argStart);
+
+        for (std::size_t i = argStart; i < end; ++i) {
+            argumentTokens.push_back(tokens[i]);
+        }
+
+        Expression argument = make_shallow_expression_from_tokens(argumentTokens, 0);
+
+        expressionPool.push_back(std::move(argument));
+        const auto argumentId = expressionPool.size() - 1;
+
+        expressionPool[callExpressionId].child_expressions.push_back(argumentId);
+    }
+
+    void populate_call_argument_children(std::vector<Expression>& expressionPool,
+                                         const std::size_t callExpressionId,
+                                         const std::vector<flowmini::Token>& tokens,
+                                         const std::size_t callIndex) {
+        if (callIndex + 1 >= tokens.size() ||
+            tokens[callIndex + 1].kind != flowmini::TokenKind::LeftParen) {
+            return;
+        }
+
+        const auto closeParenIndex = find_matching_right_paren(tokens, callIndex + 1);
+        if (closeParenIndex == tokens.size() || closeParenIndex <= callIndex + 2) {
+            return;
+        }
+
+        std::size_t argBegin = callIndex + 2;
+        std::size_t parenDepth = 0;
+        std::size_t bracketDepth = 0;
+        std::size_t braceDepth = 0;
+
+        for (std::size_t i = argBegin; i <= closeParenIndex; ++i) {
+            const bool atEnd = i == closeParenIndex;
+
+            if (!atEnd) {
+                const auto& token = tokens[i];
+
+                if (token.kind == flowmini::TokenKind::LeftParen) {
+                    ++parenDepth;
+                    continue;
+                }
+
+                if (token.kind == flowmini::TokenKind::RightParen) {
+                    if (parenDepth > 0) {
+                        --parenDepth;
+                    }
+                    continue;
+                }
+
+                if (token.kind == flowmini::TokenKind::LeftBracket) {
+                    ++bracketDepth;
+                    continue;
+                }
+
+                if (token.kind == flowmini::TokenKind::RightBracket) {
+                    if (bracketDepth > 0) {
+                        --bracketDepth;
+                    }
+                    continue;
+                }
+
+                if (token.kind == flowmini::TokenKind::LeftBrace) {
+                    ++braceDepth;
+                    continue;
+                }
+
+                if (token.kind == flowmini::TokenKind::RightBrace) {
+                    if (braceDepth > 0) {
+                        --braceDepth;
+                    }
+                    continue;
+                }
+
+                const bool atTopLevelComma =
+                    token.kind == flowmini::TokenKind::Comma &&
+                    parenDepth == 0 &&
+                    bracketDepth == 0 &&
+                    braceDepth == 0;
+
+                if (!atTopLevelComma) {
+                    continue;
+                }
+            }
+
+            append_call_argument_child(expressionPool,
+                                       callExpressionId,
+                                       tokens,
+                                       argBegin,
+                                       i);
+            argBegin = i + 1;
+        }
+    }
+
+
         std::size_t add_expression_placeholder_at(std::vector<Expression>& expressionPool,
                                                   Statement& statement,
                                                   const std::vector<flowmini::Token>& tokens,
@@ -588,6 +786,10 @@ namespace flowmini::ast {
             expressionPool.push_back(std::move(expression));
             const auto expressionId = expressionPool.size() - 1;
             statement.expressions.push_back(expressionId);
+
+        if (expressionPool[expressionId].kind == ExpressionKind::Call) {
+            populate_call_argument_children(expressionPool, expressionId, tokens, i);
+        }
             return expressionId;
         }
 
