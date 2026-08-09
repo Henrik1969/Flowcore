@@ -8,10 +8,12 @@ main {
     x : int(1)
     y : int(2)
     z : int(square(x))
+    negative : int(-1)
 
     x = y
     y = x + 1
     z = square(y)
+    y = -x
 
     while x < 10 {
         x = x + 1

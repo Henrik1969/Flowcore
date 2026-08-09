@@ -23,7 +23,7 @@
             {
                 "kind": "main_block",
                 "has_body": true,
-                "body_statement_count": 8,
+                "body_statement_count": 10,
                 "body_statements": [
                     {
                         "kind": "let",
@@ -53,16 +53,17 @@
                         ]
                     },
                     {
-                        "kind": "assignment",
-                        "name": "x",
-                        "has_value": true,
+                        "kind": "let",
+                        "name": "negative",
+                        "type": "int",
+                        "has_initializer": true,
                         "expression_ids": [
                             4
                         ]
                     },
                     {
                         "kind": "assignment",
-                        "name": "y",
+                        "name": "x",
                         "has_value": true,
                         "expression_ids": [
                             5
@@ -70,33 +71,30 @@
                     },
                     {
                         "kind": "assignment",
-                        "name": "z",
+                        "name": "y",
                         "has_value": true,
                         "expression_ids": [
                             6
                         ]
                     },
                     {
-                        "kind": "while",
-                        "has_condition": true,
+                        "kind": "assignment",
+                        "name": "z",
+                        "has_value": true,
                         "expression_ids": [
-                            8
-                        ],
-                        "has_body": true,
-                        "body_statement_count": 1,
-                        "body_statements": [
-                            {
-                                "kind": "assignment",
-                                "name": "x",
-                                "has_value": true,
-                                "expression_ids": [
-                                    9
-                                ]
-                            }
+                            7
                         ]
                     },
                     {
-                        "kind": "if",
+                        "kind": "assignment",
+                        "name": "y",
+                        "has_value": true,
+                        "expression_ids": [
+                            9
+                        ]
+                    },
+                    {
+                        "kind": "while",
                         "has_condition": true,
                         "expression_ids": [
                             10
@@ -106,10 +104,29 @@
                         "body_statements": [
                             {
                                 "kind": "assignment",
-                                "name": "y",
+                                "name": "x",
                                 "has_value": true,
                                 "expression_ids": [
                                     11
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "kind": "if",
+                        "has_condition": true,
+                        "expression_ids": [
+                            12
+                        ],
+                        "has_body": true,
+                        "body_statement_count": 1,
+                        "body_statements": [
+                            {
+                                "kind": "assignment",
+                                "name": "y",
+                                "has_value": true,
+                                "expression_ids": [
+                                    13
                                 ]
                             }
                         ]
@@ -118,7 +135,7 @@
             }
         ]
     },
-    "expression_pool_size": 12,
+    "expression_pool_size": 14,
     "expression_pool": [
         {
             "id": 0,
@@ -148,50 +165,62 @@
         },
         {
             "id": 4,
+            "kind": "binary",
+            "text": "-",
+            "child_expressions": []
+        },
+        {
+            "id": 5,
             "kind": "identifier",
             "text": "y",
             "child_expressions": []
         },
         {
-            "id": 5,
+            "id": 6,
             "kind": "binary",
             "text": "+",
             "child_expressions": []
         },
         {
-            "id": 6,
+            "id": 7,
             "kind": "call",
             "text": "square",
             "child_expressions": [
-                7
+                8
             ]
         },
         {
-            "id": 7,
+            "id": 8,
             "kind": "identifier",
             "text": "y",
-            "child_expressions": []
-        },
-        {
-            "id": 8,
-            "kind": "binary",
-            "text": "<",
             "child_expressions": []
         },
         {
             "id": 9,
             "kind": "binary",
-            "text": "+",
+            "text": "-",
             "child_expressions": []
         },
         {
             "id": 10,
             "kind": "binary",
-            "text": "==",
+            "text": "<",
             "child_expressions": []
         },
         {
             "id": 11,
+            "kind": "binary",
+            "text": "+",
+            "child_expressions": []
+        },
+        {
+            "id": 12,
+            "kind": "binary",
+            "text": "==",
+            "child_expressions": []
+        },
+        {
+            "id": 13,
             "kind": "binary",
             "text": "-",
             "child_expressions": []
