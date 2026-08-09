@@ -967,6 +967,121 @@ namespace flowmini::ast {
         expressionPool[fieldExpressionId].child_expressions.push_back(baseId);
     }
 
+
+    void append_list_literal_element_child(std::vector<Expression>& expressionPool,
+                                           const std::size_t listExpressionId,
+                                           const std::vector<flowmini::Token>& tokens,
+                                           const std::size_t begin,
+                                           const std::size_t end) {
+        std::size_t elementStart = begin;
+
+        while (elementStart < end &&
+               (tokens[elementStart].kind == flowmini::TokenKind::Comma ||
+                tokens[elementStart].kind == flowmini::TokenKind::Newline)) {
+            ++elementStart;
+        }
+
+        if (elementStart >= end) {
+            return;
+        }
+
+        std::vector<flowmini::Token> elementTokens;
+        elementTokens.reserve(end - elementStart);
+
+        for (std::size_t i = elementStart; i < end; ++i) {
+            elementTokens.push_back(tokens[i]);
+        }
+
+        Expression element = make_shallow_expression_from_tokens(elementTokens, 0);
+
+        expressionPool.push_back(std::move(element));
+        const auto elementId = expressionPool.size() - 1;
+
+        expressionPool[listExpressionId].child_expressions.push_back(elementId);
+    }
+
+    void populate_list_literal_children(std::vector<Expression>& expressionPool,
+                                        const std::size_t listExpressionId,
+                                        const std::vector<flowmini::Token>& tokens,
+                                        const std::size_t expressionStart) {
+        if (!expression_starts_list_literal(tokens, expressionStart)) {
+            return;
+        }
+
+        const auto leftBracketIndex = expressionStart;
+        const auto rightBracketIndex = find_matching_right_bracket(tokens, leftBracketIndex);
+
+        if (rightBracketIndex == tokens.size() || rightBracketIndex <= leftBracketIndex + 1) {
+            return;
+        }
+
+        std::size_t elementBegin = leftBracketIndex + 1;
+        std::size_t parenDepth = 0;
+        std::size_t bracketDepth = 0;
+        std::size_t braceDepth = 0;
+
+        for (std::size_t i = elementBegin; i <= rightBracketIndex; ++i) {
+            const bool atEnd = i == rightBracketIndex;
+
+            if (!atEnd) {
+                const auto& token = tokens[i];
+
+                if (token.kind == flowmini::TokenKind::LeftParen) {
+                    ++parenDepth;
+                    continue;
+                }
+
+                if (token.kind == flowmini::TokenKind::RightParen) {
+                    if (parenDepth > 0) {
+                        --parenDepth;
+                    }
+                    continue;
+                }
+
+                if (token.kind == flowmini::TokenKind::LeftBracket) {
+                    ++bracketDepth;
+                    continue;
+                }
+
+                if (token.kind == flowmini::TokenKind::RightBracket) {
+                    if (bracketDepth > 0) {
+                        --bracketDepth;
+                    }
+                    continue;
+                }
+
+                if (token.kind == flowmini::TokenKind::LeftBrace) {
+                    ++braceDepth;
+                    continue;
+                }
+
+                if (token.kind == flowmini::TokenKind::RightBrace) {
+                    if (braceDepth > 0) {
+                        --braceDepth;
+                    }
+                    continue;
+                }
+
+                const bool atTopLevelComma =
+                    token.kind == flowmini::TokenKind::Comma &&
+                    parenDepth == 0 &&
+                    bracketDepth == 0 &&
+                    braceDepth == 0;
+
+                if (!atTopLevelComma) {
+                    continue;
+                }
+            }
+
+            append_list_literal_element_child(expressionPool,
+                                              listExpressionId,
+                                              tokens,
+                                              elementBegin,
+                                              i);
+            elementBegin = i + 1;
+        }
+    }
+
     std::size_t add_expression_placeholder_at(std::vector<Expression>& expressionPool,
                                                   Statement& statement,
                                                   const std::vector<flowmini::Token>& tokens,
@@ -1014,6 +1129,10 @@ namespace flowmini::ast {
             expressionPool.push_back(std::move(expression));
             const auto expressionId = expressionPool.size() - 1;
             statement.expressions.push_back(expressionId);
+
+        if (expressionPool[expressionId].kind == ExpressionKind::ListLiteral) {
+            populate_list_literal_children(expressionPool, expressionId, tokens, i);
+        }
 
         if (expressionPool[expressionId].kind == ExpressionKind::FieldAccess) {
             populate_field_access_children(expressionPool, expressionId, tokens, i);

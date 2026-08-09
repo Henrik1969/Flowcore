@@ -37,14 +37,14 @@
                         "name": "p",
                         "has_value": true,
                         "expression_ids": [
-                            2
+                            5
                         ]
                     }
                 ]
             }
         ]
     },
-    "expression_pool_size": 3,
+    "expression_pool_size": 6,
     "expression_pool": [
         {
             "id": 0,
@@ -56,10 +56,32 @@
             "id": 1,
             "kind": "list_literal",
             "text": "[",
-            "child_expressions": []
+            "child_expressions": [
+                2,
+                3,
+                4
+            ]
         },
         {
             "id": 2,
+            "kind": "integer_literal",
+            "text": "4",
+            "child_expressions": []
+        },
+        {
+            "id": 3,
+            "kind": "integer_literal",
+            "text": "5",
+            "child_expressions": []
+        },
+        {
+            "id": 4,
+            "kind": "integer_literal",
+            "text": "6",
+            "child_expressions": []
+        },
+        {
+            "id": 5,
             "kind": "record_literal",
             "text": "{",
             "child_expressions": []
