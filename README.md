@@ -1,5 +1,12 @@
 # Flowcore
 
+## Purpose
+
+Flowcore is experimental language/system architecture work.
+Current active implementation: Flowmini v0.24 explicit AST.
+Start with Flowmini/README.md if you want the compiler/language prototype.
+Start with docs/ if you want the architecture.
+
 ## Project Status
 
 Flowcore / Flowmini is an experimental language and runtime research project.
