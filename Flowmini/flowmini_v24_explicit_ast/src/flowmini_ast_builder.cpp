@@ -851,6 +851,102 @@ namespace flowmini::ast {
         expressionPool[unaryExpressionId].child_expressions.push_back(operandId);
     }
 
+
+    std::size_t find_matching_right_bracket(const std::vector<flowmini::Token>& tokens,
+                                            const std::size_t leftBracketIndex) {
+        if (leftBracketIndex >= tokens.size() ||
+            tokens[leftBracketIndex].kind != flowmini::TokenKind::LeftBracket) {
+            return tokens.size();
+        }
+
+        std::size_t depth = 0;
+
+        for (std::size_t i = leftBracketIndex; i < tokens.size(); ++i) {
+            if (tokens[i].kind == flowmini::TokenKind::LeftBracket) {
+                ++depth;
+                continue;
+            }
+
+            if (tokens[i].kind == flowmini::TokenKind::RightBracket) {
+                if (depth == 0) {
+                    return tokens.size();
+                }
+
+                --depth;
+
+                if (depth == 0) {
+                    return i;
+                }
+            }
+
+            if (is_end_token(tokens[i]) || tokens[i].kind == flowmini::TokenKind::Newline) {
+                return tokens.size();
+            }
+        }
+
+        return tokens.size();
+    }
+
+    void append_index_child(std::vector<Expression>& expressionPool,
+                            const std::size_t indexExpressionId,
+                            const std::vector<flowmini::Token>& tokens,
+                            const std::size_t begin,
+                            const std::size_t end) {
+        std::size_t childStart = begin;
+
+        while (childStart < end &&
+               (tokens[childStart].kind == flowmini::TokenKind::Comma ||
+                tokens[childStart].kind == flowmini::TokenKind::Newline)) {
+            ++childStart;
+        }
+
+        if (childStart >= end) {
+            return;
+        }
+
+        std::vector<flowmini::Token> childTokens;
+        childTokens.reserve(end - childStart);
+
+        for (std::size_t i = childStart; i < end; ++i) {
+            childTokens.push_back(tokens[i]);
+        }
+
+        Expression child = make_shallow_expression_from_tokens(childTokens, 0);
+
+        expressionPool.push_back(std::move(child));
+        const auto childId = expressionPool.size() - 1;
+
+        expressionPool[indexExpressionId].child_expressions.push_back(childId);
+    }
+
+    void populate_index_expression_children(std::vector<Expression>& expressionPool,
+                                            const std::size_t indexExpressionId,
+                                            const std::vector<flowmini::Token>& tokens,
+                                            const std::size_t expressionStart) {
+        if (!expression_starts_index_access(tokens, expressionStart)) {
+            return;
+        }
+
+        const auto leftBracketIndex = expressionStart + 1;
+        const auto rightBracketIndex = find_matching_right_bracket(tokens, leftBracketIndex);
+
+        if (rightBracketIndex == tokens.size() || rightBracketIndex <= leftBracketIndex + 1) {
+            return;
+        }
+
+        append_index_child(expressionPool,
+                           indexExpressionId,
+                           tokens,
+                           expressionStart,
+                           leftBracketIndex);
+
+        append_index_child(expressionPool,
+                           indexExpressionId,
+                           tokens,
+                           leftBracketIndex + 1,
+                           rightBracketIndex);
+    }
+
     std::size_t add_expression_placeholder_at(std::vector<Expression>& expressionPool,
                                                   Statement& statement,
                                                   const std::vector<flowmini::Token>& tokens,
@@ -898,6 +994,10 @@ namespace flowmini::ast {
             expressionPool.push_back(std::move(expression));
             const auto expressionId = expressionPool.size() - 1;
             statement.expressions.push_back(expressionId);
+
+        if (expressionPool[expressionId].kind == ExpressionKind::Index) {
+            populate_index_expression_children(expressionPool, expressionId, tokens, i);
+        }
 
         if (expressionPool[expressionId].kind == ExpressionKind::Binary) {
             populate_binary_operand_children(expressionPool, expressionId, tokens, i);
