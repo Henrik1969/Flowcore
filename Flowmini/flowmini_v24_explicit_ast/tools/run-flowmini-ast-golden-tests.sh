@@ -47,6 +47,8 @@ if [[ "$UPDATE" == "1" ]]; then
             | python3 -m json.tool \
             > "$actual"
 
+        python3 "${SCRIPT_DIR}/validate-flowmini-ast-payloads.py" "$actual"
+
         cp "$actual" "$expected"
         echo "updated: ${expected}"
 
@@ -72,6 +74,8 @@ else
         "$BIN" --dump-ast "$source" \
             | python3 -m json.tool \
             > "$actual"
+
+        python3 "${SCRIPT_DIR}/validate-flowmini-ast-payloads.py" "$actual"
 
         if ! diff -u "$expected" "$actual"; then
             bad=1

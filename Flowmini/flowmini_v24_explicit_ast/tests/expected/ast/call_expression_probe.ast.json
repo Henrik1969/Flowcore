@@ -109,12 +109,21 @@
             "id": 0,
             "kind": "integer_literal",
             "text": "1",
+            "payload": {
+                "value_text": "1"
+            },
             "child_expressions": []
         },
         {
             "id": 1,
             "kind": "call",
             "text": "square",
+            "payload": {
+                "base": 2,
+                "arguments": [
+                    3
+                ]
+            },
             "child_expressions": [
                 2,
                 3
@@ -124,18 +133,30 @@
             "id": 2,
             "kind": "identifier",
             "text": "square",
+            "payload": {
+                "name": "square"
+            },
             "child_expressions": []
         },
         {
             "id": 3,
             "kind": "identifier",
             "text": "x",
+            "payload": {
+                "name": "x"
+            },
             "child_expressions": []
         },
         {
             "id": 4,
             "kind": "call",
             "text": "square",
+            "payload": {
+                "base": 5,
+                "arguments": [
+                    6
+                ]
+            },
             "child_expressions": [
                 5,
                 6
@@ -145,18 +166,28 @@
             "id": 5,
             "kind": "identifier",
             "text": "square",
+            "payload": {
+                "name": "square"
+            },
             "child_expressions": []
         },
         {
             "id": 6,
             "kind": "identifier",
             "text": "y",
+            "payload": {
+                "name": "y"
+            },
             "child_expressions": []
         },
         {
             "id": 7,
             "kind": "call",
             "text": "is_ready",
+            "payload": {
+                "base": 8,
+                "arguments": []
+            },
             "child_expressions": [
                 8
             ]
@@ -165,12 +196,21 @@
             "id": 8,
             "kind": "identifier",
             "text": "is_ready",
+            "payload": {
+                "name": "is_ready"
+            },
             "child_expressions": []
         },
         {
             "id": 9,
             "kind": "call",
             "text": "square",
+            "payload": {
+                "base": 10,
+                "arguments": [
+                    11
+                ]
+            },
             "child_expressions": [
                 10,
                 11
@@ -180,18 +220,28 @@
             "id": 10,
             "kind": "identifier",
             "text": "square",
+            "payload": {
+                "name": "square"
+            },
             "child_expressions": []
         },
         {
             "id": 11,
             "kind": "identifier",
             "text": "x",
+            "payload": {
+                "name": "x"
+            },
             "child_expressions": []
         },
         {
             "id": 12,
             "kind": "call",
             "text": "is_ready",
+            "payload": {
+                "base": 13,
+                "arguments": []
+            },
             "child_expressions": [
                 13
             ]
@@ -200,12 +250,21 @@
             "id": 13,
             "kind": "identifier",
             "text": "is_ready",
+            "payload": {
+                "name": "is_ready"
+            },
             "child_expressions": []
         },
         {
             "id": 14,
             "kind": "call",
             "text": "square",
+            "payload": {
+                "base": 15,
+                "arguments": [
+                    16
+                ]
+            },
             "child_expressions": [
                 15,
                 16
@@ -215,12 +274,18 @@
             "id": 15,
             "kind": "identifier",
             "text": "square",
+            "payload": {
+                "name": "square"
+            },
             "child_expressions": []
         },
         {
             "id": 16,
             "kind": "identifier",
             "text": "x",
+            "payload": {
+                "name": "x"
+            },
             "child_expressions": []
         }
     ]

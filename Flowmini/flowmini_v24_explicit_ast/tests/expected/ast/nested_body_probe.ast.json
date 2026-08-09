@@ -76,12 +76,20 @@
             "id": 0,
             "kind": "integer_literal",
             "text": "0",
+            "payload": {
+                "value_text": "0"
+            },
             "child_expressions": []
         },
         {
             "id": 1,
             "kind": "binary",
             "text": "<",
+            "payload": {
+                "operator": "<",
+                "left": 2,
+                "right": 3
+            },
             "child_expressions": [
                 2,
                 3
@@ -91,18 +99,29 @@
             "id": 2,
             "kind": "identifier",
             "text": "x",
+            "payload": {
+                "name": "x"
+            },
             "child_expressions": []
         },
         {
             "id": 3,
             "kind": "integer_literal",
             "text": "10",
+            "payload": {
+                "value_text": "10"
+            },
             "child_expressions": []
         },
         {
             "id": 4,
             "kind": "binary",
             "text": "+",
+            "payload": {
+                "operator": "+",
+                "left": 5,
+                "right": 6
+            },
             "child_expressions": [
                 5,
                 6
@@ -112,18 +131,29 @@
             "id": 5,
             "kind": "identifier",
             "text": "x",
+            "payload": {
+                "name": "x"
+            },
             "child_expressions": []
         },
         {
             "id": 6,
             "kind": "integer_literal",
             "text": "1",
+            "payload": {
+                "value_text": "1"
+            },
             "child_expressions": []
         },
         {
             "id": 7,
             "kind": "binary",
             "text": "==",
+            "payload": {
+                "operator": "==",
+                "left": 8,
+                "right": 9
+            },
             "child_expressions": [
                 8,
                 9
@@ -133,24 +163,36 @@
             "id": 8,
             "kind": "identifier",
             "text": "x",
+            "payload": {
+                "name": "x"
+            },
             "child_expressions": []
         },
         {
             "id": 9,
             "kind": "integer_literal",
             "text": "10",
+            "payload": {
+                "value_text": "10"
+            },
             "child_expressions": []
         },
         {
             "id": 10,
             "kind": "integer_literal",
             "text": "1",
+            "payload": {
+                "value_text": "1"
+            },
             "child_expressions": []
         },
         {
             "id": 11,
             "kind": "integer_literal",
             "text": "2",
+            "payload": {
+                "value_text": "2"
+            },
             "child_expressions": []
         }
     ]

@@ -390,13 +390,23 @@ namespace flowmini::ast {
             return ExpressionKind::Unknown;
         }
 
+        Expression::Payload make_leaf_payload(const flowmini::Token& token) {
+            switch (classify_expression_token(token)) {
+                case ExpressionKind::Identifier:     return IdentifierExpr{token.text};
+                case ExpressionKind::IntegerLiteral: return IntegerLiteralExpr{token.text};
+                case ExpressionKind::FloatLiteral:   return FloatLiteralExpr{token.text};
+                case ExpressionKind::StringLiteral:  return StringLiteralExpr{token.text};
+                case ExpressionKind::BoolLiteral:    return BoolLiteralExpr{token.text};
+                default:                             return UnknownExpr{token.text};
+            }
+        }
+
         std::size_t add_expression_placeholder(std::vector<Expression>& expressionPool,
                                                Statement& statement,
                                                const flowmini::Token& token) {
             Expression expression;
-            expression.kind = classify_expression_token(token);
             expression.location = location_from_token(token);
-            expression.text = token.text;
+            expression.payload = make_leaf_payload(token);
 
             expressionPool.push_back(std::move(expression));
             const auto expressionId = expressionPool.size() - 1;
@@ -569,6 +579,14 @@ namespace flowmini::ast {
                    tokens[i].kind == flowmini::TokenKind::Minus;
         }
 
+        bool expression_starts_float_literal(const std::vector<flowmini::Token>& tokens,
+                                             const std::size_t i) {
+            return i + 2 < tokens.size() &&
+                   tokens[i].kind == flowmini::TokenKind::Number &&
+                   tokens[i + 1].kind == flowmini::TokenKind::Dot &&
+                   tokens[i + 2].kind == flowmini::TokenKind::Number;
+        }
+
 
 
         bool expression_starts_list_literal(const std::vector<flowmini::Token>& tokens,
@@ -647,16 +665,6 @@ namespace flowmini::ast {
             }
 
             return selected;
-        }
-
-        std::string token_text_range(const std::vector<flowmini::Token>& tokens,
-                                     const std::size_t begin,
-                                     const std::size_t end) {
-            std::string result;
-            for (std::size_t i = begin; i < end && i < tokens.size(); ++i) {
-                result += tokens[i].text;
-            }
-            return result;
         }
 
     std::size_t find_matching_right_paren(const std::vector<flowmini::Token>& tokens,
@@ -778,27 +786,31 @@ namespace flowmini::ast {
 
         const auto binaryOperatorIndex = find_binary_operator_split(tokens, i);
         if (binaryOperatorIndex < tokens.size()) {
-            expression.kind = ExpressionKind::Binary;
-            expression.text = tokens[binaryOperatorIndex].text;
+            expression.payload = BinaryExpr{tokens[binaryOperatorIndex].text, std::nullopt, std::nullopt};
+        } else if (expression_starts_float_literal(tokens, i)) {
+            expression.payload = FloatLiteralExpr{
+                tokens[i].text + tokens[i + 1].text + tokens[i + 2].text
+            };
         } else if (expression_starts_unary(tokens, i)) {
-            expression.kind = ExpressionKind::Unary;
-            expression.text = token.text;
+            expression.payload = UnaryExpr{token.text, std::nullopt};
         } else if (const auto postfix = find_outermost_postfix(tokens, i);
                    postfix.kind != ExpressionKind::Unknown) {
-            expression.kind = postfix.kind;
-            const auto textEnd = postfix.kind == ExpressionKind::FieldAccess
-                ? postfix.end_index + 1
-                : postfix.operator_index;
-            expression.text = token_text_range(tokens, i, textEnd);
+            if (postfix.kind == ExpressionKind::Call) {
+                expression.payload = CallExpr{};
+            } else if (postfix.kind == ExpressionKind::Index) {
+                expression.payload = IndexExpr{};
+            } else {
+                expression.payload = FieldAccessExpr{
+                    std::nullopt,
+                    tokens[postfix.end_index].text
+                };
+            }
         } else if (expression_starts_list_literal(tokens, i)) {
-            expression.kind = ExpressionKind::ListLiteral;
-            expression.text = token.text;
+            expression.payload = ListLiteralExpr{};
         } else if (expression_starts_record_literal(tokens, i)) {
-            expression.kind = ExpressionKind::RecordLiteral;
-            expression.text = token.text;
+            expression.payload = RecordLiteralExpr{};
         } else {
-            expression.kind = classify_expression_token(token);
-            expression.text = token.text;
+            expression.payload = make_leaf_payload(token);
         }
 
         return expression;
@@ -810,13 +822,14 @@ namespace flowmini::ast {
                                       std::size_t expressionStart,
                                       std::size_t depth);
 
-    void append_populated_expression_child(std::vector<Expression>& expressionPool,
+    std::optional<std::size_t> append_populated_expression_child(
+                                           std::vector<Expression>& expressionPool,
                                            const std::size_t parentExpressionId,
                                            const std::vector<flowmini::Token>& childTokens,
                                            const std::size_t depth) {
         auto normalizedTokens = strip_enclosing_parentheses(childTokens);
         if (normalizedTokens.empty()) {
-            return;
+            return std::nullopt;
         }
 
         Expression child = make_shallow_expression_from_tokens(normalizedTokens, 0);
@@ -824,8 +837,26 @@ namespace flowmini::ast {
         expressionPool.push_back(std::move(child));
         const auto childId = expressionPool.size() - 1;
 
-        expressionPool[parentExpressionId].child_expressions.push_back(childId);
+        auto& parent = expressionPool[parentExpressionId];
+        if (auto* value = std::get_if<UnaryExpr>(&parent.payload)) {
+            value->operand = childId;
+        } else if (auto* value = std::get_if<BinaryExpr>(&parent.payload)) {
+            if (!value->left) { value->left = childId; }
+            else { value->right = childId; }
+        } else if (auto* value = std::get_if<CallExpr>(&parent.payload)) {
+            if (!value->base) { value->base = childId; }
+            else { value->arguments.push_back(childId); }
+        } else if (auto* value = std::get_if<IndexExpr>(&parent.payload)) {
+            if (!value->base) { value->base = childId; }
+            else { value->indexes.push_back(childId); }
+        } else if (auto* value = std::get_if<FieldAccessExpr>(&parent.payload)) {
+            value->base = childId;
+        } else if (auto* value = std::get_if<ListLiteralExpr>(&parent.payload)) {
+            value->elements.push_back(childId);
+        }
+
         populate_expression_children(expressionPool, childId, normalizedTokens, 0, depth + 1);
+        return childId;
     }
 
     void append_call_argument_child(std::vector<Expression>& expressionPool,
@@ -1467,10 +1498,18 @@ namespace flowmini::ast {
             valueTokens.push_back(tokens[i]);
         }
 
-        append_populated_expression_child(expressionPool,
-                                          recordExpressionId,
-                                          valueTokens,
-                                          depth);
+        const auto valueId = append_populated_expression_child(expressionPool,
+                                                                recordExpressionId,
+                                                                valueTokens,
+                                                                depth);
+        auto* record = std::get_if<RecordLiteralExpr>(&expressionPool[recordExpressionId].payload);
+        if (record != nullptr) {
+            record->fields.push_back(RecordLiteralFieldExpr{
+                tokens[fieldStart].text,
+                valueId,
+                location_from_token(tokens[fieldStart])
+            });
+        }
     }
 
     void populate_record_literal_children(std::vector<Expression>& expressionPool,
@@ -1566,31 +1605,33 @@ namespace flowmini::ast {
             return;
         }
 
-        if (expressionPool[expressionId].kind == ExpressionKind::RecordLiteral) {
+        const auto kind = expression_kind(expressionPool[expressionId]);
+
+        if (kind == ExpressionKind::RecordLiteral) {
             populate_record_literal_children(expressionPool, expressionId, tokens, expressionStart, depth);
         }
 
-        if (expressionPool[expressionId].kind == ExpressionKind::ListLiteral) {
+        if (kind == ExpressionKind::ListLiteral) {
             populate_list_literal_children(expressionPool, expressionId, tokens, expressionStart, depth);
         }
 
-        if (expressionPool[expressionId].kind == ExpressionKind::FieldAccess) {
+        if (kind == ExpressionKind::FieldAccess) {
             populate_field_access_children(expressionPool, expressionId, tokens, expressionStart, depth);
         }
 
-        if (expressionPool[expressionId].kind == ExpressionKind::Index) {
+        if (kind == ExpressionKind::Index) {
             populate_index_expression_children(expressionPool, expressionId, tokens, expressionStart, depth);
         }
 
-        if (expressionPool[expressionId].kind == ExpressionKind::Binary) {
+        if (kind == ExpressionKind::Binary) {
             populate_binary_operand_children(expressionPool, expressionId, tokens, expressionStart, depth);
         }
 
-        if (expressionPool[expressionId].kind == ExpressionKind::Unary) {
+        if (kind == ExpressionKind::Unary) {
             populate_unary_operand_child(expressionPool, expressionId, tokens, expressionStart, depth);
         }
 
-        if (expressionPool[expressionId].kind == ExpressionKind::Call) {
+        if (kind == ExpressionKind::Call) {
             populate_call_argument_children(expressionPool, expressionId, tokens, expressionStart, depth);
         }
     }

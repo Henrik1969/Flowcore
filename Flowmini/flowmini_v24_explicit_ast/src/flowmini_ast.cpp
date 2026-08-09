@@ -37,6 +37,162 @@ namespace flowmini::ast {
             out << '"';
         }
 
+        std::string render_expression_full(const std::size_t expression_id,
+                                           const std::vector<Expression>& expressions,
+                                           const std::size_t depth = 0) {
+            if (expression_id >= expressions.size() || depth >= 64) {
+                return {};
+            }
+
+            const auto& expression = expressions[expression_id];
+            const auto render_child = [&](const std::optional<std::size_t>& child) {
+                return child ? render_expression_full(*child, expressions, depth + 1) : std::string{};
+            };
+            const auto render_postfix_base = [&](const std::optional<std::size_t>& child) {
+                if (!child || *child >= expressions.size()) {
+                    return std::string{};
+                }
+                auto rendered = render_expression_full(*child, expressions, depth + 1);
+                const auto& payload = expressions[*child].payload;
+                if (std::holds_alternative<BinaryExpr>(payload) ||
+                    std::holds_alternative<UnaryExpr>(payload)) {
+                    return "(" + rendered + ")";
+                }
+                return rendered;
+            };
+
+            if (const auto* value = std::get_if<UnknownExpr>(&expression.payload)) {
+                return value->text;
+            }
+            if (const auto* value = std::get_if<IdentifierExpr>(&expression.payload)) {
+                return value->name;
+            }
+            if (const auto* value = std::get_if<IntegerLiteralExpr>(&expression.payload)) {
+                return value->text;
+            }
+            if (const auto* value = std::get_if<FloatLiteralExpr>(&expression.payload)) {
+                return value->text;
+            }
+            if (const auto* value = std::get_if<StringLiteralExpr>(&expression.payload)) {
+                return value->text;
+            }
+            if (const auto* value = std::get_if<BoolLiteralExpr>(&expression.payload)) {
+                return value->text;
+            }
+            if (const auto* value = std::get_if<UnaryExpr>(&expression.payload)) {
+                return value->op + render_child(value->operand);
+            }
+            if (const auto* value = std::get_if<BinaryExpr>(&expression.payload)) {
+                return render_child(value->left) + value->op + render_child(value->right);
+            }
+            if (const auto* value = std::get_if<CallExpr>(&expression.payload)) {
+                std::string result = render_postfix_base(value->base) + "(";
+                for (std::size_t i = 0; i < value->arguments.size(); ++i) {
+                    if (i != 0) { result += ","; }
+                    result += render_expression_full(value->arguments[i], expressions, depth + 1);
+                }
+                return result + ")";
+            }
+            if (const auto* value = std::get_if<IndexExpr>(&expression.payload)) {
+                std::string result = render_postfix_base(value->base) + "[";
+                for (std::size_t i = 0; i < value->indexes.size(); ++i) {
+                    if (i != 0) { result += ","; }
+                    result += render_expression_full(value->indexes[i], expressions, depth + 1);
+                }
+                return result + "]";
+            }
+            if (const auto* value = std::get_if<FieldAccessExpr>(&expression.payload)) {
+                return render_postfix_base(value->base) + "." + value->field;
+            }
+            if (const auto* value = std::get_if<ListLiteralExpr>(&expression.payload)) {
+                std::string result = "[";
+                for (std::size_t i = 0; i < value->elements.size(); ++i) {
+                    if (i != 0) { result += ","; }
+                    result += render_expression_full(value->elements[i], expressions, depth + 1);
+                }
+                return result + "]";
+            }
+            if (const auto* value = std::get_if<RecordLiteralExpr>(&expression.payload)) {
+                std::string result = "{";
+                for (std::size_t i = 0; i < value->fields.size(); ++i) {
+                    if (i != 0) { result += ","; }
+                    result += value->fields[i].name + ":" + render_child(value->fields[i].value);
+                }
+                return result + "}";
+            }
+
+            return {};
+        }
+
+        void dump_id_array(std::ostream& out, const std::vector<std::size_t>& ids) {
+            out << "[";
+            for (std::size_t i = 0; i < ids.size(); ++i) {
+                if (i != 0) { out << ", "; }
+                out << ids[i];
+            }
+            out << "]";
+        }
+
+        void dump_optional_id(std::ostream& out, const std::optional<std::size_t>& id) {
+            if (id) { out << *id; }
+            else { out << "null"; }
+        }
+
+        void dump_expression_payload_json(std::ostream& out,
+                                          const Expression& expression,
+                                          const unsigned indent) {
+            out << "{";
+
+            if (const auto* value = std::get_if<UnknownExpr>(&expression.payload)) {
+                out << "\"text\": "; dump_json_string(out, value->text);
+            } else if (const auto* value = std::get_if<IdentifierExpr>(&expression.payload)) {
+                out << "\"name\": "; dump_json_string(out, value->name);
+            } else if (const auto* value = std::get_if<IntegerLiteralExpr>(&expression.payload)) {
+                out << "\"value_text\": "; dump_json_string(out, value->text);
+            } else if (const auto* value = std::get_if<FloatLiteralExpr>(&expression.payload)) {
+                out << "\"value_text\": "; dump_json_string(out, value->text);
+            } else if (const auto* value = std::get_if<StringLiteralExpr>(&expression.payload)) {
+                out << "\"value_text\": "; dump_json_string(out, value->text);
+            } else if (const auto* value = std::get_if<BoolLiteralExpr>(&expression.payload)) {
+                out << "\"value_text\": "; dump_json_string(out, value->text);
+            } else if (const auto* value = std::get_if<UnaryExpr>(&expression.payload)) {
+                out << "\"operator\": "; dump_json_string(out, value->op);
+                out << ", \"operand\": "; dump_optional_id(out, value->operand);
+            } else if (const auto* value = std::get_if<BinaryExpr>(&expression.payload)) {
+                out << "\"operator\": "; dump_json_string(out, value->op);
+                out << ", \"left\": "; dump_optional_id(out, value->left);
+                out << ", \"right\": "; dump_optional_id(out, value->right);
+            } else if (const auto* value = std::get_if<CallExpr>(&expression.payload)) {
+                out << "\"base\": "; dump_optional_id(out, value->base);
+                out << ", \"arguments\": "; dump_id_array(out, value->arguments);
+            } else if (const auto* value = std::get_if<IndexExpr>(&expression.payload)) {
+                out << "\"base\": "; dump_optional_id(out, value->base);
+                out << ", \"indexes\": "; dump_id_array(out, value->indexes);
+            } else if (const auto* value = std::get_if<FieldAccessExpr>(&expression.payload)) {
+                out << "\"base\": "; dump_optional_id(out, value->base);
+                out << ", \"field\": "; dump_json_string(out, value->field);
+            } else if (const auto* value = std::get_if<ListLiteralExpr>(&expression.payload)) {
+                out << "\"elements\": "; dump_id_array(out, value->elements);
+            } else if (const auto* value = std::get_if<RecordLiteralExpr>(&expression.payload)) {
+                out << "\"fields\": [";
+                if (!value->fields.empty()) { out << "\n"; }
+                for (std::size_t i = 0; i < value->fields.size(); ++i) {
+                    const auto& field = value->fields[i];
+                    dump_indent(out, indent + 2);
+                    out << "{\"name\": "; dump_json_string(out, field.name);
+                    out << ", \"value\": "; dump_optional_id(out, field.value);
+                    out << ", \"location\": {\"line\": " << field.location.line
+                        << ", \"column\": " << field.location.column << "}}";
+                    if (i + 1 < value->fields.size()) { out << ","; }
+                    out << "\n";
+                }
+                if (!value->fields.empty()) { dump_indent(out, indent); }
+                out << "]";
+            }
+
+            out << "}";
+        }
+
 
         void dump_statement_array_json(std::ostream& out,
                                        const std::vector<Statement>& statements,
@@ -154,27 +310,26 @@ namespace flowmini::ast {
 
                     dump_indent(out, indent + 4);
                     out << "\"kind\": ";
-                    dump_json_string(out, to_string(expression.kind));
+                    dump_json_string(out, to_string(expression_kind(expression)));
 
-                    if (!expression.text.empty()) {
+                    const auto text = expression_text(expression, expressions);
+                    if (!text.empty()) {
                         out << ",\n";
                         dump_indent(out, indent + 4);
                         out << "\"text\": ";
-                        dump_json_string(out, expression.text);
+                        dump_json_string(out, text);
                     }
 
+                    out << ",\n";
+                    dump_indent(out, indent + 4);
+                    out << "\"payload\": ";
+                    dump_expression_payload_json(out, expression, indent + 4);
+
+                    out << ",\n";
+                    dump_indent(out, indent + 4);
+                    out << "\"child_expressions\": ";
+                    dump_id_array(out, expression_children(expression));
                     out << "\n";
-
-                out << ",\n";
-                dump_indent(out, indent + 4);
-                out << "\"child_expressions\": [";
-                for (std::size_t child_index = 0; child_index < expression.child_expressions.size(); ++child_index) {
-                    if (child_index != 0) {
-                        out << ", ";
-                    }
-                    out << expression.child_expressions[child_index];
-                }
-                out << "]\n";
 
                     dump_indent(out, indent + 2);
                     out << "}";
@@ -402,6 +557,110 @@ namespace flowmini::ast {
             case ExpressionKind::Unknown:           return "unknown";
         }
         return "unknown";
+    }
+
+    ExpressionKind expression_kind(const Expression& expression) {
+        if (std::holds_alternative<IdentifierExpr>(expression.payload))     { return ExpressionKind::Identifier; }
+        if (std::holds_alternative<IntegerLiteralExpr>(expression.payload)) { return ExpressionKind::IntegerLiteral; }
+        if (std::holds_alternative<FloatLiteralExpr>(expression.payload))   { return ExpressionKind::FloatLiteral; }
+        if (std::holds_alternative<StringLiteralExpr>(expression.payload))  { return ExpressionKind::StringLiteral; }
+        if (std::holds_alternative<BoolLiteralExpr>(expression.payload))    { return ExpressionKind::BoolLiteral; }
+        if (std::holds_alternative<CallExpr>(expression.payload))           { return ExpressionKind::Call; }
+        if (std::holds_alternative<UnaryExpr>(expression.payload))          { return ExpressionKind::Unary; }
+        if (std::holds_alternative<BinaryExpr>(expression.payload))         { return ExpressionKind::Binary; }
+        if (std::holds_alternative<IndexExpr>(expression.payload))          { return ExpressionKind::Index; }
+        if (std::holds_alternative<FieldAccessExpr>(expression.payload))    { return ExpressionKind::FieldAccess; }
+        if (std::holds_alternative<ListLiteralExpr>(expression.payload))    { return ExpressionKind::ListLiteral; }
+        if (std::holds_alternative<RecordLiteralExpr>(expression.payload))  { return ExpressionKind::RecordLiteral; }
+        return ExpressionKind::Unknown;
+    }
+
+    std::string expression_text(const Expression& expression,
+                                const std::vector<Expression>& expression_pool) {
+        const auto render_postfix_base = [&](const std::optional<std::size_t>& child) {
+            if (!child || *child >= expression_pool.size()) {
+                return std::string{};
+            }
+            auto rendered = render_expression_full(*child, expression_pool);
+            const auto& payload = expression_pool[*child].payload;
+            if (std::holds_alternative<BinaryExpr>(payload) ||
+                std::holds_alternative<UnaryExpr>(payload)) {
+                return "(" + rendered + ")";
+            }
+            return rendered;
+        };
+
+        if (const auto* value = std::get_if<UnknownExpr>(&expression.payload)) {
+            return value->text;
+        }
+        if (const auto* value = std::get_if<IdentifierExpr>(&expression.payload)) {
+            return value->name;
+        }
+        if (const auto* value = std::get_if<IntegerLiteralExpr>(&expression.payload)) {
+            return value->text;
+        }
+        if (const auto* value = std::get_if<FloatLiteralExpr>(&expression.payload)) {
+            return value->text;
+        }
+        if (const auto* value = std::get_if<StringLiteralExpr>(&expression.payload)) {
+            return value->text;
+        }
+        if (const auto* value = std::get_if<BoolLiteralExpr>(&expression.payload)) {
+            return value->text;
+        }
+        if (const auto* value = std::get_if<UnaryExpr>(&expression.payload)) {
+            return value->op;
+        }
+        if (const auto* value = std::get_if<BinaryExpr>(&expression.payload)) {
+            return value->op;
+        }
+        if (const auto* value = std::get_if<CallExpr>(&expression.payload)) {
+            return render_postfix_base(value->base);
+        }
+        if (const auto* value = std::get_if<IndexExpr>(&expression.payload)) {
+            return render_postfix_base(value->base);
+        }
+        if (const auto* value = std::get_if<FieldAccessExpr>(&expression.payload)) {
+            const auto base = render_postfix_base(value->base);
+            return base.empty() ? value->field : base + "." + value->field;
+        }
+        if (std::holds_alternative<ListLiteralExpr>(expression.payload)) {
+            return "[";
+        }
+        if (std::holds_alternative<RecordLiteralExpr>(expression.payload)) {
+            return "{";
+        }
+        return {};
+    }
+
+    std::vector<std::size_t> expression_children(const Expression& expression) {
+        std::vector<std::size_t> result;
+        const auto append_optional = [&](const std::optional<std::size_t>& child) {
+            if (child) { result.push_back(*child); }
+        };
+
+        if (const auto* value = std::get_if<UnaryExpr>(&expression.payload)) {
+            append_optional(value->operand);
+        } else if (const auto* value = std::get_if<BinaryExpr>(&expression.payload)) {
+            append_optional(value->left);
+            append_optional(value->right);
+        } else if (const auto* value = std::get_if<CallExpr>(&expression.payload)) {
+            append_optional(value->base);
+            result.insert(result.end(), value->arguments.begin(), value->arguments.end());
+        } else if (const auto* value = std::get_if<IndexExpr>(&expression.payload)) {
+            append_optional(value->base);
+            result.insert(result.end(), value->indexes.begin(), value->indexes.end());
+        } else if (const auto* value = std::get_if<FieldAccessExpr>(&expression.payload)) {
+            append_optional(value->base);
+        } else if (const auto* value = std::get_if<ListLiteralExpr>(&expression.payload)) {
+            result = value->elements;
+        } else if (const auto* value = std::get_if<RecordLiteralExpr>(&expression.payload)) {
+            for (const auto& field : value->fields) {
+                append_optional(field.value);
+            }
+        }
+
+        return result;
     }
 
     TopLevelKind top_level_kind(const TopLevelDecl& decl) {

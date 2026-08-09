@@ -6,6 +6,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <optional>
 #include <string>
 #include <ostream>
 #include <variant>
@@ -106,45 +107,88 @@ struct Expression;
 
 struct IdentifierExpr {
     std::string name;
+};
+
+struct IntegerLiteralExpr {
     std::string text;
 };
 
-struct LiteralExpr {
+struct FloatLiteralExpr {
+    std::string text;
+};
+
+struct StringLiteralExpr {
+    std::string text;
+};
+
+struct BoolLiteralExpr {
     std::string text;
 };
 
 struct UnaryExpr {
     std::string op;
-    std::size_t operand = 0;
+    std::optional<std::size_t> operand;
 };
 
 struct BinaryExpr {
     std::string op;
-    std::size_t left = 0;
-    std::size_t right = 0;
+    std::optional<std::size_t> left;
+    std::optional<std::size_t> right;
 };
 
 struct CallExpr {
-    std::string callee;
+    std::optional<std::size_t> base;
     std::vector<std::size_t> arguments;
 };
 
-struct Expression {
-    std::string text;
-    ExpressionKind kind = ExpressionKind::Unknown;
+struct IndexExpr {
+    std::optional<std::size_t> base;
+    std::vector<std::size_t> indexes;
+};
+
+struct FieldAccessExpr {
+    std::optional<std::size_t> base;
+    std::string field;
+};
+
+struct ListLiteralExpr {
+    std::vector<std::size_t> elements;
+};
+
+struct RecordLiteralFieldExpr {
+    std::string name;
+    std::optional<std::size_t> value;
     SourceLocation location;
-    std::vector<std::size_t> child_expressions;
+};
+
+struct RecordLiteralExpr {
+    std::vector<RecordLiteralFieldExpr> fields;
+};
+
+struct UnknownExpr {
+    std::string text;
+};
+
+struct Expression {
+    SourceLocation location;
 
     using Payload = std::variant<
-        std::monostate,
+        UnknownExpr,
         IdentifierExpr,
-        LiteralExpr,
+        IntegerLiteralExpr,
+        FloatLiteralExpr,
+        StringLiteralExpr,
+        BoolLiteralExpr,
         UnaryExpr,
         BinaryExpr,
-        CallExpr
+        CallExpr,
+        IndexExpr,
+        FieldAccessExpr,
+        ListLiteralExpr,
+        RecordLiteralExpr
     >;
 
-    Payload payload;
+    Payload payload = UnknownExpr{};
 };
 
 struct Statement {
@@ -243,6 +287,11 @@ const char* to_string(TopLevelKind kind);
 const char* to_string(StatementKind kind);
 const char* to_string(ExpressionKind kind);
 const char* to_string(TypeRefKind kind);
+
+ExpressionKind expression_kind(const Expression& expression);
+std::string expression_text(const Expression& expression,
+                            const std::vector<Expression>& expression_pool);
+std::vector<std::size_t> expression_children(const Expression& expression);
 
 TopLevelKind top_level_kind(const TopLevelDecl& decl);
 

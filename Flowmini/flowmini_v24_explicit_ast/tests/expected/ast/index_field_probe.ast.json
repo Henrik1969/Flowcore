@@ -115,12 +115,21 @@
             "id": 0,
             "kind": "integer_literal",
             "text": "0",
+            "payload": {
+                "value_text": "0"
+            },
             "child_expressions": []
         },
         {
             "id": 1,
             "kind": "index",
             "text": "arr",
+            "payload": {
+                "base": 2,
+                "indexes": [
+                    3
+                ]
+            },
             "child_expressions": [
                 2,
                 3
@@ -130,18 +139,44 @@
             "id": 2,
             "kind": "identifier",
             "text": "arr",
+            "payload": {
+                "name": "arr"
+            },
             "child_expressions": []
         },
         {
             "id": 3,
             "kind": "identifier",
             "text": "i",
+            "payload": {
+                "name": "i"
+            },
             "child_expressions": []
         },
         {
             "id": 4,
             "kind": "record_literal",
             "text": "{",
+            "payload": {
+                "fields": [
+                    {
+                        "name": "x",
+                        "value": 5,
+                        "location": {
+                            "line": 14,
+                            "column": 16
+                        }
+                    },
+                    {
+                        "name": "y",
+                        "value": 6,
+                        "location": {
+                            "line": 14,
+                            "column": 23
+                        }
+                    }
+                ]
+            },
             "child_expressions": [
                 5,
                 6
@@ -151,18 +186,28 @@
             "id": 5,
             "kind": "integer_literal",
             "text": "10",
+            "payload": {
+                "value_text": "10"
+            },
             "child_expressions": []
         },
         {
             "id": 6,
             "kind": "integer_literal",
             "text": "20",
+            "payload": {
+                "value_text": "20"
+            },
             "child_expressions": []
         },
         {
             "id": 7,
             "kind": "field_access",
             "text": "p.x",
+            "payload": {
+                "base": 8,
+                "field": "x"
+            },
             "child_expressions": [
                 8
             ]
@@ -171,12 +216,21 @@
             "id": 8,
             "kind": "identifier",
             "text": "p",
+            "payload": {
+                "name": "p"
+            },
             "child_expressions": []
         },
         {
             "id": 9,
             "kind": "index",
             "text": "arr",
+            "payload": {
+                "base": 10,
+                "indexes": [
+                    11
+                ]
+            },
             "child_expressions": [
                 10,
                 11
@@ -186,18 +240,28 @@
             "id": 10,
             "kind": "identifier",
             "text": "arr",
+            "payload": {
+                "name": "arr"
+            },
             "child_expressions": []
         },
         {
             "id": 11,
             "kind": "identifier",
             "text": "i",
+            "payload": {
+                "name": "i"
+            },
             "child_expressions": []
         },
         {
             "id": 12,
             "kind": "field_access",
             "text": "p.y",
+            "payload": {
+                "base": 13,
+                "field": "y"
+            },
             "child_expressions": [
                 13
             ]
@@ -206,12 +270,20 @@
             "id": 13,
             "kind": "identifier",
             "text": "p",
+            "payload": {
+                "name": "p"
+            },
             "child_expressions": []
         },
         {
             "id": 14,
             "kind": "binary",
             "text": "<",
+            "payload": {
+                "operator": "<",
+                "left": 15,
+                "right": 18
+            },
             "child_expressions": [
                 15,
                 18
@@ -221,6 +293,12 @@
             "id": 15,
             "kind": "index",
             "text": "arr",
+            "payload": {
+                "base": 16,
+                "indexes": [
+                    17
+                ]
+            },
             "child_expressions": [
                 16,
                 17
@@ -230,24 +308,39 @@
             "id": 16,
             "kind": "identifier",
             "text": "arr",
+            "payload": {
+                "name": "arr"
+            },
             "child_expressions": []
         },
         {
             "id": 17,
             "kind": "identifier",
             "text": "i",
+            "payload": {
+                "name": "i"
+            },
             "child_expressions": []
         },
         {
             "id": 18,
             "kind": "integer_literal",
             "text": "10",
+            "payload": {
+                "value_text": "10"
+            },
             "child_expressions": []
         },
         {
             "id": 19,
             "kind": "index",
             "text": "arr",
+            "payload": {
+                "base": 20,
+                "indexes": [
+                    21
+                ]
+            },
             "child_expressions": [
                 20,
                 21
@@ -257,18 +350,29 @@
             "id": 20,
             "kind": "identifier",
             "text": "arr",
+            "payload": {
+                "name": "arr"
+            },
             "child_expressions": []
         },
         {
             "id": 21,
             "kind": "identifier",
             "text": "i",
+            "payload": {
+                "name": "i"
+            },
             "child_expressions": []
         },
         {
             "id": 22,
             "kind": "binary",
             "text": "==",
+            "payload": {
+                "operator": "==",
+                "left": 23,
+                "right": 25
+            },
             "child_expressions": [
                 23,
                 25
@@ -278,6 +382,10 @@
             "id": 23,
             "kind": "field_access",
             "text": "p.x",
+            "payload": {
+                "base": 24,
+                "field": "x"
+            },
             "child_expressions": [
                 24
             ]
@@ -286,18 +394,28 @@
             "id": 24,
             "kind": "identifier",
             "text": "p",
+            "payload": {
+                "name": "p"
+            },
             "child_expressions": []
         },
         {
             "id": 25,
             "kind": "integer_literal",
             "text": "10",
+            "payload": {
+                "value_text": "10"
+            },
             "child_expressions": []
         },
         {
             "id": 26,
             "kind": "field_access",
             "text": "p.y",
+            "payload": {
+                "base": 27,
+                "field": "y"
+            },
             "child_expressions": [
                 27
             ]
@@ -306,6 +424,9 @@
             "id": 27,
             "kind": "identifier",
             "text": "p",
+            "payload": {
+                "name": "p"
+            },
             "child_expressions": []
         }
     ]
