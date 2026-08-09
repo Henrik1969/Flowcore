@@ -6,25 +6,34 @@ The current active implementation is:
 
 ```text
 Flowmini v0.24 explicit AST
+```
 
 Active implementation path:
 
+```text
 Flowmini/flowmini_v24_explicit_ast
+```
 
 This repository is not a finished language or runtime. It is a design and implementation workspace for testing language structure, AST modeling, diagnostics, staged execution, contracts, graph-shaped execution ideas, and tooling architecture.
 
-Current status
+## Current status
+
+```text
 status: experimental
 production-ready: no
 active branch: v24-explicit-ast
 active prototype: Flowmini v0.24 explicit AST
 current milestone: shallow expression AST checkpoint
+```
 
 Current known green gates:
 
+```text
 AST golden tests: PASS (8)
 Flowmini suite:   PASS (76/76)
-What is Flowmini?
+```
+
+## What is Flowmini?
 
 Flowmini is the executable prototype language used to test and harden Flowcore ideas.
 
@@ -32,8 +41,11 @@ It is not the final Flowcore language. It is the lab where syntax, AST structure
 
 Start here:
 
+```text
 Flowmini/README.md
-Why does this look ordinary?
+```
+
+## Why does this look ordinary?
 
 At the surface, early Flowmini examples may look like a small conventional programming language.
 
@@ -41,6 +53,7 @@ That is intentional.
 
 The current goal is not novelty syntax first. The current goal is to build a visible and testable language pipeline underneath ordinary-looking source code:
 
+```text
 source text
     -> tokens
     -> source structure
@@ -49,13 +62,15 @@ source text
     -> contracts/scopes
     -> graph-shaped IR
     -> executable system projection
+```
 
 The larger Flowcore direction is not merely "another syntax for functions and variables." The goal is a contract-governed, graph-shaped system model where programs can later be understood as nodes, ports, wires, policies, capabilities, and executable projections.
 
-Core idea
+## Core idea
 
 Flowcore explores programs as graphs of communicating work nodes.
 
+```text
 nodes do work
 ports expose node inputs and outputs
 wires connect ports
@@ -63,12 +78,17 @@ wires are contracts, not values
 signals/payloads move through wires
 diagnostics and failure can flow alongside data
 scheduling should eventually be derivable from graph topology plus declared effects/resources
-Design rule
-Sugar may remove typing, but must not remove meaning.
+```
+
+## Design rule
+
+> Sugar may remove typing, but must not remove meaning.
 
 Syntax sugar is acceptable only when direction, endpoints, contracts, payload movement, and failure paths remain semantically recoverable.
 
-Repository map
+## Repository map
+
+```text
 Flowmini/
     executable Flowmini prototype language
 
@@ -89,41 +109,56 @@ tools/
 
 _archive/
     intentionally preserved historical material
-Build quickstart
+```
+
+## Build quickstart
+
+```bash
 cd Flowmini/flowmini_v24_explicit_ast
 
 cmake -S . -B cmake-build-debug
 cmake --build cmake-build-debug -j20
+```
 
-Adjust -j20 to match your machine.
+Adjust `-j20` to match your machine.
 
-Test quickstart
+## Test quickstart
+
+```bash
 cd Flowmini/flowmini_v24_explicit_ast
 
 cmake --build cmake-build-debug --target flowmini_ast_golden_tests
 cmake --build cmake-build-debug --target flowmini_suite
+```
 
 Expected current result:
 
+```text
 AST golden tests: PASS (8)
 
 total: 76
 pass:  76
 bad:   0
-Recommended reading
+```
+
+## Recommended reading
+
+```text
 Flowmini/README.md
 Flowmini/CURRENT.md
 Flowmini/flowmini_v24_explicit_ast/docs/v0.24-explicit-ast-status.md
 Flowmini/flowmini_v24_explicit_ast/docs/v0.24-shallow-expression-ast-sitrep.md
 docs/development/project-hygiene.md
-License
+```
 
-This project is licensed under the MIT License. See LICENSE.
+## License
 
-Disclaimer
+This project is licensed under the MIT License. See `LICENSE`.
+
+## Disclaimer
 
 This project is provided "as is" without warranty.
 
 It is not intended for production, safety-critical, security-critical, financial, legal, medical, or operational use.
 
-See DISCLAIMER.md.
+See `DISCLAIMER.md`.
