@@ -28,14 +28,14 @@ Flowmini is experimental and unfinished.
 lexer/token groundwork             usable
 TokenTree/source structure          observable
 explicit AST                        active and structurally deepening
-shallow expression AST              first pass complete
+recursive expression AST            active for current probe shapes
 semantic analysis                   mostly future work
 type checking                       mostly future work
 Graph IR lowering                   mostly future work
 runtime semantics                   mostly future work
 ```
 
-The current v0.24 AST can represent a shallow navigable expression graph for:
+The current v0.24 AST can represent a recursively populated expression graph for the current probe shapes:
 
 ```text
 function calls
@@ -47,7 +47,7 @@ list literals
 record literals
 ```
 
-This is still not a complete expression parser. Recursive expression population, precedence, associativity, and semantic analysis are future work.
+This is still not a complete expression parser. Recursive child population is active for current probe shapes, while full parser quality, associativity guarantees, and semantic analysis remain future work.
 
 ## Why does this look ordinary?
 
@@ -100,7 +100,7 @@ cmake --build cmake-build-debug --target flowmini_suite
 Expected current result:
 
 ```text
-AST golden tests: PASS (8)
+AST golden tests: PASS (16)
 
 total: 76
 pass:  76

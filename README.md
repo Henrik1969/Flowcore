@@ -23,13 +23,13 @@ status: experimental
 production-ready: no
 active branch: v24-explicit-ast
 active prototype: Flowmini v0.24 explicit AST
-current milestone: shallow expression AST checkpoint
+current milestone: recursive expression AST golden checkpoint
 ```
 
 Current known green gates:
 
 ```text
-AST golden tests: PASS (8)
+AST golden tests: PASS (16)
 Flowmini suite:   PASS (76/76)
 ```
 
@@ -134,7 +134,7 @@ cmake --build cmake-build-debug --target flowmini_suite
 Expected current result:
 
 ```text
-AST golden tests: PASS (8)
+AST golden tests: PASS (16)
 
 total: 76
 pass:  76
