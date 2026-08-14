@@ -41,10 +41,12 @@ add_executable(flowmini
         src/flowmini_token_tree_bridge.cpp
         src/flowmini_ast.cpp
         src/flowmini_ast_builder.cpp
+src/flowmini_symbol_projection.cpp
         src/main.cpp
 
         include/flowmini_ast.h
         include/flowmini_ast_builder.h
+include/flowmini_symbol_projection.h
 )
 
 target_include_directories(flowmini PRIVATE include)
