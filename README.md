@@ -29,8 +29,36 @@ current milestone: recursive expression AST golden checkpoint
 Current known green gates:
 
 ```text
+Symbol projection tests: PASS (2)
 AST golden tests: PASS (16)
 Flowmini suite:   PASS (76/76)
+```
+
+## Current semantic bridge
+
+Flowmini now has an observable AST-to-SymbolTable projection.
+
+```text
+source text
+    -> tokens
+    -> AST
+    -> SymbolTable projection
+```
+
+The projection is intentionally factual. It records named structure and scopes without performing full semantic validation.
+
+Current projection coverage:
+
+```text
+module/source unit
+type aliases
+records/structs
+record fields
+functions
+parameters
+main procedure
+local let variables
+if/while/else block scopes
 ```
 
 ## What is Flowmini?

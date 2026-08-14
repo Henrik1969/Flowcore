@@ -49,6 +49,7 @@ cmake --build cmake-build-debug -j"$(nproc)"
 ```bash
 cd Flowmini/flowmini_v24_explicit_ast
 
+cmake --build cmake-build-debug --target flowmini_symbol_projection_tests
 cmake --build cmake-build-debug --target flowmini_ast_golden_tests
 cmake --build cmake-build-debug --target flowmini_suite
 ```
@@ -61,6 +62,37 @@ AST golden tests: PASS (16)
 total: 76
 pass:  76
 bad:   0
+```
+
+## Current semantic bridge
+
+Flowmini now has a first AST-to-SymbolTable projection.
+
+```text
+source text
+    -> tokens
+    -> AST
+    -> SymbolTable projection
+```
+
+The projection currently covers:
+
+```text
+module/source unit
+type aliases
+records/structs
+record fields
+functions
+parameters
+main procedure
+local let variables
+if/while/else block scopes
+```
+
+The projection is observable through:
+
+```bash
+./cmake-build-debug/flowmini --dump-ast-symbols - examples/ast/type_reference_probe.flow
 ```
 
 ## Current important architecture law

@@ -85,6 +85,12 @@ Adjust `-j20` to match your machine.
 
 ## Test quickstart
 
+Run the SymbolTable projection golden tests:
+
+```bash
+cmake --build cmake-build-debug --target flowmini_symbol_projection_tests
+```
+
 Run the AST golden regression tests:
 
 ```bash
@@ -105,6 +111,39 @@ AST golden tests: PASS (16)
 total: 76
 pass:  76
 bad:   0
+```
+
+## AST-to-SymbolTable projection
+
+Flowmini v0.24 now exposes a first AST-to-SymbolTable projection.
+
+```text
+source text
+    -> tokens
+    -> AST
+    -> SymbolTable projection
+```
+
+The projection currently records:
+
+```text
+module/source unit
+type aliases
+records/structs
+record fields
+functions
+parameters
+main procedure
+local let variables
+if/while/else block scopes
+```
+
+This is not full semantic analysis yet. It is factual named-structure projection.
+
+The projection can be inspected with:
+
+```bash
+./cmake-build-debug/flowmini --dump-ast-symbols - examples/ast/type_reference_probe.flow
 ```
 
 ## Useful commands
