@@ -39,6 +39,58 @@ void project_import_decl(symboltable::SymbolTable& table,
     table.insertSymbol(moduleScope, name, symboltable::SymbolKind::Import);
 }
 
+
+std::string statement_scope_debug_name(const Statement& statement) {
+    switch (statement.kind) {
+        case StatementKind::If:    return "if";
+        case StatementKind::While: return "while";
+        default:                   return "block";
+    }
+}
+
+void project_statement_bindings(symboltable::SymbolTable& table,
+                                symboltable::ScopeId owningScope,
+                                const std::vector<Statement>& statements);
+
+void project_statement_binding(symboltable::SymbolTable& table,
+                               const symboltable::ScopeId owningScope,
+                               const Statement& statement) {
+    if (statement.kind == StatementKind::Let && !statement.name.empty()) {
+        table.insertSymbol(owningScope,
+                           statement.name,
+                           symboltable::SymbolKind::Variable);
+    }
+
+    if (statement.has_body) {
+        const auto blockScope =
+            table.createScope(symboltable::ScopeKind::Block,
+                              owningScope,
+                              std::nullopt,
+                              statement_scope_debug_name(statement));
+
+        project_statement_bindings(table, blockScope, statement.body);
+    }
+
+    if (statement.else_location.has_value()) {
+        const auto elseScope =
+            table.createScope(symboltable::ScopeKind::Block,
+                              owningScope,
+                              std::nullopt,
+                              "else");
+
+        project_statement_bindings(table, elseScope, statement.else_body);
+    }
+}
+
+void project_statement_bindings(symboltable::SymbolTable& table,
+                                const symboltable::ScopeId owningScope,
+                                const std::vector<Statement>& statements) {
+    for (const auto& statement : statements) {
+        project_statement_binding(table, owningScope, statement);
+    }
+}
+
+
 void project_function_decl(symboltable::SymbolTable& table,
                            const symboltable::ScopeId moduleScope,
                            const FunctionDecl& decl) {
@@ -64,6 +116,8 @@ void project_function_decl(symboltable::SymbolTable& table,
                            parameter.name,
                            symboltable::SymbolKind::Parameter);
     }
+
+    project_statement_bindings(table, fnScope, decl.body);
 }
 
 void project_record_decl(symboltable::SymbolTable& table,
@@ -111,10 +165,13 @@ void project_main_block(symboltable::SymbolTable& table,
     const auto mainSymbol =
         table.insertSymbol(moduleScope, name, symboltable::SymbolKind::Procedure);
 
-    table.createScope(symboltable::ScopeKind::Function,
-                      moduleScope,
-                      mainSymbol,
-                      name);
+    const auto mainScope =
+        table.createScope(symboltable::ScopeKind::Function,
+                          moduleScope,
+                          mainSymbol,
+                          name);
+
+    project_statement_bindings(table, mainScope, decl.body);
 }
 
 struct ProjectTopLevelDecl {
