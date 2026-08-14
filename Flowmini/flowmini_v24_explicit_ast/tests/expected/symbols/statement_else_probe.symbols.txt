@@ -1,0 +1,22 @@
+SymbolTable dump
+Scopes: 12
+  Scope #1 kind=Global name=global symbols=1 children=1
+  Scope #2 kind=Module name=statement_else_probe symbols=3 children=3
+  Scope #3 kind=Function name=normalize symbols=1 children=2
+  Scope #4 kind=Block name=if symbols=0 children=0
+  Scope #5 kind=Block name=else symbols=0 children=0
+  Scope #6 kind=Function name=keep_or_one symbols=1 children=1
+  Scope #7 kind=Block name=if symbols=0 children=0
+  Scope #8 kind=Function name=main symbols=1 children=2
+  Scope #9 kind=Block name=if symbols=0 children=0
+  Scope #10 kind=Block name=else symbols=0 children=2
+  Scope #11 kind=Block name=if symbols=0 children=0
+  Scope #12 kind=Block name=else symbols=0 children=0
+Symbols: 7
+  Symbol #1 scope=#1 name=statement_else_probe kind=Module facts=0
+  Symbol #2 scope=#2 name=normalize kind=Function facts=0
+  Symbol #3 scope=#3 name=value kind=Parameter facts=0
+  Symbol #4 scope=#2 name=keep_or_one kind=Function facts=0
+  Symbol #5 scope=#6 name=value kind=Parameter facts=0
+  Symbol #6 scope=#2 name=main kind=Procedure facts=0
+  Symbol #7 scope=#8 name=value kind=Variable facts=0

@@ -172,6 +172,19 @@ add_custom_target(flowmini_dump_ast_symbols
     VERBATIM
 )
 
+
+add_custom_target(flowmini_symbol_projection_tests
+    COMMAND
+        ${CMAKE_COMMAND} -E env
+        FLOWMINI_ROOT=${CMAKE_SOURCE_DIR}
+        FLOWMINI_BIN=$<TARGET_FILE:flowmini>
+        ${CMAKE_SOURCE_DIR}/tools/run-flowmini-symbol-projection-tests.sh
+    DEPENDS flowmini
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    COMMENT "Running Flowmini AST SymbolTable projection golden tests"
+    VERBATIM
+)
+
 add_custom_target(flowmini_ast_golden_tests
     COMMAND
         ${CMAKE_COMMAND} -E env
