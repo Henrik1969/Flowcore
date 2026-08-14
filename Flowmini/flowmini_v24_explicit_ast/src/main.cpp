@@ -16,6 +16,7 @@
 #include <vector>
 
 #include "flowmini_ast_builder.h"
+#include "flowmini_symbol_projection.h"
 
 namespace {
 
@@ -359,7 +360,7 @@ namespace {
     void printUsage(std::ostream& out) {
         out
             << "Usage:\n"
-            << "  flowmini [--trace true|false] [--emit-flowir <file|->] [--dump-token-tree <file|->] [--dump-token-tree-bridge [json|simple]] [--dump-symbols <file|->] <program.flow|module.flowir> < input\n\n"
+            << "  flowmini [--trace true|false] [--emit-flowir <file|->] [--dump-token-tree <file|->] [--dump-token-tree-bridge [json|simple]] [--dump-ast-symbols <file|->] [--dump-symbols <file|->] <program.flow|module.flowir> < input\n\n"
             << "Human .flow sugar examples:\n"
             << "  program demo\n"
             << "  stdin : stdin.text()\n"
@@ -414,6 +415,7 @@ int main(int argc, char** argv) {
 
         flowmini::TokenTreeBridgeDumpFormat dumpTokenTreeBridgeFormat = flowmini::TokenTreeBridgeDumpFormat::Json;
         std::string dumpSymbolsPath;
+        std::string dumpAstSymbolsPath;
         for (int i = 1; i < argc; ++i) {
             const std::string arg = argv[i];
 
@@ -454,6 +456,11 @@ int main(int argc, char** argv) {
                 continue;
             }
 
+            if (arg == "--dump-ast-symbols") {
+                dumpAstSymbolsPath = flow::requireArgValue(argc, argv, i, arg);
+                continue;
+            }
+
             if (arg == "--dump-symbols") {
                 dumpSymbolsPath = flow::requireArgValue(argc, argv, i, arg);
                 continue;
@@ -479,6 +486,21 @@ int main(int argc, char** argv) {
         if (dumpAst) {
             const auto module = flowmini::ast::build_source_header_ast(tokens);
             flowmini::ast::dump_ast_json(std::cout, module);
+            return 0;
+        }
+
+        if (!dumpAstSymbolsPath.empty()) {
+            const auto module = flowmini::ast::build_source_header_ast(tokens);
+            auto table = flowmini::ast::build_symbol_table_projection(module);
+            if (dumpAstSymbolsPath == "-") {
+                table.dump(std::cout);
+            } else {
+                std::ofstream out{dumpAstSymbolsPath};
+                if (!out) {
+                    throw flow::DiagnosticError{"cli", "could not open AST symbol dump output file: " + dumpAstSymbolsPath};
+                }
+                table.dump(out);
+            }
             return 0;
         }
 

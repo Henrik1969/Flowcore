@@ -159,6 +159,19 @@ add_custom_target(flowmini_dump_ast
         VERBATIM
 )
 
+
+add_custom_target(flowmini_dump_ast_symbols
+    COMMAND
+        $<TARGET_FILE:flowmini>
+        --dump-ast-symbols
+        -
+        examples/ast/type_reference_probe.flow
+    DEPENDS flowmini
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    COMMENT "Dumping Flowmini AST SymbolTable projection"
+    VERBATIM
+)
+
 add_custom_target(flowmini_ast_golden_tests
     COMMAND
         ${CMAKE_COMMAND} -E env
