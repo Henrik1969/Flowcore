@@ -20,6 +20,12 @@ This is the soul of Flowcore.
 - [Flowmini docs](flowmini/README.md)
 - [Session notes](sessions/)
 
+## Foundational architecture
+
+- [Flowcore core promise](architecture/flowcore-core-promise.md)
+- [Transformation and revision architecture](architecture/compiler-transformation-revision-model.md)
+- [Prerequisites](architecture/prerequisites.md)
+
 ## Current active Flowmini version
 
 See:
@@ -31,6 +37,7 @@ See:
 Current checkpoint:
 
 ```text
-Flowmini v22_unit_kinds
-suite: 75 / 75
+Flowmini v0.24 explicit AST stabilization
+AST golden tests: 11
+suite: 76 / 76
 ```

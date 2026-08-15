@@ -29,8 +29,10 @@ current milestone: shallow expression AST checkpoint
 Current known green gates:
 
 ```text
-AST golden tests: PASS (8)
-Flowmini suite:   PASS (76/76)
+normal CMake/Ninja build:      PASS
+flowmini_ast_golden_tests:     PASS (11)
+flowmini_suite:                PASS (76/76)
+CTest:                         PASS (2/2)
 ```
 
 ## What is Flowmini?
@@ -122,6 +124,12 @@ cmake --build cmake-build-debug -j20
 
 Adjust `-j20` to match your machine.
 
+The canonical v24 build and test scope is
+`Flowmini/flowmini_v24_explicit_ast` and its CMake targets. A repository-root
+build tree is not a canonical v24 build. References there to `Handwritten_V1`,
+`flowcheck`, or `flowoptimize` smoke scripts belong to a legacy root-superbuild
+configuration and are not active v24 test requirements.
+
 ## Test quickstart
 
 ```bash
@@ -129,16 +137,16 @@ cd Flowmini/flowmini_v24_explicit_ast
 
 cmake --build cmake-build-debug --target flowmini_ast_golden_tests
 cmake --build cmake-build-debug --target flowmini_suite
+ctest --test-dir cmake-build-debug --output-on-failure
 ```
 
 Expected current result:
 
 ```text
-AST golden tests: PASS (8)
-
-total: 76
-pass:  76
-bad:   0
+normal CMake/Ninja build:      PASS
+flowmini_ast_golden_tests:     PASS (11)
+flowmini_suite:                PASS (76/76)
+CTest:                         PASS (2/2)
 ```
 
 ## Recommended reading

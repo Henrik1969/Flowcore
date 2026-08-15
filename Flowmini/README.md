@@ -83,6 +83,9 @@ cmake --build cmake-build-debug -j20
 
 Adjust `-j20` to match your machine.
 
+The canonical v24 scope is this implementation directory and its CMake targets.
+Repository-root build trees are legacy/noncanonical for the active branch.
+
 ## Test quickstart
 
 Run the AST golden regression tests:
@@ -97,14 +100,19 @@ Run the full Flowmini suite:
 cmake --build cmake-build-debug --target flowmini_suite
 ```
 
+Run the registered CTest gates:
+
+```bash
+ctest --test-dir cmake-build-debug --output-on-failure
+```
+
 Expected current result:
 
 ```text
-AST golden tests: PASS (8)
-
-total: 76
-pass:  76
-bad:   0
+normal CMake/Ninja build:      PASS
+flowmini_ast_golden_tests:     PASS (11)
+flowmini_suite:                PASS (76/76)
+CTest:                         PASS (2/2)
 ```
 
 ## Useful commands
@@ -189,6 +197,8 @@ Flowmini/README.md
 Flowmini/CURRENT.md
 Flowmini/flowmini_v24_explicit_ast/docs/v0.24-explicit-ast-status.md
 Flowmini/flowmini_v24_explicit_ast/docs/v0.24-shallow-expression-ast-sitrep.md
+Flowmini/flowmini_v24_explicit_ast/docs/v0.24-future-transformation-boundary.md
+docs/architecture/compiler-transformation-revision-model.md
 Flowmini/flowmini_v24_explicit_ast/examples/ast/README.md
 docs/language/named-targets.md
 ```

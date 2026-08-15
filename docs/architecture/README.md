@@ -2,43 +2,52 @@
 
 Project-wide architecture notes belong here.
 
-Current direction:
+Current intended compiler direction:
 
 ```text
 source files
   -> import/source loading
   -> lexer
   -> TokenTree
-  -> parser
-  -> AST
-  -> SymbolTable population
-  -> semantic checker
-  -> lowerer
-  -> FlowIR
-  -> runtime/backend
+  -> parser / AST builder
+  -> semantic AST
+  -> SymbolTable / name and type resolution
+  -> semantic validation and canonicalization
+  -> Graph IR
+  -> graph analysis / pruning / transformation / policy
+  -> optimized Graph IR
+  -> target lowering
+  -> target IR
+  -> emitter
+  -> artifact/runtime
 ```
 
-Current reality as of Flowmini v22:
+The important architectural boundaries are documented before their full
+implementations exist so the current default path does not accidentally become
+the permanent definition of Flowcore.
 
-```text
-source files
-  -> import/source loading
-  -> lexer
-  -> TokenTree inspection path
-  -> current parser/lowerer
-  -> FlowIR/runtime representation
-  -> runtime interpreter
-```
+Current active implementation work is Flowmini v0.24 explicit AST
+stabilization. Graph IR, optimizer policy, target lowering, and provider
+selection remain future work.
 
-Planned architecture topics:
+Planned and active architecture topics:
 
 - pipeline boundaries
 - TokenTree
 - SymbolTable
-- AST
+- semantic AST
 - semantic checker split
+- Graph IR
+- target-independent transformation and pruning
+- policy-directed optimization
+- revisioned IR and transformation provenance
+- target lowering and emitters
 - runtime backends
 - bytecode
 - effects and failure-flow
 
+Foundational notes:
+
 - [Flowcore core promise](flowcore-core-promise.md)
+- [Transformation and revision architecture](compiler-transformation-revision-model.md)
+- [Prerequisites](prerequisites.md)
