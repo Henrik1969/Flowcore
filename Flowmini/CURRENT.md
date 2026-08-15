@@ -17,7 +17,8 @@ active C5 statement and frontend maturation
 
 ```text
 normal CMake/Ninja build:      PASS
-flowmini_ast_golden_tests:     PASS (15)
+flowmini_ast_golden_tests:     PASS (20)
+flowmini_symbol_projection:    PASS (2/2)
 flowmini_suite:                PASS (78/78)
 CTest:                         PASS (2/2)
 ```
@@ -57,7 +58,8 @@ Expected result:
 
 ```text
 normal CMake/Ninja build:      PASS
-flowmini_ast_golden_tests:     PASS (15)
+flowmini_ast_golden_tests:     PASS (20)
+flowmini_symbol_projection:    PASS (2/2)
 flowmini_suite:                PASS (78/78)
 CTest:                         PASS (2/2)
 ```
@@ -112,7 +114,7 @@ The following are still future or incomplete work:
 ```text
 complete statement coverage for the accepted language
 complete ABI, flow-placement, print, and executable source-form coverage
-complete structural SymbolTable projection
+complete structural SymbolTable projection across the accepted language
 semantic name resolution
 type checking
 Graph IR lowering

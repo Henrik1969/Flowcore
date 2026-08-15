@@ -12,7 +12,8 @@ Current baseline:
 
 ```text
 build: PASS
-AST golden tests: 15
+AST golden tests: 20
+Symbol projection tests: 2
 suite: 76 / 76
 ```
 

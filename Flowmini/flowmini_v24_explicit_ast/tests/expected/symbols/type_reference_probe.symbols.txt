@@ -1,0 +1,20 @@
+SymbolTable dump
+Scopes: 5
+  Scope #1 kind=Global name=global symbols=1 children=1
+  Scope #2 kind=Module name=type_reference_probe symbols=4 children=3
+  Scope #3 kind=Struct name=MatrixBox symbols=2 children=0
+  Scope #4 kind=Function name=transform symbols=4 children=0
+  Scope #5 kind=Function name=main symbols=1 children=0
+Symbols: 12
+  Symbol #1 scope=#1 name=type_reference_probe kind=Module facts=0
+  Symbol #2 scope=#2 name=IntList kind=Alias facts=0
+  Symbol #3 scope=#2 name=MatrixBox kind=Struct facts=0
+  Symbol #4 scope=#3 name=values kind=Field facts=0
+  Symbol #5 scope=#3 name=fallback kind=Field facts=0
+  Symbol #6 scope=#2 name=transform kind=Function facts=0
+  Symbol #7 scope=#4 name=input kind=Parameter facts=0
+  Symbol #8 scope=#4 name=grid kind=Parameter facts=0
+  Symbol #9 scope=#4 name=local kind=Variable facts=0
+  Symbol #10 scope=#4 name=scratch kind=Variable facts=0
+  Symbol #11 scope=#2 name=main kind=Procedure facts=0
+  Symbol #12 scope=#5 name=values kind=Variable facts=0

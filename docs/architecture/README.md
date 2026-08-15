@@ -66,6 +66,7 @@ Foundational notes:
 
 - [Flowcore core promise](flowcore-core-promise.md)
 - [Transformation and revision architecture](compiler-transformation-revision-model.md)
+- [Revisioned node identity](revisioned-node-identity.md)
 - [Prerequisites](prerequisites.md)
 
 `flowcore-core-promise.md` is binding foundational intent.

@@ -38,6 +38,7 @@ Current checkpoint:
 
 ```text
 Flowmini v0.24 explicit AST stabilization
-AST golden tests: 15
+AST golden tests: 20
+Symbol projection tests: 2
 suite: 76 / 76
 ```

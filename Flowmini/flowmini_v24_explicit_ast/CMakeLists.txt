@@ -41,10 +41,12 @@ add_executable(flowmini
         src/flowmini_token_tree_bridge.cpp
         src/flowmini_ast.cpp
         src/flowmini_ast_builder.cpp
+        src/flowmini_symbol_projection.cpp
         src/main.cpp
 
         include/flowmini_ast.h
         include/flowmini_ast_builder.h
+        include/flowmini_symbol_projection.h
 )
 
 target_include_directories(flowmini PRIVATE include)
@@ -157,6 +159,30 @@ add_custom_target(flowmini_dump_ast
         VERBATIM
 )
 
+add_custom_target(flowmini_dump_ast_symbols
+    COMMAND
+        $<TARGET_FILE:flowmini>
+        --dump-ast-symbols
+        -
+        examples/ast/type_reference_probe.flow
+    DEPENDS flowmini
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    COMMENT "Dumping Flowmini AST SymbolTable projection"
+    VERBATIM
+)
+
+add_custom_target(flowmini_symbol_projection_tests
+    COMMAND
+        ${CMAKE_COMMAND} -E env
+        FLOWMINI_ROOT=${CMAKE_SOURCE_DIR}
+        FLOWMINI_BIN=$<TARGET_FILE:flowmini>
+        ${CMAKE_SOURCE_DIR}/tools/run-flowmini-symbol-projection-tests.sh
+    DEPENDS flowmini
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    COMMENT "Running Flowmini AST SymbolTable projection golden tests"
+    VERBATIM
+)
+
 add_custom_target(flowmini_ast_golden_tests
     COMMAND
         ${CMAKE_COMMAND} -E env
@@ -167,4 +193,3 @@ add_custom_target(flowmini_ast_golden_tests
     COMMENT "Running Flowmini AST golden regression tests"
     VERBATIM
 )
-
