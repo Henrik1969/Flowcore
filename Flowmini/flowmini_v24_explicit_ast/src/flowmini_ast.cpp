@@ -297,9 +297,9 @@ namespace flowmini::ast {
         }
 
 
-        void dump_statement_array_json(std::ostream& out,
-                                       const std::vector<Statement>& statements,
-                                       const unsigned indent) {
+        void dump_statement_pool_json(std::ostream& out,
+                                      const std::vector<Statement>& statements,
+                                      const unsigned indent) {
             out << "[";
 
             if (!statements.empty()) {
@@ -311,6 +311,8 @@ namespace flowmini::ast {
                     dump_indent(out, indent + 2);
                     out << "{\n";
 
+                    dump_indent(out, indent + 4);
+                    out << "\"id\": " << i << ",\n";
                     dump_indent(out, indent + 4);
                     out << "\"kind\": ";
                     dump_json_string(out, to_string(statement.kind));
@@ -364,19 +366,32 @@ namespace flowmini::ast {
                         out << "]";
                     }
 
-                    if (statement.has_body) {
+                    if (statement.kind == StatementKind::If && !statement.expressions.empty()) {
                         out << ",\n";
                         dump_indent(out, indent + 4);
-                        out << "\"has_body\": true";
+                        out << "\"condition\": " << statement.expressions.front();
+                    }
 
+                    if (statement.body) {
                         out << ",\n";
                         dump_indent(out, indent + 4);
-                        out << "\"body_statement_count\": " << statement.body.size();
+                        out << (statement.kind == StatementKind::If ? "\"then_block\": " : "\"body_block\": ")
+                            << *statement.body;
+                    }
 
+                    if (statement.kind == StatementKind::If) {
                         out << ",\n";
                         dump_indent(out, indent + 4);
-                        out << "\"body_statements\": ";
-                        dump_statement_array_json(out, statement.body, indent + 4);
+                        out << "\"else_arm\": ";
+                        if (!statement.else_arm) {
+                            out << "null";
+                        } else if (const auto* arm = std::get_if<ElseBlock>(&*statement.else_arm)) {
+                            out << "{\"kind\": \"else_block\", \"block\": " << arm->block << "}";
+                        } else {
+                            const auto& elseIfArm = std::get<ElseIf>(*statement.else_arm);
+                            out << "{\"kind\": \"else_if\", \"if_statement\": "
+                                << elseIfArm.if_statement << "}";
+                        }
                     }
 
                     out << "\n";
@@ -394,6 +409,23 @@ namespace flowmini::ast {
                 dump_indent(out, indent);
             }
 
+            out << "]";
+        }
+
+        void dump_block_pool_json(std::ostream& out,
+                                  const std::vector<Block>& blocks,
+                                  const unsigned indent) {
+            out << "[";
+            if (!blocks.empty()) { out << "\n"; }
+            for (std::size_t i = 0; i < blocks.size(); ++i) {
+                dump_indent(out, indent + 2);
+                out << "{\"id\": " << i << ", \"statements\": ";
+                dump_id_array(out, blocks[i].statements);
+                out << "}";
+                if (i + 1 < blocks.size()) { out << ","; }
+                out << "\n";
+            }
+            if (!blocks.empty()) { dump_indent(out, indent); }
             out << "]";
         }
 
@@ -535,11 +567,8 @@ namespace flowmini::ast {
                 out << "\"has_body\": " << (functionDecl->has_body ? "true" : "false") << ",\n";
 
                 dump_indent(out, indent + 2);
-                out << "\"body_statement_count\": " << functionDecl->body.size() << ",\n";
-
-                dump_indent(out, indent + 2);
-                out << "\"body_statements\": ";
-                dump_statement_array_json(out, functionDecl->body, indent + 2);
+                out << "\"body_block\": ";
+                dump_optional_id(out, functionDecl->body);
                 out << "\n";
             } else if (const auto* mainBlock = std::get_if<MainBlock>(&decl)) {
                 out << ",\n";
@@ -547,11 +576,8 @@ namespace flowmini::ast {
                 out << "\"has_body\": " << (mainBlock->has_body ? "true" : "false") << ",\n";
 
                 dump_indent(out, indent + 2);
-                out << "\"body_statement_count\": " << mainBlock->body.size() << ",\n";
-
-                dump_indent(out, indent + 2);
-                out << "\"body_statements\": ";
-                dump_statement_array_json(out, mainBlock->body, indent + 2);
+                out << "\"body_block\": ";
+                dump_optional_id(out, mainBlock->body);
                 out << "\n";
             } else if (const auto* recordDecl = std::get_if<RecordDecl>(&decl)) {
                 out << ",\n";
@@ -830,7 +856,7 @@ namespace flowmini::ast {
 
     void dump_ast_json(std::ostream& out, const AstModule& module) {
         out << "{\n";
-        out << "  \"format\": \"flowmini.ast.v1\",\n";
+        out << "  \"format\": \"flowmini.ast.v2\",\n";
         out << "  \"source_unit\": {\n";
         out << "    \"kind\": \"" << to_string(module.source_unit.kind) << "\",\n";
         out << "    \"name\": "; dump_json_string(out, module.source_unit.name);out << ",\n";
@@ -853,6 +879,14 @@ namespace flowmini::ast {
         out << "  \"expression_pool_size\": " << module.expression_pool.size() << ",\n";
     out << "  \"expression_pool\": ";
     dump_expression_pool_json(out, module.expression_pool, 2);
+    out << ",\n";
+    out << "  \"statement_pool_size\": " << module.statement_pool.size() << ",\n";
+    out << "  \"statement_pool\": ";
+    dump_statement_pool_json(out, module.statement_pool, 2);
+    out << ",\n";
+    out << "  \"block_pool_size\": " << module.block_pool.size() << ",\n";
+    out << "  \"block_pool\": ";
+    dump_block_pool_json(out, module.block_pool, 2);
     out << "\n";
     out << "}\n";
     }

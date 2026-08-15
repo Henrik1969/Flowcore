@@ -110,8 +110,8 @@ Expected current result:
 
 ```text
 normal CMake/Ninja build:      PASS
-flowmini_ast_golden_tests:     PASS (11)
-flowmini_suite:                PASS (76/76)
+flowmini_ast_golden_tests:     PASS (15)
+flowmini_suite:                PASS (78/78)
 CTest:                         PASS (2/2)
 ```
 

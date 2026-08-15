@@ -207,6 +207,19 @@ struct Expression {
     Payload payload = UnknownExpr{};
 };
 
+using StatementId = std::size_t;
+using BlockId = std::size_t;
+
+struct ElseBlock {
+    BlockId block;
+};
+
+struct ElseIf {
+    StatementId if_statement;
+};
+
+using ElseArm = std::variant<ElseBlock, ElseIf>;
+
 struct Statement {
     StatementKind kind = StatementKind::Unknown;
     SourceLocation location;
@@ -221,22 +234,24 @@ struct Statement {
     bool has_value = false;
     bool has_condition = false;
 
-    bool has_body = false;
-    SourceLocation body_location;
-
-    std::vector<Statement> body;
+    std::optional<BlockId> body;
+    std::optional<ElseArm> else_arm;
 
     // For v24 this remains intentionally skeletal.
     // Expressions and nested statement bodies are populated in later steps.
-    std::vector<std::size_t> child_statements;
     std::vector<std::size_t> expressions;
+};
+
+struct Block {
+    SourceLocation location;
+    std::vector<StatementId> statements;
 };
 
 struct FunctionDecl {
     std::string name;
     std::vector<Parameter> parameters;
     TypeRef return_type;
-    std::vector<Statement> body;
+    std::optional<BlockId> body;
     SourceLocation location;
 
     bool has_body = false;
@@ -271,7 +286,7 @@ struct TypeAliasDecl {
 };
 
 struct MainBlock {
-    std::vector<Statement> body;
+    std::optional<BlockId> body;
     SourceLocation location;
 
     bool has_body = false;
@@ -296,6 +311,8 @@ struct SourceUnit {
 struct AstModule {
     SourceUnit source_unit;
     std::vector<Expression> expression_pool;
+    std::vector<Statement> statement_pool;
+    std::vector<Block> block_pool;
 };
 
 const char* to_string(SourceUnitKind kind);

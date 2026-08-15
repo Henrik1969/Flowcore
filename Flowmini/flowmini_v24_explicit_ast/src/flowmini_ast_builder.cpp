@@ -1851,7 +1851,8 @@ namespace flowmini::ast {
 
         std::size_t parse_typed_binding_statement_shell(const std::vector<flowmini::Token>& tokens,
                                                         std::size_t i,
-                                                        std::vector<Statement>& body,
+                                                        std::vector<StatementId>& body,
+                                                        std::vector<Statement>& statementPool,
                                                         std::vector<Expression>& expressionPool) {
             Statement statement;
             statement.kind = StatementKind::Let;
@@ -1877,7 +1878,8 @@ namespace flowmini::ast {
                 }
             }
 
-            body.push_back(std::move(statement));
+            statementPool.push_back(std::move(statement));
+            body.push_back(statementPool.size() - 1);
             return i;
         }
 
@@ -1891,7 +1893,8 @@ namespace flowmini::ast {
 
         std::size_t parse_plain_assignment_statement_shell(const std::vector<flowmini::Token>& tokens,
                                                            std::size_t i,
-                                                           std::vector<Statement>& body,
+                                                           std::vector<StatementId>& body,
+                                                           std::vector<Statement>& statementPool,
                                                            std::vector<Expression>& expressionPool) {
             Statement statement;
             statement.kind = StatementKind::Assignment;
@@ -1906,7 +1909,8 @@ namespace flowmini::ast {
                 add_expression_placeholder_at(expressionPool, statement, tokens, i);
             }
 
-            body.push_back(std::move(statement));
+            statementPool.push_back(std::move(statement));
+            body.push_back(statementPool.size() - 1);
             return i;
         }
 
@@ -1935,12 +1939,16 @@ namespace flowmini::ast {
 
         std::size_t parse_body_statement_shells(const std::vector<flowmini::Token>& tokens,
                                                 std::size_t i,
-                                                std::vector<Statement>& body,
+                                                BlockId blockId,
+                                                std::vector<Block>& blockPool,
+                                                std::vector<Statement>& statementPool,
                                                 std::vector<Expression>& expressionPool);
 
         std::size_t parse_if_statement_shell(const std::vector<flowmini::Token>& tokens,
                                              std::size_t i,
-                                             std::vector<Statement>& body,
+                                             std::vector<StatementId>& body,
+                                             std::vector<Block>& blockPool,
+                                             std::vector<Statement>& statementPool,
                                              std::vector<Expression>& expressionPool) {
             Statement statement;
             statement.kind = StatementKind::If;
@@ -1955,18 +1963,41 @@ namespace flowmini::ast {
             i = skip_until_body_block_or_line_end(tokens, i);
 
             if (i < tokens.size() && tokens[i].kind == flowmini::TokenKind::LeftBrace) {
-                statement.has_body = true;
-                statement.body_location = location_from_token(tokens[i]);
-                i = parse_body_statement_shells(tokens, i, statement.body, expressionPool);
+                const BlockId thenBlock = blockPool.size();
+                blockPool.push_back(Block{location_from_token(tokens[i]), {}});
+                statement.body = thenBlock;
+                i = parse_body_statement_shells(tokens, i, thenBlock, blockPool, statementPool, expressionPool);
             }
 
-            body.push_back(std::move(statement));
+            const StatementId ifId = statementPool.size();
+            statementPool.push_back(std::move(statement));
+            body.push_back(ifId);
+
+            i = skip_nonsemantic_separators(tokens, i);
+            if (i < tokens.size() && tokens[i].kind == flowmini::TokenKind::KeywordElse) {
+                ++i;
+                i = skip_nonsemantic_separators(tokens, i);
+                if (i < tokens.size() && is_if_token(tokens[i])) {
+                    std::vector<StatementId> continuation;
+                    i = parse_if_statement_shell(tokens, i, continuation, blockPool, statementPool, expressionPool);
+                    if (!continuation.empty()) {
+                        statementPool[ifId].else_arm = ElseIf{continuation.front()};
+                    }
+                } else if (i < tokens.size() && tokens[i].kind == flowmini::TokenKind::LeftBrace) {
+                    const BlockId elseBlock = blockPool.size();
+                    blockPool.push_back(Block{location_from_token(tokens[i]), {}});
+                    statementPool[ifId].else_arm = ElseBlock{elseBlock};
+                    i = parse_body_statement_shells(tokens, i, elseBlock, blockPool, statementPool, expressionPool);
+                }
+            }
             return i;
         }
 
         std::size_t parse_while_statement_shell(const std::vector<flowmini::Token>& tokens,
                                                 std::size_t i,
-                                                std::vector<Statement>& body,
+                                                std::vector<StatementId>& body,
+                                                std::vector<Block>& blockPool,
+                                                std::vector<Statement>& statementPool,
                                                 std::vector<Expression>& expressionPool) {
             Statement statement;
             statement.kind = StatementKind::While;
@@ -1981,19 +2012,24 @@ namespace flowmini::ast {
             i = skip_until_body_block_or_line_end(tokens, i);
 
             if (i < tokens.size() && tokens[i].kind == flowmini::TokenKind::LeftBrace) {
-                statement.has_body = true;
-                statement.body_location = location_from_token(tokens[i]);
-                i = parse_body_statement_shells(tokens, i, statement.body, expressionPool);
+                const BlockId loopBlock = blockPool.size();
+                blockPool.push_back(Block{location_from_token(tokens[i]), {}});
+                statement.body = loopBlock;
+                i = parse_body_statement_shells(tokens, i, loopBlock, blockPool, statementPool, expressionPool);
             }
 
-            body.push_back(std::move(statement));
+            statementPool.push_back(std::move(statement));
+            body.push_back(statementPool.size() - 1);
             return i;
         }
 
         std::size_t parse_body_statement_shells(const std::vector<flowmini::Token>& tokens,
                                                 std::size_t i,
-                                                std::vector<Statement>& body,
+                                                const BlockId blockId,
+                                                std::vector<Block>& blockPool,
+                                                std::vector<Statement>& statementPool,
                                                 std::vector<Expression>& expressionPool) {
+            auto& body = blockPool[blockId].statements;
             i = skip_nonsemantic_separators(tokens, i);
 
             if (i >= tokens.size() || tokens[i].kind != flowmini::TokenKind::LeftBrace) {
@@ -2014,22 +2050,22 @@ namespace flowmini::ast {
                 }
 
                 if (is_typed_binding_start(tokens, i)) {
-                    i = parse_typed_binding_statement_shell(tokens, i, body, expressionPool);
+                    i = parse_typed_binding_statement_shell(tokens, i, body, statementPool, expressionPool);
                     continue;
                 }
 
                 if (is_if_token(tokens[i])) {
-                    i = parse_if_statement_shell(tokens, i, body, expressionPool);
+                    i = parse_if_statement_shell(tokens, i, body, blockPool, statementPool, expressionPool);
                     continue;
                 }
 
                 if (is_while_token(tokens[i])) {
-                    i = parse_while_statement_shell(tokens, i, body, expressionPool);
+                    i = parse_while_statement_shell(tokens, i, body, blockPool, statementPool, expressionPool);
                     continue;
                 }
 
                 if (is_plain_assignment_start(tokens, i)) {
-                    i = parse_plain_assignment_statement_shell(tokens, i, body, expressionPool);
+                    i = parse_plain_assignment_statement_shell(tokens, i, body, statementPool, expressionPool);
                     continue;
                 }
 
@@ -2039,19 +2075,22 @@ namespace flowmini::ast {
                     if (statement.has_value && i + 1 < tokens.size()) {
                         add_expression_placeholder_at(expressionPool, statement, tokens, i + 1);
                     }
-                    body.push_back(std::move(statement));
+                    statementPool.push_back(std::move(statement));
+                    body.push_back(statementPool.size() - 1);
                     ++i;
                     continue;
                 }
 
                 if (is_break_token(tokens[i])) {
-                    body.push_back(make_statement_shell(StatementKind::Break, tokens[i]));
+                    statementPool.push_back(make_statement_shell(StatementKind::Break, tokens[i]));
+                    body.push_back(statementPool.size() - 1);
                     ++i;
                     continue;
                 }
 
                 if (is_continue_token(tokens[i])) {
-                    body.push_back(make_statement_shell(StatementKind::Continue, tokens[i]));
+                    statementPool.push_back(make_statement_shell(StatementKind::Continue, tokens[i]));
+                    body.push_back(statementPool.size() - 1);
                     ++i;
                     continue;
                 }
@@ -2066,7 +2105,9 @@ namespace flowmini::ast {
                                         std::size_t i,
                                         bool& hasBody,
                                         SourceLocation& bodyLocation,
-                                        std::vector<Statement>& body,
+                                        std::optional<BlockId>& body,
+                                        std::vector<Block>& blockPool,
+                                        std::vector<Statement>& statementPool,
                                         std::vector<Expression>& expressionPool) {
             i = skip_nonsemantic_separators(tokens, i);
 
@@ -2076,72 +2117,11 @@ namespace flowmini::ast {
 
             hasBody = true;
             bodyLocation = location_from_token(tokens[i]);
-
-            ++i; // consume '{'
-            std::size_t braceDepth = 1;
-
-            while (i < tokens.size() && !is_end_token(tokens[i])) {
-                if (tokens[i].kind == flowmini::TokenKind::LeftBrace) {
-                    ++braceDepth;
-                    ++i;
-                    continue;
-                }
-
-                if (tokens[i].kind == flowmini::TokenKind::RightBrace) {
-                    --braceDepth;
-                    ++i;
-
-                    if (braceDepth == 0) {
-                        return i;
-                    }
-
-                    continue;
-                }
-
-                if (braceDepth == 1) {
-                    if (is_typed_binding_start(tokens, i)) {
-                        i = parse_typed_binding_statement_shell(tokens, i, body, expressionPool);
-                        continue;
-                    }
-
-                    if (is_if_token(tokens[i])) {
-                        i = parse_if_statement_shell(tokens, i, body, expressionPool);
-                        continue;
-                    }
-
-                    if (is_while_token(tokens[i])) {
-                        i = parse_while_statement_shell(tokens, i, body, expressionPool);
-                        continue;
-                    }
-
-                    if (is_plain_assignment_start(tokens, i)) {
-                        i = parse_plain_assignment_statement_shell(tokens, i, body, expressionPool);
-                        continue;
-                    }
-
-                    if (is_return_token(tokens[i])) {
-                        body.push_back(make_statement_shell(StatementKind::Return, tokens[i]));
-                        ++i;
-                        continue;
-                    }
-
-                    if (is_break_token(tokens[i])) {
-                        body.push_back(make_statement_shell(StatementKind::Break, tokens[i]));
-                        ++i;
-                        continue;
-                    }
-
-                    if (is_continue_token(tokens[i])) {
-                        body.push_back(make_statement_shell(StatementKind::Continue, tokens[i]));
-                        ++i;
-                        continue;
-                    }
-                }
-
-                ++i;
-            }
-
-            return i;
+            const BlockId blockId = blockPool.size();
+            blockPool.push_back(Block{bodyLocation, {}});
+            body = blockId;
+            return parse_body_statement_shells(tokens, i, blockId, blockPool,
+                                               statementPool, expressionPool);
         }
 
         std::size_t skip_until_next_top_levelish_token(const std::vector<flowmini::Token>& tokens,std::size_t i) {
@@ -2175,6 +2155,8 @@ namespace flowmini::ast {
 
     AstModule build_source_header_ast(const std::vector<flowmini::Token>& tokens) {
         AstModule module = make_empty_ast_module();
+        module.block_pool.reserve(tokens.size());
+        module.statement_pool.reserve(tokens.size());
 
         std::size_t i = 0;
 
@@ -2240,7 +2222,8 @@ namespace flowmini::ast {
                 }
 
                 i = parse_function_signature(tokens, i, fn);
-                i = mark_body_container(tokens, i, fn.has_body, fn.body_location, fn.body, module.expression_pool);
+                i = mark_body_container(tokens, i, fn.has_body, fn.body_location, fn.body,
+                                        module.block_pool, module.statement_pool, module.expression_pool);
 
                 module.source_unit.declarations.emplace_back(std::move(fn));
                 i = skip_until_next_top_levelish_token(tokens, i);
@@ -2252,7 +2235,8 @@ namespace flowmini::ast {
                 mainBlock.location = location_from_token(tokens[i]);
 
                 ++i;
-                i = mark_body_container(tokens, i, mainBlock.has_body, mainBlock.body_location, mainBlock.body, module.expression_pool);
+                i = mark_body_container(tokens, i, mainBlock.has_body, mainBlock.body_location, mainBlock.body,
+                                        module.block_pool, module.statement_pool, module.expression_pool);
 
                 module.source_unit.declarations.emplace_back(std::move(mainBlock));
 

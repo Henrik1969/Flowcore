@@ -10,21 +10,23 @@ Current milestone:
 
 ```text
 Flowmini v0.24 explicit AST
-shallow expression AST checkpoint
+active C5 statement and frontend maturation
 ```
 
 ## Status
 
 ```text
 normal CMake/Ninja build:      PASS
-flowmini_ast_golden_tests:     PASS (11)
-flowmini_suite:                PASS (76/76)
+flowmini_ast_golden_tests:     PASS (15)
+flowmini_suite:                PASS (78/78)
 CTest:                         PASS (2/2)
 ```
 
 Flowmini is still experimental and unfinished.
 
-The current v0.24 line provides an observable, regression-guarded AST with a first shallow expression graph pass.
+The current v0.24 line provides an observable, regression-guarded expression
+and type-reference graph plus arena-owned statement/block structure. It is not
+yet a complete raw representation of the accepted language.
 
 ## Run the current build
 
@@ -55,8 +57,8 @@ Expected result:
 
 ```text
 normal CMake/Ninja build:      PASS
-flowmini_ast_golden_tests:     PASS (11)
-flowmini_suite:                PASS (76/76)
+flowmini_ast_golden_tests:     PASS (15)
+flowmini_suite:                PASS (78/78)
 CTest:                         PASS (2/2)
 ```
 
@@ -108,12 +110,10 @@ docs/language/named-targets.md
 The following are still future or incomplete work:
 
 ```text
-recursive expression population
-operator precedence and associativity
-else blocks
-full type-reference parsing
+complete statement coverage for the accepted language
+complete ABI, flow-placement, print, and executable source-form coverage
+complete structural SymbolTable projection
 semantic name resolution
-symbol table integration
 type checking
 Graph IR lowering
 runtime execution semantics

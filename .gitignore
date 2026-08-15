@@ -29,6 +29,7 @@ compile_commands.json
 *.dylib
 *.exe
 *.out
+!Flowmini/flowmini_v24_explicit_ast/tests/expected/stdout/*.out
 *.app
 
 # Generated / temporary files

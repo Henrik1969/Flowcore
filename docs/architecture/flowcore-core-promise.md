@@ -1,21 +1,21 @@
 ---
-
 title: Flowcore Core Promise
-status: foundational
+status: binding-foundational
 kind: architecture-note
 tags:
-
-* flowcore
-* architecture
-* graph-ir
-* dataflow
-* compiler
-* optimization
-* parallelism
-
+  - flowcore
+  - architecture
+  - graph-ir
+  - dataflow
+  - compiler
+  - optimization
+  - parallelism
 ---
 
 # Flowcore Core Promise
+
+Authority: binding architectural intent. Examples of future orchestration
+syntax are illustrative and do not by themselves approve new syntax.
 
 Flowcore's core promise is:
 
@@ -159,7 +159,7 @@ The graph is therefore not merely visual. It is checkable.
 
 Strudel is useful as inspiration because it shows how compact notation can describe orchestration while the runtime owns execution timing.
 
-For Flowcore, the lesson is not to copy musical syntax directly. The lesson is that grouping, parallel composition, sequencing, repetition, routng, and scheduler-owned execution can be expressed declaratively.
+For Flowcore, the lesson is not to copy musical syntax directly. The lesson is that grouping, parallel composition, sequencing, repetition, routing, and scheduler-owned execution can be expressed declaratively.
 
 Any such syntax must still obey the Flowcore law:
 
@@ -205,4 +205,3 @@ The checked graph should be optimizable.
 The optimized graph should be lowerable.
 
 That is the soul of the language.
-i

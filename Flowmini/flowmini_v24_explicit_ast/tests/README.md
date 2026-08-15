@@ -22,7 +22,7 @@ tests/expected/diagnostics/<test-name>.contains
 ```
 
 The current baseline was generated from `flowmini_v22_unit_kinds` with stdin value `5`.
-The suite passed 75/75 with these expectations.
+The current suite passes 78/78 with these expectations.
 
 Useful commands:
 

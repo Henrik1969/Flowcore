@@ -1,6 +1,6 @@
 ---
 title: Flowcore Transformation and Revision Architecture
-status: foundational-direction
+status: binding-boundaries-with-provisional-mechanisms
 kind: architecture-note
 tags:
   - flowcore
@@ -15,6 +15,16 @@ tags:
 ---
 
 # Flowcore Transformation and Revision Architecture
+
+## Authority
+
+The compiler-stage boundaries, domain responsibilities, target boundary,
+separation of transformation/policy/provider concerns, stable published-state
+rule, and provenance requirements are binding architectural decisions.
+
+Exact identity spelling, revision numbering, snapshot/delta storage,
+structural-sharing strategy, command-line interfaces, and provider APIs are
+provisional mechanisms. They may change without weakening the binding laws.
 
 ## Purpose
 
@@ -86,10 +96,10 @@ SOURCE / SEMANTIC DOMAIN
 source
   -> lexer / TokenTree
   -> parser / AST builder
-  -> semantic AST
-  -> semantic validation
-  -> canonicalization
-  -> target-independent semantic simplification
+  -> complete raw AST
+  -> structural SymbolTable projection
+  -> semantic analysis / facts / contracts / diagnostics
+  -> canonical semantic frontend state
 
 FLOW DOMAIN
 ────────────────────────────────────────────
@@ -116,6 +126,10 @@ optimized Graph IR
 The default implementation may initially collapse some adjacent stages into one
 executable path, but the boundaries are architectural contracts and must remain
 recoverable.
+
+The current `ModuleSpec`/FlowIR representation is not canonical Graph IR. It
+remains a compatibility execution target below Graph IR until a future runtime
+or backend consumes Graph IR or a later lowered representation directly.
 
 ## Domain responsibilities
 
@@ -283,6 +297,9 @@ Which implementation performs the stage?
 Policy and provider selection are orthogonal.
 
 ## Versioned intermediate representations
+
+Authority: stable published identities and observable lineage are binding. The
+concrete identity notation and storage mechanisms below are provisional.
 
 Flowcore intermediate representations should support versioned transformation
 history.
@@ -531,6 +548,9 @@ The architectural law is:
 > replace the default without redefining adjacent stages.
 
 ## Sane default direction
+
+Authority: provisional engineering default, constrained by the binding laws
+above.
 
 Until experiments prove otherwise, a reasonable default direction is:
 

@@ -79,7 +79,7 @@ $TOP/tools/run-flowmini-test-suite.sh
 - CMake Debug build succeeds.
 - TokenTree smoke tests pass.
 - SymbolTable tests pass.
-- Categorized Flowmini suite passes: 75 / 75.
+- Categorized Flowmini suite passes: 78 / 78.
 
 Valgrind was not run in this packaging environment because Valgrind is not
 installed here.

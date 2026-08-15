@@ -12,7 +12,7 @@ Current baseline:
 
 ```text
 build: PASS
-AST golden tests: 11
+AST golden tests: 15
 suite: 76 / 76
 ```
 

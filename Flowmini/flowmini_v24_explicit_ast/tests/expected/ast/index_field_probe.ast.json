@@ -1,5 +1,5 @@
 {
-    "format": "flowmini.ast.v1",
+    "format": "flowmini.ast.v2",
     "source_unit": {
         "kind": "program",
         "name": "index_field_probe",
@@ -8,188 +8,7 @@
             {
                 "kind": "main_block",
                 "has_body": true,
-                "body_statement_count": 9,
-                "body_statements": [
-                    {
-                        "kind": "let",
-                        "name": "arr",
-                        "type": "list<int>",
-                        "type_ref": {
-                            "kind": "generic",
-                            "text": "list<int>",
-                            "payload": {
-                                "constructor_segments": [
-                                    "list"
-                                ],
-                                "arguments": [
-                                    {
-                                        "kind": "named",
-                                        "text": "int",
-                                        "payload": {
-                                            "name_segments": [
-                                                "int"
-                                            ]
-                                        },
-                                        "location": {
-                                            "line": 10,
-                                            "column": 16
-                                        }
-                                    }
-                                ]
-                            },
-                            "location": {
-                                "line": 10,
-                                "column": 11
-                            }
-                        },
-                        "has_initializer": true,
-                        "expression_ids": [
-                            0
-                        ]
-                    },
-                    {
-                        "kind": "let",
-                        "name": "i",
-                        "type": "int",
-                        "type_ref": {
-                            "kind": "named",
-                            "text": "int",
-                            "payload": {
-                                "name_segments": [
-                                    "int"
-                                ]
-                            },
-                            "location": {
-                                "line": 11,
-                                "column": 9
-                            }
-                        },
-                        "has_initializer": true,
-                        "expression_ids": [
-                            4
-                        ]
-                    },
-                    {
-                        "kind": "let",
-                        "name": "value",
-                        "type": "int",
-                        "type_ref": {
-                            "kind": "named",
-                            "text": "int",
-                            "payload": {
-                                "name_segments": [
-                                    "int"
-                                ]
-                            },
-                            "location": {
-                                "line": 12,
-                                "column": 13
-                            }
-                        },
-                        "has_initializer": true,
-                        "expression_ids": [
-                            5
-                        ]
-                    },
-                    {
-                        "kind": "let",
-                        "name": "p",
-                        "type": "Point",
-                        "type_ref": {
-                            "kind": "named",
-                            "text": "Point",
-                            "payload": {
-                                "name_segments": [
-                                    "Point"
-                                ]
-                            },
-                            "location": {
-                                "line": 14,
-                                "column": 9
-                            }
-                        },
-                        "has_initializer": true,
-                        "expression_ids": [
-                            8
-                        ]
-                    },
-                    {
-                        "kind": "let",
-                        "name": "xvalue",
-                        "type": "int",
-                        "type_ref": {
-                            "kind": "named",
-                            "text": "int",
-                            "payload": {
-                                "name_segments": [
-                                    "int"
-                                ]
-                            },
-                            "location": {
-                                "line": 15,
-                                "column": 14
-                            }
-                        },
-                        "has_initializer": true,
-                        "expression_ids": [
-                            11
-                        ]
-                    },
-                    {
-                        "kind": "assignment",
-                        "name": "value",
-                        "has_value": true,
-                        "expression_ids": [
-                            13
-                        ]
-                    },
-                    {
-                        "kind": "assignment",
-                        "name": "xvalue",
-                        "has_value": true,
-                        "expression_ids": [
-                            16
-                        ]
-                    },
-                    {
-                        "kind": "while",
-                        "has_condition": true,
-                        "expression_ids": [
-                            18
-                        ],
-                        "has_body": true,
-                        "body_statement_count": 1,
-                        "body_statements": [
-                            {
-                                "kind": "assignment",
-                                "name": "value",
-                                "has_value": true,
-                                "expression_ids": [
-                                    23
-                                ]
-                            }
-                        ]
-                    },
-                    {
-                        "kind": "if",
-                        "has_condition": true,
-                        "expression_ids": [
-                            26
-                        ],
-                        "has_body": true,
-                        "body_statement_count": 1,
-                        "body_statements": [
-                            {
-                                "kind": "assignment",
-                                "name": "xvalue",
-                                "has_value": true,
-                                "expression_ids": [
-                                    30
-                                ]
-                            }
-                        ]
-                    }
-                ]
+                "body_block": 0
             }
         ]
     },
@@ -556,6 +375,224 @@
                 "name": "p"
             },
             "child_expressions": []
+        }
+    ],
+    "statement_pool_size": 11,
+    "statement_pool": [
+        {
+            "id": 0,
+            "kind": "let",
+            "name": "arr",
+            "type": "list<int>",
+            "type_ref": {
+                "kind": "generic",
+                "text": "list<int>",
+                "payload": {
+                    "constructor_segments": [
+                        "list"
+                    ],
+                    "arguments": [
+                        {
+                            "kind": "named",
+                            "text": "int",
+                            "payload": {
+                                "name_segments": [
+                                    "int"
+                                ]
+                            },
+                            "location": {
+                                "line": 10,
+                                "column": 16
+                            }
+                        }
+                    ]
+                },
+                "location": {
+                    "line": 10,
+                    "column": 11
+                }
+            },
+            "has_initializer": true,
+            "expression_ids": [
+                0
+            ]
+        },
+        {
+            "id": 1,
+            "kind": "let",
+            "name": "i",
+            "type": "int",
+            "type_ref": {
+                "kind": "named",
+                "text": "int",
+                "payload": {
+                    "name_segments": [
+                        "int"
+                    ]
+                },
+                "location": {
+                    "line": 11,
+                    "column": 9
+                }
+            },
+            "has_initializer": true,
+            "expression_ids": [
+                4
+            ]
+        },
+        {
+            "id": 2,
+            "kind": "let",
+            "name": "value",
+            "type": "int",
+            "type_ref": {
+                "kind": "named",
+                "text": "int",
+                "payload": {
+                    "name_segments": [
+                        "int"
+                    ]
+                },
+                "location": {
+                    "line": 12,
+                    "column": 13
+                }
+            },
+            "has_initializer": true,
+            "expression_ids": [
+                5
+            ]
+        },
+        {
+            "id": 3,
+            "kind": "let",
+            "name": "p",
+            "type": "Point",
+            "type_ref": {
+                "kind": "named",
+                "text": "Point",
+                "payload": {
+                    "name_segments": [
+                        "Point"
+                    ]
+                },
+                "location": {
+                    "line": 14,
+                    "column": 9
+                }
+            },
+            "has_initializer": true,
+            "expression_ids": [
+                8
+            ]
+        },
+        {
+            "id": 4,
+            "kind": "let",
+            "name": "xvalue",
+            "type": "int",
+            "type_ref": {
+                "kind": "named",
+                "text": "int",
+                "payload": {
+                    "name_segments": [
+                        "int"
+                    ]
+                },
+                "location": {
+                    "line": 15,
+                    "column": 14
+                }
+            },
+            "has_initializer": true,
+            "expression_ids": [
+                11
+            ]
+        },
+        {
+            "id": 5,
+            "kind": "assignment",
+            "name": "value",
+            "has_value": true,
+            "expression_ids": [
+                13
+            ]
+        },
+        {
+            "id": 6,
+            "kind": "assignment",
+            "name": "xvalue",
+            "has_value": true,
+            "expression_ids": [
+                16
+            ]
+        },
+        {
+            "id": 7,
+            "kind": "assignment",
+            "name": "value",
+            "has_value": true,
+            "expression_ids": [
+                23
+            ]
+        },
+        {
+            "id": 8,
+            "kind": "while",
+            "has_condition": true,
+            "expression_ids": [
+                18
+            ],
+            "body_block": 1
+        },
+        {
+            "id": 9,
+            "kind": "assignment",
+            "name": "xvalue",
+            "has_value": true,
+            "expression_ids": [
+                30
+            ]
+        },
+        {
+            "id": 10,
+            "kind": "if",
+            "has_condition": true,
+            "expression_ids": [
+                26
+            ],
+            "condition": 26,
+            "then_block": 2,
+            "else_arm": null
+        }
+    ],
+    "block_pool_size": 3,
+    "block_pool": [
+        {
+            "id": 0,
+            "statements": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                8,
+                10
+            ]
+        },
+        {
+            "id": 1,
+            "statements": [
+                7
+            ]
+        },
+        {
+            "id": 2,
+            "statements": [
+                9
+            ]
         }
     ]
 }

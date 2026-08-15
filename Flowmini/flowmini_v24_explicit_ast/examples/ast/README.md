@@ -47,6 +47,12 @@ precedence_expression_probe.flow
 
 These files define the v0.24 AST golden regression gate.
 
+The current `flowmini.ast.v2` dump uses arena-owned `statement_pool` and
+`block_pool` collections. Conditional statements reference a mandatory
+`then_block` and an optional tagged `else_arm`: either `else_block` with a
+`BlockId`, or `else_if` with an `IfStmtId`. Else-if continuations are not
+encoded as arbitrary nested statements inside an ordinary else block.
+
 Exploratory / edgecase examples
 
 Some examples are intentionally outside the current v0.24 accepted language surface.

@@ -178,7 +178,6 @@ def validate_declaration_types(document: dict, path: Path) -> None:
             return_type = validate_type_ref(declaration.get("return_type_ref"), f"{context}: return type")
             if declaration.get("return_type") != return_type:
                 raise ValueError(f"{context}: return_type string disagrees with canonical type_ref")
-            validate_statement_types(declaration.get("body_statements"), context)
         elif kind == "record":
             fields = declaration.get("fields")
             if not isinstance(fields, list):
@@ -192,8 +191,58 @@ def validate_declaration_types(document: dict, path: Path) -> None:
             canonical = validate_type_ref(declaration.get("target_type_ref"), f"{context}: alias target")
             if declaration.get("target") != canonical:
                 raise ValueError(f"{context}: target string disagrees with canonical type_ref")
-        elif kind == "main_block":
-            validate_statement_types(declaration.get("body_statements"), context)
+
+
+def validate_statement_arenas(document: dict, path: Path) -> None:
+    statements = document.get("statement_pool")
+    blocks = document.get("block_pool")
+    if not isinstance(statements, list) or document.get("statement_pool_size") != len(statements):
+        raise TypeError(f"{path}: invalid statement_pool")
+    if not isinstance(blocks, list) or document.get("block_pool_size") != len(blocks):
+        raise TypeError(f"{path}: invalid block_pool")
+
+    parents: dict[int, str] = {}
+    for block_id, block in enumerate(blocks):
+        if not isinstance(block, dict) or block.get("id") != block_id:
+            raise ValueError(f"{path}: block IDs must match their pool positions")
+        children = block.get("statements")
+        if not isinstance(children, list) or not all(isinstance(child, int) for child in children):
+            raise TypeError(f"{path}: block {block_id}: statements must be IDs")
+        for child in children:
+            if child < 0 or child >= len(statements):
+                raise ValueError(f"{path}: block {block_id}: dangling statement {child}")
+            if child in parents:
+                raise ValueError(f"{path}: statement {child} has multiple structural parents")
+            parents[child] = f"block {block_id}"
+
+    for statement_id, statement in enumerate(statements):
+        if not isinstance(statement, dict) or statement.get("id") != statement_id:
+            raise ValueError(f"{path}: statement IDs must match their pool positions")
+        validate_statement_types([statement], f"{path}: statement_pool")
+        for field in ("then_block", "body_block"):
+            if field in statement and statement[field] not in range(len(blocks)):
+                raise ValueError(f"{path}: statement {statement_id}: dangling {field}")
+        if statement.get("kind") == "if":
+            if "then_block" not in statement or not isinstance(statement.get("condition"), int):
+                raise ValueError(f"{path}: if statement {statement_id} requires condition and then_block")
+            arm = statement.get("else_arm")
+            if arm is not None:
+                if not isinstance(arm, dict) or arm.get("kind") not in {"else_block", "else_if"}:
+                    raise TypeError(f"{path}: if statement {statement_id}: invalid else_arm")
+                target = arm.get("block" if arm["kind"] == "else_block" else "if_statement")
+                pool_size = len(blocks) if arm["kind"] == "else_block" else len(statements)
+                if not isinstance(target, int) or target not in range(pool_size):
+                    raise ValueError(f"{path}: if statement {statement_id}: dangling else arm")
+                if arm["kind"] == "else_if":
+                    if statements[target].get("kind") != "if":
+                        raise ValueError(f"{path}: statement {statement_id}: else_if target is not an if")
+                    if target in parents:
+                        raise ValueError(f"{path}: statement {target} has multiple structural parents")
+                    parents[target] = f"if statement {statement_id} else_arm"
+
+    orphaned = sorted(set(range(len(statements))) - set(parents))
+    if orphaned:
+        raise ValueError(f"{path}: statements without a structural parent: {orphaned}")
 
 
 def validate(path: Path) -> None:
@@ -201,6 +250,7 @@ def validate(path: Path) -> None:
         document = json.load(stream)
 
     validate_declaration_types(document, path)
+    validate_statement_arenas(document, path)
 
     expressions = document.get("expression_pool")
     if not isinstance(expressions, list):

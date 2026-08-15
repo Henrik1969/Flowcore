@@ -1,5 +1,5 @@
 {
-    "format": "flowmini.ast.v1",
+    "format": "flowmini.ast.v2",
     "source_unit": {
         "kind": "program",
         "name": "precedence_expression_probe",
@@ -8,290 +8,7 @@
             {
                 "kind": "main_block",
                 "has_body": true,
-                "body_statement_count": 25,
-                "body_statements": [
-                    {
-                        "kind": "let",
-                        "name": "a",
-                        "type": "int",
-                        "type_ref": {
-                            "kind": "named",
-                            "text": "int",
-                            "payload": {
-                                "name_segments": [
-                                    "int"
-                                ]
-                            },
-                            "location": {
-                                "line": 5,
-                                "column": 9
-                            }
-                        },
-                        "has_initializer": true,
-                        "expression_ids": [
-                            0
-                        ]
-                    },
-                    {
-                        "kind": "let",
-                        "name": "b",
-                        "type": "int",
-                        "type_ref": {
-                            "kind": "named",
-                            "text": "int",
-                            "payload": {
-                                "name_segments": [
-                                    "int"
-                                ]
-                            },
-                            "location": {
-                                "line": 6,
-                                "column": 9
-                            }
-                        },
-                        "has_initializer": true,
-                        "expression_ids": [
-                            1
-                        ]
-                    },
-                    {
-                        "kind": "let",
-                        "name": "c",
-                        "type": "int",
-                        "type_ref": {
-                            "kind": "named",
-                            "text": "int",
-                            "payload": {
-                                "name_segments": [
-                                    "int"
-                                ]
-                            },
-                            "location": {
-                                "line": 7,
-                                "column": 9
-                            }
-                        },
-                        "has_initializer": true,
-                        "expression_ids": [
-                            2
-                        ]
-                    },
-                    {
-                        "kind": "let",
-                        "name": "d",
-                        "type": "int",
-                        "type_ref": {
-                            "kind": "named",
-                            "text": "int",
-                            "payload": {
-                                "name_segments": [
-                                    "int"
-                                ]
-                            },
-                            "location": {
-                                "line": 8,
-                                "column": 9
-                            }
-                        },
-                        "has_initializer": true,
-                        "expression_ids": [
-                            3
-                        ]
-                    },
-                    {
-                        "kind": "let",
-                        "name": "result",
-                        "type": "int",
-                        "type_ref": {
-                            "kind": "named",
-                            "text": "int",
-                            "payload": {
-                                "name_segments": [
-                                    "int"
-                                ]
-                            },
-                            "location": {
-                                "line": 9,
-                                "column": 14
-                            }
-                        },
-                        "has_initializer": true,
-                        "expression_ids": [
-                            4
-                        ]
-                    },
-                    {
-                        "kind": "assignment",
-                        "name": "result",
-                        "has_value": true,
-                        "expression_ids": [
-                            5
-                        ]
-                    },
-                    {
-                        "kind": "assignment",
-                        "name": "result",
-                        "has_value": true,
-                        "expression_ids": [
-                            10
-                        ]
-                    },
-                    {
-                        "kind": "assignment",
-                        "name": "result",
-                        "has_value": true,
-                        "expression_ids": [
-                            15
-                        ]
-                    },
-                    {
-                        "kind": "assignment",
-                        "name": "result",
-                        "has_value": true,
-                        "expression_ids": [
-                            20
-                        ]
-                    },
-                    {
-                        "kind": "assignment",
-                        "name": "result",
-                        "has_value": true,
-                        "expression_ids": [
-                            25
-                        ]
-                    },
-                    {
-                        "kind": "assignment",
-                        "name": "result",
-                        "has_value": true,
-                        "expression_ids": [
-                            30
-                        ]
-                    },
-                    {
-                        "kind": "assignment",
-                        "name": "result",
-                        "has_value": true,
-                        "expression_ids": [
-                            35
-                        ]
-                    },
-                    {
-                        "kind": "assignment",
-                        "name": "result",
-                        "has_value": true,
-                        "expression_ids": [
-                            40
-                        ]
-                    },
-                    {
-                        "kind": "assignment",
-                        "name": "result",
-                        "has_value": true,
-                        "expression_ids": [
-                            44
-                        ]
-                    },
-                    {
-                        "kind": "assignment",
-                        "name": "result",
-                        "has_value": true,
-                        "expression_ids": [
-                            48
-                        ]
-                    },
-                    {
-                        "kind": "assignment",
-                        "name": "result",
-                        "has_value": true,
-                        "expression_ids": [
-                            52
-                        ]
-                    },
-                    {
-                        "kind": "assignment",
-                        "name": "result",
-                        "has_value": true,
-                        "expression_ids": [
-                            55
-                        ]
-                    },
-                    {
-                        "kind": "assignment",
-                        "name": "result",
-                        "has_value": true,
-                        "expression_ids": [
-                            62
-                        ]
-                    },
-                    {
-                        "kind": "assignment",
-                        "name": "result",
-                        "has_value": true,
-                        "expression_ids": [
-                            69
-                        ]
-                    },
-                    {
-                        "kind": "assignment",
-                        "name": "result",
-                        "has_value": true,
-                        "expression_ids": [
-                            75
-                        ]
-                    },
-                    {
-                        "kind": "assignment",
-                        "name": "result",
-                        "has_value": true,
-                        "expression_ids": [
-                            81
-                        ]
-                    },
-                    {
-                        "kind": "assignment",
-                        "name": "result",
-                        "has_value": true,
-                        "expression_ids": [
-                            87
-                        ]
-                    },
-                    {
-                        "kind": "assignment",
-                        "name": "result",
-                        "has_value": true,
-                        "expression_ids": [
-                            91
-                        ]
-                    },
-                    {
-                        "kind": "assignment",
-                        "name": "result",
-                        "has_value": true,
-                        "expression_ids": [
-                            96
-                        ]
-                    },
-                    {
-                        "kind": "if",
-                        "has_condition": true,
-                        "expression_ids": [
-                            104
-                        ],
-                        "has_body": true,
-                        "body_statement_count": 1,
-                        "body_statements": [
-                            {
-                                "kind": "assignment",
-                                "name": "result",
-                                "has_value": true,
-                                "expression_ids": [
-                                    113
-                                ]
-                            }
-                        ]
-                    }
-                ]
+                "body_block": 0
             }
         ]
     },
@@ -1578,6 +1295,354 @@
                 "value_text": "1"
             },
             "child_expressions": []
+        }
+    ],
+    "statement_pool_size": 26,
+    "statement_pool": [
+        {
+            "id": 0,
+            "kind": "let",
+            "name": "a",
+            "type": "int",
+            "type_ref": {
+                "kind": "named",
+                "text": "int",
+                "payload": {
+                    "name_segments": [
+                        "int"
+                    ]
+                },
+                "location": {
+                    "line": 5,
+                    "column": 9
+                }
+            },
+            "has_initializer": true,
+            "expression_ids": [
+                0
+            ]
+        },
+        {
+            "id": 1,
+            "kind": "let",
+            "name": "b",
+            "type": "int",
+            "type_ref": {
+                "kind": "named",
+                "text": "int",
+                "payload": {
+                    "name_segments": [
+                        "int"
+                    ]
+                },
+                "location": {
+                    "line": 6,
+                    "column": 9
+                }
+            },
+            "has_initializer": true,
+            "expression_ids": [
+                1
+            ]
+        },
+        {
+            "id": 2,
+            "kind": "let",
+            "name": "c",
+            "type": "int",
+            "type_ref": {
+                "kind": "named",
+                "text": "int",
+                "payload": {
+                    "name_segments": [
+                        "int"
+                    ]
+                },
+                "location": {
+                    "line": 7,
+                    "column": 9
+                }
+            },
+            "has_initializer": true,
+            "expression_ids": [
+                2
+            ]
+        },
+        {
+            "id": 3,
+            "kind": "let",
+            "name": "d",
+            "type": "int",
+            "type_ref": {
+                "kind": "named",
+                "text": "int",
+                "payload": {
+                    "name_segments": [
+                        "int"
+                    ]
+                },
+                "location": {
+                    "line": 8,
+                    "column": 9
+                }
+            },
+            "has_initializer": true,
+            "expression_ids": [
+                3
+            ]
+        },
+        {
+            "id": 4,
+            "kind": "let",
+            "name": "result",
+            "type": "int",
+            "type_ref": {
+                "kind": "named",
+                "text": "int",
+                "payload": {
+                    "name_segments": [
+                        "int"
+                    ]
+                },
+                "location": {
+                    "line": 9,
+                    "column": 14
+                }
+            },
+            "has_initializer": true,
+            "expression_ids": [
+                4
+            ]
+        },
+        {
+            "id": 5,
+            "kind": "assignment",
+            "name": "result",
+            "has_value": true,
+            "expression_ids": [
+                5
+            ]
+        },
+        {
+            "id": 6,
+            "kind": "assignment",
+            "name": "result",
+            "has_value": true,
+            "expression_ids": [
+                10
+            ]
+        },
+        {
+            "id": 7,
+            "kind": "assignment",
+            "name": "result",
+            "has_value": true,
+            "expression_ids": [
+                15
+            ]
+        },
+        {
+            "id": 8,
+            "kind": "assignment",
+            "name": "result",
+            "has_value": true,
+            "expression_ids": [
+                20
+            ]
+        },
+        {
+            "id": 9,
+            "kind": "assignment",
+            "name": "result",
+            "has_value": true,
+            "expression_ids": [
+                25
+            ]
+        },
+        {
+            "id": 10,
+            "kind": "assignment",
+            "name": "result",
+            "has_value": true,
+            "expression_ids": [
+                30
+            ]
+        },
+        {
+            "id": 11,
+            "kind": "assignment",
+            "name": "result",
+            "has_value": true,
+            "expression_ids": [
+                35
+            ]
+        },
+        {
+            "id": 12,
+            "kind": "assignment",
+            "name": "result",
+            "has_value": true,
+            "expression_ids": [
+                40
+            ]
+        },
+        {
+            "id": 13,
+            "kind": "assignment",
+            "name": "result",
+            "has_value": true,
+            "expression_ids": [
+                44
+            ]
+        },
+        {
+            "id": 14,
+            "kind": "assignment",
+            "name": "result",
+            "has_value": true,
+            "expression_ids": [
+                48
+            ]
+        },
+        {
+            "id": 15,
+            "kind": "assignment",
+            "name": "result",
+            "has_value": true,
+            "expression_ids": [
+                52
+            ]
+        },
+        {
+            "id": 16,
+            "kind": "assignment",
+            "name": "result",
+            "has_value": true,
+            "expression_ids": [
+                55
+            ]
+        },
+        {
+            "id": 17,
+            "kind": "assignment",
+            "name": "result",
+            "has_value": true,
+            "expression_ids": [
+                62
+            ]
+        },
+        {
+            "id": 18,
+            "kind": "assignment",
+            "name": "result",
+            "has_value": true,
+            "expression_ids": [
+                69
+            ]
+        },
+        {
+            "id": 19,
+            "kind": "assignment",
+            "name": "result",
+            "has_value": true,
+            "expression_ids": [
+                75
+            ]
+        },
+        {
+            "id": 20,
+            "kind": "assignment",
+            "name": "result",
+            "has_value": true,
+            "expression_ids": [
+                81
+            ]
+        },
+        {
+            "id": 21,
+            "kind": "assignment",
+            "name": "result",
+            "has_value": true,
+            "expression_ids": [
+                87
+            ]
+        },
+        {
+            "id": 22,
+            "kind": "assignment",
+            "name": "result",
+            "has_value": true,
+            "expression_ids": [
+                91
+            ]
+        },
+        {
+            "id": 23,
+            "kind": "assignment",
+            "name": "result",
+            "has_value": true,
+            "expression_ids": [
+                96
+            ]
+        },
+        {
+            "id": 24,
+            "kind": "assignment",
+            "name": "result",
+            "has_value": true,
+            "expression_ids": [
+                113
+            ]
+        },
+        {
+            "id": 25,
+            "kind": "if",
+            "has_condition": true,
+            "expression_ids": [
+                104
+            ],
+            "condition": 104,
+            "then_block": 1,
+            "else_arm": null
+        }
+    ],
+    "block_pool_size": 2,
+    "block_pool": [
+        {
+            "id": 0,
+            "statements": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
+                11,
+                12,
+                13,
+                14,
+                15,
+                16,
+                17,
+                18,
+                19,
+                20,
+                21,
+                22,
+                23,
+                25
+            ]
+        },
+        {
+            "id": 1,
+            "statements": [
+                24
+            ]
         }
     ]
 }

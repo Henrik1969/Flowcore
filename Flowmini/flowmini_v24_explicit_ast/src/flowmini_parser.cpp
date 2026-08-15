@@ -1744,12 +1744,16 @@ private:
         const bool hasElse = match(TokenKind::KeywordElse);
         if (!hasElse) { pos_ = afterTrueBrace; }
         if (hasElse) {
-            expect(TokenKind::LeftBrace, "expected '{' after else");
-            skipNewlines();
-            enterScope("if" + std::to_string(ifIndex) + "_false");
-            falseBody = parseBlockStatementsUntilRightBrace();
-            leaveScope();
-            if (falseBody.empty) { fail(peek(), "else block may not be empty in flowmini v11"); }
+            if (check(TokenKind::KeywordIf)) {
+                falseBody = parseIfStatement();
+            } else {
+                expect(TokenKind::LeftBrace, "expected '{' or 'if' after else");
+                skipNewlines();
+                enterScope("if" + std::to_string(ifIndex) + "_false");
+                falseBody = parseBlockStatementsUntilRightBrace();
+                leaveScope();
+                if (falseBody.empty) { fail(peek(), "else block may not be empty in flowmini v11"); }
+            }
         }
 
         const std::string joinId = generatedId("if" + std::to_string(ifIndex) + "_join");
