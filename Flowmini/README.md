@@ -27,10 +27,10 @@ Flowmini is experimental and unfinished.
 ```text
 lexer/token groundwork             usable
 TokenTree/source structure          observable
-explicit AST                        declaration/expression/statement arenas; coverage incomplete
+explicit AST                        v0.24 raw-frontend coverage gate passed
 recursive expression AST            implemented and golden-guarded
 C5 typed statements/blocks          complete
-structural SymbolTable projection   proven, coverage incomplete
+structural SymbolTable projection   factual export and origins golden-guarded
 canonical type policy               binding, runtime unimplemented
 semantic analysis                   mostly future work
 type checking                       mostly future work
@@ -121,6 +121,7 @@ Expected current result:
 normal CMake/Ninja build:      PASS
 flowmini_ast_golden_tests:     PASS (26)
 flowmini_symbol_projection:    PASS (11/11)
+flowmini_frontend_bundle:      PASS (5 golden, 1 isolated, 11 negative)
 flowmini_suite:                PASS (78/78)
 CTest:                         PASS (2/2)
 ```

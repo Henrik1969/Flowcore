@@ -11,18 +11,18 @@ v24_explicit_ast
 build: OK
 AST golden tests: 26 / 26
 Symbol projection tests: 11 / 11
+Frontend bundle tests: 5 golden, 1 isolated, 11 negative
 suite: 78 / 78
 CTest: 2 / 2
 ```
 
 ## Immediate
 
-1. Maintain and close the
-   [v0.24 accepted-language coverage matrix](v0.24-accepted-language-coverage.md).
-2. Complete raw-AST coverage for the accepted language.
-3. Complete the structural, lossless SymbolTable projection.
-4. Mature identities, ownership invariants, source links, and frontend tests.
-5. Begin semantic analysis only after that frontend border is trustworthy.
+1. Preserve the passed v0.24 raw frontend/export checkpoint.
+2. Decide and document the exact v0.25 activation operation before changing
+   branch, directory, or version metadata.
+3. Continue SymbolTable maturation without beginning semantic interpretation
+   until the next milestone is explicitly activated.
 
 ## Next structural versions
 
@@ -40,6 +40,8 @@ unknown placeholders; structurally valid but semantically invalid programs can
 still be represented; ownership, identity, parentage, source provenance, and
 arena references are validated; focused goldens and the complete regression
 suite pass; and current-state documentation describes the boundary truthfully.
+
+This exit rule passed and was formally declared closed on 2026-08-16.
 
 ### Provisional next label: v25_symboltable_from_ast
 

@@ -42,11 +42,13 @@ add_executable(flowmini
         src/flowmini_ast.cpp
         src/flowmini_ast_builder.cpp
         src/flowmini_symbol_projection.cpp
+        src/flowmini_frontend_bundle.cpp
         src/main.cpp
 
         include/flowmini_ast.h
         include/flowmini_ast_builder.h
         include/flowmini_symbol_projection.h
+        include/flowmini_frontend_bundle.h
 )
 
 target_include_directories(flowmini PRIVATE
@@ -174,6 +176,17 @@ add_custom_target(flowmini_dump_ast_symbols
     VERBATIM
 )
 
+add_custom_target(flowmini_dump_frontend_bundle
+    COMMAND
+        $<TARGET_FILE:flowmini>
+        --dump-frontend-bundle
+        examples/ast/type_reference_probe.flow
+    DEPENDS flowmini
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    COMMENT "Dumping Flowmini frontend bundle JSON"
+    VERBATIM
+)
+
 add_custom_target(flowmini_symbol_projection_tests
     COMMAND
         ${CMAKE_COMMAND} -E env
@@ -183,6 +196,18 @@ add_custom_target(flowmini_symbol_projection_tests
     DEPENDS flowmini
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     COMMENT "Running Flowmini AST SymbolTable projection golden tests"
+    VERBATIM
+)
+
+add_custom_target(flowmini_frontend_bundle_tests
+    COMMAND
+        ${CMAKE_COMMAND} -E env
+        FLOWMINI_ROOT=${CMAKE_SOURCE_DIR}
+        FLOWMINI_BIN=$<TARGET_FILE:flowmini>
+        ${CMAKE_SOURCE_DIR}/tools/run-flowmini-frontend-bundle-tests.sh
+    DEPENDS flowmini
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    COMMENT "Running independent Flowmini frontend bundle consumer tests"
     VERBATIM
 )
 

@@ -9,6 +9,30 @@
 namespace flowmini::ast {
 namespace {
 
+void record_symbol_origin(std::vector<SymbolAstOrigin>& origins,
+                          const symboltable::SymbolId symbol,
+                          std::string astPath) {
+    origins.push_back(SymbolAstOrigin{symbol, std::move(astPath)});
+}
+
+void record_scope_origin(std::vector<ScopeAstOrigin>& origins,
+                         const symboltable::ScopeId scope,
+                         std::string astPath) {
+    origins.push_back(ScopeAstOrigin{scope, std::move(astPath)});
+}
+
+std::string declaration_ast_path(const DeclarationId declarationId) {
+    return "/declaration_pool/" + std::to_string(declarationId);
+}
+
+std::string statement_ast_path(const StatementId statementId) {
+    return "/statement_pool/" + std::to_string(statementId);
+}
+
+std::string block_ast_path(const BlockId blockId) {
+    return "/block_pool/" + std::to_string(blockId);
+}
+
 symboltable::SourceLocation project_source_location(const SourceLocation& location) {
     return symboltable::SourceLocation{
         .file = {},
@@ -76,7 +100,9 @@ symboltable::SymbolKind source_unit_symbol_kind(const SourceUnitKind kind) {
 
 void project_import_decl(symboltable::SymbolTable& table,
                          const symboltable::ScopeId moduleScope,
-                         const ImportDecl& decl) {
+                         const ImportDecl& decl,
+                         std::vector<SymbolAstOrigin>& symbolOrigins,
+                         const std::string& astPath) {
     const auto name = decl.module_name.empty()
         ? std::string{"<anonymous-import>"}
         : decl.module_name;
@@ -84,6 +110,7 @@ void project_import_decl(symboltable::SymbolTable& table,
     const auto importSymbol =
         table.insertSymbol(moduleScope, name, symboltable::SymbolKind::Import);
     set_declaration_location(table, importSymbol, decl.location);
+    record_symbol_origin(symbolOrigins, importSymbol, astPath);
 }
 
 
@@ -98,12 +125,16 @@ std::string statement_scope_debug_name(const Statement& statement) {
 void project_block(symboltable::SymbolTable& table,
                    const AstModule& module,
                    symboltable::ScopeId owningScope,
-                   BlockId blockId);
+                   BlockId blockId,
+                   std::vector<SymbolAstOrigin>& symbolOrigins,
+                   std::vector<ScopeAstOrigin>& scopeOrigins);
 
 void project_statement_binding(symboltable::SymbolTable& table,
                                const AstModule& module,
                                const symboltable::ScopeId owningScope,
-                               const StatementId statementId) {
+                               const StatementId statementId,
+                               std::vector<SymbolAstOrigin>& symbolOrigins,
+                               std::vector<ScopeAstOrigin>& scopeOrigins) {
     if (statementId >= module.statement_pool.size()) {
         return;
     }
@@ -116,6 +147,7 @@ void project_statement_binding(symboltable::SymbolTable& table,
                                binding->name,
                                symboltable::SymbolKind::Variable);
         set_declaration_location(table, variableSymbol, statement.location);
+        record_symbol_origin(symbolOrigins, variableSymbol, statement_ast_path(statementId));
         add_type_spelling_fact(table,
                                variableSymbol,
                                "declared_type_spelling",
@@ -138,7 +170,9 @@ void project_statement_binding(symboltable::SymbolTable& table,
                               std::nullopt,
                               statement_scope_debug_name(statement));
 
-        project_block(table, module, blockScope, *body);
+        record_scope_origin(scopeOrigins, blockScope, block_ast_path(*body));
+
+        project_block(table, module, blockScope, *body, symbolOrigins, scopeOrigins);
     }
 
     if (elseArm && *elseArm) {
@@ -149,10 +183,23 @@ void project_statement_binding(symboltable::SymbolTable& table,
                                       owningScope,
                                       std::nullopt,
                                       "else");
-                project_block(table, module, elseScope, elseBlock->block);
+                record_scope_origin(scopeOrigins,
+                                    elseScope,
+                                    block_ast_path(elseBlock->block));
+                project_block(table,
+                              module,
+                              elseScope,
+                              elseBlock->block,
+                              symbolOrigins,
+                              scopeOrigins);
             }
         } else if (const auto* elseIf = std::get_if<ElseIf>(&**elseArm)) {
-            project_statement_binding(table, module, owningScope, elseIf->if_statement);
+            project_statement_binding(table,
+                                      module,
+                                      owningScope,
+                                      elseIf->if_statement,
+                                      symbolOrigins,
+                                      scopeOrigins);
         }
     }
 }
@@ -160,12 +207,19 @@ void project_statement_binding(symboltable::SymbolTable& table,
 void project_block(symboltable::SymbolTable& table,
                    const AstModule& module,
                    const symboltable::ScopeId owningScope,
-                   const BlockId blockId) {
+                   const BlockId blockId,
+                   std::vector<SymbolAstOrigin>& symbolOrigins,
+                   std::vector<ScopeAstOrigin>& scopeOrigins) {
     if (blockId >= module.block_pool.size()) {
         return;
     }
     for (const auto statementId : module.block_pool[blockId].statements) {
-        project_statement_binding(table, module, owningScope, statementId);
+        project_statement_binding(table,
+                                  module,
+                                  owningScope,
+                                  statementId,
+                                  symbolOrigins,
+                                  scopeOrigins);
     }
 }
 
@@ -173,7 +227,10 @@ void project_block(symboltable::SymbolTable& table,
 void project_function_decl(symboltable::SymbolTable& table,
                            const AstModule& module,
                            const symboltable::ScopeId moduleScope,
-                           const FunctionDecl& decl) {
+                           const FunctionDecl& decl,
+                           std::vector<SymbolAstOrigin>& symbolOrigins,
+                           std::vector<ScopeAstOrigin>& scopeOrigins,
+                           const std::string& astPath) {
     const auto name = decl.name.empty()
         ? std::string{"<anonymous-function>"}
         : decl.name;
@@ -181,6 +238,7 @@ void project_function_decl(symboltable::SymbolTable& table,
     const auto fnSymbol =
         table.insertSymbol(moduleScope, name, symboltable::SymbolKind::Function);
     set_declaration_location(table, fnSymbol, decl.location);
+    record_symbol_origin(symbolOrigins, fnSymbol, astPath);
     add_type_spelling_fact(table,
                            fnSymbol,
                            "return_type_spelling",
@@ -191,8 +249,10 @@ void project_function_decl(symboltable::SymbolTable& table,
                           moduleScope,
                           fnSymbol,
                           name);
+    record_scope_origin(scopeOrigins, fnScope, astPath);
 
-    for (const auto& parameter : decl.parameters) {
+    for (std::size_t parameterIndex = 0; parameterIndex < decl.parameters.size(); ++parameterIndex) {
+        const auto& parameter = decl.parameters[parameterIndex];
         if (parameter.name.empty()) {
             continue;
         }
@@ -202,6 +262,9 @@ void project_function_decl(symboltable::SymbolTable& table,
                                parameter.name,
                                symboltable::SymbolKind::Parameter);
         set_declaration_location(table, parameterSymbol, parameter.location);
+        record_symbol_origin(symbolOrigins,
+                             parameterSymbol,
+                             astPath + "/parameters/" + std::to_string(parameterIndex));
         add_type_spelling_fact(table,
                                parameterSymbol,
                                "declared_type_spelling",
@@ -209,13 +272,21 @@ void project_function_decl(symboltable::SymbolTable& table,
     }
 
     if (decl.body) {
-        project_block(table, module, fnScope, *decl.body);
+        project_block(table,
+                      module,
+                      fnScope,
+                      *decl.body,
+                      symbolOrigins,
+                      scopeOrigins);
     }
 }
 
 void project_record_decl(symboltable::SymbolTable& table,
                          const symboltable::ScopeId moduleScope,
-                         const RecordDecl& decl) {
+                         const RecordDecl& decl,
+                         std::vector<SymbolAstOrigin>& symbolOrigins,
+                         std::vector<ScopeAstOrigin>& scopeOrigins,
+                         const std::string& astPath) {
     const auto name = decl.name.empty()
         ? std::string{"<anonymous-record>"}
         : decl.name;
@@ -223,14 +294,17 @@ void project_record_decl(symboltable::SymbolTable& table,
     const auto recordSymbol =
         table.insertSymbol(moduleScope, name, symboltable::SymbolKind::Struct);
     set_declaration_location(table, recordSymbol, decl.location);
+    record_symbol_origin(symbolOrigins, recordSymbol, astPath);
 
     const auto recordScope =
         table.createScope(symboltable::ScopeKind::Struct,
                           moduleScope,
                           recordSymbol,
                           name);
+    record_scope_origin(scopeOrigins, recordScope, astPath);
 
-    for (const auto& field : decl.fields) {
+    for (std::size_t fieldIndex = 0; fieldIndex < decl.fields.size(); ++fieldIndex) {
+        const auto& field = decl.fields[fieldIndex];
         if (field.name.empty()) {
             continue;
         }
@@ -240,6 +314,9 @@ void project_record_decl(symboltable::SymbolTable& table,
                                field.name,
                                symboltable::SymbolKind::Field);
         set_declaration_location(table, fieldSymbol, field.location);
+        record_symbol_origin(symbolOrigins,
+                             fieldSymbol,
+                             astPath + "/fields/" + std::to_string(fieldIndex));
         add_type_spelling_fact(table,
                                fieldSymbol,
                                "declared_type_spelling",
@@ -250,7 +327,9 @@ void project_record_decl(symboltable::SymbolTable& table,
 void project_refined_type_decl(symboltable::SymbolTable& table,
                                const AstModule& module,
                                const symboltable::ScopeId moduleScope,
-                               const RefinedTypeDecl& decl) {
+                               const RefinedTypeDecl& decl,
+                               std::vector<SymbolAstOrigin>& symbolOrigins,
+                               const std::string& astPath) {
     const auto name = decl.name.empty()
         ? std::string{"<anonymous-refined-type>"}
         : decl.name;
@@ -258,6 +337,7 @@ void project_refined_type_decl(symboltable::SymbolTable& table,
     const auto typeSymbol =
         table.insertSymbol(moduleScope, name, symboltable::SymbolKind::Type);
     set_declaration_location(table, typeSymbol, decl.location);
+    record_symbol_origin(symbolOrigins, typeSymbol, astPath);
     add_type_spelling_fact(table,
                            typeSymbol,
                            "base_type_spelling",
@@ -278,7 +358,10 @@ void project_refined_type_decl(symboltable::SymbolTable& table,
 
 void project_abi_decl(symboltable::SymbolTable& table,
                       const symboltable::ScopeId moduleScope,
-                      const AbiDecl& decl) {
+                      const AbiDecl& decl,
+                      std::vector<SymbolAstOrigin>& symbolOrigins,
+                      std::vector<ScopeAstOrigin>& scopeOrigins,
+                      const std::string& astPath) {
     const auto name = decl.name.empty()
         ? std::string{"<anonymous-abi>"}
         : decl.name;
@@ -286,14 +369,18 @@ void project_abi_decl(symboltable::SymbolTable& table,
     const auto abiSymbol =
         table.insertSymbol(moduleScope, name, symboltable::SymbolKind::Contract);
     set_declaration_location(table, abiSymbol, decl.location);
+    record_symbol_origin(symbolOrigins, abiSymbol, astPath);
 
     const auto abiScope =
         table.createScope(symboltable::ScopeKind::Contract,
                           moduleScope,
                           abiSymbol,
                           name);
+    record_scope_origin(scopeOrigins, abiScope, astPath);
 
-    for (const auto& member : decl.members) {
+    for (std::size_t memberIndex = 0; memberIndex < decl.members.size(); ++memberIndex) {
+        const auto& member = decl.members[memberIndex];
+        const auto memberPath = astPath + "/members/" + std::to_string(memberIndex);
         std::visit([&](const auto& value) {
             using Member = std::decay_t<decltype(value)>;
             if constexpr (std::is_same_v<Member, AbiLibraryClause>) {
@@ -315,6 +402,7 @@ void project_abi_decl(symboltable::SymbolTable& table,
                 const auto typeSymbol =
                     table.insertSymbol(abiScope, typeName, symboltable::SymbolKind::Type);
                 set_declaration_location(table, typeSymbol, value.location);
+                record_symbol_origin(symbolOrigins, typeSymbol, memberPath);
 
                 for (const auto& property : value.properties) {
                     std::visit([&](const auto& clause) {
@@ -349,12 +437,15 @@ void project_abi_decl(symboltable::SymbolTable& table,
                 const auto structSymbol =
                     table.insertSymbol(abiScope, structName, symboltable::SymbolKind::Struct);
                 set_declaration_location(table, structSymbol, value.location);
+                record_symbol_origin(symbolOrigins, structSymbol, memberPath);
                 const auto structScope =
                     table.createScope(symboltable::ScopeKind::Struct,
                                       abiScope,
                                       structSymbol,
                                       structName);
-                for (const auto& field : value.fields) {
+                record_scope_origin(scopeOrigins, structScope, memberPath);
+                for (std::size_t fieldIndex = 0; fieldIndex < value.fields.size(); ++fieldIndex) {
+                    const auto& field = value.fields[fieldIndex];
                     if (field.name.empty()) {
                         continue;
                     }
@@ -363,6 +454,9 @@ void project_abi_decl(symboltable::SymbolTable& table,
                                            field.name,
                                            symboltable::SymbolKind::Field);
                     set_declaration_location(table, fieldSymbol, field.location);
+                    record_symbol_origin(symbolOrigins,
+                                         fieldSymbol,
+                                         memberPath + "/fields/" + std::to_string(fieldIndex));
                     add_type_spelling_fact(table,
                                            fieldSymbol,
                                            "declared_type_spelling",
@@ -377,6 +471,7 @@ void project_abi_decl(symboltable::SymbolTable& table,
                                        functionName,
                                        symboltable::SymbolKind::Function);
                 set_declaration_location(table, functionSymbol, value.location);
+                record_symbol_origin(symbolOrigins, functionSymbol, memberPath);
                 add_type_spelling_fact(table,
                                        functionSymbol,
                                        "return_type_spelling",
@@ -400,7 +495,11 @@ void project_abi_decl(symboltable::SymbolTable& table,
                                       abiScope,
                                       functionSymbol,
                                       functionName);
-                for (const auto& parameter : value.parameters) {
+                record_scope_origin(scopeOrigins, functionScope, memberPath);
+                for (std::size_t parameterIndex = 0;
+                     parameterIndex < value.parameters.size();
+                     ++parameterIndex) {
+                    const auto& parameter = value.parameters[parameterIndex];
                     if (parameter.name.empty()) {
                         continue;
                     }
@@ -409,6 +508,10 @@ void project_abi_decl(symboltable::SymbolTable& table,
                                            parameter.name,
                                            symboltable::SymbolKind::Parameter);
                     set_declaration_location(table, parameterSymbol, parameter.location);
+                    record_symbol_origin(symbolOrigins,
+                                         parameterSymbol,
+                                         memberPath + "/parameters/" +
+                                             std::to_string(parameterIndex));
                     add_type_spelling_fact(table,
                                            parameterSymbol,
                                            "declared_type_spelling",
@@ -422,21 +525,31 @@ void project_abi_decl(symboltable::SymbolTable& table,
 void project_main_block(symboltable::SymbolTable& table,
                         const AstModule& module,
                         const symboltable::ScopeId moduleScope,
-                        const MainBlock& decl) {
+                        const MainBlock& decl,
+                        std::vector<SymbolAstOrigin>& symbolOrigins,
+                        std::vector<ScopeAstOrigin>& scopeOrigins,
+                        const std::string& astPath) {
     constexpr auto name = "main";
 
     const auto mainSymbol =
         table.insertSymbol(moduleScope, name, symboltable::SymbolKind::Procedure);
     set_declaration_location(table, mainSymbol, decl.location);
+    record_symbol_origin(symbolOrigins, mainSymbol, astPath);
 
     const auto mainScope =
         table.createScope(symboltable::ScopeKind::Function,
                           moduleScope,
                           mainSymbol,
                           name);
+    record_scope_origin(scopeOrigins, mainScope, astPath);
 
     if (decl.body) {
-        project_block(table, module, mainScope, *decl.body);
+        project_block(table,
+                      module,
+                      mainScope,
+                      *decl.body,
+                      symbolOrigins,
+                      scopeOrigins);
     }
 }
 
@@ -444,36 +557,67 @@ struct ProjectTopLevelDecl {
     symboltable::SymbolTable& table;
     const AstModule& module;
     symboltable::ScopeId moduleScope;
+    std::vector<SymbolAstOrigin>& symbolOrigins;
+    std::vector<ScopeAstOrigin>& scopeOrigins;
+    std::string astPath;
 
     void operator()(const ImportDecl& decl) const {
-        project_import_decl(table, moduleScope, decl);
+        project_import_decl(table, moduleScope, decl, symbolOrigins, astPath);
     }
 
     void operator()(const FunctionDecl& decl) const {
-        project_function_decl(table, module, moduleScope, decl);
+        project_function_decl(table,
+                              module,
+                              moduleScope,
+                              decl,
+                              symbolOrigins,
+                              scopeOrigins,
+                              astPath);
     }
 
     void operator()(const RecordDecl& decl) const {
-        project_record_decl(table, moduleScope, decl);
+        project_record_decl(table,
+                            moduleScope,
+                            decl,
+                            symbolOrigins,
+                            scopeOrigins,
+                            astPath);
     }
 
     void operator()(const RefinedTypeDecl& decl) const {
-        project_refined_type_decl(table, module, moduleScope, decl);
+        project_refined_type_decl(table,
+                                  module,
+                                  moduleScope,
+                                  decl,
+                                  symbolOrigins,
+                                  astPath);
     }
 
     void operator()(const AbiDecl& decl) const {
-        project_abi_decl(table, moduleScope, decl);
+        project_abi_decl(table,
+                         moduleScope,
+                         decl,
+                         symbolOrigins,
+                         scopeOrigins,
+                         astPath);
     }
 
     void operator()(const MainBlock& decl) const {
-        project_main_block(table, module, moduleScope, decl);
+        project_main_block(table,
+                           module,
+                           moduleScope,
+                           decl,
+                           symbolOrigins,
+                           scopeOrigins,
+                           astPath);
     }
 };
 
 } // namespace
 
-symboltable::SymbolTable build_symbol_table_projection(const AstModule& module) {
-    symboltable::SymbolTable table;
+SymbolProjection build_symbol_projection(const AstModule& module) {
+    SymbolProjection projection;
+    auto& table = projection.table;
 
     const auto global = table.globalScope();
     const auto moduleName = source_unit_debug_name(module.source_unit);
@@ -483,6 +627,7 @@ symboltable::SymbolTable build_symbol_table_projection(const AstModule& module) 
                            moduleName,
                            source_unit_symbol_kind(module.source_unit.kind));
     set_declaration_location(table, moduleSymbol, module.source_unit.location);
+    record_symbol_origin(projection.symbol_origins, moduleSymbol, "/source_unit");
     add_string_fact(table,
                     moduleSymbol,
                     symboltable::FactoidKind::Custom,
@@ -494,16 +639,28 @@ symboltable::SymbolTable build_symbol_table_projection(const AstModule& module) 
                           global,
                           moduleSymbol,
                           moduleName);
+    record_scope_origin(projection.scope_origins, moduleScope, "/source_unit");
 
     for (const auto declarationId : module.source_unit.declarations) {
         if (declarationId >= module.declaration_pool.size()) {
             continue;
         }
-        std::visit(ProjectTopLevelDecl{table, module, moduleScope},
+        std::visit(ProjectTopLevelDecl{
+                       table,
+                       module,
+                       moduleScope,
+                       projection.symbol_origins,
+                       projection.scope_origins,
+                       declaration_ast_path(declarationId),
+                   },
                    module.declaration_pool[declarationId]);
     }
 
-    return table;
+    return projection;
+}
+
+symboltable::SymbolTable build_symbol_table_projection(const AstModule& module) {
+    return build_symbol_projection(module).table;
 }
 
 } // namespace flowmini::ast

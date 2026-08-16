@@ -10,7 +10,7 @@ Current milestone:
 
 ```text
 Flowmini v0.24 explicit AST
-raw frontend maturation; C5 typed statements complete
+raw frontend/export border passed; C5 typed statements complete
 ```
 
 ## Status
@@ -19,6 +19,7 @@ raw frontend maturation; C5 typed statements complete
 normal CMake/Ninja build:      PASS
 flowmini_ast_golden_tests:     PASS (26)
 flowmini_symbol_projection:    PASS (11/11)
+flowmini_frontend_bundle:      PASS (5 golden, 1 isolated, 11 negative)
 flowmini_suite:                PASS (78/78)
 CTest:                         PASS (2/2)
 ```
@@ -36,9 +37,9 @@ locations, source-unit kind, and unresolved declared/return/refined/ABI type
 spellings and contract clauses for represented AST forms. Refined declarations
 own invariant expression IDs; ABI blocks own ordered library, convention, type,
 struct, and extern members. Projection performs no type resolution, contract
-checking, effect interpretation, or ABI lowering. The frontend is
-still not a complete raw representation of the accepted language because other
-matrix gaps remain.
+checking, effect interpretation, or ABI lowering. On 2026-08-16 the project
+owner formally declared the v0.24 raw frontend/export border passed after the
+accepted-language matrix, independent-consumer gate, and Tier 3 Firetest passed.
 
 Top-level declarations have stable `DeclarationId` values in a canonical arena.
 The source unit owns each declaration exactly once. Type references, fields,
@@ -76,6 +77,7 @@ Expected result:
 normal CMake/Ninja build:      PASS
 flowmini_ast_golden_tests:     PASS (26)
 flowmini_symbol_projection:    PASS (11/11)
+flowmini_frontend_bundle:      PASS (5 golden, 1 isolated, 11 negative)
 flowmini_suite:                PASS (78/78)
 CTest:                         PASS (2/2)
 ```
@@ -128,12 +130,10 @@ docs/language/named-targets.md
 The following are still future or incomplete work:
 
 ```text
-complete statement coverage for the accepted language
 ordinary capability/provider call model for output; no core Print statement
-complete structural SymbolTable projection across the accepted language
-stable AST-declaration and SymbolTable cross-links
 semantic name resolution
 type checking
+contract and refined-type validation
 Graph IR lowering
 runtime execution semantics
 provider/capability resolution

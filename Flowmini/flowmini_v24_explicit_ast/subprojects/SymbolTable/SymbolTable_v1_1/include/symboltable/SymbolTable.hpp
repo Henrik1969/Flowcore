@@ -58,6 +58,7 @@ public:
     [[nodiscard]] Scope& scope(ScopeId id);
 
     void dump(std::ostream& out) const;
+    void dumpJson(std::ostream& out) const;
 
 private:
     [[nodiscard]] bool isValidSymbolId(SymbolId id) const noexcept;

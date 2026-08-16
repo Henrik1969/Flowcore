@@ -1,6 +1,8 @@
 #include "symboltable/SymbolTable.hpp"
 
+#include <cmath>
 #include <iomanip>
+#include <limits>
 #include <stdexcept>
 #include <type_traits>
 #include <utility>
@@ -73,6 +75,126 @@ namespace {
         case FactoidKind::Custom:           return "Custom";
     }
     return "Custom";
+}
+
+[[nodiscard]] std::string_view toString(Visibility visibility) noexcept {
+    switch (visibility) {
+        case Visibility::Unspecified: return "Unspecified";
+        case Visibility::Public:      return "Public";
+        case Visibility::Protected:   return "Protected";
+        case Visibility::Private:     return "Private";
+        case Visibility::Internal:    return "Internal";
+        case Visibility::Local:       return "Local";
+    }
+    return "Unspecified";
+}
+
+[[nodiscard]] std::string_view toString(DefinitionState state) noexcept {
+    switch (state) {
+        case DefinitionState::Unknown:         return "Unknown";
+        case DefinitionState::Declared:        return "Declared";
+        case DefinitionState::Defined:         return "Defined";
+        case DefinitionState::ForwardDeclared: return "ForwardDeclared";
+        case DefinitionState::Imported:        return "Imported";
+        case DefinitionState::External:        return "External";
+    }
+    return "Unknown";
+}
+
+void dumpJsonString(std::ostream& out, const std::string_view value)
+{
+    out << '"';
+    for (const unsigned char ch : value) {
+        switch (ch) {
+            case '"': out << "\\\""; break;
+            case '\\': out << "\\\\"; break;
+            case '\b': out << "\\b"; break;
+            case '\f': out << "\\f"; break;
+            case '\n': out << "\\n"; break;
+            case '\r': out << "\\r"; break;
+            case '\t': out << "\\t"; break;
+            default:
+                if (ch < 0x20) {
+                    out << "\\u00"
+                        << std::hex << std::setw(2) << std::setfill('0')
+                        << static_cast<unsigned int>(ch)
+                        << std::dec << std::setfill(' ');
+                } else {
+                    out << static_cast<char>(ch);
+                }
+        }
+    }
+    out << '"';
+}
+
+void dumpJsonLocation(std::ostream& out, const SourceLocation& location)
+{
+    out << "{\"file\": ";
+    dumpJsonString(out, location.file);
+    out << ", \"line\": " << location.line
+        << ", \"column\": " << location.column << '}';
+}
+
+template <typename Id>
+void dumpJsonOptionalId(std::ostream& out, const std::optional<Id>& id)
+{
+    if (id) {
+        out << id->value;
+    } else {
+        out << "null";
+    }
+}
+
+template <typename Id>
+void dumpJsonIds(std::ostream& out, const std::vector<Id>& ids)
+{
+    out << '[';
+    for (std::size_t index = 0; index < ids.size(); ++index) {
+        if (index != 0) {
+            out << ", ";
+        }
+        out << ids[index].value;
+    }
+    out << ']';
+}
+
+void dumpJsonFactoidValue(std::ostream& out, const FactoidValue& factValue)
+{
+    std::visit([&out](const auto& value) {
+        using Value = std::decay_t<decltype(value)>;
+        if constexpr (std::is_same_v<Value, std::monostate>) {
+            out << "{\"type\": \"null\", \"value\": null}";
+        } else if constexpr (std::is_same_v<Value, bool>) {
+            out << "{\"type\": \"bool\", \"value\": "
+                << (value ? "true" : "false") << '}';
+        } else if constexpr (std::is_same_v<Value, std::int64_t>) {
+            out << "{\"type\": \"int64\", \"value\": " << value << '}';
+        } else if constexpr (std::is_same_v<Value, double>) {
+            out << "{\"type\": \"double\", \"value\": ";
+            if (std::isfinite(value)) {
+                out << std::setprecision(std::numeric_limits<double>::max_digits10) << value;
+            } else if (std::isnan(value)) {
+                out << "\"nan\"";
+            } else if (value > 0.0) {
+                out << "\"positive_infinity\"";
+            } else {
+                out << "\"negative_infinity\"";
+            }
+            out << '}';
+        } else if constexpr (std::is_same_v<Value, std::string>) {
+            out << "{\"type\": \"string\", \"value\": ";
+            dumpJsonString(out, value);
+            out << '}';
+        } else if constexpr (std::is_same_v<Value, SymbolId>) {
+            out << "{\"type\": \"symbol_id\", \"value\": " << value.value << '}';
+        } else if constexpr (std::is_same_v<Value, ScopeId>) {
+            out << "{\"type\": \"scope_id\", \"value\": " << value.value << '}';
+        } else if constexpr (std::is_same_v<Value, SourceLocation>) {
+            out << "{\"type\": \"source_location\", \"value\": ";
+            dumpJsonLocation(out, value);
+            out << '}';
+        }
+    }, factValue);
 }
 
 void dumpSourceLocation(std::ostream& out, const SourceLocation& location)
@@ -296,6 +418,89 @@ void SymbolTable::dump(std::ostream& out) const
             out << "\n";
         }
     }
+}
+
+void SymbolTable::dumpJson(std::ostream& out) const
+{
+    out << "{\n"
+        << "  \"format\": \"symboltable.snapshot\",\n"
+        << "  \"version\": 1,\n"
+        << "  \"global_scope_id\": " << globalScope_.value << ",\n"
+        << "  \"scopes\": [\n";
+
+    for (std::size_t index = 0; index < scopes_.size(); ++index) {
+        const auto& sc = scopes_[index];
+        out << "    {\"id\": " << sc.id.value << ", \"parent_id\": ";
+        dumpJsonOptionalId(out, sc.parent);
+        out << ", \"kind\": ";
+        dumpJsonString(out, toString(sc.kind));
+        out << ", \"owner_symbol_id\": ";
+        dumpJsonOptionalId(out, sc.ownerSymbol);
+        out << ", \"debug_name\": ";
+        dumpJsonString(out, sc.debugName);
+        out << ", \"child_scope_ids\": ";
+        dumpJsonIds(out, sc.children);
+        out << ", \"symbol_ids\": ";
+        dumpJsonIds(out, sc.symbols);
+        out << '}';
+        if (index + 1 < scopes_.size()) {
+            out << ',';
+        }
+        out << '\n';
+    }
+
+    out << "  ],\n"
+        << "  \"symbols\": [\n";
+
+    for (std::size_t index = 0; index < symbols_.size(); ++index) {
+        const auto& sym = symbols_[index];
+        out << "    {\"id\": " << sym.id.value
+            << ", \"owning_scope_id\": " << sym.owningScope.value
+            << ", \"name\": ";
+        dumpJsonString(out, sym.name);
+        out << ", \"kind\": ";
+        dumpJsonString(out, toString(sym.kind));
+        out << ", \"visibility\": ";
+        dumpJsonString(out, toString(sym.visibility));
+        out << ", \"definition_state\": ";
+        dumpJsonString(out, toString(sym.definitionState));
+        out << ", \"introduced_scope_id\": ";
+        dumpJsonOptionalId(out, sym.introducedScope);
+        out << ", \"declaration_location\": ";
+        if (sym.declarationLocation) {
+            dumpJsonLocation(out, *sym.declarationLocation);
+        } else {
+            out << "null";
+        }
+        out << ", \"definition_location\": ";
+        if (sym.definitionLocation) {
+            dumpJsonLocation(out, *sym.definitionLocation);
+        } else {
+            out << "null";
+        }
+        out << ", \"facts\": [";
+        for (std::size_t factIndex = 0; factIndex < sym.facts.size(); ++factIndex) {
+            const auto& fact = sym.facts[factIndex];
+            if (factIndex != 0) {
+                out << ", ";
+            }
+            out << "{\"kind\": ";
+            dumpJsonString(out, toString(fact.kind));
+            out << ", \"key\": ";
+            dumpJsonString(out, fact.key);
+            out << ", \"value\": ";
+            dumpJsonFactoidValue(out, fact.value);
+            out << '}';
+        }
+        out << "]}";
+        if (index + 1 < symbols_.size()) {
+            out << ',';
+        }
+        out << '\n';
+    }
+
+    out << "  ]\n"
+        << "}";
 }
 
 bool SymbolTable::isValidSymbolId(const SymbolId id) const noexcept

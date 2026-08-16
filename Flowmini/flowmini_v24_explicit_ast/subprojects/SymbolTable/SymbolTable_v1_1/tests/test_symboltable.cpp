@@ -4,6 +4,7 @@
 
 #include <cassert>
 #include <iostream>
+#include <limits>
 #include <sstream>
 #include <string>
 
@@ -171,6 +172,50 @@ static void test_dump()
         != std::string::npos);
 }
 
+static void test_json_dump()
+{
+    SymbolTable table;
+    const auto global = table.globalScope();
+    const auto fn = table.insertSymbol(global, "quoted\"name", SymbolKind::Function);
+    const auto fnScope = table.createScope(ScopeKind::Function, global, fn, "quoted\"name");
+    table.symbol(fn).declarationLocation = SourceLocation{"sample.flow", 4, 7};
+    table.addFact(fn, Factoid{
+        .kind = FactoidKind::TypeReference,
+        .key = "return_type_spelling",
+        .value = std::string{"result.Result<int64, Error>"},
+    });
+    table.addFact(fn, Factoid{
+        .kind = FactoidKind::Custom,
+        .key = "not_a_number",
+        .value = std::numeric_limits<double>::quiet_NaN(),
+    });
+    table.addFact(fn, Factoid{
+        .kind = FactoidKind::Custom,
+        .key = "positive_infinity",
+        .value = std::numeric_limits<double>::infinity(),
+    });
+    table.addFact(fn, Factoid{
+        .kind = FactoidKind::Custom,
+        .key = "negative_infinity",
+        .value = -std::numeric_limits<double>::infinity(),
+    });
+
+    std::ostringstream out;
+    table.dumpJson(out);
+    const auto text = out.str();
+    assert(text.find("\"format\": \"symboltable.snapshot\"") != std::string::npos);
+    assert(text.find("\"version\": 1") != std::string::npos);
+    assert(text.find("\"global_scope_id\": 1") != std::string::npos);
+    assert(text.find("\"introduced_scope_id\": " + std::to_string(fnScope.value))
+           != std::string::npos);
+    assert(text.find("quoted\\\"name") != std::string::npos);
+    assert(text.find("\"type\": \"string\"") != std::string::npos);
+    assert(text.find("result.Result<int64, Error>") != std::string::npos);
+    assert(text.find("\"value\": \"nan\"") != std::string::npos);
+    assert(text.find("\"value\": \"positive_infinity\"") != std::string::npos);
+    assert(text.find("\"value\": \"negative_infinity\"") != std::string::npos);
+}
+
 int main()
 {
     test_global_scope_exists();
@@ -182,6 +227,7 @@ int main()
     test_tree_view_expose_all_policy();
     test_tree_view_can_hide_private_factoids_without_mutating_table();
     test_dump();
+    test_json_dump();
 
     std::cout << "All SymbolTable v1.1 tests passed.\n";
     return 0;

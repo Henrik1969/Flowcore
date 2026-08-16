@@ -14,6 +14,7 @@ Current baseline:
 build: PASS
 AST golden tests: 26
 Symbol projection tests: 11
+Frontend bundle tests: 5 golden, 1 isolated, 11 negative
 suite: 78 / 78
 ```
 
@@ -33,9 +34,11 @@ Documents in this directory:
 - [Roadmap](roadmap.md)
 - [v0.24 accepted-language coverage matrix](v0.24-accepted-language-coverage.md)
 - [v0.24 canonical type policy](v0.24-type-policy.md)
+- [v0.24 frontend bundle contract](v0.24-frontend-bundle.md)
 - [C5 typed-statement sitrep](../../Flowmini/flowmini_v24_explicit_ast/docs/v0.24-c5-statement-payload-sitrep.md)
 - [Testing](testing.md)
 - [v0.24 frontend checkpoint Firetest report](v0.24-firetest-report.md)
+- [v0.24 frontend-border Firetest report](v0.24-frontend-border-firetest-report.md)
 - [Project-wide verification gates and Firetest policy](../development/verification-gates.md)
 
 Active v0.24 implementation notes:

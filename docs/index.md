@@ -46,5 +46,6 @@ Current checkpoint:
 Flowmini v0.24 explicit AST stabilization
 AST golden tests: 26
 Symbol projection tests: 11
+Frontend bundle tests: 5 golden, 1 isolated, 11 negative
 suite: 78 / 78
 ```

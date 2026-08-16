@@ -37,6 +37,7 @@ The canonical CMake-visible gates are:
 ```bash
 cmake --build cmake-build-debug --target flowmini_ast_golden_tests
 cmake --build cmake-build-debug --target flowmini_symbol_projection_tests
+cmake --build cmake-build-debug --target flowmini_frontend_bundle_tests
 cmake --build cmake-build-debug --target flowmini_suite
 ctest --test-dir cmake-build-debug --output-on-failure
 ```
@@ -46,6 +47,7 @@ Expected current baseline:
 ```text
 AST golden tests:          26 / 26
 Symbol projection tests:   11 / 11
+Frontend bundle tests:      5 golden / 1 isolated / 11 negative
 categorized suite:          78 / 78
 CTest:                       2 / 2
 ```
@@ -81,8 +83,10 @@ checkpoint evidence rather than permanent properties of the branch. A new
 greater-border claim requires a new Firetest report tied to the tested commit or
 working-tree state.
 
-The current checkpoint evidence is recorded in the
-[v0.24 frontend Firetest report](v0.24-firetest-report.md).
+The raw-frontend checkpoint evidence is recorded in the
+[v0.24 frontend Firetest report](v0.24-firetest-report.md). The independent
+export boundary has a separate
+[frontend-border Firetest report](v0.24-frontend-border-firetest-report.md).
 
 ## Current build-isolation limitation
 

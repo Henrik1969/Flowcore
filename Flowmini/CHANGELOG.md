@@ -14,7 +14,7 @@
 - Completed the C5 typed-statement migration, including explicit conditional,
   loop, placement, assignable-target, and return source-form ownership.
 - Added structural SymbolTable projection from the AST; current focused golden
-  coverage is 11/11 and remains incomplete across the accepted language.
+  coverage is 11/11 and the v0.24 factual export boundary is complete.
 - Added canonical refined-type declarations with invariant expressions and
   ordered ABI blocks containing library/convention clauses, ABI type contracts,
   ABI structs, and extern functions. Their SymbolTable projection remains
@@ -22,6 +22,12 @@
 - Established the accepted-language coverage matrix and canonical type policy.
 - Current gates: AST goldens 26/26, SymbolTable projections 11/11, suite 78/78,
   and CTest 2/2.
+- Added the versioned `flowmini.frontend_bundle` export, generic SymbolTable JSON
+  snapshot, direct structural origin links, and an independent consumer gate
+  with five goldens, an isolated consumer run, and eleven negative attacks,
+  including real multi-file import provenance.
+- Formally closed the v0.24 raw frontend/export border after the complete Tier 3
+  Firetest passed on 2026-08-16.
 - Semantic analysis, remaining accepted-language coverage, and Graph IR remain
   future work.
 
