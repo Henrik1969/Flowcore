@@ -1,0 +1,219 @@
+{
+    "format": "flowmini.ast.v2",
+    "source_unit": {
+        "kind": "program",
+        "name": "ordinary_else_probe",
+        "declaration_count": 1,
+        "declaration_ids": [
+            0
+        ],
+        "declarations": [
+            {
+                "id": 0,
+                "kind": "main_block",
+                "has_body": true,
+                "body_block": 0
+            }
+        ]
+    },
+    "declaration_pool_size": 1,
+    "declaration_pool": [
+        {
+            "id": 0,
+            "kind": "main_block",
+            "has_body": true,
+            "body_block": 0
+        }
+    ],
+    "expression_pool_size": 6,
+    "expression_pool": [
+        {
+            "id": 0,
+            "kind": "integer_literal",
+            "text": "1",
+            "payload": {
+                "value_text": "1"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 1,
+            "kind": "binary",
+            "text": "==",
+            "payload": {
+                "operator": "==",
+                "left": 2,
+                "right": 3
+            },
+            "child_expressions": [
+                2,
+                3
+            ]
+        },
+        {
+            "id": 2,
+            "kind": "identifier",
+            "text": "x",
+            "payload": {
+                "name": "x"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 3,
+            "kind": "integer_literal",
+            "text": "1",
+            "payload": {
+                "value_text": "1"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 4,
+            "kind": "integer_literal",
+            "text": "2",
+            "payload": {
+                "value_text": "2"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 5,
+            "kind": "integer_literal",
+            "text": "3",
+            "payload": {
+                "value_text": "3"
+            },
+            "child_expressions": []
+        }
+    ],
+    "statement_pool_size": 4,
+    "statement_pool": [
+        {
+            "id": 0,
+            "kind": "let",
+            "payload": {
+                "name": "x",
+                "type_ref": {
+                    "kind": "named",
+                    "text": "int",
+                    "payload": {
+                        "name_segments": [
+                            "int"
+                        ]
+                    },
+                    "location": {
+                        "line": 5,
+                        "column": 9
+                    }
+                },
+                "initializer_expression": 0
+            },
+            "name": "x",
+            "type": "int",
+            "type_ref": {
+                "kind": "named",
+                "text": "int",
+                "payload": {
+                    "name_segments": [
+                        "int"
+                    ]
+                },
+                "location": {
+                    "line": 5,
+                    "column": 9
+                }
+            },
+            "has_initializer": true,
+            "expression_ids": [
+                0
+            ]
+        },
+        {
+            "id": 1,
+            "kind": "assignment",
+            "payload": {
+                "target": {
+                    "kind": "identifier",
+                    "name": "x",
+                    "location": {
+                        "line": 7,
+                        "column": 9
+                    }
+                },
+                "value_expression": 4,
+                "source_form": "equals_assignment"
+            },
+            "name": "x",
+            "has_value": true,
+            "expression_ids": [
+                4
+            ]
+        },
+        {
+            "id": 2,
+            "kind": "if",
+            "payload": {
+                "condition_expression": 1,
+                "then_block": 1,
+                "else_arm": {
+                    "kind": "else_block",
+                    "block": 2
+                }
+            },
+            "has_condition": true,
+            "expression_ids": [
+                1
+            ],
+            "condition": 1,
+            "then_block": 1,
+            "else_arm": {
+                "kind": "else_block",
+                "block": 2
+            }
+        },
+        {
+            "id": 3,
+            "kind": "assignment",
+            "payload": {
+                "target": {
+                    "kind": "identifier",
+                    "name": "x",
+                    "location": {
+                        "line": 9,
+                        "column": 9
+                    }
+                },
+                "value_expression": 5,
+                "source_form": "equals_assignment"
+            },
+            "name": "x",
+            "has_value": true,
+            "expression_ids": [
+                5
+            ]
+        }
+    ],
+    "block_pool_size": 3,
+    "block_pool": [
+        {
+            "id": 0,
+            "statements": [
+                0,
+                2
+            ]
+        },
+        {
+            "id": 1,
+            "statements": [
+                1
+            ]
+        },
+        {
+            "id": 2,
+            "statements": [
+                3
+            ]
+        }
+    ]
+}

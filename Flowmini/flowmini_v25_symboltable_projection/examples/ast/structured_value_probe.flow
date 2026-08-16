@@ -1,0 +1,29 @@
+program structured_value_probe
+
+type Positive refines int64 {
+    invariant value > 0
+}
+
+type Person {
+    field age : int
+    field active : Bool
+}
+
+abi local {
+    library "liblocal.so"
+
+    struct Point {
+        x : c_int
+        y : c_int
+    }
+}
+
+main {
+    positive : Positive(1)
+    values : list<int>([1, 2, 3])
+    matrix : array<int>[2, 2]([1, 2, 3, 4])
+    person : Person({age: 42, active: true})
+    point : Point({x: 10, y: 20})
+    selected : int(matrix[1, 0])
+    age : int(person.age)
+}

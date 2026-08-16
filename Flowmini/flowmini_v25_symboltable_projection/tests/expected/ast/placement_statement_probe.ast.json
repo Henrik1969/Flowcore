@@ -1,0 +1,1185 @@
+{
+    "format": "flowmini.ast.v2",
+    "source_unit": {
+        "kind": "program",
+        "name": "placement_statement_probe",
+        "declaration_count": 4,
+        "declaration_ids": [
+            0,
+            1,
+            2,
+            3
+        ],
+        "declarations": [
+            {
+                "id": 0,
+                "kind": "record",
+                "name": "Gear",
+                "field_count": 2,
+                "fields": [
+                    {
+                        "name": "teeth",
+                        "type": "int",
+                        "type_ref": {
+                            "kind": "named",
+                            "text": "int",
+                            "payload": {
+                                "name_segments": [
+                                    "int"
+                                ]
+                            },
+                            "location": {
+                                "line": 5,
+                                "column": 19
+                            }
+                        }
+                    },
+                    {
+                        "name": "rpm",
+                        "type": "int",
+                        "type_ref": {
+                            "kind": "named",
+                            "text": "int",
+                            "payload": {
+                                "name_segments": [
+                                    "int"
+                                ]
+                            },
+                            "location": {
+                                "line": 6,
+                                "column": 17
+                            }
+                        }
+                    }
+                ]
+            },
+            {
+                "id": 1,
+                "kind": "record",
+                "name": "GearPair",
+                "field_count": 2,
+                "fields": [
+                    {
+                        "name": "driver",
+                        "type": "Gear",
+                        "type_ref": {
+                            "kind": "named",
+                            "text": "Gear",
+                            "payload": {
+                                "name_segments": [
+                                    "Gear"
+                                ]
+                            },
+                            "location": {
+                                "line": 10,
+                                "column": 20
+                            }
+                        }
+                    },
+                    {
+                        "name": "driven",
+                        "type": "Gear",
+                        "type_ref": {
+                            "kind": "named",
+                            "text": "Gear",
+                            "payload": {
+                                "name_segments": [
+                                    "Gear"
+                                ]
+                            },
+                            "location": {
+                                "line": 11,
+                                "column": 20
+                            }
+                        }
+                    }
+                ]
+            },
+            {
+                "id": 2,
+                "kind": "function",
+                "name": "keep",
+                "parameter_count": 1,
+                "parameters": [
+                    {
+                        "name": "value",
+                        "type": "int",
+                        "type_ref": {
+                            "kind": "named",
+                            "text": "int",
+                            "payload": {
+                                "name_segments": [
+                                    "int"
+                                ]
+                            },
+                            "location": {
+                                "line": 14,
+                                "column": 17
+                            }
+                        }
+                    }
+                ],
+                "return_type": "int",
+                "return_type_ref": {
+                    "kind": "named",
+                    "text": "int",
+                    "payload": {
+                        "name_segments": [
+                            "int"
+                        ]
+                    },
+                    "location": {
+                        "line": 14,
+                        "column": 23
+                    }
+                },
+                "has_body": true,
+                "body_block": 0
+            },
+            {
+                "id": 3,
+                "kind": "main_block",
+                "has_body": true,
+                "body_block": 1
+            }
+        ]
+    },
+    "declaration_pool_size": 4,
+    "declaration_pool": [
+        {
+            "id": 0,
+            "kind": "record",
+            "name": "Gear",
+            "field_count": 2,
+            "fields": [
+                {
+                    "name": "teeth",
+                    "type": "int",
+                    "type_ref": {
+                        "kind": "named",
+                        "text": "int",
+                        "payload": {
+                            "name_segments": [
+                                "int"
+                            ]
+                        },
+                        "location": {
+                            "line": 5,
+                            "column": 19
+                        }
+                    }
+                },
+                {
+                    "name": "rpm",
+                    "type": "int",
+                    "type_ref": {
+                        "kind": "named",
+                        "text": "int",
+                        "payload": {
+                            "name_segments": [
+                                "int"
+                            ]
+                        },
+                        "location": {
+                            "line": 6,
+                            "column": 17
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "id": 1,
+            "kind": "record",
+            "name": "GearPair",
+            "field_count": 2,
+            "fields": [
+                {
+                    "name": "driver",
+                    "type": "Gear",
+                    "type_ref": {
+                        "kind": "named",
+                        "text": "Gear",
+                        "payload": {
+                            "name_segments": [
+                                "Gear"
+                            ]
+                        },
+                        "location": {
+                            "line": 10,
+                            "column": 20
+                        }
+                    }
+                },
+                {
+                    "name": "driven",
+                    "type": "Gear",
+                    "type_ref": {
+                        "kind": "named",
+                        "text": "Gear",
+                        "payload": {
+                            "name_segments": [
+                                "Gear"
+                            ]
+                        },
+                        "location": {
+                            "line": 11,
+                            "column": 20
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "id": 2,
+            "kind": "function",
+            "name": "keep",
+            "parameter_count": 1,
+            "parameters": [
+                {
+                    "name": "value",
+                    "type": "int",
+                    "type_ref": {
+                        "kind": "named",
+                        "text": "int",
+                        "payload": {
+                            "name_segments": [
+                                "int"
+                            ]
+                        },
+                        "location": {
+                            "line": 14,
+                            "column": 17
+                        }
+                    }
+                }
+            ],
+            "return_type": "int",
+            "return_type_ref": {
+                "kind": "named",
+                "text": "int",
+                "payload": {
+                    "name_segments": [
+                        "int"
+                    ]
+                },
+                "location": {
+                    "line": 14,
+                    "column": 23
+                }
+            },
+            "has_body": true,
+            "body_block": 0
+        },
+        {
+            "id": 3,
+            "kind": "main_block",
+            "has_body": true,
+            "body_block": 1
+        }
+    ],
+    "expression_pool_size": 30,
+    "expression_pool": [
+        {
+            "id": 0,
+            "kind": "identifier",
+            "text": "value",
+            "payload": {
+                "name": "value"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 1,
+            "kind": "integer_literal",
+            "text": "0",
+            "payload": {
+                "value_text": "0"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 2,
+            "kind": "integer_literal",
+            "text": "0",
+            "payload": {
+                "value_text": "0"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 3,
+            "kind": "integer_literal",
+            "text": "1",
+            "payload": {
+                "value_text": "1"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 4,
+            "kind": "list_literal",
+            "text": "[",
+            "payload": {
+                "elements": [
+                    5,
+                    6
+                ]
+            },
+            "child_expressions": [
+                5,
+                6
+            ]
+        },
+        {
+            "id": 5,
+            "kind": "integer_literal",
+            "text": "0",
+            "payload": {
+                "value_text": "0"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 6,
+            "kind": "integer_literal",
+            "text": "0",
+            "payload": {
+                "value_text": "0"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 7,
+            "kind": "list_literal",
+            "text": "[",
+            "payload": {
+                "elements": [
+                    8,
+                    9,
+                    10,
+                    11
+                ]
+            },
+            "child_expressions": [
+                8,
+                9,
+                10,
+                11
+            ]
+        },
+        {
+            "id": 8,
+            "kind": "integer_literal",
+            "text": "0",
+            "payload": {
+                "value_text": "0"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 9,
+            "kind": "integer_literal",
+            "text": "0",
+            "payload": {
+                "value_text": "0"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 10,
+            "kind": "integer_literal",
+            "text": "0",
+            "payload": {
+                "value_text": "0"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 11,
+            "kind": "integer_literal",
+            "text": "0",
+            "payload": {
+                "value_text": "0"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 12,
+            "kind": "record_literal",
+            "text": "{",
+            "payload": {
+                "fields": [
+                    {
+                        "name": "teeth",
+                        "value": 13,
+                        "location": {
+                            "line": 24,
+                            "column": 20
+                        }
+                    },
+                    {
+                        "name": "rpm",
+                        "value": 14,
+                        "location": {
+                            "line": 24,
+                            "column": 30
+                        }
+                    }
+                ]
+            },
+            "child_expressions": [
+                13,
+                14
+            ]
+        },
+        {
+            "id": 13,
+            "kind": "integer_literal",
+            "text": "12",
+            "payload": {
+                "value_text": "12"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 14,
+            "kind": "integer_literal",
+            "text": "100",
+            "payload": {
+                "value_text": "100"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 15,
+            "kind": "record_literal",
+            "text": "{",
+            "payload": {
+                "fields": [
+                    {
+                        "name": "teeth",
+                        "value": 16,
+                        "location": {
+                            "line": 25,
+                            "column": 20
+                        }
+                    },
+                    {
+                        "name": "rpm",
+                        "value": 17,
+                        "location": {
+                            "line": 25,
+                            "column": 30
+                        }
+                    }
+                ]
+            },
+            "child_expressions": [
+                16,
+                17
+            ]
+        },
+        {
+            "id": 16,
+            "kind": "integer_literal",
+            "text": "36",
+            "payload": {
+                "value_text": "36"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 17,
+            "kind": "integer_literal",
+            "text": "0",
+            "payload": {
+                "value_text": "0"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 18,
+            "kind": "record_literal",
+            "text": "{",
+            "payload": {
+                "fields": [
+                    {
+                        "name": "driver",
+                        "value": 19,
+                        "location": {
+                            "line": 26,
+                            "column": 22
+                        }
+                    },
+                    {
+                        "name": "driven",
+                        "value": 20,
+                        "location": {
+                            "line": 26,
+                            "column": 37
+                        }
+                    }
+                ]
+            },
+            "child_expressions": [
+                19,
+                20
+            ]
+        },
+        {
+            "id": 19,
+            "kind": "identifier",
+            "text": "driver",
+            "payload": {
+                "name": "driver"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 20,
+            "kind": "identifier",
+            "text": "driven",
+            "payload": {
+                "name": "driven"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 21,
+            "kind": "call",
+            "text": "keep",
+            "payload": {
+                "base": 22,
+                "arguments": [
+                    23
+                ]
+            },
+            "child_expressions": [
+                22,
+                23
+            ]
+        },
+        {
+            "id": 22,
+            "kind": "identifier",
+            "text": "keep",
+            "payload": {
+                "name": "keep"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 23,
+            "kind": "identifier",
+            "text": "scalar",
+            "payload": {
+                "name": "scalar"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 24,
+            "kind": "integer_literal",
+            "text": "42",
+            "payload": {
+                "value_text": "42"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 25,
+            "kind": "integer_literal",
+            "text": "42",
+            "payload": {
+                "value_text": "42"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 26,
+            "kind": "identifier",
+            "text": "i",
+            "payload": {
+                "name": "i"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 27,
+            "kind": "integer_literal",
+            "text": "42",
+            "payload": {
+                "value_text": "42"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 28,
+            "kind": "identifier",
+            "text": "i",
+            "payload": {
+                "name": "i"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 29,
+            "kind": "identifier",
+            "text": "j",
+            "payload": {
+                "name": "j"
+            },
+            "child_expressions": []
+        }
+    ],
+    "statement_pool_size": 13,
+    "statement_pool": [
+        {
+            "id": 0,
+            "kind": "return",
+            "payload": {
+                "value_expression": 0,
+                "source_form": "arrow_placement"
+            },
+            "has_value": true,
+            "expression_ids": [
+                0
+            ]
+        },
+        {
+            "id": 1,
+            "kind": "let",
+            "payload": {
+                "name": "scalar",
+                "type_ref": {
+                    "kind": "named",
+                    "text": "int",
+                    "payload": {
+                        "name_segments": [
+                            "int"
+                        ]
+                    },
+                    "location": {
+                        "line": 19,
+                        "column": 14
+                    }
+                },
+                "initializer_expression": 1
+            },
+            "name": "scalar",
+            "type": "int",
+            "type_ref": {
+                "kind": "named",
+                "text": "int",
+                "payload": {
+                    "name_segments": [
+                        "int"
+                    ]
+                },
+                "location": {
+                    "line": 19,
+                    "column": 14
+                }
+            },
+            "has_initializer": true,
+            "expression_ids": [
+                1
+            ]
+        },
+        {
+            "id": 2,
+            "kind": "let",
+            "payload": {
+                "name": "i",
+                "type_ref": {
+                    "kind": "named",
+                    "text": "int",
+                    "payload": {
+                        "name_segments": [
+                            "int"
+                        ]
+                    },
+                    "location": {
+                        "line": 20,
+                        "column": 9
+                    }
+                },
+                "initializer_expression": 2
+            },
+            "name": "i",
+            "type": "int",
+            "type_ref": {
+                "kind": "named",
+                "text": "int",
+                "payload": {
+                    "name_segments": [
+                        "int"
+                    ]
+                },
+                "location": {
+                    "line": 20,
+                    "column": 9
+                }
+            },
+            "has_initializer": true,
+            "expression_ids": [
+                2
+            ]
+        },
+        {
+            "id": 3,
+            "kind": "let",
+            "payload": {
+                "name": "j",
+                "type_ref": {
+                    "kind": "named",
+                    "text": "int",
+                    "payload": {
+                        "name_segments": [
+                            "int"
+                        ]
+                    },
+                    "location": {
+                        "line": 21,
+                        "column": 9
+                    }
+                },
+                "initializer_expression": 3
+            },
+            "name": "j",
+            "type": "int",
+            "type_ref": {
+                "kind": "named",
+                "text": "int",
+                "payload": {
+                    "name_segments": [
+                        "int"
+                    ]
+                },
+                "location": {
+                    "line": 21,
+                    "column": 9
+                }
+            },
+            "has_initializer": true,
+            "expression_ids": [
+                3
+            ]
+        },
+        {
+            "id": 4,
+            "kind": "let",
+            "payload": {
+                "name": "values",
+                "type_ref": {
+                    "kind": "generic",
+                    "text": "list<int>",
+                    "payload": {
+                        "constructor_segments": [
+                            "list"
+                        ],
+                        "arguments": [
+                            {
+                                "kind": "named",
+                                "text": "int",
+                                "payload": {
+                                    "name_segments": [
+                                        "int"
+                                    ]
+                                },
+                                "location": {
+                                    "line": 22,
+                                    "column": 19
+                                }
+                            }
+                        ]
+                    },
+                    "location": {
+                        "line": 22,
+                        "column": 14
+                    }
+                },
+                "initializer_expression": 4
+            },
+            "name": "values",
+            "type": "list<int>",
+            "type_ref": {
+                "kind": "generic",
+                "text": "list<int>",
+                "payload": {
+                    "constructor_segments": [
+                        "list"
+                    ],
+                    "arguments": [
+                        {
+                            "kind": "named",
+                            "text": "int",
+                            "payload": {
+                                "name_segments": [
+                                    "int"
+                                ]
+                            },
+                            "location": {
+                                "line": 22,
+                                "column": 19
+                            }
+                        }
+                    ]
+                },
+                "location": {
+                    "line": 22,
+                    "column": 14
+                }
+            },
+            "has_initializer": true,
+            "expression_ids": [
+                4
+            ]
+        },
+        {
+            "id": 5,
+            "kind": "let",
+            "payload": {
+                "name": "matrix",
+                "type_ref": {
+                    "kind": "array",
+                    "text": "array<int>[2,2]",
+                    "payload": {
+                        "element_type": {
+                            "kind": "named",
+                            "text": "int",
+                            "payload": {
+                                "name_segments": [
+                                    "int"
+                                ]
+                            },
+                            "location": {
+                                "line": 23,
+                                "column": 20
+                            }
+                        },
+                        "extents": [
+                            {
+                                "text": "2",
+                                "location": {
+                                    "line": 23,
+                                    "column": 25
+                                }
+                            },
+                            {
+                                "text": "2",
+                                "location": {
+                                    "line": 23,
+                                    "column": 28
+                                }
+                            }
+                        ]
+                    },
+                    "location": {
+                        "line": 23,
+                        "column": 14
+                    }
+                },
+                "initializer_expression": 7
+            },
+            "name": "matrix",
+            "type": "array<int>[2,2]",
+            "type_ref": {
+                "kind": "array",
+                "text": "array<int>[2,2]",
+                "payload": {
+                    "element_type": {
+                        "kind": "named",
+                        "text": "int",
+                        "payload": {
+                            "name_segments": [
+                                "int"
+                            ]
+                        },
+                        "location": {
+                            "line": 23,
+                            "column": 20
+                        }
+                    },
+                    "extents": [
+                        {
+                            "text": "2",
+                            "location": {
+                                "line": 23,
+                                "column": 25
+                            }
+                        },
+                        {
+                            "text": "2",
+                            "location": {
+                                "line": 23,
+                                "column": 28
+                            }
+                        }
+                    ]
+                },
+                "location": {
+                    "line": 23,
+                    "column": 14
+                }
+            },
+            "has_initializer": true,
+            "expression_ids": [
+                7
+            ]
+        },
+        {
+            "id": 6,
+            "kind": "let",
+            "payload": {
+                "name": "driver",
+                "type_ref": {
+                    "kind": "named",
+                    "text": "Gear",
+                    "payload": {
+                        "name_segments": [
+                            "Gear"
+                        ]
+                    },
+                    "location": {
+                        "line": 24,
+                        "column": 14
+                    }
+                },
+                "initializer_expression": 12
+            },
+            "name": "driver",
+            "type": "Gear",
+            "type_ref": {
+                "kind": "named",
+                "text": "Gear",
+                "payload": {
+                    "name_segments": [
+                        "Gear"
+                    ]
+                },
+                "location": {
+                    "line": 24,
+                    "column": 14
+                }
+            },
+            "has_initializer": true,
+            "expression_ids": [
+                12
+            ]
+        },
+        {
+            "id": 7,
+            "kind": "let",
+            "payload": {
+                "name": "driven",
+                "type_ref": {
+                    "kind": "named",
+                    "text": "Gear",
+                    "payload": {
+                        "name_segments": [
+                            "Gear"
+                        ]
+                    },
+                    "location": {
+                        "line": 25,
+                        "column": 14
+                    }
+                },
+                "initializer_expression": 15
+            },
+            "name": "driven",
+            "type": "Gear",
+            "type_ref": {
+                "kind": "named",
+                "text": "Gear",
+                "payload": {
+                    "name_segments": [
+                        "Gear"
+                    ]
+                },
+                "location": {
+                    "line": 25,
+                    "column": 14
+                }
+            },
+            "has_initializer": true,
+            "expression_ids": [
+                15
+            ]
+        },
+        {
+            "id": 8,
+            "kind": "let",
+            "payload": {
+                "name": "pair",
+                "type_ref": {
+                    "kind": "named",
+                    "text": "GearPair",
+                    "payload": {
+                        "name_segments": [
+                            "GearPair"
+                        ]
+                    },
+                    "location": {
+                        "line": 26,
+                        "column": 12
+                    }
+                },
+                "initializer_expression": 18
+            },
+            "name": "pair",
+            "type": "GearPair",
+            "type_ref": {
+                "kind": "named",
+                "text": "GearPair",
+                "payload": {
+                    "name_segments": [
+                        "GearPair"
+                    ]
+                },
+                "location": {
+                    "line": 26,
+                    "column": 12
+                }
+            },
+            "has_initializer": true,
+            "expression_ids": [
+                18
+            ]
+        },
+        {
+            "id": 9,
+            "kind": "placement",
+            "payload": {
+                "value_expression": 21,
+                "target": {
+                    "kind": "identifier",
+                    "name": "scalar",
+                    "location": {
+                        "line": 28,
+                        "column": 21
+                    }
+                },
+                "source_form": "arrow_placement"
+            },
+            "has_value": true,
+            "expression_ids": [
+                21
+            ]
+        },
+        {
+            "id": 10,
+            "kind": "placement",
+            "payload": {
+                "value_expression": 24,
+                "target": {
+                    "kind": "field_path",
+                    "base_identifier": "pair",
+                    "location": {
+                        "line": 29,
+                        "column": 11
+                    },
+                    "fields": [
+                        {
+                            "name": "driven",
+                            "location": {
+                                "line": 29,
+                                "column": 16
+                            }
+                        },
+                        {
+                            "name": "rpm",
+                            "location": {
+                                "line": 29,
+                                "column": 23
+                            }
+                        }
+                    ]
+                },
+                "source_form": "arrow_placement"
+            },
+            "has_value": true,
+            "expression_ids": [
+                24
+            ]
+        },
+        {
+            "id": 11,
+            "kind": "placement",
+            "payload": {
+                "value_expression": 25,
+                "target": {
+                    "kind": "indexed",
+                    "base_identifier": "values",
+                    "location": {
+                        "line": 30,
+                        "column": 11
+                    },
+                    "indexes": [
+                        26
+                    ]
+                },
+                "source_form": "arrow_placement"
+            },
+            "has_value": true,
+            "expression_ids": [
+                25,
+                26
+            ]
+        },
+        {
+            "id": 12,
+            "kind": "placement",
+            "payload": {
+                "value_expression": 27,
+                "target": {
+                    "kind": "indexed",
+                    "base_identifier": "matrix",
+                    "location": {
+                        "line": 31,
+                        "column": 11
+                    },
+                    "indexes": [
+                        28,
+                        29
+                    ]
+                },
+                "source_form": "arrow_placement"
+            },
+            "has_value": true,
+            "expression_ids": [
+                27,
+                28,
+                29
+            ]
+        }
+    ],
+    "block_pool_size": 2,
+    "block_pool": [
+        {
+            "id": 0,
+            "statements": [
+                0
+            ]
+        },
+        {
+            "id": 1,
+            "statements": [
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
+                11,
+                12
+            ]
+        }
+    ]
+}

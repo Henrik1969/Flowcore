@@ -9,16 +9,17 @@ It is not the final Flowcore language. It is the laboratory where syntax, AST st
 The current active implementation is:
 
 ```text
-Flowmini/flowmini_v24_explicit_ast
+Flowmini/flowmini_v25_symboltable_projection
 ```
 
 Current stage theme:
 
 ```text
-Flowmini v0.24 explicit AST
+Flowmini v0.25 SymbolTable projection maturation
 ```
 
-The v0.24 line focuses on making the AST explicit, observable, regression-tested, and safe to deepen.
+The v0.25 line matures the factual AST-to-SymbolTable projection and its
+independent export boundary without beginning semantic analysis.
 
 ## Current status
 
@@ -38,7 +39,7 @@ Graph IR lowering                   mostly future work
 runtime semantics                   mostly future work
 ```
 
-The current v0.24 AST represents a recursive, precedence-aware expression graph
+The inherited v0.24 AST represents a recursive, precedence-aware expression graph
 for the established expression surface, including:
 
 ```text
@@ -53,10 +54,9 @@ record literals
 
 Expressions use typed payloads and recursively owned child IDs. Parenthesized
 grouping, operator precedence, associativity, prefix operators, and nested
-postfix call/index/field forms are regression-guarded. This does not close the
-frontend gate: some accepted declaration, provenance, and
-SymbolTable-projection forms remain partial or absent, and semantic analysis is
-deliberately later work.
+postfix call/index/field forms are regression-guarded. The v0.24 raw
+frontend/export border is closed; v0.25 now strengthens projection coverage,
+factual metadata, cross-links, provenance, and bundle stability.
 
 ## Why does this look ordinary?
 
@@ -77,14 +77,14 @@ source text
     -> executable system projection
 ```
 
-Flowmini v0.24 is focused on the explicit AST layer.
+Flowmini v0.25 is focused on SymbolTable projection maturation.
 
 ## Build quickstart
 
-From the active v0.24 directory:
+From the active v0.25 directory:
 
 ```bash
-cd Flowmini/flowmini_v24_explicit_ast
+cd Flowmini/flowmini_v25_symboltable_projection
 
 cmake -S . -B cmake-build-debug
 cmake --build cmake-build-debug -j20
@@ -92,7 +92,7 @@ cmake --build cmake-build-debug -j20
 
 Adjust `-j20` to match your machine.
 
-The canonical v24 scope is this implementation directory and its CMake targets.
+The canonical v25 scope is this implementation directory and its CMake targets.
 Repository-root build trees are legacy/noncanonical for the active branch.
 
 ## Test quickstart
@@ -151,22 +151,22 @@ Always inspect the diff before committing updated goldens.
 ## Important paths
 
 ```text
-flowmini_v24_explicit_ast/include/
+flowmini_v25_symboltable_projection/include/
     public headers
 
-flowmini_v24_explicit_ast/src/
+flowmini_v25_symboltable_projection/src/
     implementation
 
-flowmini_v24_explicit_ast/examples/ast/
+flowmini_v25_symboltable_projection/examples/ast/
     AST-focused source examples
 
-flowmini_v24_explicit_ast/tests/expected/ast/
+flowmini_v25_symboltable_projection/tests/expected/ast/
     golden AST JSON outputs
 
-flowmini_v24_explicit_ast/tools/
+flowmini_v25_symboltable_projection/tools/
     maintained helper scripts
 
-flowmini_v24_explicit_ast/docs/
+flowmini_v25_symboltable_projection/docs/
     status notes and implementation documentation
 ```
 
@@ -179,7 +179,7 @@ They are useful historical material, but they are not the active implementation 
 Current active development should happen in:
 
 ```text
-Flowmini/flowmini_v24_explicit_ast
+Flowmini/flowmini_v25_symboltable_projection
 ```
 
 ## Design direction
@@ -197,7 +197,8 @@ TokenTree remembers what the source looked like.
 AST states what the source means.
 ```
 
-The current v0.24 work is about making that AST layer real.
+The current v0.25 work is about making its SymbolTable projection a trustworthy
+input for independent tools and later semantic analysis.
 
 ## Documentation map
 
@@ -206,7 +207,7 @@ Recommended reading order:
 ```text
 Flowmini/README.md
 Flowmini/CURRENT.md
-Flowmini/flowmini_v24_explicit_ast/docs/v0.24-explicit-ast-status.md
+Flowmini/flowmini_v25_symboltable_projection/docs/v0.25-symboltable-projection-status.md
 docs/flowmini/v0.24-accepted-language-coverage.md
 docs/flowmini/v0.24-type-policy.md
 Flowmini/flowmini_v24_explicit_ast/docs/v0.24-c5-statement-payload-sitrep.md

@@ -43,7 +43,7 @@ See:
 Current checkpoint:
 
 ```text
-Flowmini v0.24 explicit AST stabilization
+Flowmini v0.25 SymbolTable projection maturation
 AST golden tests: 26
 Symbol projection tests: 11
 Frontend bundle tests: 5 golden, 1 isolated, 11 negative

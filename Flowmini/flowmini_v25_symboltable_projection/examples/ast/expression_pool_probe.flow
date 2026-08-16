@@ -1,0 +1,19 @@
+program expression_pool_probe
+
+fn square(n : int) -> int {
+    return n * n
+}
+
+main {
+    x : int(1)
+    y : int(2)
+    x = y
+
+    while x < 10 {
+        x = x + 1
+    }
+
+    if x == 10 {
+        y = x
+    }
+}

@@ -1,0 +1,804 @@
+{
+    "format": "flowmini.ast.v2",
+    "source_unit": {
+        "kind": "program",
+        "name": "canonical_type_spelling_probe",
+        "declaration_count": 2,
+        "declaration_ids": [
+            0,
+            1
+        ],
+        "declarations": [
+            {
+                "id": 0,
+                "kind": "record",
+                "name": "CanonicalTypeSpellings",
+                "field_count": 22,
+                "fields": [
+                    {
+                        "name": "boolean",
+                        "type": "bool",
+                        "type_ref": {
+                            "kind": "named",
+                            "text": "bool",
+                            "payload": {
+                                "name_segments": [
+                                    "bool"
+                                ]
+                            },
+                            "location": {
+                                "line": 5,
+                                "column": 21
+                            }
+                        }
+                    },
+                    {
+                        "name": "signed_8",
+                        "type": "int8",
+                        "type_ref": {
+                            "kind": "named",
+                            "text": "int8",
+                            "payload": {
+                                "name_segments": [
+                                    "int8"
+                                ]
+                            },
+                            "location": {
+                                "line": 7,
+                                "column": 22
+                            }
+                        }
+                    },
+                    {
+                        "name": "signed_16",
+                        "type": "int16",
+                        "type_ref": {
+                            "kind": "named",
+                            "text": "int16",
+                            "payload": {
+                                "name_segments": [
+                                    "int16"
+                                ]
+                            },
+                            "location": {
+                                "line": 8,
+                                "column": 23
+                            }
+                        }
+                    },
+                    {
+                        "name": "signed_32",
+                        "type": "int32",
+                        "type_ref": {
+                            "kind": "named",
+                            "text": "int32",
+                            "payload": {
+                                "name_segments": [
+                                    "int32"
+                                ]
+                            },
+                            "location": {
+                                "line": 9,
+                                "column": 23
+                            }
+                        }
+                    },
+                    {
+                        "name": "signed_64",
+                        "type": "int64",
+                        "type_ref": {
+                            "kind": "named",
+                            "text": "int64",
+                            "payload": {
+                                "name_segments": [
+                                    "int64"
+                                ]
+                            },
+                            "location": {
+                                "line": 10,
+                                "column": 23
+                            }
+                        }
+                    },
+                    {
+                        "name": "signed_128",
+                        "type": "int128",
+                        "type_ref": {
+                            "kind": "named",
+                            "text": "int128",
+                            "payload": {
+                                "name_segments": [
+                                    "int128"
+                                ]
+                            },
+                            "location": {
+                                "line": 11,
+                                "column": 24
+                            }
+                        }
+                    },
+                    {
+                        "name": "unsigned_8",
+                        "type": "uint8",
+                        "type_ref": {
+                            "kind": "named",
+                            "text": "uint8",
+                            "payload": {
+                                "name_segments": [
+                                    "uint8"
+                                ]
+                            },
+                            "location": {
+                                "line": 13,
+                                "column": 24
+                            }
+                        }
+                    },
+                    {
+                        "name": "unsigned_16",
+                        "type": "uint16",
+                        "type_ref": {
+                            "kind": "named",
+                            "text": "uint16",
+                            "payload": {
+                                "name_segments": [
+                                    "uint16"
+                                ]
+                            },
+                            "location": {
+                                "line": 14,
+                                "column": 25
+                            }
+                        }
+                    },
+                    {
+                        "name": "unsigned_32",
+                        "type": "uint32",
+                        "type_ref": {
+                            "kind": "named",
+                            "text": "uint32",
+                            "payload": {
+                                "name_segments": [
+                                    "uint32"
+                                ]
+                            },
+                            "location": {
+                                "line": 15,
+                                "column": 25
+                            }
+                        }
+                    },
+                    {
+                        "name": "unsigned_64",
+                        "type": "uint64",
+                        "type_ref": {
+                            "kind": "named",
+                            "text": "uint64",
+                            "payload": {
+                                "name_segments": [
+                                    "uint64"
+                                ]
+                            },
+                            "location": {
+                                "line": 16,
+                                "column": 25
+                            }
+                        }
+                    },
+                    {
+                        "name": "unsigned_128",
+                        "type": "uint128",
+                        "type_ref": {
+                            "kind": "named",
+                            "text": "uint128",
+                            "payload": {
+                                "name_segments": [
+                                    "uint128"
+                                ]
+                            },
+                            "location": {
+                                "line": 17,
+                                "column": 26
+                            }
+                        }
+                    },
+                    {
+                        "name": "binary_16",
+                        "type": "float16",
+                        "type_ref": {
+                            "kind": "named",
+                            "text": "float16",
+                            "payload": {
+                                "name_segments": [
+                                    "float16"
+                                ]
+                            },
+                            "location": {
+                                "line": 19,
+                                "column": 23
+                            }
+                        }
+                    },
+                    {
+                        "name": "binary_32",
+                        "type": "float32",
+                        "type_ref": {
+                            "kind": "named",
+                            "text": "float32",
+                            "payload": {
+                                "name_segments": [
+                                    "float32"
+                                ]
+                            },
+                            "location": {
+                                "line": 20,
+                                "column": 23
+                            }
+                        }
+                    },
+                    {
+                        "name": "binary_64",
+                        "type": "float64",
+                        "type_ref": {
+                            "kind": "named",
+                            "text": "float64",
+                            "payload": {
+                                "name_segments": [
+                                    "float64"
+                                ]
+                            },
+                            "location": {
+                                "line": 21,
+                                "column": 23
+                            }
+                        }
+                    },
+                    {
+                        "name": "binary_128",
+                        "type": "float128",
+                        "type_ref": {
+                            "kind": "named",
+                            "text": "float128",
+                            "payload": {
+                                "name_segments": [
+                                    "float128"
+                                ]
+                            },
+                            "location": {
+                                "line": 22,
+                                "column": 24
+                            }
+                        }
+                    },
+                    {
+                        "name": "character_8",
+                        "type": "char8",
+                        "type_ref": {
+                            "kind": "named",
+                            "text": "char8",
+                            "payload": {
+                                "name_segments": [
+                                    "char8"
+                                ]
+                            },
+                            "location": {
+                                "line": 24,
+                                "column": 25
+                            }
+                        }
+                    },
+                    {
+                        "name": "character_16",
+                        "type": "char16",
+                        "type_ref": {
+                            "kind": "named",
+                            "text": "char16",
+                            "payload": {
+                                "name_segments": [
+                                    "char16"
+                                ]
+                            },
+                            "location": {
+                                "line": 25,
+                                "column": 26
+                            }
+                        }
+                    },
+                    {
+                        "name": "character_32",
+                        "type": "char32",
+                        "type_ref": {
+                            "kind": "named",
+                            "text": "char32",
+                            "payload": {
+                                "name_segments": [
+                                    "char32"
+                                ]
+                            },
+                            "location": {
+                                "line": 26,
+                                "column": 26
+                            }
+                        }
+                    },
+                    {
+                        "name": "integer_alias",
+                        "type": "int",
+                        "type_ref": {
+                            "kind": "named",
+                            "text": "int",
+                            "payload": {
+                                "name_segments": [
+                                    "int"
+                                ]
+                            },
+                            "location": {
+                                "line": 28,
+                                "column": 27
+                            }
+                        }
+                    },
+                    {
+                        "name": "float_alias",
+                        "type": "float",
+                        "type_ref": {
+                            "kind": "named",
+                            "text": "float",
+                            "payload": {
+                                "name_segments": [
+                                    "float"
+                                ]
+                            },
+                            "location": {
+                                "line": 29,
+                                "column": 25
+                            }
+                        }
+                    },
+                    {
+                        "name": "boolean_alias",
+                        "type": "Bool",
+                        "type_ref": {
+                            "kind": "named",
+                            "text": "Bool",
+                            "payload": {
+                                "name_segments": [
+                                    "Bool"
+                                ]
+                            },
+                            "location": {
+                                "line": 30,
+                                "column": 27
+                            }
+                        }
+                    },
+                    {
+                        "name": "text_domain",
+                        "type": "string",
+                        "type_ref": {
+                            "kind": "named",
+                            "text": "string",
+                            "payload": {
+                                "name_segments": [
+                                    "string"
+                                ]
+                            },
+                            "location": {
+                                "line": 31,
+                                "column": 25
+                            }
+                        }
+                    }
+                ]
+            },
+            {
+                "id": 1,
+                "kind": "main_block",
+                "has_body": true,
+                "body_block": 0
+            }
+        ]
+    },
+    "declaration_pool_size": 2,
+    "declaration_pool": [
+        {
+            "id": 0,
+            "kind": "record",
+            "name": "CanonicalTypeSpellings",
+            "field_count": 22,
+            "fields": [
+                {
+                    "name": "boolean",
+                    "type": "bool",
+                    "type_ref": {
+                        "kind": "named",
+                        "text": "bool",
+                        "payload": {
+                            "name_segments": [
+                                "bool"
+                            ]
+                        },
+                        "location": {
+                            "line": 5,
+                            "column": 21
+                        }
+                    }
+                },
+                {
+                    "name": "signed_8",
+                    "type": "int8",
+                    "type_ref": {
+                        "kind": "named",
+                        "text": "int8",
+                        "payload": {
+                            "name_segments": [
+                                "int8"
+                            ]
+                        },
+                        "location": {
+                            "line": 7,
+                            "column": 22
+                        }
+                    }
+                },
+                {
+                    "name": "signed_16",
+                    "type": "int16",
+                    "type_ref": {
+                        "kind": "named",
+                        "text": "int16",
+                        "payload": {
+                            "name_segments": [
+                                "int16"
+                            ]
+                        },
+                        "location": {
+                            "line": 8,
+                            "column": 23
+                        }
+                    }
+                },
+                {
+                    "name": "signed_32",
+                    "type": "int32",
+                    "type_ref": {
+                        "kind": "named",
+                        "text": "int32",
+                        "payload": {
+                            "name_segments": [
+                                "int32"
+                            ]
+                        },
+                        "location": {
+                            "line": 9,
+                            "column": 23
+                        }
+                    }
+                },
+                {
+                    "name": "signed_64",
+                    "type": "int64",
+                    "type_ref": {
+                        "kind": "named",
+                        "text": "int64",
+                        "payload": {
+                            "name_segments": [
+                                "int64"
+                            ]
+                        },
+                        "location": {
+                            "line": 10,
+                            "column": 23
+                        }
+                    }
+                },
+                {
+                    "name": "signed_128",
+                    "type": "int128",
+                    "type_ref": {
+                        "kind": "named",
+                        "text": "int128",
+                        "payload": {
+                            "name_segments": [
+                                "int128"
+                            ]
+                        },
+                        "location": {
+                            "line": 11,
+                            "column": 24
+                        }
+                    }
+                },
+                {
+                    "name": "unsigned_8",
+                    "type": "uint8",
+                    "type_ref": {
+                        "kind": "named",
+                        "text": "uint8",
+                        "payload": {
+                            "name_segments": [
+                                "uint8"
+                            ]
+                        },
+                        "location": {
+                            "line": 13,
+                            "column": 24
+                        }
+                    }
+                },
+                {
+                    "name": "unsigned_16",
+                    "type": "uint16",
+                    "type_ref": {
+                        "kind": "named",
+                        "text": "uint16",
+                        "payload": {
+                            "name_segments": [
+                                "uint16"
+                            ]
+                        },
+                        "location": {
+                            "line": 14,
+                            "column": 25
+                        }
+                    }
+                },
+                {
+                    "name": "unsigned_32",
+                    "type": "uint32",
+                    "type_ref": {
+                        "kind": "named",
+                        "text": "uint32",
+                        "payload": {
+                            "name_segments": [
+                                "uint32"
+                            ]
+                        },
+                        "location": {
+                            "line": 15,
+                            "column": 25
+                        }
+                    }
+                },
+                {
+                    "name": "unsigned_64",
+                    "type": "uint64",
+                    "type_ref": {
+                        "kind": "named",
+                        "text": "uint64",
+                        "payload": {
+                            "name_segments": [
+                                "uint64"
+                            ]
+                        },
+                        "location": {
+                            "line": 16,
+                            "column": 25
+                        }
+                    }
+                },
+                {
+                    "name": "unsigned_128",
+                    "type": "uint128",
+                    "type_ref": {
+                        "kind": "named",
+                        "text": "uint128",
+                        "payload": {
+                            "name_segments": [
+                                "uint128"
+                            ]
+                        },
+                        "location": {
+                            "line": 17,
+                            "column": 26
+                        }
+                    }
+                },
+                {
+                    "name": "binary_16",
+                    "type": "float16",
+                    "type_ref": {
+                        "kind": "named",
+                        "text": "float16",
+                        "payload": {
+                            "name_segments": [
+                                "float16"
+                            ]
+                        },
+                        "location": {
+                            "line": 19,
+                            "column": 23
+                        }
+                    }
+                },
+                {
+                    "name": "binary_32",
+                    "type": "float32",
+                    "type_ref": {
+                        "kind": "named",
+                        "text": "float32",
+                        "payload": {
+                            "name_segments": [
+                                "float32"
+                            ]
+                        },
+                        "location": {
+                            "line": 20,
+                            "column": 23
+                        }
+                    }
+                },
+                {
+                    "name": "binary_64",
+                    "type": "float64",
+                    "type_ref": {
+                        "kind": "named",
+                        "text": "float64",
+                        "payload": {
+                            "name_segments": [
+                                "float64"
+                            ]
+                        },
+                        "location": {
+                            "line": 21,
+                            "column": 23
+                        }
+                    }
+                },
+                {
+                    "name": "binary_128",
+                    "type": "float128",
+                    "type_ref": {
+                        "kind": "named",
+                        "text": "float128",
+                        "payload": {
+                            "name_segments": [
+                                "float128"
+                            ]
+                        },
+                        "location": {
+                            "line": 22,
+                            "column": 24
+                        }
+                    }
+                },
+                {
+                    "name": "character_8",
+                    "type": "char8",
+                    "type_ref": {
+                        "kind": "named",
+                        "text": "char8",
+                        "payload": {
+                            "name_segments": [
+                                "char8"
+                            ]
+                        },
+                        "location": {
+                            "line": 24,
+                            "column": 25
+                        }
+                    }
+                },
+                {
+                    "name": "character_16",
+                    "type": "char16",
+                    "type_ref": {
+                        "kind": "named",
+                        "text": "char16",
+                        "payload": {
+                            "name_segments": [
+                                "char16"
+                            ]
+                        },
+                        "location": {
+                            "line": 25,
+                            "column": 26
+                        }
+                    }
+                },
+                {
+                    "name": "character_32",
+                    "type": "char32",
+                    "type_ref": {
+                        "kind": "named",
+                        "text": "char32",
+                        "payload": {
+                            "name_segments": [
+                                "char32"
+                            ]
+                        },
+                        "location": {
+                            "line": 26,
+                            "column": 26
+                        }
+                    }
+                },
+                {
+                    "name": "integer_alias",
+                    "type": "int",
+                    "type_ref": {
+                        "kind": "named",
+                        "text": "int",
+                        "payload": {
+                            "name_segments": [
+                                "int"
+                            ]
+                        },
+                        "location": {
+                            "line": 28,
+                            "column": 27
+                        }
+                    }
+                },
+                {
+                    "name": "float_alias",
+                    "type": "float",
+                    "type_ref": {
+                        "kind": "named",
+                        "text": "float",
+                        "payload": {
+                            "name_segments": [
+                                "float"
+                            ]
+                        },
+                        "location": {
+                            "line": 29,
+                            "column": 25
+                        }
+                    }
+                },
+                {
+                    "name": "boolean_alias",
+                    "type": "Bool",
+                    "type_ref": {
+                        "kind": "named",
+                        "text": "Bool",
+                        "payload": {
+                            "name_segments": [
+                                "Bool"
+                            ]
+                        },
+                        "location": {
+                            "line": 30,
+                            "column": 27
+                        }
+                    }
+                },
+                {
+                    "name": "text_domain",
+                    "type": "string",
+                    "type_ref": {
+                        "kind": "named",
+                        "text": "string",
+                        "payload": {
+                            "name_segments": [
+                                "string"
+                            ]
+                        },
+                        "location": {
+                            "line": 31,
+                            "column": 25
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "id": 1,
+            "kind": "main_block",
+            "has_body": true,
+            "body_block": 0
+        }
+    ],
+    "expression_pool_size": 0,
+    "expression_pool": [],
+    "statement_pool_size": 0,
+    "statement_pool": [],
+    "block_pool_size": 1,
+    "block_pool": [
+        {
+            "id": 0,
+            "statements": []
+        }
+    ]
+}

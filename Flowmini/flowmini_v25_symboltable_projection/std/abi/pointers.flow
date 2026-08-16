@@ -1,0 +1,31 @@
+unit std_abi_pointers
+
+abi pointer_contracts {
+    library "libc.so.6"
+    convention c
+
+    type c_buffer_read {
+        repr "const void*, size_t"
+        ownership borrowed
+        access read
+        lifetime call
+        nullable false
+    }
+
+    type c_buffer_mut {
+        repr "void*, size_t"
+        ownership borrowed
+        access readwrite
+        lifetime call
+        nullable false
+    }
+
+    type c_opaque_handle {
+        repr "void*"
+        ownership external
+        access opaque
+        lifetime external
+        nullable true
+        opaque true
+    }
+}

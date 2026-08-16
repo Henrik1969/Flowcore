@@ -25,7 +25,7 @@ examples/docs/*
 ## Runner
 
 ```bash
-cd Flowmini/flowmini_v24_explicit_ast
+cd Flowmini/flowmini_v25_symboltable_projection
 ../../tools/run-flowmini-test-suite.sh \
     --root . \
     --build-dir cmake-build-debug \

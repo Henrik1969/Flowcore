@@ -1,0 +1,1074 @@
+{
+    "format": "flowmini.ast.v2",
+    "source_unit": {
+        "kind": "program",
+        "name": "type_reference_probe",
+        "declaration_count": 4,
+        "declaration_ids": [
+            0,
+            1,
+            2,
+            3
+        ],
+        "declarations": [
+            {
+                "id": 0,
+                "kind": "refined_type",
+                "name": "IntList",
+                "base_type": "collection.list<int>",
+                "base_type_ref": {
+                    "kind": "generic",
+                    "text": "collection.list<int>",
+                    "payload": {
+                        "constructor_segments": [
+                            "collection",
+                            "list"
+                        ],
+                        "arguments": [
+                            {
+                                "kind": "named",
+                                "text": "int",
+                                "payload": {
+                                    "name_segments": [
+                                        "int"
+                                    ]
+                                },
+                                "location": {
+                                    "line": 4,
+                                    "column": 38
+                                }
+                            }
+                        ]
+                    },
+                    "location": {
+                        "line": 4,
+                        "column": 22
+                    }
+                },
+                "invariants": [],
+                "location": {
+                    "line": 4,
+                    "column": 1
+                }
+            },
+            {
+                "id": 1,
+                "kind": "record",
+                "name": "MatrixBox",
+                "field_count": 2,
+                "fields": [
+                    {
+                        "name": "values",
+                        "type": "array<math.scalar>[Rows,2]",
+                        "type_ref": {
+                            "kind": "array",
+                            "text": "array<math.scalar>[Rows,2]",
+                            "payload": {
+                                "element_type": {
+                                    "kind": "named",
+                                    "text": "math.scalar",
+                                    "payload": {
+                                        "name_segments": [
+                                            "math",
+                                            "scalar"
+                                        ]
+                                    },
+                                    "location": {
+                                        "line": 8,
+                                        "column": 26
+                                    }
+                                },
+                                "extents": [
+                                    {
+                                        "text": "Rows",
+                                        "location": {
+                                            "line": 8,
+                                            "column": 39
+                                        }
+                                    },
+                                    {
+                                        "text": "2",
+                                        "location": {
+                                            "line": 8,
+                                            "column": 45
+                                        }
+                                    }
+                                ]
+                            },
+                            "location": {
+                                "line": 8,
+                                "column": 20
+                            }
+                        }
+                    },
+                    {
+                        "name": "fallback",
+                        "type": "optional<collection.list<int>>",
+                        "type_ref": {
+                            "kind": "generic",
+                            "text": "optional<collection.list<int>>",
+                            "payload": {
+                                "constructor_segments": [
+                                    "optional"
+                                ],
+                                "arguments": [
+                                    {
+                                        "kind": "generic",
+                                        "text": "collection.list<int>",
+                                        "payload": {
+                                            "constructor_segments": [
+                                                "collection",
+                                                "list"
+                                            ],
+                                            "arguments": [
+                                                {
+                                                    "kind": "named",
+                                                    "text": "int",
+                                                    "payload": {
+                                                        "name_segments": [
+                                                            "int"
+                                                        ]
+                                                    },
+                                                    "location": {
+                                                        "line": 9,
+                                                        "column": 47
+                                                    }
+                                                }
+                                            ]
+                                        },
+                                        "location": {
+                                            "line": 9,
+                                            "column": 31
+                                        }
+                                    }
+                                ]
+                            },
+                            "location": {
+                                "line": 9,
+                                "column": 22
+                            }
+                        }
+                    }
+                ]
+            },
+            {
+                "id": 2,
+                "kind": "function",
+                "name": "transform",
+                "parameter_count": 2,
+                "parameters": [
+                    {
+                        "name": "input",
+                        "type": "optional<collection.list<int>>",
+                        "type_ref": {
+                            "kind": "generic",
+                            "text": "optional<collection.list<int>>",
+                            "payload": {
+                                "constructor_segments": [
+                                    "optional"
+                                ],
+                                "arguments": [
+                                    {
+                                        "kind": "generic",
+                                        "text": "collection.list<int>",
+                                        "payload": {
+                                            "constructor_segments": [
+                                                "collection",
+                                                "list"
+                                            ],
+                                            "arguments": [
+                                                {
+                                                    "kind": "named",
+                                                    "text": "int",
+                                                    "payload": {
+                                                        "name_segments": [
+                                                            "int"
+                                                        ]
+                                                    },
+                                                    "location": {
+                                                        "line": 13,
+                                                        "column": 38
+                                                    }
+                                                }
+                                            ]
+                                        },
+                                        "location": {
+                                            "line": 13,
+                                            "column": 22
+                                        }
+                                    }
+                                ]
+                            },
+                            "location": {
+                                "line": 13,
+                                "column": 13
+                            }
+                        }
+                    },
+                    {
+                        "name": "grid",
+                        "type": "array<int>[2,3]",
+                        "type_ref": {
+                            "kind": "array",
+                            "text": "array<int>[2,3]",
+                            "payload": {
+                                "element_type": {
+                                    "kind": "named",
+                                    "text": "int",
+                                    "payload": {
+                                        "name_segments": [
+                                            "int"
+                                        ]
+                                    },
+                                    "location": {
+                                        "line": 14,
+                                        "column": 18
+                                    }
+                                },
+                                "extents": [
+                                    {
+                                        "text": "2",
+                                        "location": {
+                                            "line": 14,
+                                            "column": 23
+                                        }
+                                    },
+                                    {
+                                        "text": "3",
+                                        "location": {
+                                            "line": 14,
+                                            "column": 26
+                                        }
+                                    }
+                                ]
+                            },
+                            "location": {
+                                "line": 14,
+                                "column": 12
+                            }
+                        }
+                    }
+                ],
+                "return_type": "result.Result<array<int>,Error>",
+                "return_type_ref": {
+                    "kind": "generic",
+                    "text": "result.Result<array<int>,Error>",
+                    "payload": {
+                        "constructor_segments": [
+                            "result",
+                            "Result"
+                        ],
+                        "arguments": [
+                            {
+                                "kind": "array",
+                                "text": "array<int>",
+                                "payload": {
+                                    "element_type": {
+                                        "kind": "named",
+                                        "text": "int",
+                                        "payload": {
+                                            "name_segments": [
+                                                "int"
+                                            ]
+                                        },
+                                        "location": {
+                                            "line": 15,
+                                            "column": 26
+                                        }
+                                    },
+                                    "extents": []
+                                },
+                                "location": {
+                                    "line": 15,
+                                    "column": 20
+                                }
+                            },
+                            {
+                                "kind": "named",
+                                "text": "Error",
+                                "payload": {
+                                    "name_segments": [
+                                        "Error"
+                                    ]
+                                },
+                                "location": {
+                                    "line": 15,
+                                    "column": 32
+                                }
+                            }
+                        ]
+                    },
+                    "location": {
+                        "line": 15,
+                        "column": 6
+                    }
+                },
+                "has_body": true,
+                "body_block": 0
+            },
+            {
+                "id": 3,
+                "kind": "main_block",
+                "has_body": true,
+                "body_block": 1
+            }
+        ]
+    },
+    "declaration_pool_size": 4,
+    "declaration_pool": [
+        {
+            "id": 0,
+            "kind": "refined_type",
+            "name": "IntList",
+            "base_type": "collection.list<int>",
+            "base_type_ref": {
+                "kind": "generic",
+                "text": "collection.list<int>",
+                "payload": {
+                    "constructor_segments": [
+                        "collection",
+                        "list"
+                    ],
+                    "arguments": [
+                        {
+                            "kind": "named",
+                            "text": "int",
+                            "payload": {
+                                "name_segments": [
+                                    "int"
+                                ]
+                            },
+                            "location": {
+                                "line": 4,
+                                "column": 38
+                            }
+                        }
+                    ]
+                },
+                "location": {
+                    "line": 4,
+                    "column": 22
+                }
+            },
+            "invariants": [],
+            "location": {
+                "line": 4,
+                "column": 1
+            }
+        },
+        {
+            "id": 1,
+            "kind": "record",
+            "name": "MatrixBox",
+            "field_count": 2,
+            "fields": [
+                {
+                    "name": "values",
+                    "type": "array<math.scalar>[Rows,2]",
+                    "type_ref": {
+                        "kind": "array",
+                        "text": "array<math.scalar>[Rows,2]",
+                        "payload": {
+                            "element_type": {
+                                "kind": "named",
+                                "text": "math.scalar",
+                                "payload": {
+                                    "name_segments": [
+                                        "math",
+                                        "scalar"
+                                    ]
+                                },
+                                "location": {
+                                    "line": 8,
+                                    "column": 26
+                                }
+                            },
+                            "extents": [
+                                {
+                                    "text": "Rows",
+                                    "location": {
+                                        "line": 8,
+                                        "column": 39
+                                    }
+                                },
+                                {
+                                    "text": "2",
+                                    "location": {
+                                        "line": 8,
+                                        "column": 45
+                                    }
+                                }
+                            ]
+                        },
+                        "location": {
+                            "line": 8,
+                            "column": 20
+                        }
+                    }
+                },
+                {
+                    "name": "fallback",
+                    "type": "optional<collection.list<int>>",
+                    "type_ref": {
+                        "kind": "generic",
+                        "text": "optional<collection.list<int>>",
+                        "payload": {
+                            "constructor_segments": [
+                                "optional"
+                            ],
+                            "arguments": [
+                                {
+                                    "kind": "generic",
+                                    "text": "collection.list<int>",
+                                    "payload": {
+                                        "constructor_segments": [
+                                            "collection",
+                                            "list"
+                                        ],
+                                        "arguments": [
+                                            {
+                                                "kind": "named",
+                                                "text": "int",
+                                                "payload": {
+                                                    "name_segments": [
+                                                        "int"
+                                                    ]
+                                                },
+                                                "location": {
+                                                    "line": 9,
+                                                    "column": 47
+                                                }
+                                            }
+                                        ]
+                                    },
+                                    "location": {
+                                        "line": 9,
+                                        "column": 31
+                                    }
+                                }
+                            ]
+                        },
+                        "location": {
+                            "line": 9,
+                            "column": 22
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "id": 2,
+            "kind": "function",
+            "name": "transform",
+            "parameter_count": 2,
+            "parameters": [
+                {
+                    "name": "input",
+                    "type": "optional<collection.list<int>>",
+                    "type_ref": {
+                        "kind": "generic",
+                        "text": "optional<collection.list<int>>",
+                        "payload": {
+                            "constructor_segments": [
+                                "optional"
+                            ],
+                            "arguments": [
+                                {
+                                    "kind": "generic",
+                                    "text": "collection.list<int>",
+                                    "payload": {
+                                        "constructor_segments": [
+                                            "collection",
+                                            "list"
+                                        ],
+                                        "arguments": [
+                                            {
+                                                "kind": "named",
+                                                "text": "int",
+                                                "payload": {
+                                                    "name_segments": [
+                                                        "int"
+                                                    ]
+                                                },
+                                                "location": {
+                                                    "line": 13,
+                                                    "column": 38
+                                                }
+                                            }
+                                        ]
+                                    },
+                                    "location": {
+                                        "line": 13,
+                                        "column": 22
+                                    }
+                                }
+                            ]
+                        },
+                        "location": {
+                            "line": 13,
+                            "column": 13
+                        }
+                    }
+                },
+                {
+                    "name": "grid",
+                    "type": "array<int>[2,3]",
+                    "type_ref": {
+                        "kind": "array",
+                        "text": "array<int>[2,3]",
+                        "payload": {
+                            "element_type": {
+                                "kind": "named",
+                                "text": "int",
+                                "payload": {
+                                    "name_segments": [
+                                        "int"
+                                    ]
+                                },
+                                "location": {
+                                    "line": 14,
+                                    "column": 18
+                                }
+                            },
+                            "extents": [
+                                {
+                                    "text": "2",
+                                    "location": {
+                                        "line": 14,
+                                        "column": 23
+                                    }
+                                },
+                                {
+                                    "text": "3",
+                                    "location": {
+                                        "line": 14,
+                                        "column": 26
+                                    }
+                                }
+                            ]
+                        },
+                        "location": {
+                            "line": 14,
+                            "column": 12
+                        }
+                    }
+                }
+            ],
+            "return_type": "result.Result<array<int>,Error>",
+            "return_type_ref": {
+                "kind": "generic",
+                "text": "result.Result<array<int>,Error>",
+                "payload": {
+                    "constructor_segments": [
+                        "result",
+                        "Result"
+                    ],
+                    "arguments": [
+                        {
+                            "kind": "array",
+                            "text": "array<int>",
+                            "payload": {
+                                "element_type": {
+                                    "kind": "named",
+                                    "text": "int",
+                                    "payload": {
+                                        "name_segments": [
+                                            "int"
+                                        ]
+                                    },
+                                    "location": {
+                                        "line": 15,
+                                        "column": 26
+                                    }
+                                },
+                                "extents": []
+                            },
+                            "location": {
+                                "line": 15,
+                                "column": 20
+                            }
+                        },
+                        {
+                            "kind": "named",
+                            "text": "Error",
+                            "payload": {
+                                "name_segments": [
+                                    "Error"
+                                ]
+                            },
+                            "location": {
+                                "line": 15,
+                                "column": 32
+                            }
+                        }
+                    ]
+                },
+                "location": {
+                    "line": 15,
+                    "column": 6
+                }
+            },
+            "has_body": true,
+            "body_block": 0
+        },
+        {
+            "id": 3,
+            "kind": "main_block",
+            "has_body": true,
+            "body_block": 1
+        }
+    ],
+    "expression_pool_size": 14,
+    "expression_pool": [
+        {
+            "id": 0,
+            "kind": "list_literal",
+            "text": "[",
+            "payload": {
+                "elements": [
+                    1,
+                    2,
+                    3
+                ]
+            },
+            "child_expressions": [
+                1,
+                2,
+                3
+            ]
+        },
+        {
+            "id": 1,
+            "kind": "integer_literal",
+            "text": "1",
+            "payload": {
+                "value_text": "1"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 2,
+            "kind": "integer_literal",
+            "text": "2",
+            "payload": {
+                "value_text": "2"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 3,
+            "kind": "integer_literal",
+            "text": "3",
+            "payload": {
+                "value_text": "3"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 4,
+            "kind": "list_literal",
+            "text": "[",
+            "payload": {
+                "elements": [
+                    5,
+                    6,
+                    7,
+                    8
+                ]
+            },
+            "child_expressions": [
+                5,
+                6,
+                7,
+                8
+            ]
+        },
+        {
+            "id": 5,
+            "kind": "integer_literal",
+            "text": "1",
+            "payload": {
+                "value_text": "1"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 6,
+            "kind": "integer_literal",
+            "text": "2",
+            "payload": {
+                "value_text": "2"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 7,
+            "kind": "integer_literal",
+            "text": "3",
+            "payload": {
+                "value_text": "3"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 8,
+            "kind": "integer_literal",
+            "text": "4",
+            "payload": {
+                "value_text": "4"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 9,
+            "kind": "identifier",
+            "text": "grid",
+            "payload": {
+                "name": "grid"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 10,
+            "kind": "list_literal",
+            "text": "[",
+            "payload": {
+                "elements": [
+                    11,
+                    12,
+                    13
+                ]
+            },
+            "child_expressions": [
+                11,
+                12,
+                13
+            ]
+        },
+        {
+            "id": 11,
+            "kind": "integer_literal",
+            "text": "1",
+            "payload": {
+                "value_text": "1"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 12,
+            "kind": "integer_literal",
+            "text": "2",
+            "payload": {
+                "value_text": "2"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 13,
+            "kind": "integer_literal",
+            "text": "3",
+            "payload": {
+                "value_text": "3"
+            },
+            "child_expressions": []
+        }
+    ],
+    "statement_pool_size": 4,
+    "statement_pool": [
+        {
+            "id": 0,
+            "kind": "let",
+            "payload": {
+                "name": "local",
+                "type_ref": {
+                    "kind": "generic",
+                    "text": "optional<collection.list<int>>",
+                    "payload": {
+                        "constructor_segments": [
+                            "optional"
+                        ],
+                        "arguments": [
+                            {
+                                "kind": "generic",
+                                "text": "collection.list<int>",
+                                "payload": {
+                                    "constructor_segments": [
+                                        "collection",
+                                        "list"
+                                    ],
+                                    "arguments": [
+                                        {
+                                            "kind": "named",
+                                            "text": "int",
+                                            "payload": {
+                                                "name_segments": [
+                                                    "int"
+                                                ]
+                                            },
+                                            "location": {
+                                                "line": 16,
+                                                "column": 38
+                                            }
+                                        }
+                                    ]
+                                },
+                                "location": {
+                                    "line": 16,
+                                    "column": 22
+                                }
+                            }
+                        ]
+                    },
+                    "location": {
+                        "line": 16,
+                        "column": 13
+                    }
+                },
+                "initializer_expression": 0
+            },
+            "name": "local",
+            "type": "optional<collection.list<int>>",
+            "type_ref": {
+                "kind": "generic",
+                "text": "optional<collection.list<int>>",
+                "payload": {
+                    "constructor_segments": [
+                        "optional"
+                    ],
+                    "arguments": [
+                        {
+                            "kind": "generic",
+                            "text": "collection.list<int>",
+                            "payload": {
+                                "constructor_segments": [
+                                    "collection",
+                                    "list"
+                                ],
+                                "arguments": [
+                                    {
+                                        "kind": "named",
+                                        "text": "int",
+                                        "payload": {
+                                            "name_segments": [
+                                                "int"
+                                            ]
+                                        },
+                                        "location": {
+                                            "line": 16,
+                                            "column": 38
+                                        }
+                                    }
+                                ]
+                            },
+                            "location": {
+                                "line": 16,
+                                "column": 22
+                            }
+                        }
+                    ]
+                },
+                "location": {
+                    "line": 16,
+                    "column": 13
+                }
+            },
+            "has_initializer": true,
+            "expression_ids": [
+                0
+            ]
+        },
+        {
+            "id": 1,
+            "kind": "let",
+            "payload": {
+                "name": "scratch",
+                "type_ref": {
+                    "kind": "array",
+                    "text": "array<int>[Rows,2]",
+                    "payload": {
+                        "element_type": {
+                            "kind": "named",
+                            "text": "int",
+                            "payload": {
+                                "name_segments": [
+                                    "int"
+                                ]
+                            },
+                            "location": {
+                                "line": 17,
+                                "column": 21
+                            }
+                        },
+                        "extents": [
+                            {
+                                "text": "Rows",
+                                "location": {
+                                    "line": 17,
+                                    "column": 26
+                                }
+                            },
+                            {
+                                "text": "2",
+                                "location": {
+                                    "line": 17,
+                                    "column": 32
+                                }
+                            }
+                        ]
+                    },
+                    "location": {
+                        "line": 17,
+                        "column": 15
+                    }
+                },
+                "initializer_expression": 4
+            },
+            "name": "scratch",
+            "type": "array<int>[Rows,2]",
+            "type_ref": {
+                "kind": "array",
+                "text": "array<int>[Rows,2]",
+                "payload": {
+                    "element_type": {
+                        "kind": "named",
+                        "text": "int",
+                        "payload": {
+                            "name_segments": [
+                                "int"
+                            ]
+                        },
+                        "location": {
+                            "line": 17,
+                            "column": 21
+                        }
+                    },
+                    "extents": [
+                        {
+                            "text": "Rows",
+                            "location": {
+                                "line": 17,
+                                "column": 26
+                            }
+                        },
+                        {
+                            "text": "2",
+                            "location": {
+                                "line": 17,
+                                "column": 32
+                            }
+                        }
+                    ]
+                },
+                "location": {
+                    "line": 17,
+                    "column": 15
+                }
+            },
+            "has_initializer": true,
+            "expression_ids": [
+                4
+            ]
+        },
+        {
+            "id": 2,
+            "kind": "return",
+            "payload": {
+                "value_expression": 9,
+                "source_form": "keyword_return"
+            },
+            "has_value": true,
+            "expression_ids": [
+                9
+            ]
+        },
+        {
+            "id": 3,
+            "kind": "let",
+            "payload": {
+                "name": "values",
+                "type_ref": {
+                    "kind": "generic",
+                    "text": "collection.list<int>",
+                    "payload": {
+                        "constructor_segments": [
+                            "collection",
+                            "list"
+                        ],
+                        "arguments": [
+                            {
+                                "kind": "named",
+                                "text": "int",
+                                "payload": {
+                                    "name_segments": [
+                                        "int"
+                                    ]
+                                },
+                                "location": {
+                                    "line": 22,
+                                    "column": 30
+                                }
+                            }
+                        ]
+                    },
+                    "location": {
+                        "line": 22,
+                        "column": 14
+                    }
+                },
+                "initializer_expression": 10
+            },
+            "name": "values",
+            "type": "collection.list<int>",
+            "type_ref": {
+                "kind": "generic",
+                "text": "collection.list<int>",
+                "payload": {
+                    "constructor_segments": [
+                        "collection",
+                        "list"
+                    ],
+                    "arguments": [
+                        {
+                            "kind": "named",
+                            "text": "int",
+                            "payload": {
+                                "name_segments": [
+                                    "int"
+                                ]
+                            },
+                            "location": {
+                                "line": 22,
+                                "column": 30
+                            }
+                        }
+                    ]
+                },
+                "location": {
+                    "line": 22,
+                    "column": 14
+                }
+            },
+            "has_initializer": true,
+            "expression_ids": [
+                10
+            ]
+        }
+    ],
+    "block_pool_size": 2,
+    "block_pool": [
+        {
+            "id": 0,
+            "statements": [
+                0,
+                1,
+                2
+            ]
+        },
+        {
+            "id": 1,
+            "statements": [
+                3
+            ]
+        }
+    ]
+}

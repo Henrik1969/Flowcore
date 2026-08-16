@@ -1,0 +1,16 @@
+program list_index_read_write
+
+main {
+    arr : list<int>([1,9,3])
+    i   : int(1)
+    x   : int(0)
+
+    arr[i] -> x
+    print x
+
+    42 -> arr[i]
+    arr[i] -> x
+    print x
+
+    print arr
+}

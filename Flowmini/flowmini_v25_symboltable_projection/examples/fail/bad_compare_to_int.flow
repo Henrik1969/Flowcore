@@ -1,0 +1,9 @@
+program bad_compare_to_int
+
+main {
+    a : int(1)
+    b : int(2)
+    n : int(0)
+
+    a < b -> n
+}

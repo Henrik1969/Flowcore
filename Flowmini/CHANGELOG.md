@@ -1,6 +1,18 @@
 # Flowmini Changelog
 
-## v24_explicit_ast — active
+## v25_symboltable_projection — active
+
+- Activated from the tagged `flowmini-v0.24-frontend-border` checkpoint on
+  branch `v25-symboltable-projection`.
+- Preserved v0.24 as a closed implementation line and created
+  `flowmini_v25_symboltable_projection` without build or test artifacts.
+- Established SymbolTable projection maturation, factual cross-links,
+  provenance, projection coverage, and frontend-bundle hardening as the v0.25
+  scope.
+- Kept semantic resolution, contract checking, Graph IR, and runtime lowering
+  outside v0.25.
+
+## v24_explicit_ast — closed frontend-export border
 
 - Added observable typed AST payloads for expressions, type references, and
   statements.

@@ -1,0 +1,425 @@
+{
+  "format": "flowmini.lowering_skeleton",
+  "version": 1,
+  "source": {
+    "path": "examples/ast/type_reference_probe.flow"
+  },
+  "source_files": [
+    {
+      "id": 0,
+      "path": "examples/ast/type_reference_probe.flow"
+    }
+  ],
+  "expanded_line_count": 23,
+  "source_unit": {
+    "kind": "program",
+    "name": "type_reference_probe"
+  },
+  "diagnostic_count": 0,
+  "declarations": [
+    {
+      "id": 0,
+      "kind": "refined_type",
+      "name": "IntList",
+      "symbol_ids": [
+        2
+      ]
+    },
+    {
+      "id": 1,
+      "kind": "record",
+      "name": "MatrixBox",
+      "symbol_ids": [
+        3
+      ]
+    },
+    {
+      "id": 2,
+      "kind": "function",
+      "name": "transform",
+      "symbol_ids": [
+        6
+      ]
+    },
+    {
+      "id": 3,
+      "kind": "main_block",
+      "name": null,
+      "symbol_ids": [
+        11
+      ]
+    }
+  ],
+  "scopes": [
+    {
+      "id": 1,
+      "kind": "Global",
+      "parent_id": null,
+      "owner_symbol_id": null,
+      "ast_path": null,
+      "symbol_ids": [
+        1
+      ]
+    },
+    {
+      "id": 2,
+      "kind": "Module",
+      "parent_id": 1,
+      "owner_symbol_id": 1,
+      "ast_path": "/source_unit",
+      "symbol_ids": [
+        2,
+        3,
+        6,
+        11
+      ]
+    },
+    {
+      "id": 3,
+      "kind": "Struct",
+      "parent_id": 2,
+      "owner_symbol_id": 3,
+      "ast_path": "/declaration_pool/1",
+      "symbol_ids": [
+        4,
+        5
+      ]
+    },
+    {
+      "id": 4,
+      "kind": "Function",
+      "parent_id": 2,
+      "owner_symbol_id": 6,
+      "ast_path": "/declaration_pool/2",
+      "symbol_ids": [
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "id": 5,
+      "kind": "Function",
+      "parent_id": 2,
+      "owner_symbol_id": 11,
+      "ast_path": "/declaration_pool/3",
+      "symbol_ids": [
+        12
+      ]
+    }
+  ],
+  "symbols": [
+    {
+      "id": 1,
+      "name": "type_reference_probe",
+      "kind": "Module",
+      "owning_scope_id": 1,
+      "introduced_scope_id": 2,
+      "ast_path": "/source_unit",
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/ast/type_reference_probe.flow",
+        "line": 1,
+        "column": 1
+      },
+      "facts": [
+        {
+          "kind": "Custom",
+          "key": "source_unit_kind",
+          "value": {
+            "type": "string",
+            "value": "program"
+          }
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "IntList",
+      "kind": "Type",
+      "owning_scope_id": 2,
+      "introduced_scope_id": null,
+      "ast_path": "/declaration_pool/0",
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/ast/type_reference_probe.flow",
+        "line": 3,
+        "column": 1
+      },
+      "facts": [
+        {
+          "kind": "TypeReference",
+          "key": "base_type_spelling",
+          "value": {
+            "type": "string",
+            "value": "collection.list<int>"
+          }
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "MatrixBox",
+      "kind": "Struct",
+      "owning_scope_id": 2,
+      "introduced_scope_id": 3,
+      "ast_path": "/declaration_pool/1",
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/ast/type_reference_probe.flow",
+        "line": 6,
+        "column": 6
+      },
+      "facts": []
+    },
+    {
+      "id": 4,
+      "name": "values",
+      "kind": "Field",
+      "owning_scope_id": 3,
+      "introduced_scope_id": null,
+      "ast_path": "/declaration_pool/1/fields/0",
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/ast/type_reference_probe.flow",
+        "line": 7,
+        "column": 5
+      },
+      "facts": [
+        {
+          "kind": "TypeReference",
+          "key": "declared_type_spelling",
+          "value": {
+            "type": "string",
+            "value": "array<math.scalar>[Rows,2]"
+          }
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "name": "fallback",
+      "kind": "Field",
+      "owning_scope_id": 3,
+      "introduced_scope_id": null,
+      "ast_path": "/declaration_pool/1/fields/1",
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/ast/type_reference_probe.flow",
+        "line": 8,
+        "column": 5
+      },
+      "facts": [
+        {
+          "kind": "TypeReference",
+          "key": "declared_type_spelling",
+          "value": {
+            "type": "string",
+            "value": "optional<collection.list<int>>"
+          }
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "name": "transform",
+      "kind": "Function",
+      "owning_scope_id": 2,
+      "introduced_scope_id": 4,
+      "ast_path": "/declaration_pool/2",
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/ast/type_reference_probe.flow",
+        "line": 11,
+        "column": 1
+      },
+      "facts": [
+        {
+          "kind": "TypeReference",
+          "key": "return_type_spelling",
+          "value": {
+            "type": "string",
+            "value": "result.Result<array<int>,Error>"
+          }
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "name": "input",
+      "kind": "Parameter",
+      "owning_scope_id": 4,
+      "introduced_scope_id": null,
+      "ast_path": "/declaration_pool/2/parameters/0",
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/ast/type_reference_probe.flow",
+        "line": 12,
+        "column": 5
+      },
+      "facts": [
+        {
+          "kind": "TypeReference",
+          "key": "declared_type_spelling",
+          "value": {
+            "type": "string",
+            "value": "optional<collection.list<int>>"
+          }
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "name": "grid",
+      "kind": "Parameter",
+      "owning_scope_id": 4,
+      "introduced_scope_id": null,
+      "ast_path": "/declaration_pool/2/parameters/1",
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/ast/type_reference_probe.flow",
+        "line": 13,
+        "column": 5
+      },
+      "facts": [
+        {
+          "kind": "TypeReference",
+          "key": "declared_type_spelling",
+          "value": {
+            "type": "string",
+            "value": "array<int>[2,3]"
+          }
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "name": "local",
+      "kind": "Variable",
+      "owning_scope_id": 4,
+      "introduced_scope_id": null,
+      "ast_path": "/statement_pool/0",
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/ast/type_reference_probe.flow",
+        "line": 15,
+        "column": 5
+      },
+      "facts": [
+        {
+          "kind": "TypeReference",
+          "key": "declared_type_spelling",
+          "value": {
+            "type": "string",
+            "value": "optional<collection.list<int>>"
+          }
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "name": "scratch",
+      "kind": "Variable",
+      "owning_scope_id": 4,
+      "introduced_scope_id": null,
+      "ast_path": "/statement_pool/1",
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/ast/type_reference_probe.flow",
+        "line": 16,
+        "column": 5
+      },
+      "facts": [
+        {
+          "kind": "TypeReference",
+          "key": "declared_type_spelling",
+          "value": {
+            "type": "string",
+            "value": "array<int>[Rows,2]"
+          }
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "name": "main",
+      "kind": "Procedure",
+      "owning_scope_id": 2,
+      "introduced_scope_id": 5,
+      "ast_path": "/declaration_pool/3",
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/ast/type_reference_probe.flow",
+        "line": 20,
+        "column": 1
+      },
+      "facts": []
+    },
+    {
+      "id": 12,
+      "name": "values",
+      "kind": "Variable",
+      "owning_scope_id": 5,
+      "introduced_scope_id": null,
+      "ast_path": "/statement_pool/3",
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/ast/type_reference_probe.flow",
+        "line": 21,
+        "column": 5
+      },
+      "facts": [
+        {
+          "kind": "TypeReference",
+          "key": "declared_type_spelling",
+          "value": {
+            "type": "string",
+            "value": "collection.list<int>"
+          }
+        }
+      ]
+    }
+  ],
+  "blocks": [
+    {
+      "id": 0,
+      "statement_ids": []
+    },
+    {
+      "id": 1,
+      "statement_ids": []
+    }
+  ],
+  "statements": [
+    {
+      "id": 0,
+      "kind": "let",
+      "source_form": null,
+      "target_kind": null,
+      "source_location": null
+    },
+    {
+      "id": 1,
+      "kind": "let",
+      "source_form": null,
+      "target_kind": null,
+      "source_location": null
+    },
+    {
+      "id": 2,
+      "kind": "return",
+      "source_form": "keyword_return",
+      "target_kind": null,
+      "source_location": null
+    },
+    {
+      "id": 3,
+      "kind": "let",
+      "source_form": null,
+      "target_kind": null,
+      "source_location": null
+    }
+  ],
+  "expression_count": 14
+}

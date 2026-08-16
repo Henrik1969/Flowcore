@@ -1,0 +1,35 @@
+SymbolTable dump
+Scopes: 12
+  Scope #1 kind=Global name=global symbols=1 children=1
+  Scope #2 kind=Module name=statement_else_probe symbols=3 children=3
+  Scope #3 kind=Function name=normalize symbols=1 children=2
+  Scope #4 kind=Block name=if symbols=0 children=0
+  Scope #5 kind=Block name=else symbols=0 children=0
+  Scope #6 kind=Function name=keep_or_one symbols=1 children=1
+  Scope #7 kind=Block name=if symbols=0 children=0
+  Scope #8 kind=Function name=main symbols=1 children=2
+  Scope #9 kind=Block name=if symbols=0 children=0
+  Scope #10 kind=Block name=else symbols=0 children=2
+  Scope #11 kind=Block name=if symbols=0 children=0
+  Scope #12 kind=Block name=else symbols=0 children=0
+Symbols: 7
+  Symbol #1 scope=#1 name=statement_else_probe kind=Module facts=1
+    declaration_location=<source>:1:1
+    Fact kind=Custom key=source_unit_kind value="program"
+  Symbol #2 scope=#2 name=normalize kind=Function facts=1
+    declaration_location=<source>:4:1
+    Fact kind=TypeReference key=return_type_spelling value="int"
+  Symbol #3 scope=#3 name=value kind=Parameter facts=1
+    declaration_location=<source>:4:14
+    Fact kind=TypeReference key=declared_type_spelling value="int"
+  Symbol #4 scope=#2 name=keep_or_one kind=Function facts=1
+    declaration_location=<source>:12:1
+    Fact kind=TypeReference key=return_type_spelling value="int"
+  Symbol #5 scope=#6 name=value kind=Parameter facts=1
+    declaration_location=<source>:12:16
+    Fact kind=TypeReference key=declared_type_spelling value="int"
+  Symbol #6 scope=#2 name=main kind=Procedure facts=0
+    declaration_location=<source>:20:1
+  Symbol #7 scope=#8 name=value kind=Variable facts=1
+    declaration_location=<source>:21:5
+    Fact kind=TypeReference key=declared_type_spelling value="int"

@@ -1,0 +1,18 @@
+program statement_assignment_probe
+
+fn adjust(x : int) -> int {
+    value : int(x)
+    value = value + 1
+
+    if value > 0 {
+        value = value * 2
+    }
+
+    return value
+}
+
+main {
+    a : int(1)
+    b : int(2)
+    a = b + 3
+}

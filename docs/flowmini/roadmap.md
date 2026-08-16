@@ -7,7 +7,7 @@ provisional until each milestone is activated.
 ## Current checkpoint
 
 ```text
-v24_explicit_ast
+v25_symboltable_projection
 build: OK
 AST golden tests: 26 / 26
 Symbol projection tests: 11 / 11
@@ -18,11 +18,10 @@ CTest: 2 / 2
 
 ## Immediate
 
-1. Preserve the passed v0.24 raw frontend/export checkpoint.
-2. Decide and document the exact v0.25 activation operation before changing
-   branch, directory, or version metadata.
-3. Continue SymbolTable maturation without beginning semantic interpretation
-   until the next milestone is explicitly activated.
+1. Mature structural SymbolTable projection coverage and factual metadata.
+2. Harden AST-to-symbol origins, source provenance, and the frontend bundle.
+3. Expand projection and independent-consumer goldens.
+4. Keep semantic interpretation outside v0.25.
 
 ## Next structural versions
 
@@ -30,7 +29,7 @@ CTest: 2 / 2
 
 Move parser input toward TokenTree without changing language behavior.
 
-### Active: v24_explicit_ast
+### Closed: v24_explicit_ast
 
 Introduce explicit AST as parser output.
 
@@ -43,9 +42,10 @@ suite pass; and current-state documentation describes the boundary truthfully.
 
 This exit rule passed and was formally declared closed on 2026-08-16.
 
-### Provisional next label: v25_symboltable_from_ast
+### Active: v25_symboltable_projection
 
-Populate SymbolTable from AST declarations before lowering.
+Mature the factual AST-to-SymbolTable projection and independent export boundary
+before semantic analysis.
 
 Advance to v0.26 only when the complete AST and lossless structural SymbolTable
 projection form a mature frontend border with stable cross-links, scope

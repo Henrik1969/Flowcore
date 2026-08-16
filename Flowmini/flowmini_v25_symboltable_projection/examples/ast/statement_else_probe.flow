@@ -1,0 +1,31 @@
+program statement_else_probe
+
+fn normalize(value : int) -> int {
+    if value > 0 {
+        return value
+    } else {
+        return -value
+    }
+}
+
+fn keep_or_one(value : int) -> int {
+    if value == 0 {
+        return 1
+    }
+
+    return value
+}
+
+main {
+    value : int(1)
+
+    if value > 0 {
+        value = 2
+    } else {
+        if value == 0 {
+            value = 3
+        } else {
+            value = 4
+        }
+    }
+}

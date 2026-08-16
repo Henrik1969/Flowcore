@@ -7,19 +7,20 @@ Earlier stages are historical snapshots. They are useful for understanding devel
 Current active version:
 
 ```text
-v24 — flowmini_v24_explicit_ast
+v25 — flowmini_v25_symboltable_projection
 ```
 
 ## Active version
 
 | Version | Directory | Main purpose |
 |---:|---|---|
-| v24 | `flowmini_v24_explicit_ast` | Typed explicit AST, recursive expressions, statement/block arenas, structural SymbolTable projection |
+| v25 | `flowmini_v25_symboltable_projection` | SymbolTable projection maturation, factual cross-links, provenance, and frontend-bundle hardening |
 
 ## Recent historical versions
 
 | Version | Directory | Main purpose |
 |---:|---|---|
+| v24 | `flowmini_v24_explicit_ast` | Closed raw frontend/export border with typed explicit AST |
 | v23 | `flowmini_v23_token_tree_bridge` | TokenTree bridge made visible and trustworthy |
 | v22 | `flowmini_v22_unit_kinds` | `program`/`unit`, categorized examples, expected suite |
 | v21 | `flowmini_v21_structural_bridge` | TokenTree + SymbolTable structural bridge |
@@ -52,7 +53,7 @@ Missing version numbers are historical gaps or discarded intermediate experiment
 Current active development should happen in:
 
 ```text
-Flowmini/flowmini_v24_explicit_ast
+Flowmini/flowmini_v25_symboltable_projection
 ```
 
 Older versions should not be mistaken for the active implementation.

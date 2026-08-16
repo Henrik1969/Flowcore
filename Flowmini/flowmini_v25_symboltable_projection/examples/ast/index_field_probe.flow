@@ -1,0 +1,26 @@
+program index_field_probe
+
+record Point {
+    x : int
+    y : int
+}
+
+main {
+    arr : list<int>([1, 2, 3])
+    i : int(0)
+    value : int(arr[i])
+
+    p : Point({x: 10, y: 20})
+    xvalue : int(p.x)
+
+    value = arr[i]
+    xvalue = p.y
+
+    while arr[i] < 10 {
+        value = arr[i]
+    }
+
+    if p.x == 10 {
+        xvalue = p.y
+    }
+}

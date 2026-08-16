@@ -5,7 +5,7 @@ Flowmini is the executable prototype/lab language used to explore Flowcore ideas
 Current active version:
 
 ```text
-Flowmini/flowmini_v24_explicit_ast
+Flowmini/flowmini_v25_symboltable_projection
 ```
 
 Current baseline:
@@ -25,9 +25,9 @@ TokenTree remembers what the source looked like.
 AST states what the source means.
 ```
 
-The v0.24 AST checkpoint is stabilized so later semantic analysis, Graph IR,
-target-independent transformation, policy, and target lowering can be added
-behind explicit stage boundaries.
+The v0.24 frontend-export border is closed. The active v0.25 line matures its
+factual SymbolTable projection so independent tools and later semantic analysis
+can rely on the boundary.
 
 Documents in this directory:
 
@@ -39,9 +39,14 @@ Documents in this directory:
 - [Testing](testing.md)
 - [v0.24 frontend checkpoint Firetest report](v0.24-firetest-report.md)
 - [v0.24 frontend-border Firetest report](v0.24-frontend-border-firetest-report.md)
+- [v0.25 SymbolTable projection status](../../Flowmini/flowmini_v25_symboltable_projection/docs/v0.25-symboltable-projection-status.md)
 - [Project-wide verification gates and Firetest policy](../development/verification-gates.md)
 
-Active v0.24 implementation notes:
+Active v0.25 implementation note:
+
+- [SymbolTable projection status](../../Flowmini/flowmini_v25_symboltable_projection/docs/v0.25-symboltable-projection-status.md)
+
+Closed v0.24 implementation notes:
 
 - [Explicit AST status](../../Flowmini/flowmini_v24_explicit_ast/docs/v0.24-explicit-ast-status.md)
 - [Historical shallow-expression AST sitrep](../../Flowmini/flowmini_v24_explicit_ast/docs/v0.24-shallow-expression-ast-sitrep.md)

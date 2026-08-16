@@ -3,14 +3,14 @@
 Current active implementation:
 
 ```text
-flowmini_v24_explicit_ast
+flowmini_v25_symboltable_projection
 ```
 
 Current milestone:
 
 ```text
-Flowmini v0.24 explicit AST
-raw frontend/export border passed; C5 typed statements complete
+Flowmini v0.25 SymbolTable projection maturation
+factual projection and frontend-bundle hardening; no semantic analysis yet
 ```
 
 ## Status
@@ -26,7 +26,7 @@ CTest:                         PASS (2/2)
 
 Flowmini is still experimental and unfinished.
 
-The current v0.24 line provides an observable, regression-guarded expression
+The v0.25 line inherits the closed, observable, regression-guarded v0.24 expression
 and type-reference graph plus arena-owned declaration/statement/block
 structure. C5 is now
 complete: every statement kind is selected by its typed payload, conditional
@@ -40,6 +40,10 @@ struct, and extern members. Projection performs no type resolution, contract
 checking, effect interpretation, or ABI lowering. On 2026-08-16 the project
 owner formally declared the v0.24 raw frontend/export border passed after the
 accepted-language matrix, independent-consumer gate, and Tier 3 Firetest passed.
+v0.25 now owns projection completeness, factual cross-links and provenance,
+expanded projection goldens, and frontend-bundle schema hardening. It does not
+own semantic type resolution, legality checking, contract satisfaction, Graph
+IR, or runtime lowering.
 
 Top-level declarations have stable `DeclarationId` values in a canonical arena.
 The source unit owns each declaration exactly once. Type references, fields,
@@ -49,7 +53,7 @@ than receiving unnecessary global IDs.
 ## Run the current build
 
 ```bash
-cd Flowmini/flowmini_v24_explicit_ast
+cd Flowmini/flowmini_v25_symboltable_projection
 
 cmake -S . -B cmake-build-debug
 cmake --build cmake-build-debug -j20
@@ -57,14 +61,14 @@ cmake --build cmake-build-debug -j20
 
 Adjust `-j20` to match your machine.
 
-This directory is the canonical v24 build and test scope. Repository-root build
+This directory is the canonical v25 build and test scope. Repository-root build
 trees and their legacy superbuild test registrations are noncanonical for this
 branch.
 
 ## Run the current tests
 
 ```bash
-cd Flowmini/flowmini_v24_explicit_ast
+cd Flowmini/flowmini_v25_symboltable_projection
 
 cmake --build cmake-build-debug --target flowmini_ast_golden_tests
 cmake --build cmake-build-debug --target flowmini_suite
@@ -91,8 +95,8 @@ AST states what the source means.
 
 ## Architecture checkpoint for future lowering
 
-The v0.24 AST is being stabilized against the future Flowcore transformation
-pipeline.
+The closed v0.24 AST/export boundary is the inherited base for the v0.25
+SymbolTable projection line and future Flowcore transformation pipeline.
 
 Current work should preserve semantic meaning and source provenance without
 encoding optimizer, scheduler, runtime, or target-specific realization choices.
@@ -139,7 +143,7 @@ runtime execution semantics
 provider/capability resolution
 ```
 
-The binding completion checklist is:
+The closed v0.24 completion checklist is:
 
 ```text
 docs/flowmini/v0.24-accepted-language-coverage.md

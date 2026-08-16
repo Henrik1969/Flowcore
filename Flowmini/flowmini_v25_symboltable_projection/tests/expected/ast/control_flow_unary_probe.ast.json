@@ -1,0 +1,538 @@
+{
+    "format": "flowmini.ast.v2",
+    "source_unit": {
+        "kind": "program",
+        "name": "control_flow_unary_probe",
+        "declaration_count": 1,
+        "declaration_ids": [
+            0
+        ],
+        "declarations": [
+            {
+                "id": 0,
+                "kind": "main_block",
+                "has_body": true,
+                "body_block": 0
+            }
+        ]
+    },
+    "declaration_pool_size": 1,
+    "declaration_pool": [
+        {
+            "id": 0,
+            "kind": "main_block",
+            "has_body": true,
+            "body_block": 0
+        }
+    ],
+    "expression_pool_size": 20,
+    "expression_pool": [
+        {
+            "id": 0,
+            "kind": "bool_literal",
+            "text": "true",
+            "payload": {
+                "value_text": "true"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 1,
+            "kind": "bool_literal",
+            "text": "false",
+            "payload": {
+                "value_text": "false"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 2,
+            "kind": "unary",
+            "text": "-",
+            "payload": {
+                "operator": "-",
+                "operand": 3
+            },
+            "child_expressions": [
+                3
+            ]
+        },
+        {
+            "id": 3,
+            "kind": "integer_literal",
+            "text": "1",
+            "payload": {
+                "value_text": "1"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 4,
+            "kind": "integer_literal",
+            "text": "0",
+            "payload": {
+                "value_text": "0"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 5,
+            "kind": "unary",
+            "text": "not",
+            "payload": {
+                "operator": "not",
+                "operand": 6
+            },
+            "child_expressions": [
+                6
+            ]
+        },
+        {
+            "id": 6,
+            "kind": "identifier",
+            "text": "flag",
+            "payload": {
+                "name": "flag"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 7,
+            "kind": "binary",
+            "text": "<",
+            "payload": {
+                "operator": "<",
+                "left": 8,
+                "right": 9
+            },
+            "child_expressions": [
+                8,
+                9
+            ]
+        },
+        {
+            "id": 8,
+            "kind": "identifier",
+            "text": "index",
+            "payload": {
+                "name": "index"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 9,
+            "kind": "integer_literal",
+            "text": "10",
+            "payload": {
+                "value_text": "10"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 10,
+            "kind": "binary",
+            "text": "+",
+            "payload": {
+                "operator": "+",
+                "left": 11,
+                "right": 12
+            },
+            "child_expressions": [
+                11,
+                12
+            ]
+        },
+        {
+            "id": 11,
+            "kind": "identifier",
+            "text": "index",
+            "payload": {
+                "name": "index"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 12,
+            "kind": "integer_literal",
+            "text": "1",
+            "payload": {
+                "value_text": "1"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 13,
+            "kind": "binary",
+            "text": "==",
+            "payload": {
+                "operator": "==",
+                "left": 14,
+                "right": 15
+            },
+            "child_expressions": [
+                14,
+                15
+            ]
+        },
+        {
+            "id": 14,
+            "kind": "identifier",
+            "text": "index",
+            "payload": {
+                "name": "index"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 15,
+            "kind": "integer_literal",
+            "text": "2",
+            "payload": {
+                "value_text": "2"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 16,
+            "kind": "unary",
+            "text": "not",
+            "payload": {
+                "operator": "not",
+                "operand": 17
+            },
+            "child_expressions": [
+                17
+            ]
+        },
+        {
+            "id": 17,
+            "kind": "binary",
+            "text": "==",
+            "payload": {
+                "operator": "==",
+                "left": 18,
+                "right": 19
+            },
+            "child_expressions": [
+                18,
+                19
+            ]
+        },
+        {
+            "id": 18,
+            "kind": "identifier",
+            "text": "index",
+            "payload": {
+                "name": "index"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 19,
+            "kind": "integer_literal",
+            "text": "5",
+            "payload": {
+                "value_text": "5"
+            },
+            "child_expressions": []
+        }
+    ],
+    "statement_pool_size": 12,
+    "statement_pool": [
+        {
+            "id": 0,
+            "kind": "let",
+            "payload": {
+                "name": "flag",
+                "type_ref": {
+                    "kind": "named",
+                    "text": "Bool",
+                    "payload": {
+                        "name_segments": [
+                            "Bool"
+                        ]
+                    },
+                    "location": {
+                        "line": 5,
+                        "column": 12
+                    }
+                },
+                "initializer_expression": 0
+            },
+            "name": "flag",
+            "type": "Bool",
+            "type_ref": {
+                "kind": "named",
+                "text": "Bool",
+                "payload": {
+                    "name_segments": [
+                        "Bool"
+                    ]
+                },
+                "location": {
+                    "line": 5,
+                    "column": 12
+                }
+            },
+            "has_initializer": true,
+            "expression_ids": [
+                0
+            ]
+        },
+        {
+            "id": 1,
+            "kind": "let",
+            "payload": {
+                "name": "inverted",
+                "type_ref": {
+                    "kind": "named",
+                    "text": "Bool",
+                    "payload": {
+                        "name_segments": [
+                            "Bool"
+                        ]
+                    },
+                    "location": {
+                        "line": 6,
+                        "column": 16
+                    }
+                },
+                "initializer_expression": 1
+            },
+            "name": "inverted",
+            "type": "Bool",
+            "type_ref": {
+                "kind": "named",
+                "text": "Bool",
+                "payload": {
+                    "name_segments": [
+                        "Bool"
+                    ]
+                },
+                "location": {
+                    "line": 6,
+                    "column": 16
+                }
+            },
+            "has_initializer": true,
+            "expression_ids": [
+                1
+            ]
+        },
+        {
+            "id": 2,
+            "kind": "let",
+            "payload": {
+                "name": "negative",
+                "type_ref": {
+                    "kind": "named",
+                    "text": "int",
+                    "payload": {
+                        "name_segments": [
+                            "int"
+                        ]
+                    },
+                    "location": {
+                        "line": 7,
+                        "column": 16
+                    }
+                },
+                "initializer_expression": 2
+            },
+            "name": "negative",
+            "type": "int",
+            "type_ref": {
+                "kind": "named",
+                "text": "int",
+                "payload": {
+                    "name_segments": [
+                        "int"
+                    ]
+                },
+                "location": {
+                    "line": 7,
+                    "column": 16
+                }
+            },
+            "has_initializer": true,
+            "expression_ids": [
+                2
+            ]
+        },
+        {
+            "id": 3,
+            "kind": "let",
+            "payload": {
+                "name": "index",
+                "type_ref": {
+                    "kind": "named",
+                    "text": "int",
+                    "payload": {
+                        "name_segments": [
+                            "int"
+                        ]
+                    },
+                    "location": {
+                        "line": 8,
+                        "column": 13
+                    }
+                },
+                "initializer_expression": 4
+            },
+            "name": "index",
+            "type": "int",
+            "type_ref": {
+                "kind": "named",
+                "text": "int",
+                "payload": {
+                    "name_segments": [
+                        "int"
+                    ]
+                },
+                "location": {
+                    "line": 8,
+                    "column": 13
+                }
+            },
+            "has_initializer": true,
+            "expression_ids": [
+                4
+            ]
+        },
+        {
+            "id": 4,
+            "kind": "placement",
+            "payload": {
+                "value_expression": 5,
+                "target": {
+                    "kind": "identifier",
+                    "name": "inverted",
+                    "location": {
+                        "line": 10,
+                        "column": 17
+                    }
+                },
+                "source_form": "arrow_placement"
+            },
+            "has_value": true,
+            "expression_ids": [
+                5
+            ]
+        },
+        {
+            "id": 5,
+            "kind": "placement",
+            "payload": {
+                "value_expression": 10,
+                "target": {
+                    "kind": "identifier",
+                    "name": "index",
+                    "location": {
+                        "line": 13,
+                        "column": 22
+                    }
+                },
+                "source_form": "arrow_placement"
+            },
+            "has_value": true,
+            "expression_ids": [
+                10
+            ]
+        },
+        {
+            "id": 6,
+            "kind": "continue",
+            "payload": {}
+        },
+        {
+            "id": 7,
+            "kind": "if",
+            "payload": {
+                "condition_expression": 13,
+                "then_block": 2,
+                "else_arm": null
+            },
+            "has_condition": true,
+            "expression_ids": [
+                13
+            ],
+            "condition": 13,
+            "then_block": 2,
+            "else_arm": null
+        },
+        {
+            "id": 8,
+            "kind": "continue",
+            "payload": {}
+        },
+        {
+            "id": 9,
+            "kind": "if",
+            "payload": {
+                "condition_expression": 16,
+                "then_block": 3,
+                "else_arm": null
+            },
+            "has_condition": true,
+            "expression_ids": [
+                16
+            ],
+            "condition": 16,
+            "then_block": 3,
+            "else_arm": null
+        },
+        {
+            "id": 10,
+            "kind": "break",
+            "payload": {}
+        },
+        {
+            "id": 11,
+            "kind": "while",
+            "payload": {
+                "condition_expression": 7,
+                "body_block": 1
+            },
+            "has_condition": true,
+            "expression_ids": [
+                7
+            ],
+            "body_block": 1
+        }
+    ],
+    "block_pool_size": 4,
+    "block_pool": [
+        {
+            "id": 0,
+            "statements": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                11
+            ]
+        },
+        {
+            "id": 1,
+            "statements": [
+                5,
+                7,
+                9,
+                10
+            ]
+        },
+        {
+            "id": 2,
+            "statements": [
+                6
+            ]
+        },
+        {
+            "id": 3,
+            "statements": [
+                8
+            ]
+        }
+    ]
+}
