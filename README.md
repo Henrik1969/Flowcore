@@ -165,6 +165,10 @@ Flowmini/flowmini_v24_explicit_ast/docs/v0.24-shallow-expression-ast-sitrep.md (
 docs/development/project-hygiene.md
 ```
 
+The current project boundary and its conformance to the FrankenCore
+architectural laws are recorded in the
+[Flowcore FrankenCore conformance declaration](docs/architecture/frankencore-conformance.md).
+
 ## License
 
 This project is licensed under the MIT License. See `LICENSE`.

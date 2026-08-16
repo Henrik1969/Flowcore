@@ -24,6 +24,7 @@ This is the soul of Flowcore.
 
 - [Flowcore core promise](architecture/flowcore-core-promise.md)
 - [Transformation and revision architecture](architecture/compiler-transformation-revision-model.md)
+- [FrankenCore conformance declaration](architecture/frankencore-conformance.md)
 - [Prerequisites](architecture/prerequisites.md)
 
 ## Development policy
