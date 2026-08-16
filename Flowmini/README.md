@@ -27,15 +27,19 @@ Flowmini is experimental and unfinished.
 ```text
 lexer/token groundwork             usable
 TokenTree/source structure          observable
-explicit AST                        active and structurally deepening
-shallow expression AST              first pass complete
+explicit AST                        structurally deep, coverage incomplete
+recursive expression AST            implemented and golden-guarded
+C5 typed statements/blocks          complete
+structural SymbolTable projection   proven, coverage incomplete
+canonical type policy               binding, runtime unimplemented
 semantic analysis                   mostly future work
 type checking                       mostly future work
 Graph IR lowering                   mostly future work
 runtime semantics                   mostly future work
 ```
 
-The current v0.24 AST can represent a shallow navigable expression graph for:
+The current v0.24 AST represents a recursive, precedence-aware expression graph
+for the established expression surface, including:
 
 ```text
 function calls
@@ -47,7 +51,12 @@ list literals
 record literals
 ```
 
-This is still not a complete expression parser. Recursive expression population, precedence, associativity, and semantic analysis are future work.
+Expressions use typed payloads and recursively owned child IDs. Parenthesized
+grouping, operator precedence, associativity, prefix operators, and nested
+postfix call/index/field forms are regression-guarded. This does not close the
+frontend gate: some accepted declaration, contract, ABI, provenance, and
+SymbolTable-projection forms remain partial or absent, and semantic analysis is
+deliberately later work.
 
 ## Why does this look ordinary?
 
@@ -197,7 +206,10 @@ Recommended reading order:
 Flowmini/README.md
 Flowmini/CURRENT.md
 Flowmini/flowmini_v24_explicit_ast/docs/v0.24-explicit-ast-status.md
-Flowmini/flowmini_v24_explicit_ast/docs/v0.24-shallow-expression-ast-sitrep.md
+docs/flowmini/v0.24-accepted-language-coverage.md
+docs/flowmini/v0.24-type-policy.md
+Flowmini/flowmini_v24_explicit_ast/docs/v0.24-c5-statement-payload-sitrep.md
+Flowmini/flowmini_v24_explicit_ast/docs/v0.24-shallow-expression-ast-sitrep.md (historical checkpoint)
 Flowmini/flowmini_v24_explicit_ast/docs/v0.24-future-transformation-boundary.md
 docs/architecture/compiler-transformation-revision-model.md
 Flowmini/flowmini_v24_explicit_ast/examples/ast/README.md

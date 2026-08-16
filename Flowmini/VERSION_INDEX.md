@@ -14,7 +14,7 @@ v24 — flowmini_v24_explicit_ast
 
 | Version | Directory | Main purpose |
 |---:|---|---|
-| v24 | `flowmini_v24_explicit_ast` | Explicit AST stabilization, AST golden tests, shallow expression graph |
+| v24 | `flowmini_v24_explicit_ast` | Typed explicit AST, recursive expressions, statement/block arenas, structural SymbolTable projection |
 
 ## Recent historical versions
 

@@ -10,7 +10,7 @@ Current milestone:
 
 ```text
 Flowmini v0.24 explicit AST
-active C5 statement and frontend maturation
+raw frontend maturation; C5 typed statements complete
 ```
 
 ## Status
@@ -117,7 +117,7 @@ The following are still future or incomplete work:
 
 ```text
 complete statement coverage for the accepted language
-complete ABI and canonical flow-placement source-form coverage
+complete ABI declaration and contract AST coverage
 ordinary capability/provider call model for output; no core Print statement
 complete structural SymbolTable projection across the accepted language
 semantic name resolution

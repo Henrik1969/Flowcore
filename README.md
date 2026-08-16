@@ -157,7 +157,7 @@ CTest:                         PASS (2/2)
 Flowmini/README.md
 Flowmini/CURRENT.md
 Flowmini/flowmini_v24_explicit_ast/docs/v0.24-explicit-ast-status.md
-Flowmini/flowmini_v24_explicit_ast/docs/v0.24-shallow-expression-ast-sitrep.md
+Flowmini/flowmini_v24_explicit_ast/docs/v0.24-shallow-expression-ast-sitrep.md (historical checkpoint)
 docs/development/project-hygiene.md
 ```
 
