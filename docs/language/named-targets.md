@@ -6,13 +6,15 @@ kind: language-design
 
 # Named Targets and Main Entrypoints
 
-Authority: the one-root-`main` v0.24 rule and the future named-target direction
-are binding. Candidate syntax, AST shapes, lowering details, and deferred
-questions are provisional. Named targets are not implemented in v0.24.
+Authority: the one-root-`main` rule inherited from v0.24 and the future
+named-target direction are binding. Candidate syntax, AST shapes, lowering
+details, and deferred questions are provisional. Named targets are not
+implemented in active Flowmini v0.25.
 
-## Current v0.24 rule
+## Current v0.25 rule
 
-In the current Flowmini v0.24 explicit-AST line, a root program supports exactly one root `main` block.
+Active Flowmini v0.25 inherits the closed v0.24 rule: a root program supports
+exactly one root `main` block.
 
 Multiple root `main` blocks are currently an error.
 
@@ -28,9 +30,10 @@ main {
 }
 ```
 
-This remains invalid for v0.24.
+This remains invalid in v0.25.
 
-The current rule is intentionally strict because v0.24 is focused on stabilizing the explicit AST, not expanding the language surface.
+The current rule remains intentionally strict because v0.25 is focused on
+structural SymbolTable projection, not expansion of the language surface.
 ## Future direction
 
 Flowcore/Flowmini may later support multiple named buildable or runnable targets from the same source base.
@@ -172,7 +175,7 @@ A target is a named projection of that universe into a buildable or runnable pro
 
 A main block is the entrypoint of a target.
 
-For v0.24, root programs support exactly one main block.
+For active v0.25, root programs support exactly one main block.
 
 Future versions may support named target scopes, each owning exactly one main block.
 
@@ -186,11 +189,11 @@ program bad_example
 main {
     ...
 }
-```
 
 main {
     ...
 }
+```
 
 The compiler or build tool would have to guess which main represents the executable entrypoint.
 
@@ -280,7 +283,7 @@ program + target test_runner
 
 ## Current decision
 
-For now, keep v0.24 strict:
+For now, keep v0.25 strict:
 
 ```text
 one root main only

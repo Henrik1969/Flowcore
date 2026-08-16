@@ -3,7 +3,7 @@ title: Revisioned Node Identity
 status: binding-direction-provisional-mechanisms
 kind: architecture-note
 scope: Flowcore and FrankenCore model direction
-implementation: not implemented in Flowmini v0.24
+implementation: not implemented in active Flowmini v0.25
 ---
 
 # Revisioned Node Identity
@@ -77,15 +77,17 @@ Revisioned identity supports:
 - provenance-aware transformations;
 - speculative lowering and optimization.
 
-## Relationship to Flowmini v0.24
+## Relationship to Flowmini v0.25
 
-Flowmini v0.24 uses arena-owned statement, block, and expression IDs to avoid
-raw-pointer ownership and provide stable references within an AST instance.
-Those pool IDs are not yet the full revision model.
+Flowmini v0.25 inherits v0.24's arena-owned declaration, statement, block, and
+expression IDs to avoid raw-pointer ownership and provide stable references
+within one exported AST revision. Its typed structural origins make derivation
+provenance independently inspectable. Those pool IDs and origins are not yet
+the full cross-edit revision model.
 
-Do not force revision machinery into v0.24 before the raw AST and structural
-SymbolTable projection are mature. Current choices must nevertheless avoid
-making future stable identity or provenance impossible.
+Do not force revision machinery into the active v0.25 projection milestone.
+Current choices must nevertheless avoid making future stable identity or
+mutation provenance impossible.
 
 ## Relationship to Graph IR
 
@@ -112,5 +114,6 @@ or historical states of one conceptual entity remain observable.
 ## Current decision
 
 Preserve the revisioned-identity law and defer its concrete machinery. Continue
-v0.24 with simple arena-owned IDs while maturing the AST and SymbolTable
-frontend border.
+v0.25 with stable-within-one-export arena IDs and explicit structural origins
+while maturing the SymbolTable projection boundary. Define the runtime mutation
+provenance contract separately before selecting storage machinery.

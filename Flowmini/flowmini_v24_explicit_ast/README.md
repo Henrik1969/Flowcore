@@ -1,6 +1,23 @@
-# Flowmini v22 — Unit Kinds
+# Flowmini v0.24 — Closed Explicit AST and Frontend Export
 
-This version introduces the first hard source-role boundary for Flowmini.
+Status: frozen historical implementation checkpoint
+
+This directory contains the tagged v0.24 raw frontend/export implementation.
+It inherited the v22 source-role boundary and subsequently added the typed raw
+AST, factual SymbolTable projection, versioned frontend bundle, independent
+consumer, and the recorded Tier 3 border gate.
+
+Active development now happens in:
+
+```text
+Flowmini/flowmini_v25_symboltable_projection
+```
+
+The authoritative v0.24 checkpoint description is
+[`docs/v0.24-explicit-ast-status.md`](docs/v0.24-explicit-ast-status.md). Current
+project state is recorded in [`../CURRENT.md`](../CURRENT.md).
+
+## Inherited source-unit rule
 
 Flowmini source files now have an explicit unit kind:
 
@@ -64,13 +81,13 @@ examples/
 This supports the external suite runner:
 
 ```bash
-$TOP/tools/run-flowmini-test-suite.sh --root Flowmini/flowmini_v22_unit_kinds
+$TOP/tools/run-flowmini-test-suite.sh --root Flowmini/flowmini_v24_explicit_ast
 ```
 
 or, with environment defaults:
 
 ```bash
-export FLOWMINI_ROOT="$TOP/Flowmini/flowmini_v22_unit_kinds"
+export FLOWMINI_ROOT="$TOP/Flowmini/flowmini_v24_explicit_ast"
 $TOP/tools/run-flowmini-test-suite.sh
 ```
 
@@ -96,4 +113,5 @@ source role:    program | unit
 artifact form:  source | bytecode | cache | object
 ```
 
-v22 only defines the source role boundary.
+The source-role rule originated in v22. The v0.24 checkpoint preserves it as
+part of the closed frontend contract.

@@ -21,8 +21,9 @@ tests/expected/diagnostics/<test-name>.contains
     One required diagnostic substring per non-empty line. Preferred for negative tests.
 ```
 
-The current baseline was generated from `flowmini_v22_unit_kinds` with stdin value `5`.
-The current suite passes 78/78 with these expectations.
+The expectation set originated in `flowmini_v22_unit_kinds` with stdin value
+`5` and was extended through the closed v0.24 checkpoint. The v0.24 suite
+passes 78/78 with these expectations.
 
 Useful commands:
 

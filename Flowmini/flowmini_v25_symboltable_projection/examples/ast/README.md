@@ -1,8 +1,9 @@
 # Flowmini AST Examples
 
-Status: v0.24 explicit-AST development examples
+Status: active v0.25 structural frontend examples
 
-This directory contains Flowmini source files used while stabilizing the explicit AST.
+This directory contains Flowmini source files used to stabilize the explicit
+AST and mature its factual SymbolTable projection.
 
 Not every file in this directory is expected to pass today.
 
@@ -13,7 +14,7 @@ canonical AST probes
     stable examples used by golden AST regression tests
 
 exploratory / edgecase examples
-    useful language-design specimens, but not necessarily valid v0.24 programs
+    useful language-design specimens, but not necessarily valid v0.25 programs
 ```
 
 ## Canonical AST probes
@@ -47,6 +48,7 @@ Current canonical probe set:
 ```text
 abi_contract_probe.flow
 call_expression_probe.flow
+canonical_type_spelling_probe.flow
 control_flow_unary_probe.flow
 else_if_chain_probe.flow
 else_if_final_else_probe.flow
@@ -72,7 +74,8 @@ structured_value_probe.flow
 type_reference_probe.flow
 ```
 
-These 26 files define the current v0.24 AST golden regression gate.
+These 26 files define the current v0.25 AST golden regression gate inherited
+from and extended after the v0.24 frontend checkpoint.
 
 `function_signature_gallery.flow`, `unit_symbol_projection_gallery.flow`, and
 the refined/ABI contract probes also serve the separate SymbolTable projection
@@ -88,7 +91,8 @@ encoded as arbitrary nested statements inside an ordinary else block.
 
 ## Exploratory / edgecase examples
 
-Some examples are intentionally outside the current v0.24 accepted language surface.
+Some examples are intentionally outside the current v0.25 accepted language
+surface.
 
 These files may fail today.
 
@@ -103,7 +107,7 @@ gate.
 
 At the time of writing, it contains multiple root main blocks.
 
-Current v0.24 rule:
+Current v0.25 rule, inherited from v0.24:
 
 ```text
 a root program supports exactly one root main block
@@ -115,7 +119,7 @@ Therefore this file may fail with an error similar to:
 multiple main definitions found in root file
 ```
 
-This is expected for v0.24.
+This is expected for v0.25.
 
 The file is still useful because it helped expose a future language-design direction:
 
@@ -145,7 +149,7 @@ target daemon {
 }
 ```
 
-But this is not implemented in v0.24.
+But this is not implemented in v0.25.
 
 ## Rule for test tooling
 

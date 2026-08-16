@@ -117,7 +117,7 @@ Flowmini/flowmini_v24_explicit_ast/docs/v0.24-future-transformation-boundary.md
 
 ## Current important language rule
 
-For v0.24:
+Active v0.25 inherits the v0.24 rule:
 
 ```text
 A root program supports exactly one root main block.

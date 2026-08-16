@@ -265,8 +265,6 @@ model, or production security boundary.
 - The ABI provider bridge couples tests to a source-tree output path and cannot
   safely prepare multiple build configurations concurrently.
 - Security and capability isolation are not mature enough for production use.
-- Some project-hygiene documentation still names v0.24 as the active stage and
-  is stale relative to v0.25.
 
 ### Intentional experiments
 

@@ -42,9 +42,11 @@ The important architectural boundaries are documented before their full
 implementations exist so the current default path does not accidentally become
 the permanent definition of Flowcore.
 
-Current active implementation work is Flowmini v0.24 explicit AST
-stabilization. Graph IR, optimizer policy, target lowering, and provider
-selection remain future work.
+Current active implementation work is Flowmini v0.25 SymbolTable projection
+maturation. It inherits the closed v0.24 raw frontend/export border and hardens
+factual origins and the independent-consumer contract before semantic analysis.
+Graph IR, optimizer policy, target lowering, and generalized provider selection
+remain future work.
 
 Planned and active architecture topics:
 
@@ -68,6 +70,7 @@ Foundational notes:
 - [Transformation and revision architecture](compiler-transformation-revision-model.md)
 - [Revisioned node identity](revisioned-node-identity.md)
 - [Prerequisites](prerequisites.md)
+- [FrankenCore conformance declaration](frankencore-conformance.md)
 
 `flowcore-core-promise.md` is binding foundational intent.
 `compiler-transformation-revision-model.md` contains binding stage laws and
