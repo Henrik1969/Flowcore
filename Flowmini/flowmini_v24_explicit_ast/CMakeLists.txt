@@ -49,7 +49,10 @@ add_executable(flowmini
         include/flowmini_symbol_projection.h
 )
 
-target_include_directories(flowmini PRIVATE include)
+target_include_directories(flowmini PRIVATE
+        include
+        subprojects/testabi/include
+)
 
 target_compile_options(flowmini PRIVATE
         -Wall

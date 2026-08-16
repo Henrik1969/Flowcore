@@ -45,7 +45,9 @@ tests/expected/ast/*.ast.json
 Current canonical probe set:
 
 ```text
+abi_contract_probe.flow
 call_expression_probe.flow
+control_flow_unary_probe.flow
 else_if_chain_probe.flow
 else_if_final_else_probe.flow
 expression_kind_probe.flow
@@ -60,19 +62,22 @@ ordinary_else_probe.flow
 placement_statement_probe.flow
 precedence_expression_probe.flow
 recursive_expression_probe.flow
+refined_contract_probe.flow
 statement_assignment_probe.flow
 statement_condition_probe.flow
 statement_else_probe.flow
 statement_initializer_probe.flow
 statement_return_probe.flow
+structured_value_probe.flow
 type_reference_probe.flow
 ```
 
-These 21 files define the current v0.24 AST golden regression gate.
+These 26 files define the current v0.24 AST golden regression gate.
 
-`function_signature_gallery.flow` and `unit_symbol_projection_gallery.flow`
-also serve the separate SymbolTable projection golden gate. The unit gallery is
-inspectable through structural dump modes but remains non-executable as a root
+`function_signature_gallery.flow`, `unit_symbol_projection_gallery.flow`, and
+the refined/ABI contract probes also serve the separate SymbolTable projection
+golden gate. The unit galleries are
+inspectable through structural dump modes but remain non-executable as root
 source, preserving the program/unit boundary.
 
 The current `flowmini.ast.v2` dump uses arena-owned `statement_pool` and

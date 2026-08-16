@@ -4,12 +4,19 @@
         "kind": "program",
         "name": "type_reference_probe",
         "declaration_count": 4,
+        "declaration_ids": [
+            0,
+            1,
+            2,
+            3
+        ],
         "declarations": [
             {
-                "kind": "type_alias",
+                "id": 0,
+                "kind": "refined_type",
                 "name": "IntList",
-                "target": "collection.list<int>",
-                "target_type_ref": {
+                "base_type": "collection.list<int>",
+                "base_type_ref": {
                     "kind": "generic",
                     "text": "collection.list<int>",
                     "payload": {
@@ -37,9 +44,15 @@
                         "line": 4,
                         "column": 22
                     }
+                },
+                "invariants": [],
+                "location": {
+                    "line": 4,
+                    "column": 1
                 }
             },
             {
+                "id": 1,
                 "kind": "record",
                 "name": "MatrixBox",
                 "field_count": 2,
@@ -61,7 +74,7 @@
                                         ]
                                     },
                                     "location": {
-                                        "line": 7,
+                                        "line": 8,
                                         "column": 26
                                     }
                                 },
@@ -69,21 +82,21 @@
                                     {
                                         "text": "Rows",
                                         "location": {
-                                            "line": 7,
+                                            "line": 8,
                                             "column": 39
                                         }
                                     },
                                     {
                                         "text": "2",
                                         "location": {
-                                            "line": 7,
+                                            "line": 8,
                                             "column": 45
                                         }
                                     }
                                 ]
                             },
                             "location": {
-                                "line": 7,
+                                "line": 8,
                                 "column": 20
                             }
                         }
@@ -117,21 +130,21 @@
                                                         ]
                                                     },
                                                     "location": {
-                                                        "line": 8,
+                                                        "line": 9,
                                                         "column": 47
                                                     }
                                                 }
                                             ]
                                         },
                                         "location": {
-                                            "line": 8,
+                                            "line": 9,
                                             "column": 31
                                         }
                                     }
                                 ]
                             },
                             "location": {
-                                "line": 8,
+                                "line": 9,
                                 "column": 22
                             }
                         }
@@ -139,6 +152,7 @@
                 ]
             },
             {
+                "id": 2,
                 "kind": "function",
                 "name": "transform",
                 "parameter_count": 2,
@@ -172,21 +186,21 @@
                                                         ]
                                                     },
                                                     "location": {
-                                                        "line": 12,
+                                                        "line": 13,
                                                         "column": 38
                                                     }
                                                 }
                                             ]
                                         },
                                         "location": {
-                                            "line": 12,
+                                            "line": 13,
                                             "column": 22
                                         }
                                     }
                                 ]
                             },
                             "location": {
-                                "line": 12,
+                                "line": 13,
                                 "column": 13
                             }
                         }
@@ -207,7 +221,7 @@
                                         ]
                                     },
                                     "location": {
-                                        "line": 13,
+                                        "line": 14,
                                         "column": 18
                                     }
                                 },
@@ -215,21 +229,21 @@
                                     {
                                         "text": "2",
                                         "location": {
-                                            "line": 13,
+                                            "line": 14,
                                             "column": 23
                                         }
                                     },
                                     {
                                         "text": "3",
                                         "location": {
-                                            "line": 13,
+                                            "line": 14,
                                             "column": 26
                                         }
                                     }
                                 ]
                             },
                             "location": {
-                                "line": 13,
+                                "line": 14,
                                 "column": 12
                             }
                         }
@@ -258,14 +272,14 @@
                                             ]
                                         },
                                         "location": {
-                                            "line": 14,
+                                            "line": 15,
                                             "column": 26
                                         }
                                     },
                                     "extents": []
                                 },
                                 "location": {
-                                    "line": 14,
+                                    "line": 15,
                                     "column": 20
                                 }
                             },
@@ -278,14 +292,14 @@
                                     ]
                                 },
                                 "location": {
-                                    "line": 14,
+                                    "line": 15,
                                     "column": 32
                                 }
                             }
                         ]
                     },
                     "location": {
-                        "line": 14,
+                        "line": 15,
                         "column": 6
                     }
                 },
@@ -293,12 +307,317 @@
                 "body_block": 0
             },
             {
+                "id": 3,
                 "kind": "main_block",
                 "has_body": true,
                 "body_block": 1
             }
         ]
     },
+    "declaration_pool_size": 4,
+    "declaration_pool": [
+        {
+            "id": 0,
+            "kind": "refined_type",
+            "name": "IntList",
+            "base_type": "collection.list<int>",
+            "base_type_ref": {
+                "kind": "generic",
+                "text": "collection.list<int>",
+                "payload": {
+                    "constructor_segments": [
+                        "collection",
+                        "list"
+                    ],
+                    "arguments": [
+                        {
+                            "kind": "named",
+                            "text": "int",
+                            "payload": {
+                                "name_segments": [
+                                    "int"
+                                ]
+                            },
+                            "location": {
+                                "line": 4,
+                                "column": 38
+                            }
+                        }
+                    ]
+                },
+                "location": {
+                    "line": 4,
+                    "column": 22
+                }
+            },
+            "invariants": [],
+            "location": {
+                "line": 4,
+                "column": 1
+            }
+        },
+        {
+            "id": 1,
+            "kind": "record",
+            "name": "MatrixBox",
+            "field_count": 2,
+            "fields": [
+                {
+                    "name": "values",
+                    "type": "array<math.scalar>[Rows,2]",
+                    "type_ref": {
+                        "kind": "array",
+                        "text": "array<math.scalar>[Rows,2]",
+                        "payload": {
+                            "element_type": {
+                                "kind": "named",
+                                "text": "math.scalar",
+                                "payload": {
+                                    "name_segments": [
+                                        "math",
+                                        "scalar"
+                                    ]
+                                },
+                                "location": {
+                                    "line": 8,
+                                    "column": 26
+                                }
+                            },
+                            "extents": [
+                                {
+                                    "text": "Rows",
+                                    "location": {
+                                        "line": 8,
+                                        "column": 39
+                                    }
+                                },
+                                {
+                                    "text": "2",
+                                    "location": {
+                                        "line": 8,
+                                        "column": 45
+                                    }
+                                }
+                            ]
+                        },
+                        "location": {
+                            "line": 8,
+                            "column": 20
+                        }
+                    }
+                },
+                {
+                    "name": "fallback",
+                    "type": "optional<collection.list<int>>",
+                    "type_ref": {
+                        "kind": "generic",
+                        "text": "optional<collection.list<int>>",
+                        "payload": {
+                            "constructor_segments": [
+                                "optional"
+                            ],
+                            "arguments": [
+                                {
+                                    "kind": "generic",
+                                    "text": "collection.list<int>",
+                                    "payload": {
+                                        "constructor_segments": [
+                                            "collection",
+                                            "list"
+                                        ],
+                                        "arguments": [
+                                            {
+                                                "kind": "named",
+                                                "text": "int",
+                                                "payload": {
+                                                    "name_segments": [
+                                                        "int"
+                                                    ]
+                                                },
+                                                "location": {
+                                                    "line": 9,
+                                                    "column": 47
+                                                }
+                                            }
+                                        ]
+                                    },
+                                    "location": {
+                                        "line": 9,
+                                        "column": 31
+                                    }
+                                }
+                            ]
+                        },
+                        "location": {
+                            "line": 9,
+                            "column": 22
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "id": 2,
+            "kind": "function",
+            "name": "transform",
+            "parameter_count": 2,
+            "parameters": [
+                {
+                    "name": "input",
+                    "type": "optional<collection.list<int>>",
+                    "type_ref": {
+                        "kind": "generic",
+                        "text": "optional<collection.list<int>>",
+                        "payload": {
+                            "constructor_segments": [
+                                "optional"
+                            ],
+                            "arguments": [
+                                {
+                                    "kind": "generic",
+                                    "text": "collection.list<int>",
+                                    "payload": {
+                                        "constructor_segments": [
+                                            "collection",
+                                            "list"
+                                        ],
+                                        "arguments": [
+                                            {
+                                                "kind": "named",
+                                                "text": "int",
+                                                "payload": {
+                                                    "name_segments": [
+                                                        "int"
+                                                    ]
+                                                },
+                                                "location": {
+                                                    "line": 13,
+                                                    "column": 38
+                                                }
+                                            }
+                                        ]
+                                    },
+                                    "location": {
+                                        "line": 13,
+                                        "column": 22
+                                    }
+                                }
+                            ]
+                        },
+                        "location": {
+                            "line": 13,
+                            "column": 13
+                        }
+                    }
+                },
+                {
+                    "name": "grid",
+                    "type": "array<int>[2,3]",
+                    "type_ref": {
+                        "kind": "array",
+                        "text": "array<int>[2,3]",
+                        "payload": {
+                            "element_type": {
+                                "kind": "named",
+                                "text": "int",
+                                "payload": {
+                                    "name_segments": [
+                                        "int"
+                                    ]
+                                },
+                                "location": {
+                                    "line": 14,
+                                    "column": 18
+                                }
+                            },
+                            "extents": [
+                                {
+                                    "text": "2",
+                                    "location": {
+                                        "line": 14,
+                                        "column": 23
+                                    }
+                                },
+                                {
+                                    "text": "3",
+                                    "location": {
+                                        "line": 14,
+                                        "column": 26
+                                    }
+                                }
+                            ]
+                        },
+                        "location": {
+                            "line": 14,
+                            "column": 12
+                        }
+                    }
+                }
+            ],
+            "return_type": "result.Result<array<int>,Error>",
+            "return_type_ref": {
+                "kind": "generic",
+                "text": "result.Result<array<int>,Error>",
+                "payload": {
+                    "constructor_segments": [
+                        "result",
+                        "Result"
+                    ],
+                    "arguments": [
+                        {
+                            "kind": "array",
+                            "text": "array<int>",
+                            "payload": {
+                                "element_type": {
+                                    "kind": "named",
+                                    "text": "int",
+                                    "payload": {
+                                        "name_segments": [
+                                            "int"
+                                        ]
+                                    },
+                                    "location": {
+                                        "line": 15,
+                                        "column": 26
+                                    }
+                                },
+                                "extents": []
+                            },
+                            "location": {
+                                "line": 15,
+                                "column": 20
+                            }
+                        },
+                        {
+                            "kind": "named",
+                            "text": "Error",
+                            "payload": {
+                                "name_segments": [
+                                    "Error"
+                                ]
+                            },
+                            "location": {
+                                "line": 15,
+                                "column": 32
+                            }
+                        }
+                    ]
+                },
+                "location": {
+                    "line": 15,
+                    "column": 6
+                }
+            },
+            "has_body": true,
+            "body_block": 0
+        },
+        {
+            "id": 3,
+            "kind": "main_block",
+            "has_body": true,
+            "body_block": 1
+        }
+    ],
     "expression_pool_size": 14,
     "expression_pool": [
         {
@@ -487,21 +806,21 @@
                                                 ]
                                             },
                                             "location": {
-                                                "line": 15,
+                                                "line": 16,
                                                 "column": 38
                                             }
                                         }
                                     ]
                                 },
                                 "location": {
-                                    "line": 15,
+                                    "line": 16,
                                     "column": 22
                                 }
                             }
                         ]
                     },
                     "location": {
-                        "line": 15,
+                        "line": 16,
                         "column": 13
                     }
                 },
@@ -535,21 +854,21 @@
                                             ]
                                         },
                                         "location": {
-                                            "line": 15,
+                                            "line": 16,
                                             "column": 38
                                         }
                                     }
                                 ]
                             },
                             "location": {
-                                "line": 15,
+                                "line": 16,
                                 "column": 22
                             }
                         }
                     ]
                 },
                 "location": {
-                    "line": 15,
+                    "line": 16,
                     "column": 13
                 }
             },
@@ -576,7 +895,7 @@
                                 ]
                             },
                             "location": {
-                                "line": 16,
+                                "line": 17,
                                 "column": 21
                             }
                         },
@@ -584,21 +903,21 @@
                             {
                                 "text": "Rows",
                                 "location": {
-                                    "line": 16,
+                                    "line": 17,
                                     "column": 26
                                 }
                             },
                             {
                                 "text": "2",
                                 "location": {
-                                    "line": 16,
+                                    "line": 17,
                                     "column": 32
                                 }
                             }
                         ]
                     },
                     "location": {
-                        "line": 16,
+                        "line": 17,
                         "column": 15
                     }
                 },
@@ -619,7 +938,7 @@
                             ]
                         },
                         "location": {
-                            "line": 16,
+                            "line": 17,
                             "column": 21
                         }
                     },
@@ -627,21 +946,21 @@
                         {
                             "text": "Rows",
                             "location": {
-                                "line": 16,
+                                "line": 17,
                                 "column": 26
                             }
                         },
                         {
                             "text": "2",
                             "location": {
-                                "line": 16,
+                                "line": 17,
                                 "column": 32
                             }
                         }
                     ]
                 },
                 "location": {
-                    "line": 16,
+                    "line": 17,
                     "column": 15
                 }
             },
@@ -685,14 +1004,14 @@
                                     ]
                                 },
                                 "location": {
-                                    "line": 21,
+                                    "line": 22,
                                     "column": 30
                                 }
                             }
                         ]
                     },
                     "location": {
-                        "line": 21,
+                        "line": 22,
                         "column": 14
                     }
                 },
@@ -718,14 +1037,14 @@
                                 ]
                             },
                             "location": {
-                                "line": 21,
+                                "line": 22,
                                 "column": 30
                             }
                         }
                     ]
                 },
                 "location": {
-                    "line": 21,
+                    "line": 22,
                     "column": 14
                 }
             },

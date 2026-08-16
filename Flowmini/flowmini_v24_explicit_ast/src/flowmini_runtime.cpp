@@ -1,4 +1,5 @@
 #include "flowmini_runtime.h"
+#include "flowmini_testabi.h"
 
 #include "flow_common.h"
 
@@ -1012,8 +1013,7 @@ public:
             const auto arg0 = static_cast<long>(getPathAbiInt(record, argPaths[0], "abi.call"));
             setPathInt(record, out, static_cast<std::int64_t>(fn(arg0)), "abi.call");
         } else if (argTypes.size() == 1 && argTypes[0] == "Point" && returnType == "c_int") {
-            struct Point { int x; int y; };
-            using Fn = int (*)(Point);
+            using Fn = int (*)(FlowminiTestAbiPoint);
             auto fn = reinterpret_cast<Fn>(raw);
             const AbiStruct arg = getPathAbiStruct(record, argPaths[0], "abi.call");
             if (arg.typeName != "Point") { throw flow::DiagnosticError{"abi.call", "expected ABI struct Point, got " + arg.typeName}; }
@@ -1023,7 +1023,7 @@ public:
             const auto x = std::get_if<std::int64_t>(&xIt->second.data);
             const auto y = std::get_if<std::int64_t>(&yIt->second.data);
             if (x == nullptr || y == nullptr) { throw flow::DiagnosticError{"abi.call", "Point fields must be integer ABI values"}; }
-            Point p{static_cast<int>(*x), static_cast<int>(*y)};
+            FlowminiTestAbiPoint p{static_cast<int>(*x), static_cast<int>(*y)};
             setPathInt(record, out, static_cast<std::int64_t>(fn(p)), "abi.call");
         } else {
             throw flow::DiagnosticError{"abi.call", "unsupported v17 ABI signature: " + returnType + "(" + argTypesText + ")"};

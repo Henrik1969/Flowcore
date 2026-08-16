@@ -285,9 +285,9 @@ TokenTreeStatus tokentree_node_detach(TokenTree *tree, const TokenTreeNodeId nod
     return TOKENTREE_OK;
 }
 
-const char *tokentree_status_message(const TokenTreeStatus status)
+const char *tokentree_status_message(const int status_code)
 {
-    switch (status) {
+    switch (status_code) {
     case TOKENTREE_OK:
         return "ok";
     case TOKENTREE_ERROR_INVALID_ARGUMENT:

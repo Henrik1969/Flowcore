@@ -3,15 +3,113 @@
     "source_unit": {
         "kind": "program",
         "name": "recursive_expression_probe",
-        "declaration_count": 1,
+        "declaration_count": 2,
+        "declaration_ids": [
+            0,
+            1
+        ],
         "declarations": [
             {
+                "id": 0,
+                "kind": "record",
+                "name": "Point",
+                "field_count": 2,
+                "fields": [
+                    {
+                        "name": "x",
+                        "type": "int",
+                        "type_ref": {
+                            "kind": "named",
+                            "text": "int",
+                            "payload": {
+                                "name_segments": [
+                                    "int"
+                                ]
+                            },
+                            "location": {
+                                "line": 5,
+                                "column": 15
+                            }
+                        }
+                    },
+                    {
+                        "name": "y",
+                        "type": "int",
+                        "type_ref": {
+                            "kind": "named",
+                            "text": "int",
+                            "payload": {
+                                "name_segments": [
+                                    "int"
+                                ]
+                            },
+                            "location": {
+                                "line": 6,
+                                "column": 15
+                            }
+                        }
+                    }
+                ]
+            },
+            {
+                "id": 1,
                 "kind": "main_block",
                 "has_body": true,
                 "body_block": 0
             }
         ]
     },
+    "declaration_pool_size": 2,
+    "declaration_pool": [
+        {
+            "id": 0,
+            "kind": "record",
+            "name": "Point",
+            "field_count": 2,
+            "fields": [
+                {
+                    "name": "x",
+                    "type": "int",
+                    "type_ref": {
+                        "kind": "named",
+                        "text": "int",
+                        "payload": {
+                            "name_segments": [
+                                "int"
+                            ]
+                        },
+                        "location": {
+                            "line": 5,
+                            "column": 15
+                        }
+                    }
+                },
+                {
+                    "name": "y",
+                    "type": "int",
+                    "type_ref": {
+                        "kind": "named",
+                        "text": "int",
+                        "payload": {
+                            "name_segments": [
+                                "int"
+                            ]
+                        },
+                        "location": {
+                            "line": 6,
+                            "column": 15
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "id": 1,
+            "kind": "main_block",
+            "has_body": true,
+            "body_block": 0
+        }
+    ],
     "expression_pool_size": 35,
     "expression_pool": [
         {

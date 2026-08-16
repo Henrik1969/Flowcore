@@ -8,6 +8,7 @@ EXPECTED_DIR="$ROOT/tests/expected/symbols"
 EXAMPLES_DIR="$ROOT/examples/ast"
 
 PROBES=(
+  "canonical_type_spelling_probe"
   "type_reference_probe"
   "statement_else_probe"
   "placement_statement_probe"
@@ -15,6 +16,9 @@ PROBES=(
   "statement_initializer_probe"
   "recursive_expression_probe"
   "unit_symbol_projection_gallery"
+  "refined_contract_probe"
+  "abi_contract_probe"
+  "structured_value_probe"
 )
 
 if [[ ! -x "$FLOWMINI_BIN" ]]; then

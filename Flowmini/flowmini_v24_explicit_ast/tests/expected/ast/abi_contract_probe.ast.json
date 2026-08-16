@@ -1,0 +1,829 @@
+{
+    "format": "flowmini.ast.v2",
+    "source_unit": {
+        "kind": "unit",
+        "name": "abi_contract_probe",
+        "declaration_count": 2,
+        "declaration_ids": [
+            0,
+            1
+        ],
+        "declarations": [
+            {
+                "id": 0,
+                "kind": "abi",
+                "name": "system",
+                "members": [
+                    {
+                        "kind": "library",
+                        "spelling": "libexample.so",
+                        "location": {
+                            "line": 5,
+                            "column": 5
+                        }
+                    },
+                    {
+                        "kind": "convention",
+                        "spelling": "c",
+                        "location": {
+                            "line": 6,
+                            "column": 5
+                        }
+                    },
+                    {
+                        "kind": "type",
+                        "name": "c_string",
+                        "properties": [
+                            {
+                                "kind": "repr",
+                                "spelling": "const char*",
+                                "location": {
+                                    "line": 9,
+                                    "column": 9
+                                }
+                            },
+                            {
+                                "kind": "ownership",
+                                "spelling": "borrowed",
+                                "location": {
+                                    "line": 10,
+                                    "column": 9
+                                }
+                            },
+                            {
+                                "kind": "access",
+                                "spelling": "read",
+                                "location": {
+                                    "line": 11,
+                                    "column": 9
+                                }
+                            },
+                            {
+                                "kind": "lifetime",
+                                "spelling": "call",
+                                "location": {
+                                    "line": 12,
+                                    "column": 9
+                                }
+                            },
+                            {
+                                "kind": "nullable",
+                                "spelling": "false",
+                                "location": {
+                                    "line": 13,
+                                    "column": 9
+                                }
+                            },
+                            {
+                                "kind": "terminator",
+                                "spelling": "nul",
+                                "location": {
+                                    "line": 14,
+                                    "column": 9
+                                }
+                            }
+                        ],
+                        "location": {
+                            "line": 8,
+                            "column": 5
+                        }
+                    },
+                    {
+                        "kind": "type",
+                        "name": "c_handle",
+                        "properties": [
+                            {
+                                "kind": "repr",
+                                "spelling": "void*",
+                                "location": {
+                                    "line": 18,
+                                    "column": 9
+                                }
+                            },
+                            {
+                                "kind": "ownership",
+                                "spelling": "external",
+                                "location": {
+                                    "line": 19,
+                                    "column": 9
+                                }
+                            },
+                            {
+                                "kind": "access",
+                                "spelling": "opaque",
+                                "location": {
+                                    "line": 20,
+                                    "column": 9
+                                }
+                            },
+                            {
+                                "kind": "lifetime",
+                                "spelling": "external",
+                                "location": {
+                                    "line": 21,
+                                    "column": 9
+                                }
+                            },
+                            {
+                                "kind": "nullable",
+                                "spelling": "true",
+                                "location": {
+                                    "line": 22,
+                                    "column": 9
+                                }
+                            },
+                            {
+                                "kind": "opaque",
+                                "spelling": "true",
+                                "location": {
+                                    "line": 23,
+                                    "column": 9
+                                }
+                            }
+                        ],
+                        "location": {
+                            "line": 17,
+                            "column": 5
+                        }
+                    },
+                    {
+                        "kind": "type",
+                        "name": "c_buffer",
+                        "properties": [
+                            {
+                                "kind": "repr",
+                                "spelling": "const void*",
+                                "location": {
+                                    "line": 27,
+                                    "column": 9
+                                }
+                            },
+                            {
+                                "kind": "ownership",
+                                "spelling": "borrowed",
+                                "location": {
+                                    "line": 28,
+                                    "column": 9
+                                }
+                            },
+                            {
+                                "kind": "access",
+                                "spelling": "read",
+                                "location": {
+                                    "line": 29,
+                                    "column": 9
+                                }
+                            },
+                            {
+                                "kind": "lifetime",
+                                "spelling": "call",
+                                "location": {
+                                    "line": 30,
+                                    "column": 9
+                                }
+                            }
+                        ],
+                        "location": {
+                            "line": 26,
+                            "column": 5
+                        }
+                    },
+                    {
+                        "kind": "struct",
+                        "name": "Point",
+                        "fields": [
+                            {
+                                "name": "x",
+                                "type": "c_int",
+                                "type_ref": {
+                                    "kind": "named",
+                                    "text": "c_int",
+                                    "payload": {
+                                        "name_segments": [
+                                            "c_int"
+                                        ]
+                                    },
+                                    "location": {
+                                        "line": 34,
+                                        "column": 13
+                                    }
+                                },
+                                "location": {
+                                    "line": 34,
+                                    "column": 9
+                                }
+                            },
+                            {
+                                "name": "y",
+                                "type": "c_long",
+                                "type_ref": {
+                                    "kind": "named",
+                                    "text": "c_long",
+                                    "payload": {
+                                        "name_segments": [
+                                            "c_long"
+                                        ]
+                                    },
+                                    "location": {
+                                        "line": 35,
+                                        "column": 13
+                                    }
+                                },
+                                "location": {
+                                    "line": 35,
+                                    "column": 9
+                                }
+                            }
+                        ],
+                        "location": {
+                            "line": 33,
+                            "column": 5
+                        }
+                    },
+                    {
+                        "kind": "extern_function",
+                        "name": "inspect",
+                        "parameters": [
+                            {
+                                "name": "text",
+                                "type": "c_string",
+                                "type_ref": {
+                                    "kind": "named",
+                                    "text": "c_string",
+                                    "payload": {
+                                        "name_segments": [
+                                            "c_string"
+                                        ]
+                                    },
+                                    "location": {
+                                        "line": 38,
+                                        "column": 30
+                                    }
+                                },
+                                "location": {
+                                    "line": 38,
+                                    "column": 23
+                                }
+                            },
+                            {
+                                "name": "point",
+                                "type": "Point",
+                                "type_ref": {
+                                    "kind": "named",
+                                    "text": "Point",
+                                    "payload": {
+                                        "name_segments": [
+                                            "Point"
+                                        ]
+                                    },
+                                    "location": {
+                                        "line": 38,
+                                        "column": 48
+                                    }
+                                },
+                                "location": {
+                                    "line": 38,
+                                    "column": 40
+                                }
+                            }
+                        ],
+                        "return_type": "c_size_t",
+                        "return_type_ref": {
+                            "kind": "named",
+                            "text": "c_size_t",
+                            "payload": {
+                                "name_segments": [
+                                    "c_size_t"
+                                ]
+                            },
+                            "location": {
+                                "line": 38,
+                                "column": 56
+                            }
+                        },
+                        "clauses": [
+                            {
+                                "kind": "symbol",
+                                "spelling": "inspect_point",
+                                "location": {
+                                    "line": 39,
+                                    "column": 9
+                                }
+                            },
+                            {
+                                "kind": "effect",
+                                "spelling": "pure",
+                                "location": {
+                                    "line": 40,
+                                    "column": 9
+                                }
+                            }
+                        ],
+                        "location": {
+                            "line": 38,
+                            "column": 5
+                        }
+                    }
+                ],
+                "location": {
+                    "line": 4,
+                    "column": 1
+                }
+            },
+            {
+                "id": 1,
+                "kind": "abi",
+                "name": "implicit_convention",
+                "members": [
+                    {
+                        "kind": "library",
+                        "spelling": "libimplicit.so",
+                        "location": {
+                            "line": 45,
+                            "column": 5
+                        }
+                    },
+                    {
+                        "kind": "extern_function",
+                        "name": "ping",
+                        "parameters": [
+                            {
+                                "name": "value",
+                                "type": "c_int",
+                                "type_ref": {
+                                    "kind": "named",
+                                    "text": "c_int",
+                                    "payload": {
+                                        "name_segments": [
+                                            "c_int"
+                                        ]
+                                    },
+                                    "location": {
+                                        "line": 47,
+                                        "column": 28
+                                    }
+                                },
+                                "location": {
+                                    "line": 47,
+                                    "column": 20
+                                }
+                            }
+                        ],
+                        "return_type": "c_int",
+                        "return_type_ref": {
+                            "kind": "named",
+                            "text": "c_int",
+                            "payload": {
+                                "name_segments": [
+                                    "c_int"
+                                ]
+                            },
+                            "location": {
+                                "line": 47,
+                                "column": 36
+                            }
+                        },
+                        "clauses": [
+                            {
+                                "kind": "symbol",
+                                "spelling": "ping",
+                                "location": {
+                                    "line": 48,
+                                    "column": 9
+                                }
+                            },
+                            {
+                                "kind": "effect",
+                                "spelling": "pure",
+                                "location": {
+                                    "line": 49,
+                                    "column": 9
+                                }
+                            }
+                        ],
+                        "location": {
+                            "line": 47,
+                            "column": 5
+                        }
+                    }
+                ],
+                "location": {
+                    "line": 44,
+                    "column": 1
+                }
+            }
+        ]
+    },
+    "declaration_pool_size": 2,
+    "declaration_pool": [
+        {
+            "id": 0,
+            "kind": "abi",
+            "name": "system",
+            "members": [
+                {
+                    "kind": "library",
+                    "spelling": "libexample.so",
+                    "location": {
+                        "line": 5,
+                        "column": 5
+                    }
+                },
+                {
+                    "kind": "convention",
+                    "spelling": "c",
+                    "location": {
+                        "line": 6,
+                        "column": 5
+                    }
+                },
+                {
+                    "kind": "type",
+                    "name": "c_string",
+                    "properties": [
+                        {
+                            "kind": "repr",
+                            "spelling": "const char*",
+                            "location": {
+                                "line": 9,
+                                "column": 9
+                            }
+                        },
+                        {
+                            "kind": "ownership",
+                            "spelling": "borrowed",
+                            "location": {
+                                "line": 10,
+                                "column": 9
+                            }
+                        },
+                        {
+                            "kind": "access",
+                            "spelling": "read",
+                            "location": {
+                                "line": 11,
+                                "column": 9
+                            }
+                        },
+                        {
+                            "kind": "lifetime",
+                            "spelling": "call",
+                            "location": {
+                                "line": 12,
+                                "column": 9
+                            }
+                        },
+                        {
+                            "kind": "nullable",
+                            "spelling": "false",
+                            "location": {
+                                "line": 13,
+                                "column": 9
+                            }
+                        },
+                        {
+                            "kind": "terminator",
+                            "spelling": "nul",
+                            "location": {
+                                "line": 14,
+                                "column": 9
+                            }
+                        }
+                    ],
+                    "location": {
+                        "line": 8,
+                        "column": 5
+                    }
+                },
+                {
+                    "kind": "type",
+                    "name": "c_handle",
+                    "properties": [
+                        {
+                            "kind": "repr",
+                            "spelling": "void*",
+                            "location": {
+                                "line": 18,
+                                "column": 9
+                            }
+                        },
+                        {
+                            "kind": "ownership",
+                            "spelling": "external",
+                            "location": {
+                                "line": 19,
+                                "column": 9
+                            }
+                        },
+                        {
+                            "kind": "access",
+                            "spelling": "opaque",
+                            "location": {
+                                "line": 20,
+                                "column": 9
+                            }
+                        },
+                        {
+                            "kind": "lifetime",
+                            "spelling": "external",
+                            "location": {
+                                "line": 21,
+                                "column": 9
+                            }
+                        },
+                        {
+                            "kind": "nullable",
+                            "spelling": "true",
+                            "location": {
+                                "line": 22,
+                                "column": 9
+                            }
+                        },
+                        {
+                            "kind": "opaque",
+                            "spelling": "true",
+                            "location": {
+                                "line": 23,
+                                "column": 9
+                            }
+                        }
+                    ],
+                    "location": {
+                        "line": 17,
+                        "column": 5
+                    }
+                },
+                {
+                    "kind": "type",
+                    "name": "c_buffer",
+                    "properties": [
+                        {
+                            "kind": "repr",
+                            "spelling": "const void*",
+                            "location": {
+                                "line": 27,
+                                "column": 9
+                            }
+                        },
+                        {
+                            "kind": "ownership",
+                            "spelling": "borrowed",
+                            "location": {
+                                "line": 28,
+                                "column": 9
+                            }
+                        },
+                        {
+                            "kind": "access",
+                            "spelling": "read",
+                            "location": {
+                                "line": 29,
+                                "column": 9
+                            }
+                        },
+                        {
+                            "kind": "lifetime",
+                            "spelling": "call",
+                            "location": {
+                                "line": 30,
+                                "column": 9
+                            }
+                        }
+                    ],
+                    "location": {
+                        "line": 26,
+                        "column": 5
+                    }
+                },
+                {
+                    "kind": "struct",
+                    "name": "Point",
+                    "fields": [
+                        {
+                            "name": "x",
+                            "type": "c_int",
+                            "type_ref": {
+                                "kind": "named",
+                                "text": "c_int",
+                                "payload": {
+                                    "name_segments": [
+                                        "c_int"
+                                    ]
+                                },
+                                "location": {
+                                    "line": 34,
+                                    "column": 13
+                                }
+                            },
+                            "location": {
+                                "line": 34,
+                                "column": 9
+                            }
+                        },
+                        {
+                            "name": "y",
+                            "type": "c_long",
+                            "type_ref": {
+                                "kind": "named",
+                                "text": "c_long",
+                                "payload": {
+                                    "name_segments": [
+                                        "c_long"
+                                    ]
+                                },
+                                "location": {
+                                    "line": 35,
+                                    "column": 13
+                                }
+                            },
+                            "location": {
+                                "line": 35,
+                                "column": 9
+                            }
+                        }
+                    ],
+                    "location": {
+                        "line": 33,
+                        "column": 5
+                    }
+                },
+                {
+                    "kind": "extern_function",
+                    "name": "inspect",
+                    "parameters": [
+                        {
+                            "name": "text",
+                            "type": "c_string",
+                            "type_ref": {
+                                "kind": "named",
+                                "text": "c_string",
+                                "payload": {
+                                    "name_segments": [
+                                        "c_string"
+                                    ]
+                                },
+                                "location": {
+                                    "line": 38,
+                                    "column": 30
+                                }
+                            },
+                            "location": {
+                                "line": 38,
+                                "column": 23
+                            }
+                        },
+                        {
+                            "name": "point",
+                            "type": "Point",
+                            "type_ref": {
+                                "kind": "named",
+                                "text": "Point",
+                                "payload": {
+                                    "name_segments": [
+                                        "Point"
+                                    ]
+                                },
+                                "location": {
+                                    "line": 38,
+                                    "column": 48
+                                }
+                            },
+                            "location": {
+                                "line": 38,
+                                "column": 40
+                            }
+                        }
+                    ],
+                    "return_type": "c_size_t",
+                    "return_type_ref": {
+                        "kind": "named",
+                        "text": "c_size_t",
+                        "payload": {
+                            "name_segments": [
+                                "c_size_t"
+                            ]
+                        },
+                        "location": {
+                            "line": 38,
+                            "column": 56
+                        }
+                    },
+                    "clauses": [
+                        {
+                            "kind": "symbol",
+                            "spelling": "inspect_point",
+                            "location": {
+                                "line": 39,
+                                "column": 9
+                            }
+                        },
+                        {
+                            "kind": "effect",
+                            "spelling": "pure",
+                            "location": {
+                                "line": 40,
+                                "column": 9
+                            }
+                        }
+                    ],
+                    "location": {
+                        "line": 38,
+                        "column": 5
+                    }
+                }
+            ],
+            "location": {
+                "line": 4,
+                "column": 1
+            }
+        },
+        {
+            "id": 1,
+            "kind": "abi",
+            "name": "implicit_convention",
+            "members": [
+                {
+                    "kind": "library",
+                    "spelling": "libimplicit.so",
+                    "location": {
+                        "line": 45,
+                        "column": 5
+                    }
+                },
+                {
+                    "kind": "extern_function",
+                    "name": "ping",
+                    "parameters": [
+                        {
+                            "name": "value",
+                            "type": "c_int",
+                            "type_ref": {
+                                "kind": "named",
+                                "text": "c_int",
+                                "payload": {
+                                    "name_segments": [
+                                        "c_int"
+                                    ]
+                                },
+                                "location": {
+                                    "line": 47,
+                                    "column": 28
+                                }
+                            },
+                            "location": {
+                                "line": 47,
+                                "column": 20
+                            }
+                        }
+                    ],
+                    "return_type": "c_int",
+                    "return_type_ref": {
+                        "kind": "named",
+                        "text": "c_int",
+                        "payload": {
+                            "name_segments": [
+                                "c_int"
+                            ]
+                        },
+                        "location": {
+                            "line": 47,
+                            "column": 36
+                        }
+                    },
+                    "clauses": [
+                        {
+                            "kind": "symbol",
+                            "spelling": "ping",
+                            "location": {
+                                "line": 48,
+                                "column": 9
+                            }
+                        },
+                        {
+                            "kind": "effect",
+                            "spelling": "pure",
+                            "location": {
+                                "line": 49,
+                                "column": 9
+                            }
+                        }
+                    ],
+                    "location": {
+                        "line": 47,
+                        "column": 5
+                    }
+                }
+            ],
+            "location": {
+                "line": 44,
+                "column": 1
+            }
+        }
+    ],
+    "expression_pool_size": 0,
+    "expression_pool": [],
+    "statement_pool_size": 0,
+    "statement_pool": [],
+    "block_pool_size": 0,
+    "block_pool": []
+}

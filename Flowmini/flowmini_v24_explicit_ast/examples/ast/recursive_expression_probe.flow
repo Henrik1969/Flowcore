@@ -1,8 +1,8 @@
 program recursive_expression_probe
 
-record Point {
-    x : int
-    y : int
+type Point {
+    field x : int
+    field y : int
 }
 
 main {

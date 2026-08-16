@@ -242,6 +242,153 @@ namespace flowmini::ast {
             else { out << "null"; }
         }
 
+        void dump_source_location_json(std::ostream& out, const SourceLocation& location) {
+            out << "{\"line\": " << location.line
+                << ", \"column\": " << location.column << "}";
+        }
+
+        template<typename Clause>
+        void dump_spelling_clause_json(std::ostream& out,
+                                       const char* kind,
+                                       const Clause& clause) {
+            out << "{\"kind\": ";
+            dump_json_string(out, kind);
+            out << ", \"spelling\": ";
+            dump_json_string(out, clause.spelling);
+            out << ", \"location\": ";
+            dump_source_location_json(out, clause.location);
+            out << "}";
+        }
+
+        void dump_abi_type_property_json(std::ostream& out,
+                                         const AbiTypeProperty& property) {
+            std::visit([&out](const auto& clause) {
+                using Clause = std::decay_t<decltype(clause)>;
+                if constexpr (std::is_same_v<Clause, AbiReprClause>) {
+                    dump_spelling_clause_json(out, "repr", clause);
+                } else if constexpr (std::is_same_v<Clause, AbiOwnershipClause>) {
+                    dump_spelling_clause_json(out, "ownership", clause);
+                } else if constexpr (std::is_same_v<Clause, AbiAccessClause>) {
+                    dump_spelling_clause_json(out, "access", clause);
+                } else if constexpr (std::is_same_v<Clause, AbiLifetimeClause>) {
+                    dump_spelling_clause_json(out, "lifetime", clause);
+                } else if constexpr (std::is_same_v<Clause, AbiNullableClause>) {
+                    dump_spelling_clause_json(out, "nullable", clause);
+                } else if constexpr (std::is_same_v<Clause, AbiTerminatorClause>) {
+                    dump_spelling_clause_json(out, "terminator", clause);
+                } else if constexpr (std::is_same_v<Clause, AbiOpaqueClause>) {
+                    dump_spelling_clause_json(out, "opaque", clause);
+                }
+            }, property);
+        }
+
+        void dump_extern_clause_json(std::ostream& out, const ExternClause& clause) {
+            std::visit([&out](const auto& value) {
+                using Clause = std::decay_t<decltype(value)>;
+                if constexpr (std::is_same_v<Clause, ExternSymbolClause>) {
+                    dump_spelling_clause_json(out, "symbol", value);
+                } else if constexpr (std::is_same_v<Clause, ExternEffectClause>) {
+                    dump_spelling_clause_json(out, "effect", value);
+                }
+            }, clause);
+        }
+
+        void dump_parameter_json(std::ostream& out,
+                                 const Parameter& parameter,
+                                 const std::size_t indent) {
+            dump_indent(out, indent);
+            out << "{\"name\": ";
+            dump_json_string(out, parameter.name);
+            out << ", \"type\": ";
+            dump_json_string(out, type_ref_text(parameter.type));
+            out << ", \"type_ref\": ";
+            dump_type_ref_json(out, parameter.type);
+            out << ", \"location\": ";
+            dump_source_location_json(out, parameter.location);
+            out << "}";
+        }
+
+        void dump_record_field_json(std::ostream& out,
+                                    const RecordField& field,
+                                    const std::size_t indent) {
+            dump_indent(out, indent);
+            out << "{\"name\": ";
+            dump_json_string(out, field.name);
+            out << ", \"type\": ";
+            dump_json_string(out, type_ref_text(field.type));
+            out << ", \"type_ref\": ";
+            dump_type_ref_json(out, field.type);
+            out << ", \"location\": ";
+            dump_source_location_json(out, field.location);
+            out << "}";
+        }
+
+        void dump_abi_member_json(std::ostream& out,
+                                  const AbiMember& member,
+                                  const std::size_t indent) {
+            std::visit([&out, indent](const auto& value) {
+                using Member = std::decay_t<decltype(value)>;
+                if constexpr (std::is_same_v<Member, AbiLibraryClause>) {
+                    dump_indent(out, indent);
+                    dump_spelling_clause_json(out, "library", value);
+                } else if constexpr (std::is_same_v<Member, AbiConventionClause>) {
+                    dump_indent(out, indent);
+                    dump_spelling_clause_json(out, "convention", value);
+                } else if constexpr (std::is_same_v<Member, AbiTypeDecl>) {
+                    dump_indent(out, indent);
+                    out << "{\"kind\": \"type\", \"name\": ";
+                    dump_json_string(out, value.name);
+                    out << ", \"properties\": [";
+                    for (std::size_t i = 0; i < value.properties.size(); ++i) {
+                        if (i != 0) { out << ", "; }
+                        dump_abi_type_property_json(out, value.properties[i]);
+                    }
+                    out << "], \"location\": ";
+                    dump_source_location_json(out, value.location);
+                    out << "}";
+                } else if constexpr (std::is_same_v<Member, AbiStructDecl>) {
+                    dump_indent(out, indent);
+                    out << "{\"kind\": \"struct\", \"name\": ";
+                    dump_json_string(out, value.name);
+                    out << ", \"fields\": [";
+                    if (!value.fields.empty()) { out << "\n"; }
+                    for (std::size_t i = 0; i < value.fields.size(); ++i) {
+                        dump_record_field_json(out, value.fields[i], indent + 2);
+                        if (i + 1 < value.fields.size()) { out << ","; }
+                        out << "\n";
+                    }
+                    if (!value.fields.empty()) { dump_indent(out, indent); }
+                    out << "], \"location\": ";
+                    dump_source_location_json(out, value.location);
+                    out << "}";
+                } else if constexpr (std::is_same_v<Member, ExternFunctionDecl>) {
+                    dump_indent(out, indent);
+                    out << "{\"kind\": \"extern_function\", \"name\": ";
+                    dump_json_string(out, value.name);
+                    out << ", \"parameters\": [";
+                    if (!value.parameters.empty()) { out << "\n"; }
+                    for (std::size_t i = 0; i < value.parameters.size(); ++i) {
+                        dump_parameter_json(out, value.parameters[i], indent + 2);
+                        if (i + 1 < value.parameters.size()) { out << ","; }
+                        out << "\n";
+                    }
+                    if (!value.parameters.empty()) { dump_indent(out, indent); }
+                    out << "], \"return_type\": ";
+                    dump_json_string(out, type_ref_text(value.return_type));
+                    out << ", \"return_type_ref\": ";
+                    dump_type_ref_json(out, value.return_type);
+                    out << ", \"clauses\": [";
+                    for (std::size_t i = 0; i < value.clauses.size(); ++i) {
+                        if (i != 0) { out << ", "; }
+                        dump_extern_clause_json(out, value.clauses[i]);
+                    }
+                    out << "], \"location\": ";
+                    dump_source_location_json(out, value.location);
+                    out << "}";
+                }
+            }, member);
+        }
+
         void dump_expression_payload_json(std::ostream& out,
                                           const Expression& expression,
                                           const unsigned indent) {
@@ -639,11 +786,17 @@ namespace flowmini::ast {
             out << "]";
         }
 
-        void dump_top_level_decl_json(std::ostream& out, const TopLevelDecl& decl, std::size_t indent) {
+        void dump_top_level_decl_json(std::ostream& out,
+                                      const TopLevelDecl& decl,
+                                      const DeclarationId id,
+                                      const std::size_t indent) {
             dump_indent(out, indent);
             out << "{\n";
 
             const TopLevelKind kind = top_level_kind(decl);
+
+            dump_indent(out, indent + 2);
+            out << "\"id\": " << id << ",\n";
 
             dump_indent(out, indent + 2);
             out << "\"kind\": \"" << to_string(kind) << "\"";
@@ -783,21 +936,58 @@ namespace flowmini::ast {
                 }
 
                 out << "]\n";
-            } else if (const auto* typeAliasDecl = std::get_if<TypeAliasDecl>(&decl)) {
+            } else if (const auto* refinedTypeDecl = std::get_if<RefinedTypeDecl>(&decl)) {
                 out << ",\n";
                 dump_indent(out, indent + 2);
                 out << "\"name\": ";
-                dump_json_string(out, typeAliasDecl->name);
+                dump_json_string(out, refinedTypeDecl->name);
                 out << ",\n";
 
                 dump_indent(out, indent + 2);
-                out << "\"target\": ";
-                dump_json_string(out, type_ref_text(typeAliasDecl->target));
+                out << "\"base_type\": ";
+                dump_json_string(out, type_ref_text(refinedTypeDecl->base_type));
                 out << ",\n";
 
                 dump_indent(out, indent + 2);
-                out << "\"target_type_ref\": ";
-                dump_type_ref_json(out, typeAliasDecl->target);
+                out << "\"base_type_ref\": ";
+                dump_type_ref_json(out, refinedTypeDecl->base_type);
+                out << ",\n";
+
+                dump_indent(out, indent + 2);
+                out << "\"invariants\": [";
+                for (std::size_t i = 0; i < refinedTypeDecl->invariants.size(); ++i) {
+                    if (i != 0) { out << ", "; }
+                    out << "{\"condition_expression\": "
+                        << refinedTypeDecl->invariants[i].condition_expression
+                        << ", \"location\": ";
+                    dump_source_location_json(out, refinedTypeDecl->invariants[i].location);
+                    out << "}";
+                }
+                out << "],\n";
+                dump_indent(out, indent + 2);
+                out << "\"location\": ";
+                dump_source_location_json(out, refinedTypeDecl->location);
+                out << "\n";
+            } else if (const auto* abiDecl = std::get_if<AbiDecl>(&decl)) {
+                out << ",\n";
+                dump_indent(out, indent + 2);
+                out << "\"name\": ";
+                dump_json_string(out, abiDecl->name);
+                out << ",\n";
+
+                dump_indent(out, indent + 2);
+                out << "\"members\": [";
+                if (!abiDecl->members.empty()) { out << "\n"; }
+                for (std::size_t i = 0; i < abiDecl->members.size(); ++i) {
+                    dump_abi_member_json(out, abiDecl->members[i], indent + 4);
+                    if (i + 1 < abiDecl->members.size()) { out << ","; }
+                    out << "\n";
+                }
+                if (!abiDecl->members.empty()) { dump_indent(out, indent + 2); }
+                out << "],\n";
+                dump_indent(out, indent + 2);
+                out << "\"location\": ";
+                dump_source_location_json(out, abiDecl->location);
                 out << "\n";
             } else {
                 out << "\n";
@@ -805,6 +995,20 @@ namespace flowmini::ast {
 
             dump_indent(out, indent);
             out << "}";
+        }
+
+        void dump_declaration_pool_json(std::ostream& out,
+                                        const std::vector<TopLevelDecl>& declarations,
+                                        const std::size_t indent) {
+            out << "[";
+            if (!declarations.empty()) { out << "\n"; }
+            for (DeclarationId id = 0; id < declarations.size(); ++id) {
+                dump_top_level_decl_json(out, declarations[id], id, indent + 2);
+                if (id + 1 < declarations.size()) { out << ","; }
+                out << "\n";
+            }
+            if (!declarations.empty()) { dump_indent(out, indent); }
+            out << "]";
         }
     }// end namespace for helpers
 
@@ -822,7 +1026,8 @@ namespace flowmini::ast {
             case TopLevelKind::Import:      return "import";
             case TopLevelKind::Function:    return "function";
             case TopLevelKind::Record:      return "record";
-            case TopLevelKind::TypeAlias:   return "type_alias";
+            case TopLevelKind::RefinedType: return "refined_type";
+            case TopLevelKind::Abi:         return "abi";
             case TopLevelKind::MainBlock:   return "main_block";
             case TopLevelKind::Unknown:     return "unknown";
         }
@@ -998,6 +1203,11 @@ namespace flowmini::ast {
         return {};
     }
 
+    std::string expression_tree_text(const std::size_t expression_id,
+                                     const std::vector<Expression>& expression_pool) {
+        return render_expression_full(expression_id, expression_pool);
+    }
+
     std::vector<std::size_t> expression_children(const Expression& expression) {
         std::vector<std::size_t> result;
         const auto append_optional = [&](const std::optional<std::size_t>& child) {
@@ -1032,7 +1242,8 @@ namespace flowmini::ast {
         if (std::holds_alternative<ImportDecl>(decl))       { return TopLevelKind::Import;}
         if (std::holds_alternative<FunctionDecl>(decl))     { return TopLevelKind::Function;}
         if (std::holds_alternative<RecordDecl>(decl))       { return TopLevelKind::Record;}
-        if (std::holds_alternative<TypeAliasDecl>(decl))    { return TopLevelKind::TypeAlias;}
+        if (std::holds_alternative<RefinedTypeDecl>(decl))  { return TopLevelKind::RefinedType;}
+        if (std::holds_alternative<AbiDecl>(decl))          { return TopLevelKind::Abi;}
         if (std::holds_alternative<MainBlock>(decl))        { return TopLevelKind::MainBlock;}
         return TopLevelKind::Unknown;
     }
@@ -1053,10 +1264,19 @@ namespace flowmini::ast {
         out << "    \"name\": "; dump_json_string(out, module.source_unit.name);out << ",\n";
 
         out << "    \"declaration_count\": " << module.source_unit.declarations.size() << ",\n";
+        out << "    \"declaration_ids\": ";
+        dump_id_array(out, module.source_unit.declarations);
+        out << ",\n";
         out << "    \"declarations\": [\n";
 
         for (std::size_t i = 0; i < module.source_unit.declarations.size(); ++i) {
-            dump_top_level_decl_json(out, module.source_unit.declarations[i], 6);
+            const auto id = module.source_unit.declarations[i];
+            if (id < module.declaration_pool.size()) {
+                dump_top_level_decl_json(out, module.declaration_pool[id], id, 6);
+            } else {
+                dump_indent(out, 6);
+                out << "null";
+            }
 
             if (i + 1 < module.source_unit.declarations.size()) {
                 out << ",";
@@ -1067,6 +1287,10 @@ namespace flowmini::ast {
         out << "    ]\n";
 
         out << "  },\n";
+        out << "  \"declaration_pool_size\": " << module.declaration_pool.size() << ",\n";
+        out << "  \"declaration_pool\": ";
+        dump_declaration_pool_json(out, module.declaration_pool, 2);
+        out << ",\n";
         out << "  \"expression_pool_size\": " << module.expression_pool.size() << ",\n";
     out << "  \"expression_pool\": ";
     dump_expression_pool_json(out, module.expression_pool, 2);

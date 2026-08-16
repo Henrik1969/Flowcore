@@ -30,7 +30,8 @@ enum class TopLevelKind {
     Import,
     Function,
     Record,
-    TypeAlias,
+    RefinedType,
+    Abi,
     MainBlock,
     Unknown
 };
@@ -209,6 +210,7 @@ struct Expression {
 
 using StatementId = std::size_t;
 using BlockId = std::size_t;
+using DeclarationId = std::size_t;
 
 struct ElseBlock {
     BlockId block;
@@ -341,9 +343,116 @@ struct RecordDecl {
     SourceLocation location;
 };
 
-struct TypeAliasDecl {
+struct InvariantClause {
+    std::size_t condition_expression = 0;
+    SourceLocation location;
+};
+
+struct RefinedTypeDecl {
     std::string name;
-    TypeRef target;
+    TypeRef base_type;
+    std::vector<InvariantClause> invariants;
+    SourceLocation location;
+};
+
+struct AbiLibraryClause {
+    std::string spelling;
+    SourceLocation location;
+};
+
+struct AbiConventionClause {
+    std::string spelling;
+    SourceLocation location;
+};
+
+struct AbiReprClause {
+    std::string spelling;
+    SourceLocation location;
+};
+
+struct AbiOwnershipClause {
+    std::string spelling;
+    SourceLocation location;
+};
+
+struct AbiAccessClause {
+    std::string spelling;
+    SourceLocation location;
+};
+
+struct AbiLifetimeClause {
+    std::string spelling;
+    SourceLocation location;
+};
+
+struct AbiNullableClause {
+    std::string spelling;
+    SourceLocation location;
+};
+
+struct AbiTerminatorClause {
+    std::string spelling;
+    SourceLocation location;
+};
+
+struct AbiOpaqueClause {
+    std::string spelling;
+    SourceLocation location;
+};
+
+using AbiTypeProperty = std::variant<
+    AbiReprClause,
+    AbiOwnershipClause,
+    AbiAccessClause,
+    AbiLifetimeClause,
+    AbiNullableClause,
+    AbiTerminatorClause,
+    AbiOpaqueClause
+>;
+
+struct AbiTypeDecl {
+    std::string name;
+    std::vector<AbiTypeProperty> properties;
+    SourceLocation location;
+};
+
+struct AbiStructDecl {
+    std::string name;
+    std::vector<RecordField> fields;
+    SourceLocation location;
+};
+
+struct ExternSymbolClause {
+    std::string spelling;
+    SourceLocation location;
+};
+
+struct ExternEffectClause {
+    std::string spelling;
+    SourceLocation location;
+};
+
+using ExternClause = std::variant<ExternSymbolClause, ExternEffectClause>;
+
+struct ExternFunctionDecl {
+    std::string name;
+    std::vector<Parameter> parameters;
+    TypeRef return_type;
+    std::vector<ExternClause> clauses;
+    SourceLocation location;
+};
+
+using AbiMember = std::variant<
+    AbiLibraryClause,
+    AbiConventionClause,
+    AbiTypeDecl,
+    AbiStructDecl,
+    ExternFunctionDecl
+>;
+
+struct AbiDecl {
+    std::string name;
+    std::vector<AbiMember> members;
     SourceLocation location;
 };
 
@@ -359,19 +468,21 @@ using TopLevelDecl = std::variant<
     ImportDecl,
     FunctionDecl,
     RecordDecl,
-    TypeAliasDecl,
+    RefinedTypeDecl,
+    AbiDecl,
     MainBlock
 >;
 
 struct SourceUnit {
     SourceUnitKind kind = SourceUnitKind::Unknown;
     std::string name;
-    std::vector<TopLevelDecl> declarations;
+    std::vector<DeclarationId> declarations;
     SourceLocation location;
 };
 
 struct AstModule {
     SourceUnit source_unit;
+    std::vector<TopLevelDecl> declaration_pool;
     std::vector<Expression> expression_pool;
     std::vector<Statement> statement_pool;
     std::vector<Block> block_pool;
@@ -391,6 +502,8 @@ ExpressionKind expression_kind(const Expression& expression);
 StatementKind statement_kind(const Statement& statement);
 std::string expression_text(const Expression& expression,
                             const std::vector<Expression>& expression_pool);
+std::string expression_tree_text(std::size_t expression_id,
+                                 const std::vector<Expression>& expression_pool);
 std::vector<std::size_t> expression_children(const Expression& expression);
 
 TopLevelKind top_level_kind(const TopLevelDecl& decl);

@@ -1,6 +1,7 @@
 unit unit_symbol_projection_gallery
 
-type ExternalAlias refines vendor.Domain
+type ExternalAlias refines vendor.Domain {
+}
 
 type Packet {
     field payload : optional<collection.list<int>>

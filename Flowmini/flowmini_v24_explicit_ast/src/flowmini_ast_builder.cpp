@@ -18,6 +18,7 @@ namespace flowmini::ast {
         constexpr std::size_t max_expression_population_depth = 64;
 
         bool is_end_token(const flowmini::Token& token);
+        Expression::Payload make_leaf_payload(const flowmini::Token& token);
 
 
 
@@ -178,9 +179,10 @@ namespace flowmini::ast {
             return type;
         }
 
+        template<typename FunctionLike>
         std::size_t parse_function_signature(const std::vector<flowmini::Token>& tokens,
                                              std::size_t i,
-                                             FunctionDecl& fn) {
+                                             FunctionLike& fn) {
             if (i >= tokens.size() || tokens[i].kind != flowmini::TokenKind::LeftParen) {
                 return i;
             }
@@ -251,6 +253,10 @@ namespace flowmini::ast {
             return is_identifier_text(token, "type");
         }
 
+        bool is_abi_token(const flowmini::Token& token) {
+            return is_identifier_text(token, "abi");
+        }
+
         bool is_field_token(const flowmini::Token& token) {
             return is_identifier_text(token, "field");
         }
@@ -269,31 +275,11 @@ namespace flowmini::ast {
             return i;
         }
 
-        std::size_t skip_balanced_brace_group(const std::vector<flowmini::Token>& tokens,
-                                              std::size_t i) {
-            if (i >= tokens.size() || tokens[i].kind != flowmini::TokenKind::LeftBrace) {
-                return i;
-            }
-
-            std::size_t depth = 0;
-            while (i < tokens.size() && !is_end_token(tokens[i])) {
-                if (tokens[i].kind == flowmini::TokenKind::LeftBrace) {
-                    ++depth;
-                } else if (tokens[i].kind == flowmini::TokenKind::RightBrace) {
-                    if (depth == 0) {
-                        return i;
-                    }
-
-                    --depth;
-                    if (depth == 0) {
-                        return i + 1;
-                    }
-                }
-
-                ++i;
-            }
-
-            return i;
+        template<typename Declaration>
+        void append_top_level_declaration(AstModule& module, Declaration declaration) {
+            const DeclarationId id = module.declaration_pool.size();
+            module.declaration_pool.emplace_back(std::move(declaration));
+            module.source_unit.declarations.push_back(id);
         }
 
         std::size_t parse_import_declaration(const std::vector<flowmini::Token>& tokens,
@@ -308,7 +294,7 @@ namespace flowmini::ast {
                 ++i;
             }
 
-            module.source_unit.declarations.emplace_back(std::move(importDecl));
+            append_top_level_declaration(module, std::move(importDecl));
             return skip_until_line_end(tokens, i);
         }
 
@@ -377,22 +363,111 @@ namespace flowmini::ast {
             ++i;
 
             if (i < tokens.size() && is_refines_token(tokens[i])) {
-                TypeAliasDecl aliasDecl;
-                aliasDecl.name = typeName;
-                aliasDecl.location = typeLocation;
+                RefinedTypeDecl refinedDecl;
+                refinedDecl.name = typeName;
+                refinedDecl.location = typeLocation;
                 ++i; // consume refines
 
                 if (i < tokens.size() && is_identifier_like_type_token(tokens[i])) {
-                    aliasDecl.target = parse_type_ref(tokens, i);
+                    refinedDecl.base_type = parse_type_ref(tokens, i);
                 }
 
-                module.source_unit.declarations.emplace_back(std::move(aliasDecl));
-
-                if (i < tokens.size() && tokens[i].kind == flowmini::TokenKind::LeftBrace) {
-                    return skip_balanced_brace_group(tokens, i);
+                while (i < tokens.size() && tokens[i].kind == flowmini::TokenKind::Newline) {
+                    ++i;
                 }
 
-                return skip_until_line_end(tokens, i);
+                if (i >= tokens.size() || tokens[i].kind != flowmini::TokenKind::LeftBrace) {
+                    return skip_until_line_end(tokens, i);
+                }
+
+                if (tokens[i].kind == flowmini::TokenKind::LeftBrace) {
+                    ++i;
+                    while (i < tokens.size() &&
+                           tokens[i].kind != flowmini::TokenKind::RightBrace &&
+                           !is_end_token(tokens[i])) {
+                        if (tokens[i].kind == flowmini::TokenKind::Newline ||
+                            tokens[i].kind == flowmini::TokenKind::Comma) {
+                            ++i;
+                            continue;
+                        }
+
+                        if (!is_identifier_text(tokens[i], "invariant")) {
+                            i = skip_until_line_end(tokens, i);
+                            continue;
+                        }
+
+                        InvariantClause clause;
+                        clause.location = location_from_token(tokens[i]);
+                        ++i;
+
+                        const auto expressionBegin = i;
+                        while (i < tokens.size() &&
+                               tokens[i].kind != flowmini::TokenKind::Newline &&
+                               tokens[i].kind != flowmini::TokenKind::RightBrace &&
+                               !is_end_token(tokens[i])) {
+                            ++i;
+                        }
+
+                        std::size_t operatorIndex = expressionBegin;
+                        while (operatorIndex < i &&
+                               !(tokens[operatorIndex].kind == flowmini::TokenKind::Greater ||
+                                 tokens[operatorIndex].kind == flowmini::TokenKind::Less ||
+                                 tokens[operatorIndex].kind == flowmini::TokenKind::GreaterEqual ||
+                                 tokens[operatorIndex].kind == flowmini::TokenKind::LessEqual ||
+                                 tokens[operatorIndex].kind == flowmini::TokenKind::EqualEqual ||
+                                 tokens[operatorIndex].kind == flowmini::TokenKind::BangEqual)) {
+                            ++operatorIndex;
+                        }
+
+                        if (expressionBegin < operatorIndex && operatorIndex + 1 < i) {
+                            const auto rootId = module.expression_pool.size();
+                            Expression root;
+                            root.location = location_from_token(tokens[operatorIndex]);
+                            root.payload = BinaryExpr{tokens[operatorIndex].text, std::nullopt, std::nullopt};
+                            module.expression_pool.push_back(std::move(root));
+
+                            const auto leftId = module.expression_pool.size();
+                            Expression left;
+                            left.location = location_from_token(tokens[expressionBegin]);
+                            left.payload = make_leaf_payload(tokens[expressionBegin]);
+                            module.expression_pool.push_back(std::move(left));
+
+                            const auto rightStart = operatorIndex + 1;
+                            std::size_t rightId = module.expression_pool.size();
+                            if (tokens[rightStart].kind == flowmini::TokenKind::Minus && rightStart + 1 < i) {
+                                Expression unary;
+                                unary.location = location_from_token(tokens[rightStart]);
+                                unary.payload = UnaryExpr{tokens[rightStart].text, std::nullopt};
+                                module.expression_pool.push_back(std::move(unary));
+
+                                const auto literalId = module.expression_pool.size();
+                                Expression literal;
+                                literal.location = location_from_token(tokens[rightStart + 1]);
+                                literal.payload = make_leaf_payload(tokens[rightStart + 1]);
+                                module.expression_pool.push_back(std::move(literal));
+                                std::get<UnaryExpr>(module.expression_pool[rightId].payload).operand = literalId;
+                            } else {
+                                Expression right;
+                                right.location = location_from_token(tokens[rightStart]);
+                                right.payload = make_leaf_payload(tokens[rightStart]);
+                                module.expression_pool.push_back(std::move(right));
+                            }
+
+                            auto& binary = std::get<BinaryExpr>(module.expression_pool[rootId].payload);
+                            binary.left = leftId;
+                            binary.right = rightId;
+                            clause.condition_expression = rootId;
+                            refinedDecl.invariants.push_back(std::move(clause));
+                        }
+                    }
+
+                    if (i < tokens.size() && tokens[i].kind == flowmini::TokenKind::RightBrace) {
+                        ++i;
+                    }
+                }
+
+                append_top_level_declaration(module, std::move(refinedDecl));
+                return i;
             }
 
             RecordDecl recordDecl;
@@ -403,7 +478,252 @@ namespace flowmini::ast {
                 i = parse_record_fields(tokens, i, recordDecl);
             }
 
-            module.source_unit.declarations.emplace_back(std::move(recordDecl));
+            append_top_level_declaration(module, std::move(recordDecl));
+            return i;
+        }
+
+        std::size_t parse_abi_type_declaration(const std::vector<flowmini::Token>& tokens,
+                                               std::size_t i,
+                                               AbiDecl& abi) {
+            AbiTypeDecl declaration;
+            declaration.location = location_from_token(tokens[i]);
+            ++i; // consume type
+
+            if (i < tokens.size() && tokens[i].kind == flowmini::TokenKind::Identifier) {
+                declaration.name = tokens[i].text;
+                ++i;
+            }
+
+            if (i >= tokens.size() || tokens[i].kind != flowmini::TokenKind::LeftBrace) {
+                abi.members.emplace_back(std::move(declaration));
+                return skip_until_line_end(tokens, i);
+            }
+
+            ++i;
+            while (i < tokens.size() &&
+                   tokens[i].kind != flowmini::TokenKind::RightBrace &&
+                   !is_end_token(tokens[i])) {
+                if (tokens[i].kind == flowmini::TokenKind::Newline ||
+                    tokens[i].kind == flowmini::TokenKind::Comma) {
+                    ++i;
+                    continue;
+                }
+
+                if (tokens[i].kind != flowmini::TokenKind::Identifier) {
+                    i = skip_until_line_end(tokens, i);
+                    continue;
+                }
+
+                const auto propertyLocation = location_from_token(tokens[i]);
+                const auto propertyName = tokens[i].text;
+                ++i;
+                if (i >= tokens.size() || is_end_token(tokens[i])) {
+                    break;
+                }
+
+                const auto spelling = tokens[i].text;
+                if (propertyName == "repr") {
+                    declaration.properties.emplace_back(AbiReprClause{spelling, propertyLocation});
+                } else if (propertyName == "ownership") {
+                    declaration.properties.emplace_back(AbiOwnershipClause{spelling, propertyLocation});
+                } else if (propertyName == "access") {
+                    declaration.properties.emplace_back(AbiAccessClause{spelling, propertyLocation});
+                } else if (propertyName == "lifetime") {
+                    declaration.properties.emplace_back(AbiLifetimeClause{spelling, propertyLocation});
+                } else if (propertyName == "nullable") {
+                    declaration.properties.emplace_back(AbiNullableClause{spelling, propertyLocation});
+                } else if (propertyName == "terminator") {
+                    declaration.properties.emplace_back(AbiTerminatorClause{spelling, propertyLocation});
+                } else if (propertyName == "opaque") {
+                    declaration.properties.emplace_back(AbiOpaqueClause{spelling, propertyLocation});
+                }
+                ++i;
+                i = skip_until_line_end(tokens, i);
+            }
+
+            if (i < tokens.size() && tokens[i].kind == flowmini::TokenKind::RightBrace) {
+                ++i;
+            }
+            abi.members.emplace_back(std::move(declaration));
+            return i;
+        }
+
+        std::size_t parse_abi_struct_declaration(const std::vector<flowmini::Token>& tokens,
+                                                 std::size_t i,
+                                                 AbiDecl& abi) {
+            AbiStructDecl declaration;
+            declaration.location = location_from_token(tokens[i]);
+            ++i; // consume struct
+
+            if (i < tokens.size() && tokens[i].kind == flowmini::TokenKind::Identifier) {
+                declaration.name = tokens[i].text;
+                ++i;
+            }
+
+            if (i >= tokens.size() || tokens[i].kind != flowmini::TokenKind::LeftBrace) {
+                abi.members.emplace_back(std::move(declaration));
+                return skip_until_line_end(tokens, i);
+            }
+
+            ++i;
+            while (i < tokens.size() &&
+                   tokens[i].kind != flowmini::TokenKind::RightBrace &&
+                   !is_end_token(tokens[i])) {
+                if (tokens[i].kind == flowmini::TokenKind::Newline ||
+                    tokens[i].kind == flowmini::TokenKind::Comma) {
+                    ++i;
+                    continue;
+                }
+                if (tokens[i].kind != flowmini::TokenKind::Identifier) {
+                    i = skip_until_line_end(tokens, i);
+                    continue;
+                }
+
+                RecordField field;
+                field.location = location_from_token(tokens[i]);
+                field.name = tokens[i].text;
+                ++i;
+                if (i < tokens.size() && tokens[i].kind == flowmini::TokenKind::Colon) {
+                    ++i;
+                    if (i < tokens.size() && is_identifier_like_type_token(tokens[i])) {
+                        field.type = parse_type_ref(tokens, i);
+                    }
+                }
+                declaration.fields.push_back(std::move(field));
+                i = skip_until_line_end(tokens, i);
+            }
+
+            if (i < tokens.size() && tokens[i].kind == flowmini::TokenKind::RightBrace) {
+                ++i;
+            }
+            abi.members.emplace_back(std::move(declaration));
+            return i;
+        }
+
+        std::size_t parse_extern_function_declaration(const std::vector<flowmini::Token>& tokens,
+                                                      std::size_t i,
+                                                      AbiDecl& abi) {
+            ExternFunctionDecl declaration;
+            declaration.location = location_from_token(tokens[i]);
+            ++i; // consume extern
+
+            if (i < tokens.size() && tokens[i].kind == flowmini::TokenKind::KeywordFn) {
+                ++i;
+            }
+            if (i < tokens.size() && tokens[i].kind == flowmini::TokenKind::Identifier) {
+                declaration.name = tokens[i].text;
+                ++i;
+            }
+
+            i = parse_function_signature(tokens, i, declaration);
+            if (i >= tokens.size() || tokens[i].kind != flowmini::TokenKind::LeftBrace) {
+                abi.members.emplace_back(std::move(declaration));
+                return skip_until_line_end(tokens, i);
+            }
+
+            ++i;
+            while (i < tokens.size() &&
+                   tokens[i].kind != flowmini::TokenKind::RightBrace &&
+                   !is_end_token(tokens[i])) {
+                if (tokens[i].kind == flowmini::TokenKind::Newline ||
+                    tokens[i].kind == flowmini::TokenKind::Comma) {
+                    ++i;
+                    continue;
+                }
+                if (tokens[i].kind != flowmini::TokenKind::Identifier) {
+                    i = skip_until_line_end(tokens, i);
+                    continue;
+                }
+
+                const auto clauseLocation = location_from_token(tokens[i]);
+                const auto clauseName = tokens[i].text;
+                ++i;
+                if (i >= tokens.size() || is_end_token(tokens[i])) {
+                    break;
+                }
+
+                const auto spelling = tokens[i].text;
+                if (clauseName == "symbol") {
+                    declaration.clauses.emplace_back(ExternSymbolClause{spelling, clauseLocation});
+                } else if (clauseName == "effect") {
+                    declaration.clauses.emplace_back(ExternEffectClause{spelling, clauseLocation});
+                }
+                ++i;
+                i = skip_until_line_end(tokens, i);
+            }
+
+            if (i < tokens.size() && tokens[i].kind == flowmini::TokenKind::RightBrace) {
+                ++i;
+            }
+            abi.members.emplace_back(std::move(declaration));
+            return i;
+        }
+
+        std::size_t parse_abi_declaration(const std::vector<flowmini::Token>& tokens,
+                                          std::size_t i,
+                                          AstModule& module) {
+            AbiDecl declaration;
+            declaration.location = location_from_token(tokens[i]);
+            ++i; // consume abi
+
+            if (i < tokens.size() && tokens[i].kind == flowmini::TokenKind::Identifier) {
+                declaration.name = tokens[i].text;
+                ++i;
+            }
+
+            if (i >= tokens.size() || tokens[i].kind != flowmini::TokenKind::LeftBrace) {
+                append_top_level_declaration(module, std::move(declaration));
+                return skip_until_line_end(tokens, i);
+            }
+
+            ++i;
+            while (i < tokens.size() &&
+                   tokens[i].kind != flowmini::TokenKind::RightBrace &&
+                   !is_end_token(tokens[i])) {
+                if (tokens[i].kind == flowmini::TokenKind::Newline ||
+                    tokens[i].kind == flowmini::TokenKind::Comma) {
+                    ++i;
+                    continue;
+                }
+                if (is_identifier_text(tokens[i], "library")) {
+                    const auto location = location_from_token(tokens[i]);
+                    ++i;
+                    if (i < tokens.size()) {
+                        declaration.members.emplace_back(AbiLibraryClause{tokens[i].text, location});
+                        ++i;
+                    }
+                    i = skip_until_line_end(tokens, i);
+                    continue;
+                }
+                if (is_identifier_text(tokens[i], "convention")) {
+                    const auto location = location_from_token(tokens[i]);
+                    ++i;
+                    if (i < tokens.size()) {
+                        declaration.members.emplace_back(AbiConventionClause{tokens[i].text, location});
+                        ++i;
+                    }
+                    i = skip_until_line_end(tokens, i);
+                    continue;
+                }
+                if (is_identifier_text(tokens[i], "type")) {
+                    i = parse_abi_type_declaration(tokens, i, declaration);
+                    continue;
+                }
+                if (is_identifier_text(tokens[i], "struct")) {
+                    i = parse_abi_struct_declaration(tokens, i, declaration);
+                    continue;
+                }
+                if (is_identifier_text(tokens[i], "extern")) {
+                    i = parse_extern_function_declaration(tokens, i, declaration);
+                    continue;
+                }
+                i = skip_until_line_end(tokens, i);
+            }
+
+            if (i < tokens.size() && tokens[i].kind == flowmini::TokenKind::RightBrace) {
+                ++i;
+            }
+            append_top_level_declaration(module, std::move(declaration));
             return i;
         }
 
@@ -425,6 +745,9 @@ namespace flowmini::ast {
         bool is_top_level_boundry(const flowmini::Token& token) {
             return  token.kind == flowmini::TokenKind::KeywordFn ||
                     is_main_token(token) ||
+                    is_import_token(token) ||
+                    is_type_token(token) ||
+                    is_abi_token(token) ||
                     token.kind == flowmini::TokenKind::KeywordMain ||
                     token.kind == flowmini::TokenKind::KeywordUnit ||
                     token.kind == flowmini::TokenKind::KeywordProgram ||
@@ -714,10 +1037,16 @@ namespace flowmini::ast {
             return selectedOperator;
         }
 
+        bool expression_starts_word_unary(const std::vector<flowmini::Token>& tokens,
+                                          const std::size_t i) {
+            return i < tokens.size() && is_identifier_text(tokens[i], "not");
+        }
+
         bool expression_starts_unary(const std::vector<flowmini::Token>& tokens,
                                      const std::size_t i) {
             return i < tokens.size() &&
-                   tokens[i].kind == flowmini::TokenKind::Minus;
+                   (tokens[i].kind == flowmini::TokenKind::Minus ||
+                    expression_starts_word_unary(tokens, i));
         }
 
         bool expression_starts_float_literal(const std::vector<flowmini::Token>& tokens,
@@ -926,7 +1255,9 @@ namespace flowmini::ast {
         expression.location = location_from_token(token);
 
         const auto binaryOperatorIndex = find_binary_operator_split(tokens, i);
-        if (binaryOperatorIndex < tokens.size()) {
+        if (expression_starts_word_unary(tokens, i)) {
+            expression.payload = UnaryExpr{token.text, std::nullopt};
+        } else if (binaryOperatorIndex < tokens.size()) {
             expression.payload = BinaryExpr{tokens[binaryOperatorIndex].text, std::nullopt, std::nullopt};
         } else if (expression_starts_float_literal(tokens, i)) {
             expression.payload = FloatLiteralExpr{
@@ -2373,6 +2704,11 @@ namespace flowmini::ast {
                 continue;
             }
 
+            if (is_abi_token(tokens[i])) {
+                i = parse_abi_declaration(tokens, i, module);
+                continue;
+            }
+
             if (tokens[i].kind == flowmini::TokenKind::KeywordFn) {
                 FunctionDecl fn;
                 fn.location = location_from_token(tokens[i]);
@@ -2388,7 +2724,7 @@ namespace flowmini::ast {
                 i = mark_body_container(tokens, i, fn.has_body, fn.body_location, fn.body,
                                         module.block_pool, module.statement_pool, module.expression_pool);
 
-                module.source_unit.declarations.emplace_back(std::move(fn));
+                append_top_level_declaration(module, std::move(fn));
                 i = skip_until_next_top_levelish_token(tokens, i);
                 continue;
             }
@@ -2401,7 +2737,7 @@ namespace flowmini::ast {
                 i = mark_body_container(tokens, i, mainBlock.has_body, mainBlock.body_location, mainBlock.body,
                                         module.block_pool, module.statement_pool, module.expression_pool);
 
-                module.source_unit.declarations.emplace_back(std::move(mainBlock));
+                append_top_level_declaration(module, std::move(mainBlock));
 
                 i = skip_until_next_top_levelish_token(tokens, i);
                 continue;

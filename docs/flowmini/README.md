@@ -12,8 +12,8 @@ Current baseline:
 
 ```text
 build: PASS
-AST golden tests: 21
-Symbol projection tests: 7
+AST golden tests: 26
+Symbol projection tests: 11
 suite: 78 / 78
 ```
 
@@ -24,7 +24,7 @@ TokenTree remembers what the source looked like.
 AST states what the source means.
 ```
 
-The v0.24 AST is being stabilized so later semantic analysis, Graph IR,
+The v0.24 AST checkpoint is stabilized so later semantic analysis, Graph IR,
 target-independent transformation, policy, and target lowering can be added
 behind explicit stage boundaries.
 
@@ -35,6 +35,7 @@ Documents in this directory:
 - [v0.24 canonical type policy](v0.24-type-policy.md)
 - [C5 typed-statement sitrep](../../Flowmini/flowmini_v24_explicit_ast/docs/v0.24-c5-statement-payload-sitrep.md)
 - [Testing](testing.md)
+- [v0.24 frontend checkpoint Firetest report](v0.24-firetest-report.md)
 - [Project-wide verification gates and Firetest policy](../development/verification-gates.md)
 
 Active v0.24 implementation notes:

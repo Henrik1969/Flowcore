@@ -1,0 +1,69 @@
+SymbolTable dump
+Scopes: 7
+  Scope #1 kind=Global name=global symbols=1 children=1
+  Scope #2 kind=Module name=abi_contract_probe symbols=2 children=2
+  Scope #3 kind=Contract name=system symbols=5 children=2
+  Scope #4 kind=Struct name=Point symbols=2 children=0
+  Scope #5 kind=Function name=inspect symbols=2 children=0
+  Scope #6 kind=Contract name=implicit_convention symbols=1 children=1
+  Scope #7 kind=Function name=ping symbols=1 children=0
+Symbols: 14
+  Symbol #1 scope=#1 name=abi_contract_probe kind=Module facts=1
+    declaration_location=<source>:1:1
+    Fact kind=Custom key=source_unit_kind value="unit"
+  Symbol #2 scope=#2 name=system kind=Contract facts=2
+    declaration_location=<source>:4:1
+    Fact kind=AbiTag key=library_spelling value="libexample.so"
+    Fact kind=AbiTag key=convention_spelling value="c"
+  Symbol #3 scope=#3 name=c_string kind=Type facts=6
+    declaration_location=<source>:8:5
+    Fact kind=AbiTag key=repr_spelling value="const char*"
+    Fact kind=AbiTag key=ownership_spelling value="borrowed"
+    Fact kind=AbiTag key=access_spelling value="read"
+    Fact kind=AbiTag key=lifetime_spelling value="call"
+    Fact kind=AbiTag key=nullable_spelling value="false"
+    Fact kind=AbiTag key=terminator_spelling value="nul"
+  Symbol #4 scope=#3 name=c_handle kind=Type facts=6
+    declaration_location=<source>:17:5
+    Fact kind=AbiTag key=repr_spelling value="void*"
+    Fact kind=AbiTag key=ownership_spelling value="external"
+    Fact kind=AbiTag key=access_spelling value="opaque"
+    Fact kind=AbiTag key=lifetime_spelling value="external"
+    Fact kind=AbiTag key=nullable_spelling value="true"
+    Fact kind=AbiTag key=opaque_spelling value="true"
+  Symbol #5 scope=#3 name=c_buffer kind=Type facts=4
+    declaration_location=<source>:26:5
+    Fact kind=AbiTag key=repr_spelling value="const void*"
+    Fact kind=AbiTag key=ownership_spelling value="borrowed"
+    Fact kind=AbiTag key=access_spelling value="read"
+    Fact kind=AbiTag key=lifetime_spelling value="call"
+  Symbol #6 scope=#3 name=Point kind=Struct facts=0
+    declaration_location=<source>:33:5
+  Symbol #7 scope=#4 name=x kind=Field facts=1
+    declaration_location=<source>:34:9
+    Fact kind=TypeReference key=declared_type_spelling value="c_int"
+  Symbol #8 scope=#4 name=y kind=Field facts=1
+    declaration_location=<source>:35:9
+    Fact kind=TypeReference key=declared_type_spelling value="c_long"
+  Symbol #9 scope=#3 name=inspect kind=Function facts=3
+    declaration_location=<source>:38:5
+    Fact kind=TypeReference key=return_type_spelling value="c_size_t"
+    Fact kind=AbiTag key=external_symbol_spelling value="inspect_point"
+    Fact kind=AbiTag key=effect_spelling value="pure"
+  Symbol #10 scope=#5 name=text kind=Parameter facts=1
+    declaration_location=<source>:38:23
+    Fact kind=TypeReference key=declared_type_spelling value="c_string"
+  Symbol #11 scope=#5 name=point kind=Parameter facts=1
+    declaration_location=<source>:38:40
+    Fact kind=TypeReference key=declared_type_spelling value="Point"
+  Symbol #12 scope=#2 name=implicit_convention kind=Contract facts=1
+    declaration_location=<source>:44:1
+    Fact kind=AbiTag key=library_spelling value="libimplicit.so"
+  Symbol #13 scope=#6 name=ping kind=Function facts=3
+    declaration_location=<source>:47:5
+    Fact kind=TypeReference key=return_type_spelling value="c_int"
+    Fact kind=AbiTag key=external_symbol_spelling value="ping"
+    Fact kind=AbiTag key=effect_spelling value="pure"
+  Symbol #14 scope=#7 name=value kind=Parameter facts=1
+    declaration_location=<source>:47:20
+    Fact kind=TypeReference key=declared_type_spelling value="c_int"

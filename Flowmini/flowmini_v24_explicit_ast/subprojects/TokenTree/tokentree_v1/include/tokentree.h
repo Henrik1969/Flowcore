@@ -139,7 +139,11 @@ TOKENTREE_API TokenTreeStatus tokentree_node_append_child(TokenTree *tree,
                                                           TokenTreeNodeId child);
 TOKENTREE_API TokenTreeStatus tokentree_node_detach(TokenTree *tree, TokenTreeNodeId node);
 
-TOKENTREE_API const char *tokentree_status_message(TokenTreeStatus status);
+/*
+ * Accepts an integer code so diagnostic boundaries can describe unknown or
+ * future status values without first constructing an invalid enum value.
+ */
+TOKENTREE_API const char *tokentree_status_message(int status_code);
 
 #ifdef __cplusplus
 }

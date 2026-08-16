@@ -137,6 +137,6 @@ TT_TEST(status_messages_are_stable)
 {
     TT_EXPECT(std::string_view(tokentree_status_message(TOKENTREE_OK)) == "ok");
     TT_EXPECT(std::string_view(tokentree_status_message(TOKENTREE_ERROR_INVALID_ARGUMENT)) == "invalid argument");
-    TT_EXPECT(std::string_view(tokentree_status_message(static_cast<TokenTreeStatus>(999))) == "unknown status");
+    TT_EXPECT(std::string_view(tokentree_status_message(999)) == "unknown status");
     return true;
 }

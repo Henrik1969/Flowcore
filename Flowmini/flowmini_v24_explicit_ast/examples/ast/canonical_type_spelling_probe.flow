@@ -1,0 +1,34 @@
+program canonical_type_spelling_probe
+
+type CanonicalTypeSpellings {
+    field boolean : bool
+
+    field signed_8 : int8
+    field signed_16 : int16
+    field signed_32 : int32
+    field signed_64 : int64
+    field signed_128 : int128
+
+    field unsigned_8 : uint8
+    field unsigned_16 : uint16
+    field unsigned_32 : uint32
+    field unsigned_64 : uint64
+    field unsigned_128 : uint128
+
+    field binary_16 : float16
+    field binary_32 : float32
+    field binary_64 : float64
+    field binary_128 : float128
+
+    field character_8 : char8
+    field character_16 : char16
+    field character_32 : char32
+
+    field integer_alias : int
+    field float_alias : float
+    field boolean_alias : Bool
+    field text_domain : string
+}
+
+main {
+}

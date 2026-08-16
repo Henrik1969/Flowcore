@@ -17,8 +17,8 @@ raw frontend maturation; C5 typed statements complete
 
 ```text
 normal CMake/Ninja build:      PASS
-flowmini_ast_golden_tests:     PASS (21)
-flowmini_symbol_projection:    PASS (7/7)
+flowmini_ast_golden_tests:     PASS (26)
+flowmini_symbol_projection:    PASS (11/11)
 flowmini_suite:                PASS (78/78)
 CTest:                         PASS (2/2)
 ```
@@ -26,15 +26,24 @@ CTest:                         PASS (2/2)
 Flowmini is still experimental and unfinished.
 
 The current v0.24 line provides an observable, regression-guarded expression
-and type-reference graph plus arena-owned statement/block structure. C5 is now
+and type-reference graph plus arena-owned declaration/statement/block
+structure. C5 is now
 complete: every statement kind is selected by its typed payload, conditional
 and loop ownership lives in those payloads, canonical arrow placement preserves
 closed assignable targets and source form, and obsolete shared statement fields
 are gone. Structural SymbolTable projection now records factual declaration
-locations, source-unit kind, and unresolved declared/return/alias type spellings
-for represented AST forms. It performs no type resolution. The frontend is
+locations, source-unit kind, and unresolved declared/return/refined/ABI type
+spellings and contract clauses for represented AST forms. Refined declarations
+own invariant expression IDs; ABI blocks own ordered library, convention, type,
+struct, and extern members. Projection performs no type resolution, contract
+checking, effect interpretation, or ABI lowering. The frontend is
 still not a complete raw representation of the accepted language because other
 matrix gaps remain.
+
+Top-level declarations have stable `DeclarationId` values in a canonical arena.
+The source unit owns each declaration exactly once. Type references, fields,
+parameters, invariant clauses, and ABI clauses remain parent-owned values rather
+than receiving unnecessary global IDs.
 
 ## Run the current build
 
@@ -65,8 +74,8 @@ Expected result:
 
 ```text
 normal CMake/Ninja build:      PASS
-flowmini_ast_golden_tests:     PASS (21)
-flowmini_symbol_projection:    PASS (7/7)
+flowmini_ast_golden_tests:     PASS (26)
+flowmini_symbol_projection:    PASS (11/11)
 flowmini_suite:                PASS (78/78)
 CTest:                         PASS (2/2)
 ```
@@ -120,9 +129,9 @@ The following are still future or incomplete work:
 
 ```text
 complete statement coverage for the accepted language
-complete ABI declaration and contract AST coverage
 ordinary capability/provider call model for output; no core Print statement
 complete structural SymbolTable projection across the accepted language
+stable AST-declaration and SymbolTable cross-links
 semantic name resolution
 type checking
 Graph IR lowering

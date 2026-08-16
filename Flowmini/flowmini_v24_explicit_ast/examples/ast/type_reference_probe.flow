@@ -1,6 +1,7 @@
 program type_reference_probe
 
-type IntList refines collection.list<int>
+type IntList refines collection.list<int> {
+}
 
 type MatrixBox {
     field values : array<math.scalar>[Rows, 2]

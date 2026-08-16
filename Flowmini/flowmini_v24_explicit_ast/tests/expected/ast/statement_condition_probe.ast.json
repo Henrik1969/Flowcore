@@ -4,8 +4,13 @@
         "kind": "program",
         "name": "statement_condition_probe",
         "declaration_count": 2,
+        "declaration_ids": [
+            0,
+            1
+        ],
         "declarations": [
             {
+                "id": 0,
                 "kind": "function",
                 "name": "adjust",
                 "parameter_count": 2,
@@ -63,12 +68,80 @@
                 "body_block": 0
             },
             {
+                "id": 1,
                 "kind": "main_block",
                 "has_body": true,
                 "body_block": 4
             }
         ]
     },
+    "declaration_pool_size": 2,
+    "declaration_pool": [
+        {
+            "id": 0,
+            "kind": "function",
+            "name": "adjust",
+            "parameter_count": 2,
+            "parameters": [
+                {
+                    "name": "value",
+                    "type": "int",
+                    "type_ref": {
+                        "kind": "named",
+                        "text": "int",
+                        "payload": {
+                            "name_segments": [
+                                "int"
+                            ]
+                        },
+                        "location": {
+                            "line": 4,
+                            "column": 19
+                        }
+                    }
+                },
+                {
+                    "name": "limit",
+                    "type": "int",
+                    "type_ref": {
+                        "kind": "named",
+                        "text": "int",
+                        "payload": {
+                            "name_segments": [
+                                "int"
+                            ]
+                        },
+                        "location": {
+                            "line": 4,
+                            "column": 32
+                        }
+                    }
+                }
+            ],
+            "return_type": "int",
+            "return_type_ref": {
+                "kind": "named",
+                "text": "int",
+                "payload": {
+                    "name_segments": [
+                        "int"
+                    ]
+                },
+                "location": {
+                    "line": 4,
+                    "column": 40
+                }
+            },
+            "has_body": true,
+            "body_block": 0
+        },
+        {
+            "id": 1,
+            "kind": "main_block",
+            "has_body": true,
+            "body_block": 4
+        }
+    ],
     "expression_pool_size": 31,
     "expression_pool": [
         {

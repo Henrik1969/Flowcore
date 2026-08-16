@@ -4,8 +4,13 @@
         "kind": "program",
         "name": "statement_assignment_probe",
         "declaration_count": 2,
+        "declaration_ids": [
+            0,
+            1
+        ],
         "declarations": [
             {
+                "id": 0,
                 "kind": "function",
                 "name": "adjust",
                 "parameter_count": 1,
@@ -46,12 +51,63 @@
                 "body_block": 0
             },
             {
+                "id": 1,
                 "kind": "main_block",
                 "has_body": true,
                 "body_block": 2
             }
         ]
     },
+    "declaration_pool_size": 2,
+    "declaration_pool": [
+        {
+            "id": 0,
+            "kind": "function",
+            "name": "adjust",
+            "parameter_count": 1,
+            "parameters": [
+                {
+                    "name": "x",
+                    "type": "int",
+                    "type_ref": {
+                        "kind": "named",
+                        "text": "int",
+                        "payload": {
+                            "name_segments": [
+                                "int"
+                            ]
+                        },
+                        "location": {
+                            "line": 4,
+                            "column": 15
+                        }
+                    }
+                }
+            ],
+            "return_type": "int",
+            "return_type_ref": {
+                "kind": "named",
+                "text": "int",
+                "payload": {
+                    "name_segments": [
+                        "int"
+                    ]
+                },
+                "location": {
+                    "line": 4,
+                    "column": 23
+                }
+            },
+            "has_body": true,
+            "body_block": 0
+        },
+        {
+            "id": 1,
+            "kind": "main_block",
+            "has_body": true,
+            "body_block": 2
+        }
+    ],
     "expression_pool_size": 16,
     "expression_pool": [
         {

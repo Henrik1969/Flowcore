@@ -4,8 +4,14 @@
         "kind": "program",
         "name": "statement_return_probe",
         "declaration_count": 3,
+        "declaration_ids": [
+            0,
+            1,
+            2
+        ],
         "declarations": [
             {
+                "id": 0,
                 "kind": "function",
                 "name": "direct",
                 "parameter_count": 1,
@@ -46,6 +52,7 @@
                 "body_block": 0
             },
             {
+                "id": 1,
                 "kind": "function",
                 "name": "nested",
                 "parameter_count": 2,
@@ -103,12 +110,121 @@
                 "body_block": 1
             },
             {
+                "id": 2,
                 "kind": "main_block",
                 "has_body": true,
                 "body_block": 3
             }
         ]
     },
+    "declaration_pool_size": 3,
+    "declaration_pool": [
+        {
+            "id": 0,
+            "kind": "function",
+            "name": "direct",
+            "parameter_count": 1,
+            "parameters": [
+                {
+                    "name": "x",
+                    "type": "int",
+                    "type_ref": {
+                        "kind": "named",
+                        "text": "int",
+                        "payload": {
+                            "name_segments": [
+                                "int"
+                            ]
+                        },
+                        "location": {
+                            "line": 4,
+                            "column": 15
+                        }
+                    }
+                }
+            ],
+            "return_type": "int",
+            "return_type_ref": {
+                "kind": "named",
+                "text": "int",
+                "payload": {
+                    "name_segments": [
+                        "int"
+                    ]
+                },
+                "location": {
+                    "line": 4,
+                    "column": 23
+                }
+            },
+            "has_body": true,
+            "body_block": 0
+        },
+        {
+            "id": 1,
+            "kind": "function",
+            "name": "nested",
+            "parameter_count": 2,
+            "parameters": [
+                {
+                    "name": "x",
+                    "type": "int",
+                    "type_ref": {
+                        "kind": "named",
+                        "text": "int",
+                        "payload": {
+                            "name_segments": [
+                                "int"
+                            ]
+                        },
+                        "location": {
+                            "line": 8,
+                            "column": 15
+                        }
+                    }
+                },
+                {
+                    "name": "ready",
+                    "type": "bool",
+                    "type_ref": {
+                        "kind": "named",
+                        "text": "bool",
+                        "payload": {
+                            "name_segments": [
+                                "bool"
+                            ]
+                        },
+                        "location": {
+                            "line": 8,
+                            "column": 28
+                        }
+                    }
+                }
+            ],
+            "return_type": "int",
+            "return_type_ref": {
+                "kind": "named",
+                "text": "int",
+                "payload": {
+                    "name_segments": [
+                        "int"
+                    ]
+                },
+                "location": {
+                    "line": 8,
+                    "column": 37
+                }
+            },
+            "has_body": true,
+            "body_block": 1
+        },
+        {
+            "id": 2,
+            "kind": "main_block",
+            "has_body": true,
+            "body_block": 3
+        }
+    ],
     "expression_pool_size": 8,
     "expression_pool": [
         {

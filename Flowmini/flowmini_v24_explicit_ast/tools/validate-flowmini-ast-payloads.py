@@ -312,10 +312,9 @@ def validate_statement_payload(statement: dict, context: str) -> None:
 
 
 def validate_declaration_types(document: dict, path: Path) -> None:
-    source_unit = document.get("source_unit")
-    declarations = source_unit.get("declarations") if isinstance(source_unit, dict) else None
+    declarations = document.get("declaration_pool")
     if not isinstance(declarations, list):
-        raise TypeError(f"{path}: source_unit declarations must be an array")
+        raise TypeError(f"{path}: declaration_pool must be an array")
 
     for index, declaration in enumerate(declarations):
         context = f"{path}: declaration {index}"
@@ -343,10 +342,174 @@ def validate_declaration_types(document: dict, path: Path) -> None:
                 canonical = validate_type_ref(field.get("type_ref"), field_context)
                 if field.get("type") != canonical:
                     raise ValueError(f"{field_context}: type string disagrees with canonical type_ref")
-        elif kind == "type_alias":
-            canonical = validate_type_ref(declaration.get("target_type_ref"), f"{context}: alias target")
-            if declaration.get("target") != canonical:
-                raise ValueError(f"{context}: target string disagrees with canonical type_ref")
+        elif kind == "refined_type":
+            require_exact_fields(
+                declaration,
+                {"id", "kind", "name", "base_type", "base_type_ref", "invariants", "location"},
+                context,
+            )
+            canonical = validate_type_ref(
+                declaration.get("base_type_ref"), f"{context}: refined base type"
+            )
+            if declaration.get("base_type") != canonical:
+                raise ValueError(f"{context}: base_type string disagrees with canonical type_ref")
+            invariants = declaration.get("invariants")
+            if not isinstance(invariants, list):
+                raise TypeError(f"{context}: invariants must be an array")
+            for invariant_index, invariant in enumerate(invariants):
+                invariant_context = f"{context}: invariant {invariant_index}"
+                if not isinstance(invariant, dict):
+                    raise TypeError(f"{invariant_context} must be an object")
+                require_exact_fields(
+                    invariant, {"condition_expression", "location"}, invariant_context
+                )
+                if not isinstance(invariant.get("condition_expression"), int):
+                    raise TypeError(f"{invariant_context}: condition_expression must be an ID")
+                location(invariant.get("location"), invariant_context)
+            location(declaration.get("location"), context)
+        elif kind == "abi":
+            require_exact_fields(declaration, {"id", "kind", "name", "members", "location"}, context)
+            members = declaration.get("members")
+            if not isinstance(members, list):
+                raise TypeError(f"{context}: ABI members must be an array")
+            for member_index, member in enumerate(members):
+                member_context = f"{context}: ABI member {member_index}"
+                if not isinstance(member, dict):
+                    raise TypeError(f"{member_context} must be an object")
+                member_kind = member.get("kind")
+                if member_kind in {"library", "convention"}:
+                    require_exact_fields(
+                        member, {"kind", "spelling", "location"}, member_context
+                    )
+                    if not isinstance(member.get("spelling"), str):
+                        raise TypeError(f"{member_context}: spelling must be a string")
+                    location(member.get("location"), member_context)
+                elif member_kind == "type":
+                    require_exact_fields(
+                        member, {"kind", "name", "properties", "location"}, member_context
+                    )
+                    properties = member.get("properties")
+                    if not isinstance(properties, list):
+                        raise TypeError(f"{member_context}: properties must be an array")
+                    for property_index, prop in enumerate(properties):
+                        property_context = f"{member_context}: property {property_index}"
+                        if not isinstance(prop, dict):
+                            raise TypeError(f"{property_context} must be an object")
+                        require_exact_fields(
+                            prop, {"kind", "spelling", "location"}, property_context
+                        )
+                        if prop.get("kind") not in {
+                            "repr", "ownership", "access", "lifetime",
+                            "nullable", "terminator", "opaque",
+                        }:
+                            raise ValueError(f"{property_context}: unsupported ABI type property")
+                        if not isinstance(prop.get("spelling"), str):
+                            raise TypeError(f"{property_context}: spelling must be a string")
+                        location(prop.get("location"), property_context)
+                    location(member.get("location"), member_context)
+                elif member_kind == "struct":
+                    require_exact_fields(
+                        member, {"kind", "name", "fields", "location"}, member_context
+                    )
+                    fields = member.get("fields")
+                    if not isinstance(fields, list):
+                        raise TypeError(f"{member_context}: fields must be an array")
+                    for field_index, field in enumerate(fields):
+                        field_context = f"{member_context}: field {field_index}"
+                        if not isinstance(field, dict):
+                            raise TypeError(f"{field_context} must be an object")
+                        require_exact_fields(
+                            field, {"name", "type", "type_ref", "location"}, field_context
+                        )
+                        canonical = validate_type_ref(field.get("type_ref"), field_context)
+                        if field.get("type") != canonical:
+                            raise ValueError(f"{field_context}: type disagrees with type_ref")
+                        location(field.get("location"), field_context)
+                    location(member.get("location"), member_context)
+                elif member_kind == "extern_function":
+                    require_exact_fields(
+                        member,
+                        {"kind", "name", "parameters", "return_type", "return_type_ref", "clauses", "location"},
+                        member_context,
+                    )
+                    parameters = member.get("parameters")
+                    if not isinstance(parameters, list):
+                        raise TypeError(f"{member_context}: parameters must be an array")
+                    for parameter_index, parameter in enumerate(parameters):
+                        parameter_context = f"{member_context}: parameter {parameter_index}"
+                        if not isinstance(parameter, dict):
+                            raise TypeError(f"{parameter_context} must be an object")
+                        require_exact_fields(
+                            parameter, {"name", "type", "type_ref", "location"}, parameter_context
+                        )
+                        canonical = validate_type_ref(parameter.get("type_ref"), parameter_context)
+                        if parameter.get("type") != canonical:
+                            raise ValueError(f"{parameter_context}: type disagrees with type_ref")
+                        location(parameter.get("location"), parameter_context)
+                    canonical_return = validate_type_ref(
+                        member.get("return_type_ref"), f"{member_context}: return type"
+                    )
+                    if member.get("return_type") != canonical_return:
+                        raise ValueError(f"{member_context}: return type disagrees with type_ref")
+                    clauses = member.get("clauses")
+                    if not isinstance(clauses, list):
+                        raise TypeError(f"{member_context}: clauses must be an array")
+                    for clause_index, clause in enumerate(clauses):
+                        clause_context = f"{member_context}: clause {clause_index}"
+                        if not isinstance(clause, dict):
+                            raise TypeError(f"{clause_context} must be an object")
+                        require_exact_fields(
+                            clause, {"kind", "spelling", "location"}, clause_context
+                        )
+                        if clause.get("kind") not in {"symbol", "effect"}:
+                            raise ValueError(f"{clause_context}: unsupported extern clause")
+                        if not isinstance(clause.get("spelling"), str):
+                            raise TypeError(f"{clause_context}: spelling must be a string")
+                        location(clause.get("location"), clause_context)
+                    location(member.get("location"), member_context)
+                else:
+                    raise ValueError(f"{member_context}: unsupported ABI member kind {member_kind!r}")
+            location(declaration.get("location"), context)
+
+
+def invariant_expression_ids(document: dict) -> list[int]:
+    declarations = document.get("declaration_pool", [])
+    result: list[int] = []
+    if not isinstance(declarations, list):
+        return result
+    for declaration in declarations:
+        if isinstance(declaration, dict) and declaration.get("kind") == "refined_type":
+            for invariant in declaration.get("invariants", []):
+                if isinstance(invariant, dict) and isinstance(invariant.get("condition_expression"), int):
+                    result.append(invariant["condition_expression"])
+    return result
+
+
+def validate_declaration_arena(document: dict, path: Path) -> None:
+    source_unit = document.get("source_unit")
+    if not isinstance(source_unit, dict):
+        raise TypeError(f"{path}: source_unit must be an object")
+
+    pool = document.get("declaration_pool")
+    if not isinstance(pool, list) or document.get("declaration_pool_size") != len(pool):
+        raise TypeError(f"{path}: invalid declaration_pool")
+
+    for expected_id, declaration in enumerate(pool):
+        if not isinstance(declaration, dict) or declaration.get("id") != expected_id:
+            raise ValueError(f"{path}: declaration IDs must match their pool positions")
+
+    ids = source_unit.get("declaration_ids")
+    projections = source_unit.get("declarations")
+    if not isinstance(ids, list) or not all(isinstance(item, int) for item in ids):
+        raise TypeError(f"{path}: source_unit declaration_ids must be an ID array")
+    if source_unit.get("declaration_count") != len(ids):
+        raise ValueError(f"{path}: declaration_count does not match declaration_ids")
+    if len(ids) != len(set(ids)):
+        raise ValueError(f"{path}: declaration has multiple structural parents")
+    if set(ids) != set(range(len(pool))):
+        raise ValueError(f"{path}: declaration pool must be wholly owned by source_unit")
+    if not isinstance(projections, list) or projections != [pool[item] for item in ids]:
+        raise ValueError(f"{path}: source_unit declaration projections disagree with pool IDs")
 
 
 def validate_statement_arenas(document: dict, path: Path) -> None:
@@ -406,6 +569,7 @@ def validate(path: Path) -> None:
     with path.open(encoding="utf-8") as stream:
         document = json.load(stream)
 
+    validate_declaration_arena(document, path)
     validate_declaration_types(document, path)
     validate_statement_arenas(document, path)
 
@@ -414,6 +578,10 @@ def validate(path: Path) -> None:
         raise TypeError(f"{path}: expression_pool must be an array")
     if document.get("expression_pool_size") != len(expressions):
         raise ValueError(f"{path}: expression_pool_size does not match expression_pool")
+
+    for expression_id in invariant_expression_ids(document):
+        if expression_id < 0 or expression_id >= len(expressions):
+            raise ValueError(f"{path}: dangling invariant expression id {expression_id}")
 
     for statement in document["statement_pool"]:
         for expression_id in statement.get("expression_ids", []):

@@ -44,8 +44,8 @@ ctest --test-dir cmake-build-debug --output-on-failure
 Expected current baseline:
 
 ```text
-AST golden tests:          21 / 21
-Symbol projection tests:    7 / 7
+AST golden tests:          26 / 26
+Symbol projection tests:   11 / 11
 categorized suite:          78 / 78
 CTest:                       2 / 2
 ```
@@ -81,6 +81,9 @@ checkpoint evidence rather than permanent properties of the branch. A new
 greater-border claim requires a new Firetest report tied to the tested commit or
 working-tree state.
 
+The current checkpoint evidence is recorded in the
+[v0.24 frontend Firetest report](v0.24-firetest-report.md).
+
 ## Current build-isolation limitation
 
 The legacy ABI example path still loads:
@@ -101,3 +104,10 @@ cmake --build <build-tree> --target flowmini_prepare_test_dependencies
 
 This is a documented compatibility bridge, not the intended future
 prerequisite/provider model.
+
+The current struct-by-value ABI probe also shares the focused C declaration in
+`subprojects/testabi/include/flowmini_testabi.h` between the test provider and
+the runtime's existing hard-coded `Point` compatibility path. This keeps the
+function-pointer type and carrier layout exact under UndefinedBehaviorSanitizer.
+It is test-provider infrastructure, not a canonical Flowmini ABI type or the
+future general ABI call mechanism.

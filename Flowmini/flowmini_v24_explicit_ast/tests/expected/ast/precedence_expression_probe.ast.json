@@ -4,14 +4,27 @@
         "kind": "program",
         "name": "precedence_expression_probe",
         "declaration_count": 1,
+        "declaration_ids": [
+            0
+        ],
         "declarations": [
             {
+                "id": 0,
                 "kind": "main_block",
                 "has_body": true,
                 "body_block": 0
             }
         ]
     },
+    "declaration_pool_size": 1,
+    "declaration_pool": [
+        {
+            "id": 0,
+            "kind": "main_block",
+            "has_body": true,
+            "body_block": 0
+        }
+    ],
     "expression_pool_size": 116,
     "expression_pool": [
         {

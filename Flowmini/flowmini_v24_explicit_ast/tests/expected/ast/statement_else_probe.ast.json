@@ -4,8 +4,14 @@
         "kind": "program",
         "name": "statement_else_probe",
         "declaration_count": 3,
+        "declaration_ids": [
+            0,
+            1,
+            2
+        ],
         "declarations": [
             {
+                "id": 0,
                 "kind": "function",
                 "name": "normalize",
                 "parameter_count": 1,
@@ -46,6 +52,7 @@
                 "body_block": 0
             },
             {
+                "id": 1,
                 "kind": "function",
                 "name": "keep_or_one",
                 "parameter_count": 1,
@@ -86,12 +93,104 @@
                 "body_block": 3
             },
             {
+                "id": 2,
                 "kind": "main_block",
                 "has_body": true,
                 "body_block": 5
             }
         ]
     },
+    "declaration_pool_size": 3,
+    "declaration_pool": [
+        {
+            "id": 0,
+            "kind": "function",
+            "name": "normalize",
+            "parameter_count": 1,
+            "parameters": [
+                {
+                    "name": "value",
+                    "type": "int",
+                    "type_ref": {
+                        "kind": "named",
+                        "text": "int",
+                        "payload": {
+                            "name_segments": [
+                                "int"
+                            ]
+                        },
+                        "location": {
+                            "line": 4,
+                            "column": 22
+                        }
+                    }
+                }
+            ],
+            "return_type": "int",
+            "return_type_ref": {
+                "kind": "named",
+                "text": "int",
+                "payload": {
+                    "name_segments": [
+                        "int"
+                    ]
+                },
+                "location": {
+                    "line": 4,
+                    "column": 30
+                }
+            },
+            "has_body": true,
+            "body_block": 0
+        },
+        {
+            "id": 1,
+            "kind": "function",
+            "name": "keep_or_one",
+            "parameter_count": 1,
+            "parameters": [
+                {
+                    "name": "value",
+                    "type": "int",
+                    "type_ref": {
+                        "kind": "named",
+                        "text": "int",
+                        "payload": {
+                            "name_segments": [
+                                "int"
+                            ]
+                        },
+                        "location": {
+                            "line": 12,
+                            "column": 24
+                        }
+                    }
+                }
+            ],
+            "return_type": "int",
+            "return_type_ref": {
+                "kind": "named",
+                "text": "int",
+                "payload": {
+                    "name_segments": [
+                        "int"
+                    ]
+                },
+                "location": {
+                    "line": 12,
+                    "column": 32
+                }
+            },
+            "has_body": true,
+            "body_block": 3
+        },
+        {
+            "id": 2,
+            "kind": "main_block",
+            "has_body": true,
+            "body_block": 5
+        }
+    ],
     "expression_pool_size": 21,
     "expression_pool": [
         {
