@@ -1,99 +1,60 @@
-# Flowmini v22 — Unit Kinds
+# Flowmini v0.25 — SymbolTable Projection Maturation
 
-This version introduces the first hard source-role boundary for Flowmini.
-
-Flowmini source files now have an explicit unit kind:
-
-```flow
-program demo
-```
-
-or:
-
-```flow
-unit math_helpers
-```
-
-## Rule
+This is the active Flowmini implementation line on branch:
 
 ```text
-program = executable/root source unit
-unit    = defining/importable source unit
+v25-symboltable-projection
 ```
 
-A `program` may contain `main` and may be run as the root input.
+It inherits the tagged `flowmini-v0.24-frontend-border` implementation. v0.24
+proved that an independent process can consume the exported raw AST and
+SymbolTable without linking Flowmini internals or reparsing source.
 
-A `unit` may be imported and must not contain `main`.
+## Purpose
 
-## Import law
+v0.25 matures that structural projection boundary:
 
-```text
-root execution:
-    accepts program with main
-    rejects unit as root input
-    rejects program without main
+- broaden and harden AST-to-SymbolTable projection coverage;
+- preserve factual metadata and source provenance;
+- make AST-to-symbol and AST-to-scope origins precise and testable;
+- expand projection and independent-consumer goldens;
+- harden the versioned frontend bundle contract;
+- prepare a trustworthy input boundary for later semantic analysis.
 
-import:
-    accepts unit
-    rejects program
-    rejects any imported file that defines main
-```
+v0.25 does not perform semantic type resolution, alias normalization, contract
+satisfaction, Graph IR construction, or runtime lowering.
 
-This separates executable units from defining/header/library units, inspired by
-C/C++ headers/source separation, Turbo Pascal units, and Visual Basic-style
-units/modules.
+The authoritative line status is
+[v0.25 SymbolTable projection status](docs/v0.25-symboltable-projection-status.md).
 
-## Compatibility note
+## Build
 
-The parser still accepts legacy `module` as a spelling so old FlowIR/internal
-paths continue to work during the transition. The examples and std files in this
-version have been migrated to `program` / `unit`.
-
-## Test-oriented example layout
-
-The examples directory is now categorized by intent:
-
-```text
-examples/
-├── pass/       root programs expected to execute successfully
-├── fail/       negative tests expected to fail with diagnostics
-├── support/    defining/support files, not normally root-run
-└── docs/       documentation
-```
-
-This supports the external suite runner:
+From this directory:
 
 ```bash
-$TOP/tools/run-flowmini-test-suite.sh --root Flowmini/flowmini_v22_unit_kinds
+cmake -S . -B cmake-build-debug -G Ninja
+cmake --build cmake-build-debug -j20
 ```
 
-or, with environment defaults:
+## Gates
 
 ```bash
-export FLOWMINI_ROOT="$TOP/Flowmini/flowmini_v22_unit_kinds"
-$TOP/tools/run-flowmini-test-suite.sh
+cmake --build cmake-build-debug --target flowmini_frontend_bundle_tests
+cmake --build cmake-build-debug --target flowmini_symbol_projection_tests
+cmake --build cmake-build-debug --target flowmini_ast_golden_tests
+cmake --build cmake-build-debug --target flowmini_suite
+ctest --test-dir cmake-build-debug --output-on-failure
 ```
 
-## Verified
-
-- CMake Debug build succeeds.
-- TokenTree smoke tests pass.
-- SymbolTable tests pass.
-- Categorized Flowmini suite passes: 78 / 78.
-
-Valgrind was not run in this packaging environment because Valgrind is not
-installed here.
-
-## Intent
-
-This is a language-structure cleanup step, not a bytecode step.
-
-Later versions may add artifact kinds such as precompiled bytecode units, but
-that will be a separate concern:
+Opening baseline:
 
 ```text
-source role:    program | unit
-artifact form:  source | bytecode | cache | object
+AST golden tests:          26/26
+Symbol projection tests:   11/11
+Frontend bundle tests:      5 golden, 1 isolated, 11 negative
+Flowmini suite:             78/78
+CTest:                       2/2
 ```
 
-v22 only defines the source role boundary.
+Build trees, runtime build output, test reports, and cache files are local
+artifacts and must not be committed.
