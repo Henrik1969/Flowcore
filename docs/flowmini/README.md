@@ -35,6 +35,7 @@ Documents in this directory:
 - [v0.24 canonical type policy](v0.24-type-policy.md)
 - [C5 typed-statement sitrep](../../Flowmini/flowmini_v24_explicit_ast/docs/v0.24-c5-statement-payload-sitrep.md)
 - [Testing](testing.md)
+- [Project-wide verification gates and Firetest policy](../development/verification-gates.md)
 
 Active v0.24 implementation notes:
 

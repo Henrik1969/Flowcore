@@ -26,6 +26,12 @@ This is the soul of Flowcore.
 - [Transformation and revision architecture](architecture/compiler-transformation-revision-model.md)
 - [Prerequisites](architecture/prerequisites.md)
 
+## Development policy
+
+- [Verification gates and Firetest policy](development/verification-gates.md)
+- [Project hygiene](development/project-hygiene.md)
+- [Documentation style](development/documentation-style.md)
+
 ## Current active Flowmini version
 
 See:

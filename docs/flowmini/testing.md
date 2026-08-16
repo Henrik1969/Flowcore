@@ -2,6 +2,10 @@
 
 Flowmini uses a categorized integration test suite.
 
+The project-wide [verification-gate policy](../development/verification-gates.md)
+defines the binding Tier 1, Tier 2, and Tier 3 Firetest requirements. The
+commands below are the current Flowmini realization of those gates.
+
 ## Categories
 
 ```text
@@ -46,6 +50,10 @@ categorized suite:          78 / 78
 CTest:                       2 / 2
 ```
 
+These normal gates form the Flowmini Tier 2 integration baseline. Before
+declaring a greater architectural border closed, run and record the additional
+Tier 3 Firetest pressure checks defined by the project-wide policy.
+
 ## Expected files
 
 ```text
@@ -67,6 +75,11 @@ Diagnostic `.contains` files are substring checks. They should contain stable di
 
 `--run-support` executes importable support units as expected failures when used
 as root sources. The current support-inclusive firetest result is 94/94.
+
+Compiler, sanitizer, Valgrind, support-inclusive, and concurrency results are
+checkpoint evidence rather than permanent properties of the branch. A new
+greater-border claim requires a new Firetest report tied to the tested commit or
+working-tree state.
 
 ## Current build-isolation limitation
 
