@@ -133,6 +133,16 @@ The binding completion checklist is:
 docs/flowmini/v0.24-accepted-language-coverage.md
 ```
 
+The binding canonical type identities and layer boundary are recorded in:
+
+```text
+docs/flowmini/v0.24-type-policy.md
+```
+
+The raw AST preserves written type references. Alias resolution, type checking,
+ABI lowering, and complete runtime storage for the canonical primitive family
+are not yet implemented.
+
 The completed C5 implementation checkpoint is recorded in:
 
 ```text
