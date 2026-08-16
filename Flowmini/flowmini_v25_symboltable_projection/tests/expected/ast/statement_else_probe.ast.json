@@ -3,6 +3,10 @@
     "source_unit": {
         "kind": "program",
         "name": "statement_else_probe",
+        "location": {
+            "line": 1,
+            "column": 1
+        },
         "declaration_count": 3,
         "declaration_ids": [
             0,
@@ -31,6 +35,10 @@
                                 "line": 4,
                                 "column": 22
                             }
+                        },
+                        "location": {
+                            "line": 4,
+                            "column": 14
                         }
                     }
                 ],
@@ -49,7 +57,11 @@
                     }
                 },
                 "has_body": true,
-                "body_block": 0
+                "body_block": 0,
+                "location": {
+                    "line": 4,
+                    "column": 1
+                }
             },
             {
                 "id": 1,
@@ -72,6 +84,10 @@
                                 "line": 12,
                                 "column": 24
                             }
+                        },
+                        "location": {
+                            "line": 12,
+                            "column": 16
                         }
                     }
                 ],
@@ -90,13 +106,21 @@
                     }
                 },
                 "has_body": true,
-                "body_block": 3
+                "body_block": 3,
+                "location": {
+                    "line": 12,
+                    "column": 1
+                }
             },
             {
                 "id": 2,
                 "kind": "main_block",
                 "has_body": true,
-                "body_block": 5
+                "body_block": 5,
+                "location": {
+                    "line": 20,
+                    "column": 1
+                }
             }
         ]
     },
@@ -123,6 +147,10 @@
                             "line": 4,
                             "column": 22
                         }
+                    },
+                    "location": {
+                        "line": 4,
+                        "column": 14
                     }
                 }
             ],
@@ -141,7 +169,11 @@
                 }
             },
             "has_body": true,
-            "body_block": 0
+            "body_block": 0,
+            "location": {
+                "line": 4,
+                "column": 1
+            }
         },
         {
             "id": 1,
@@ -164,6 +196,10 @@
                             "line": 12,
                             "column": 24
                         }
+                    },
+                    "location": {
+                        "line": 12,
+                        "column": 16
                     }
                 }
             ],
@@ -182,13 +218,21 @@
                 }
             },
             "has_body": true,
-            "body_block": 3
+            "body_block": 3,
+            "location": {
+                "line": 12,
+                "column": 1
+            }
         },
         {
             "id": 2,
             "kind": "main_block",
             "has_body": true,
-            "body_block": 5
+            "body_block": 5,
+            "location": {
+                "line": 20,
+                "column": 1
+            }
         }
     ],
     "expression_pool_size": 21,
@@ -418,7 +462,11 @@
             "has_value": true,
             "expression_ids": [
                 3
-            ]
+            ],
+            "location": {
+                "line": 6,
+                "column": 9
+            }
         },
         {
             "id": 1,
@@ -440,6 +488,10 @@
             "else_arm": {
                 "kind": "else_block",
                 "block": 2
+            },
+            "location": {
+                "line": 5,
+                "column": 5
             }
         },
         {
@@ -452,7 +504,11 @@
             "has_value": true,
             "expression_ids": [
                 4
-            ]
+            ],
+            "location": {
+                "line": 8,
+                "column": 9
+            }
         },
         {
             "id": 3,
@@ -464,7 +520,11 @@
             "has_value": true,
             "expression_ids": [
                 9
-            ]
+            ],
+            "location": {
+                "line": 14,
+                "column": 9
+            }
         },
         {
             "id": 4,
@@ -480,7 +540,11 @@
             ],
             "condition": 6,
             "then_block": 4,
-            "else_arm": null
+            "else_arm": null,
+            "location": {
+                "line": 13,
+                "column": 5
+            }
         },
         {
             "id": 5,
@@ -492,7 +556,11 @@
             "has_value": true,
             "expression_ids": [
                 10
-            ]
+            ],
+            "location": {
+                "line": 17,
+                "column": 5
+            }
         },
         {
             "id": 6,
@@ -532,7 +600,11 @@
             "has_initializer": true,
             "expression_ids": [
                 11
-            ]
+            ],
+            "location": {
+                "line": 21,
+                "column": 5
+            }
         },
         {
             "id": 7,
@@ -553,7 +625,11 @@
             "has_value": true,
             "expression_ids": [
                 15
-            ]
+            ],
+            "location": {
+                "line": 24,
+                "column": 9
+            }
         },
         {
             "id": 8,
@@ -575,6 +651,10 @@
             "else_arm": {
                 "kind": "else_block",
                 "block": 7
+            },
+            "location": {
+                "line": 23,
+                "column": 5
             }
         },
         {
@@ -596,7 +676,11 @@
             "has_value": true,
             "expression_ids": [
                 19
-            ]
+            ],
+            "location": {
+                "line": 27,
+                "column": 13
+            }
         },
         {
             "id": 10,
@@ -618,6 +702,10 @@
             "else_arm": {
                 "kind": "else_block",
                 "block": 9
+            },
+            "location": {
+                "line": 26,
+                "column": 9
             }
         },
         {
@@ -639,7 +727,11 @@
             "has_value": true,
             "expression_ids": [
                 20
-            ]
+            ],
+            "location": {
+                "line": 29,
+                "column": 13
+            }
         }
     ],
     "block_pool_size": 10,

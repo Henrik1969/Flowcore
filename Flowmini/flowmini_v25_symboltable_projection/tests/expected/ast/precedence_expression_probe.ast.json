@@ -3,6 +3,10 @@
     "source_unit": {
         "kind": "program",
         "name": "precedence_expression_probe",
+        "location": {
+            "line": 1,
+            "column": 1
+        },
         "declaration_count": 1,
         "declaration_ids": [
             0
@@ -12,7 +16,11 @@
                 "id": 0,
                 "kind": "main_block",
                 "has_body": true,
-                "body_block": 0
+                "body_block": 0,
+                "location": {
+                    "line": 4,
+                    "column": 1
+                }
             }
         ]
     },
@@ -22,7 +30,11 @@
             "id": 0,
             "kind": "main_block",
             "has_body": true,
-            "body_block": 0
+            "body_block": 0,
+            "location": {
+                "line": 4,
+                "column": 1
+            }
         }
     ],
     "expression_pool_size": 116,
@@ -1350,7 +1362,11 @@
             "has_initializer": true,
             "expression_ids": [
                 0
-            ]
+            ],
+            "location": {
+                "line": 5,
+                "column": 5
+            }
         },
         {
             "id": 1,
@@ -1390,7 +1406,11 @@
             "has_initializer": true,
             "expression_ids": [
                 1
-            ]
+            ],
+            "location": {
+                "line": 6,
+                "column": 5
+            }
         },
         {
             "id": 2,
@@ -1430,7 +1450,11 @@
             "has_initializer": true,
             "expression_ids": [
                 2
-            ]
+            ],
+            "location": {
+                "line": 7,
+                "column": 5
+            }
         },
         {
             "id": 3,
@@ -1470,7 +1494,11 @@
             "has_initializer": true,
             "expression_ids": [
                 3
-            ]
+            ],
+            "location": {
+                "line": 8,
+                "column": 5
+            }
         },
         {
             "id": 4,
@@ -1510,7 +1538,11 @@
             "has_initializer": true,
             "expression_ids": [
                 4
-            ]
+            ],
+            "location": {
+                "line": 9,
+                "column": 5
+            }
         },
         {
             "id": 5,
@@ -1531,7 +1563,11 @@
             "has_value": true,
             "expression_ids": [
                 5
-            ]
+            ],
+            "location": {
+                "line": 11,
+                "column": 5
+            }
         },
         {
             "id": 6,
@@ -1552,7 +1588,11 @@
             "has_value": true,
             "expression_ids": [
                 10
-            ]
+            ],
+            "location": {
+                "line": 12,
+                "column": 5
+            }
         },
         {
             "id": 7,
@@ -1573,7 +1613,11 @@
             "has_value": true,
             "expression_ids": [
                 15
-            ]
+            ],
+            "location": {
+                "line": 13,
+                "column": 5
+            }
         },
         {
             "id": 8,
@@ -1594,7 +1638,11 @@
             "has_value": true,
             "expression_ids": [
                 20
-            ]
+            ],
+            "location": {
+                "line": 14,
+                "column": 5
+            }
         },
         {
             "id": 9,
@@ -1615,7 +1663,11 @@
             "has_value": true,
             "expression_ids": [
                 25
-            ]
+            ],
+            "location": {
+                "line": 15,
+                "column": 5
+            }
         },
         {
             "id": 10,
@@ -1636,7 +1688,11 @@
             "has_value": true,
             "expression_ids": [
                 30
-            ]
+            ],
+            "location": {
+                "line": 16,
+                "column": 5
+            }
         },
         {
             "id": 11,
@@ -1657,7 +1713,11 @@
             "has_value": true,
             "expression_ids": [
                 35
-            ]
+            ],
+            "location": {
+                "line": 17,
+                "column": 5
+            }
         },
         {
             "id": 12,
@@ -1678,7 +1738,11 @@
             "has_value": true,
             "expression_ids": [
                 40
-            ]
+            ],
+            "location": {
+                "line": 18,
+                "column": 5
+            }
         },
         {
             "id": 13,
@@ -1699,7 +1763,11 @@
             "has_value": true,
             "expression_ids": [
                 44
-            ]
+            ],
+            "location": {
+                "line": 19,
+                "column": 5
+            }
         },
         {
             "id": 14,
@@ -1720,7 +1788,11 @@
             "has_value": true,
             "expression_ids": [
                 48
-            ]
+            ],
+            "location": {
+                "line": 20,
+                "column": 5
+            }
         },
         {
             "id": 15,
@@ -1741,7 +1813,11 @@
             "has_value": true,
             "expression_ids": [
                 52
-            ]
+            ],
+            "location": {
+                "line": 21,
+                "column": 5
+            }
         },
         {
             "id": 16,
@@ -1762,7 +1838,11 @@
             "has_value": true,
             "expression_ids": [
                 55
-            ]
+            ],
+            "location": {
+                "line": 22,
+                "column": 5
+            }
         },
         {
             "id": 17,
@@ -1783,7 +1863,11 @@
             "has_value": true,
             "expression_ids": [
                 62
-            ]
+            ],
+            "location": {
+                "line": 23,
+                "column": 5
+            }
         },
         {
             "id": 18,
@@ -1804,7 +1888,11 @@
             "has_value": true,
             "expression_ids": [
                 69
-            ]
+            ],
+            "location": {
+                "line": 24,
+                "column": 5
+            }
         },
         {
             "id": 19,
@@ -1825,7 +1913,11 @@
             "has_value": true,
             "expression_ids": [
                 75
-            ]
+            ],
+            "location": {
+                "line": 25,
+                "column": 5
+            }
         },
         {
             "id": 20,
@@ -1846,7 +1938,11 @@
             "has_value": true,
             "expression_ids": [
                 81
-            ]
+            ],
+            "location": {
+                "line": 26,
+                "column": 5
+            }
         },
         {
             "id": 21,
@@ -1867,7 +1963,11 @@
             "has_value": true,
             "expression_ids": [
                 87
-            ]
+            ],
+            "location": {
+                "line": 27,
+                "column": 5
+            }
         },
         {
             "id": 22,
@@ -1888,7 +1988,11 @@
             "has_value": true,
             "expression_ids": [
                 91
-            ]
+            ],
+            "location": {
+                "line": 28,
+                "column": 5
+            }
         },
         {
             "id": 23,
@@ -1909,7 +2013,11 @@
             "has_value": true,
             "expression_ids": [
                 96
-            ]
+            ],
+            "location": {
+                "line": 29,
+                "column": 5
+            }
         },
         {
             "id": 24,
@@ -1930,7 +2038,11 @@
             "has_value": true,
             "expression_ids": [
                 113
-            ]
+            ],
+            "location": {
+                "line": 32,
+                "column": 9
+            }
         },
         {
             "id": 25,
@@ -1946,7 +2058,11 @@
             ],
             "condition": 104,
             "then_block": 1,
-            "else_arm": null
+            "else_arm": null,
+            "location": {
+                "line": 31,
+                "column": 5
+            }
         }
     ],
     "block_pool_size": 2,

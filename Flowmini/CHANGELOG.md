@@ -11,6 +11,15 @@
   scope.
 - Kept semantic resolution, contract checking, Graph IR, and runtime lowering
   outside v0.25.
+- Advanced `flowmini.frontend_bundle` to version 2 with typed symbol/scope
+  origins, canonical arena IDs where available, exact structural roles, and
+  source-location provenance.
+- Hardened the independent consumer with kind, role, ID, ownership, uniqueness,
+  source-map, and reverse-origin validation; expanded the gate to seven goldens,
+  one isolated run, and nineteen required failures.
+- Preserved imports in structural inspection modes so import symbols and
+  multi-file origins are observable without changing execution policy.
+- Expanded SymbolTable projection coverage to 12/12 with `import_demo`.
 
 ## v24_explicit_ast — closed frontend-export border
 

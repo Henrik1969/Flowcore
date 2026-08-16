@@ -56,7 +56,7 @@
       "kind": "Global",
       "parent_id": null,
       "owner_symbol_id": null,
-      "ast_path": null,
+      "origin": null,
       "symbol_ids": [
         1
       ]
@@ -66,7 +66,16 @@
       "kind": "Module",
       "parent_id": 1,
       "owner_symbol_id": 1,
-      "ast_path": "/source_unit",
+      "origin": {
+        "ast_path": "/source_unit",
+        "entity_kind": "source_unit",
+        "role": "module_scope",
+        "ast_id": null,
+        "source_location": {
+          "line": 1,
+          "column": 1
+        }
+      },
       "symbol_ids": [
         2,
         3,
@@ -79,7 +88,16 @@
       "kind": "Struct",
       "parent_id": 2,
       "owner_symbol_id": 3,
-      "ast_path": "/declaration_pool/1",
+      "origin": {
+        "ast_path": "/declaration_pool/1",
+        "entity_kind": "declaration",
+        "role": "record_scope",
+        "ast_id": 1,
+        "source_location": {
+          "line": 7,
+          "column": 6
+        }
+      },
       "symbol_ids": [
         4,
         5
@@ -90,7 +108,16 @@
       "kind": "Function",
       "parent_id": 2,
       "owner_symbol_id": 6,
-      "ast_path": "/declaration_pool/2",
+      "origin": {
+        "ast_path": "/declaration_pool/2",
+        "entity_kind": "declaration",
+        "role": "function_scope",
+        "ast_id": 2,
+        "source_location": {
+          "line": 12,
+          "column": 1
+        }
+      },
       "symbol_ids": [
         7,
         8,
@@ -103,7 +130,16 @@
       "kind": "Function",
       "parent_id": 2,
       "owner_symbol_id": 11,
-      "ast_path": "/declaration_pool/3",
+      "origin": {
+        "ast_path": "/declaration_pool/3",
+        "entity_kind": "declaration",
+        "role": "main_scope",
+        "ast_id": 3,
+        "source_location": {
+          "line": 21,
+          "column": 1
+        }
+      },
       "symbol_ids": [
         12
       ]
@@ -116,7 +152,16 @@
       "kind": "Module",
       "owning_scope_id": 1,
       "introduced_scope_id": 2,
-      "ast_path": "/source_unit",
+      "origin": {
+        "ast_path": "/source_unit",
+        "entity_kind": "source_unit",
+        "role": "source_unit",
+        "ast_id": null,
+        "source_location": {
+          "line": 1,
+          "column": 1
+        }
+      },
       "source_location": {
         "source_id": 0,
         "path": "examples/ast/type_reference_probe.flow",
@@ -140,7 +185,16 @@
       "kind": "Type",
       "owning_scope_id": 2,
       "introduced_scope_id": null,
-      "ast_path": "/declaration_pool/0",
+      "origin": {
+        "ast_path": "/declaration_pool/0",
+        "entity_kind": "declaration",
+        "role": "refined_type_declaration",
+        "ast_id": 0,
+        "source_location": {
+          "line": 4,
+          "column": 1
+        }
+      },
       "source_location": {
         "source_id": 0,
         "path": "examples/ast/type_reference_probe.flow",
@@ -164,7 +218,16 @@
       "kind": "Struct",
       "owning_scope_id": 2,
       "introduced_scope_id": 3,
-      "ast_path": "/declaration_pool/1",
+      "origin": {
+        "ast_path": "/declaration_pool/1",
+        "entity_kind": "declaration",
+        "role": "record_declaration",
+        "ast_id": 1,
+        "source_location": {
+          "line": 7,
+          "column": 6
+        }
+      },
       "source_location": {
         "source_id": 0,
         "path": "examples/ast/type_reference_probe.flow",
@@ -179,7 +242,16 @@
       "kind": "Field",
       "owning_scope_id": 3,
       "introduced_scope_id": null,
-      "ast_path": "/declaration_pool/1/fields/0",
+      "origin": {
+        "ast_path": "/declaration_pool/1/fields/0",
+        "entity_kind": "field",
+        "role": "record_field",
+        "ast_id": null,
+        "source_location": {
+          "line": 8,
+          "column": 5
+        }
+      },
       "source_location": {
         "source_id": 0,
         "path": "examples/ast/type_reference_probe.flow",
@@ -203,7 +275,16 @@
       "kind": "Field",
       "owning_scope_id": 3,
       "introduced_scope_id": null,
-      "ast_path": "/declaration_pool/1/fields/1",
+      "origin": {
+        "ast_path": "/declaration_pool/1/fields/1",
+        "entity_kind": "field",
+        "role": "record_field",
+        "ast_id": null,
+        "source_location": {
+          "line": 9,
+          "column": 5
+        }
+      },
       "source_location": {
         "source_id": 0,
         "path": "examples/ast/type_reference_probe.flow",
@@ -227,7 +308,16 @@
       "kind": "Function",
       "owning_scope_id": 2,
       "introduced_scope_id": 4,
-      "ast_path": "/declaration_pool/2",
+      "origin": {
+        "ast_path": "/declaration_pool/2",
+        "entity_kind": "declaration",
+        "role": "function_declaration",
+        "ast_id": 2,
+        "source_location": {
+          "line": 12,
+          "column": 1
+        }
+      },
       "source_location": {
         "source_id": 0,
         "path": "examples/ast/type_reference_probe.flow",
@@ -251,7 +341,16 @@
       "kind": "Parameter",
       "owning_scope_id": 4,
       "introduced_scope_id": null,
-      "ast_path": "/declaration_pool/2/parameters/0",
+      "origin": {
+        "ast_path": "/declaration_pool/2/parameters/0",
+        "entity_kind": "parameter",
+        "role": "function_parameter",
+        "ast_id": null,
+        "source_location": {
+          "line": 13,
+          "column": 5
+        }
+      },
       "source_location": {
         "source_id": 0,
         "path": "examples/ast/type_reference_probe.flow",
@@ -275,7 +374,16 @@
       "kind": "Parameter",
       "owning_scope_id": 4,
       "introduced_scope_id": null,
-      "ast_path": "/declaration_pool/2/parameters/1",
+      "origin": {
+        "ast_path": "/declaration_pool/2/parameters/1",
+        "entity_kind": "parameter",
+        "role": "function_parameter",
+        "ast_id": null,
+        "source_location": {
+          "line": 14,
+          "column": 5
+        }
+      },
       "source_location": {
         "source_id": 0,
         "path": "examples/ast/type_reference_probe.flow",
@@ -299,7 +407,16 @@
       "kind": "Variable",
       "owning_scope_id": 4,
       "introduced_scope_id": null,
-      "ast_path": "/statement_pool/0",
+      "origin": {
+        "ast_path": "/statement_pool/0",
+        "entity_kind": "statement",
+        "role": "local_binding",
+        "ast_id": 0,
+        "source_location": {
+          "line": 16,
+          "column": 5
+        }
+      },
       "source_location": {
         "source_id": 0,
         "path": "examples/ast/type_reference_probe.flow",
@@ -323,7 +440,16 @@
       "kind": "Variable",
       "owning_scope_id": 4,
       "introduced_scope_id": null,
-      "ast_path": "/statement_pool/1",
+      "origin": {
+        "ast_path": "/statement_pool/1",
+        "entity_kind": "statement",
+        "role": "local_binding",
+        "ast_id": 1,
+        "source_location": {
+          "line": 17,
+          "column": 5
+        }
+      },
       "source_location": {
         "source_id": 0,
         "path": "examples/ast/type_reference_probe.flow",
@@ -347,7 +473,16 @@
       "kind": "Procedure",
       "owning_scope_id": 2,
       "introduced_scope_id": 5,
-      "ast_path": "/declaration_pool/3",
+      "origin": {
+        "ast_path": "/declaration_pool/3",
+        "entity_kind": "declaration",
+        "role": "main_declaration",
+        "ast_id": 3,
+        "source_location": {
+          "line": 21,
+          "column": 1
+        }
+      },
       "source_location": {
         "source_id": 0,
         "path": "examples/ast/type_reference_probe.flow",
@@ -362,7 +497,16 @@
       "kind": "Variable",
       "owning_scope_id": 5,
       "introduced_scope_id": null,
-      "ast_path": "/statement_pool/3",
+      "origin": {
+        "ast_path": "/statement_pool/3",
+        "entity_kind": "statement",
+        "role": "local_binding",
+        "ast_id": 3,
+        "source_location": {
+          "line": 22,
+          "column": 5
+        }
+      },
       "source_location": {
         "source_id": 0,
         "path": "examples/ast/type_reference_probe.flow",
@@ -381,6 +525,100 @@
       ]
     }
   ],
+  "origin_index": [
+    {
+      "ast_path": "/declaration_pool/0",
+      "symbol_ids": [
+        2
+      ],
+      "scope_ids": []
+    },
+    {
+      "ast_path": "/declaration_pool/1",
+      "symbol_ids": [
+        3
+      ],
+      "scope_ids": [
+        3
+      ]
+    },
+    {
+      "ast_path": "/declaration_pool/1/fields/0",
+      "symbol_ids": [
+        4
+      ],
+      "scope_ids": []
+    },
+    {
+      "ast_path": "/declaration_pool/1/fields/1",
+      "symbol_ids": [
+        5
+      ],
+      "scope_ids": []
+    },
+    {
+      "ast_path": "/declaration_pool/2",
+      "symbol_ids": [
+        6
+      ],
+      "scope_ids": [
+        4
+      ]
+    },
+    {
+      "ast_path": "/declaration_pool/2/parameters/0",
+      "symbol_ids": [
+        7
+      ],
+      "scope_ids": []
+    },
+    {
+      "ast_path": "/declaration_pool/2/parameters/1",
+      "symbol_ids": [
+        8
+      ],
+      "scope_ids": []
+    },
+    {
+      "ast_path": "/declaration_pool/3",
+      "symbol_ids": [
+        11
+      ],
+      "scope_ids": [
+        5
+      ]
+    },
+    {
+      "ast_path": "/source_unit",
+      "symbol_ids": [
+        1
+      ],
+      "scope_ids": [
+        2
+      ]
+    },
+    {
+      "ast_path": "/statement_pool/0",
+      "symbol_ids": [
+        9
+      ],
+      "scope_ids": []
+    },
+    {
+      "ast_path": "/statement_pool/1",
+      "symbol_ids": [
+        10
+      ],
+      "scope_ids": []
+    },
+    {
+      "ast_path": "/statement_pool/3",
+      "symbol_ids": [
+        12
+      ],
+      "scope_ids": []
+    }
+  ],
   "blocks": [
     {
       "id": 0,
@@ -397,28 +635,48 @@
       "kind": "let",
       "source_form": null,
       "target_kind": null,
-      "source_location": null
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/ast/type_reference_probe.flow",
+        "line": 15,
+        "column": 5
+      }
     },
     {
       "id": 1,
       "kind": "let",
       "source_form": null,
       "target_kind": null,
-      "source_location": null
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/ast/type_reference_probe.flow",
+        "line": 16,
+        "column": 5
+      }
     },
     {
       "id": 2,
       "kind": "return",
       "source_form": "keyword_return",
       "target_kind": null,
-      "source_location": null
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/ast/type_reference_probe.flow",
+        "line": 17,
+        "column": 5
+      }
     },
     {
       "id": 3,
       "kind": "let",
       "source_form": null,
       "target_kind": null,
-      "source_location": null
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/ast/type_reference_probe.flow",
+        "line": 21,
+        "column": 5
+      }
     }
   ],
   "expression_count": 14

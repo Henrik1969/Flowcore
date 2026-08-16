@@ -40,7 +40,7 @@
       "kind": "Global",
       "parent_id": null,
       "owner_symbol_id": null,
-      "ast_path": null,
+      "origin": null,
       "symbol_ids": [
         1
       ]
@@ -50,7 +50,16 @@
       "kind": "Module",
       "parent_id": 1,
       "owner_symbol_id": 1,
-      "ast_path": "/source_unit",
+      "origin": {
+        "ast_path": "/source_unit",
+        "entity_kind": "source_unit",
+        "role": "module_scope",
+        "ast_id": null,
+        "source_location": {
+          "line": 1,
+          "column": 1
+        }
+      },
       "symbol_ids": [
         2,
         12
@@ -61,7 +70,16 @@
       "kind": "Contract",
       "parent_id": 2,
       "owner_symbol_id": 2,
-      "ast_path": "/declaration_pool/0",
+      "origin": {
+        "ast_path": "/declaration_pool/0",
+        "entity_kind": "declaration",
+        "role": "abi_scope",
+        "ast_id": 0,
+        "source_location": {
+          "line": 4,
+          "column": 1
+        }
+      },
       "symbol_ids": [
         3,
         4,
@@ -75,7 +93,16 @@
       "kind": "Struct",
       "parent_id": 3,
       "owner_symbol_id": 6,
-      "ast_path": "/declaration_pool/0/members/5",
+      "origin": {
+        "ast_path": "/declaration_pool/0/members/5",
+        "entity_kind": "abi_member",
+        "role": "abi_struct_scope",
+        "ast_id": null,
+        "source_location": {
+          "line": 33,
+          "column": 5
+        }
+      },
       "symbol_ids": [
         7,
         8
@@ -86,7 +113,16 @@
       "kind": "Function",
       "parent_id": 3,
       "owner_symbol_id": 9,
-      "ast_path": "/declaration_pool/0/members/6",
+      "origin": {
+        "ast_path": "/declaration_pool/0/members/6",
+        "entity_kind": "abi_member",
+        "role": "extern_function_scope",
+        "ast_id": null,
+        "source_location": {
+          "line": 38,
+          "column": 5
+        }
+      },
       "symbol_ids": [
         10,
         11
@@ -97,7 +133,16 @@
       "kind": "Contract",
       "parent_id": 2,
       "owner_symbol_id": 12,
-      "ast_path": "/declaration_pool/1",
+      "origin": {
+        "ast_path": "/declaration_pool/1",
+        "entity_kind": "declaration",
+        "role": "abi_scope",
+        "ast_id": 1,
+        "source_location": {
+          "line": 44,
+          "column": 1
+        }
+      },
       "symbol_ids": [
         13
       ]
@@ -107,7 +152,16 @@
       "kind": "Function",
       "parent_id": 6,
       "owner_symbol_id": 13,
-      "ast_path": "/declaration_pool/1/members/1",
+      "origin": {
+        "ast_path": "/declaration_pool/1/members/1",
+        "entity_kind": "abi_member",
+        "role": "extern_function_scope",
+        "ast_id": null,
+        "source_location": {
+          "line": 47,
+          "column": 5
+        }
+      },
       "symbol_ids": [
         14
       ]
@@ -120,7 +174,16 @@
       "kind": "Module",
       "owning_scope_id": 1,
       "introduced_scope_id": 2,
-      "ast_path": "/source_unit",
+      "origin": {
+        "ast_path": "/source_unit",
+        "entity_kind": "source_unit",
+        "role": "source_unit",
+        "ast_id": null,
+        "source_location": {
+          "line": 1,
+          "column": 1
+        }
+      },
       "source_location": {
         "source_id": 0,
         "path": "examples/ast/abi_contract_probe.flow",
@@ -144,7 +207,16 @@
       "kind": "Contract",
       "owning_scope_id": 2,
       "introduced_scope_id": 3,
-      "ast_path": "/declaration_pool/0",
+      "origin": {
+        "ast_path": "/declaration_pool/0",
+        "entity_kind": "declaration",
+        "role": "abi_declaration",
+        "ast_id": 0,
+        "source_location": {
+          "line": 4,
+          "column": 1
+        }
+      },
       "source_location": {
         "source_id": 0,
         "path": "examples/ast/abi_contract_probe.flow",
@@ -176,7 +248,16 @@
       "kind": "Type",
       "owning_scope_id": 3,
       "introduced_scope_id": null,
-      "ast_path": "/declaration_pool/0/members/2",
+      "origin": {
+        "ast_path": "/declaration_pool/0/members/2",
+        "entity_kind": "abi_member",
+        "role": "abi_type",
+        "ast_id": null,
+        "source_location": {
+          "line": 8,
+          "column": 5
+        }
+      },
       "source_location": {
         "source_id": 0,
         "path": "examples/ast/abi_contract_probe.flow",
@@ -240,7 +321,16 @@
       "kind": "Type",
       "owning_scope_id": 3,
       "introduced_scope_id": null,
-      "ast_path": "/declaration_pool/0/members/3",
+      "origin": {
+        "ast_path": "/declaration_pool/0/members/3",
+        "entity_kind": "abi_member",
+        "role": "abi_type",
+        "ast_id": null,
+        "source_location": {
+          "line": 17,
+          "column": 5
+        }
+      },
       "source_location": {
         "source_id": 0,
         "path": "examples/ast/abi_contract_probe.flow",
@@ -304,7 +394,16 @@
       "kind": "Type",
       "owning_scope_id": 3,
       "introduced_scope_id": null,
-      "ast_path": "/declaration_pool/0/members/4",
+      "origin": {
+        "ast_path": "/declaration_pool/0/members/4",
+        "entity_kind": "abi_member",
+        "role": "abi_type",
+        "ast_id": null,
+        "source_location": {
+          "line": 26,
+          "column": 5
+        }
+      },
       "source_location": {
         "source_id": 0,
         "path": "examples/ast/abi_contract_probe.flow",
@@ -352,7 +451,16 @@
       "kind": "Struct",
       "owning_scope_id": 3,
       "introduced_scope_id": 4,
-      "ast_path": "/declaration_pool/0/members/5",
+      "origin": {
+        "ast_path": "/declaration_pool/0/members/5",
+        "entity_kind": "abi_member",
+        "role": "abi_struct",
+        "ast_id": null,
+        "source_location": {
+          "line": 33,
+          "column": 5
+        }
+      },
       "source_location": {
         "source_id": 0,
         "path": "examples/ast/abi_contract_probe.flow",
@@ -367,7 +475,16 @@
       "kind": "Field",
       "owning_scope_id": 4,
       "introduced_scope_id": null,
-      "ast_path": "/declaration_pool/0/members/5/fields/0",
+      "origin": {
+        "ast_path": "/declaration_pool/0/members/5/fields/0",
+        "entity_kind": "field",
+        "role": "abi_struct_field",
+        "ast_id": null,
+        "source_location": {
+          "line": 34,
+          "column": 9
+        }
+      },
       "source_location": {
         "source_id": 0,
         "path": "examples/ast/abi_contract_probe.flow",
@@ -391,7 +508,16 @@
       "kind": "Field",
       "owning_scope_id": 4,
       "introduced_scope_id": null,
-      "ast_path": "/declaration_pool/0/members/5/fields/1",
+      "origin": {
+        "ast_path": "/declaration_pool/0/members/5/fields/1",
+        "entity_kind": "field",
+        "role": "abi_struct_field",
+        "ast_id": null,
+        "source_location": {
+          "line": 35,
+          "column": 9
+        }
+      },
       "source_location": {
         "source_id": 0,
         "path": "examples/ast/abi_contract_probe.flow",
@@ -415,7 +541,16 @@
       "kind": "Function",
       "owning_scope_id": 3,
       "introduced_scope_id": 5,
-      "ast_path": "/declaration_pool/0/members/6",
+      "origin": {
+        "ast_path": "/declaration_pool/0/members/6",
+        "entity_kind": "abi_member",
+        "role": "extern_function",
+        "ast_id": null,
+        "source_location": {
+          "line": 38,
+          "column": 5
+        }
+      },
       "source_location": {
         "source_id": 0,
         "path": "examples/ast/abi_contract_probe.flow",
@@ -455,7 +590,16 @@
       "kind": "Parameter",
       "owning_scope_id": 5,
       "introduced_scope_id": null,
-      "ast_path": "/declaration_pool/0/members/6/parameters/0",
+      "origin": {
+        "ast_path": "/declaration_pool/0/members/6/parameters/0",
+        "entity_kind": "parameter",
+        "role": "extern_parameter",
+        "ast_id": null,
+        "source_location": {
+          "line": 38,
+          "column": 23
+        }
+      },
       "source_location": {
         "source_id": 0,
         "path": "examples/ast/abi_contract_probe.flow",
@@ -479,7 +623,16 @@
       "kind": "Parameter",
       "owning_scope_id": 5,
       "introduced_scope_id": null,
-      "ast_path": "/declaration_pool/0/members/6/parameters/1",
+      "origin": {
+        "ast_path": "/declaration_pool/0/members/6/parameters/1",
+        "entity_kind": "parameter",
+        "role": "extern_parameter",
+        "ast_id": null,
+        "source_location": {
+          "line": 38,
+          "column": 40
+        }
+      },
       "source_location": {
         "source_id": 0,
         "path": "examples/ast/abi_contract_probe.flow",
@@ -503,7 +656,16 @@
       "kind": "Contract",
       "owning_scope_id": 2,
       "introduced_scope_id": 6,
-      "ast_path": "/declaration_pool/1",
+      "origin": {
+        "ast_path": "/declaration_pool/1",
+        "entity_kind": "declaration",
+        "role": "abi_declaration",
+        "ast_id": 1,
+        "source_location": {
+          "line": 44,
+          "column": 1
+        }
+      },
       "source_location": {
         "source_id": 0,
         "path": "examples/ast/abi_contract_probe.flow",
@@ -527,7 +689,16 @@
       "kind": "Function",
       "owning_scope_id": 6,
       "introduced_scope_id": 7,
-      "ast_path": "/declaration_pool/1/members/1",
+      "origin": {
+        "ast_path": "/declaration_pool/1/members/1",
+        "entity_kind": "abi_member",
+        "role": "extern_function",
+        "ast_id": null,
+        "source_location": {
+          "line": 47,
+          "column": 5
+        }
+      },
       "source_location": {
         "source_id": 0,
         "path": "examples/ast/abi_contract_probe.flow",
@@ -567,7 +738,16 @@
       "kind": "Parameter",
       "owning_scope_id": 7,
       "introduced_scope_id": null,
-      "ast_path": "/declaration_pool/1/members/1/parameters/0",
+      "origin": {
+        "ast_path": "/declaration_pool/1/members/1/parameters/0",
+        "entity_kind": "parameter",
+        "role": "extern_parameter",
+        "ast_id": null,
+        "source_location": {
+          "line": 47,
+          "column": 20
+        }
+      },
       "source_location": {
         "source_id": 0,
         "path": "examples/ast/abi_contract_probe.flow",
@@ -583,6 +763,118 @@
             "value": "c_int"
           }
         }
+      ]
+    }
+  ],
+  "origin_index": [
+    {
+      "ast_path": "/declaration_pool/0",
+      "symbol_ids": [
+        2
+      ],
+      "scope_ids": [
+        3
+      ]
+    },
+    {
+      "ast_path": "/declaration_pool/0/members/2",
+      "symbol_ids": [
+        3
+      ],
+      "scope_ids": []
+    },
+    {
+      "ast_path": "/declaration_pool/0/members/3",
+      "symbol_ids": [
+        4
+      ],
+      "scope_ids": []
+    },
+    {
+      "ast_path": "/declaration_pool/0/members/4",
+      "symbol_ids": [
+        5
+      ],
+      "scope_ids": []
+    },
+    {
+      "ast_path": "/declaration_pool/0/members/5",
+      "symbol_ids": [
+        6
+      ],
+      "scope_ids": [
+        4
+      ]
+    },
+    {
+      "ast_path": "/declaration_pool/0/members/5/fields/0",
+      "symbol_ids": [
+        7
+      ],
+      "scope_ids": []
+    },
+    {
+      "ast_path": "/declaration_pool/0/members/5/fields/1",
+      "symbol_ids": [
+        8
+      ],
+      "scope_ids": []
+    },
+    {
+      "ast_path": "/declaration_pool/0/members/6",
+      "symbol_ids": [
+        9
+      ],
+      "scope_ids": [
+        5
+      ]
+    },
+    {
+      "ast_path": "/declaration_pool/0/members/6/parameters/0",
+      "symbol_ids": [
+        10
+      ],
+      "scope_ids": []
+    },
+    {
+      "ast_path": "/declaration_pool/0/members/6/parameters/1",
+      "symbol_ids": [
+        11
+      ],
+      "scope_ids": []
+    },
+    {
+      "ast_path": "/declaration_pool/1",
+      "symbol_ids": [
+        12
+      ],
+      "scope_ids": [
+        6
+      ]
+    },
+    {
+      "ast_path": "/declaration_pool/1/members/1",
+      "symbol_ids": [
+        13
+      ],
+      "scope_ids": [
+        7
+      ]
+    },
+    {
+      "ast_path": "/declaration_pool/1/members/1/parameters/0",
+      "symbol_ids": [
+        14
+      ],
+      "scope_ids": []
+    },
+    {
+      "ast_path": "/source_unit",
+      "symbol_ids": [
+        1
+      ],
+      "scope_ids": [
+        2
       ]
     }
   ],

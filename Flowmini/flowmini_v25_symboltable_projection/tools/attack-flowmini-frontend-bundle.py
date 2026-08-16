@@ -117,6 +117,64 @@ def mutate_invalid_fact_value(bundle: dict[str, Any]) -> None:
     fail("attack fixture contains no symbol facts")
 
 
+def origin_with_role(bundle: dict[str, Any], collection: str, role: str) -> dict[str, Any]:
+    for origin in bundle[collection]:
+        if origin.get("role") == role:
+            return origin
+    fail(f"attack fixture has no {collection} entry with role {role}")
+
+
+def copy_origin_target(target: dict[str, Any], source: dict[str, Any]) -> None:
+    for key in ("ast_path", "entity_kind", "ast_id", "source_location"):
+        target[key] = copy.deepcopy(source[key])
+
+
+def mutate_resolvable_wrong_symbol_kind(bundle: dict[str, Any]) -> None:
+    function = origin_with_role(bundle, "symbol_origins", "function_declaration")
+    main = origin_with_role(bundle, "symbol_origins", "main_declaration")
+    copy_origin_target(function, main)
+
+
+def mutate_resolvable_wrong_scope_kind(bundle: dict[str, Any]) -> None:
+    function = origin_with_role(bundle, "scope_origins", "function_scope")
+    main = origin_with_role(bundle, "scope_origins", "main_scope")
+    copy_origin_target(function, main)
+
+
+def mutate_missing_scope_origin(bundle: dict[str, Any]) -> None:
+    if not bundle["scope_origins"]:
+        fail("attack fixture contains no scope origins")
+    bundle["scope_origins"].pop()
+
+
+def mutate_duplicate_symbol_origin(bundle: dict[str, Any]) -> None:
+    if not bundle["symbol_origins"]:
+        fail("attack fixture contains no symbol origins")
+    bundle["symbol_origins"].append(copy.deepcopy(bundle["symbol_origins"][0]))
+
+
+def mutate_duplicate_scope_origin(bundle: dict[str, Any]) -> None:
+    if not bundle["scope_origins"]:
+        fail("attack fixture contains no scope origins")
+    bundle["scope_origins"].append(copy.deepcopy(bundle["scope_origins"][0]))
+
+
+def mutate_origin_location_disagreement(bundle: dict[str, Any]) -> None:
+    origin = origin_with_role(bundle, "symbol_origins", "function_declaration")
+    origin["source_location"]["column"] += 1
+
+
+def mutate_global_scope_origin(bundle: dict[str, Any]) -> None:
+    origin = copy.deepcopy(origin_with_role(bundle, "scope_origins", "module_scope"))
+    origin["scope_id"] = bundle["symbol_table"]["global_scope_id"]
+    bundle["scope_origins"].append(origin)
+
+
+def mutate_wrong_explicit_role(bundle: dict[str, Any]) -> None:
+    origin = origin_with_role(bundle, "symbol_origins", "local_binding")
+    origin["role"] = "function_declaration"
+
+
 ATTACKS: list[tuple[str, Callable[[dict[str, Any]], None]]] = [
     ("unsupported bundle version", mutate_bundle_version),
     ("unsupported AST format", mutate_ast_format),
@@ -128,6 +186,14 @@ ATTACKS: list[tuple[str, Callable[[dict[str, Any]], None]]] = [
     ("declaration pool size mismatch", mutate_pool_size),
     ("duplicate symbol ID", mutate_duplicate_symbol),
     ("invalid typed fact value", mutate_invalid_fact_value),
+    ("resolvable wrong-kind symbol origin", mutate_resolvable_wrong_symbol_kind),
+    ("resolvable wrong-kind scope origin", mutate_resolvable_wrong_scope_kind),
+    ("missing scope origin", mutate_missing_scope_origin),
+    ("duplicate symbol origin", mutate_duplicate_symbol_origin),
+    ("duplicate scope origin", mutate_duplicate_scope_origin),
+    ("origin location disagreement", mutate_origin_location_disagreement),
+    ("global scope origin", mutate_global_scope_origin),
+    ("wrong explicit origin role", mutate_wrong_explicit_role),
 ]
 
 

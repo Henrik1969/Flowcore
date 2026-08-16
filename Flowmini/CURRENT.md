@@ -18,8 +18,8 @@ factual projection and frontend-bundle hardening; no semantic analysis yet
 ```text
 normal CMake/Ninja build:      PASS
 flowmini_ast_golden_tests:     PASS (26)
-flowmini_symbol_projection:    PASS (11/11)
-flowmini_frontend_bundle:      PASS (5 golden, 1 isolated, 11 negative)
+flowmini_symbol_projection:    PASS (12/12)
+flowmini_frontend_bundle:      PASS (7 golden, 1 isolated, 19 negative)
 flowmini_suite:                PASS (78/78)
 CTest:                         PASS (2/2)
 ```
@@ -40,8 +40,10 @@ struct, and extern members. Projection performs no type resolution, contract
 checking, effect interpretation, or ABI lowering. On 2026-08-16 the project
 owner formally declared the v0.24 raw frontend/export border passed after the
 accepted-language matrix, independent-consumer gate, and Tier 3 Firetest passed.
-v0.25 now owns projection completeness, factual cross-links and provenance,
-expanded projection goldens, and frontend-bundle schema hardening. It does not
+v0.25 now exports typed structural origins through frontend bundle version 2.
+The independent consumer verifies precise roles, canonical AST IDs, source
+provenance, uniqueness, scope ownership, and reverse lookup without name
+guessing. It does not
 own semantic type resolution, legality checking, contract satisfaction, Graph
 IR, or runtime lowering.
 
@@ -80,8 +82,8 @@ Expected result:
 ```text
 normal CMake/Ninja build:      PASS
 flowmini_ast_golden_tests:     PASS (26)
-flowmini_symbol_projection:    PASS (11/11)
-flowmini_frontend_bundle:      PASS (5 golden, 1 isolated, 11 negative)
+flowmini_symbol_projection:    PASS (12/12)
+flowmini_frontend_bundle:      PASS (7 golden, 1 isolated, 19 negative)
 flowmini_suite:                PASS (78/78)
 CTest:                         PASS (2/2)
 ```

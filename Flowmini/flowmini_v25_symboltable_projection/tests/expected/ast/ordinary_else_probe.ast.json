@@ -3,6 +3,10 @@
     "source_unit": {
         "kind": "program",
         "name": "ordinary_else_probe",
+        "location": {
+            "line": 1,
+            "column": 1
+        },
         "declaration_count": 1,
         "declaration_ids": [
             0
@@ -12,7 +16,11 @@
                 "id": 0,
                 "kind": "main_block",
                 "has_body": true,
-                "body_block": 0
+                "body_block": 0,
+                "location": {
+                    "line": 4,
+                    "column": 1
+                }
             }
         ]
     },
@@ -22,7 +30,11 @@
             "id": 0,
             "kind": "main_block",
             "has_body": true,
-            "body_block": 0
+            "body_block": 0,
+            "location": {
+                "line": 4,
+                "column": 1
+            }
         }
     ],
     "expression_pool_size": 6,
@@ -127,7 +139,11 @@
             "has_initializer": true,
             "expression_ids": [
                 0
-            ]
+            ],
+            "location": {
+                "line": 5,
+                "column": 5
+            }
         },
         {
             "id": 1,
@@ -148,7 +164,11 @@
             "has_value": true,
             "expression_ids": [
                 4
-            ]
+            ],
+            "location": {
+                "line": 7,
+                "column": 9
+            }
         },
         {
             "id": 2,
@@ -170,6 +190,10 @@
             "else_arm": {
                 "kind": "else_block",
                 "block": 2
+            },
+            "location": {
+                "line": 6,
+                "column": 5
             }
         },
         {
@@ -191,7 +215,11 @@
             "has_value": true,
             "expression_ids": [
                 5
-            ]
+            ],
+            "location": {
+                "line": 9,
+                "column": 9
+            }
         }
     ],
     "block_pool_size": 3,

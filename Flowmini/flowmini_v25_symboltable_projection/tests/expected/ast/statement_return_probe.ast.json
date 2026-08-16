@@ -3,6 +3,10 @@
     "source_unit": {
         "kind": "program",
         "name": "statement_return_probe",
+        "location": {
+            "line": 1,
+            "column": 1
+        },
         "declaration_count": 3,
         "declaration_ids": [
             0,
@@ -31,6 +35,10 @@
                                 "line": 4,
                                 "column": 15
                             }
+                        },
+                        "location": {
+                            "line": 4,
+                            "column": 11
                         }
                     }
                 ],
@@ -49,7 +57,11 @@
                     }
                 },
                 "has_body": true,
-                "body_block": 0
+                "body_block": 0,
+                "location": {
+                    "line": 4,
+                    "column": 1
+                }
             },
             {
                 "id": 1,
@@ -72,6 +84,10 @@
                                 "line": 8,
                                 "column": 15
                             }
+                        },
+                        "location": {
+                            "line": 8,
+                            "column": 11
                         }
                     },
                     {
@@ -89,6 +105,10 @@
                                 "line": 8,
                                 "column": 28
                             }
+                        },
+                        "location": {
+                            "line": 8,
+                            "column": 20
                         }
                     }
                 ],
@@ -107,13 +127,21 @@
                     }
                 },
                 "has_body": true,
-                "body_block": 1
+                "body_block": 1,
+                "location": {
+                    "line": 8,
+                    "column": 1
+                }
             },
             {
                 "id": 2,
                 "kind": "main_block",
                 "has_body": true,
-                "body_block": 3
+                "body_block": 3,
+                "location": {
+                    "line": 15,
+                    "column": 1
+                }
             }
         ]
     },
@@ -140,6 +168,10 @@
                             "line": 4,
                             "column": 15
                         }
+                    },
+                    "location": {
+                        "line": 4,
+                        "column": 11
                     }
                 }
             ],
@@ -158,7 +190,11 @@
                 }
             },
             "has_body": true,
-            "body_block": 0
+            "body_block": 0,
+            "location": {
+                "line": 4,
+                "column": 1
+            }
         },
         {
             "id": 1,
@@ -181,6 +217,10 @@
                             "line": 8,
                             "column": 15
                         }
+                    },
+                    "location": {
+                        "line": 8,
+                        "column": 11
                     }
                 },
                 {
@@ -198,6 +238,10 @@
                             "line": 8,
                             "column": 28
                         }
+                    },
+                    "location": {
+                        "line": 8,
+                        "column": 20
                     }
                 }
             ],
@@ -216,13 +260,21 @@
                 }
             },
             "has_body": true,
-            "body_block": 1
+            "body_block": 1,
+            "location": {
+                "line": 8,
+                "column": 1
+            }
         },
         {
             "id": 2,
             "kind": "main_block",
             "has_body": true,
-            "body_block": 3
+            "body_block": 3,
+            "location": {
+                "line": 15,
+                "column": 1
+            }
         }
     ],
     "expression_pool_size": 8,
@@ -322,7 +374,11 @@
             "has_value": true,
             "expression_ids": [
                 0
-            ]
+            ],
+            "location": {
+                "line": 5,
+                "column": 5
+            }
         },
         {
             "id": 1,
@@ -334,7 +390,11 @@
             "has_value": true,
             "expression_ids": [
                 4
-            ]
+            ],
+            "location": {
+                "line": 10,
+                "column": 9
+            }
         },
         {
             "id": 2,
@@ -350,7 +410,11 @@
             ],
             "condition": 3,
             "then_block": 2,
-            "else_arm": null
+            "else_arm": null,
+            "location": {
+                "line": 9,
+                "column": 5
+            }
         },
         {
             "id": 3,
@@ -362,7 +426,11 @@
             "has_value": true,
             "expression_ids": [
                 7
-            ]
+            ],
+            "location": {
+                "line": 12,
+                "column": 5
+            }
         }
     ],
     "block_pool_size": 4,

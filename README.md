@@ -31,8 +31,8 @@ Current known green gates:
 ```text
 normal CMake/Ninja build:      PASS
 flowmini_ast_golden_tests:     PASS (26)
-flowmini_symbol_projection:    PASS (11/11)
-flowmini_frontend_bundle:      PASS (5 golden, 1 isolated, 11 negative)
+flowmini_symbol_projection:    PASS (12/12)
+flowmini_frontend_bundle:      PASS (7 golden, 1 isolated, 19 negative)
 flowmini_suite:                PASS (78/78)
 CTest:                         PASS (2/2)
 ```
@@ -147,8 +147,8 @@ Expected current result:
 ```text
 normal CMake/Ninja build:      PASS
 flowmini_ast_golden_tests:     PASS (26)
-flowmini_symbol_projection:    PASS (11/11)
-flowmini_frontend_bundle:      PASS (5 golden, 1 isolated, 11 negative)
+flowmini_symbol_projection:    PASS (12/12)
+flowmini_frontend_bundle:      PASS (7 golden, 1 isolated, 19 negative)
 flowmini_suite:                PASS (78/78)
 CTest:                         PASS (2/2)
 ```
@@ -159,6 +159,8 @@ CTest:                         PASS (2/2)
 Flowmini/README.md
 Flowmini/CURRENT.md
 Flowmini/flowmini_v25_symboltable_projection/docs/v0.25-symboltable-projection-status.md
+docs/flowmini/v0.25-origin-maturity-audit.md
+docs/flowmini/v0.25-frontend-bundle.md
 Flowmini/flowmini_v24_explicit_ast/docs/v0.24-shallow-expression-ast-sitrep.md (historical checkpoint)
 docs/development/project-hygiene.md
 ```

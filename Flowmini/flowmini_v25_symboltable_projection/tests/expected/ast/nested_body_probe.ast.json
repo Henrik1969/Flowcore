@@ -3,6 +3,10 @@
     "source_unit": {
         "kind": "program",
         "name": "nested_body_probe",
+        "location": {
+            "line": 1,
+            "column": 1
+        },
         "declaration_count": 1,
         "declaration_ids": [
             0
@@ -12,7 +16,11 @@
                 "id": 0,
                 "kind": "main_block",
                 "has_body": true,
-                "body_block": 0
+                "body_block": 0,
+                "location": {
+                    "line": 4,
+                    "column": 1
+                }
             }
         ]
     },
@@ -22,7 +30,11 @@
             "id": 0,
             "kind": "main_block",
             "has_body": true,
-            "body_block": 0
+            "body_block": 0,
+            "location": {
+                "line": 4,
+                "column": 1
+            }
         }
     ],
     "expression_pool_size": 12,
@@ -191,7 +203,11 @@
             "has_initializer": true,
             "expression_ids": [
                 0
-            ]
+            ],
+            "location": {
+                "line": 5,
+                "column": 5
+            }
         },
         {
             "id": 1,
@@ -212,7 +228,11 @@
             "has_value": true,
             "expression_ids": [
                 4
-            ]
+            ],
+            "location": {
+                "line": 8,
+                "column": 9
+            }
         },
         {
             "id": 2,
@@ -225,7 +245,11 @@
             "expression_ids": [
                 1
             ],
-            "body_block": 1
+            "body_block": 1,
+            "location": {
+                "line": 7,
+                "column": 5
+            }
         },
         {
             "id": 3,
@@ -265,7 +289,11 @@
             "has_initializer": true,
             "expression_ids": [
                 10
-            ]
+            ],
+            "location": {
+                "line": 12,
+                "column": 9
+            }
         },
         {
             "id": 4,
@@ -286,7 +314,11 @@
             "has_value": true,
             "expression_ids": [
                 11
-            ]
+            ],
+            "location": {
+                "line": 13,
+                "column": 9
+            }
         },
         {
             "id": 5,
@@ -302,7 +334,11 @@
             ],
             "condition": 7,
             "then_block": 2,
-            "else_arm": null
+            "else_arm": null,
+            "location": {
+                "line": 11,
+                "column": 5
+            }
         }
     ],
     "block_pool_size": 3,

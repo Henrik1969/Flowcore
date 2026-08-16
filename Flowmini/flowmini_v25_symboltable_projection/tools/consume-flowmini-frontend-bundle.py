@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 from pathlib import Path
 from typing import Any
@@ -160,10 +161,150 @@ def validate_fact(fact: Any, label: str, symbol_ids: set[int], scope_ids: set[in
         validate_location(value, f"{label}.value")
 
 
+SYMBOL_ORIGIN_CONTRACT: dict[str, tuple[str, str, set[str]]] = {
+    "source_unit": ("Module", "source_unit", {"program", "unit"}),
+    "import_declaration": ("Import", "declaration", {"import"}),
+    "function_declaration": ("Function", "declaration", {"function"}),
+    "function_parameter": ("Parameter", "parameter", set()),
+    "record_declaration": ("Struct", "declaration", {"record"}),
+    "record_field": ("Field", "field", set()),
+    "refined_type_declaration": ("Type", "declaration", {"refined_type"}),
+    "abi_declaration": ("Contract", "declaration", {"abi"}),
+    "abi_type": ("Type", "abi_member", {"type"}),
+    "abi_struct": ("Struct", "abi_member", {"struct"}),
+    "abi_struct_field": ("Field", "field", set()),
+    "extern_function": ("Function", "abi_member", {"extern_function"}),
+    "extern_parameter": ("Parameter", "parameter", set()),
+    "main_declaration": ("Procedure", "declaration", {"main_block"}),
+    "local_binding": ("Variable", "statement", {"let"}),
+}
+
+
+SCOPE_ORIGIN_CONTRACT: dict[str, tuple[str, str, set[str]]] = {
+    "module_scope": ("Module", "source_unit", {"program", "unit"}),
+    "function_scope": ("Function", "declaration", {"function"}),
+    "record_scope": ("Struct", "declaration", {"record"}),
+    "abi_scope": ("Contract", "declaration", {"abi"}),
+    "abi_struct_scope": ("Struct", "abi_member", {"struct"}),
+    "extern_function_scope": ("Function", "abi_member", {"extern_function"}),
+    "main_scope": ("Function", "declaration", {"main_block"}),
+    "if_then_scope": ("Block", "block", set()),
+    "while_body_scope": ("Block", "block", set()),
+    "else_block_scope": ("Block", "block", set()),
+}
+
+
+def location_coordinates(value: Any, label: str) -> tuple[int, int]:
+    location = require_object(value, label)
+    line = location.get("line")
+    column = location.get("column")
+    require(isinstance(line, int), f"{label}.line must be an integer")
+    require(isinstance(column, int), f"{label}.column must be an integer")
+    return line, column
+
+
+def validate_origin_path(entity_kind: str, path: str, ast_id: Any, label: str) -> None:
+    patterns = {
+        "source_unit": r"/source_unit",
+        "declaration": r"/declaration_pool/(\d+)",
+        "statement": r"/statement_pool/(\d+)",
+        "block": r"/block_pool/(\d+)",
+        "parameter": r"/declaration_pool/\d+/(?:parameters/\d+|members/\d+/parameters/\d+)",
+        "field": r"/declaration_pool/\d+/(?:fields/\d+|members/\d+/fields/\d+)",
+        "abi_member": r"/declaration_pool/\d+/members/\d+",
+    }
+    require(entity_kind in patterns, f"{label} has unknown entity_kind {entity_kind!r}")
+    match = re.fullmatch(patterns[entity_kind], path)
+    require(match is not None,
+            f"{label} path {path!r} does not match entity_kind {entity_kind!r}")
+    if entity_kind in {"declaration", "statement", "block"}:
+        require(isinstance(ast_id, int) and ast_id == int(match.group(1)),
+                f"{label}.ast_id does not match its canonical pool path")
+    else:
+        require(ast_id is None,
+                f"{label}.ast_id must be null for parent-owned {entity_kind}")
+
+
+def block_origin_causes(statements: dict[int, dict[str, Any]]) -> dict[int, tuple[str, dict[str, Any]]]:
+    causes: dict[int, tuple[str, dict[str, Any]]] = {}
+
+    def add(block_id: Any, role: str, statement: dict[str, Any]) -> None:
+        require(isinstance(block_id, int), f"{role} block id must be an integer")
+        require(block_id not in causes, f"block {block_id} has multiple structural causes")
+        causes[block_id] = (role, statement)
+
+    for statement in statements.values():
+        payload = statement.get("payload")
+        if not isinstance(payload, dict):
+            continue
+        if statement.get("kind") == "if":
+            add(payload.get("then_block"), "if_then_scope", statement)
+            else_arm = payload.get("else_arm")
+            if isinstance(else_arm, dict) and else_arm.get("kind") == "else_block":
+                add(else_arm.get("block"), "else_block_scope", statement)
+        elif statement.get("kind") == "while":
+            add(payload.get("body_block"), "while_body_scope", statement)
+    return causes
+
+
+def validate_origin_entry(
+    origin: dict[str, Any],
+    label: str,
+    expected_contract: tuple[str, str, set[str]],
+    ast: dict[str, Any],
+    source_lines: dict[int, dict[str, Any]],
+    block_causes: dict[int, tuple[str, dict[str, Any]]],
+) -> tuple[Any, tuple[int, int]]:
+    _expected_owner_kind, expected_entity_kind, expected_target_kinds = expected_contract
+    entity_kind = origin.get("entity_kind")
+    role = origin.get("role")
+    path = origin.get("ast_path")
+    require(isinstance(path, str), f"{label}.ast_path must be a string")
+    require(entity_kind == expected_entity_kind,
+            f"{label} role {role!r} requires entity_kind {expected_entity_kind!r}")
+    validate_origin_path(entity_kind, path, origin.get("ast_id"), label)
+    target = resolve_json_pointer(ast, path)
+    target_obj = require_object(target, f"{label} target")
+    if expected_target_kinds:
+        require(target_obj.get("kind") in expected_target_kinds,
+                f"{label} resolves to wrong AST kind {target_obj.get('kind')!r}")
+
+    parent_kinds = {
+        "function_parameter": "function",
+        "record_field": "record",
+        "abi_struct_field": "struct",
+        "extern_parameter": "extern_function",
+    }
+    if role in parent_kinds:
+        parent_path = path.rsplit("/", 2)[0]
+        parent = require_object(resolve_json_pointer(ast, parent_path),
+                                f"{label} parent target")
+        require(parent.get("kind") == parent_kinds[role],
+                f"{label} parent has wrong AST kind {parent.get('kind')!r}")
+
+    location = origin.get("source_location")
+    validate_mapped_location(location, f"{label}.source_location", source_lines)
+    coordinates = location_coordinates(location, f"{label}.source_location")
+
+    if entity_kind == "block":
+        block_id = origin.get("ast_id")
+        require(block_id in block_causes, f"{label} block has no structural cause")
+        cause_role, cause_statement = block_causes[block_id]
+        require(role == cause_role,
+                f"{label} role {role!r} disagrees with block cause {cause_role!r}")
+        target_location = cause_statement.get("location")
+    else:
+        target_location = target_obj.get("location")
+    require(target_location is not None, f"{label} AST target has no source location")
+    require(location_coordinates(target_location, f"{label} target location") == coordinates,
+            f"{label} source location disagrees with its AST origin")
+    return target, coordinates
+
+
 def validate_and_build(bundle: dict[str, Any]) -> dict[str, Any]:
     require(bundle.get("format") == "flowmini.frontend_bundle",
             "unsupported frontend bundle format")
-    require(bundle.get("version") == 1, "unsupported frontend bundle version")
+    require(bundle.get("version") == 2, "unsupported frontend bundle version")
 
     source = require_object(bundle.get("source"), "source")
     require(isinstance(source.get("path"), str), "source.path must be a string")
@@ -215,6 +356,7 @@ def validate_and_build(bundle: dict[str, Any]) -> dict[str, Any]:
     expressions = indexed_by_id(expression_pool, "expression")
     statements = indexed_by_id(statement_pool, "statement")
     blocks = indexed_by_id(block_pool, "block")
+    block_causes = block_origin_causes(statements)
     require(len(declarations) == ast.get("declaration_pool_size"),
             "declaration pool size mismatch")
     require(len(expressions) == ast.get("expression_pool_size"),
@@ -279,30 +421,69 @@ def validate_and_build(bundle: dict[str, Any]) -> dict[str, Any]:
             validate_fact(fact, f"symbol {symbol_id} fact {fact_index}",
                           symbol_ids, scope_ids)
 
-    symbol_origins: dict[int, str] = {}
+    origin_contract = require_object(bundle.get("origin_contract"), "origin_contract")
+    require(origin_contract.get("format") == "flowmini.structural_origins",
+            "unsupported structural-origin format")
+    require(origin_contract.get("version") == 1,
+            "unsupported structural-origin version")
+
+    symbol_origins: dict[int, dict[str, Any]] = {}
     for entry in require_array(bundle.get("symbol_origins"), "symbol_origins"):
         origin = require_object(entry, "symbol origin")
         symbol_id = origin.get("symbol_id")
         require(symbol_id in symbols, f"origin references unknown symbol {symbol_id}")
         require(symbol_id not in symbol_origins, f"duplicate origin for symbol {symbol_id}")
-        path = origin.get("ast_path")
-        resolve_json_pointer(ast, path)
-        symbol_origins[symbol_id] = path
+        role = origin.get("role")
+        require(role in SYMBOL_ORIGIN_CONTRACT,
+                f"symbol origin {symbol_id} has unknown role {role!r}")
+        expected_symbol_kind = SYMBOL_ORIGIN_CONTRACT[role][0]
+        require(symbols[symbol_id].get("kind") == expected_symbol_kind,
+                f"symbol {symbol_id} kind disagrees with origin role {role!r}")
+        _, coordinates = validate_origin_entry(
+            origin,
+            f"symbol origin {symbol_id}",
+            SYMBOL_ORIGIN_CONTRACT[role],
+            ast,
+            source_lines,
+            block_causes,
+        )
+        require(location_coordinates(symbols[symbol_id].get("declaration_location"),
+                                     f"symbol {symbol_id} declaration location") == coordinates,
+                f"symbol {symbol_id} declaration location disagrees with its AST origin")
+        symbol_origins[symbol_id] = origin
     require(set(symbol_origins) == set(symbols),
             "every projected symbol must have exactly one AST origin")
 
-    scope_origins: dict[int, str] = {}
+    scope_origins: dict[int, dict[str, Any]] = {}
     for entry in require_array(bundle.get("scope_origins"), "scope_origins"):
         origin = require_object(entry, "scope origin")
         scope_id = origin.get("scope_id")
         require(scope_id in scopes, f"origin references unknown scope {scope_id}")
         require(scope_id != global_scope_id, "global scope must not claim an AST origin")
         require(scope_id not in scope_origins, f"duplicate origin for scope {scope_id}")
-        path = origin.get("ast_path")
-        resolve_json_pointer(ast, path)
-        scope_origins[scope_id] = path
+        role = origin.get("role")
+        require(role in SCOPE_ORIGIN_CONTRACT,
+                f"scope origin {scope_id} has unknown role {role!r}")
+        expected_scope_kind = SCOPE_ORIGIN_CONTRACT[role][0]
+        require(scopes[scope_id].get("kind") == expected_scope_kind,
+                f"scope {scope_id} kind disagrees with origin role {role!r}")
+        validate_origin_entry(
+            origin,
+            f"scope origin {scope_id}",
+            SCOPE_ORIGIN_CONTRACT[role],
+            ast,
+            source_lines,
+            block_causes,
+        )
+        scope_origins[scope_id] = origin
     require(set(scope_origins) == set(scopes) - {global_scope_id},
             "every non-global scope must have exactly one AST origin")
+
+    for scope_id, origin in scope_origins.items():
+        owner_symbol_id = scopes[scope_id].get("owner_symbol_id")
+        if owner_symbol_id is not None:
+            require(symbol_origins[owner_symbol_id].get("ast_path") == origin.get("ast_path"),
+                    f"scope {scope_id} and owner symbol {owner_symbol_id} have different origins")
 
     lowering_declarations = []
     for declaration_id in source_declaration_ids:
@@ -312,8 +493,8 @@ def validate_and_build(bundle: dict[str, Any]) -> dict[str, Any]:
             "kind": declaration.get("kind"),
             "name": declaration.get("name"),
             "symbol_ids": [
-                symbol_id for symbol_id, path in symbol_origins.items()
-                if path == f"/declaration_pool/{declaration_id}"
+                symbol_id for symbol_id, origin in symbol_origins.items()
+                if origin.get("ast_path") == f"/declaration_pool/{declaration_id}"
             ],
         })
 
@@ -326,7 +507,10 @@ def validate_and_build(bundle: dict[str, Any]) -> dict[str, Any]:
             "kind": symbol.get("kind"),
             "owning_scope_id": symbol.get("owning_scope_id"),
             "introduced_scope_id": symbol.get("introduced_scope_id"),
-            "ast_path": symbol_origins[symbol_id],
+            "origin": {
+                key: value for key, value in symbol_origins[symbol_id].items()
+                if key != "symbol_id"
+            },
             "source_location": resolve_source_location(
                 symbol.get("declaration_location"), source_lines, source_files
             ),
@@ -341,7 +525,10 @@ def validate_and_build(bundle: dict[str, Any]) -> dict[str, Any]:
             "kind": scope.get("kind"),
             "parent_id": scope.get("parent_id"),
             "owner_symbol_id": scope.get("owner_symbol_id"),
-            "ast_path": scope_origins.get(scope_id),
+            "origin": None if scope_id == global_scope_id else {
+                key: value for key, value in scope_origins[scope_id].items()
+                if key != "scope_id"
+            },
             "symbol_ids": scope.get("symbol_ids"),
         })
 
@@ -374,6 +561,23 @@ def validate_and_build(bundle: dict[str, Any]) -> dict[str, Any]:
         "declarations": lowering_declarations,
         "scopes": lowering_scopes,
         "symbols": lowering_symbols,
+        "origin_index": [
+            {
+                "ast_path": path,
+                "symbol_ids": sorted(
+                    symbol_id for symbol_id, origin in symbol_origins.items()
+                    if origin.get("ast_path") == path
+                ),
+                "scope_ids": sorted(
+                    scope_id for scope_id, origin in scope_origins.items()
+                    if origin.get("ast_path") == path
+                ),
+            }
+            for path in sorted({
+                *(origin.get("ast_path") for origin in symbol_origins.values()),
+                *(origin.get("ast_path") for origin in scope_origins.values()),
+            })
+        ],
         "blocks": [
             {"id": block_id, "statement_ids": blocks[block_id].get("statement_ids", [])}
             for block_id in sorted(blocks)
@@ -395,6 +599,10 @@ def parse_args() -> argparse.Namespace:
                         help="fail unless the skeleton contains this statement kind")
     parser.add_argument("--minimum-source-files", type=int, default=1,
                         help="fail unless at least this many source files are mapped")
+    parser.add_argument("--require-symbol-origin-role", action="append", default=[],
+                        help="fail unless a symbol origin has this structural role")
+    parser.add_argument("--require-scope-origin-role", action="append", default=[],
+                        help="fail unless a scope origin has this structural role")
     return parser.parse_args()
 
 
@@ -409,6 +617,13 @@ def main() -> int:
         skeleton = validate_and_build(require_object(bundle, "bundle"))
         declaration_kinds = {item.get("kind") for item in skeleton["declarations"]}
         statement_kinds = {item.get("kind") for item in skeleton["statements"]}
+        symbol_origin_roles = {
+            item.get("origin", {}).get("role") for item in skeleton["symbols"]
+        }
+        scope_origin_roles = {
+            item.get("origin", {}).get("role")
+            for item in skeleton["scopes"] if item.get("origin") is not None
+        }
         require(len(skeleton["source_files"]) >= args.minimum_source_files,
                 f"expected at least {args.minimum_source_files} mapped source files")
         for required_kind in args.require_declaration_kind:
@@ -417,6 +632,12 @@ def main() -> int:
         for required_kind in args.require_statement_kind:
             require(required_kind in statement_kinds,
                     f"required statement kind {required_kind!r} is missing")
+        for required_role in args.require_symbol_origin_role:
+            require(required_role in symbol_origin_roles,
+                    f"required symbol origin role {required_role!r} is missing")
+        for required_role in args.require_scope_origin_role:
+            require(required_role in scope_origin_roles,
+                    f"required scope origin role {required_role!r} is missing")
         json.dump(skeleton, sys.stdout, indent=2, ensure_ascii=False)
         sys.stdout.write("\n")
         return 0

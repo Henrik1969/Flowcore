@@ -3,6 +3,10 @@
     "source_unit": {
         "kind": "program",
         "name": "control_flow_unary_probe",
+        "location": {
+            "line": 1,
+            "column": 1
+        },
         "declaration_count": 1,
         "declaration_ids": [
             0
@@ -12,7 +16,11 @@
                 "id": 0,
                 "kind": "main_block",
                 "has_body": true,
-                "body_block": 0
+                "body_block": 0,
+                "location": {
+                    "line": 4,
+                    "column": 1
+                }
             }
         ]
     },
@@ -22,7 +30,11 @@
             "id": 0,
             "kind": "main_block",
             "has_body": true,
-            "body_block": 0
+            "body_block": 0,
+            "location": {
+                "line": 4,
+                "column": 1
+            }
         }
     ],
     "expression_pool_size": 20,
@@ -277,7 +289,11 @@
             "has_initializer": true,
             "expression_ids": [
                 0
-            ]
+            ],
+            "location": {
+                "line": 5,
+                "column": 5
+            }
         },
         {
             "id": 1,
@@ -317,7 +333,11 @@
             "has_initializer": true,
             "expression_ids": [
                 1
-            ]
+            ],
+            "location": {
+                "line": 6,
+                "column": 5
+            }
         },
         {
             "id": 2,
@@ -357,7 +377,11 @@
             "has_initializer": true,
             "expression_ids": [
                 2
-            ]
+            ],
+            "location": {
+                "line": 7,
+                "column": 5
+            }
         },
         {
             "id": 3,
@@ -397,7 +421,11 @@
             "has_initializer": true,
             "expression_ids": [
                 4
-            ]
+            ],
+            "location": {
+                "line": 8,
+                "column": 5
+            }
         },
         {
             "id": 4,
@@ -417,7 +445,11 @@
             "has_value": true,
             "expression_ids": [
                 5
-            ]
+            ],
+            "location": {
+                "line": 10,
+                "column": 5
+            }
         },
         {
             "id": 5,
@@ -437,12 +469,20 @@
             "has_value": true,
             "expression_ids": [
                 10
-            ]
+            ],
+            "location": {
+                "line": 13,
+                "column": 9
+            }
         },
         {
             "id": 6,
             "kind": "continue",
-            "payload": {}
+            "payload": {},
+            "location": {
+                "line": 15,
+                "column": 13
+            }
         },
         {
             "id": 7,
@@ -458,12 +498,20 @@
             ],
             "condition": 13,
             "then_block": 2,
-            "else_arm": null
+            "else_arm": null,
+            "location": {
+                "line": 14,
+                "column": 9
+            }
         },
         {
             "id": 8,
             "kind": "continue",
-            "payload": {}
+            "payload": {},
+            "location": {
+                "line": 18,
+                "column": 13
+            }
         },
         {
             "id": 9,
@@ -479,12 +527,20 @@
             ],
             "condition": 16,
             "then_block": 3,
-            "else_arm": null
+            "else_arm": null,
+            "location": {
+                "line": 17,
+                "column": 9
+            }
         },
         {
             "id": 10,
             "kind": "break",
-            "payload": {}
+            "payload": {},
+            "location": {
+                "line": 20,
+                "column": 9
+            }
         },
         {
             "id": 11,
@@ -497,7 +553,11 @@
             "expression_ids": [
                 7
             ],
-            "body_block": 1
+            "body_block": 1,
+            "location": {
+                "line": 12,
+                "column": 5
+            }
         }
     ],
     "block_pool_size": 4,

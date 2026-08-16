@@ -12,6 +12,8 @@ SOURCES=(
   "examples/ast/type_reference_probe.flow"
   "examples/ast/placement_statement_probe.flow"
   "examples/ast/statement_assignment_probe.flow"
+  "examples/ast/statement_else_probe.flow"
+  "examples/ast/control_flow_unary_probe.flow"
   "examples/ast/abi_contract_probe.flow"
   "examples/pass/import_demo.flow"
 )
@@ -49,6 +51,16 @@ for source_file in "${SOURCES[@]}"; do
                 --require-declaration-kind record
                 --require-declaration-kind function
                 --require-declaration-kind main_block
+                --require-symbol-origin-role refined_type_declaration
+                --require-symbol-origin-role record_declaration
+                --require-symbol-origin-role record_field
+                --require-symbol-origin-role function_declaration
+                --require-symbol-origin-role function_parameter
+                --require-symbol-origin-role main_declaration
+                --require-scope-origin-role module_scope
+                --require-scope-origin-role record_scope
+                --require-scope-origin-role function_scope
+                --require-scope-origin-role main_scope
             )
             ;;
         placement_statement_probe)
@@ -60,14 +72,41 @@ for source_file in "${SOURCES[@]}"; do
         statement_assignment_probe)
             consumer_args+=(--require-statement-kind assignment)
             ;;
+        statement_else_probe)
+            consumer_args+=(
+                --require-scope-origin-role if_then_scope
+                --require-scope-origin-role else_block_scope
+            )
+            ;;
+        control_flow_unary_probe)
+            consumer_args+=(
+                --require-scope-origin-role while_body_scope
+                --require-scope-origin-role if_then_scope
+            )
+            ;;
         abi_contract_probe)
-            consumer_args+=(--require-declaration-kind abi)
+            consumer_args+=(
+                --require-declaration-kind abi
+                --require-symbol-origin-role abi_declaration
+                --require-symbol-origin-role abi_type
+                --require-symbol-origin-role abi_struct
+                --require-symbol-origin-role abi_struct_field
+                --require-symbol-origin-role extern_function
+                --require-symbol-origin-role extern_parameter
+                --require-scope-origin-role abi_scope
+                --require-scope-origin-role abi_struct_scope
+                --require-scope-origin-role extern_function_scope
+            )
             ;;
         import_demo)
             consumer_args+=(
                 --minimum-source-files 3
+                --require-declaration-kind import
                 --require-declaration-kind function
                 --require-declaration-kind main_block
+                --require-symbol-origin-role source_unit
+                --require-symbol-origin-role import_declaration
+                --require-scope-origin-role module_scope
             )
             ;;
     esac
@@ -101,5 +140,5 @@ python3 "$ATTACKER" "$CONSUMER" "$tmpdir/import_demo.bundle.json"
 if [[ "$UPDATE" == "1" ]]; then
     echo "Frontend bundle golden files updated: $updated"
 else
-    echo "Frontend bundle tests: PASS ($checked golden, 1 isolated, 11 negative)"
+    echo "Frontend bundle tests: PASS ($checked golden, 1 isolated, 19 negative)"
 fi

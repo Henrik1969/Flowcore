@@ -19,6 +19,7 @@ PROBES=(
   "refined_contract_probe"
   "abi_contract_probe"
   "structured_value_probe"
+  "import_demo"
 )
 
 if [[ ! -x "$FLOWMINI_BIN" ]]; then
@@ -32,7 +33,11 @@ updated=0
 checked=0
 
 for probe in "${PROBES[@]}"; do
-    source_file="$EXAMPLES_DIR/$probe.flow"
+    if [[ "$probe" == "import_demo" ]]; then
+        source_file="$ROOT/examples/pass/import_demo.flow"
+    else
+        source_file="$EXAMPLES_DIR/$probe.flow"
+    fi
     expected_file="$EXPECTED_DIR/$probe.symbols.txt"
     actual_file="$(mktemp)"
 

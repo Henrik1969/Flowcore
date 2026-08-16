@@ -13,8 +13,8 @@ Current baseline:
 ```text
 build: PASS
 AST golden tests: 26
-Symbol projection tests: 11
-Frontend bundle tests: 5 golden, 1 isolated, 11 negative
+Symbol projection tests: 12
+Frontend bundle tests: 7 golden, 1 isolated, 19 negative
 suite: 78 / 78
 ```
 
@@ -35,6 +35,8 @@ Documents in this directory:
 - [v0.24 accepted-language coverage matrix](v0.24-accepted-language-coverage.md)
 - [v0.24 canonical type policy](v0.24-type-policy.md)
 - [v0.24 frontend bundle contract](v0.24-frontend-bundle.md)
+- [v0.25 frontend bundle contract](v0.25-frontend-bundle.md)
+- [v0.25 structural-origin maturity audit](v0.25-origin-maturity-audit.md)
 - [C5 typed-statement sitrep](../../Flowmini/flowmini_v24_explicit_ast/docs/v0.24-c5-statement-payload-sitrep.md)
 - [Testing](testing.md)
 - [v0.24 frontend checkpoint Firetest report](v0.24-firetest-report.md)

@@ -46,8 +46,8 @@ Expected current baseline:
 
 ```text
 AST golden tests:          26 / 26
-Symbol projection tests:   11 / 11
-Frontend bundle tests:      5 golden / 1 isolated / 11 negative
+Symbol projection tests:   12 / 12
+Frontend bundle tests:      7 golden / 1 isolated / 19 negative
 categorized suite:          78 / 78
 CTest:                       2 / 2
 ```
@@ -87,6 +87,9 @@ The raw-frontend checkpoint evidence is recorded in the
 [v0.24 frontend Firetest report](v0.24-firetest-report.md). The independent
 export boundary has a separate
 [frontend-border Firetest report](v0.24-frontend-border-firetest-report.md).
+
+The active v0.25 structural-origin contract and its negative attack surface are
+documented in the [origin maturity audit](v0.25-origin-maturity-audit.md).
 
 ## Current build-isolation limitation
 

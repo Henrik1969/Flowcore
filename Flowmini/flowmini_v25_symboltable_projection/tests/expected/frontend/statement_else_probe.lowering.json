@@ -1,0 +1,775 @@
+{
+  "format": "flowmini.lowering_skeleton",
+  "version": 1,
+  "source": {
+    "path": "examples/ast/statement_else_probe.flow"
+  },
+  "source_files": [
+    {
+      "id": 0,
+      "path": "examples/ast/statement_else_probe.flow"
+    }
+  ],
+  "expanded_line_count": 32,
+  "source_unit": {
+    "kind": "program",
+    "name": "statement_else_probe"
+  },
+  "diagnostic_count": 0,
+  "declarations": [
+    {
+      "id": 0,
+      "kind": "function",
+      "name": "normalize",
+      "symbol_ids": [
+        2
+      ]
+    },
+    {
+      "id": 1,
+      "kind": "function",
+      "name": "keep_or_one",
+      "symbol_ids": [
+        4
+      ]
+    },
+    {
+      "id": 2,
+      "kind": "main_block",
+      "name": null,
+      "symbol_ids": [
+        6
+      ]
+    }
+  ],
+  "scopes": [
+    {
+      "id": 1,
+      "kind": "Global",
+      "parent_id": null,
+      "owner_symbol_id": null,
+      "origin": null,
+      "symbol_ids": [
+        1
+      ]
+    },
+    {
+      "id": 2,
+      "kind": "Module",
+      "parent_id": 1,
+      "owner_symbol_id": 1,
+      "origin": {
+        "ast_path": "/source_unit",
+        "entity_kind": "source_unit",
+        "role": "module_scope",
+        "ast_id": null,
+        "source_location": {
+          "line": 1,
+          "column": 1
+        }
+      },
+      "symbol_ids": [
+        2,
+        4,
+        6
+      ]
+    },
+    {
+      "id": 3,
+      "kind": "Function",
+      "parent_id": 2,
+      "owner_symbol_id": 2,
+      "origin": {
+        "ast_path": "/declaration_pool/0",
+        "entity_kind": "declaration",
+        "role": "function_scope",
+        "ast_id": 0,
+        "source_location": {
+          "line": 4,
+          "column": 1
+        }
+      },
+      "symbol_ids": [
+        3
+      ]
+    },
+    {
+      "id": 4,
+      "kind": "Block",
+      "parent_id": 3,
+      "owner_symbol_id": null,
+      "origin": {
+        "ast_path": "/block_pool/1",
+        "entity_kind": "block",
+        "role": "if_then_scope",
+        "ast_id": 1,
+        "source_location": {
+          "line": 5,
+          "column": 5
+        }
+      },
+      "symbol_ids": []
+    },
+    {
+      "id": 5,
+      "kind": "Block",
+      "parent_id": 3,
+      "owner_symbol_id": null,
+      "origin": {
+        "ast_path": "/block_pool/2",
+        "entity_kind": "block",
+        "role": "else_block_scope",
+        "ast_id": 2,
+        "source_location": {
+          "line": 5,
+          "column": 5
+        }
+      },
+      "symbol_ids": []
+    },
+    {
+      "id": 6,
+      "kind": "Function",
+      "parent_id": 2,
+      "owner_symbol_id": 4,
+      "origin": {
+        "ast_path": "/declaration_pool/1",
+        "entity_kind": "declaration",
+        "role": "function_scope",
+        "ast_id": 1,
+        "source_location": {
+          "line": 12,
+          "column": 1
+        }
+      },
+      "symbol_ids": [
+        5
+      ]
+    },
+    {
+      "id": 7,
+      "kind": "Block",
+      "parent_id": 6,
+      "owner_symbol_id": null,
+      "origin": {
+        "ast_path": "/block_pool/4",
+        "entity_kind": "block",
+        "role": "if_then_scope",
+        "ast_id": 4,
+        "source_location": {
+          "line": 13,
+          "column": 5
+        }
+      },
+      "symbol_ids": []
+    },
+    {
+      "id": 8,
+      "kind": "Function",
+      "parent_id": 2,
+      "owner_symbol_id": 6,
+      "origin": {
+        "ast_path": "/declaration_pool/2",
+        "entity_kind": "declaration",
+        "role": "main_scope",
+        "ast_id": 2,
+        "source_location": {
+          "line": 20,
+          "column": 1
+        }
+      },
+      "symbol_ids": [
+        7
+      ]
+    },
+    {
+      "id": 9,
+      "kind": "Block",
+      "parent_id": 8,
+      "owner_symbol_id": null,
+      "origin": {
+        "ast_path": "/block_pool/6",
+        "entity_kind": "block",
+        "role": "if_then_scope",
+        "ast_id": 6,
+        "source_location": {
+          "line": 23,
+          "column": 5
+        }
+      },
+      "symbol_ids": []
+    },
+    {
+      "id": 10,
+      "kind": "Block",
+      "parent_id": 8,
+      "owner_symbol_id": null,
+      "origin": {
+        "ast_path": "/block_pool/7",
+        "entity_kind": "block",
+        "role": "else_block_scope",
+        "ast_id": 7,
+        "source_location": {
+          "line": 23,
+          "column": 5
+        }
+      },
+      "symbol_ids": []
+    },
+    {
+      "id": 11,
+      "kind": "Block",
+      "parent_id": 10,
+      "owner_symbol_id": null,
+      "origin": {
+        "ast_path": "/block_pool/8",
+        "entity_kind": "block",
+        "role": "if_then_scope",
+        "ast_id": 8,
+        "source_location": {
+          "line": 26,
+          "column": 9
+        }
+      },
+      "symbol_ids": []
+    },
+    {
+      "id": 12,
+      "kind": "Block",
+      "parent_id": 10,
+      "owner_symbol_id": null,
+      "origin": {
+        "ast_path": "/block_pool/9",
+        "entity_kind": "block",
+        "role": "else_block_scope",
+        "ast_id": 9,
+        "source_location": {
+          "line": 26,
+          "column": 9
+        }
+      },
+      "symbol_ids": []
+    }
+  ],
+  "symbols": [
+    {
+      "id": 1,
+      "name": "statement_else_probe",
+      "kind": "Module",
+      "owning_scope_id": 1,
+      "introduced_scope_id": 2,
+      "origin": {
+        "ast_path": "/source_unit",
+        "entity_kind": "source_unit",
+        "role": "source_unit",
+        "ast_id": null,
+        "source_location": {
+          "line": 1,
+          "column": 1
+        }
+      },
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/ast/statement_else_probe.flow",
+        "line": 1,
+        "column": 1
+      },
+      "facts": [
+        {
+          "kind": "Custom",
+          "key": "source_unit_kind",
+          "value": {
+            "type": "string",
+            "value": "program"
+          }
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "normalize",
+      "kind": "Function",
+      "owning_scope_id": 2,
+      "introduced_scope_id": 3,
+      "origin": {
+        "ast_path": "/declaration_pool/0",
+        "entity_kind": "declaration",
+        "role": "function_declaration",
+        "ast_id": 0,
+        "source_location": {
+          "line": 4,
+          "column": 1
+        }
+      },
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/ast/statement_else_probe.flow",
+        "line": 3,
+        "column": 1
+      },
+      "facts": [
+        {
+          "kind": "TypeReference",
+          "key": "return_type_spelling",
+          "value": {
+            "type": "string",
+            "value": "int"
+          }
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "value",
+      "kind": "Parameter",
+      "owning_scope_id": 3,
+      "introduced_scope_id": null,
+      "origin": {
+        "ast_path": "/declaration_pool/0/parameters/0",
+        "entity_kind": "parameter",
+        "role": "function_parameter",
+        "ast_id": null,
+        "source_location": {
+          "line": 4,
+          "column": 14
+        }
+      },
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/ast/statement_else_probe.flow",
+        "line": 3,
+        "column": 14
+      },
+      "facts": [
+        {
+          "kind": "TypeReference",
+          "key": "declared_type_spelling",
+          "value": {
+            "type": "string",
+            "value": "int"
+          }
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "keep_or_one",
+      "kind": "Function",
+      "owning_scope_id": 2,
+      "introduced_scope_id": 6,
+      "origin": {
+        "ast_path": "/declaration_pool/1",
+        "entity_kind": "declaration",
+        "role": "function_declaration",
+        "ast_id": 1,
+        "source_location": {
+          "line": 12,
+          "column": 1
+        }
+      },
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/ast/statement_else_probe.flow",
+        "line": 11,
+        "column": 1
+      },
+      "facts": [
+        {
+          "kind": "TypeReference",
+          "key": "return_type_spelling",
+          "value": {
+            "type": "string",
+            "value": "int"
+          }
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "name": "value",
+      "kind": "Parameter",
+      "owning_scope_id": 6,
+      "introduced_scope_id": null,
+      "origin": {
+        "ast_path": "/declaration_pool/1/parameters/0",
+        "entity_kind": "parameter",
+        "role": "function_parameter",
+        "ast_id": null,
+        "source_location": {
+          "line": 12,
+          "column": 16
+        }
+      },
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/ast/statement_else_probe.flow",
+        "line": 11,
+        "column": 16
+      },
+      "facts": [
+        {
+          "kind": "TypeReference",
+          "key": "declared_type_spelling",
+          "value": {
+            "type": "string",
+            "value": "int"
+          }
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "name": "main",
+      "kind": "Procedure",
+      "owning_scope_id": 2,
+      "introduced_scope_id": 8,
+      "origin": {
+        "ast_path": "/declaration_pool/2",
+        "entity_kind": "declaration",
+        "role": "main_declaration",
+        "ast_id": 2,
+        "source_location": {
+          "line": 20,
+          "column": 1
+        }
+      },
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/ast/statement_else_probe.flow",
+        "line": 19,
+        "column": 1
+      },
+      "facts": []
+    },
+    {
+      "id": 7,
+      "name": "value",
+      "kind": "Variable",
+      "owning_scope_id": 8,
+      "introduced_scope_id": null,
+      "origin": {
+        "ast_path": "/statement_pool/6",
+        "entity_kind": "statement",
+        "role": "local_binding",
+        "ast_id": 6,
+        "source_location": {
+          "line": 21,
+          "column": 5
+        }
+      },
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/ast/statement_else_probe.flow",
+        "line": 20,
+        "column": 5
+      },
+      "facts": [
+        {
+          "kind": "TypeReference",
+          "key": "declared_type_spelling",
+          "value": {
+            "type": "string",
+            "value": "int"
+          }
+        }
+      ]
+    }
+  ],
+  "origin_index": [
+    {
+      "ast_path": "/block_pool/1",
+      "symbol_ids": [],
+      "scope_ids": [
+        4
+      ]
+    },
+    {
+      "ast_path": "/block_pool/2",
+      "symbol_ids": [],
+      "scope_ids": [
+        5
+      ]
+    },
+    {
+      "ast_path": "/block_pool/4",
+      "symbol_ids": [],
+      "scope_ids": [
+        7
+      ]
+    },
+    {
+      "ast_path": "/block_pool/6",
+      "symbol_ids": [],
+      "scope_ids": [
+        9
+      ]
+    },
+    {
+      "ast_path": "/block_pool/7",
+      "symbol_ids": [],
+      "scope_ids": [
+        10
+      ]
+    },
+    {
+      "ast_path": "/block_pool/8",
+      "symbol_ids": [],
+      "scope_ids": [
+        11
+      ]
+    },
+    {
+      "ast_path": "/block_pool/9",
+      "symbol_ids": [],
+      "scope_ids": [
+        12
+      ]
+    },
+    {
+      "ast_path": "/declaration_pool/0",
+      "symbol_ids": [
+        2
+      ],
+      "scope_ids": [
+        3
+      ]
+    },
+    {
+      "ast_path": "/declaration_pool/0/parameters/0",
+      "symbol_ids": [
+        3
+      ],
+      "scope_ids": []
+    },
+    {
+      "ast_path": "/declaration_pool/1",
+      "symbol_ids": [
+        4
+      ],
+      "scope_ids": [
+        6
+      ]
+    },
+    {
+      "ast_path": "/declaration_pool/1/parameters/0",
+      "symbol_ids": [
+        5
+      ],
+      "scope_ids": []
+    },
+    {
+      "ast_path": "/declaration_pool/2",
+      "symbol_ids": [
+        6
+      ],
+      "scope_ids": [
+        8
+      ]
+    },
+    {
+      "ast_path": "/source_unit",
+      "symbol_ids": [
+        1
+      ],
+      "scope_ids": [
+        2
+      ]
+    },
+    {
+      "ast_path": "/statement_pool/6",
+      "symbol_ids": [
+        7
+      ],
+      "scope_ids": []
+    }
+  ],
+  "blocks": [
+    {
+      "id": 0,
+      "statement_ids": []
+    },
+    {
+      "id": 1,
+      "statement_ids": []
+    },
+    {
+      "id": 2,
+      "statement_ids": []
+    },
+    {
+      "id": 3,
+      "statement_ids": []
+    },
+    {
+      "id": 4,
+      "statement_ids": []
+    },
+    {
+      "id": 5,
+      "statement_ids": []
+    },
+    {
+      "id": 6,
+      "statement_ids": []
+    },
+    {
+      "id": 7,
+      "statement_ids": []
+    },
+    {
+      "id": 8,
+      "statement_ids": []
+    },
+    {
+      "id": 9,
+      "statement_ids": []
+    }
+  ],
+  "statements": [
+    {
+      "id": 0,
+      "kind": "return",
+      "source_form": "keyword_return",
+      "target_kind": null,
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/ast/statement_else_probe.flow",
+        "line": 5,
+        "column": 9
+      }
+    },
+    {
+      "id": 1,
+      "kind": "if",
+      "source_form": null,
+      "target_kind": null,
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/ast/statement_else_probe.flow",
+        "line": 4,
+        "column": 5
+      }
+    },
+    {
+      "id": 2,
+      "kind": "return",
+      "source_form": "keyword_return",
+      "target_kind": null,
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/ast/statement_else_probe.flow",
+        "line": 7,
+        "column": 9
+      }
+    },
+    {
+      "id": 3,
+      "kind": "return",
+      "source_form": "keyword_return",
+      "target_kind": null,
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/ast/statement_else_probe.flow",
+        "line": 13,
+        "column": 9
+      }
+    },
+    {
+      "id": 4,
+      "kind": "if",
+      "source_form": null,
+      "target_kind": null,
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/ast/statement_else_probe.flow",
+        "line": 12,
+        "column": 5
+      }
+    },
+    {
+      "id": 5,
+      "kind": "return",
+      "source_form": "keyword_return",
+      "target_kind": null,
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/ast/statement_else_probe.flow",
+        "line": 16,
+        "column": 5
+      }
+    },
+    {
+      "id": 6,
+      "kind": "let",
+      "source_form": null,
+      "target_kind": null,
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/ast/statement_else_probe.flow",
+        "line": 20,
+        "column": 5
+      }
+    },
+    {
+      "id": 7,
+      "kind": "assignment",
+      "source_form": "equals_assignment",
+      "target_kind": "identifier",
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/ast/statement_else_probe.flow",
+        "line": 23,
+        "column": 9
+      }
+    },
+    {
+      "id": 8,
+      "kind": "if",
+      "source_form": null,
+      "target_kind": null,
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/ast/statement_else_probe.flow",
+        "line": 22,
+        "column": 5
+      }
+    },
+    {
+      "id": 9,
+      "kind": "assignment",
+      "source_form": "equals_assignment",
+      "target_kind": "identifier",
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/ast/statement_else_probe.flow",
+        "line": 26,
+        "column": 13
+      }
+    },
+    {
+      "id": 10,
+      "kind": "if",
+      "source_form": null,
+      "target_kind": null,
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/ast/statement_else_probe.flow",
+        "line": 25,
+        "column": 9
+      }
+    },
+    {
+      "id": 11,
+      "kind": "assignment",
+      "source_form": "equals_assignment",
+      "target_kind": "identifier",
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/ast/statement_else_probe.flow",
+        "line": 28,
+        "column": 13
+      }
+    }
+  ],
+  "expression_count": 21
+}

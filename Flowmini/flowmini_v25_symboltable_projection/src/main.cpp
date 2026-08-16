@@ -278,6 +278,10 @@ namespace {
     }
 
     struct ImportExpander {
+        explicit ImportExpander(const bool preserveImports)
+            : preserveImportDeclarations{preserveImports} {}
+
+        bool preserveImportDeclarations {false};
         std::map<std::string, ImportState> states;
         std::vector<std::string> stack;
 
@@ -290,6 +294,7 @@ namespace {
             std::istringstream scanInput{scanSource};
 
             std::vector<ExpandedSource> importExpansions;
+            std::vector<ExpandedSourceLine> importDeclarations;
             std::vector<ExpandedSourceLine> rootBodyLines;
             ExpandedSourceLine headerLine;
             SourceUnitKind rootKind = SourceUnitKind::None;
@@ -306,6 +311,15 @@ namespace {
                 if (parseImportLine(scanLine, importText)) {
                     if (sawHeader) {
                         throw flow::DiagnosticError{"import", "import statements must appear before program/unit declaration in: " + rootPath.string()};
+                    }
+                    if (preserveImportDeclarations) {
+                        importDeclarations.push_back(ExpandedSourceLine{
+                            line,
+                            flowmini::ast::FrontendSourceLineOrigin{
+                                rootDisplayPath,
+                                lineNumber,
+                            },
+                        });
                     }
                     importExpansions.push_back(expandLibrary(canonicalImportPath(rootPath, importText)));
                     ++lineNumber;
@@ -350,6 +364,12 @@ namespace {
             ExpandedSource result;
             result.lines.push_back(std::move(headerLine));
             result.appendGeneratedBlank();
+            result.lines.insert(result.lines.end(),
+                                std::make_move_iterator(importDeclarations.begin()),
+                                std::make_move_iterator(importDeclarations.end()));
+            if (!importDeclarations.empty()) {
+                result.appendGeneratedBlank();
+            }
             for (auto& expanded : importExpansions) {
                 if (!expanded.lines.empty()) {
                     result.append(std::move(expanded));
@@ -386,6 +406,7 @@ namespace {
             std::istringstream input{source};
             std::istringstream scanInput{scanSource};
             std::vector<ExpandedSource> importExpansions;
+            std::vector<ExpandedSourceLine> importDeclarations;
             std::vector<ExpandedSourceLine> bodyLines;
             SourceUnitKind libKind = SourceUnitKind::None;
             bool sawHeader = false;
@@ -401,6 +422,12 @@ namespace {
                 if (parseImportLine(scanLine, importText)) {
                     if (sawHeader) {
                         throw flow::DiagnosticError{"import", "import statements must appear before unit declaration in imported file: " + key};
+                    }
+                    if (preserveImportDeclarations) {
+                        importDeclarations.push_back(ExpandedSourceLine{
+                            line,
+                            flowmini::ast::FrontendSourceLineOrigin{displayPath, lineNumber},
+                        });
                     }
                     importExpansions.push_back(expandLibrary(canonicalImportPath(libPath, importText)));
                     ++lineNumber;
@@ -435,6 +462,12 @@ namespace {
             }
 
             ExpandedSource result;
+            result.lines.insert(result.lines.end(),
+                                std::make_move_iterator(importDeclarations.begin()),
+                                std::make_move_iterator(importDeclarations.end()));
+            if (!importDeclarations.empty()) {
+                result.appendGeneratedBlank();
+            }
             for (auto& expanded : importExpansions) {
                 if (!expanded.lines.empty()) {
                     result.append(std::move(expanded));
@@ -452,8 +485,9 @@ namespace {
     };
 
     [[nodiscard]] ExpandedSource expandImports(const std::string& sourcePath,
-                                               const bool allowUnitRoot = false) {
-        ImportExpander expander;
+                                               const bool allowUnitRoot = false,
+                                               const bool preserveImportDeclarations = false) {
+        ImportExpander expander{preserveImportDeclarations};
         return expander.expandRoot(sourcePath, allowUnitRoot);
     }
 
@@ -591,11 +625,15 @@ int main(int argc, char** argv) {
             !dumpAstSymbolsPath.empty() ||
             !dumpTokenTreePath.empty() ||
             dumpTokenTreeBridge;
+        const bool preserveImportDeclarations =
+            dumpAst || dumpFrontendBundle || !dumpAstSymbolsPath.empty();
 
         const std::filesystem::path inputPath{sourcePath};
         const auto expandedSource = (inputPath.extension() == ".flowir")
             ? directExpandedSource(sourcePath, readFile(sourcePath))
-            : expandImports(sourcePath, structuralInspection);
+            : expandImports(sourcePath,
+                            structuralInspection,
+                            preserveImportDeclarations);
         const std::string source = expandedSource.render();
         const auto tokens = flowmini::lexSource(source);
 

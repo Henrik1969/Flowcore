@@ -694,6 +694,11 @@ namespace flowmini::ast {
                         }
                     }
 
+                    out << ",\n";
+                    dump_indent(out, indent + 4);
+                    out << "\"location\": ";
+                    dump_source_location_json(out, statement.location);
+
                     out << "\n";
 
                     dump_indent(out, indent + 2);
@@ -806,6 +811,10 @@ namespace flowmini::ast {
                 dump_indent(out, indent + 2);
                 out << "\"module_name\": ";
                 dump_json_string(out, importDecl->module_name);
+                out << ",\n";
+                dump_indent(out, indent + 2);
+                out << "\"location\": ";
+                dump_source_location_json(out, importDecl->location);
                 out << "\n";
             } else if (const auto* functionDecl = std::get_if<FunctionDecl>(&decl)) {
                 out << ",\n";
@@ -842,6 +851,11 @@ namespace flowmini::ast {
                         dump_indent(out, indent + 6);
                         out << "\"type_ref\": ";
                         dump_type_ref_json(out, parameter.type);
+                        out << ",\n";
+
+                        dump_indent(out, indent + 6);
+                        out << "\"location\": ";
+                        dump_source_location_json(out, parameter.location);
                         out << "\n";
 
                         dump_indent(out, indent + 4);
@@ -875,6 +889,11 @@ namespace flowmini::ast {
                 dump_indent(out, indent + 2);
                 out << "\"body_block\": ";
                 dump_optional_id(out, functionDecl->body);
+                out << ",\n";
+
+                dump_indent(out, indent + 2);
+                out << "\"location\": ";
+                dump_source_location_json(out, functionDecl->location);
                 out << "\n";
             } else if (const auto* mainBlock = std::get_if<MainBlock>(&decl)) {
                 out << ",\n";
@@ -884,6 +903,11 @@ namespace flowmini::ast {
                 dump_indent(out, indent + 2);
                 out << "\"body_block\": ";
                 dump_optional_id(out, mainBlock->body);
+                out << ",\n";
+
+                dump_indent(out, indent + 2);
+                out << "\"location\": ";
+                dump_source_location_json(out, mainBlock->location);
                 out << "\n";
             } else if (const auto* recordDecl = std::get_if<RecordDecl>(&decl)) {
                 out << ",\n";
@@ -920,6 +944,11 @@ namespace flowmini::ast {
                         dump_indent(out, indent + 6);
                         out << "\"type_ref\": ";
                         dump_type_ref_json(out, field.type);
+                        out << ",\n";
+
+                        dump_indent(out, indent + 6);
+                        out << "\"location\": ";
+                        dump_source_location_json(out, field.location);
                         out << "\n";
 
                         dump_indent(out, indent + 4);
@@ -935,7 +964,12 @@ namespace flowmini::ast {
                     dump_indent(out, indent + 2);
                 }
 
-                out << "]\n";
+                out << "],\n";
+
+                dump_indent(out, indent + 2);
+                out << "\"location\": ";
+                dump_source_location_json(out, recordDecl->location);
+                out << "\n";
             } else if (const auto* refinedTypeDecl = std::get_if<RefinedTypeDecl>(&decl)) {
                 out << ",\n";
                 dump_indent(out, indent + 2);
@@ -1262,6 +1296,9 @@ namespace flowmini::ast {
         out << "  \"source_unit\": {\n";
         out << "    \"kind\": \"" << to_string(module.source_unit.kind) << "\",\n";
         out << "    \"name\": "; dump_json_string(out, module.source_unit.name);out << ",\n";
+        out << "    \"location\": ";
+        dump_source_location_json(out, module.source_unit.location);
+        out << ",\n";
 
         out << "    \"declaration_count\": " << module.source_unit.declarations.size() << ",\n";
         out << "    \"declaration_ids\": ";

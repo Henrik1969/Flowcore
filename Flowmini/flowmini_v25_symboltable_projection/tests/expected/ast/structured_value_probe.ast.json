@@ -3,6 +3,10 @@
     "source_unit": {
         "kind": "program",
         "name": "structured_value_probe",
+        "location": {
+            "line": 1,
+            "column": 1
+        },
         "declaration_count": 4,
         "declaration_ids": [
             0,
@@ -64,6 +68,10 @@
                                 "line": 9,
                                 "column": 17
                             }
+                        },
+                        "location": {
+                            "line": 9,
+                            "column": 5
                         }
                     },
                     {
@@ -81,9 +89,17 @@
                                 "line": 10,
                                 "column": 20
                             }
+                        },
+                        "location": {
+                            "line": 10,
+                            "column": 5
                         }
                     }
-                ]
+                ],
+                "location": {
+                    "line": 8,
+                    "column": 6
+                }
             },
             {
                 "id": 2,
@@ -160,7 +176,11 @@
                 "id": 3,
                 "kind": "main_block",
                 "has_body": true,
-                "body_block": 0
+                "body_block": 0,
+                "location": {
+                    "line": 22,
+                    "column": 1
+                }
             }
         ]
     },
@@ -219,6 +239,10 @@
                             "line": 9,
                             "column": 17
                         }
+                    },
+                    "location": {
+                        "line": 9,
+                        "column": 5
                     }
                 },
                 {
@@ -236,9 +260,17 @@
                             "line": 10,
                             "column": 20
                         }
+                    },
+                    "location": {
+                        "line": 10,
+                        "column": 5
                     }
                 }
-            ]
+            ],
+            "location": {
+                "line": 8,
+                "column": 6
+            }
         },
         {
             "id": 2,
@@ -315,7 +347,11 @@
             "id": 3,
             "kind": "main_block",
             "has_body": true,
-            "body_block": 0
+            "body_block": 0,
+            "location": {
+                "line": 22,
+                "column": 1
+            }
         }
     ],
     "expression_pool_size": 25,
@@ -660,7 +696,11 @@
             "has_initializer": true,
             "expression_ids": [
                 3
-            ]
+            ],
+            "location": {
+                "line": 23,
+                "column": 5
+            }
         },
         {
             "id": 1,
@@ -730,7 +770,11 @@
             "has_initializer": true,
             "expression_ids": [
                 4
-            ]
+            ],
+            "location": {
+                "line": 24,
+                "column": 5
+            }
         },
         {
             "id": 2,
@@ -822,7 +866,11 @@
             "has_initializer": true,
             "expression_ids": [
                 8
-            ]
+            ],
+            "location": {
+                "line": 25,
+                "column": 5
+            }
         },
         {
             "id": 3,
@@ -862,7 +910,11 @@
             "has_initializer": true,
             "expression_ids": [
                 13
-            ]
+            ],
+            "location": {
+                "line": 26,
+                "column": 5
+            }
         },
         {
             "id": 4,
@@ -902,7 +954,11 @@
             "has_initializer": true,
             "expression_ids": [
                 16
-            ]
+            ],
+            "location": {
+                "line": 27,
+                "column": 5
+            }
         },
         {
             "id": 5,
@@ -942,7 +998,11 @@
             "has_initializer": true,
             "expression_ids": [
                 19
-            ]
+            ],
+            "location": {
+                "line": 28,
+                "column": 5
+            }
         },
         {
             "id": 6,
@@ -982,7 +1042,11 @@
             "has_initializer": true,
             "expression_ids": [
                 23
-            ]
+            ],
+            "location": {
+                "line": 29,
+                "column": 5
+            }
         }
     ],
     "block_pool_size": 1,

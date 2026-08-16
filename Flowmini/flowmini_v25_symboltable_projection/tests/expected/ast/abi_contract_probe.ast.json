@@ -3,6 +3,10 @@
     "source_unit": {
         "kind": "unit",
         "name": "abi_contract_probe",
+        "location": {
+            "line": 1,
+            "column": 1
+        },
         "declaration_count": 2,
         "declaration_ids": [
             0,

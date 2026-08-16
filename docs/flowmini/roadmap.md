@@ -10,8 +10,8 @@ provisional until each milestone is activated.
 v25_symboltable_projection
 build: OK
 AST golden tests: 26 / 26
-Symbol projection tests: 11 / 11
-Frontend bundle tests: 5 golden, 1 isolated, 11 negative
+Symbol projection tests: 12 / 12
+Frontend bundle tests: 7 golden, 1 isolated, 19 negative
 suite: 78 / 78
 CTest: 2 / 2
 ```
@@ -19,8 +19,9 @@ CTest: 2 / 2
 ## Immediate
 
 1. Mature structural SymbolTable projection coverage and factual metadata.
-2. Harden AST-to-symbol origins, source provenance, and the frontend bundle.
-3. Expand projection and independent-consumer goldens.
+2. Maintain the audited typed-origin and source-provenance contract as
+   projection coverage grows.
+3. Close remaining factual projection gaps before semantic-analysis entry.
 4. Keep semantic interpretation outside v0.25.
 
 ## Next structural versions

@@ -34,6 +34,21 @@ void dump_json_string(std::ostream& out, const std::string_view value) {
     out << '"';
 }
 
+void dump_origin_descriptor(std::ostream& out, const AstOriginDescriptor& descriptor) {
+    out << "\"entity_kind\": ";
+    dump_json_string(out, to_string(descriptor.entity_kind));
+    out << ", \"role\": ";
+    dump_json_string(out, to_string(descriptor.role));
+    out << ", \"ast_id\": ";
+    if (descriptor.ast_id) {
+        out << *descriptor.ast_id;
+    } else {
+        out << "null";
+    }
+    out << ", \"source_location\": {\"line\": " << descriptor.location.line
+        << ", \"column\": " << descriptor.location.column << '}';
+}
+
 } // namespace
 
 void dump_frontend_bundle_json(std::ostream& out,
@@ -54,7 +69,7 @@ void dump_frontend_bundle_json(std::ostream& out,
 
     out << "{\n"
         << "  \"format\": \"flowmini.frontend_bundle\",\n"
-        << "  \"version\": 1,\n"
+        << "  \"version\": 2,\n"
         << "  \"source\": {\"path\": ";
     dump_json_string(out, sourcePath);
     out << "},\n"
@@ -100,6 +115,8 @@ void dump_frontend_bundle_json(std::ostream& out,
         << "  \"symbol_table\": ";
     projection.table.dumpJson(out);
     out << ",\n"
+        << "  \"origin_contract\": {\"format\": \"flowmini.structural_origins\", "
+           "\"version\": 1},\n"
         << "  \"symbol_origins\": [\n";
 
     for (std::size_t index = 0; index < projection.symbol_origins.size(); ++index) {
@@ -107,6 +124,8 @@ void dump_frontend_bundle_json(std::ostream& out,
         out << "    {\"symbol_id\": " << origin.symbol_id.value
             << ", \"ast_path\": ";
         dump_json_string(out, origin.ast_path);
+        out << ", ";
+        dump_origin_descriptor(out, origin.descriptor);
         out << '}';
         if (index + 1 < projection.symbol_origins.size()) {
             out << ',';
@@ -122,6 +141,8 @@ void dump_frontend_bundle_json(std::ostream& out,
         out << "    {\"scope_id\": " << origin.scope_id.value
             << ", \"ast_path\": ";
         dump_json_string(out, origin.ast_path);
+        out << ", ";
+        dump_origin_descriptor(out, origin.descriptor);
         out << '}';
         if (index + 1 < projection.scope_origins.size()) {
             out << ',';

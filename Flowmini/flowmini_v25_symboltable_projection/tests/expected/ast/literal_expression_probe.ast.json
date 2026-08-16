@@ -3,6 +3,10 @@
     "source_unit": {
         "kind": "program",
         "name": "literal_expression_probe",
+        "location": {
+            "line": 1,
+            "column": 1
+        },
         "declaration_count": 2,
         "declaration_ids": [
             0,
@@ -30,6 +34,10 @@
                                 "line": 5,
                                 "column": 15
                             }
+                        },
+                        "location": {
+                            "line": 5,
+                            "column": 5
                         }
                     },
                     {
@@ -47,15 +55,27 @@
                                 "line": 6,
                                 "column": 15
                             }
+                        },
+                        "location": {
+                            "line": 6,
+                            "column": 5
                         }
                     }
-                ]
+                ],
+                "location": {
+                    "line": 4,
+                    "column": 6
+                }
             },
             {
                 "id": 1,
                 "kind": "main_block",
                 "has_body": true,
-                "body_block": 0
+                "body_block": 0,
+                "location": {
+                    "line": 9,
+                    "column": 1
+                }
             }
         ]
     },
@@ -82,6 +102,10 @@
                             "line": 5,
                             "column": 15
                         }
+                    },
+                    "location": {
+                        "line": 5,
+                        "column": 5
                     }
                 },
                 {
@@ -99,15 +123,27 @@
                             "line": 6,
                             "column": 15
                         }
+                    },
+                    "location": {
+                        "line": 6,
+                        "column": 5
                     }
                 }
-            ]
+            ],
+            "location": {
+                "line": 4,
+                "column": 6
+            }
         },
         {
             "id": 1,
             "kind": "main_block",
             "has_body": true,
-            "body_block": 0
+            "body_block": 0,
+            "location": {
+                "line": 9,
+                "column": 1
+            }
         }
     ],
     "expression_pool_size": 14,
@@ -365,7 +401,11 @@
             "has_initializer": true,
             "expression_ids": [
                 0
-            ]
+            ],
+            "location": {
+                "line": 10,
+                "column": 5
+            }
         },
         {
             "id": 1,
@@ -405,7 +445,11 @@
             "has_initializer": true,
             "expression_ids": [
                 4
-            ]
+            ],
+            "location": {
+                "line": 11,
+                "column": 5
+            }
         },
         {
             "id": 2,
@@ -426,7 +470,11 @@
             "has_value": true,
             "expression_ids": [
                 7
-            ]
+            ],
+            "location": {
+                "line": 13,
+                "column": 5
+            }
         },
         {
             "id": 3,
@@ -447,7 +495,11 @@
             "has_value": true,
             "expression_ids": [
                 11
-            ]
+            ],
+            "location": {
+                "line": 14,
+                "column": 5
+            }
         }
     ],
     "block_pool_size": 1,

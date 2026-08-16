@@ -3,6 +3,10 @@
     "source_unit": {
         "kind": "program",
         "name": "else_if_chain_probe",
+        "location": {
+            "line": 1,
+            "column": 1
+        },
         "declaration_count": 1,
         "declaration_ids": [
             0
@@ -12,7 +16,11 @@
                 "id": 0,
                 "kind": "main_block",
                 "has_body": true,
-                "body_block": 0
+                "body_block": 0,
+                "location": {
+                    "line": 4,
+                    "column": 1
+                }
             }
         ]
     },
@@ -22,7 +30,11 @@
             "id": 0,
             "kind": "main_block",
             "has_body": true,
-            "body_block": 0
+            "body_block": 0,
+            "location": {
+                "line": 4,
+                "column": 1
+            }
         }
     ],
     "expression_pool_size": 13,
@@ -200,7 +212,11 @@
             "has_initializer": true,
             "expression_ids": [
                 0
-            ]
+            ],
+            "location": {
+                "line": 5,
+                "column": 5
+            }
         },
         {
             "id": 1,
@@ -221,7 +237,11 @@
             "has_value": true,
             "expression_ids": [
                 4
-            ]
+            ],
+            "location": {
+                "line": 7,
+                "column": 9
+            }
         },
         {
             "id": 2,
@@ -243,6 +263,10 @@
             "else_arm": {
                 "kind": "else_if",
                 "if_statement": 4
+            },
+            "location": {
+                "line": 6,
+                "column": 5
             }
         },
         {
@@ -264,7 +288,11 @@
             "has_value": true,
             "expression_ids": [
                 8
-            ]
+            ],
+            "location": {
+                "line": 9,
+                "column": 9
+            }
         },
         {
             "id": 4,
@@ -286,6 +314,10 @@
             "else_arm": {
                 "kind": "else_if",
                 "if_statement": 6
+            },
+            "location": {
+                "line": 8,
+                "column": 12
             }
         },
         {
@@ -307,7 +339,11 @@
             "has_value": true,
             "expression_ids": [
                 12
-            ]
+            ],
+            "location": {
+                "line": 11,
+                "column": 9
+            }
         },
         {
             "id": 6,
@@ -323,7 +359,11 @@
             ],
             "condition": 9,
             "then_block": 3,
-            "else_arm": null
+            "else_arm": null,
+            "location": {
+                "line": 10,
+                "column": 12
+            }
         }
     ],
     "block_pool_size": 4,

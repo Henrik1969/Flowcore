@@ -2,35 +2,27 @@
   "format": "flowmini.lowering_skeleton",
   "version": 1,
   "source": {
-    "path": "examples/ast/statement_assignment_probe.flow"
+    "path": "examples/ast/control_flow_unary_probe.flow"
   },
   "source_files": [
     {
       "id": 0,
-      "path": "examples/ast/statement_assignment_probe.flow"
+      "path": "examples/ast/control_flow_unary_probe.flow"
     }
   ],
-  "expanded_line_count": 19,
+  "expanded_line_count": 22,
   "source_unit": {
     "kind": "program",
-    "name": "statement_assignment_probe"
+    "name": "control_flow_unary_probe"
   },
   "diagnostic_count": 0,
   "declarations": [
     {
       "id": 0,
-      "kind": "function",
-      "name": "adjust",
-      "symbol_ids": [
-        2
-      ]
-    },
-    {
-      "id": 1,
       "kind": "main_block",
       "name": null,
       "symbol_ids": [
-        5
+        2
       ]
     }
   ],
@@ -61,8 +53,7 @@
         }
       },
       "symbol_ids": [
-        2,
-        5
+        2
       ]
     },
     {
@@ -73,7 +64,7 @@
       "origin": {
         "ast_path": "/declaration_pool/0",
         "entity_kind": "declaration",
-        "role": "function_scope",
+        "role": "main_scope",
         "ast_id": 0,
         "source_location": {
           "line": 4,
@@ -82,7 +73,9 @@
       },
       "symbol_ids": [
         3,
-        4
+        4,
+        5,
+        6
       ]
     },
     {
@@ -93,10 +86,10 @@
       "origin": {
         "ast_path": "/block_pool/1",
         "entity_kind": "block",
-        "role": "if_then_scope",
+        "role": "while_body_scope",
         "ast_id": 1,
         "source_location": {
-          "line": 8,
+          "line": 12,
           "column": 5
         }
       },
@@ -104,29 +97,43 @@
     },
     {
       "id": 5,
-      "kind": "Function",
-      "parent_id": 2,
-      "owner_symbol_id": 5,
+      "kind": "Block",
+      "parent_id": 4,
+      "owner_symbol_id": null,
       "origin": {
-        "ast_path": "/declaration_pool/1",
-        "entity_kind": "declaration",
-        "role": "main_scope",
-        "ast_id": 1,
+        "ast_path": "/block_pool/2",
+        "entity_kind": "block",
+        "role": "if_then_scope",
+        "ast_id": 2,
         "source_location": {
-          "line": 15,
-          "column": 1
+          "line": 14,
+          "column": 9
         }
       },
-      "symbol_ids": [
-        6,
-        7
-      ]
+      "symbol_ids": []
+    },
+    {
+      "id": 6,
+      "kind": "Block",
+      "parent_id": 4,
+      "owner_symbol_id": null,
+      "origin": {
+        "ast_path": "/block_pool/3",
+        "entity_kind": "block",
+        "role": "if_then_scope",
+        "ast_id": 3,
+        "source_location": {
+          "line": 17,
+          "column": 9
+        }
+      },
+      "symbol_ids": []
     }
   ],
   "symbols": [
     {
       "id": 1,
-      "name": "statement_assignment_probe",
+      "name": "control_flow_unary_probe",
       "kind": "Module",
       "owning_scope_id": 1,
       "introduced_scope_id": 2,
@@ -142,7 +149,7 @@
       },
       "source_location": {
         "source_id": 0,
-        "path": "examples/ast/statement_assignment_probe.flow",
+        "path": "examples/ast/control_flow_unary_probe.flow",
         "line": 1,
         "column": 1
       },
@@ -159,14 +166,14 @@
     },
     {
       "id": 2,
-      "name": "adjust",
-      "kind": "Function",
+      "name": "main",
+      "kind": "Procedure",
       "owning_scope_id": 2,
       "introduced_scope_id": 3,
       "origin": {
         "ast_path": "/declaration_pool/0",
         "entity_kind": "declaration",
-        "role": "function_declaration",
+        "role": "main_declaration",
         "ast_id": 0,
         "source_location": {
           "line": 4,
@@ -175,57 +182,15 @@
       },
       "source_location": {
         "source_id": 0,
-        "path": "examples/ast/statement_assignment_probe.flow",
+        "path": "examples/ast/control_flow_unary_probe.flow",
         "line": 3,
         "column": 1
       },
-      "facts": [
-        {
-          "kind": "TypeReference",
-          "key": "return_type_spelling",
-          "value": {
-            "type": "string",
-            "value": "int"
-          }
-        }
-      ]
+      "facts": []
     },
     {
       "id": 3,
-      "name": "x",
-      "kind": "Parameter",
-      "owning_scope_id": 3,
-      "introduced_scope_id": null,
-      "origin": {
-        "ast_path": "/declaration_pool/0/parameters/0",
-        "entity_kind": "parameter",
-        "role": "function_parameter",
-        "ast_id": null,
-        "source_location": {
-          "line": 4,
-          "column": 11
-        }
-      },
-      "source_location": {
-        "source_id": 0,
-        "path": "examples/ast/statement_assignment_probe.flow",
-        "line": 3,
-        "column": 11
-      },
-      "facts": [
-        {
-          "kind": "TypeReference",
-          "key": "declared_type_spelling",
-          "value": {
-            "type": "string",
-            "value": "int"
-          }
-        }
-      ]
-    },
-    {
-      "id": 4,
-      "name": "value",
+      "name": "flag",
       "kind": "Variable",
       "owning_scope_id": 3,
       "introduced_scope_id": null,
@@ -241,7 +206,7 @@
       },
       "source_location": {
         "source_id": 0,
-        "path": "examples/ast/statement_assignment_probe.flow",
+        "path": "examples/ast/control_flow_unary_probe.flow",
         "line": 4,
         "column": 5
       },
@@ -251,55 +216,64 @@
           "key": "declared_type_spelling",
           "value": {
             "type": "string",
-            "value": "int"
+            "value": "Bool"
+          }
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "inverted",
+      "kind": "Variable",
+      "owning_scope_id": 3,
+      "introduced_scope_id": null,
+      "origin": {
+        "ast_path": "/statement_pool/1",
+        "entity_kind": "statement",
+        "role": "local_binding",
+        "ast_id": 1,
+        "source_location": {
+          "line": 6,
+          "column": 5
+        }
+      },
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/ast/control_flow_unary_probe.flow",
+        "line": 5,
+        "column": 5
+      },
+      "facts": [
+        {
+          "kind": "TypeReference",
+          "key": "declared_type_spelling",
+          "value": {
+            "type": "string",
+            "value": "Bool"
           }
         }
       ]
     },
     {
       "id": 5,
-      "name": "main",
-      "kind": "Procedure",
-      "owning_scope_id": 2,
-      "introduced_scope_id": 5,
-      "origin": {
-        "ast_path": "/declaration_pool/1",
-        "entity_kind": "declaration",
-        "role": "main_declaration",
-        "ast_id": 1,
-        "source_location": {
-          "line": 15,
-          "column": 1
-        }
-      },
-      "source_location": {
-        "source_id": 0,
-        "path": "examples/ast/statement_assignment_probe.flow",
-        "line": 14,
-        "column": 1
-      },
-      "facts": []
-    },
-    {
-      "id": 6,
-      "name": "a",
+      "name": "negative",
       "kind": "Variable",
-      "owning_scope_id": 5,
+      "owning_scope_id": 3,
       "introduced_scope_id": null,
       "origin": {
-        "ast_path": "/statement_pool/5",
+        "ast_path": "/statement_pool/2",
         "entity_kind": "statement",
         "role": "local_binding",
-        "ast_id": 5,
+        "ast_id": 2,
         "source_location": {
-          "line": 16,
+          "line": 7,
           "column": 5
         }
       },
       "source_location": {
         "source_id": 0,
-        "path": "examples/ast/statement_assignment_probe.flow",
-        "line": 15,
+        "path": "examples/ast/control_flow_unary_probe.flow",
+        "line": 6,
         "column": 5
       },
       "facts": [
@@ -314,25 +288,25 @@
       ]
     },
     {
-      "id": 7,
-      "name": "b",
+      "id": 6,
+      "name": "index",
       "kind": "Variable",
-      "owning_scope_id": 5,
+      "owning_scope_id": 3,
       "introduced_scope_id": null,
       "origin": {
-        "ast_path": "/statement_pool/6",
+        "ast_path": "/statement_pool/3",
         "entity_kind": "statement",
         "role": "local_binding",
-        "ast_id": 6,
+        "ast_id": 3,
         "source_location": {
-          "line": 17,
+          "line": 8,
           "column": 5
         }
       },
       "source_location": {
         "source_id": 0,
-        "path": "examples/ast/statement_assignment_probe.flow",
-        "line": 16,
+        "path": "examples/ast/control_flow_unary_probe.flow",
+        "line": 7,
         "column": 5
       },
       "facts": [
@@ -356,28 +330,26 @@
       ]
     },
     {
+      "ast_path": "/block_pool/2",
+      "symbol_ids": [],
+      "scope_ids": [
+        5
+      ]
+    },
+    {
+      "ast_path": "/block_pool/3",
+      "symbol_ids": [],
+      "scope_ids": [
+        6
+      ]
+    },
+    {
       "ast_path": "/declaration_pool/0",
       "symbol_ids": [
         2
       ],
       "scope_ids": [
         3
-      ]
-    },
-    {
-      "ast_path": "/declaration_pool/0/parameters/0",
-      "symbol_ids": [
-        3
-      ],
-      "scope_ids": []
-    },
-    {
-      "ast_path": "/declaration_pool/1",
-      "symbol_ids": [
-        5
-      ],
-      "scope_ids": [
-        5
       ]
     },
     {
@@ -392,21 +364,28 @@
     {
       "ast_path": "/statement_pool/0",
       "symbol_ids": [
+        3
+      ],
+      "scope_ids": []
+    },
+    {
+      "ast_path": "/statement_pool/1",
+      "symbol_ids": [
         4
       ],
       "scope_ids": []
     },
     {
-      "ast_path": "/statement_pool/5",
+      "ast_path": "/statement_pool/2",
       "symbol_ids": [
-        6
+        5
       ],
       "scope_ids": []
     },
     {
-      "ast_path": "/statement_pool/6",
+      "ast_path": "/statement_pool/3",
       "symbol_ids": [
-        7
+        6
       ],
       "scope_ids": []
     }
@@ -423,6 +402,10 @@
     {
       "id": 2,
       "statement_ids": []
+    },
+    {
+      "id": 3,
+      "statement_ids": []
     }
   ],
   "statements": [
@@ -433,95 +416,143 @@
       "target_kind": null,
       "source_location": {
         "source_id": 0,
-        "path": "examples/ast/statement_assignment_probe.flow",
+        "path": "examples/ast/control_flow_unary_probe.flow",
         "line": 4,
         "column": 5
       }
     },
     {
       "id": 1,
-      "kind": "assignment",
-      "source_form": "equals_assignment",
-      "target_kind": "identifier",
+      "kind": "let",
+      "source_form": null,
+      "target_kind": null,
       "source_location": {
         "source_id": 0,
-        "path": "examples/ast/statement_assignment_probe.flow",
+        "path": "examples/ast/control_flow_unary_probe.flow",
         "line": 5,
         "column": 5
       }
     },
     {
       "id": 2,
-      "kind": "assignment",
-      "source_form": "equals_assignment",
-      "target_kind": "identifier",
-      "source_location": {
-        "source_id": 0,
-        "path": "examples/ast/statement_assignment_probe.flow",
-        "line": 8,
-        "column": 9
-      }
-    },
-    {
-      "id": 3,
-      "kind": "if",
+      "kind": "let",
       "source_form": null,
       "target_kind": null,
       "source_location": {
         "source_id": 0,
-        "path": "examples/ast/statement_assignment_probe.flow",
+        "path": "examples/ast/control_flow_unary_probe.flow",
+        "line": 6,
+        "column": 5
+      }
+    },
+    {
+      "id": 3,
+      "kind": "let",
+      "source_form": null,
+      "target_kind": null,
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/ast/control_flow_unary_probe.flow",
         "line": 7,
         "column": 5
       }
     },
     {
       "id": 4,
-      "kind": "return",
-      "source_form": "keyword_return",
-      "target_kind": null,
+      "kind": "placement",
+      "source_form": "arrow_placement",
+      "target_kind": "identifier",
       "source_location": {
         "source_id": 0,
-        "path": "examples/ast/statement_assignment_probe.flow",
-        "line": 11,
+        "path": "examples/ast/control_flow_unary_probe.flow",
+        "line": 9,
         "column": 5
       }
     },
     {
       "id": 5,
-      "kind": "let",
-      "source_form": null,
-      "target_kind": null,
+      "kind": "placement",
+      "source_form": "arrow_placement",
+      "target_kind": "identifier",
       "source_location": {
         "source_id": 0,
-        "path": "examples/ast/statement_assignment_probe.flow",
-        "line": 15,
-        "column": 5
+        "path": "examples/ast/control_flow_unary_probe.flow",
+        "line": 12,
+        "column": 9
       }
     },
     {
       "id": 6,
-      "kind": "let",
+      "kind": "continue",
       "source_form": null,
       "target_kind": null,
       "source_location": {
         "source_id": 0,
-        "path": "examples/ast/statement_assignment_probe.flow",
-        "line": 16,
-        "column": 5
+        "path": "examples/ast/control_flow_unary_probe.flow",
+        "line": 14,
+        "column": 13
       }
     },
     {
       "id": 7,
-      "kind": "assignment",
-      "source_form": "equals_assignment",
-      "target_kind": "identifier",
+      "kind": "if",
+      "source_form": null,
+      "target_kind": null,
       "source_location": {
         "source_id": 0,
-        "path": "examples/ast/statement_assignment_probe.flow",
+        "path": "examples/ast/control_flow_unary_probe.flow",
+        "line": 13,
+        "column": 9
+      }
+    },
+    {
+      "id": 8,
+      "kind": "continue",
+      "source_form": null,
+      "target_kind": null,
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/ast/control_flow_unary_probe.flow",
         "line": 17,
+        "column": 13
+      }
+    },
+    {
+      "id": 9,
+      "kind": "if",
+      "source_form": null,
+      "target_kind": null,
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/ast/control_flow_unary_probe.flow",
+        "line": 16,
+        "column": 9
+      }
+    },
+    {
+      "id": 10,
+      "kind": "break",
+      "source_form": null,
+      "target_kind": null,
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/ast/control_flow_unary_probe.flow",
+        "line": 19,
+        "column": 9
+      }
+    },
+    {
+      "id": 11,
+      "kind": "while",
+      "source_form": null,
+      "target_kind": null,
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/ast/control_flow_unary_probe.flow",
+        "line": 11,
         "column": 5
       }
     }
   ],
-  "expression_count": 16
+  "expression_count": 20
 }
