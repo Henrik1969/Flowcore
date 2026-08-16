@@ -224,6 +224,23 @@
         {
             "id": 0,
             "kind": "let",
+            "payload": {
+                "name": "value",
+                "type_ref": {
+                    "kind": "named",
+                    "text": "int",
+                    "payload": {
+                        "name_segments": [
+                            "int"
+                        ]
+                    },
+                    "location": {
+                        "line": 5,
+                        "column": 13
+                    }
+                },
+                "initializer_expression": 0
+            },
             "name": "value",
             "type": "int",
             "type_ref": {
@@ -247,6 +264,18 @@
         {
             "id": 1,
             "kind": "assignment",
+            "payload": {
+                "target": {
+                    "kind": "identifier",
+                    "name": "value",
+                    "location": {
+                        "line": 6,
+                        "column": 5
+                    }
+                },
+                "value_expression": 1,
+                "source_form": "equals_assignment"
+            },
             "name": "value",
             "has_value": true,
             "expression_ids": [
@@ -256,6 +285,18 @@
         {
             "id": 2,
             "kind": "assignment",
+            "payload": {
+                "target": {
+                    "kind": "identifier",
+                    "name": "value",
+                    "location": {
+                        "line": 9,
+                        "column": 9
+                    }
+                },
+                "value_expression": 7,
+                "source_form": "equals_assignment"
+            },
             "name": "value",
             "has_value": true,
             "expression_ids": [
@@ -265,6 +306,11 @@
         {
             "id": 3,
             "kind": "if",
+            "payload": {
+                "condition_expression": 4,
+                "then_block": 1,
+                "else_arm": null
+            },
             "has_condition": true,
             "expression_ids": [
                 4
@@ -276,6 +322,10 @@
         {
             "id": 4,
             "kind": "return",
+            "payload": {
+                "value_expression": 10,
+                "source_form": "keyword_return"
+            },
             "has_value": true,
             "expression_ids": [
                 10
@@ -284,6 +334,23 @@
         {
             "id": 5,
             "kind": "let",
+            "payload": {
+                "name": "a",
+                "type_ref": {
+                    "kind": "named",
+                    "text": "int",
+                    "payload": {
+                        "name_segments": [
+                            "int"
+                        ]
+                    },
+                    "location": {
+                        "line": 16,
+                        "column": 9
+                    }
+                },
+                "initializer_expression": 11
+            },
             "name": "a",
             "type": "int",
             "type_ref": {
@@ -307,6 +374,23 @@
         {
             "id": 6,
             "kind": "let",
+            "payload": {
+                "name": "b",
+                "type_ref": {
+                    "kind": "named",
+                    "text": "int",
+                    "payload": {
+                        "name_segments": [
+                            "int"
+                        ]
+                    },
+                    "location": {
+                        "line": 17,
+                        "column": 9
+                    }
+                },
+                "initializer_expression": 12
+            },
             "name": "b",
             "type": "int",
             "type_ref": {
@@ -330,6 +414,18 @@
         {
             "id": 7,
             "kind": "assignment",
+            "payload": {
+                "target": {
+                    "kind": "identifier",
+                    "name": "a",
+                    "location": {
+                        "line": 18,
+                        "column": 5
+                    }
+                },
+                "value_expression": 13,
+                "source_form": "equals_assignment"
+            },
             "name": "a",
             "has_value": true,
             "expression_ids": [

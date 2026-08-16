@@ -306,6 +306,10 @@
         {
             "id": 0,
             "kind": "return",
+            "payload": {
+                "value_expression": 0,
+                "source_form": "keyword_return"
+            },
             "has_value": true,
             "expression_ids": [
                 0
@@ -314,6 +318,10 @@
         {
             "id": 1,
             "kind": "return",
+            "payload": {
+                "value_expression": 3,
+                "source_form": "keyword_return"
+            },
             "has_value": true,
             "expression_ids": [
                 3
@@ -322,6 +330,23 @@
         {
             "id": 2,
             "kind": "let",
+            "payload": {
+                "name": "x",
+                "type_ref": {
+                    "kind": "named",
+                    "text": "int",
+                    "payload": {
+                        "name_segments": [
+                            "int"
+                        ]
+                    },
+                    "location": {
+                        "line": 13,
+                        "column": 9
+                    }
+                },
+                "initializer_expression": 4
+            },
             "name": "x",
             "type": "int",
             "type_ref": {
@@ -345,6 +370,23 @@
         {
             "id": 3,
             "kind": "let",
+            "payload": {
+                "name": "y",
+                "type_ref": {
+                    "kind": "named",
+                    "text": "int",
+                    "payload": {
+                        "name_segments": [
+                            "int"
+                        ]
+                    },
+                    "location": {
+                        "line": 14,
+                        "column": 9
+                    }
+                },
+                "initializer_expression": 5
+            },
             "name": "y",
             "type": "int",
             "type_ref": {
@@ -368,6 +410,18 @@
         {
             "id": 4,
             "kind": "assignment",
+            "payload": {
+                "target": {
+                    "kind": "identifier",
+                    "name": "x",
+                    "location": {
+                        "line": 16,
+                        "column": 5
+                    }
+                },
+                "value_expression": 8,
+                "source_form": "equals_assignment"
+            },
             "name": "x",
             "has_value": true,
             "expression_ids": [
@@ -377,6 +431,18 @@
         {
             "id": 5,
             "kind": "assignment",
+            "payload": {
+                "target": {
+                    "kind": "identifier",
+                    "name": "x",
+                    "location": {
+                        "line": 19,
+                        "column": 9
+                    }
+                },
+                "value_expression": 13,
+                "source_form": "equals_assignment"
+            },
             "name": "x",
             "has_value": true,
             "expression_ids": [
@@ -386,6 +452,10 @@
         {
             "id": 6,
             "kind": "while",
+            "payload": {
+                "condition_expression": 11,
+                "body_block": 3
+            },
             "has_condition": true,
             "expression_ids": [
                 11
@@ -395,6 +465,18 @@
         {
             "id": 7,
             "kind": "assignment",
+            "payload": {
+                "target": {
+                    "kind": "identifier",
+                    "name": "y",
+                    "location": {
+                        "line": 23,
+                        "column": 9
+                    }
+                },
+                "value_expression": 18,
+                "source_form": "equals_assignment"
+            },
             "name": "y",
             "has_value": true,
             "expression_ids": [
@@ -404,6 +486,11 @@
         {
             "id": 8,
             "kind": "if",
+            "payload": {
+                "condition_expression": 16,
+                "then_block": 4,
+                "else_arm": null
+            },
             "has_condition": true,
             "expression_ids": [
                 16

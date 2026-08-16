@@ -202,6 +202,38 @@
         {
             "id": 0,
             "kind": "let",
+            "payload": {
+                "name": "xs",
+                "type_ref": {
+                    "kind": "generic",
+                    "text": "list<int>",
+                    "payload": {
+                        "constructor_segments": [
+                            "list"
+                        ],
+                        "arguments": [
+                            {
+                                "kind": "named",
+                                "text": "int",
+                                "payload": {
+                                    "name_segments": [
+                                        "int"
+                                    ]
+                                },
+                                "location": {
+                                    "line": 10,
+                                    "column": 15
+                                }
+                            }
+                        ]
+                    },
+                    "location": {
+                        "line": 10,
+                        "column": 10
+                    }
+                },
+                "initializer_expression": 0
+            },
             "name": "xs",
             "type": "list<int>",
             "type_ref": {
@@ -240,6 +272,23 @@
         {
             "id": 1,
             "kind": "let",
+            "payload": {
+                "name": "p",
+                "type_ref": {
+                    "kind": "named",
+                    "text": "Point",
+                    "payload": {
+                        "name_segments": [
+                            "Point"
+                        ]
+                    },
+                    "location": {
+                        "line": 11,
+                        "column": 9
+                    }
+                },
+                "initializer_expression": 4
+            },
             "name": "p",
             "type": "Point",
             "type_ref": {
@@ -263,6 +312,18 @@
         {
             "id": 2,
             "kind": "assignment",
+            "payload": {
+                "target": {
+                    "kind": "identifier",
+                    "name": "xs",
+                    "location": {
+                        "line": 13,
+                        "column": 5
+                    }
+                },
+                "value_expression": 7,
+                "source_form": "equals_assignment"
+            },
             "name": "xs",
             "has_value": true,
             "expression_ids": [
@@ -272,6 +333,18 @@
         {
             "id": 3,
             "kind": "assignment",
+            "payload": {
+                "target": {
+                    "kind": "identifier",
+                    "name": "p",
+                    "location": {
+                        "line": 14,
+                        "column": 5
+                    }
+                },
+                "value_expression": 11,
+                "source_form": "equals_assignment"
+            },
             "name": "p",
             "has_value": true,
             "expression_ids": [

@@ -12,9 +12,9 @@ Current baseline:
 
 ```text
 build: PASS
-AST golden tests: 20
+AST golden tests: 21
 Symbol projection tests: 2
-suite: 76 / 76
+suite: 78 / 78
 ```
 
 Current architecture checkpoint:
@@ -31,6 +31,8 @@ behind explicit stage boundaries.
 Documents in this directory:
 
 - [Roadmap](roadmap.md)
+- [v0.24 accepted-language coverage matrix](v0.24-accepted-language-coverage.md)
+- [C5 typed-statement sitrep](../../Flowmini/flowmini_v24_explicit_ast/docs/v0.24-c5-statement-payload-sitrep.md)
 - [Testing](testing.md)
 
 Active v0.24 implementation notes:

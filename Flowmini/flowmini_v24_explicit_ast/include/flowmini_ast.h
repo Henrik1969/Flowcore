@@ -36,9 +36,9 @@ enum class TopLevelKind {
 };
 
 enum class StatementKind {
-    Block,
     Let,
     Assignment,
+    Placement,
     If,
     While,
     Break,
@@ -220,26 +220,88 @@ struct ElseIf {
 
 using ElseArm = std::variant<ElseBlock, ElseIf>;
 
-struct Statement {
-    StatementKind kind = StatementKind::Unknown;
-    SourceLocation location;
+enum class StatementSourceForm {
+    EqualsAssignment,
+    ArrowPlacement,
+    KeywordReturn
+};
 
-    // Statement-shell metadata.
-    // For typed bindings:
-    //     name : Type(...)
+struct FieldPathSegment {
+    std::string name;
+    SourceLocation location;
+};
+
+struct IdentifierTarget {
+    std::string name;
+    SourceLocation location;
+};
+
+struct FieldPathTarget {
+    std::string base_identifier;
+    SourceLocation location;
+    std::vector<FieldPathSegment> fields;
+};
+
+struct IndexedTarget {
+    std::string base_identifier;
+    SourceLocation location;
+    std::vector<std::size_t> indexes;
+};
+
+using AssignableTarget = std::variant<IdentifierTarget, FieldPathTarget, IndexedTarget>;
+
+struct UnknownStatement { std::string text; };
+struct LetStatement {
     std::string name;
     TypeRef type;
-
-    bool has_initializer = false;
-    bool has_value = false;
-    bool has_condition = false;
-
-    std::optional<BlockId> body;
+    std::optional<std::size_t> initializer_expression;
+};
+struct AssignmentStatement {
+    AssignableTarget target;
+    std::size_t value_expression;
+    StatementSourceForm source_form = StatementSourceForm::EqualsAssignment;
+};
+struct PlacementStatement {
+    std::size_t value_expression;
+    AssignableTarget target;
+    StatementSourceForm source_form = StatementSourceForm::ArrowPlacement;
+};
+struct IfStatement {
+    std::size_t condition_expression;
+    BlockId then_block;
     std::optional<ElseArm> else_arm;
+};
+struct WhileStatement {
+    std::size_t condition_expression;
+    BlockId body_block;
+};
+struct BreakStatement {};
+struct ContinueStatement {};
+struct ReturnStatement {
+    std::optional<std::size_t> value_expression;
+    StatementSourceForm source_form = StatementSourceForm::KeywordReturn;
+};
+struct ExpressionStatement { std::size_t expression; };
+struct FlowStatement { std::vector<std::size_t> expressions; };
 
-    // For v24 this remains intentionally skeletal.
-    // Expressions and nested statement bodies are populated in later steps.
-    std::vector<std::size_t> expressions;
+struct Statement {
+    SourceLocation location;
+
+    using Payload = std::variant<
+        LetStatement,
+        AssignmentStatement,
+        PlacementStatement,
+        IfStatement,
+        WhileStatement,
+        BreakStatement,
+        ContinueStatement,
+        ReturnStatement,
+        ExpressionStatement,
+        FlowStatement,
+        UnknownStatement
+    >;
+
+    Payload payload = UnknownStatement{};
 };
 
 struct Block {
@@ -318,6 +380,7 @@ struct AstModule {
 const char* to_string(SourceUnitKind kind);
 const char* to_string(TopLevelKind kind);
 const char* to_string(StatementKind kind);
+const char* to_string(StatementSourceForm form);
 const char* to_string(ExpressionKind kind);
 const char* to_string(TypeRefKind kind);
 
@@ -325,6 +388,7 @@ TypeRefKind type_ref_kind(const TypeRef& type);
 std::string type_ref_text(const TypeRef& type);
 
 ExpressionKind expression_kind(const Expression& expression);
+StatementKind statement_kind(const Statement& statement);
 std::string expression_text(const Expression& expression,
                             const std::vector<Expression>& expression_pool);
 std::vector<std::size_t> expression_children(const Expression& expression);

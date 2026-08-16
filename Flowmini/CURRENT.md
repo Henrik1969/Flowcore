@@ -17,7 +17,7 @@ active C5 statement and frontend maturation
 
 ```text
 normal CMake/Ninja build:      PASS
-flowmini_ast_golden_tests:     PASS (20)
+flowmini_ast_golden_tests:     PASS (21)
 flowmini_symbol_projection:    PASS (2/2)
 flowmini_suite:                PASS (78/78)
 CTest:                         PASS (2/2)
@@ -26,8 +26,12 @@ CTest:                         PASS (2/2)
 Flowmini is still experimental and unfinished.
 
 The current v0.24 line provides an observable, regression-guarded expression
-and type-reference graph plus arena-owned statement/block structure. It is not
-yet a complete raw representation of the accepted language.
+and type-reference graph plus arena-owned statement/block structure. C5 is now
+complete: every statement kind is selected by its typed payload, conditional
+and loop ownership lives in those payloads, canonical arrow placement preserves
+closed assignable targets and source form, and obsolete shared statement fields
+are gone. The frontend is still not a complete raw representation of the
+accepted language because other matrix gaps remain.
 
 ## Run the current build
 
@@ -58,7 +62,7 @@ Expected result:
 
 ```text
 normal CMake/Ninja build:      PASS
-flowmini_ast_golden_tests:     PASS (20)
+flowmini_ast_golden_tests:     PASS (21)
 flowmini_symbol_projection:    PASS (2/2)
 flowmini_suite:                PASS (78/78)
 CTest:                         PASS (2/2)
@@ -113,11 +117,24 @@ The following are still future or incomplete work:
 
 ```text
 complete statement coverage for the accepted language
-complete ABI, flow-placement, print, and executable source-form coverage
+complete ABI and canonical flow-placement source-form coverage
+ordinary capability/provider call model for output; no core Print statement
 complete structural SymbolTable projection across the accepted language
 semantic name resolution
 type checking
 Graph IR lowering
 runtime execution semantics
 provider/capability resolution
+```
+
+The binding completion checklist is:
+
+```text
+docs/flowmini/v0.24-accepted-language-coverage.md
+```
+
+The completed C5 implementation checkpoint is recorded in:
+
+```text
+flowmini_v24_explicit_ast/docs/v0.24-c5-statement-payload-sitrep.md
 ```

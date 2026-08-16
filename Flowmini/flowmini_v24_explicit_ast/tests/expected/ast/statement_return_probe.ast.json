@@ -199,6 +199,10 @@
         {
             "id": 0,
             "kind": "return",
+            "payload": {
+                "value_expression": 0,
+                "source_form": "keyword_return"
+            },
             "has_value": true,
             "expression_ids": [
                 0
@@ -207,6 +211,10 @@
         {
             "id": 1,
             "kind": "return",
+            "payload": {
+                "value_expression": 4,
+                "source_form": "keyword_return"
+            },
             "has_value": true,
             "expression_ids": [
                 4
@@ -215,6 +223,11 @@
         {
             "id": 2,
             "kind": "if",
+            "payload": {
+                "condition_expression": 3,
+                "then_block": 2,
+                "else_arm": null
+            },
             "has_condition": true,
             "expression_ids": [
                 3
@@ -226,6 +239,10 @@
         {
             "id": 3,
             "kind": "return",
+            "payload": {
+                "value_expression": 7,
+                "source_form": "keyword_return"
+            },
             "has_value": true,
             "expression_ids": [
                 7

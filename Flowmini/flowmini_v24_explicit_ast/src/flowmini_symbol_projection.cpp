@@ -42,7 +42,7 @@ void project_import_decl(symboltable::SymbolTable& table,
 
 
 std::string statement_scope_debug_name(const Statement& statement) {
-    switch (statement.kind) {
+    switch (statement_kind(statement)) {
         case StatementKind::If:    return "if";
         case StatementKind::While: return "while";
         default:                   return "block";
@@ -63,25 +63,35 @@ void project_statement_binding(symboltable::SymbolTable& table,
     }
     const auto& statement = module.statement_pool[statementId];
 
-    if (statement.kind == StatementKind::Let && !statement.name.empty()) {
+    if (const auto* binding = std::get_if<LetStatement>(&statement.payload);
+        binding && !binding->name.empty()) {
         [[maybe_unused]] const auto variableSymbol =
             table.insertSymbol(owningScope,
-                               statement.name,
+                               binding->name,
                                symboltable::SymbolKind::Variable);
     }
 
-    if (statement.body && *statement.body < module.block_pool.size()) {
+    std::optional<BlockId> body;
+    const std::optional<ElseArm>* elseArm = nullptr;
+    if (const auto* ifStatement = std::get_if<IfStatement>(&statement.payload)) {
+        body = ifStatement->then_block;
+        elseArm = &ifStatement->else_arm;
+    } else if (const auto* whileStatement = std::get_if<WhileStatement>(&statement.payload)) {
+        body = whileStatement->body_block;
+    }
+
+    if (body && *body < module.block_pool.size()) {
         const auto blockScope =
             table.createScope(symboltable::ScopeKind::Block,
                               owningScope,
                               std::nullopt,
                               statement_scope_debug_name(statement));
 
-        project_block(table, module, blockScope, *statement.body);
+        project_block(table, module, blockScope, *body);
     }
 
-    if (statement.else_arm) {
-        if (const auto* elseBlock = std::get_if<ElseBlock>(&*statement.else_arm)) {
+    if (elseArm && *elseArm) {
+        if (const auto* elseBlock = std::get_if<ElseBlock>(&**elseArm)) {
             if (elseBlock->block < module.block_pool.size()) {
                 const auto elseScope =
                     table.createScope(symboltable::ScopeKind::Block,
@@ -90,7 +100,7 @@ void project_statement_binding(symboltable::SymbolTable& table,
                                       "else");
                 project_block(table, module, elseScope, elseBlock->block);
             }
-        } else if (const auto* elseIf = std::get_if<ElseIf>(&*statement.else_arm)) {
+        } else if (const auto* elseIf = std::get_if<ElseIf>(&**elseArm)) {
             project_statement_binding(table, module, owningScope, elseIf->if_statement);
         }
     }

@@ -189,6 +189,10 @@
         {
             "id": 0,
             "kind": "return",
+            "payload": {
+                "value_expression": 0,
+                "source_form": "keyword_return"
+            },
             "has_value": true,
             "expression_ids": [
                 0
@@ -197,6 +201,23 @@
         {
             "id": 1,
             "kind": "let",
+            "payload": {
+                "name": "scalar",
+                "type_ref": {
+                    "kind": "named",
+                    "text": "int",
+                    "payload": {
+                        "name_segments": [
+                            "int"
+                        ]
+                    },
+                    "location": {
+                        "line": 9,
+                        "column": 14
+                    }
+                },
+                "initializer_expression": 1
+            },
             "name": "scalar",
             "type": "int",
             "type_ref": {
@@ -220,6 +241,38 @@
         {
             "id": 2,
             "kind": "let",
+            "payload": {
+                "name": "values",
+                "type_ref": {
+                    "kind": "generic",
+                    "text": "list<int>",
+                    "payload": {
+                        "constructor_segments": [
+                            "list"
+                        ],
+                        "arguments": [
+                            {
+                                "kind": "named",
+                                "text": "int",
+                                "payload": {
+                                    "name_segments": [
+                                        "int"
+                                    ]
+                                },
+                                "location": {
+                                    "line": 10,
+                                    "column": 19
+                                }
+                            }
+                        ]
+                    },
+                    "location": {
+                        "line": 10,
+                        "column": 14
+                    }
+                },
+                "initializer_expression": 5
+            },
             "name": "values",
             "type": "list<int>",
             "type_ref": {
@@ -258,6 +311,24 @@
         {
             "id": 3,
             "kind": "let",
+            "payload": {
+                "name": "source",
+                "type_ref": {
+                    "kind": "named",
+                    "text": "stdin.text",
+                    "payload": {
+                        "name_segments": [
+                            "stdin",
+                            "text"
+                        ]
+                    },
+                    "location": {
+                        "line": 11,
+                        "column": 14
+                    }
+                },
+                "initializer_expression": 9
+            },
             "name": "source",
             "type": "stdin.text",
             "type_ref": {
@@ -282,6 +353,23 @@
         {
             "id": 4,
             "kind": "let",
+            "payload": {
+                "name": "nested",
+                "type_ref": {
+                    "kind": "named",
+                    "text": "int",
+                    "payload": {
+                        "name_segments": [
+                            "int"
+                        ]
+                    },
+                    "location": {
+                        "line": 14,
+                        "column": 18
+                    }
+                },
+                "initializer_expression": 11
+            },
             "name": "nested",
             "type": "int",
             "type_ref": {
@@ -305,6 +393,11 @@
         {
             "id": 5,
             "kind": "if",
+            "payload": {
+                "condition_expression": 10,
+                "then_block": 2,
+                "else_arm": null
+            },
             "has_condition": true,
             "expression_ids": [
                 10

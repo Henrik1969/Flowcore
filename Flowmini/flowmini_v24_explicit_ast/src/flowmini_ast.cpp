@@ -7,6 +7,7 @@
 // AST represents Flowmini source meaning.
 
 #include "flowmini_ast.h"
+#include <type_traits>
 #include <variant>
 
 namespace flowmini::ast {
@@ -297,6 +298,103 @@ namespace flowmini::ast {
         }
 
 
+        void dump_assignable_target_json(std::ostream& out, const AssignableTarget& target) {
+            std::visit([&out](const auto& value) {
+                using Target = std::decay_t<decltype(value)>;
+                out << "{";
+                if constexpr (std::is_same_v<Target, IdentifierTarget>) {
+                    out << "\"kind\": \"identifier\", \"name\": ";
+                    dump_json_string(out, value.name);
+                    out << ", \"location\": {\"line\": " << value.location.line
+                        << ", \"column\": " << value.location.column << "}";
+                } else if constexpr (std::is_same_v<Target, FieldPathTarget>) {
+                    out << "\"kind\": \"field_path\", \"base_identifier\": ";
+                    dump_json_string(out, value.base_identifier);
+                    out << ", \"location\": {\"line\": " << value.location.line
+                        << ", \"column\": " << value.location.column << "}, \"fields\": [";
+                    for (std::size_t index = 0; index < value.fields.size(); ++index) {
+                        if (index > 0) { out << ", "; }
+                        out << "{\"name\": ";
+                        dump_json_string(out, value.fields[index].name);
+                        out << ", \"location\": {\"line\": " << value.fields[index].location.line
+                            << ", \"column\": " << value.fields[index].location.column << "}}";
+                    }
+                    out << "]";
+                } else {
+                    out << "\"kind\": \"indexed\", \"base_identifier\": ";
+                    dump_json_string(out, value.base_identifier);
+                    out << ", \"location\": {\"line\": " << value.location.line
+                        << ", \"column\": " << value.location.column << "}, \"indexes\": ";
+                    dump_id_array(out, value.indexes);
+                }
+                out << "}";
+            }, target);
+        }
+
+        void dump_statement_payload_json(std::ostream& out, const Statement& statement) {
+            std::visit([&out](const auto& payload) {
+                using Payload = std::decay_t<decltype(payload)>;
+                out << "{";
+                if constexpr (std::is_same_v<Payload, LetStatement>) {
+                    out << "\"name\": ";
+                    dump_json_string(out, payload.name);
+                    out << ", \"type_ref\": ";
+                    dump_type_ref_json(out, payload.type);
+                    out << ", \"initializer_expression\": ";
+                    dump_optional_id(out, payload.initializer_expression);
+                } else if constexpr (std::is_same_v<Payload, AssignmentStatement>) {
+                    out << "\"target\": ";
+                    dump_assignable_target_json(out, payload.target);
+                    out << ", \"value_expression\": ";
+                    out << payload.value_expression;
+                    out << ", \"source_form\": ";
+                    dump_json_string(out, to_string(payload.source_form));
+                } else if constexpr (std::is_same_v<Payload, PlacementStatement>) {
+                    out << "\"value_expression\": ";
+                    out << payload.value_expression;
+                    out << ", \"target\": ";
+                    dump_assignable_target_json(out, payload.target);
+                    out << ", \"source_form\": ";
+                    dump_json_string(out, to_string(payload.source_form));
+                } else if constexpr (std::is_same_v<Payload, IfStatement>) {
+                    out << "\"condition_expression\": ";
+                    out << payload.condition_expression;
+                    out << ", \"then_block\": ";
+                    out << payload.then_block;
+                    out << ", \"else_arm\": ";
+                    if (!payload.else_arm) {
+                        out << "null";
+                    } else if (const auto* arm = std::get_if<ElseBlock>(&*payload.else_arm)) {
+                        out << "{\"kind\": \"else_block\", \"block\": " << arm->block << "}";
+                    } else {
+                        const auto& elseIfArm = std::get<ElseIf>(*payload.else_arm);
+                        out << "{\"kind\": \"else_if\", \"if_statement\": "
+                            << elseIfArm.if_statement << "}";
+                    }
+                } else if constexpr (std::is_same_v<Payload, WhileStatement>) {
+                    out << "\"condition_expression\": ";
+                    out << payload.condition_expression;
+                    out << ", \"body_block\": ";
+                    out << payload.body_block;
+                } else if constexpr (std::is_same_v<Payload, ReturnStatement>) {
+                    out << "\"value_expression\": ";
+                    dump_optional_id(out, payload.value_expression);
+                    out << ", \"source_form\": ";
+                    dump_json_string(out, to_string(payload.source_form));
+                } else if constexpr (std::is_same_v<Payload, ExpressionStatement>) {
+                    out << "\"expression\": ";
+                    out << payload.expression;
+                } else if constexpr (std::is_same_v<Payload, FlowStatement>) {
+                    out << "\"expressions\": ";
+                    dump_id_array(out, payload.expressions);
+                } else if constexpr (std::is_same_v<Payload, UnknownStatement>) {
+                    out << "\"text\": ";
+                    dump_json_string(out, payload.text);
+                }
+                out << "}";
+            }, statement.payload);
+        }
+
         void dump_statement_pool_json(std::ostream& out,
                                       const std::vector<Statement>& statements,
                                       const unsigned indent) {
@@ -307,6 +405,45 @@ namespace flowmini::ast {
 
                 for (std::size_t i = 0; i < statements.size(); ++i) {
                     const auto& statement = statements[i];
+                    const auto kind = statement_kind(statement);
+                    const auto* let = std::get_if<LetStatement>(&statement.payload);
+                    const auto* assignment = std::get_if<AssignmentStatement>(&statement.payload);
+                    const auto* placement = std::get_if<PlacementStatement>(&statement.payload);
+                    const auto* ifStatement = std::get_if<IfStatement>(&statement.payload);
+                    const auto* whileStatement = std::get_if<WhileStatement>(&statement.payload);
+                    const auto* returnStatement = std::get_if<ReturnStatement>(&statement.payload);
+                    const auto* expressionStatement = std::get_if<ExpressionStatement>(&statement.payload);
+                    const auto* flowStatement = std::get_if<FlowStatement>(&statement.payload);
+                    std::vector<std::size_t> expressionIds;
+                    if (let) {
+                        if (let->initializer_expression) {
+                            expressionIds.push_back(*let->initializer_expression);
+                        }
+                    } else if (assignment) {
+                        expressionIds.push_back(assignment->value_expression);
+                        if (const auto* target = std::get_if<IndexedTarget>(&assignment->target)) {
+                            expressionIds.insert(expressionIds.end(),
+                                                 target->indexes.begin(), target->indexes.end());
+                        }
+                    } else if (placement) {
+                        expressionIds.push_back(placement->value_expression);
+                        if (const auto* target = std::get_if<IndexedTarget>(&placement->target)) {
+                            expressionIds.insert(expressionIds.end(),
+                                                 target->indexes.begin(), target->indexes.end());
+                        }
+                    } else if (ifStatement) {
+                        expressionIds.push_back(ifStatement->condition_expression);
+                    } else if (whileStatement) {
+                        expressionIds.push_back(whileStatement->condition_expression);
+                    } else if (returnStatement) {
+                        if (returnStatement->value_expression) {
+                            expressionIds.push_back(*returnStatement->value_expression);
+                        }
+                    } else if (expressionStatement) {
+                        expressionIds.push_back(expressionStatement->expression);
+                    } else if (flowStatement) {
+                        expressionIds = flowStatement->expressions;
+                    }
 
                     dump_indent(out, indent + 2);
                     out << "{\n";
@@ -315,80 +452,96 @@ namespace flowmini::ast {
                     out << "\"id\": " << i << ",\n";
                     dump_indent(out, indent + 4);
                     out << "\"kind\": ";
-                    dump_json_string(out, to_string(statement.kind));
+                    dump_json_string(out, to_string(kind));
+                    out << ",\n";
+                    dump_indent(out, indent + 4);
+                    out << "\"payload\": ";
+                    dump_statement_payload_json(out, statement);
 
-                    if (!statement.name.empty()) {
+                    const std::string* name = nullptr;
+                    if (let && !let->name.empty()) {
+                        name = &let->name;
+                    } else if (assignment) {
+                        if (const auto* target = std::get_if<IdentifierTarget>(&assignment->target)) {
+                            name = &target->name;
+                        }
+                    }
+                    if (name && !name->empty()) {
                         out << ",\n";
                         dump_indent(out, indent + 4);
                         out << "\"name\": ";
-                        dump_json_string(out, statement.name);
+                        dump_json_string(out, *name);
                     }
 
-                    if (type_ref_kind(statement.type) != TypeRefKind::Unknown) {
+                    if (let && type_ref_kind(let->type) != TypeRefKind::Unknown) {
                         out << ",\n";
                         dump_indent(out, indent + 4);
                         out << "\"type\": ";
-                        dump_json_string(out, type_ref_text(statement.type));
+                        dump_json_string(out, type_ref_text(let->type));
                         out << ",\n";
                         dump_indent(out, indent + 4);
                         out << "\"type_ref\": ";
-                        dump_type_ref_json(out, statement.type);
+                        dump_type_ref_json(out, let->type);
                     }
 
-                    if (statement.has_initializer) {
+                    if (let && let->initializer_expression) {
                         out << ",\n";
                         dump_indent(out, indent + 4);
                         out << "\"has_initializer\": true";
                     }
 
-                    if (statement.has_value) {
+                    if (assignment || placement ||
+                        (returnStatement && returnStatement->value_expression)) {
                         out << ",\n";
                         dump_indent(out, indent + 4);
                         out << "\"has_value\": true";
                     }
 
-                    if (statement.has_condition) {
+                    if (ifStatement || whileStatement) {
                         out << ",\n";
                         dump_indent(out, indent + 4);
                         out << "\"has_condition\": true";
                     }
 
-                    if (!statement.expressions.empty()) {
+                    if (!expressionIds.empty()) {
                         out << ",\n";
                         dump_indent(out, indent + 4);
                         out << "\"expression_ids\": [";
-                        for (std::size_t exprIndex = 0; exprIndex < statement.expressions.size(); ++exprIndex) {
+                        for (std::size_t exprIndex = 0; exprIndex < expressionIds.size(); ++exprIndex) {
                             if (exprIndex > 0) {
                                 out << ", ";
                             }
-                            out << statement.expressions[exprIndex];
+                            out << expressionIds[exprIndex];
                         }
                         out << "]";
                     }
 
-                    if (statement.kind == StatementKind::If && !statement.expressions.empty()) {
+                    if (ifStatement) {
                         out << ",\n";
                         dump_indent(out, indent + 4);
-                        out << "\"condition\": " << statement.expressions.front();
+                        out << "\"condition\": " << ifStatement->condition_expression;
                     }
 
-                    if (statement.body) {
+                    if (ifStatement) {
                         out << ",\n";
                         dump_indent(out, indent + 4);
-                        out << (statement.kind == StatementKind::If ? "\"then_block\": " : "\"body_block\": ")
-                            << *statement.body;
+                        out << "\"then_block\": " << ifStatement->then_block;
+                    } else if (whileStatement) {
+                        out << ",\n";
+                        dump_indent(out, indent + 4);
+                        out << "\"body_block\": " << whileStatement->body_block;
                     }
 
-                    if (statement.kind == StatementKind::If) {
+                    if (ifStatement) {
                         out << ",\n";
                         dump_indent(out, indent + 4);
                         out << "\"else_arm\": ";
-                        if (!statement.else_arm) {
+                        if (!ifStatement->else_arm) {
                             out << "null";
-                        } else if (const auto* arm = std::get_if<ElseBlock>(&*statement.else_arm)) {
+                        } else if (const auto* arm = std::get_if<ElseBlock>(&*ifStatement->else_arm)) {
                             out << "{\"kind\": \"else_block\", \"block\": " << arm->block << "}";
                         } else {
-                            const auto& elseIfArm = std::get<ElseIf>(*statement.else_arm);
+                            const auto& elseIfArm = std::get<ElseIf>(*ifStatement->else_arm);
                             out << "{\"kind\": \"else_if\", \"if_statement\": "
                                 << elseIfArm.if_statement << "}";
                         }
@@ -678,9 +831,9 @@ namespace flowmini::ast {
 
     const char* to_string(StatementKind kind) {
         switch (kind) {
-            case StatementKind::Block:      return "block";
             case StatementKind::Let:        return "let";
             case StatementKind::Assignment: return "assignment";
+            case StatementKind::Placement:  return "placement";
             case StatementKind::If:         return "if";
             case StatementKind::While:      return "while";
             case StatementKind::Break:      return "break";
@@ -691,6 +844,44 @@ namespace flowmini::ast {
             case StatementKind::Unknown:    return "unknown";
         }
         return "unknown";
+    }
+
+    const char* to_string(StatementSourceForm form) {
+        switch (form) {
+            case StatementSourceForm::EqualsAssignment: return "equals_assignment";
+            case StatementSourceForm::ArrowPlacement:   return "arrow_placement";
+            case StatementSourceForm::KeywordReturn:    return "keyword_return";
+        }
+        return "unknown";
+    }
+
+    StatementKind statement_kind(const Statement& statement) {
+        return std::visit([](const auto& payload) {
+            using Payload = std::decay_t<decltype(payload)>;
+            if constexpr (std::is_same_v<Payload, LetStatement>) {
+                return StatementKind::Let;
+            } else if constexpr (std::is_same_v<Payload, AssignmentStatement>) {
+                return StatementKind::Assignment;
+            } else if constexpr (std::is_same_v<Payload, PlacementStatement>) {
+                return StatementKind::Placement;
+            } else if constexpr (std::is_same_v<Payload, IfStatement>) {
+                return StatementKind::If;
+            } else if constexpr (std::is_same_v<Payload, WhileStatement>) {
+                return StatementKind::While;
+            } else if constexpr (std::is_same_v<Payload, BreakStatement>) {
+                return StatementKind::Break;
+            } else if constexpr (std::is_same_v<Payload, ContinueStatement>) {
+                return StatementKind::Continue;
+            } else if constexpr (std::is_same_v<Payload, ReturnStatement>) {
+                return StatementKind::Return;
+            } else if constexpr (std::is_same_v<Payload, ExpressionStatement>) {
+                return StatementKind::Expression;
+            } else if constexpr (std::is_same_v<Payload, FlowStatement>) {
+                return StatementKind::Flow;
+            } else {
+                return StatementKind::Unknown;
+            }
+        }, statement.payload);
     }
 
     const char* to_string(ExpressionKind kind) {

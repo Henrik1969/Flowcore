@@ -9,7 +9,7 @@ provisional until each milestone is activated.
 ```text
 v24_explicit_ast
 build: OK
-AST golden tests: 20 / 20
+AST golden tests: 21 / 21
 Symbol projection tests: 2 / 2
 suite: 78 / 78
 CTest: 2 / 2
@@ -17,10 +17,12 @@ CTest: 2 / 2
 
 ## Immediate
 
-1. Complete raw-AST coverage for the accepted language.
-2. Complete the structural, lossless SymbolTable projection.
-3. Mature identities, ownership invariants, source links, and frontend tests.
-4. Begin semantic analysis only after that frontend border is trustworthy.
+1. Maintain and close the
+   [v0.24 accepted-language coverage matrix](v0.24-accepted-language-coverage.md).
+2. Complete raw-AST coverage for the accepted language.
+3. Complete the structural, lossless SymbolTable projection.
+4. Mature identities, ownership invariants, source links, and frontend tests.
+5. Begin semantic analysis only after that frontend border is trustworthy.
 
 ## Next structural versions
 

@@ -155,6 +155,162 @@ def validate_statement_types(statements: object, context: str) -> None:
             validate_statement_types(statement["body_statements"], statement_context)
 
 
+def statement_optional_id(payload: dict, field: str, context: str) -> list[int]:
+    value = payload.get(field)
+    if value is None:
+        return []
+    if not isinstance(value, int):
+        raise TypeError(f"{context}: {field} must be an expression id or null")
+    return [value]
+
+
+def require_exact_fields(payload: dict, fields: set[str], context: str) -> None:
+    actual = set(payload)
+    if actual != fields:
+        raise ValueError(
+            f"{context}: payload fields {sorted(actual)} != required {sorted(fields)}"
+        )
+
+
+def validate_assignable_target(target: object, context: str) -> list[int]:
+    if not isinstance(target, dict):
+        raise TypeError(f"{context}: assignable target must be an object")
+    kind = target.get("kind")
+    if kind == "identifier":
+        require_exact_fields(target, {"kind", "name", "location"}, context)
+        if not isinstance(target.get("name"), str) or not target["name"]:
+            raise TypeError(f"{context}: identifier target requires a non-empty name")
+        location(target.get("location"), f"{context}: identifier target")
+        return []
+    if kind == "field_path":
+        require_exact_fields(
+            target, {"kind", "base_identifier", "location", "fields"}, context
+        )
+        if not isinstance(target.get("base_identifier"), str) or not target["base_identifier"]:
+            raise TypeError(f"{context}: field-path target requires a base identifier")
+        location(target.get("location"), f"{context}: field-path target")
+        fields = target.get("fields")
+        if not isinstance(fields, list) or not fields:
+            raise TypeError(f"{context}: field-path target requires one or more fields")
+        for index, field in enumerate(fields):
+            if not isinstance(field, dict) or not isinstance(field.get("name"), str) or not field["name"]:
+                raise TypeError(f"{context}: field {index} requires a non-empty name")
+            location(field.get("location"), f"{context}: field {index}")
+        return []
+    if kind == "indexed":
+        require_exact_fields(
+            target, {"kind", "base_identifier", "location", "indexes"}, context
+        )
+        if not isinstance(target.get("base_identifier"), str) or not target["base_identifier"]:
+            raise TypeError(f"{context}: indexed target requires a base identifier")
+        location(target.get("location"), f"{context}: indexed target")
+        indexes = target.get("indexes")
+        if not isinstance(indexes, list) or not indexes or not all(isinstance(index, int) for index in indexes):
+            raise TypeError(f"{context}: indexed target requires one or more expression IDs")
+        return indexes
+    raise ValueError(f"{context}: unsupported assignable target kind {kind!r}")
+
+
+def validate_statement_payload(statement: dict, context: str) -> None:
+    kind = statement.get("kind")
+    payload = statement.get("payload")
+    if not isinstance(kind, str) or not isinstance(payload, dict):
+        raise TypeError(f"{context}: kind and canonical payload are required")
+
+    canonical_expressions: list[int] | None = None
+    if kind == "let":
+        require_exact_fields(payload, {"name", "type_ref", "initializer_expression"}, context)
+        if not isinstance(payload.get("name"), str) or not payload["name"]:
+            raise TypeError(f"{context}: let payload requires a non-empty name")
+        canonical_type = validate_type_ref(payload.get("type_ref"), f"{context}: let payload")
+        if statement.get("name") != payload["name"]:
+            raise ValueError(f"{context}: name projection disagrees with let payload")
+        if statement.get("type") != canonical_type or statement.get("type_ref") != payload["type_ref"]:
+            raise ValueError(f"{context}: type projection disagrees with let payload")
+        canonical_expressions = statement_optional_id(payload, "initializer_expression", context)
+        if statement.get("has_initializer", False) != bool(canonical_expressions):
+            raise ValueError(f"{context}: has_initializer projection disagrees with let payload")
+    elif kind == "assignment":
+        require_exact_fields(payload, {"target", "value_expression", "source_form"}, context)
+        target_expressions = validate_assignable_target(
+            payload.get("target"), f"{context}: assignment payload"
+        )
+        if payload.get("source_form") != "equals_assignment":
+            raise ValueError(f"{context}: assignment requires equals_assignment source form")
+        target = payload["target"]
+        if target.get("kind") == "identifier" and statement.get("name") != target.get("name"):
+            raise ValueError(f"{context}: name projection disagrees with assignment target")
+        canonical_expressions = (
+            statement_optional_id(payload, "value_expression", context) + target_expressions
+        )
+        if statement.get("has_value", False) != bool(canonical_expressions):
+            raise ValueError(f"{context}: has_value projection disagrees with assignment payload")
+    elif kind == "placement":
+        require_exact_fields(payload, {"value_expression", "target", "source_form"}, context)
+        target_expressions = validate_assignable_target(
+            payload.get("target"), f"{context}: placement payload"
+        )
+        if payload.get("source_form") != "arrow_placement":
+            raise ValueError(f"{context}: placement requires arrow_placement source form")
+        canonical_expressions = (
+            statement_optional_id(payload, "value_expression", context) + target_expressions
+        )
+        if not statement_optional_id(payload, "value_expression", context):
+            raise ValueError(f"{context}: placement requires a value expression")
+        if statement.get("has_value", False) is not True:
+            raise ValueError(f"{context}: placement must project has_value")
+    elif kind == "return":
+        require_exact_fields(payload, {"value_expression", "source_form"}, context)
+        if payload.get("source_form") not in {"keyword_return", "arrow_placement"}:
+            raise ValueError(f"{context}: return has invalid source form")
+        canonical_expressions = statement_optional_id(payload, "value_expression", context)
+        if statement.get("has_value", False) != bool(canonical_expressions):
+            raise ValueError(f"{context}: has_value projection disagrees with return payload")
+    elif kind == "if":
+        require_exact_fields(payload, {"condition_expression", "then_block", "else_arm"}, context)
+        canonical_expressions = statement_optional_id(payload, "condition_expression", context)
+        if len(canonical_expressions) != 1:
+            raise ValueError(f"{context}: if requires a condition expression")
+        if statement.get("condition") != canonical_expressions[0]:
+            raise ValueError(f"{context}: condition projection disagrees with if payload")
+        if statement.get("has_condition", False) is not True:
+            raise ValueError(f"{context}: if must project has_condition")
+        if statement.get("then_block") != payload.get("then_block"):
+            raise ValueError(f"{context}: then_block projection disagrees with if payload")
+        if not isinstance(payload.get("then_block"), int):
+            raise TypeError(f"{context}: if requires a then_block ID")
+        if statement.get("else_arm") != payload.get("else_arm"):
+            raise ValueError(f"{context}: else_arm projection disagrees with if payload")
+    elif kind == "while":
+        require_exact_fields(payload, {"condition_expression", "body_block"}, context)
+        canonical_expressions = statement_optional_id(payload, "condition_expression", context)
+        if len(canonical_expressions) != 1:
+            raise ValueError(f"{context}: while requires a condition expression")
+        if statement.get("has_condition", False) is not True:
+            raise ValueError(f"{context}: while must project has_condition")
+        if statement.get("body_block") != payload.get("body_block"):
+            raise ValueError(f"{context}: body_block projection disagrees with while payload")
+        if not isinstance(payload.get("body_block"), int):
+            raise TypeError(f"{context}: while requires a body_block ID")
+    elif kind in {"break", "continue"}:
+        require_exact_fields(payload, set(), context)
+    elif kind == "expression":
+        require_exact_fields(payload, {"expression"}, context)
+        canonical_expressions = statement_optional_id(payload, "expression", context)
+    elif kind == "flow":
+        require_exact_fields(payload, {"expressions"}, context)
+        canonical_expressions = id_array(payload, "expressions")
+    elif kind == "unknown":
+        require_exact_fields(payload, {"text"}, context)
+        if not isinstance(payload.get("text"), str):
+            raise TypeError(f"{context}: unknown payload requires text")
+    else:
+        raise ValueError(f"{context}: unsupported statement kind {kind!r}")
+
+    if canonical_expressions is not None and statement.get("expression_ids", []) != canonical_expressions:
+        raise ValueError(f"{context}: expression_ids projection disagrees with canonical payload")
+
+
 def validate_declaration_types(document: dict, path: Path) -> None:
     source_unit = document.get("source_unit")
     declarations = source_unit.get("declarations") if isinstance(source_unit, dict) else None
@@ -218,6 +374,7 @@ def validate_statement_arenas(document: dict, path: Path) -> None:
     for statement_id, statement in enumerate(statements):
         if not isinstance(statement, dict) or statement.get("id") != statement_id:
             raise ValueError(f"{path}: statement IDs must match their pool positions")
+        validate_statement_payload(statement, f"{path}: statement {statement_id}")
         validate_statement_types([statement], f"{path}: statement_pool")
         for field in ("then_block", "body_block"):
             if field in statement and statement[field] not in range(len(blocks)):
@@ -257,6 +414,13 @@ def validate(path: Path) -> None:
         raise TypeError(f"{path}: expression_pool must be an array")
     if document.get("expression_pool_size") != len(expressions):
         raise ValueError(f"{path}: expression_pool_size does not match expression_pool")
+
+    for statement in document["statement_pool"]:
+        for expression_id in statement.get("expression_ids", []):
+            if expression_id < 0 or expression_id >= len(expressions):
+                raise ValueError(
+                    f"{path}: statement {statement['id']}: dangling expression id {expression_id}"
+                )
 
     for expected_id, expression in enumerate(expressions):
         if expression.get("id") != expected_id:

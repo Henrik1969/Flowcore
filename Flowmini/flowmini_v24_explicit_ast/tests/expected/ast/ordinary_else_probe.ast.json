@@ -79,6 +79,23 @@
         {
             "id": 0,
             "kind": "let",
+            "payload": {
+                "name": "x",
+                "type_ref": {
+                    "kind": "named",
+                    "text": "int",
+                    "payload": {
+                        "name_segments": [
+                            "int"
+                        ]
+                    },
+                    "location": {
+                        "line": 5,
+                        "column": 9
+                    }
+                },
+                "initializer_expression": 0
+            },
             "name": "x",
             "type": "int",
             "type_ref": {
@@ -102,6 +119,18 @@
         {
             "id": 1,
             "kind": "assignment",
+            "payload": {
+                "target": {
+                    "kind": "identifier",
+                    "name": "x",
+                    "location": {
+                        "line": 7,
+                        "column": 9
+                    }
+                },
+                "value_expression": 4,
+                "source_form": "equals_assignment"
+            },
             "name": "x",
             "has_value": true,
             "expression_ids": [
@@ -111,6 +140,14 @@
         {
             "id": 2,
             "kind": "if",
+            "payload": {
+                "condition_expression": 1,
+                "then_block": 1,
+                "else_arm": {
+                    "kind": "else_block",
+                    "block": 2
+                }
+            },
             "has_condition": true,
             "expression_ids": [
                 1
@@ -125,6 +162,18 @@
         {
             "id": 3,
             "kind": "assignment",
+            "payload": {
+                "target": {
+                    "kind": "identifier",
+                    "name": "x",
+                    "location": {
+                        "line": 9,
+                        "column": 9
+                    }
+                },
+                "value_expression": 5,
+                "source_form": "equals_assignment"
+            },
             "name": "x",
             "has_value": true,
             "expression_ids": [

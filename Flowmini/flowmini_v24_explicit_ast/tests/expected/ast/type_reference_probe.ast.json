@@ -459,6 +459,54 @@
         {
             "id": 0,
             "kind": "let",
+            "payload": {
+                "name": "local",
+                "type_ref": {
+                    "kind": "generic",
+                    "text": "optional<collection.list<int>>",
+                    "payload": {
+                        "constructor_segments": [
+                            "optional"
+                        ],
+                        "arguments": [
+                            {
+                                "kind": "generic",
+                                "text": "collection.list<int>",
+                                "payload": {
+                                    "constructor_segments": [
+                                        "collection",
+                                        "list"
+                                    ],
+                                    "arguments": [
+                                        {
+                                            "kind": "named",
+                                            "text": "int",
+                                            "payload": {
+                                                "name_segments": [
+                                                    "int"
+                                                ]
+                                            },
+                                            "location": {
+                                                "line": 15,
+                                                "column": 38
+                                            }
+                                        }
+                                    ]
+                                },
+                                "location": {
+                                    "line": 15,
+                                    "column": 22
+                                }
+                            }
+                        ]
+                    },
+                    "location": {
+                        "line": 15,
+                        "column": 13
+                    }
+                },
+                "initializer_expression": 0
+            },
             "name": "local",
             "type": "optional<collection.list<int>>",
             "type_ref": {
@@ -513,6 +561,49 @@
         {
             "id": 1,
             "kind": "let",
+            "payload": {
+                "name": "scratch",
+                "type_ref": {
+                    "kind": "array",
+                    "text": "array<int>[Rows,2]",
+                    "payload": {
+                        "element_type": {
+                            "kind": "named",
+                            "text": "int",
+                            "payload": {
+                                "name_segments": [
+                                    "int"
+                                ]
+                            },
+                            "location": {
+                                "line": 16,
+                                "column": 21
+                            }
+                        },
+                        "extents": [
+                            {
+                                "text": "Rows",
+                                "location": {
+                                    "line": 16,
+                                    "column": 26
+                                }
+                            },
+                            {
+                                "text": "2",
+                                "location": {
+                                    "line": 16,
+                                    "column": 32
+                                }
+                            }
+                        ]
+                    },
+                    "location": {
+                        "line": 16,
+                        "column": 15
+                    }
+                },
+                "initializer_expression": 4
+            },
             "name": "scratch",
             "type": "array<int>[Rows,2]",
             "type_ref": {
@@ -562,6 +653,10 @@
         {
             "id": 2,
             "kind": "return",
+            "payload": {
+                "value_expression": 9,
+                "source_form": "keyword_return"
+            },
             "has_value": true,
             "expression_ids": [
                 9
@@ -570,6 +665,39 @@
         {
             "id": 3,
             "kind": "let",
+            "payload": {
+                "name": "values",
+                "type_ref": {
+                    "kind": "generic",
+                    "text": "collection.list<int>",
+                    "payload": {
+                        "constructor_segments": [
+                            "collection",
+                            "list"
+                        ],
+                        "arguments": [
+                            {
+                                "kind": "named",
+                                "text": "int",
+                                "payload": {
+                                    "name_segments": [
+                                        "int"
+                                    ]
+                                },
+                                "location": {
+                                    "line": 21,
+                                    "column": 30
+                                }
+                            }
+                        ]
+                    },
+                    "location": {
+                        "line": 21,
+                        "column": 14
+                    }
+                },
+                "initializer_expression": 10
+            },
             "name": "values",
             "type": "collection.list<int>",
             "type_ref": {

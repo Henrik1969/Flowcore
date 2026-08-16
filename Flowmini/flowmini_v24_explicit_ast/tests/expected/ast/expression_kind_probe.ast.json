@@ -228,6 +228,10 @@
         {
             "id": 0,
             "kind": "return",
+            "payload": {
+                "value_expression": 0,
+                "source_form": "keyword_return"
+            },
             "has_value": true,
             "expression_ids": [
                 0
@@ -236,6 +240,23 @@
         {
             "id": 1,
             "kind": "let",
+            "payload": {
+                "name": "a",
+                "type_ref": {
+                    "kind": "named",
+                    "text": "int",
+                    "payload": {
+                        "name_segments": [
+                            "int"
+                        ]
+                    },
+                    "location": {
+                        "line": 9,
+                        "column": 9
+                    }
+                },
+                "initializer_expression": 3
+            },
             "name": "a",
             "type": "int",
             "type_ref": {
@@ -259,6 +280,23 @@
         {
             "id": 2,
             "kind": "let",
+            "payload": {
+                "name": "b",
+                "type_ref": {
+                    "kind": "named",
+                    "text": "int",
+                    "payload": {
+                        "name_segments": [
+                            "int"
+                        ]
+                    },
+                    "location": {
+                        "line": 10,
+                        "column": 9
+                    }
+                },
+                "initializer_expression": 4
+            },
             "name": "b",
             "type": "int",
             "type_ref": {
@@ -282,6 +320,23 @@
         {
             "id": 3,
             "kind": "let",
+            "payload": {
+                "name": "c",
+                "type_ref": {
+                    "kind": "named",
+                    "text": "float",
+                    "payload": {
+                        "name_segments": [
+                            "float"
+                        ]
+                    },
+                    "location": {
+                        "line": 11,
+                        "column": 9
+                    }
+                },
+                "initializer_expression": 5
+            },
             "name": "c",
             "type": "float",
             "type_ref": {
@@ -305,6 +360,23 @@
         {
             "id": 4,
             "kind": "let",
+            "payload": {
+                "name": "s",
+                "type_ref": {
+                    "kind": "named",
+                    "text": "string",
+                    "payload": {
+                        "name_segments": [
+                            "string"
+                        ]
+                    },
+                    "location": {
+                        "line": 12,
+                        "column": 9
+                    }
+                },
+                "initializer_expression": 6
+            },
             "name": "s",
             "type": "string",
             "type_ref": {
@@ -328,6 +400,23 @@
         {
             "id": 5,
             "kind": "let",
+            "payload": {
+                "name": "flag",
+                "type_ref": {
+                    "kind": "named",
+                    "text": "Bool",
+                    "payload": {
+                        "name_segments": [
+                            "Bool"
+                        ]
+                    },
+                    "location": {
+                        "line": 13,
+                        "column": 12
+                    }
+                },
+                "initializer_expression": 7
+            },
             "name": "flag",
             "type": "Bool",
             "type_ref": {
@@ -351,6 +440,18 @@
         {
             "id": 6,
             "kind": "assignment",
+            "payload": {
+                "target": {
+                    "kind": "identifier",
+                    "name": "a",
+                    "location": {
+                        "line": 15,
+                        "column": 5
+                    }
+                },
+                "value_expression": 8,
+                "source_form": "equals_assignment"
+            },
             "name": "a",
             "has_value": true,
             "expression_ids": [
@@ -360,6 +461,18 @@
         {
             "id": 7,
             "kind": "assignment",
+            "payload": {
+                "target": {
+                    "kind": "identifier",
+                    "name": "a",
+                    "location": {
+                        "line": 18,
+                        "column": 9
+                    }
+                },
+                "value_expression": 12,
+                "source_form": "equals_assignment"
+            },
             "name": "a",
             "has_value": true,
             "expression_ids": [
@@ -369,6 +482,10 @@
         {
             "id": 8,
             "kind": "while",
+            "payload": {
+                "condition_expression": 9,
+                "body_block": 2
+            },
             "has_condition": true,
             "expression_ids": [
                 9
@@ -378,6 +495,18 @@
         {
             "id": 9,
             "kind": "assignment",
+            "payload": {
+                "target": {
+                    "kind": "identifier",
+                    "name": "b",
+                    "location": {
+                        "line": 22,
+                        "column": 9
+                    }
+                },
+                "value_expression": 16,
+                "source_form": "equals_assignment"
+            },
             "name": "b",
             "has_value": true,
             "expression_ids": [
@@ -387,6 +516,11 @@
         {
             "id": 10,
             "kind": "if",
+            "payload": {
+                "condition_expression": 15,
+                "then_block": 3,
+                "else_arm": null
+            },
             "has_condition": true,
             "expression_ids": [
                 15
