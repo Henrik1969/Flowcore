@@ -152,13 +152,23 @@ static void test_dump()
 {
     SymbolTable table;
     const auto global = table.globalScope();
-    [[maybe_unused]] const auto foo = table.insertSymbol(global, "foo", SymbolKind::Function);
+    const auto foo = table.insertSymbol(global, "foo", SymbolKind::Function);
+    table.symbol(foo).declarationLocation = SourceLocation{"sample.flow", 4, 7};
+    table.addFact(foo, Factoid{
+        .kind = FactoidKind::TypeReference,
+        .key = "return_type_spelling",
+        .value = std::string{"int64"},
+    });
 
     std::ostringstream out;
     table.dump(out);
     const auto text = out.str();
     assert(text.find("SymbolTable dump") != std::string::npos);
     assert(text.find("foo") != std::string::npos);
+    assert(text.find("declaration_location=sample.flow:4:7") != std::string::npos);
+    assert(text.find(
+        "Fact kind=TypeReference key=return_type_spelling value=\"int64\"")
+        != std::string::npos);
 }
 
 int main()

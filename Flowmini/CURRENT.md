@@ -30,8 +30,11 @@ and type-reference graph plus arena-owned statement/block structure. C5 is now
 complete: every statement kind is selected by its typed payload, conditional
 and loop ownership lives in those payloads, canonical arrow placement preserves
 closed assignable targets and source form, and obsolete shared statement fields
-are gone. The frontend is still not a complete raw representation of the
-accepted language because other matrix gaps remain.
+are gone. Structural SymbolTable projection now records factual declaration
+locations, source-unit kind, and unresolved declared/return/alias type spellings
+for represented AST forms. It performs no type resolution. The frontend is
+still not a complete raw representation of the accepted language because other
+matrix gaps remain.
 
 ## Run the current build
 

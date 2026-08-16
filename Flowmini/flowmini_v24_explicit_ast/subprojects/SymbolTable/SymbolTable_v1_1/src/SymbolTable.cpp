@@ -1,6 +1,8 @@
 #include "symboltable/SymbolTable.hpp"
 
+#include <iomanip>
 #include <stdexcept>
+#include <type_traits>
 #include <utility>
 
 namespace symboltable {
@@ -52,6 +54,53 @@ namespace {
         case ScopeKind::Anonymous: return "Anonymous";
     }
     return "Anonymous";
+}
+
+[[nodiscard]] std::string_view toString(FactoidKind kind) noexcept {
+    switch (kind) {
+        case FactoidKind::Visibility:       return "Visibility";
+        case FactoidKind::StorageClass:     return "StorageClass";
+        case FactoidKind::TypeReference:    return "TypeReference";
+        case FactoidKind::AbiTag:           return "AbiTag";
+        case FactoidKind::SourceLocation:   return "SourceLocation";
+        case FactoidKind::DeclarationState: return "DeclarationState";
+        case FactoidKind::ImportOrigin:     return "ImportOrigin";
+        case FactoidKind::ExportMarker:     return "ExportMarker";
+        case FactoidKind::GeneratedBy:      return "GeneratedBy";
+        case FactoidKind::Deprecated:       return "Deprecated";
+        case FactoidKind::UserTag:          return "UserTag";
+        case FactoidKind::Relation:         return "Relation";
+        case FactoidKind::Custom:           return "Custom";
+    }
+    return "Custom";
+}
+
+void dumpSourceLocation(std::ostream& out, const SourceLocation& location)
+{
+    out << (location.file.empty() ? "<source>" : location.file)
+        << ':' << location.line
+        << ':' << location.column;
+}
+
+void dumpFactoidValue(std::ostream& out, const FactoidValue& factValue)
+{
+    std::visit([&out](const auto& value) {
+        using Value = std::decay_t<decltype(value)>;
+        if constexpr (std::is_same_v<Value, std::monostate>) {
+            out << "null";
+        } else if constexpr (std::is_same_v<Value, bool>) {
+            out << (value ? "true" : "false");
+        } else if constexpr (std::is_same_v<Value, std::string>) {
+            out << std::quoted(value);
+        } else if constexpr (std::is_same_v<Value, SymbolId> ||
+                             std::is_same_v<Value, ScopeId>) {
+            out << '#' << value.value;
+        } else if constexpr (std::is_same_v<Value, SourceLocation>) {
+            dumpSourceLocation(out, value);
+        } else {
+            out << value;
+        }
+    }, factValue);
 }
 
 } // namespace
@@ -232,6 +281,20 @@ void SymbolTable::dump(std::ostream& out) const
             << " kind=" << toString(sym.kind)
             << " facts=" << sym.facts.size()
             << "\n";
+
+        if (sym.declarationLocation) {
+            out << "    declaration_location=";
+            dumpSourceLocation(out, *sym.declarationLocation);
+            out << "\n";
+        }
+
+        for (const auto& fact : sym.facts) {
+            out << "    Fact kind=" << toString(fact.kind)
+                << " key=" << fact.key
+                << " value=";
+            dumpFactoidValue(out, fact.value);
+            out << "\n";
+        }
     }
 }
 
