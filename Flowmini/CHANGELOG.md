@@ -10,9 +10,9 @@
 - Completed the C5 typed-statement migration, including explicit conditional,
   loop, placement, assignable-target, and return source-form ownership.
 - Added structural SymbolTable projection from the AST; current focused golden
-  coverage is 2/2 and remains incomplete across the accepted language.
+  coverage is 7/7 and remains incomplete across the accepted language.
 - Established the accepted-language coverage matrix and canonical type policy.
-- Current gates: AST goldens 21/21, SymbolTable projections 2/2, suite 78/78,
+- Current gates: AST goldens 21/21, SymbolTable projections 7/7, suite 78/78,
   and CTest 2/2.
 - Semantic analysis, complete ABI/refined-contract AST coverage, and Graph IR
   remain future work.

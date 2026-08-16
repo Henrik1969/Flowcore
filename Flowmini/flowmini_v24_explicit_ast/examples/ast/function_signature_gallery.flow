@@ -17,6 +17,10 @@ fn bool_arg(flag : Bool): Bool {
     flag -> return
 }
 
+fn no_declared_return(value : int) {
+    return value
+}
+
 fn many_args(a : int, b : int, c : int, d : int): int {
     a + b + c + d -> return
 }

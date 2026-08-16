@@ -70,6 +70,11 @@ type_reference_probe.flow
 
 These 21 files define the current v0.24 AST golden regression gate.
 
+`function_signature_gallery.flow` and `unit_symbol_projection_gallery.flow`
+also serve the separate SymbolTable projection golden gate. The unit gallery is
+inspectable through structural dump modes but remains non-executable as a root
+source, preserving the program/unit boundary.
+
 The current `flowmini.ast.v2` dump uses arena-owned `statement_pool` and
 `block_pool` collections. Conditional statements reference a mandatory
 `then_block` and an optional tagged `else_arm`: either `else_block` with a

@@ -10,7 +10,7 @@ provisional until each milestone is activated.
 v24_explicit_ast
 build: OK
 AST golden tests: 21 / 21
-Symbol projection tests: 2 / 2
+Symbol projection tests: 7 / 7
 suite: 78 / 78
 CTest: 2 / 2
 ```

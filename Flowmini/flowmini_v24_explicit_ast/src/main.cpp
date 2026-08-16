@@ -215,7 +215,8 @@ namespace {
         std::map<std::string, ImportState> states;
         std::vector<std::string> stack;
 
-        [[nodiscard]] std::string expandRoot(const std::string& sourcePath) {
+        [[nodiscard]] std::string expandRoot(const std::string& sourcePath,
+                                             const bool allowUnitRoot) {
             const auto rootPath = std::filesystem::weakly_canonical(std::filesystem::absolute(std::filesystem::path{sourcePath}));
             const std::string source = readFile(rootPath.string());
             const std::string scanSource = maskCommentsForImportScanner(source);
@@ -262,10 +263,12 @@ namespace {
             }
 
             if (!sawHeader) { throw flow::DiagnosticError{"import", "root source has no program/unit declaration: " + rootPath.string()}; }
-            if (rootKind == SourceUnitKind::Unit) {
+            if (rootKind == SourceUnitKind::Unit && !allowUnitRoot) {
                 throw flow::DiagnosticError{"import", "root source is a unit; units are defining/importable units and cannot be executed directly: " + rootPath.string()};
             }
-            if (!sawMain) { throw flow::DiagnosticError{"import", "root program has no main block: " + rootPath.string()}; }
+            if (rootKind != SourceUnitKind::Unit && !sawMain) {
+                throw flow::DiagnosticError{"import", "root program has no main block: " + rootPath.string()};
+            }
 
             std::ostringstream out;
             out << headerLine << "\n\n";
@@ -352,9 +355,10 @@ namespace {
         }
     };
 
-    [[nodiscard]] std::string expandImports(const std::string& sourcePath) {
+    [[nodiscard]] std::string expandImports(const std::string& sourcePath,
+                                            const bool allowUnitRoot = false) {
         ImportExpander expander;
-        return expander.expandRoot(sourcePath);
+        return expander.expandRoot(sourcePath, allowUnitRoot);
     }
 
     void printUsage(std::ostream& out) {
@@ -479,8 +483,16 @@ int main(int argc, char** argv) {
             return 2;
         }
 
+        const bool structuralInspection =
+            dumpAst ||
+            !dumpAstSymbolsPath.empty() ||
+            !dumpTokenTreePath.empty() ||
+            dumpTokenTreeBridge;
+
         const std::filesystem::path inputPath{sourcePath};
-        const std::string source = (inputPath.extension() == ".flowir") ? readFile(sourcePath) : expandImports(sourcePath);
+        const std::string source = (inputPath.extension() == ".flowir")
+            ? readFile(sourcePath)
+            : expandImports(sourcePath, structuralInspection);
         const auto tokens = flowmini::lexSource(source);
 
         if (dumpAst) {

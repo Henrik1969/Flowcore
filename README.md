@@ -31,7 +31,7 @@ Current known green gates:
 ```text
 normal CMake/Ninja build:      PASS
 flowmini_ast_golden_tests:     PASS (21)
-flowmini_symbol_projection:    PASS (2/2)
+flowmini_symbol_projection:    PASS (7/7)
 flowmini_suite:                PASS (78/78)
 CTest:                         PASS (2/2)
 ```
@@ -146,7 +146,7 @@ Expected current result:
 ```text
 normal CMake/Ninja build:      PASS
 flowmini_ast_golden_tests:     PASS (21)
-flowmini_symbol_projection:    PASS (2/2)
+flowmini_symbol_projection:    PASS (7/7)
 flowmini_suite:                PASS (78/78)
 CTest:                         PASS (2/2)
 ```

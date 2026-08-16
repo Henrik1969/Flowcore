@@ -10,6 +10,11 @@ EXAMPLES_DIR="$ROOT/examples/ast"
 PROBES=(
   "type_reference_probe"
   "statement_else_probe"
+  "placement_statement_probe"
+  "function_signature_gallery"
+  "statement_initializer_probe"
+  "recursive_expression_probe"
+  "unit_symbol_projection_gallery"
 )
 
 if [[ ! -x "$FLOWMINI_BIN" ]]; then
