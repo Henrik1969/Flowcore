@@ -119,6 +119,8 @@ int run(const Json& bundle) {
     auto is_abi_type = [&](const std::string& value) { for (const auto& item : abi_types) if (item == value) return true; return false; };
     const std::vector<std::string> intrinsic_types = {"stdin.text", "start.record"};
     auto is_intrinsic_type = [&](const std::string& value) { for (const auto& item : intrinsic_types) if (item == value) return true; return false; };
+    const std::vector<std::string> intrinsic_roots = {"stdin", "start"};
+    const std::vector<std::string> intrinsic_functions = {"length"};
     std::map<std::string, int> type_symbols;
     for (const auto& [id, symbol] : symbols) { auto kind = text(field(*symbol, "kind")); if (kind == "Type" || kind == "Struct" || kind == "Contract") type_symbols[text(field(*symbol, "name"))] = id; }
     const std::vector<std::string> generic_constructors = {"list", "array", "optional", "collection.list", "result.Result"};
@@ -159,9 +161,18 @@ int run(const Json& bundle) {
         if (!expressions.count(expression_id) || scope_id < 0 || !visited_expressions.emplace(expression_id, scope_id).second) return;
         const auto* expression = expressions[expression_id]; if (text(field(*expression, "kind")) == "identifier") {
             const auto name = text(field(field(*expression, "payload"), "name")); int current = scope_id, found = -1;
-            while (current >= 0 && scopes.count(current) && found < 0) { for (const auto& candidate : list(field(*scopes[current], "symbol_ids"))) { int candidate_id = integer(&candidate); if (symbols.count(candidate_id) && text(field(*symbols[candidate_id], "name")) == name) { found = candidate_id; break; } } current = integer(field(*scopes[current], "parent_id")); }
+            while (current >= 0 && scopes.count(current) && found < 0) {
+                for (const auto& candidate : list(field(*scopes[current], "symbol_ids"))) { int candidate_id = integer(&candidate); if (symbols.count(candidate_id) && text(field(*symbols[candidate_id], "name")) == name) { found = candidate_id; break; } }
+                if (found < 0) for (const auto& child : list(field(*scopes[current], "child_scope_ids"))) {
+                    const int child_id = integer(&child); if (!scopes.count(child_id) || text(field(*scopes[child_id], "kind")) != "Contract") continue;
+                    for (const auto& candidate : list(field(*scopes[child_id], "symbol_ids"))) { int candidate_id = integer(&candidate); if (symbols.count(candidate_id) && text(field(*symbols[candidate_id], "name")) == name) { found = candidate_id; break; } }
+                    if (found >= 0) break;
+                }
+                current = integer(field(*scopes[current], "parent_id"));
+            }
             resolutions.push_back({expression_id, statement_id, scope_id, found, name});
-            if (found < 0) add_diagnostic("FLOWANALYST_UNRESOLVED_NAME", "name '" + name + "' cannot be resolved", -1, "scope:" + std::to_string(scope_id));
+            bool intrinsic = false; for (const auto& item : intrinsic_roots) if (item == name) intrinsic = true; for (const auto& item : intrinsic_functions) if (item == name) intrinsic = true;
+            if (found < 0 && !intrinsic) add_diagnostic("FLOWANALYST_UNRESOLVED_NAME", "name '" + name + "' cannot be resolved", -1, "scope:" + std::to_string(scope_id));
         }
         for (const auto& child : list(field(*expression, "child_expressions"))) resolve_expression(integer(&child), statement_id, scope_id);
     };
@@ -200,14 +211,28 @@ int run(const Json& bundle) {
         int callable = resolved_expression_symbols[base], declaration_id = -1; const auto* origin = origins.count(callable) ? origins[callable] : nullptr;
         if (origin) { const auto path = text(field(*origin, "ast_path")); const auto marker = std::string("/declaration_pool/"); if (path.rfind(marker, 0) == 0) declaration_id = std::stoi(path.substr(marker.size())); }
         if (!declarations.count(declaration_id)) continue;
-        const int expected = static_cast<int>(list(field(*declarations[declaration_id], "parameters")).size());
+        int expected = static_cast<int>(list(field(*declarations[declaration_id], "parameters")).size());
+        for (const auto& [scope_id, scope] : scopes) if (integer(field(*scope, "owner_symbol_id")) == callable) {
+            int scoped_parameters = 0;
+            for (const auto& candidate : list(field(*scope, "symbol_ids"))) {
+                const int candidate_id = integer(&candidate);
+                if (symbols.count(candidate_id) && text(field(*symbols[candidate_id], "kind")) == "Parameter") ++scoped_parameters;
+            }
+            expected = scoped_parameters;
+            break;
+        }
         const int actual = static_cast<int>(list(field(field(*expression, "payload"), "arguments")).size());
         if (expected != actual) add_diagnostic("FLOWANALYST_CALL_ARITY", "call to '" + text(field(*symbols[callable], "name")) + "' expects " + std::to_string(expected) + " argument(s), got " + std::to_string(actual), callable, "symbol:" + std::to_string(callable));
     }
     for (const auto& [scope_id, scope] : scopes) {
         std::map<std::string, std::vector<int>> names;
         for (const auto& child : list(field(*scope, "symbol_ids"))) { int id = integer(&child); if (symbols.count(id)) names[text(field(*symbols[id], "name"))].push_back(id); }
-        for (const auto& [name, ids] : names) if (!name.empty() && ids.size() > 1) add_diagnostic("FLOWANALYST_DUPLICATE_NAME", "name '" + name + "' is declared more than once in scope " + std::to_string(scope_id), ids.front(), "scope:" + std::to_string(scope_id));
+        for (const auto& [name, ids] : names) {
+            if (name.empty() || ids.size() <= 1) continue;
+            bool imports_only = true;
+            for (const int id : ids) if (text(field(*symbols[id], "kind")) != "Import") imports_only = false;
+            if (!imports_only) add_diagnostic("FLOWANALYST_DUPLICATE_NAME", "name '" + name + "' is declared more than once in scope " + std::to_string(scope_id), ids.front(), "scope:" + std::to_string(scope_id));
+        }
     }
     for (const auto& [id, symbol] : symbols) for (const auto& fact : list(field(*symbol, "facts"))) if (text(field(fact, "key")) == "declared_type_spelling" || text(field(fact, "key")) == "return_type_spelling") {
         auto value = text(field(field(fact, "value"), "value")); if (value.empty()) continue; if (is_resolved_type(value)) ++resolved_types; else { ++unresolved_types; add_diagnostic("FLOWANALYST_UNKNOWN_TYPE", "declared type '" + value + "' cannot be resolved", id, "symbol:" + std::to_string(id)); }
