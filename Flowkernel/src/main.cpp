@@ -161,10 +161,15 @@ Result namespaces_probe() {
     if (child == 0) {
         close(channel[0]);
         const int result = unshare(CLONE_NEWUSER | CLONE_NEWUTS | CLONE_NEWIPC);
-        const int child_errno = result == 0 ? 0 : errno;
+        int child_errno = result == 0 ? 0 : errno;
+        if (result == 0) {
+            const char private_hostname[] = "flowkernel-child";
+            char observed_hostname[sizeof(private_hostname)]{};
+            if (sethostname(private_hostname, sizeof(private_hostname) - 1) < 0 || gethostname(observed_hostname, sizeof(observed_hostname)) < 0 || std::strcmp(observed_hostname, private_hostname) != 0) child_errno = errno == 0 ? EIO : errno;
+        }
         write(channel[1], &child_errno, sizeof(child_errno));
         close(channel[1]);
-        _exit(result == 0 ? 0 : (child_errno == EPERM || child_errno == EACCES ? 125 : 126));
+        _exit(result == 0 && child_errno == 0 ? 0 : (child_errno == EPERM || child_errno == EACCES ? 125 : 126));
     }
     close(channel[1]);
     int child_errno = 0;
