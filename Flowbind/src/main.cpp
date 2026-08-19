@@ -13,7 +13,7 @@ namespace {
 
 constexpr std::string_view VERSION = "0.1.0";
 
-struct Requirement { std::string contract, library, convention, symbol, effect; };
+struct Requirement { std::string contract, library, convention, symbol, effect, parameter_types, return_type; };
 
 std::string read_input(int argc, char** argv) {
     if (argc > 2) throw std::runtime_error("usage: flowbind [semantic-report.json]");
@@ -42,7 +42,7 @@ std::vector<Requirement> requirements(const std::string& report) {
         const auto end = body.find('}', cursor);
         if (end == std::string::npos) break;
         const auto object = body.substr(cursor, end - cursor + 1);
-        result.push_back({value(object, "contract"), value(object, "library"), value(object, "convention"), value(object, "symbol"), value(object, "effect")});
+        result.push_back({value(object, "contract"), value(object, "library"), value(object, "convention"), value(object, "symbol"), value(object, "effect"), value(object, "parameter_types"), value(object, "return_type")});
         cursor = end + 1;
     }
     return result;
@@ -56,9 +56,21 @@ int verify(const std::string& report) {
         return 2;
     }
     const auto needed = requirements(report);
+    const std::vector<std::string> supported_types = {"c_int", "c_long", "c_size_t", "c_string"};
+    auto supported_type = [&](const std::string& type) { for (const auto& candidate : supported_types) if (candidate == type) return true; return false; };
     std::map<std::string, void*> handles;
     std::vector<std::string> failures;
     for (const auto& item : needed) {
+        if (item.convention != "c") failures.push_back(item.symbol + ": unsupported calling convention '" + item.convention + "'");
+        if (!supported_type(item.return_type)) failures.push_back(item.symbol + ": unsupported return ABI type '" + item.return_type + "'");
+        std::size_t start = 0;
+        while (start < item.parameter_types.size()) {
+            const auto end = item.parameter_types.find(',', start);
+            const auto type = item.parameter_types.substr(start, end == std::string::npos ? std::string::npos : end - start);
+            if (!supported_type(type)) failures.push_back(item.symbol + ": unsupported parameter ABI type '" + type + "'");
+            if (end == std::string::npos) break;
+            start = end + 1;
+        }
         if (!handles.count(item.library)) handles[item.library] = dlopen(item.library.c_str(), RTLD_LAZY | RTLD_LOCAL);
         if (!handles[item.library]) { failures.push_back(item.library + ": library unavailable"); continue; }
         if (!dlsym(handles[item.library], item.symbol.c_str())) failures.push_back(item.library + ": symbol '" + item.symbol + "' unavailable");
@@ -70,7 +82,7 @@ int verify(const std::string& report) {
         std::cout << "]\n}\n";
         return 2;
     }
-    std::cout << "{\n  \"format\": \"flowbind.binding_report\",\n  \"version\": 1,\n  \"status\": \"ready\",\n  \"provider\": {\"name\": \"dlopen+dlsym\", \"requirements\": " << needed.size() << "},\n  \"execution\": \"not-performed\"\n}\n";
+    std::cout << "{\n  \"format\": \"flowbind.binding_report\",\n  \"version\": 1,\n  \"status\": \"ready\",\n  \"provider\": {\"name\": \"dlopen+dlsym\", \"requirements\": " << needed.size() << "},\n  \"abi\": {\"convention\": \"c\", \"signature_verified\": true, \"sizeof_int\": " << sizeof(int) << ", \"sizeof_long\": " << sizeof(long) << ", \"sizeof_size_t\": " << sizeof(std::size_t) << ", \"sizeof_pointer\": " << sizeof(void*) << "},\n  \"execution\": \"not-performed\"\n}\n";
     return 0;
 }
 

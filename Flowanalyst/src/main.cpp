@@ -63,7 +63,7 @@ const Array& list(const Json* value) { static const Array empty; return value &&
 std::string quote(std::string_view value) { std::ostringstream out; out << '"'; for (char c : value) { if (c == '"' || c == '\\') out << '\\'; if (c == '\n') out << "\\n"; else if (c == '\r') out << "\\r"; else if (c != '\n') out << c; } return out.str() + '"'; }
 struct Diagnostic { std::string code, severity, message, ast_path, region, source; int symbol = -1, line = -1, column = -1; };
 struct Target { int symbol = -1, mains = 0; std::string name; };
-struct BindingRequirement { std::string contract, library, convention, symbol, effect; };
+struct BindingRequirement { std::string contract, library, convention, symbol, effect, parameter_types, return_type; };
 struct Region { std::string id, kind, status; std::vector<std::string> prerequisites; };
 struct Resolution { int expression = -1, statement = -1, scope = -1, symbol = -1; std::string name; };
 
@@ -126,7 +126,14 @@ int run(const Json& bundle) {
         for (const auto& child : list(field(*scopes[contract_scope], "symbol_ids"))) {
             const int child_id = integer(&child); if (!symbols.count(child_id) || text(field(*symbols[child_id], "kind")) != "Function") continue;
             const auto external = fact_value(*symbols[child_id], "external_symbol_spelling"); if (external.empty()) continue;
-            binding_requirements.push_back({text(field(*contract, "name")), library, convention, external, fact_value(*symbols[child_id], "effect_spelling")});
+            std::string parameter_types;
+            const int function_scope = integer(field(*symbols[child_id], "introduced_scope_id"));
+            if (scopes.count(function_scope)) for (const auto& parameter : list(field(*scopes[function_scope], "symbol_ids"))) {
+                const int parameter_id = integer(&parameter); if (!symbols.count(parameter_id) || text(field(*symbols[parameter_id], "kind")) != "Parameter") continue;
+                if (!parameter_types.empty()) parameter_types += ',';
+                parameter_types += fact_value(*symbols[parameter_id], "declared_type_spelling");
+            }
+            binding_requirements.push_back({text(field(*contract, "name")), library, convention, external, fact_value(*symbols[child_id], "effect_spelling"), parameter_types, fact_value(*symbols[child_id], "return_type_spelling")});
         }
     }
     int resolved_types = 0, unresolved_types = 0;
@@ -299,7 +306,7 @@ int run(const Json& bundle) {
     std::cout << "{\n  \"format\": \"flowanalyst.semantic_report\",\n  \"version\": 1,\n  \"status\": \"" << (diagnostics.empty() ? "ok" : "error") << "\",\n  \"frontend_bundle\": {\"format\": \"flowmini.frontend_bundle\", \"version\": 2},\n  \"lowering_profile\": \"" << (empty_main_profile ? "empty_program_main" : "none") << "\",\n  \"diagnostics\": [";
     for (std::size_t i = 0; i < diagnostics.size(); ++i) { const auto& d = diagnostics[i]; if (i) std::cout << ','; std::cout << "{\"code\":" << quote(d.code) << ",\"severity\":" << quote(d.severity) << ",\"message\":" << quote(d.message) << ",\"root_cause\":true"; if (d.symbol >= 0) { std::cout << ",\"subject\":{\"kind\":\"symbol\",\"id\":" << d.symbol << "}"; std::cout << ",\"provenance\":{\"source\":" << quote(d.source) << ",\"ast_path\":" << quote(d.ast_path) << ",\"line\":" << d.line << ",\"column\":" << d.column << "}"; } if (!d.region.empty()) std::cout << ",\"region\":" << quote(d.region); std::cout << '}'; }
     std::cout << "],\n  \"binding_requirements\": [";
-    for (std::size_t i = 0; i < binding_requirements.size(); ++i) { if (i) std::cout << ','; const auto& requirement = binding_requirements[i]; std::cout << "{\"contract\":" << quote(requirement.contract) << ",\"library\":" << quote(requirement.library) << ",\"convention\":" << quote(requirement.convention) << ",\"symbol\":" << quote(requirement.symbol) << ",\"effect\":" << quote(requirement.effect) << "}"; }
+    for (std::size_t i = 0; i < binding_requirements.size(); ++i) { if (i) std::cout << ','; const auto& requirement = binding_requirements[i]; std::cout << "{\"contract\":" << quote(requirement.contract) << ",\"library\":" << quote(requirement.library) << ",\"convention\":" << quote(requirement.convention) << ",\"symbol\":" << quote(requirement.symbol) << ",\"effect\":" << quote(requirement.effect) << ",\"parameter_types\":" << quote(requirement.parameter_types) << ",\"return_type\":" << quote(requirement.return_type) << "}"; }
     std::cout << "],\n  \"facts\": [{\"kind\":\"semantic_summary\",\"scopes\":" << scopes.size() << ",\"symbols\":" << symbols.size() << ",\"resolved_types\":" << resolved_types << ",\"unresolved_types\":" << unresolved_types << ",\"refined_types\":" << refined_types << ",\"resolved_names\":" << resolutions.size() << ",\"targets\":" << targets.size() << ",\"regions\":" << regions.size() << "}],\n  \"resolved_names\": [";
     bool first_resolution = true; for (const auto& resolution : resolutions) if (resolution.symbol >= 0) { if (!first_resolution) std::cout << ','; first_resolution = false; std::cout << "{\"expression_id\":" << resolution.expression << ",\"statement_id\":" << resolution.statement << ",\"name\":" << quote(resolution.name) << ",\"symbol_id\":" << resolution.symbol << ",\"scope_id\":" << resolution.scope << "}"; }
     std::cout << "],\n  \"analysis_regions\": [";
