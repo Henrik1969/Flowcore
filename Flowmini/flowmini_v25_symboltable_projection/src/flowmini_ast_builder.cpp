@@ -253,6 +253,10 @@ namespace flowmini::ast {
             return is_identifier_text(token, "type");
         }
 
+        bool is_record_token(const flowmini::Token& token) {
+            return is_identifier_text(token, "record");
+        }
+
         bool is_abi_token(const flowmini::Token& token) {
             return is_identifier_text(token, "abi");
         }
@@ -326,14 +330,19 @@ namespace flowmini::ast {
                     continue;
                 }
 
-                if (!is_field_token(tokens[i])) {
+                RecordField field;
+                field.location = location_from_token(tokens[i]);
+                if (is_field_token(tokens[i])) {
+                    ++i; // consume the optional field keyword
+                } else if (tokens[i].kind == flowmini::TokenKind::Identifier &&
+                           i + 1 < tokens.size() &&
+                           tokens[i + 1].kind == flowmini::TokenKind::Colon) {
+                    // The standalone `record` form uses `name : type`; the
+                    // older `type` record form spells this `field name : type`.
+                } else {
                     ++i;
                     continue;
                 }
-
-                RecordField field;
-                field.location = location_from_token(tokens[i]);
-                ++i; // consume field
 
                 if (i < tokens.size() && tokens[i].kind == flowmini::TokenKind::Identifier) {
                     field.name = tokens[i].text;
@@ -2779,6 +2788,22 @@ namespace flowmini::ast {
 
             if (is_type_token(tokens[i])) {
                 i = parse_type_declaration(tokens, i, module);
+                continue;
+            }
+
+            if (is_record_token(tokens[i])) {
+                RecordDecl recordDecl;
+                recordDecl.location = location_from_token(tokens[i]);
+                ++i;
+
+                if (i < tokens.size() && tokens[i].kind == flowmini::TokenKind::Identifier) {
+                    recordDecl.name = tokens[i].text;
+                    ++i;
+                }
+
+                i = parse_record_fields(tokens, i, recordDecl);
+                append_top_level_declaration(module, std::move(recordDecl));
+                i = skip_until_next_top_levelish_token(tokens, i);
                 continue;
             }
 

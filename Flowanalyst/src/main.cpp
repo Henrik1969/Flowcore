@@ -66,6 +66,25 @@ struct Target { int symbol = -1, mains = 0; std::string name; };
 struct Region { std::string id, kind, status; std::vector<std::string> prerequisites; };
 struct Resolution { int expression = -1, statement = -1, scope = -1, symbol = -1; std::string name; };
 
+std::string trim_copy(std::string value) {
+    const auto first = value.find_first_not_of(" \t\n\r");
+    if (first == std::string::npos) return {};
+    const auto last = value.find_last_not_of(" \t\n\r");
+    return value.substr(first, last - first + 1);
+}
+
+std::vector<std::string> split_generic_arguments(const std::string& value) {
+    std::vector<std::string> result; std::size_t start = 0, depth = 0;
+    for (std::size_t i = 0; i < value.size(); ++i) { if (value[i] == '<') ++depth; else if (value[i] == '>') --depth; else if (value[i] == ',' && depth == 0) { result.push_back(trim_copy(value.substr(start, i - start))); start = i + 1; } }
+    result.push_back(trim_copy(value.substr(start))); return result;
+}
+
+bool numeric_extents(const std::string& value) {
+    if (value.empty() || value.front() != '[' || value.back() != ']') return false;
+    for (std::size_t i = 1; i + 1 < value.size(); ++i) if (!std::isdigit(static_cast<unsigned char>(value[i])) && value[i] != ',' && value[i] != ' ') return false;
+    return true;
+}
+
 int run(const Json& bundle) {
     if (text(field(bundle, "format")) != "flowmini.frontend_bundle" || integer(field(bundle, "version")) != 2) throw std::runtime_error("unsupported FlowMini frontend bundle");
     const auto* snapshot = field(bundle, "symbol_table"); if (!snapshot) throw std::runtime_error("bundle has no symbol_table");
@@ -96,8 +115,20 @@ int run(const Json& bundle) {
     int resolved_types = 0, unresolved_types = 0;
     const std::vector<std::string> builtin = {"bool", "Bool", "int8", "int16", "int32", "int64", "int128", "uint8", "uint16", "uint32", "uint64", "uint128", "float16", "float32", "float64", "float128", "char8", "char16", "char32", "int", "float", "string", "void"};
     auto is_builtin = [&](const std::string& value) { for (const auto& item : builtin) if (item == value) return true; return false; };
+    const std::vector<std::string> abi_types = {"c_int", "c_long", "c_size_t"};
+    auto is_abi_type = [&](const std::string& value) { for (const auto& item : abi_types) if (item == value) return true; return false; };
     std::map<std::string, int> type_symbols;
     for (const auto& [id, symbol] : symbols) { auto kind = text(field(*symbol, "kind")); if (kind == "Type" || kind == "Struct" || kind == "Contract") type_symbols[text(field(*symbol, "name"))] = id; }
+    const std::vector<std::string> generic_constructors = {"list", "array", "optional", "collection.list", "result.Result"};
+    std::function<bool(const std::string&)> is_resolved_type = [&](const std::string& raw_value) {
+        const auto value = trim_copy(raw_value); if (is_builtin(value) || is_abi_type(value) || type_symbols.count(value) != 0) return true;
+        std::string core = value; const auto shape = value.find("["); if (shape != std::string::npos) { if (!numeric_extents(value.substr(shape)) || shape == 0) return false; core = value.substr(0, shape); }
+        const auto open = core.find('<'); if (open == std::string::npos || core.back() != '>') return false;
+        const auto constructor = core.substr(0, open); bool known = false; for (const auto& candidate : generic_constructors) if (constructor == candidate) known = true; if (!known) return false;
+        const auto arguments = split_generic_arguments(core.substr(open + 1, core.size() - open - 2)); if (arguments.empty()) return false;
+        for (const auto& argument : arguments) if (!is_resolved_type(argument)) return false;
+        return true;
+    };
     std::map<int, int> declaration_scopes, block_scopes, statement_scopes;
     for (const auto& [scope_id, scope] : scopes) {
         for (const auto& origin : list(field(bundle, "scope_origins"))) if (integer(field(origin, "scope_id")) == scope_id) {
@@ -150,7 +181,7 @@ int run(const Json& bundle) {
         for (const auto& [name, ids] : names) if (!name.empty() && ids.size() > 1) add_diagnostic("FLOWANALYST_DUPLICATE_NAME", "name '" + name + "' is declared more than once in scope " + std::to_string(scope_id), ids.front(), "scope:" + std::to_string(scope_id));
     }
     for (const auto& [id, symbol] : symbols) for (const auto& fact : list(field(*symbol, "facts"))) if (text(field(fact, "key")) == "declared_type_spelling" || text(field(fact, "key")) == "return_type_spelling") {
-        auto value = text(field(field(fact, "value"), "value")); if (value.empty()) continue; if (is_builtin(value) || type_symbols.count(value)) ++resolved_types; else { ++unresolved_types; add_diagnostic("FLOWANALYST_UNKNOWN_TYPE", "declared type '" + value + "' cannot be resolved", id, "symbol:" + std::to_string(id)); }
+        auto value = text(field(field(fact, "value"), "value")); if (value.empty()) continue; if (is_resolved_type(value)) ++resolved_types; else { ++unresolved_types; add_diagnostic("FLOWANALYST_UNKNOWN_TYPE", "declared type '" + value + "' cannot be resolved", id, "symbol:" + std::to_string(id)); }
     }
     int refined_types = 0;
     std::function<void(int, int)> check_invariant = [&](int expression_id, int refined_symbol) {
@@ -161,7 +192,7 @@ int run(const Json& bundle) {
     };
     for (const auto& [declaration_id, declaration] : declarations) if (text(field(*declaration, "kind")) == "refined_type") {
         ++refined_types; int refined_symbol = -1; for (const auto& [symbol_id, origin] : origins) { const auto path = text(field(*origin, "ast_path")); if (path == "/declaration_pool/" + std::to_string(declaration_id)) { refined_symbol = symbol_id; break; } }
-        const auto base = text(field(*declaration, "base_type")); if (!is_builtin(base) && !type_symbols.count(base)) add_diagnostic("FLOWANALYST_REFINED_BASE_TYPE", "refined type base '" + base + "' cannot be resolved", refined_symbol, "symbol:" + std::to_string(refined_symbol));
+        const auto base = text(field(*declaration, "base_type")); if (!is_resolved_type(base)) add_diagnostic("FLOWANALYST_REFINED_BASE_TYPE", "refined type base '" + base + "' cannot be resolved", refined_symbol, "symbol:" + std::to_string(refined_symbol));
         for (const auto& invariant : list(field(*declaration, "invariants"))) check_invariant(integer(field(invariant, "condition_expression")), refined_symbol);
     }
     for (const auto& [id, symbol] : symbols) if (text(field(*symbol, "kind")) == "Namespace") {

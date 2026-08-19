@@ -64,12 +64,32 @@ run_blocked() {
     echo "PASS blocked $name"
 }
 
+run_semantic_accepted() {
+    name=$1
+    bundle=$tmpdir/$name.bundle.json
+    semantic=$tmpdir/$name.semantic.json
+    optimized=$tmpdir/$name.optimized.json
+    lowered=$tmpdir/$name.lowered.json
+    "$flowmini" --dump-frontend-bundle "$ast_root/$name.flow" > "$bundle"
+    "$analyst" < "$bundle" > "$semantic"
+    grep -q '"status": "ok"' "$semantic"
+    "$optimizer" < "$semantic" > "$optimized"
+    grep -q '"status": "ready"' "$optimized"
+    "$lowerer" < "$optimized" > "$lowered"
+    grep -q '"status": "ready"' "$lowered"
+    grep -q '"status": "not-emitted"' "$lowered"
+    pass_count=$((pass_count + 1))
+    echo "PASS semantic $name"
+}
+
 run_accepted call_expression_probe
 run_accepted control_flow_unary_probe
 run_accepted expression_pool_probe
 run_accepted refined_contract_probe
 run_accepted target_projection_probe
-run_blocked abi_contract_probe
+run_accepted abi_contract_probe
+run_accepted literal_expression_probe
+run_semantic_accepted index_field_probe
 run_blocked type_reference_probe
 
 echo "Flowcore pipeline matrix: $pass_count accepted, $blocked_count blocked"

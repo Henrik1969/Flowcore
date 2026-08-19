@@ -23,7 +23,9 @@ This prevents unfinished language areas from being mistaken for regressions.
 | `expression_pool_probe` | expression ownership and local resolution | accepted through Flowlower boundary |
 | `refined_contract_probe` | refined bases and invariant bindings | accepted through Flowlower boundary |
 | `target_projection_probe` | named targets and entrypoints | accepted through Flowlower boundary |
-| `abi_contract_probe` | ABI type semantics | blocked by incomplete ABI type resolution |
+| `abi_contract_probe` | ABI type identities and declarations | accepted through Flowlower boundary |
+| `index_field_probe` | list/array types, indexing, records, field paths | accepted through semantic boundary; lowering is not emitted |
+| `literal_expression_probe` | typed literals and collection values | accepted through Flowlower boundary |
 | `type_reference_probe` | generic, qualified, and shaped types | blocked by incomplete type-family resolution |
 
 The empty `main` trial remains the only case that currently emits LLVM IR and
@@ -37,13 +39,17 @@ result to a gate. The scan exposed these current gaps:
 
 ```text
 generic/container/shape types:
-  list<int>, array<int>, optional<...>, result<...>
+  list<int>, array<int>, optional<...>, result<...> are covered in accepted
+  probes; advanced qualified and symbolic extents remain unresolved:
+  collection.list<int>, math.scalar, Rows
 
-ABI contract types:
+ABI lowering remains future work even though the canonical ABI spellings now
+resolve:
   c_int, c_long, c_size_t
 
 qualified/domain types:
-  Point, vendor.Domain, collection.list<int>
+  Point is now structurally projected from standalone `record` declarations;
+  vendor.Domain and other domain-qualified names remain unresolved
 
 cross-unit and recursive call visibility:
   some imported or recursively described call names are not yet projected
