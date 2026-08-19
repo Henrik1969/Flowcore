@@ -5,27 +5,31 @@ stages are intentionally preserved as implementation checkpoints.
 
 ## Current checkpoint
 
-- Active implementation: `Flowmini/flowmini_v25_symboltable_projection`
-- Active branch: `v25-symboltable-projection`
-- Milestone: factual SymbolTable projection maturation and frontend-bundle
-  hardening before semantic analysis
-- Current integration baseline: AST 26/26, SymbolTable projection 12/12,
-  frontend bundle seven goldens plus one isolated run and nineteen negative
-  attacks, categorized suite 78/78, CTest 2/2
+- Active milestone: Flowcore v0.26 language-chain vertical slice
+- Implementation base: `Flowmini/flowmini_v25_symboltable_projection`
+- Active branch retained for continuity: `v25-symboltable-projection`
+- Current integration baseline: AST 28/28, SymbolTable projection 14/14,
+  frontend bundle eight goldens plus one isolated run and nineteen negative
+  attacks, downstream CTest green, and native `flowcat` ELF execution
 - Current bundle contract: `flowmini.frontend_bundle` version 2
 
 The detailed implementation history is maintained in
 [`Flowmini/CHANGELOG.md`](Flowmini/CHANGELOG.md), and the active/historical stage
 map is maintained in [`Flowmini/VERSION_INDEX.md`](Flowmini/VERSION_INDEX.md).
 
-## Flowmini v25_symboltable_projection
+## Flowcore v0.26 language-chain vertical slice
 
 - Activated from the tagged `flowmini-v0.24-frontend-border` checkpoint.
 - Preserved v0.24 as a closed implementation line.
 - Added typed AST-to-symbol and AST-to-scope origin provenance.
 - Hardened the versioned frontend bundle and independent consumer.
-- Kept semantic analysis, Graph IR, and runtime redesign outside the v0.25
-  boundary.
+- Added semantic analysis, capability binding, optimization preservation,
+  explicit LLVM lowering profiles, and the first native ELF application.
+
+## Flowmini v25_symboltable_projection — historical projection milestone
+
+- Established the typed AST-to-symbol and AST-to-scope origin boundary.
+- Hardened the versioned frontend bundle and independent consumer.
 
 ## Flowmini v24_explicit_ast
 

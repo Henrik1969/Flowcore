@@ -1,6 +1,19 @@
 # Flowmini Changelog
 
-## v25_symboltable_projection — active
+## v26_language_chain — active
+
+- Promoted the verified vertical language chain to the active v0.26 milestone.
+- Added semantic analysis, capability/ABI verification, optimization boundary,
+  explicit LLVM lowering profiles, and a native ELF application proof.
+- Added named-target semantic entrypoint checks while leaving target selection
+  and separate artifact emission as the next lowering boundary.
+- Packaged the reproducible `flowcat` application example with policy, reports,
+  LLVM, expected output, and preserved inspection builds.
+
+The implementation directory remains `flowmini_v25_symboltable_projection` for
+continuity; the v25 projection milestone is now historical.
+
+## v25_symboltable_projection — historical
 
 - Activated from the tagged `flowmini-v0.24-frontend-border` checkpoint on
   branch `v25-symboltable-projection`.

@@ -7,7 +7,7 @@ provisional until each milestone is activated.
 ## Current checkpoint
 
 ```text
-v25_symboltable_projection
+v26_language_chain (implementation base: v25_symboltable_projection)
 build: OK
 AST golden tests: 28 / 28
 Symbol projection tests: 14 / 14
@@ -36,7 +36,7 @@ Move parser input toward TokenTree without changing language behavior.
 
 Introduce explicit AST as parser output.
 
-Advance to v0.25 only when every accepted source construct has a canonical,
+The historical v0.25 exit rule required every accepted source construct to have a canonical,
 lossless raw-AST representation; accepted syntax does not fall through generic
 unknown placeholders; structurally valid but semantically invalid programs can
 still be represented; ownership, identity, parentage, source provenance, and
@@ -45,11 +45,17 @@ suite pass; and current-state documentation describes the boundary truthfully.
 
 This exit rule passed and was formally declared closed on 2026-08-16.
 
-### Active: v25_symboltable_projection
+### Historical: v25_symboltable_projection
 
-Maintain the factual AST-to-SymbolTable projection and the independent export
-boundary while integrating semantic analysis, capability binding, optimization,
-and explicit LLVM lowering profiles.
+Established the factual AST-to-SymbolTable projection and independent export
+boundary now used by the active v26 language-chain milestone.
+
+### Active: v26_language_chain
+
+Carry selected programs through semantic analysis, capability binding,
+optimization boundary, explicit target lowering, LLVM, and native execution.
+The implementation base remains `flowmini_v25_symboltable_projection` until a
+separate directory migration is justified.
 
 Advance to v0.26 only when the complete AST and lossless structural SymbolTable
 projection form a mature frontend border with stable cross-links, scope

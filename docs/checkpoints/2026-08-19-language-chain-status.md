@@ -1,10 +1,10 @@
 ---
-title: Flowcore v0.25 language-chain status
+title: Flowcore v0.26 language-chain status
 status: current-experimental
 date: 2026-08-19
 ---
 
-# Flowcore v0.25 language-chain status
+# Flowcore v0.26 language-chain status
 
 This is the current implementation summary for the active
 `v25-symboltable-projection` branch. It supersedes older status wording that

@@ -42,7 +42,7 @@ The important architectural boundaries are documented before their full
 implementations exist so the current default path does not accidentally become
 the permanent definition of Flowcore.
 
-Current active implementation is a verified v0.25 language-chain slice. It
+Current active implementation is a verified v0.26 language-chain slice. It
 inherits the closed v0.24 raw frontend/export border, establishes semantic
 analysis and policy-binding consumers, preserves an optimization boundary, and
 lowers selected profiles to executable LLVM/ELF artifacts. Graph IR, real

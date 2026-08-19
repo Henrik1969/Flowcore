@@ -9,7 +9,7 @@ flowmini_v25_symboltable_projection
 Current milestone:
 
 ```text
-Flowmini v0.25 language-chain vertical slice
+Flowmini v0.26 language-chain vertical slice
 frontend export, semantic analysis, policy binding, optimization boundary,
 LLVM lowering, and executable application proof
 ```
@@ -26,7 +26,7 @@ flowcat native ELF example:    PASS
 
 Flowmini is still experimental and unfinished.
 
-The v0.25 line inherits the closed, observable, regression-guarded v0.24 expression
+The active v0.26 line inherits the closed, observable, regression-guarded v0.24 expression
 and type-reference graph plus arena-owned declaration/statement/block
 structure. C5 is now
 complete: every statement kind is selected by its typed payload, conditional
@@ -40,7 +40,7 @@ struct, and extern members. Projection performs no type resolution, contract
 checking, effect interpretation, or ABI lowering. On 2026-08-16 the project
 owner formally declared the v0.24 raw frontend/export border passed after the
 accepted-language matrix, independent-consumer gate, and Tier 3 Firetest passed.
-v0.25 now exports typed structural origins through frontend bundle version 2.
+The implementation base exports typed structural origins through frontend bundle version 2.
 The independent consumer verifies precise roles, canonical AST IDs, source
 provenance, uniqueness, scope ownership, and reverse lookup without name
 guessing. Flowanalyst now consumes that export and establishes the initial
@@ -65,7 +65,7 @@ cmake --build cmake-build-debug -j20
 
 Adjust `-j20` to match your machine.
 
-This directory is the canonical v25 build and test scope. Repository-root build
+This directory is the canonical v26 build and test scope. Repository-root build
 trees and their legacy superbuild test registrations are noncanonical for this
 branch.
 
@@ -98,7 +98,7 @@ AST states what the source means.
 
 ## Architecture checkpoint for future lowering
 
-The closed v0.24 AST/export boundary is the inherited base for the v0.25
+The closed v0.24 AST/export boundary is the inherited base for the v0.26
 SymbolTable projection line and future Flowcore transformation pipeline.
 
 Current work should preserve semantic meaning and source provenance without
@@ -118,7 +118,7 @@ Flowmini/flowmini_v24_explicit_ast/docs/v0.24-future-transformation-boundary.md
 
 ## Current important language rule
 
-Active v0.25 supports the inherited root form and the structural named-target
+Active v0.26 supports the inherited root form and the structural named-target
 form. Flowanalyst checks target entrypoint completeness; artifact selection and
 target-specific lowering remain downstream build work:
 

@@ -5,7 +5,9 @@ Flowmini is the executable prototype/lab language used to explore Flowcore ideas
 Current active version:
 
 ```text
-Flowmini/flowmini_v25_symboltable_projection
+Flowmini v0.26 language-chain vertical slice
+
+Implementation base: `Flowmini/flowmini_v25_symboltable_projection`
 ```
 
 Current baseline:
@@ -25,7 +27,7 @@ TokenTree remembers what the source looked like.
 AST states what the source means.
 ```
 
-The v0.24 frontend-export border is closed. The active v0.25 line makes its
+The v0.24 frontend-export border is closed. The active v0.26 line makes its
 factual SymbolTable projection consumable by Flowanalyst, Flowbind,
 Flowoptimize, and Flowlower, with `flowcat` proving a native ELF artifact.
 
@@ -41,10 +43,10 @@ Documents in this directory:
 - [Testing](testing.md)
 - [v0.24 frontend checkpoint Firetest report](v0.24-firetest-report.md)
 - [v0.24 frontend-border Firetest report](v0.24-frontend-border-firetest-report.md)
-- [v0.25 SymbolTable projection status](../../Flowmini/flowmini_v25_symboltable_projection/docs/v0.25-symboltable-projection-status.md)
+- [v0.26 language-chain status](../checkpoints/2026-08-19-language-chain-status.md)
 - [Project-wide verification gates and Firetest policy](../development/verification-gates.md)
 
-Active v0.25 implementation note:
+Implementation-base note:
 
 - [SymbolTable projection status](../../Flowmini/flowmini_v25_symboltable_projection/docs/v0.25-symboltable-projection-status.md)
 

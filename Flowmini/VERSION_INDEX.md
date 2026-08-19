@@ -7,19 +7,20 @@ Earlier stages are historical snapshots. They are useful for understanding devel
 Current active version:
 
 ```text
-v25 — flowmini_v25_symboltable_projection
+v26 — language-chain vertical slice
 ```
 
 ## Active version
 
 | Version | Directory | Main purpose |
 |---:|---|---|
-| v25 | `flowmini_v25_symboltable_projection` | SymbolTable projection maturation, factual cross-links, provenance, and frontend-bundle hardening |
+| v26 | `flowmini_v25_symboltable_projection` | Verified language chain from frontend export through semantic analysis, capability binding, LLVM, and native ELF |
 
 ## Recent historical versions
 
 | Version | Directory | Main purpose |
 |---:|---|---|
+| v25 | `flowmini_v25_symboltable_projection` | Historical projection milestone retained as the implementation base for v26 |
 | v24 | `flowmini_v24_explicit_ast` | Closed raw frontend/export border with typed explicit AST |
 | v23 | `flowmini_v23_token_tree_bridge` | TokenTree bridge made visible and trustworthy |
 | v22 | `flowmini_v22_unit_kinds` | `program`/`unit`, categorized examples, expected suite |
@@ -55,5 +56,8 @@ Current active development should happen in:
 ```text
 Flowmini/flowmini_v25_symboltable_projection
 ```
+
+The directory name is retained for continuity while the active milestone is
+v26. A future layout migration will be a separate, explicit change.
 
 Older versions should not be mistaken for the active implementation.

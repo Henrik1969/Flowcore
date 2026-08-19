@@ -36,9 +36,9 @@ Do not put deep philosophy before the reader knows where they are.
 
 - Flowcore is the broader language and system-architecture direction.
 - Flowmini is the executable prototype language used to test Flowcore ideas.
-- Flowmini v0.25 SymbolTable projection maturation is the active stage. It
-  hardens factual structural origins and an independent-consumer boundary
-  before semantic analysis.
+- Flowcore v0.26 language-chain integration is the active stage. It preserves
+  the v0.25 structural-origin boundary while carrying selected programs through
+  semantic analysis, capability binding, LLVM lowering, and native execution.
 - Flowmini v0.24 explicit AST is the closed raw frontend/export checkpoint
   inherited by v0.25.
 - FrankenCore is the constitutional system and capability layer above the

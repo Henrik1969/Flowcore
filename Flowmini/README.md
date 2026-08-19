@@ -15,10 +15,10 @@ Flowmini/flowmini_v25_symboltable_projection
 Current stage theme:
 
 ```text
-Flowmini v0.25 language-chain vertical slice
+Flowmini v0.26 language-chain vertical slice
 ```
 
-The v0.25 line now carries a source program through AST, SymbolTable,
+The v0.26 line now carries a source program through AST, SymbolTable,
 Flowanalyst, Flowoptimize, Flowlower, LLVM, and a native ELF executable for a
 small accepted application subset.
 
@@ -56,7 +56,7 @@ record literals
 Expressions use typed payloads and recursively owned child IDs. Parenthesized
 grouping, operator precedence, associativity, prefix operators, and nested
 postfix call/index/field forms are regression-guarded. The v0.24 raw
-frontend/export border is closed; v0.25 now strengthens projection coverage,
+frontend/export border is closed; v0.26 now uses the strengthened projection coverage,
 factual metadata, cross-links, provenance, and bundle stability.
 
 ## Why does this look ordinary?
@@ -78,11 +78,11 @@ source text
     -> executable system projection
 ```
 
-Flowmini v0.25 is focused on SymbolTable projection maturation.
+Flowmini v0.26 is focused on the verified language-chain slice.
 
 ## Build quickstart
 
-From the active v0.25 directory:
+From the active v0.26 implementation base:
 
 ```bash
 cd Flowmini/flowmini_v25_symboltable_projection
@@ -93,7 +93,7 @@ cmake --build cmake-build-debug -j20
 
 Adjust `-j20` to match your machine.
 
-The canonical v25 scope is this implementation directory and its CMake targets.
+The canonical v26 scope is this implementation directory and its CMake targets.
 Repository-root build trees are legacy/noncanonical for the active branch.
 
 ## Test quickstart
@@ -197,7 +197,7 @@ TokenTree remembers what the source looked like.
 AST states what the source means.
 ```
 
-The current v0.25 work makes the SymbolTable projection a trustworthy input for
+The current v0.26 work makes the SymbolTable projection a trustworthy input for
 independent tools and carries selected programs through the complete language
 chain.
 

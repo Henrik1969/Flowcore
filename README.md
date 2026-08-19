@@ -5,7 +5,7 @@ Flowcore is experimental language and system-architecture work.
 The current active implementation is:
 
 ```text
-Flowmini v0.25 SymbolTable projection maturation
+Flowcore v0.26 language-chain vertical slice
 ```
 
 Active implementation path:
@@ -22,19 +22,19 @@ This repository is not a finished language or runtime. It is a design and implem
 status: experimental
 production-ready: no
 active branch: v25-symboltable-projection
-active prototype: Flowmini v0.25 SymbolTable projection maturation
-current milestone: mature factual projection and prepare semantic-analysis entry
+active prototype: Flowmini v0.26 language-chain vertical slice
+current milestone: verified frontend-to-ELF chain with explicit lowering profiles
 ```
 
 Current known green gates:
 
 ```text
 normal CMake/Ninja build:      PASS
-flowmini_ast_golden_tests:     PASS (26)
-flowmini_symbol_projection:    PASS (12/12)
-flowmini_frontend_bundle:      PASS (7 golden, 1 isolated, 19 negative)
-flowmini_suite:                PASS (78/78)
-CTest:                         PASS (2/2)
+AST golden tests:              PASS (28/28)
+Symbol projection tests:       PASS (14/14)
+frontend bundle:               PASS (8 golden, 1 isolated, 19 negative)
+downstream sibling CTest:      PASS
+flowcat native ELF:            PASS
 ```
 
 ## What is Flowmini?
