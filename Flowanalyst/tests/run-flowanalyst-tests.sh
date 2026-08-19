@@ -29,6 +29,12 @@ abi_report=$("$flowmini" --dump-frontend-bundle "$abi_fixture" | "$bin")
 printf '%s\n' "$abi_report" | grep -q '"binding_requirements"'
 printf '%s\n' "$abi_report" | grep -q '"symbol":"strlen"'
 
+flowcat_fixture="$root/Flowmini/flowmini_v25_symboltable_projection/examples/apps/flowcat.flow"
+flowcat_report=$("$flowmini" --dump-frontend-bundle "$flowcat_fixture" | "$bin")
+printf '%s\n' "$flowcat_report" | grep -q '"lowering_profile": "flowcat_argv_main"'
+printf '%s\n' "$flowcat_report" | grep -q '"name":"args"'
+printf '%s\n' "$flowcat_report" | grep -q '"symbol":"puts"'
+
 bad_field_fixture="$root/Flowmini/flowmini_v25_symboltable_projection/examples/fail/bad_record_no_such_field.flow"
 set +e
 bad_field_report=$("$flowmini" --dump-frontend-bundle "$bad_field_fixture" | "$bin")

@@ -113,15 +113,42 @@
             }
         }
     ],
-    "expression_pool_size": 0,
-    "expression_pool": [],
-    "statement_pool_size": 0,
-    "statement_pool": [],
+    "expression_pool_size": 1,
+    "expression_pool": [
+        {
+            "id": 0,
+            "kind": "integer_literal",
+            "text": "0",
+            "payload": {
+                "value_text": "0"
+            },
+            "child_expressions": []
+        }
+    ],
+    "statement_pool_size": 1,
+    "statement_pool": [
+        {
+            "id": 0,
+            "kind": "expression",
+            "payload": {
+                "expression": 0
+            },
+            "expression_ids": [
+                0
+            ],
+            "location": {
+                "line": 5,
+                "column": 5
+            }
+        }
+    ],
     "block_pool_size": 1,
     "block_pool": [
         {
             "id": 0,
-            "statements": []
+            "statements": [
+                0
+            ]
         }
     ]
 }

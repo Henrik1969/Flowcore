@@ -2575,6 +2575,26 @@ namespace flowmini::ast {
                     continue;
                 }
 
+                if (is_identifier_text(tokens[i], "print") ||
+                    tokens[i].kind == flowmini::TokenKind::KeywordPrint) {
+                    Statement statement = make_statement(ExpressionStatement{}, tokens[i]);
+                    const bool hasValue = has_expression_until_statement_boundary(tokens, i + 1);
+                    if (hasValue && i + 1 < tokens.size()) {
+                        statement.payload = ExpressionStatement{
+                            add_expression_placeholder_at(expressionPool, tokens, i + 1)
+                        };
+                    }
+                    statementPool.push_back(std::move(statement));
+                    body.push_back(statementPool.size() - 1);
+                    while (i < tokens.size() &&
+                           tokens[i].kind != flowmini::TokenKind::Newline &&
+                           tokens[i].kind != flowmini::TokenKind::RightBrace &&
+                           !is_end_token(tokens[i])) {
+                        ++i;
+                    }
+                    continue;
+                }
+
                 if (const auto arrow = find_top_level_place_arrow(tokens, i)) {
                     i = parse_placement_statement(tokens, i, *arrow, body,
                                                   statementPool, expressionPool);

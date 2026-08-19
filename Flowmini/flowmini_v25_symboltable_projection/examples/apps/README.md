@@ -9,6 +9,7 @@ are end-to-end application candidates, not yet promises of a complete runtime.
 
 ```flow
 main(args : list<string>) {
+    print args
 }
 ```
 

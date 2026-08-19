@@ -104,6 +104,7 @@ int verify(const std::string& report, const std::string& policy_path) {
     const Requirement* lowering_requirement = nullptr;
     if (profile == "abi_abs_main") for (const auto& item : needed) if (item.symbol == "abs") lowering_requirement = &item;
     if (profile == "abi_strlen_main") for (const auto& item : needed) if (item.symbol == "strlen") lowering_requirement = &item;
+    if (profile == "flowcat_argv_main") for (const auto& item : needed) if (item.symbol == "puts") lowering_requirement = &item;
     const auto grants = read_policy(policy_path);
     const std::vector<std::string> supported_types = {"c_int", "c_long", "c_size_t", "c_string"};
     auto supported_type = [&](const std::string& type) { for (const auto& candidate : supported_types) if (candidate == type) return true; return false; };

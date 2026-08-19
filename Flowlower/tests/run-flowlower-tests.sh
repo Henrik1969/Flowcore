@@ -61,4 +61,16 @@ set +e
 strlen_rc=$?
 set -e
 test "$strlen_rc" -eq 8
+
+flowcat_source="$root/Flowmini/flowmini_v25_symboltable_projection/examples/apps/flowcat.flow"
+"$flowmini" --dump-frontend-bundle "$flowcat_source" > "$tmpdir/flowcat.bundle.json"
+"$analyst" < "$tmpdir/flowcat.bundle.json" > "$tmpdir/flowcat.semantic.json"
+grep -q '"lowering_profile": "flowcat_argv_main"' "$tmpdir/flowcat.semantic.json"
+"$bind" --policy "$policy" < "$tmpdir/flowcat.semantic.json" > "$tmpdir/flowcat.binding.json"
+"$optimizer" < "$tmpdir/flowcat.semantic.json" > "$tmpdir/flowcat.optimized.json"
+"$lowerer" --emit-llvm "$tmpdir/flowcat.ll" --binding-report "$tmpdir/flowcat.binding.json" < "$tmpdir/flowcat.optimized.json" > "$tmpdir/flowcat.lowering.json"
+grep -q '"status": "emitted"' "$tmpdir/flowcat.lowering.json"
+clang "$tmpdir/flowcat.ll" -o "$tmpdir/flowcat"
+"$tmpdir/flowcat" alpha beta > "$tmpdir/flowcat.output"
+printf '%s\n' alpha beta | cmp -s - "$tmpdir/flowcat.output"
 echo 'Flowlower tests: PASS'

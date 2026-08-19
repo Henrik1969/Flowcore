@@ -34,7 +34,7 @@ int analyze(std::string_view report) {
     // claimed until the accepted semantic bundle and transformation contract
     // are complete.
     std::string profile = "none";
-    for (const auto candidate : {"empty_program_main", "abi_abs_main", "abi_strlen_main"}) if (has_field(report, "lowering_profile", candidate)) profile = candidate;
+    for (const auto candidate : {"empty_program_main", "abi_abs_main", "abi_strlen_main", "flowcat_argv_main"}) if (has_field(report, "lowering_profile", candidate)) profile = candidate;
     std::cout << "{\n  \"format\": \"flowoptimize.optimization_report\",\n"
                  "  \"version\": 1,\n"
                  "  \"status\": \"ready\",\n"

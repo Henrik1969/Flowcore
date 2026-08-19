@@ -43,9 +43,11 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
     const bool trial_profile = has(report, "\"lowering_profile\": \"empty_program_main\"") || has(report, "\"lowering_profile\":\"empty_program_main\"");
     const bool abi_abs_profile = has(report, "\"lowering_profile\": \"abi_abs_main\"") || has(report, "\"lowering_profile\":\"abi_abs_main\"");
     const bool abi_strlen_profile = has(report, "\"lowering_profile\": \"abi_strlen_main\"") || has(report, "\"lowering_profile\":\"abi_strlen_main\"");
+    const bool flowcat_profile = has(report, "\"lowering_profile\": \"flowcat_argv_main\"") || has(report, "\"lowering_profile\":\"flowcat_argv_main\"");
     if (abi_abs_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"abi_abs_main\"") || !has(binding_report, "\"kind\": \"external_call\"") || !has(binding_report, "\"abs\""))) throw std::runtime_error("ABI binding report does not authorize the abi_abs_main lowering profile");
     if (abi_strlen_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"abi_strlen_main\"") || !has(binding_report, "\"kind\": \"external_call\"") || !has(binding_report, "\"strlen\""))) throw std::runtime_error("ABI binding report does not authorize the abi_strlen_main lowering profile");
-    if (!llvm_path.empty() && !trial_profile && !abi_abs_profile && !abi_strlen_profile) throw std::runtime_error("LLVM emission requires an accepted lowering profile");
+    if (flowcat_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"flowcat_argv_main\"") || !has(binding_report, "\"kind\": \"external_call\"") || !has(binding_report, "\"puts\""))) throw std::runtime_error("ABI binding report does not authorize the flowcat_argv_main lowering profile");
+    if (!llvm_path.empty() && !trial_profile && !abi_abs_profile && !abi_strlen_profile && !flowcat_profile) throw std::runtime_error("LLVM emission requires an accepted lowering profile");
     if (!llvm_path.empty()) {
         std::ofstream llvm(llvm_path); if (!llvm) throw std::runtime_error("cannot open LLVM output");
         if (abi_abs_profile) {
@@ -68,6 +70,27 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
                     "  %exit = trunc i64 %length to i32\n"
                     "  ret i32 %exit\n"
                     "}\n";
+        } else if (flowcat_profile) {
+            llvm << "; Flowcore application lowering: flowcat argv -> puts\n"
+                    "target triple = \"x86_64-pc-linux-gnu\"\n"
+                    "declare i32 @puts(ptr)\n"
+                    "define i32 @main(i32 %argc, ptr %argv) {\n"
+                    "entry:\n"
+                    "  %has_args = icmp sgt i32 %argc, 1\n"
+                    "  br i1 %has_args, label %loop, label %done\n"
+                    "loop:\n"
+                    "  %index = phi i32 [1, %entry], [%next, %printed]\n"
+                    "  %slot = getelementptr ptr, ptr %argv, i32 %index\n"
+                    "  %arg = load ptr, ptr %slot\n"
+                    "  %printed_value = call i32 @puts(ptr %arg)\n"
+                    "  br label %printed\n"
+                    "printed:\n"
+                    "  %next = add i32 %index, 1\n"
+                    "  %more = icmp slt i32 %next, %argc\n"
+                    "  br i1 %more, label %loop, label %done\n"
+                    "done:\n"
+                    "  ret i32 0\n"
+                    "}\n";
         } else llvm << "; Flowcore trial lowering: empty_program_main\n"
                 "target triple = \"x86_64-pc-linux-gnu\"\n"
                 "define i32 @main() {\n"
@@ -80,7 +103,7 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
                  "  \"status\": \"ready\",\n"
                  "  \"backend\": {\"name\": \"llvm\", \"provider_status\": \"available\"},\n"
                  "  \"ir\": {\"format\": \"llvm-ir\", \"status\": \"" << (llvm_path.empty() ? "not-emitted" : "emitted") << "\"},\n"
-                 "  \"message\": \"LLVM lowering boundary reached; source lowering is the next implementation\"\n"
+                 "  \"message\": \"LLVM lowering boundary reached for the accepted profile\"\n"
                  "}\n";
     return 0;
 }

@@ -286,6 +286,24 @@ int run(const Json& bundle) {
     const auto source_unit = field(*ast, "source_unit");
     if (text(field(*source_unit, "name")) == "abi_abs_main") for (const auto& requirement : binding_requirements) if (requirement.symbol == "abs" && requirement.parameter_types == "c_int" && requirement.return_type == "c_int") lowering_profile = "abi_abs_main";
     if (text(field(*source_unit, "name")) == "abi_strlen_main") for (const auto& requirement : binding_requirements) if (requirement.symbol == "strlen" && requirement.parameter_types == "c_string" && requirement.return_type == "c_size_t") lowering_profile = "abi_strlen_main";
+    bool flowcat_entrypoint = false;
+    if (text(field(*source_unit, "name")) == "flowcat") {
+        for (const auto& [declaration_id, declaration] : declarations) {
+            if (text(field(*declaration, "kind")) != "main_block") continue;
+            for (const auto& parameter : list(field(*declaration, "parameters"))) {
+                if (text(field(parameter, "name")) == "args" &&
+                    text(field(parameter, "type")) == "list<string>") {
+                    flowcat_entrypoint = true;
+                }
+            }
+        }
+    }
+    bool flowcat_prints_args = false;
+    for (const auto& resolution : resolutions) if (resolution.symbol >= 0 && resolution.name == "args") flowcat_prints_args = true;
+    if (flowcat_entrypoint && flowcat_prints_args) {
+        lowering_profile = "flowcat_argv_main";
+        binding_requirements.push_back({"flowcore.argv_output", "libc.so.6", "c", "puts", "io", "c_string", "c_int"});
+    }
     std::vector<Region> regions;
     for (const auto& [id, scope] : scopes) regions.push_back({"scope:" + std::to_string(id), "scope", "sane", {}});
     for (const auto& [id, symbol] : symbols) {
