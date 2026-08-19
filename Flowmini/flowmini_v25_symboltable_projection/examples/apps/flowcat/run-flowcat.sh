@@ -4,6 +4,24 @@ set -euo pipefail
 EXAMPLE_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 FLOWMINI_ROOT="$(cd -- "${EXAMPLE_DIR}/../../.." && pwd)"
 FLOWCORE_ROOT="$(cd -- "${FLOWMINI_ROOT}/../.." && pwd)"
+KEEP_BUILD=0
+
+for argument in "$@"; do
+    case "$argument" in
+        --keep-build) KEEP_BUILD=1 ;;
+        -h|--help)
+            sed -n '1,24p' "$EXAMPLE_DIR/README.md"
+            echo
+            echo "Usage: $0 [--keep-build]"
+            exit 0
+            ;;
+        *)
+            echo "unknown option: $argument" >&2
+            echo "usage: $0 [--keep-build]" >&2
+            exit 2
+            ;;
+    esac
+done
 
 FLOWMINI_BIN="${FLOWMINI_BIN:-${FLOWMINI_ROOT}/cmake-build-debug/flowmini}"
 FLOWANALYST_BIN="${FLOWANALYST_BIN:-${FLOWCORE_ROOT}/Flowanalyst/build/flowanalyst}"
@@ -20,9 +38,15 @@ for tool in "$FLOWMINI_BIN" "$FLOWANALYST_BIN" "$FLOWBIND_BIN" "$FLOWOPTIMIZE_BI
     fi
 done
 
-tmpdir="$(mktemp -d)"
-cleanup() { rm -rf -- "$tmpdir"; }
-trap cleanup EXIT
+if [[ "$KEEP_BUILD" -eq 1 ]]; then
+    tmpdir="$EXAMPLE_DIR/build"
+    mkdir -p -- "$tmpdir"
+    echo "preserving build artifacts in: $tmpdir"
+else
+    tmpdir="$(mktemp -d)"
+    cleanup() { rm -rf -- "$tmpdir"; }
+    trap cleanup EXIT
+fi
 
 "$FLOWMINI_BIN" --dump-frontend-bundle "$EXAMPLE_DIR/flowcat.flow" > "$tmpdir/frontend-bundle.json"
 "$FLOWANALYST_BIN" < "$tmpdir/frontend-bundle.json" > "$tmpdir/semantic-report.json"
@@ -46,4 +70,5 @@ cmp -s "$EXAMPLE_DIR/expected-stdout.txt" "$tmpdir/stdout.txt"
 
 echo "flowcat example: PASS"
 echo "  source: $EXAMPLE_DIR/flowcat.flow"
+echo "  binary: $tmpdir/flowcat"
 echo "  final output: alpha beta"

@@ -38,9 +38,20 @@ Build all sibling projects first, then run:
 ./run-flowcat.sh
 ```
 
-The runner writes all intermediate reports and LLVM into a temporary directory,
-leaving the example directory clean. It verifies the final output against
-`expected-stdout.txt`.
+By default the runner writes all intermediate reports and LLVM into a temporary
+directory, leaving the example directory clean. It verifies the final output
+against `expected-stdout.txt`.
+
+To preserve the complete inspection build:
+
+```sh
+./run-flowcat.sh --keep-build
+```
+
+This leaves the generated binary at `build/flowcat`, with the frontend bundle,
+semantic report, binding report, optimization report, lowering report, LLVM,
+and captured output beside it. The `build/` directory is ignored and is not a
+source artifact.
 
 The runner accepts tool overrides for alternate builds:
 
