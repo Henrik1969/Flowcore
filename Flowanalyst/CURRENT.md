@@ -21,8 +21,10 @@ Implemented checks:
 - each named target must expose exactly one `main` procedure.
 
 The report also exposes the first semantic analysis graph and Boolean sparse
-matrix view. The accepted semantic bundle and green-flag gate remain planned
-until the complete semantic check family and final integrity pass exist.
+matrix view. It is the current green-flag input for downstream stages when its
+status is `ok`; the final integrity pass and broader semantic check family are
+still expansion work.
 
-This is semantic analysis, not Graph IR construction, optimization, target
-lowering, or execution.
+Flowanalyst does not construct Graph IR, optimize, select named target
+artifacts, or execute code. It establishes the semantic facts and consumer
+contract those later stages use.

@@ -24,6 +24,7 @@ This is the soul of Flowcore.
 
 - [Flowcore core promise](architecture/flowcore-core-promise.md)
 - [Transformation and revision architecture](architecture/compiler-transformation-revision-model.md)
+- [Current v0.25 language-chain status](checkpoints/2026-08-19-language-chain-status.md)
 - [FrankenCore conformance declaration](architecture/frankencore-conformance.md)
 - [Prerequisites](architecture/prerequisites.md)
 
@@ -44,9 +45,9 @@ See:
 Current checkpoint:
 
 ```text
-Flowmini v0.25 SymbolTable projection maturation
-AST golden tests: 26
-Symbol projection tests: 12
-Frontend bundle tests: 7 golden, 1 isolated, 19 negative
-suite: 78 / 78
+Flowcore v0.25 executable language-chain slice
+AST golden tests: 28
+Symbol projection tests: 14
+Flowanalyst / Flowbind / Flowoptimize / Flowlower: CTest green
+flowcat: native ELF example PASS
 ```

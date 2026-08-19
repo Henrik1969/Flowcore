@@ -12,10 +12,10 @@ Current baseline:
 
 ```text
 build: PASS
-AST golden tests: 26
-Symbol projection tests: 12
-Frontend bundle tests: 7 golden, 1 isolated, 19 negative
-suite: 78 / 78
+AST golden tests: 28
+Symbol projection tests: 14
+downstream language-chain CTest gates: PASS
+flowcat native ELF example: PASS
 ```
 
 Current architecture checkpoint:
@@ -25,9 +25,9 @@ TokenTree remembers what the source looked like.
 AST states what the source means.
 ```
 
-The v0.24 frontend-export border is closed. The active v0.25 line matures its
-factual SymbolTable projection so independent tools and later semantic analysis
-can rely on the boundary.
+The v0.24 frontend-export border is closed. The active v0.25 line makes its
+factual SymbolTable projection consumable by Flowanalyst, Flowbind,
+Flowoptimize, and Flowlower, with `flowcat` proving a native ELF artifact.
 
 Documents in this directory:
 
@@ -58,9 +58,9 @@ Project-wide architecture:
 
 - [Transformation and revision architecture](../architecture/compiler-transformation-revision-model.md)
 
-Planned:
+Current chain and application example:
 
-- programmer's manual
-- language reference
-- ABI notes
-- examples guide
+- [Parameterized main](v0.25-parameterized-main.md)
+- [Flowcat application](../../Flowmini/flowmini_v25_symboltable_projection/examples/apps/flowcat/README.md)
+- [Named targets](../language/named-targets.md)
+- [Target artifact model](../language/target-artifact-model.md)

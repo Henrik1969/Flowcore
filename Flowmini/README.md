@@ -15,15 +15,16 @@ Flowmini/flowmini_v25_symboltable_projection
 Current stage theme:
 
 ```text
-Flowmini v0.25 SymbolTable projection maturation
+Flowmini v0.25 language-chain vertical slice
 ```
 
-The v0.25 line matures the factual AST-to-SymbolTable projection and its
-independent export boundary without beginning semantic analysis.
+The v0.25 line now carries a source program through AST, SymbolTable,
+Flowanalyst, Flowoptimize, Flowlower, LLVM, and a native ELF executable for a
+small accepted application subset.
 
 ## Current status
 
-Flowmini is experimental and unfinished.
+Flowmini is experimental and unfinished, but the current chain is executable.
 
 ```text
 lexer/token groundwork             usable
@@ -32,11 +33,11 @@ explicit AST                        v0.24 raw-frontend coverage gate passed
 recursive expression AST            implemented and golden-guarded
 C5 typed statements/blocks          complete
 structural SymbolTable projection   typed origins independently validated
-canonical type policy               binding, runtime unimplemented
-semantic analysis                   mostly future work
-type checking                       mostly future work
-Graph IR lowering                   mostly future work
-runtime semantics                   mostly future work
+canonical type policy               represented and checked at current boundary
+semantic analysis                   initial report, regions, names, calls, types
+type checking                       accepted subset and explicit diagnostics
+Graph IR lowering                   downstream boundary not yet generalized
+runtime semantics                   executable profiles only
 ```
 
 The inherited v0.24 AST represents a recursive, precedence-aware expression graph
@@ -119,11 +120,10 @@ Expected current result:
 
 ```text
 normal CMake/Ninja build:      PASS
-flowmini_ast_golden_tests:     PASS (27)
-flowmini_symbol_projection_tests: PASS (13/13)
-flowmini_frontend_bundle_tests:   PASS (8 golden, 1 isolated, 19 negative)
-flowmini_suite:                PASS (78/78)
-CTest:                         PASS (2/2)
+AST golden tests:              PASS (28)
+Symbol projection tests:       PASS (14/14)
+downstream sibling CTest gates: PASS
+flowcat native ELF example:    PASS
 ```
 
 ## Useful commands
@@ -197,8 +197,9 @@ TokenTree remembers what the source looked like.
 AST states what the source means.
 ```
 
-The current v0.25 work is about making its SymbolTable projection a trustworthy
-input for independent tools and later semantic analysis.
+The current v0.25 work makes the SymbolTable projection a trustworthy input for
+independent tools and carries selected programs through the complete language
+chain.
 
 ## Documentation map
 

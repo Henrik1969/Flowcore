@@ -1,6 +1,6 @@
 ---
 title: Flowcore FrankenCore Conformance Declaration
-status: current-experimental
+status: historical-checkpoint
 kind: architecture-declaration
 verified: 2026-08-16
 repository-revision: 2927c981fa029433952ca699d567a5986771eca5
@@ -9,7 +9,10 @@ repository-revision: 2927c981fa029433952ca699d567a5986771eca5
 # Flowcore FrankenCore conformance declaration
 
 This declaration records the observed architecture of the canonical Flowcore
-repository at the revision above. It follows the canonical FrankenCore
+repository at the revision above. It is retained as historical evidence; the
+current implementation summary is
+`docs/checkpoints/2026-08-19-language-chain-status.md`.
+It follows the canonical FrankenCore
 architectural laws maintained in the private sibling repository at
 `/home/henrik/Projekter/Udvikling/FrankenCore`. It does not copy or replace
 that authority.

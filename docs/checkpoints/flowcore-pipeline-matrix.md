@@ -16,7 +16,7 @@ This prevents unfinished language areas from being mistaken for regressions.
 
 The companion `tools/run-flowcore-pass-corpus.sh` breadth gate runs every
 program in `Flowmini/.../examples/pass` through the same four boundaries. The
-current corpus contains 41 programs, all of which pass semantic analysis,
+current corpus contains 43 programs, all of which pass semantic analysis,
 optimization, and the lowering report boundary. This does not claim that
 Flowlower emits target code for every program.
 
@@ -35,10 +35,15 @@ Flowlower emits target code for every program.
 | `literal_expression_probe` | typed literals and collection values | accepted through Flowlower boundary |
 | `type_reference_probe` | generic, qualified, and shaped types | blocked by incomplete type-family resolution |
 
-The `empty_program_main`, `abi_abs_main`, and `abi_strlen_main` profiles
-currently emit LLVM IR and produce executables. The other accepted matrix
+The `empty_program_main`, `abi_abs_main`, `abi_strlen_main`, and
+`flowcat_argv_main` profiles currently emit LLVM IR and produce executables.
+The other accepted matrix
 cases prove semantic and boundary continuation; they do not claim that
 general lowering is implemented.
+
+The named-target probe proves that `cli` and `daemon` each have exactly one
+semantic `main`. Target-aware selection and separate artifact emission are not
+yet part of Flowlower.
 
 ## Exploratory AST-family scan
 
@@ -51,7 +56,7 @@ generic/container/shape types:
   probes; advanced qualified and symbolic extents remain unresolved:
   collection.list<int>, math.scalar, Rows
 
-ABI lowering remains future work even though the canonical ABI spellings now
+General ABI lowering remains future work even though the canonical ABI spellings now
 resolve:
   c_int, c_long, c_size_t
 

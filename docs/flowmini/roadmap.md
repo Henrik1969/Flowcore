@@ -9,20 +9,22 @@ provisional until each milestone is activated.
 ```text
 v25_symboltable_projection
 build: OK
-AST golden tests: 26 / 26
-Symbol projection tests: 12 / 12
-Frontend bundle tests: 7 golden, 1 isolated, 19 negative
-suite: 78 / 78
+AST golden tests: 28 / 28
+Symbol projection tests: 14 / 14
+Frontend bundle tests: 8 golden, 1 isolated, 19 negative
+downstream language-chain CTest: PASS
+flowcat ELF example: PASS
 CTest: 2 / 2
 ```
 
 ## Immediate
 
-1. Mature structural SymbolTable projection coverage and factual metadata.
-2. Maintain the audited typed-origin and source-provenance contract as
-   projection coverage grows.
-3. Close remaining factual projection gaps before semantic-analysis entry.
-4. Keep semantic interpretation outside v0.25.
+1. Maintain structural SymbolTable coverage and factual metadata.
+2. Maintain the typed-origin and source-provenance contract as the language
+   chain grows.
+3. Expand semantic checks and accepted lowering profiles one explicit contract
+   at a time.
+4. Keep every stage independently consumable and provenance-preserving.
 
 ## Next structural versions
 
@@ -45,8 +47,9 @@ This exit rule passed and was formally declared closed on 2026-08-16.
 
 ### Active: v25_symboltable_projection
 
-Mature the factual AST-to-SymbolTable projection and independent export boundary
-before semantic analysis.
+Maintain the factual AST-to-SymbolTable projection and the independent export
+boundary while integrating semantic analysis, capability binding, optimization,
+and explicit LLVM lowering profiles.
 
 Advance to v0.26 only when the complete AST and lossless structural SymbolTable
 projection form a mature frontend border with stable cross-links, scope
@@ -54,9 +57,10 @@ coverage, source locations, and unresolved declared type/contract facts.
 
 ### Provisional later label: v26_semantic_checker_split
 
-Separate syntax parsing, symbol collection, semantic checking, and lowering.
-This is where resolution, derived facts, contract satisfaction, type
-correctness, and semantic diagnostics begin.
+Separate and deepen syntax parsing, symbol collection, semantic checking, and
+lowering. The initial resolution, derived facts, contract satisfaction, type
+correctness, and semantic diagnostics already exist in the v25 sibling chain;
+v26 expands their coverage and integrity guarantees.
 
 ## Later runtime work
 

@@ -6,7 +6,7 @@ date: 2026-08-19
 
 # Flowcore four-stage vertical slice
 
-This checkpoint records the first complete executable walk through the planned
+This checkpoint records the first complete executable walk through the current
 Flowcore compiler model:
 
 ```text
@@ -22,7 +22,7 @@ Flowcore source
 
 ## What is proven
 
-The trial program is:
+The first trial program was:
 
 ```flow
 program empty_program_main
@@ -55,26 +55,31 @@ clang /tmp/flowcore-trial.ll -o /tmp/flowcore-trial
 /tmp/flowcore-trial
 ```
 
-The resulting executable is an x86-64 ELF binary and returns 0.
+The resulting executable is an x86-64 ELF binary and returns 0. The current
+application proof is the packaged `flowcat` example, which emits a native ELF
+binary and prints its command-line arguments through an authorized `puts`
+capability.
 
 The sibling-specific CTest gates also pass:
 
 ```text
-Flowanalyst:  1/1 PASS
+  Flowanalyst:  1/1 PASS
+Flowbind:     provider and fuzz gates PASS
 Flowoptimize: 1/1 PASS
-Flowlower:    1/1 PASS
+Flowlower:    pipeline matrix and executable profiles PASS
+flowcat:      complete example runner PASS
 ```
 
 ## Honest boundary statement
 
 This is a vertical model checkpoint, not a claim of a production compiler.
 
-FlowMini has the mature structural AST/SymbolTable export. Flowanalyst has the
-initial semantic graph, name/type/call/refined-type checks, and diagnostics, but
-the full semantic bundle and final green-flag integrity pass are still being
-implemented. Flowoptimize currently performs no transformations. Flowlower
-currently emits source-derived LLVM IR only for `empty_program_main`; other
-programs report that IR has not been emitted.
+FlowMini has the structural AST/SymbolTable export. Flowanalyst has the initial
+semantic graph, name/type/call/refined-type/record checks, diagnostics, and
+target entrypoint checks. Flowbind verifies and authorizes selected external
+capabilities. Flowoptimize currently performs no transformations. Flowlower
+emits only explicitly accepted profiles; `flowcat_argv_main` is the first
+application profile.
 
 The checkpoint is valuable because every border is explicit, inspectable,
 versioned, independently consumable, and recoverable before deeper maturity
@@ -82,11 +87,10 @@ work begins.
 
 ## Next expansion
 
-1. Complete Flowanalyst's semantic checks and accepted semantic-bundle export.
-2. Add the final single-thread integrity pass and green flag.
-3. Replace the optimizer boundary stub with one provenance-preserving
-   transformation.
-4. Expand Flowlower from the empty-main profile to a small real target subset.
-5. Validate generated LLVM with the installed LLVM toolchain and extend the
-   executable firetests.
-
+1. Complete the final semantic integrity pass and green flag.
+2. Add explicit target selection and separate artifacts for named targets.
+3. Replace the optimizer identity boundary with provenance-preserving
+   transformations.
+4. Expand the standard library and file-content I/O beyond `flowcat` argv output.
+5. Add policy-directed parallelism, CUDA providers, and bootstrap/self-hosting
+   stages.

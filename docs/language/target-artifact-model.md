@@ -57,7 +57,9 @@ remote/service bindings as separate ecosystem projections.
 
 ## Boundary rule
 
-FlowMini v0.25 currently accepts one root `main`. Named targets are the next
-frontend feature. Lazy loading, dispatcher implementation, dependency
-resolution, native lowering, and binding emission remain downstream of the
-AST/SymbolTable border.
+FlowMini v0.25 accepts one anonymous root `main` or multiple named targets.
+Flowanalyst validates named-target entrypoint shape. The current lowering slice
+can emit selected single-profile programs, including `flowcat`, but does not
+yet accept a target selector and produce one artifact per named target. Lazy
+loading, dispatcher implementation, dependency resolution, and generalized
+binding emission remain downstream work.

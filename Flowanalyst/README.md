@@ -28,10 +28,12 @@ The command also accepts a bundle file path instead of stdin:
 Flowanalyst/build/flowanalyst bundle.json
 ```
 
-Flowanalyst currently reports duplicate declarations in one scope, unresolved
-declared type spellings, and target entrypoint shape. More checks will be added
-as explicit semantic contracts, without moving semantic meaning backward into
-Flowmini.
+Flowanalyst currently reports frontend diagnostics, duplicate declarations,
+declared type resolution, identifier and call resolution, call arity, refined
+invariants, record fields, external ABI requirements, and named-target
+entrypoint shape. It emits analysis regions and a Boolean dependency matrix.
+More checks will be added as explicit semantic contracts, without moving
+semantic meaning backward into Flowmini.
 
 The independent consumer boundary is specified in
 [`docs/flowanalyst/v0.1-consumer-contract.md`](../docs/flowanalyst/v0.1-consumer-contract.md).

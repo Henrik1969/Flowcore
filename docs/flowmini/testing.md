@@ -45,11 +45,11 @@ ctest --test-dir cmake-build-debug --output-on-failure
 Expected current baseline:
 
 ```text
-AST golden tests:          26 / 26
-Symbol projection tests:   12 / 12
-Frontend bundle tests:      7 golden / 1 isolated / 19 negative
-categorized suite:          78 / 78
-CTest:                       2 / 2
+AST golden tests:          28 / 28
+Symbol projection tests:   14 / 14
+Frontend bundle tests:      8 golden / 1 isolated / 19 negative
+downstream sibling CTest:   PASS
+flowcat ELF example:        PASS
 ```
 
 These normal gates form the Flowmini Tier 2 integration baseline. Before

@@ -6,10 +6,10 @@ kind: language-design
 
 # Named Targets and Main Entrypoints
 
-Authority: the one-root-`main` rule inherited from v0.24 remains supported.
-The neutral source universe and target projection model are now implemented at
-the structural AST/SymbolTable boundary. Target completeness, artifact
-selection, lowering, and loader mechanisms remain staged work.
+Authority: the one-root-`main` rule inherited from v0.24 remains supported for
+anonymous root programs. The neutral source universe and named-target
+projection model are implemented through Flowanalyst. Artifact selection and
+target-specific lowering remain staged work.
 
 ## Current v0.25 rule
 
@@ -17,7 +17,7 @@ Active Flowmini v0.25 supports the inherited root form and named target
 declarations. A root program may contain one root `main`, or named targets with
 target-local declarations and entrypoints.
 
-Multiple root `main` blocks are currently an error.
+Multiple anonymous root `main` blocks are currently an error.
 
 ```flow
 program example
@@ -37,8 +37,10 @@ Named targets are the explicit structural expansion of that rule.
 
 ## Target implementation status
 
-Flowcore/Flowmini now preserves multiple named targets from the same source
-base. It does not yet enforce runnable-target completeness or build artifacts.
+Flowcore/Flowmini preserves multiple named targets from the same source base.
+Flowanalyst enforces exactly one `main` procedure per named target and emits
+target status in its semantic report. Flowlower does not yet select a target or
+emit separate artifacts for the named-target case.
 
 The planned model is:
 
@@ -213,10 +215,11 @@ A target is a named projection of that universe into a buildable or runnable pro
 
 A main block is the entrypoint of a target.
 
-For active v0.25, root programs support exactly one main block.
+For active v0.25, root programs support one anonymous main block, while named
+targets may each own one main block.
 
-Future versions may support named target scopes, each owning at most one main
-block, with runnable target selection requiring exactly one.
+Future versions will add explicit target selection and require a selected
+target when a source universe contains more than one runnable target.
 
 Why not allow multiple anonymous main blocks?
 
@@ -272,7 +275,7 @@ TargetDecl
     location
 ```
 
-Likely future semantic checks:
+Implemented/current semantic checks:
 
 ```text
 root program may have either:
@@ -286,7 +289,7 @@ target names must be unique within the program
 
 target-local declarations must obey normal scoping rules
 
-build/lowering must select an explicit target when more than one target exists
+target-aware build/lowering must select an explicit target when more than one target exists
 ```
 
 Possible future lowering behavior:
@@ -320,17 +323,18 @@ program + target test_runner
 
 - How should this appear in the visual graph/patchbay UI?
 
-## Current decision
+## Current implementation status
 
-For now, keep v0.25 strict:
+The current v0.25 implementation is strict about anonymous roots:
 
 ```text
-one root main only
+one anonymous root main only
 ```
 
 But preserve the future canon:
 
 ```text
-multiple runnable products should be modeled as named targets,
-not as multiple anonymous root main blocks
+multiple runnable products are modeled as named targets, not as multiple
+anonymous root main blocks. The semantic boundary is implemented; target-aware
+artifact selection is the next lowering boundary.
 ```

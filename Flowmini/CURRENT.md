@@ -9,19 +9,19 @@ flowmini_v25_symboltable_projection
 Current milestone:
 
 ```text
-Flowmini v0.25 SymbolTable projection maturation
-factual projection and frontend-bundle hardening; no semantic analysis yet
+Flowmini v0.25 language-chain vertical slice
+frontend export, semantic analysis, policy binding, optimization boundary,
+LLVM lowering, and executable application proof
 ```
 
 ## Status
 
 ```text
 normal CMake/Ninja build:      PASS
-flowmini_ast_golden_tests:     PASS (27)
-flowmini_symbol_projection_tests: PASS (13/13)
-flowmini_frontend_bundle_tests:   PASS (8 golden, 1 isolated, 19 negative)
-flowmini_suite:                PASS (78/78)
-CTest:                         PASS (2/2)
+AST golden tests:              PASS (28)
+Symbol projection tests:       PASS (14/14)
+downstream sibling CTest gates: PASS
+flowcat native ELF example:    PASS
 ```
 
 Flowmini is still experimental and unfinished.
@@ -43,9 +43,11 @@ accepted-language matrix, independent-consumer gate, and Tier 3 Firetest passed.
 v0.25 now exports typed structural origins through frontend bundle version 2.
 The independent consumer verifies precise roles, canonical AST IDs, source
 provenance, uniqueness, scope ownership, and reverse lookup without name
-guessing. It does not
-own semantic type resolution, legality checking, contract satisfaction, Graph
-IR, or runtime lowering.
+guessing. Flowanalyst now consumes that export and establishes the initial
+semantic report, including type/name/call checks, target entrypoint checks,
+analysis regions, and a Boolean dependency matrix. Flowbind authorizes selected
+external capabilities, Flowoptimize preserves the report boundary, and
+Flowlower emits LLVM for explicitly accepted profiles.
 
 Top-level declarations have stable `DeclarationId` values in a canonical arena.
 The source unit owns each declaration exactly once. Type references, fields,
@@ -81,11 +83,10 @@ Expected result:
 
 ```text
 normal CMake/Ninja build:      PASS
-flowmini_ast_golden_tests:     PASS (26)
-flowmini_symbol_projection_tests: PASS (12/12)
-flowmini_frontend_bundle:      PASS (7 golden, 1 isolated, 19 negative)
-flowmini_suite:                PASS (78/78)
-CTest:                         PASS (2/2)
+AST golden tests:              PASS (28)
+Symbol projection tests:       PASS (14/14)
+downstream sibling CTest gates: PASS
+flowcat native ELF example:    PASS
 ```
 
 ## Current important architecture law
@@ -118,8 +119,8 @@ Flowmini/flowmini_v24_explicit_ast/docs/v0.24-future-transformation-boundary.md
 ## Current important language rule
 
 Active v0.25 supports the inherited root form and the structural named-target
-form. Target completeness and artifact selection remain later semantic/build
-checks:
+form. Flowanalyst checks target entrypoint completeness; artifact selection and
+target-specific lowering remain downstream build work:
 
 ```text
 A root program may use one root main block or named targets.
@@ -134,18 +135,17 @@ That future direction is documented in:
 docs/language/named-targets.md
 ```
 
-## Not yet complete
+## Current boundary and remaining work
 
 The following are still future or incomplete work:
 
 ```text
-ordinary capability/provider call model for output; no core Print statement
-semantic name resolution
-type checking
-contract and refined-type validation
-Graph IR lowering
-runtime execution semantics
-provider/capability resolution
+general source lowering beyond accepted profiles
+target selection and separate artifact emission for named multitarget programs
+general list/string/file I/O standard library
+optimizer transformations beyond the identity boundary
+parallelism and CUDA execution policies
+self-hosting and bootstrap builds
 ```
 
 The closed v0.24 completion checklist is:

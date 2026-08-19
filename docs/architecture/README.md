@@ -42,11 +42,12 @@ The important architectural boundaries are documented before their full
 implementations exist so the current default path does not accidentally become
 the permanent definition of Flowcore.
 
-Current active implementation work is Flowmini v0.25 SymbolTable projection
-maturation. It inherits the closed v0.24 raw frontend/export border and hardens
-factual origins and the independent-consumer contract before semantic analysis.
-Graph IR, optimizer policy, target lowering, and generalized provider selection
-remain future work.
+Current active implementation is a verified v0.25 language-chain slice. It
+inherits the closed v0.24 raw frontend/export border, establishes semantic
+analysis and policy-binding consumers, preserves an optimization boundary, and
+lowers selected profiles to executable LLVM/ELF artifacts. Graph IR, real
+optimizer transforms, generalized target selection, parallelism policies, CUDA
+providers, and self-hosting remain future expansion work.
 
 Planned and active architecture topics:
 

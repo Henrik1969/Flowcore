@@ -2046,13 +2046,13 @@
     },
     {
       "id": 27,
-      "kind": "placement",
-      "source_form": "arrow_placement",
-      "target_kind": "identifier",
+      "kind": "expression",
+      "source_form": null,
+      "target_kind": null,
       "source_location": {
         "source_id": 0,
         "path": "examples/pass/import_demo.flow",
-        "line": 15,
+        "line": 13,
         "column": 5
       }
     },
@@ -2064,10 +2064,46 @@
       "source_location": {
         "source_id": 0,
         "path": "examples/pass/import_demo.flow",
+        "line": 15,
+        "column": 5
+      }
+    },
+    {
+      "id": 29,
+      "kind": "expression",
+      "source_form": null,
+      "target_kind": null,
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/pass/import_demo.flow",
+        "line": 16,
+        "column": 5
+      }
+    },
+    {
+      "id": 30,
+      "kind": "placement",
+      "source_form": "arrow_placement",
+      "target_kind": "identifier",
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/pass/import_demo.flow",
         "line": 18,
+        "column": 5
+      }
+    },
+    {
+      "id": 31,
+      "kind": "expression",
+      "source_form": null,
+      "target_kind": null,
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/pass/import_demo.flow",
+        "line": 19,
         "column": 5
       }
     }
   ],
-  "expression_count": 64
+  "expression_count": 67
 }

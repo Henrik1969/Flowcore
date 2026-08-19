@@ -13,7 +13,9 @@ FlowMini → Flowanalyst → Flowbind
 It uses `dlopen` and `dlsym` to prove that a declared library and symbol are
 available. It also verifies the v0.1 supported C signature family
 (`c_int`, `c_long`, `c_size_t`, and `c_string`) and reports host layout facts.
-It never calls a foreign function and does not claim lowering readiness yet.
+It never calls a foreign function. A ready report is the authorization input
+for a later lowering profile; the `flowcat_argv_main` example demonstrates this
+with an exact `libc.so.6 puts c io` grant.
 
 Required CLI invariants:
 
