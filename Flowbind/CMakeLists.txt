@@ -16,3 +16,7 @@ add_test(NAME flowbind_provider
         FLOWMINI_BIN=${CMAKE_CURRENT_SOURCE_DIR}/../Flowmini/flowmini_v25_symboltable_projection/cmake-build-debug/flowmini
         FLOWANALYST_BIN=${CMAKE_CURRENT_SOURCE_DIR}/../Flowanalyst/build/flowanalyst
         ${CMAKE_CURRENT_SOURCE_DIR}/tests/run-flowbind-tests.sh)
+add_test(NAME flowbind_fuzz
+    COMMAND ${CMAKE_COMMAND} -E env
+        FLOWBIND_BIN=$<TARGET_FILE:flowbind>
+        ${CMAKE_CURRENT_SOURCE_DIR}/../tools/run-flowbind-fuzz.sh)

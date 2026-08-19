@@ -101,6 +101,9 @@ int verify(const std::string& report, const std::string& policy_path) {
     }
     const auto needed = requirements(report);
     const auto profile = value(report, "lowering_profile");
+    const Requirement* lowering_requirement = nullptr;
+    if (profile == "abi_abs_main") for (const auto& item : needed) if (item.symbol == "abs") lowering_requirement = &item;
+    if (profile == "abi_strlen_main") for (const auto& item : needed) if (item.symbol == "strlen") lowering_requirement = &item;
     const auto grants = read_policy(policy_path);
     const std::vector<std::string> supported_types = {"c_int", "c_long", "c_size_t", "c_string"};
     auto supported_type = [&](const std::string& type) { for (const auto& candidate : supported_types) if (candidate == type) return true; return false; };
@@ -132,7 +135,9 @@ int verify(const std::string& report, const std::string& policy_path) {
     }
     std::cout << "{\n  \"format\": \"flowbind.binding_report\",\n  \"version\": 1,\n  \"status\": \"ready\",\n  \"lowering_profile\": " << (profile.empty() ? "\"none\"" : "\"" + profile + "\"") << ",\n  \"provider\": {\"name\": \"dlopen+dlsym\", \"requirements\": " << needed.size() << "},\n  \"symbols\": [";
     for (std::size_t i = 0; i < needed.size(); ++i) { if (i) std::cout << ','; std::cout << '"' << needed[i].symbol << '"'; }
-    std::cout << "],\n  \"policy\": {\"status\": \"authorized\", \"grants\": " << grants.size() << "},\n  \"abi\": {\"convention\": \"c\", \"signature_verified\": true, \"sizeof_int\": " << sizeof(int) << ", \"sizeof_long\": " << sizeof(long) << ", \"sizeof_size_t\": " << sizeof(std::size_t) << ", \"sizeof_pointer\": " << sizeof(void*) << "},\n  \"execution\": \"not-performed\"\n}\n";
+    std::cout << "],\n  \"lowering_plan\": {\"kind\": " << (lowering_requirement ? "\"external_call\"" : "\"none\"");
+    if (lowering_requirement) std::cout << ",\"symbol\":\"" << lowering_requirement->symbol << "\",\"parameter_types\":\"" << lowering_requirement->parameter_types << "\",\"return_type\":\"" << lowering_requirement->return_type << "\"";
+    std::cout << "},\n  \"policy\": {\"status\": \"authorized\", \"grants\": " << grants.size() << "},\n  \"abi\": {\"convention\": \"c\", \"signature_verified\": true, \"sizeof_int\": " << sizeof(int) << ", \"sizeof_long\": " << sizeof(long) << ", \"sizeof_size_t\": " << sizeof(std::size_t) << ", \"sizeof_pointer\": " << sizeof(void*) << "},\n  \"execution\": \"not-performed\"\n}\n";
     return 0;
 }
 
