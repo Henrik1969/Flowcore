@@ -136,6 +136,7 @@
             {
                 "id": 2,
                 "kind": "main_block",
+                "parameters": [],
                 "has_body": true,
                 "body_block": 3,
                 "location": {
@@ -269,6 +270,7 @@
         {
             "id": 2,
             "kind": "main_block",
+            "parameters": [],
             "has_body": true,
             "body_block": 3,
             "location": {

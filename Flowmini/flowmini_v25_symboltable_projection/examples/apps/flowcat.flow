@@ -1,0 +1,6 @@
+program flowcat
+
+// First application specimen: the canonical entry point is now explicit.
+// Runtime argv-to-text streaming remains a later stdlib/lowering boundary.
+main(args : list<string>) {
+}

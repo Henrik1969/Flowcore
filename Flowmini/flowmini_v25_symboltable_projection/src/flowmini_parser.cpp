@@ -1846,6 +1846,14 @@ private:
 
     void parseMainBlock() {
         enterScope("main");
+        if (check(TokenKind::LeftParen)) {
+            std::size_t depth = 0;
+            do {
+                if (check(TokenKind::LeftParen)) { ++depth; }
+                if (check(TokenKind::RightParen) && depth > 0) { --depth; }
+                ++pos_;
+            } while (depth > 0 && !check(TokenKind::End));
+        }
         expect(TokenKind::LeftBrace, "expected '{' after main");
         skipNewlines();
         Step body = parseBlockStatementsUntilRightBrace();

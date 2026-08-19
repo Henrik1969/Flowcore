@@ -455,6 +455,7 @@ struct AbiDecl {
 };
 
 struct MainBlock {
+    std::vector<Parameter> parameters;
     std::optional<BlockId> body;
     SourceLocation location;
 

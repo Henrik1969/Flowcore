@@ -8,6 +8,7 @@ EXPECTED_DIR="$ROOT/tests/expected/symbols"
 EXAMPLES_DIR="$ROOT/examples/ast"
 
 PROBES=(
+  "main_args_probe"
   "canonical_type_spelling_probe"
   "type_reference_probe"
   "statement_else_probe"

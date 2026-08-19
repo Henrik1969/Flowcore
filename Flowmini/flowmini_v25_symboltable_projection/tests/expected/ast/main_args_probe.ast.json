@@ -1,0 +1,127 @@
+{
+    "format": "flowmini.ast.v2",
+    "source_unit": {
+        "kind": "program",
+        "name": "main_args_probe",
+        "location": {
+            "line": 1,
+            "column": 1
+        },
+        "declaration_count": 1,
+        "declaration_ids": [
+            0
+        ],
+        "declarations": [
+            {
+                "id": 0,
+                "kind": "main_block",
+                "parameters": [
+                    {
+                        "name": "args",
+                        "type": "list<string>",
+                        "type_ref": {
+                            "kind": "generic",
+                            "text": "list<string>",
+                            "payload": {
+                                "constructor_segments": [
+                                    "list"
+                                ],
+                                "arguments": [
+                                    {
+                                        "kind": "named",
+                                        "text": "string",
+                                        "payload": {
+                                            "name_segments": [
+                                                "string"
+                                            ]
+                                        },
+                                        "location": {
+                                            "line": 4,
+                                            "column": 18
+                                        }
+                                    }
+                                ]
+                            },
+                            "location": {
+                                "line": 4,
+                                "column": 13
+                            }
+                        },
+                        "location": {
+                            "line": 4,
+                            "column": 6
+                        }
+                    }
+                ],
+                "has_body": true,
+                "body_block": 0,
+                "location": {
+                    "line": 4,
+                    "column": 1
+                }
+            }
+        ]
+    },
+    "declaration_pool_size": 1,
+    "declaration_pool": [
+        {
+            "id": 0,
+            "kind": "main_block",
+            "parameters": [
+                {
+                    "name": "args",
+                    "type": "list<string>",
+                    "type_ref": {
+                        "kind": "generic",
+                        "text": "list<string>",
+                        "payload": {
+                            "constructor_segments": [
+                                "list"
+                            ],
+                            "arguments": [
+                                {
+                                    "kind": "named",
+                                    "text": "string",
+                                    "payload": {
+                                        "name_segments": [
+                                            "string"
+                                        ]
+                                    },
+                                    "location": {
+                                        "line": 4,
+                                        "column": 18
+                                    }
+                                }
+                            ]
+                        },
+                        "location": {
+                            "line": 4,
+                            "column": 13
+                        }
+                    },
+                    "location": {
+                        "line": 4,
+                        "column": 6
+                    }
+                }
+            ],
+            "has_body": true,
+            "body_block": 0,
+            "location": {
+                "line": 4,
+                "column": 1
+            }
+        }
+    ],
+    "expression_pool_size": 0,
+    "expression_pool": [],
+    "statement_pool_size": 0,
+    "statement_pool": [],
+    "block_pool_size": 1,
+    "block_pool": [
+        {
+            "id": 0,
+            "statements": []
+        }
+    ]
+}

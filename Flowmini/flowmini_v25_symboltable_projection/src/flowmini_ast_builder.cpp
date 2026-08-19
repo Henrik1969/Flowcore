@@ -227,13 +227,15 @@ namespace flowmini::ast {
                 ++i; // consume ')'
             }
 
-            if (i < tokens.size() &&
-                (tokens[i].kind == flowmini::TokenKind::Colon ||
-                 tokens[i].kind == flowmini::TokenKind::PlaceArrow)) {
-                ++i;
+            if constexpr (requires { fn.return_type; }) {
+                if (i < tokens.size() &&
+                    (tokens[i].kind == flowmini::TokenKind::Colon ||
+                     tokens[i].kind == flowmini::TokenKind::PlaceArrow)) {
+                    ++i;
 
-                if (i < tokens.size() && is_identifier_like_type_token(tokens[i])) {
-                    fn.return_type = parse_type_ref(tokens, i);
+                    if (i < tokens.size() && is_identifier_like_type_token(tokens[i])) {
+                        fn.return_type = parse_type_ref(tokens, i);
+                    }
                 }
             }
 
@@ -2687,6 +2689,7 @@ namespace flowmini::ast {
                     MainBlock mainBlock;
                     mainBlock.location = location_from_token(tokens[i]);
                     ++i;
+                    i = parse_function_signature(tokens, i, mainBlock);
                     i = mark_body_container(tokens, i, mainBlock.has_body,
                                             mainBlock.body_location, mainBlock.body,
                                             module.block_pool, module.statement_pool,
@@ -2842,6 +2845,7 @@ namespace flowmini::ast {
                 mainBlock.location = location_from_token(tokens[i]);
 
                 ++i;
+                i = parse_function_signature(tokens, i, mainBlock);
                 i = mark_body_container(tokens, i, mainBlock.has_body, mainBlock.body_location, mainBlock.body,
                                         module.block_pool, module.statement_pool, module.expression_pool);
 

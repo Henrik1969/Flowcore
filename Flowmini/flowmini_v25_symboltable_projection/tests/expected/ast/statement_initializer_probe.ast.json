@@ -43,6 +43,7 @@
             {
                 "id": 1,
                 "kind": "main_block",
+                "parameters": [],
                 "has_body": true,
                 "body_block": 1,
                 "location": {
@@ -84,6 +85,7 @@
         {
             "id": 1,
             "kind": "main_block",
+            "parameters": [],
             "has_body": true,
             "body_block": 1,
             "location": {

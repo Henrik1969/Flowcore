@@ -721,6 +721,30 @@ void project_main_block(symboltable::SymbolTable& table,
                                     decl.location,
                                     declarationId));
 
+    for (std::size_t parameterIndex = 0;
+         parameterIndex < decl.parameters.size();
+         ++parameterIndex) {
+        const auto& parameter = decl.parameters[parameterIndex];
+        if (parameter.name.empty()) {
+            continue;
+        }
+        const auto parameterSymbol =
+            table.insertSymbol(mainScope,
+                               parameter.name,
+                               symboltable::SymbolKind::Parameter);
+        set_declaration_location(table, parameterSymbol, parameter.location);
+        record_symbol_origin(symbolOrigins,
+                             parameterSymbol,
+                             astPath + "/parameters/" + std::to_string(parameterIndex),
+                             make_origin(AstOriginEntityKind::Parameter,
+                                         AstOriginRole::FunctionParameter,
+                                         parameter.location));
+        add_type_spelling_fact(table,
+                               parameterSymbol,
+                               "declared_type_spelling",
+                               parameter.type);
+    }
+
     if (decl.body) {
         project_block(table,
                       module,

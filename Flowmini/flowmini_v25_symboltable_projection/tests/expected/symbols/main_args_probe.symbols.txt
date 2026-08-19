@@ -1,0 +1,14 @@
+SymbolTable dump
+Scopes: 3
+  Scope #1 kind=Global name=global symbols=1 children=1
+  Scope #2 kind=Module name=main_args_probe symbols=1 children=1
+  Scope #3 kind=Function name=main symbols=1 children=0
+Symbols: 3
+  Symbol #1 scope=#1 name=main_args_probe kind=Module facts=1
+    declaration_location=<source>:1:1
+    Fact kind=Custom key=source_unit_kind value="program"
+  Symbol #2 scope=#2 name=main kind=Procedure facts=0
+    declaration_location=<source>:4:1
+  Symbol #3 scope=#3 name=args kind=Parameter facts=1
+    declaration_location=<source>:4:6
+    Fact kind=TypeReference key=declared_type_spelling value="list<string>"

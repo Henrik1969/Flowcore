@@ -898,6 +898,15 @@ namespace flowmini::ast {
             } else if (const auto* mainBlock = std::get_if<MainBlock>(&decl)) {
                 out << ",\n";
                 dump_indent(out, indent + 2);
+                out << "\"parameters\": [";
+                if (!mainBlock->parameters.empty()) { out << "\n"; }
+                for (std::size_t i = 0; i < mainBlock->parameters.size(); ++i) {
+                    dump_parameter_json(out, mainBlock->parameters[i], indent + 2);
+                    if (i + 1 < mainBlock->parameters.size()) { out << ","; }
+                }
+                if (!mainBlock->parameters.empty()) { dump_indent(out, indent + 2); }
+                out << "],\n";
+                dump_indent(out, indent + 2);
                 out << "\"has_body\": " << (mainBlock->has_body ? "true" : "false") << ",\n";
 
                 dump_indent(out, indent + 2);
