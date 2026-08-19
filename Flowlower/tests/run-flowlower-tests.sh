@@ -5,6 +5,7 @@ root=$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)
 lowerer=${FLOWLOWER_BIN:?FLOWLOWER_BIN is required}
 optimizer=${FLOWOPTIMIZE_BIN:?FLOWOPTIMIZE_BIN is required}
 analyst=${FLOWANALYST_BIN:?FLOWANALYST_BIN is required}
+bind=${FLOWBIND_BIN:?FLOWBIND_BIN is required}
 flowmini="$root/Flowmini/flowmini_v25_symboltable_projection/cmake-build-debug/flowmini"
 fixture="$root/Flowmini/flowmini_v25_symboltable_projection/examples/ast/call_expression_probe.flow"
 
@@ -26,4 +27,24 @@ grep -q '"status": "emitted"' "$tmpdir/lowering-report.json"
 test -s "$tmpdir/trial.ll"
 clang "$tmpdir/trial.ll" -o "$tmpdir/trial"
 "$tmpdir/trial"
+
+policy="$tmpdir/abi.policy"
+printf '%s\n' \
+    'allow libc.so.6 strlen c pure' \
+    'allow libc.so.6 abs c pure' \
+    'allow libc.so.6 labs c pure' \
+    'allow libc.so.6 puts c io' > "$policy"
+abs_source="$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass/abi_abs_main.flow"
+"$flowmini" --dump-frontend-bundle "$abs_source" > "$tmpdir/abs.bundle.json"
+"$analyst" < "$tmpdir/abs.bundle.json" > "$tmpdir/abs.semantic.json"
+"$bind" --policy "$policy" < "$tmpdir/abs.semantic.json" > "$tmpdir/abs.binding.json"
+"$optimizer" < "$tmpdir/abs.semantic.json" > "$tmpdir/abs.optimized.json"
+"$lowerer" --emit-llvm "$tmpdir/abs.ll" --binding-report "$tmpdir/abs.binding.json" < "$tmpdir/abs.optimized.json" > "$tmpdir/abs.lowering.json"
+grep -q '"status": "emitted"' "$tmpdir/abs.lowering.json"
+clang "$tmpdir/abs.ll" -o "$tmpdir/abs"
+set +e
+"$tmpdir/abs"
+abs_rc=$?
+set -e
+test "$abs_rc" -eq 42
 echo 'Flowlower tests: PASS'

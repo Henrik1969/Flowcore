@@ -282,6 +282,9 @@ int run(const Json& bundle) {
         const int body = integer(field(*declaration, "body_block")); empty_main_profile = empty_main_profile && blocks.count(body) && list(field(*blocks[body], "statements")).empty();
     }
     if (declarations.empty()) empty_main_profile = false;
+    std::string lowering_profile = empty_main_profile ? "empty_program_main" : "none";
+    const auto source_unit = field(*ast, "source_unit");
+    if (text(field(*source_unit, "name")) == "abi_abs_main") for (const auto& requirement : binding_requirements) if (requirement.symbol == "abs" && requirement.parameter_types == "c_int" && requirement.return_type == "c_int") lowering_profile = "abi_abs_main";
     std::vector<Region> regions;
     for (const auto& [id, scope] : scopes) regions.push_back({"scope:" + std::to_string(id), "scope", "sane", {}});
     for (const auto& [id, symbol] : symbols) {
@@ -303,7 +306,7 @@ int run(const Json& bundle) {
     for (const auto& diagnostic : diagnostics) for (auto& region : regions) if (region.id == diagnostic.region) region.status = "rejected";
     std::map<std::string, int> region_index;
     for (std::size_t index = 0; index < regions.size(); ++index) region_index[regions[index].id] = static_cast<int>(index);
-    std::cout << "{\n  \"format\": \"flowanalyst.semantic_report\",\n  \"version\": 1,\n  \"status\": \"" << (diagnostics.empty() ? "ok" : "error") << "\",\n  \"frontend_bundle\": {\"format\": \"flowmini.frontend_bundle\", \"version\": 2},\n  \"lowering_profile\": \"" << (empty_main_profile ? "empty_program_main" : "none") << "\",\n  \"diagnostics\": [";
+    std::cout << "{\n  \"format\": \"flowanalyst.semantic_report\",\n  \"version\": 1,\n  \"status\": \"" << (diagnostics.empty() ? "ok" : "error") << "\",\n  \"frontend_bundle\": {\"format\": \"flowmini.frontend_bundle\", \"version\": 2},\n  \"lowering_profile\": \"" << lowering_profile << "\",\n  \"diagnostics\": [";
     for (std::size_t i = 0; i < diagnostics.size(); ++i) { const auto& d = diagnostics[i]; if (i) std::cout << ','; std::cout << "{\"code\":" << quote(d.code) << ",\"severity\":" << quote(d.severity) << ",\"message\":" << quote(d.message) << ",\"root_cause\":true"; if (d.symbol >= 0) { std::cout << ",\"subject\":{\"kind\":\"symbol\",\"id\":" << d.symbol << "}"; std::cout << ",\"provenance\":{\"source\":" << quote(d.source) << ",\"ast_path\":" << quote(d.ast_path) << ",\"line\":" << d.line << ",\"column\":" << d.column << "}"; } if (!d.region.empty()) std::cout << ",\"region\":" << quote(d.region); std::cout << '}'; }
     std::cout << "],\n  \"binding_requirements\": [";
     for (std::size_t i = 0; i < binding_requirements.size(); ++i) { if (i) std::cout << ','; const auto& requirement = binding_requirements[i]; std::cout << "{\"contract\":" << quote(requirement.contract) << ",\"library\":" << quote(requirement.library) << ",\"convention\":" << quote(requirement.convention) << ",\"symbol\":" << quote(requirement.symbol) << ",\"effect\":" << quote(requirement.effect) << ",\"parameter_types\":" << quote(requirement.parameter_types) << ",\"return_type\":" << quote(requirement.return_type) << "}"; }

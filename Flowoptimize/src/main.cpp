@@ -33,11 +33,13 @@ int analyze(std::string_view report) {
     // This is deliberately a boundary implementation. No optimization is
     // claimed until the accepted semantic bundle and transformation contract
     // are complete.
+    std::string profile = "none";
+    for (const auto candidate : {"empty_program_main", "abi_abs_main"}) if (has_field(report, "lowering_profile", candidate)) profile = candidate;
     std::cout << "{\n  \"format\": \"flowoptimize.optimization_report\",\n"
                  "  \"version\": 1,\n"
                  "  \"status\": \"ready\",\n"
                  "  \"input\": {\"format\": \"flowanalyst.semantic_report\", \"version\": 1},\n"
-                 "  \"lowering_profile\": \"" << (has_field(report, "lowering_profile", "empty_program_main") ? "empty_program_main" : "none") << "\",\n"
+                 "  \"lowering_profile\": \"" << profile << "\",\n"
                  "  \"transforms\": [],\n"
                  "  \"message\": \"optimization boundary reached; no transforms enabled\"\n"
                  "}\n";

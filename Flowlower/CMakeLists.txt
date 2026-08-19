@@ -14,6 +14,7 @@ add_test(NAME flowlower_pipeline
         FLOWLOWER_BIN=$<TARGET_FILE:flowlower>
         FLOWOPTIMIZE_BIN=${CMAKE_CURRENT_SOURCE_DIR}/../Flowoptimize/build/flowoptimize
         FLOWANALYST_BIN=${CMAKE_CURRENT_SOURCE_DIR}/../Flowanalyst/build/flowanalyst
+        FLOWBIND_BIN=${CMAKE_CURRENT_SOURCE_DIR}/../Flowbind/build/flowbind
         ${CMAKE_CURRENT_SOURCE_DIR}/tests/run-flowlower-tests.sh)
 
 add_test(NAME flowcore_pipeline_matrix
@@ -23,6 +24,7 @@ add_test(NAME flowcore_pipeline_matrix
         FLOWANALYST_BIN=${CMAKE_CURRENT_SOURCE_DIR}/../Flowanalyst/build/flowanalyst
         FLOWOPTIMIZE_BIN=${CMAKE_CURRENT_SOURCE_DIR}/../Flowoptimize/build/flowoptimize
         FLOWLOWER_BIN=$<TARGET_FILE:flowlower>
+        FLOWBIND_BIN=${CMAKE_CURRENT_SOURCE_DIR}/../Flowbind/build/flowbind
         ${CMAKE_CURRENT_SOURCE_DIR}/../tools/run-flowcore-pipeline-matrix.sh)
 
 add_test(NAME flowcore_pass_corpus
@@ -32,4 +34,5 @@ add_test(NAME flowcore_pass_corpus
         FLOWANALYST_BIN=${CMAKE_CURRENT_SOURCE_DIR}/../Flowanalyst/build/flowanalyst
         FLOWOPTIMIZE_BIN=${CMAKE_CURRENT_SOURCE_DIR}/../Flowoptimize/build/flowoptimize
         FLOWLOWER_BIN=$<TARGET_FILE:flowlower>
+        FLOWBIND_BIN=${CMAKE_CURRENT_SOURCE_DIR}/../Flowbind/build/flowbind
         ${CMAKE_CURRENT_SOURCE_DIR}/../tools/run-flowcore-pass-corpus.sh)
