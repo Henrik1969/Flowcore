@@ -285,6 +285,7 @@ int run(const Json& bundle) {
     std::string lowering_profile = empty_main_profile ? "empty_program_main" : "none";
     const auto source_unit = field(*ast, "source_unit");
     if (text(field(*source_unit, "name")) == "abi_abs_main") for (const auto& requirement : binding_requirements) if (requirement.symbol == "abs" && requirement.parameter_types == "c_int" && requirement.return_type == "c_int") lowering_profile = "abi_abs_main";
+    if (text(field(*source_unit, "name")) == "abi_strlen_main") for (const auto& requirement : binding_requirements) if (requirement.symbol == "strlen" && requirement.parameter_types == "c_string" && requirement.return_type == "c_size_t") lowering_profile = "abi_strlen_main";
     std::vector<Region> regions;
     for (const auto& [id, scope] : scopes) regions.push_back({"scope:" + std::to_string(id), "scope", "sane", {}});
     for (const auto& [id, symbol] : symbols) {

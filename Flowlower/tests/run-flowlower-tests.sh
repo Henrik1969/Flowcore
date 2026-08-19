@@ -47,4 +47,18 @@ set +e
 abs_rc=$?
 set -e
 test "$abs_rc" -eq 42
+
+strlen_source="$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass/abi_strlen_main.flow"
+"$flowmini" --dump-frontend-bundle "$strlen_source" > "$tmpdir/strlen.bundle.json"
+"$analyst" < "$tmpdir/strlen.bundle.json" > "$tmpdir/strlen.semantic.json"
+"$bind" --policy "$policy" < "$tmpdir/strlen.semantic.json" > "$tmpdir/strlen.binding.json"
+"$optimizer" < "$tmpdir/strlen.semantic.json" > "$tmpdir/strlen.optimized.json"
+"$lowerer" --emit-llvm "$tmpdir/strlen.ll" --binding-report "$tmpdir/strlen.binding.json" < "$tmpdir/strlen.optimized.json" > "$tmpdir/strlen.lowering.json"
+grep -q '"status": "emitted"' "$tmpdir/strlen.lowering.json"
+clang "$tmpdir/strlen.ll" -o "$tmpdir/strlen"
+set +e
+"$tmpdir/strlen"
+strlen_rc=$?
+set -e
+test "$strlen_rc" -eq 8
 echo 'Flowlower tests: PASS'

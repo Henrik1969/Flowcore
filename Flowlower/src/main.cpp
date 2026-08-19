@@ -42,8 +42,10 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
     }
     const bool trial_profile = has(report, "\"lowering_profile\": \"empty_program_main\"") || has(report, "\"lowering_profile\":\"empty_program_main\"");
     const bool abi_abs_profile = has(report, "\"lowering_profile\": \"abi_abs_main\"") || has(report, "\"lowering_profile\":\"abi_abs_main\"");
+    const bool abi_strlen_profile = has(report, "\"lowering_profile\": \"abi_strlen_main\"") || has(report, "\"lowering_profile\":\"abi_strlen_main\"");
     if (abi_abs_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"abi_abs_main\"") || !has(binding_report, "\"abs\""))) throw std::runtime_error("ABI binding report does not authorize the abi_abs_main lowering profile");
-    if (!llvm_path.empty() && !trial_profile && !abi_abs_profile) throw std::runtime_error("LLVM emission requires an accepted lowering profile");
+    if (abi_strlen_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"abi_strlen_main\"") || !has(binding_report, "\"strlen\""))) throw std::runtime_error("ABI binding report does not authorize the abi_strlen_main lowering profile");
+    if (!llvm_path.empty() && !trial_profile && !abi_abs_profile && !abi_strlen_profile) throw std::runtime_error("LLVM emission requires an accepted lowering profile");
     if (!llvm_path.empty()) {
         std::ofstream llvm(llvm_path); if (!llvm) throw std::runtime_error("cannot open LLVM output");
         if (abi_abs_profile) {
@@ -54,6 +56,17 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
                     "entry:\n"
                     "  %result = call i32 @abs(i32 -42)\n"
                     "  ret i32 %result\n"
+                    "}\n";
+        } else if (abi_strlen_profile) {
+            llvm << "; Flowcore ABI trial lowering: strlen\n"
+                    "target triple = \"x86_64-pc-linux-gnu\"\n"
+                    "@flowcore_message = private unnamed_addr constant [9 x i8] c\"Flowcore\\00\"\n"
+                    "declare i64 @strlen(ptr)\n"
+                    "define i32 @main() {\n"
+                    "entry:\n"
+                    "  %length = call i64 @strlen(ptr @flowcore_message)\n"
+                    "  %exit = trunc i64 %length to i32\n"
+                    "  ret i32 %exit\n"
                     "}\n";
         } else llvm << "; Flowcore trial lowering: empty_program_main\n"
                 "target triple = \"x86_64-pc-linux-gnu\"\n"

@@ -35,9 +35,10 @@ Flowlower emits target code for every program.
 | `literal_expression_probe` | typed literals and collection values | accepted through Flowlower boundary |
 | `type_reference_probe` | generic, qualified, and shaped types | blocked by incomplete type-family resolution |
 
-The `empty_program_main` and `abi_abs_main` profiles currently emit LLVM IR
-and produce executables. The other accepted matrix cases prove semantic and
-boundary continuation; they do not claim that general lowering is implemented.
+The `empty_program_main`, `abi_abs_main`, and `abi_strlen_main` profiles
+currently emit LLVM IR and produce executables. The other accepted matrix
+cases prove semantic and boundary continuation; they do not claim that
+general lowering is implemented.
 
 ## Exploratory AST-family scan
 

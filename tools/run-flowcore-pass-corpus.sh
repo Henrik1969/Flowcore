@@ -31,7 +31,7 @@ for source in "$pass_root"/*.flow; do
     grep -q '"status": "ok"' "$semantic"
     "$optimizer" < "$semantic" > "$optimized"
     grep -q '"status": "ready"' "$optimized"
-    if [ "$name" = "abi_abs_main" ]; then
+    if [ "$name" = "abi_abs_main" ] || [ "$name" = "abi_strlen_main" ]; then
         binding=$tmpdir/$name.binding.json
         "$bind" --policy "$policy" < "$semantic" > "$binding"
         "$lowerer" --binding-report "$binding" < "$optimized" > "$lowered"
