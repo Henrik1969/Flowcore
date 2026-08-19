@@ -25,6 +25,7 @@ This prevents unfinished language areas from being mistaken for regressions.
 | `target_projection_probe` | named targets and entrypoints | accepted through Flowlower boundary |
 | `abi_contract_probe` | ABI type identities and declarations | accepted through Flowlower boundary |
 | `index_field_probe` | list/array types, indexing, records, field paths | accepted through semantic boundary; lowering is not emitted |
+| `statement_initializer_probe` | function calls, collection literals, intrinsic `stdin.text` capability | accepted through semantic boundary; lowering is not emitted |
 | `literal_expression_probe` | typed literals and collection values | accepted through Flowlower boundary |
 | `type_reference_probe` | generic, qualified, and shaped types | blocked by incomplete type-family resolution |
 

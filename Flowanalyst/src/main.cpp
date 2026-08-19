@@ -117,11 +117,13 @@ int run(const Json& bundle) {
     auto is_builtin = [&](const std::string& value) { for (const auto& item : builtin) if (item == value) return true; return false; };
     const std::vector<std::string> abi_types = {"c_int", "c_long", "c_size_t"};
     auto is_abi_type = [&](const std::string& value) { for (const auto& item : abi_types) if (item == value) return true; return false; };
+    const std::vector<std::string> intrinsic_types = {"stdin.text", "start.record"};
+    auto is_intrinsic_type = [&](const std::string& value) { for (const auto& item : intrinsic_types) if (item == value) return true; return false; };
     std::map<std::string, int> type_symbols;
     for (const auto& [id, symbol] : symbols) { auto kind = text(field(*symbol, "kind")); if (kind == "Type" || kind == "Struct" || kind == "Contract") type_symbols[text(field(*symbol, "name"))] = id; }
     const std::vector<std::string> generic_constructors = {"list", "array", "optional", "collection.list", "result.Result"};
     std::function<bool(const std::string&)> is_resolved_type = [&](const std::string& raw_value) {
-        const auto value = trim_copy(raw_value); if (is_builtin(value) || is_abi_type(value) || type_symbols.count(value) != 0) return true;
+        const auto value = trim_copy(raw_value); if (is_builtin(value) || is_abi_type(value) || is_intrinsic_type(value) || type_symbols.count(value) != 0) return true;
         std::string core = value; const auto shape = value.find("["); if (shape != std::string::npos) { if (!numeric_extents(value.substr(shape)) || shape == 0) return false; core = value.substr(0, shape); }
         const auto open = core.find('<'); if (open == std::string::npos || core.back() != '>') return false;
         const auto constructor = core.substr(0, open); bool known = false; for (const auto& candidate : generic_constructors) if (constructor == candidate) known = true; if (!known) return false;

@@ -90,6 +90,7 @@ run_accepted target_projection_probe
 run_accepted abi_contract_probe
 run_accepted literal_expression_probe
 run_semantic_accepted index_field_probe
+run_semantic_accepted statement_initializer_probe
 run_blocked type_reference_probe
 
 echo "Flowcore pipeline matrix: $pass_count accepted, $blocked_count blocked"
