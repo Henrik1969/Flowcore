@@ -168,6 +168,33 @@ int run(const Json& bundle) {
     for (const auto& [statement_id, statement] : statements) { int scope_id = statement_scopes.count(statement_id) ? statement_scopes[statement_id] : -1; for (const auto& expression : list(field(*statement, "expression_ids"))) resolve_expression(integer(&expression), statement_id, scope_id); }
     std::map<int, int> resolved_expression_symbols;
     for (const auto& resolution : resolutions) if (resolution.symbol >= 0) resolved_expression_symbols[resolution.expression] = resolution.symbol;
+    std::map<int, std::string> symbol_types;
+    for (const auto& [id, symbol] : symbols) for (const auto& fact : list(field(*symbol, "facts"))) {
+        const auto key = text(field(fact, "key"));
+        if (key == "declared_type_spelling" || key == "return_type_spelling") {
+            symbol_types[id] = text(field(field(fact, "value"), "value"));
+            break;
+        }
+    }
+    for (const auto& [expression_id, expression] : expressions) if (text(field(*expression, "kind")) == "field_access") {
+        const auto* payload = field(*expression, "payload");
+        const int base = integer(field(*payload, "base"));
+        const auto field_name = text(field(*payload, "field"));
+        if (!resolved_expression_symbols.count(base)) continue;
+        const int base_symbol = resolved_expression_symbols[base];
+        if (!symbol_types.count(base_symbol) || !type_symbols.count(symbol_types[base_symbol])) continue;
+        const int record_symbol = type_symbols[symbol_types[base_symbol]];
+        bool found_field = false;
+        for (const auto& [scope_id, scope] : scopes) {
+            if (text(field(*scope, "kind")) != "Struct") continue;
+            if (integer(field(*scope, "owner_symbol_id")) != record_symbol) continue;
+            for (const auto& candidate : list(field(*scope, "symbol_ids"))) {
+                const int candidate_id = integer(&candidate);
+                if (symbols.count(candidate_id) && text(field(*symbols[candidate_id], "name")) == field_name) found_field = true;
+            }
+        }
+        if (!found_field) add_diagnostic("FLOWANALYST_UNKNOWN_FIELD", "record type '" + symbol_types[base_symbol] + "' has no field '" + field_name + "'", base_symbol, "expression:" + std::to_string(expression_id));
+    }
     for (const auto& [expression_id, expression] : expressions) if (text(field(*expression, "kind")) == "call") {
         int base = integer(field(field(*expression, "payload"), "base")); if (!resolved_expression_symbols.count(base)) continue;
         int callable = resolved_expression_symbols[base], declaration_id = -1; const auto* origin = origins.count(callable) ? origins[callable] : nullptr;

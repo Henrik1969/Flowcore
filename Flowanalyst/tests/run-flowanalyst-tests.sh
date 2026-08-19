@@ -24,6 +24,14 @@ refined_report=$("$flowmini" --dump-frontend-bundle "$refined_fixture" | "$bin")
 printf '%s\n' "$refined_report" | grep -q '"status": "ok"'
 printf '%s\n' "$refined_report" | grep -q '"refined_types":2'
 
+bad_field_fixture="$root/Flowmini/flowmini_v25_symboltable_projection/examples/fail/bad_record_no_such_field.flow"
+set +e
+bad_field_report=$("$flowmini" --dump-frontend-bundle "$bad_field_fixture" | "$bin")
+bad_field_rc=$?
+set -e
+test "$bad_field_rc" -eq 2
+printf '%s\n' "$bad_field_report" | grep -q 'FLOWANALYST_UNKNOWN_FIELD'
+
 if printf '%s' '{"format":"wrong","version":2}' | "$bin" >/dev/null 2>&1; then
     echo 'invalid bundle unexpectedly accepted' >&2
     exit 1
