@@ -13,5 +13,9 @@ add_test(NAME flowkernel_readonly
     COMMAND $<TARGET_FILE:flowkernel> --probe readonly)
 add_test(NAME flowkernel_tempfs
     COMMAND $<TARGET_FILE:flowkernel> --probe tempfs)
+add_test(NAME flowkernel_ipc
+    COMMAND $<TARGET_FILE:flowkernel> --probe ipc)
+add_test(NAME flowkernel_socket_ipc
+    COMMAND $<TARGET_FILE:flowkernel> --probe socket_ipc)
 add_test(NAME flowkernel_all
     COMMAND $<TARGET_FILE:flowkernel> --probe all)

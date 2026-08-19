@@ -4,6 +4,7 @@
 #include <cstring>
 #include <fcntl.h>
 #include <iostream>
+#include <sys/socket.h>
 #include <string>
 #include <string_view>
 #include <stdexcept>
@@ -12,6 +13,7 @@
 #include <sys/types.h>
 #include <sys/utsname.h>
 #include <unistd.h>
+#include <sys/wait.h>
 
 namespace {
 
@@ -68,6 +70,43 @@ Result tempfs_probe() {
     return {"tempfs", true, 0};
 }
 
+Result ipc_probe() {
+    int channel[2]{};
+    if (pipe2(channel, O_CLOEXEC) < 0) return {"pipe2", false, errno};
+    const pid_t child = fork();
+    if (child < 0) { const int saved = errno; close(channel[0]); close(channel[1]); return {"fork", false, saved}; }
+    if (child == 0) {
+        close(channel[0]);
+        const char message = 'F';
+        const auto sent = write(channel[1], &message, 1);
+        close(channel[1]);
+        _exit(sent == 1 ? 0 : 111);
+    }
+    close(channel[1]);
+    char observed = 0;
+    const auto received = read(channel[0], &observed, 1);
+    close(channel[0]);
+    int child_status = 0;
+    if (waitpid(child, &child_status, 0) < 0) return {"waitpid", false, errno};
+    if (received != 1 || observed != 'F' || !WIFEXITED(child_status) || WEXITSTATUS(child_status) != 0) return {"pipe/fork verification", false, EIO};
+    return {"ipc", true, 0};
+}
+
+Result socket_ipc_probe() {
+    int pair[2]{};
+    if (socketpair(AF_UNIX, SOCK_STREAM | SOCK_CLOEXEC, 0, pair) < 0) return {"socketpair", false, errno};
+    const char message = 'N';
+    const auto sent = write(pair[1], &message, 1);
+    char observed = 0;
+    const auto received = read(pair[0], &observed, 1);
+    close(pair[0]);
+    close(pair[1]);
+    if (sent != 1) return {"socket send", false, sent < 0 ? errno : EIO};
+    if (received != 1) return {"socket recv", false, received < 0 ? errno : EIO};
+    if (observed != 'N') return {"socket payload", false, EIO};
+    return {"socket_ipc", true, 0};
+}
+
 void print_result(const Result& result) {
     std::cout << "{\"name\":\"" << result.name << "\",\"status\":\"" << (result.ok ? "ok" : "error") << "\"";
     if (!result.ok) std::cout << ",\"errno\":" << result.error << ",\"message\":\"" << std::strerror(result.error) << "\"";
@@ -75,17 +114,23 @@ void print_result(const Result& result) {
 }
 
 int run(std::string_view probe) {
-    if (probe != "readonly" && probe != "tempfs" && probe != "all") throw std::runtime_error("unknown probe; choose readonly, tempfs, or all");
+    if (probe != "readonly" && probe != "tempfs" && probe != "ipc" && probe != "socket_ipc" && probe != "all") throw std::runtime_error("unknown probe; choose readonly, tempfs, ipc, socket_ipc, or all");
     const bool run_readonly = probe == "readonly" || probe == "all";
     const bool run_tempfs = probe == "tempfs" || probe == "all";
+    const bool run_ipc = probe == "ipc" || probe == "all";
+    const bool run_socket_ipc = probe == "socket_ipc" || probe == "all";
     const auto readonly = run_readonly ? readonly_probe() : Result{"", true, 0};
     const auto tempfs = run_tempfs ? tempfs_probe() : Result{"", true, 0};
-    std::cout << "{\"format\":\"flowkernel.probe_report\",\"version\":1,\"probe\":\"" << probe << "\",\"effects\":[\"read-only-kernel\"" << (run_tempfs ? ",\"private-tempfs\"" : "") << "],\"results\":[";
+    const auto ipc = run_ipc ? ipc_probe() : Result{"", true, 0};
+    const auto socket_ipc = run_socket_ipc ? socket_ipc_probe() : Result{"", true, 0};
+    std::cout << "{\"format\":\"flowkernel.probe_report\",\"version\":1,\"probe\":\"" << probe << "\",\"effects\":[\"read-only-kernel\"" << (run_tempfs ? ",\"private-tempfs\"" : "") << (run_ipc ? ",\"child-process-ipc\"" : "") << (run_socket_ipc ? ",\"local-socket-ipc\"" : "") << "],\"results\":[";
     bool first = true;
     if (run_readonly) { print_result(readonly); first = false; }
     if (run_tempfs) { if (!first) std::cout << ','; print_result(tempfs); }
-    std::cout << "] ,\"status\":\"" << (readonly.ok && tempfs.ok ? "ok" : "error") << "\"}\n";
-    return readonly.ok && tempfs.ok ? 0 : 2;
+    if (run_ipc) { if (!first || run_tempfs) std::cout << ','; print_result(ipc); }
+    if (run_socket_ipc) { if (!first || run_tempfs || run_ipc) std::cout << ','; print_result(socket_ipc); }
+    std::cout << "] ,\"status\":\"" << (readonly.ok && tempfs.ok && ipc.ok && socket_ipc.ok ? "ok" : "error") << "\"}\n";
+    return readonly.ok && tempfs.ok && ipc.ok && socket_ipc.ok ? 0 : 2;
 }
 
 }
@@ -98,7 +143,7 @@ int main(int argc, char** argv) {
             if (option == "-a" || option == "--about") { std::cout << "Flowkernel runs explicitly scoped, non-privileged Linux boundary probes.\nMore help: Flowkernel/README.md\n"; return 0; }
             if (option == "-v" || option == "--version") { std::cout << VERSION << '\n'; return 0; }
         }
-        if (argc != 3 || std::string(argv[1]) != "--probe") throw std::runtime_error("usage: flowkernel --probe readonly|tempfs|all");
+        if (argc != 3 || std::string(argv[1]) != "--probe") throw std::runtime_error("usage: flowkernel --probe readonly|tempfs|ipc|socket_ipc|all");
         return run(argv[2]);
     } catch (const std::exception& error) { std::cerr << "flowkernel error: " << error.what() << '\n'; return 1; }
 }
