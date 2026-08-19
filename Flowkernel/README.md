@@ -8,8 +8,10 @@ Flowkernel is the first isolated Linux-kernel boundary probe brick. Version
   `lseek`, `unlinkat`, and `rmdir`.
 - child-process IPC through `pipe2`, `fork`, `read`, `write`, and `waitpid`;
 - local Unix-socket IPC through `socketpair`, `send`, `recv`, and `waitpid`.
+- local-only TCP loopback through `bind`, `listen`, `poll`, `accept4`, and
+  `connect` on an ephemeral `127.0.0.1` port.
 
-It performs no privileged operations, device access, mounts, networking,
+It performs no privileged operations, device access, mounts, external networking,
 namespace creation, cgroup changes, reboot, or host shutdown operations.
 
 Every report states its format, version, probe, effects, individual results,
