@@ -909,6 +909,25 @@ namespace flowmini::ast {
                 out << "\"location\": ";
                 dump_source_location_json(out, mainBlock->location);
                 out << "\n";
+            } else if (const auto* targetDecl = std::get_if<TargetDecl>(&decl)) {
+                out << ",\n";
+                dump_indent(out, indent + 2);
+                out << "\"name\": ";
+                dump_json_string(out, targetDecl->name);
+                out << ",\n";
+
+                dump_indent(out, indent + 2);
+                out << "\"declaration_ids\": [";
+                for (std::size_t i = 0; i < targetDecl->declarations.size(); ++i) {
+                    if (i != 0) { out << ", "; }
+                    out << targetDecl->declarations[i];
+                }
+                out << "],\n";
+
+                dump_indent(out, indent + 2);
+                out << "\"location\": ";
+                dump_source_location_json(out, targetDecl->location);
+                out << "\n";
             } else if (const auto* recordDecl = std::get_if<RecordDecl>(&decl)) {
                 out << ",\n";
                 dump_indent(out, indent + 2);
@@ -1062,6 +1081,7 @@ namespace flowmini::ast {
             case TopLevelKind::Record:      return "record";
             case TopLevelKind::RefinedType: return "refined_type";
             case TopLevelKind::Abi:         return "abi";
+            case TopLevelKind::Target:      return "target";
             case TopLevelKind::MainBlock:   return "main_block";
             case TopLevelKind::Unknown:     return "unknown";
         }
@@ -1278,6 +1298,7 @@ namespace flowmini::ast {
         if (std::holds_alternative<RecordDecl>(decl))       { return TopLevelKind::Record;}
         if (std::holds_alternative<RefinedTypeDecl>(decl))  { return TopLevelKind::RefinedType;}
         if (std::holds_alternative<AbiDecl>(decl))          { return TopLevelKind::Abi;}
+        if (std::holds_alternative<TargetDecl>(decl))       { return TopLevelKind::Target;}
         if (std::holds_alternative<MainBlock>(decl))        { return TopLevelKind::MainBlock;}
         return TopLevelKind::Unknown;
     }

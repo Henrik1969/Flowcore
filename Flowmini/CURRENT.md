@@ -17,9 +17,9 @@ factual projection and frontend-bundle hardening; no semantic analysis yet
 
 ```text
 normal CMake/Ninja build:      PASS
-flowmini_ast_golden_tests:     PASS (26)
-flowmini_symbol_projection:    PASS (12/12)
-flowmini_frontend_bundle:      PASS (7 golden, 1 isolated, 19 negative)
+flowmini_ast_golden_tests:     PASS (27)
+flowmini_symbol_projection_tests: PASS (13/13)
+flowmini_frontend_bundle_tests:   PASS (8 golden, 1 isolated, 19 negative)
 flowmini_suite:                PASS (78/78)
 CTest:                         PASS (2/2)
 ```
@@ -82,7 +82,7 @@ Expected result:
 ```text
 normal CMake/Ninja build:      PASS
 flowmini_ast_golden_tests:     PASS (26)
-flowmini_symbol_projection:    PASS (12/12)
+flowmini_symbol_projection_tests: PASS (12/12)
 flowmini_frontend_bundle:      PASS (7 golden, 1 isolated, 19 negative)
 flowmini_suite:                PASS (78/78)
 CTest:                         PASS (2/2)
@@ -117,13 +117,16 @@ Flowmini/flowmini_v24_explicit_ast/docs/v0.24-future-transformation-boundary.md
 
 ## Current important language rule
 
-Active v0.25 inherits the v0.24 rule:
+Active v0.25 supports the inherited root form and the structural named-target
+form. Target completeness and artifact selection remain later semantic/build
+checks:
 
 ```text
-A root program supports exactly one root main block.
+A root program may use one root main block or named targets.
 ```
 
-Future Flowmini/Flowcore may support named targets, where each target owns its own main block.
+Named targets are structurally represented; each owns target-local declaration
+IDs and may contain a main declaration.
 
 That future direction is documented in:
 

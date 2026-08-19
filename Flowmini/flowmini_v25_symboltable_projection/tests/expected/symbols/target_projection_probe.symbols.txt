@@ -1,0 +1,29 @@
+SymbolTable dump
+Scopes: 8
+  Scope #1 kind=Global name=global symbols=1 children=1
+  Scope #2 kind=Module name=target_projection_probe symbols=3 children=3
+  Scope #3 kind=Function name=shared_log symbols=1 children=0
+  Scope #4 kind=Namespace name=cli symbols=2 children=2
+  Scope #5 kind=Function name=parse_args symbols=0 children=0
+  Scope #6 kind=Function name=main symbols=0 children=0
+  Scope #7 kind=Namespace name=daemon symbols=1 children=1
+  Scope #8 kind=Function name=main symbols=0 children=0
+Symbols: 8
+  Symbol #1 scope=#1 name=target_projection_probe kind=Module facts=1
+    declaration_location=<source>:1:1
+    Fact kind=Custom key=source_unit_kind value="program"
+  Symbol #2 scope=#2 name=shared_log kind=Function facts=0
+    declaration_location=<source>:4:1
+  Symbol #3 scope=#3 name=message kind=Parameter facts=1
+    declaration_location=<source>:4:15
+    Fact kind=TypeReference key=declared_type_spelling value="string"
+  Symbol #4 scope=#2 name=cli kind=Namespace facts=0
+    declaration_location=<source>:7:1
+  Symbol #5 scope=#4 name=parse_args kind=Function facts=0
+    declaration_location=<source>:8:5
+  Symbol #6 scope=#4 name=main kind=Procedure facts=0
+    declaration_location=<source>:11:5
+  Symbol #7 scope=#2 name=daemon kind=Namespace facts=0
+    declaration_location=<source>:16:1
+  Symbol #8 scope=#7 name=main kind=Procedure facts=0
+    declaration_location=<source>:17:5

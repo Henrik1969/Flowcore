@@ -176,6 +176,7 @@ SYMBOL_ORIGIN_CONTRACT: dict[str, tuple[str, str, set[str]]] = {
     "extern_function": ("Function", "abi_member", {"extern_function"}),
     "extern_parameter": ("Parameter", "parameter", set()),
     "main_declaration": ("Procedure", "declaration", {"main_block"}),
+    "target_declaration": ("Namespace", "declaration", {"target"}),
     "local_binding": ("Variable", "statement", {"let"}),
 }
 
@@ -188,6 +189,7 @@ SCOPE_ORIGIN_CONTRACT: dict[str, tuple[str, str, set[str]]] = {
     "abi_struct_scope": ("Struct", "abi_member", {"struct"}),
     "extern_function_scope": ("Function", "abi_member", {"extern_function"}),
     "main_scope": ("Function", "declaration", {"main_block"}),
+    "target_scope": ("Namespace", "declaration", {"target"}),
     "if_then_scope": ("Block", "block", set()),
     "while_body_scope": ("Block", "block", set()),
     "else_block_scope": ("Block", "block", set()),
@@ -367,10 +369,30 @@ def validate_and_build(bundle: dict[str, Any]) -> dict[str, Any]:
 
     source_declaration_ids = require_array(source_unit.get("declaration_ids"),
                                            "source declaration ids")
-    require(set(source_declaration_ids) == set(declarations),
-            "source unit must own the complete declaration pool exactly once")
     require(len(source_declaration_ids) == len(set(source_declaration_ids)),
             "source unit repeats a declaration id")
+
+    owned_declaration_ids: list[int] = []
+
+    def collect_declaration(declaration_id: Any, owner: str) -> None:
+        require(isinstance(declaration_id, int),
+                f"{owner} declaration id must be an integer")
+        require(declaration_id in declarations,
+                f"{owner} references unknown declaration {declaration_id}")
+        require(declaration_id not in owned_declaration_ids,
+                f"declaration {declaration_id} has multiple structural parents")
+        owned_declaration_ids.append(declaration_id)
+        declaration = declarations[declaration_id]
+        if declaration.get("kind") == "target":
+            children = require_array(declaration.get("declaration_ids"),
+                                     f"target {declaration_id} declaration ids")
+            for child_id in children:
+                collect_declaration(child_id, f"target {declaration_id}")
+
+    for declaration_id in source_declaration_ids:
+        collect_declaration(declaration_id, "source unit")
+    require(set(owned_declaration_ids) == set(declarations),
+            "source/target structure must own the complete declaration pool exactly once")
 
     snapshot = require_object(bundle.get("symbol_table"), "symbol_table")
     require(snapshot.get("format") == "symboltable.snapshot",
@@ -486,7 +508,7 @@ def validate_and_build(bundle: dict[str, Any]) -> dict[str, Any]:
                     f"scope {scope_id} and owner symbol {owner_symbol_id} have different origins")
 
     lowering_declarations = []
-    for declaration_id in source_declaration_ids:
+    for declaration_id in owned_declaration_ids:
         declaration = declarations[declaration_id]
         lowering_declarations.append({
             "id": declaration_id,

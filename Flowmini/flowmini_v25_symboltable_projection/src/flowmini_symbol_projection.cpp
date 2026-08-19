@@ -37,6 +37,7 @@ const char* to_string(const AstOriginRole role) {
         case AstOriginRole::ExternFunction:      return "extern_function";
         case AstOriginRole::ExternParameter:     return "extern_parameter";
         case AstOriginRole::MainDeclaration:     return "main_declaration";
+        case AstOriginRole::TargetDeclaration:   return "target_declaration";
         case AstOriginRole::LocalBinding:        return "local_binding";
         case AstOriginRole::ModuleScope:         return "module_scope";
         case AstOriginRole::FunctionScope:       return "function_scope";
@@ -45,6 +46,7 @@ const char* to_string(const AstOriginRole role) {
         case AstOriginRole::AbiStructScope:      return "abi_struct_scope";
         case AstOriginRole::ExternFunctionScope: return "extern_function_scope";
         case AstOriginRole::MainScope:           return "main_scope";
+        case AstOriginRole::TargetScope:         return "target_scope";
         case AstOriginRole::IfThenScope:         return "if_then_scope";
         case AstOriginRole::WhileBodyScope:      return "while_body_scope";
         case AstOriginRole::ElseBlockScope:      return "else_block_scope";
@@ -797,6 +799,51 @@ struct ProjectTopLevelDecl {
                            scopeOrigins,
                            astPath,
                            declarationId);
+    }
+
+    void operator()(const TargetDecl& decl) const {
+        const auto name = decl.name.empty()
+            ? std::string{"<anonymous-target>"}
+            : decl.name;
+        const auto targetSymbol =
+            table.insertSymbol(moduleScope, name, symboltable::SymbolKind::Namespace);
+        set_declaration_location(table, targetSymbol, decl.location);
+        record_symbol_origin(symbolOrigins,
+                             targetSymbol,
+                             astPath,
+                             make_origin(AstOriginEntityKind::Declaration,
+                                         AstOriginRole::TargetDeclaration,
+                                         decl.location,
+                                         declarationId));
+
+        const auto targetScope =
+            table.createScope(symboltable::ScopeKind::Namespace,
+                              moduleScope,
+                              targetSymbol,
+                              name);
+        record_scope_origin(scopeOrigins,
+                            targetScope,
+                            astPath,
+                            make_origin(AstOriginEntityKind::Declaration,
+                                        AstOriginRole::TargetScope,
+                                        decl.location,
+                                        declarationId));
+
+        for (const auto childId : decl.declarations) {
+            if (childId >= module.declaration_pool.size()) {
+                continue;
+            }
+            std::visit(ProjectTopLevelDecl{
+                           table,
+                           module,
+                           targetScope,
+                           symbolOrigins,
+                           scopeOrigins,
+                           declaration_ast_path(childId),
+                           childId,
+                       },
+                       module.declaration_pool[childId]);
+        }
     }
 };
 

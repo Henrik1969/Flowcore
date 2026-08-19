@@ -470,6 +470,16 @@ def validate_declaration_types(document: dict, path: Path) -> None:
                 else:
                     raise ValueError(f"{member_context}: unsupported ABI member kind {member_kind!r}")
             location(declaration.get("location"), context)
+        elif kind == "target":
+            require_exact_fields(
+                declaration, {"id", "kind", "name", "declaration_ids", "location"}, context
+            )
+            if not isinstance(declaration.get("name"), str):
+                raise TypeError(f"{context}: target name must be a string")
+            children = declaration.get("declaration_ids")
+            if not isinstance(children, list) or not all(isinstance(item, int) for item in children):
+                raise TypeError(f"{context}: target declaration_ids must be an ID array")
+            location(declaration.get("location"), context)
 
 
 def invariant_expression_ids(document: dict) -> list[int]:
@@ -506,8 +516,23 @@ def validate_declaration_arena(document: dict, path: Path) -> None:
         raise ValueError(f"{path}: declaration_count does not match declaration_ids")
     if len(ids) != len(set(ids)):
         raise ValueError(f"{path}: declaration has multiple structural parents")
-    if set(ids) != set(range(len(pool))):
-        raise ValueError(f"{path}: declaration pool must be wholly owned by source_unit")
+    owned = []
+
+    def collect(declaration_id: int, owner: str) -> None:
+        if declaration_id < 0 or declaration_id >= len(pool):
+            raise ValueError(f"{path}: {owner} references dangling declaration {declaration_id}")
+        if declaration_id in owned:
+            raise ValueError(f"{path}: declaration {declaration_id} has multiple structural parents")
+        owned.append(declaration_id)
+        declaration = pool[declaration_id]
+        if declaration.get("kind") == "target":
+            for child in declaration.get("declaration_ids", []):
+                collect(child, f"target {declaration_id}")
+
+    for declaration_id in ids:
+        collect(declaration_id, "source_unit")
+    if set(owned) != set(range(len(pool))):
+        raise ValueError(f"{path}: declaration pool must be wholly owned by source/target structure")
     if not isinstance(projections, list) or projections != [pool[item] for item in ids]:
         raise ValueError(f"{path}: source_unit declaration projections disagree with pool IDs")
 

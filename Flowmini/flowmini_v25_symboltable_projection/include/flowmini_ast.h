@@ -32,6 +32,7 @@ enum class TopLevelKind {
     Record,
     RefinedType,
     Abi,
+    Target,
     MainBlock,
     Unknown
 };
@@ -114,9 +115,6 @@ struct TypeRef {
 struct Parameter {
     std::string name;
     TypeRef type;
-
-    bool has_body = false;
-    SourceLocation body_location;
     SourceLocation location;
 };
 
@@ -464,12 +462,19 @@ struct MainBlock {
     SourceLocation body_location;
 };
 
+struct TargetDecl {
+    std::string name;
+    std::vector<DeclarationId> declarations;
+    SourceLocation location;
+};
+
 using TopLevelDecl = std::variant<
     ImportDecl,
     FunctionDecl,
     RecordDecl,
     RefinedTypeDecl,
     AbiDecl,
+    TargetDecl,
     MainBlock
 >;
 

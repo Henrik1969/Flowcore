@@ -20,6 +20,7 @@ const char* tokenKindName(TokenKind kind) {
         case TokenKind::KeywordSink:     return "sink";
         case TokenKind::KeywordWire:     return "wire";
         case TokenKind::KeywordPolicy:   return "policy";
+        case TokenKind::KeywordTarget:   return "target";
         case TokenKind::KeywordMain:     return "main";
         case TokenKind::KeywordFn:       return "fn";
         case TokenKind::KeywordScope:    return "scope";
@@ -80,6 +81,7 @@ namespace {
     if (text == "sink") { return TokenKind::KeywordSink; }
     if (text == "wire") { return TokenKind::KeywordWire; }
     if (text == "policy") { return TokenKind::KeywordPolicy; }
+    if (text == "target") { return TokenKind::KeywordTarget; }
     if (text == "main") { return TokenKind::KeywordMain; }
     if (text == "fn") { return TokenKind::KeywordFn; }
     if (text == "scope") { return TokenKind::KeywordScope; }

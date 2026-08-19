@@ -119,9 +119,9 @@ Expected current result:
 
 ```text
 normal CMake/Ninja build:      PASS
-flowmini_ast_golden_tests:     PASS (26)
-flowmini_symbol_projection:    PASS (12/12)
-flowmini_frontend_bundle:      PASS (7 golden, 1 isolated, 19 negative)
+flowmini_ast_golden_tests:     PASS (27)
+flowmini_symbol_projection_tests: PASS (13/13)
+flowmini_frontend_bundle_tests:   PASS (8 golden, 1 isolated, 19 negative)
 flowmini_suite:                PASS (78/78)
 CTest:                         PASS (2/2)
 ```
@@ -205,6 +205,7 @@ input for independent tools and later semantic analysis.
 Recommended reading order:
 
 ```text
+docs/language/flowmini-programmers-manual.md
 Flowmini/README.md
 Flowmini/CURRENT.md
 Flowmini/flowmini_v25_symboltable_projection/docs/v0.25-symboltable-projection-status.md
@@ -216,6 +217,7 @@ Flowmini/flowmini_v24_explicit_ast/docs/v0.24-future-transformation-boundary.md
 docs/architecture/compiler-transformation-revision-model.md
 Flowmini/flowmini_v24_explicit_ast/examples/ast/README.md
 docs/language/named-targets.md
+docs/language/target-artifact-model.md
 ```
 
 ## Warning

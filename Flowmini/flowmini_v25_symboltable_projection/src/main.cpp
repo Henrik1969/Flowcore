@@ -300,6 +300,9 @@ namespace {
             SourceUnitKind rootKind = SourceUnitKind::None;
             bool sawHeader = false;
             bool sawMain = false;
+            bool sawTarget = false;
+            int braceDepth = 0;
+            int targetBaseDepth = -1;
             std::string line;
             std::size_t lineNumber = 1;
             const auto rootDisplayPath = sourceDisplayPath(rootPath);
@@ -339,7 +342,15 @@ namespace {
                     continue;
                 }
 
-                if (startsWithWord(trimmed, "main")) {
+                const bool insideTarget = targetBaseDepth >= 0 && braceDepth > targetBaseDepth;
+                if (startsWithWord(trimmed, "target")) {
+                    sawTarget = true;
+                    if (trimmed.find('{') != std::string::npos) {
+                        targetBaseDepth = braceDepth;
+                    }
+                }
+
+                if (startsWithWord(trimmed, "main") && !insideTarget) {
                     if (sawMain) { throw flow::DiagnosticError{"import", "multiple main definitions found in root file: " + rootPath.string()}; }
                     sawMain = true;
                 }
@@ -350,6 +361,13 @@ namespace {
                         flowmini::ast::FrontendSourceLineOrigin{rootDisplayPath, lineNumber},
                     });
                 }
+                for (const char c : scanLine) {
+                    if (c == '{') { ++braceDepth; }
+                    else if (c == '}' && braceDepth > 0) { --braceDepth; }
+                }
+                if (targetBaseDepth >= 0 && braceDepth <= targetBaseDepth) {
+                    targetBaseDepth = -1;
+                }
                 ++lineNumber;
             }
 
@@ -357,7 +375,7 @@ namespace {
             if (rootKind == SourceUnitKind::Unit && !allowUnitRoot) {
                 throw flow::DiagnosticError{"import", "root source is a unit; units are defining/importable units and cannot be executed directly: " + rootPath.string()};
             }
-            if (rootKind != SourceUnitKind::Unit && !sawMain) {
+            if (rootKind != SourceUnitKind::Unit && !sawMain && !sawTarget) {
                 throw flow::DiagnosticError{"import", "root program has no main block: " + rootPath.string()};
             }
 

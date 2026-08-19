@@ -15,6 +15,7 @@ SOURCES=(
   "examples/ast/statement_else_probe.flow"
   "examples/ast/control_flow_unary_probe.flow"
   "examples/ast/abi_contract_probe.flow"
+  "examples/ast/target_projection_probe.flow"
   "examples/pass/import_demo.flow"
 )
 
@@ -96,6 +97,13 @@ for source_file in "${SOURCES[@]}"; do
                 --require-scope-origin-role abi_scope
                 --require-scope-origin-role abi_struct_scope
                 --require-scope-origin-role extern_function_scope
+            )
+            ;;
+        target_projection_probe)
+            consumer_args+=(
+                --require-declaration-kind target
+                --require-symbol-origin-role target_declaration
+                --require-scope-origin-role target_scope
             )
             ;;
         import_demo)

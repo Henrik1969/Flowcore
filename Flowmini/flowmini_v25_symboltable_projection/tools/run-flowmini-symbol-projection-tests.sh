@@ -19,6 +19,7 @@ PROBES=(
   "refined_contract_probe"
   "abi_contract_probe"
   "structured_value_probe"
+  "target_projection_probe"
   "import_demo"
 )
 

@@ -1,20 +1,21 @@
 ---
 title: Named Targets and Main Entrypoints
-status: binding-direction-provisional-syntax
+status: binding-direction-active-design
 kind: language-design
 ---
 
 # Named Targets and Main Entrypoints
 
-Authority: the one-root-`main` rule inherited from v0.24 and the future
-named-target direction are binding. Candidate syntax, AST shapes, lowering
-details, and deferred questions are provisional. Named targets are not
-implemented in active Flowmini v0.25.
+Authority: the one-root-`main` rule inherited from v0.24 remains supported.
+The neutral source universe and target projection model are now implemented at
+the structural AST/SymbolTable boundary. Target completeness, artifact
+selection, lowering, and loader mechanisms remain staged work.
 
 ## Current v0.25 rule
 
-Active Flowmini v0.25 inherits the closed v0.24 rule: a root program supports
-exactly one root `main` block.
+Active Flowmini v0.25 supports the inherited root form and named target
+declarations. A root program may contain one root `main`, or named targets with
+target-local declarations and entrypoints.
 
 Multiple root `main` blocks are currently an error.
 
@@ -30,13 +31,14 @@ main {
 }
 ```
 
-This remains invalid in v0.25.
+This remains invalid as two anonymous root entrypoints in v0.25.
 
-The current rule remains intentionally strict because v0.25 is focused on
-structural SymbolTable projection, not expansion of the language surface.
-## Future direction
+Named targets are the explicit structural expansion of that rule.
 
-Flowcore/Flowmini may later support multiple named buildable or runnable targets from the same source base.
+## Target implementation status
+
+Flowcore/Flowmini now preserves multiple named targets from the same source
+base. It does not yet enforce runnable-target completeness or build artifacts.
 
 The planned model is:
 
@@ -51,9 +53,15 @@ main
     entrypoint inside a target
 ```
 
-A program owns shared declarations.
+A source universe owns shared declarations.
 
-A target owns target-local declarations, target-local prerequisites, and exactly one main block.
+A target owns target-local declarations, target-local prerequisites, and at
+most one main block until target completeness is checked. A selected runnable
+target must have exactly one main block.
+
+“Program” and “library” are artifact roles, not mutually exclusive source
+universe kinds. The same source universe may produce a library target, an
+executable target, a test target, or several of them.
 ## Candidate syntax
 
 The following spelling is provisional:
@@ -129,6 +137,33 @@ target is a buildable or runnable product.
 program is the shared declaration universe.
 ```
 
+## Artifact and loading model
+
+The target declaration is structural input to later artifact planning. It does
+not encode CPU instructions, register choices, calling conventions, or memory
+placement in the AST.
+
+The planned artifact is layered:
+
+```text
+manifest
+dispatcher
+symbol/version lookup
+API and ABI contracts
+dependency metadata
+lazy implementation sections
+```
+
+An artifact is materialized from the selected target’s dependency closure. It
+may contain multiple compatible implementations of one capability, provided
+their API, ABI, state, and dependency contracts are explicit. The dispatcher
+selects an implementation by capability identity, version, ABI, and policy.
+Unused implementation sections need not be loaded.
+
+This is a post-AST artifact concern. The frontend records declarations,
+targets, names, source locations, and written contracts; semantic analysis and
+artifact planning establish compatibility and dependency closure later.
+
 ## Build and lowering model
 
 A build or lowering tool may later select one or more targets:
@@ -139,7 +174,10 @@ flowmini build --target daemon
 flowmini build --all-targets
 ```
 
-Each selected target may lower to a separate executable, service, test runner, tool, graph projection, or runtime surface.
+Each selected target may lower to a separate library, executable, service, test
+runner, tool, graph projection, language binding, or runtime surface. One
+source universe may produce both a library and an executable without changing
+the meaning of the shared declarations.
 ## Visual patchbay interpretation
 
 Named targets fit the Flowcore visual patchbay model.
@@ -169,7 +207,7 @@ Target-local declarations only appear inside their target projection.
 This supports the long-term goal of representing a whole system from one governed source base rather than only representing one executable at a time.
 ## Design law
 
-A Flowcore program is a shared semantic universe.
+A Flowcore source universe is a shared semantic universe.
 
 A target is a named projection of that universe into a buildable or runnable product.
 
@@ -177,7 +215,8 @@ A main block is the entrypoint of a target.
 
 For active v0.25, root programs support exactly one main block.
 
-Future versions may support named target scopes, each owning exactly one main block.
+Future versions may support named target scopes, each owning at most one main
+block, with runnable target selection requiring exactly one.
 
 Why not allow multiple anonymous main blocks?
 
@@ -222,13 +261,13 @@ This feature should not be implemented as a quick relaxation of the current “o
 
 Instead, it should be implemented as a real scoped construct.
 
-Likely future AST concepts:
+Likely AST concepts:
 
 ```text
 TargetDecl
     name
     declarations
-    main block
+    optional main block
     prerequisites
     location
 ```
