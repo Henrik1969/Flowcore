@@ -26,3 +26,14 @@ Required CLI invariants:
 The binding report is a versioned consumer boundary. A ready report means only
 that provider discovery succeeded; `execution` is explicitly
 `not-performed`.
+
+External use is denied unless an exact capability grant is supplied:
+
+```text
+allow libc.so.6 strlen c pure
+allow libc.so.6 puts c io
+```
+
+Pass the policy with `--policy path`. The policy is intentionally small and
+explicit; environment and configuration discovery belong to a later policy
+boundary.

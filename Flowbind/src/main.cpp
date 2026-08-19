@@ -14,13 +14,57 @@ namespace {
 constexpr std::string_view VERSION = "0.1.0";
 
 struct Requirement { std::string contract, library, convention, symbol, effect, parameter_types, return_type; };
+struct Grant { std::string library, symbol, convention, effect; };
 
-std::string read_input(int argc, char** argv) {
-    if (argc > 2) throw std::runtime_error("usage: flowbind [semantic-report.json]");
+struct Options { std::string report_path, policy_path; };
+
+Options parse_options(int argc, char** argv) {
+    Options options;
+    for (int i = 1; i < argc; ++i) {
+        const std::string argument = argv[i];
+        if (argument == "--policy") {
+            if (++i >= argc) throw std::runtime_error("--policy requires a path");
+            options.policy_path = argv[i];
+        } else if (argument == "-h" || argument == "--help" || argument == "-?" || argument == "-a" || argument == "--about" || argument == "-v" || argument == "--version") {
+            continue;
+        } else if (!argument.empty() && argument.front() == '-') {
+            throw std::runtime_error("unknown option '" + argument + "'");
+        } else if (options.report_path.empty()) {
+            options.report_path = argument;
+        } else {
+            throw std::runtime_error("too many input paths");
+        }
+    }
+    return options;
+}
+
+std::string read_input(const Options& options) {
     std::ostringstream input;
-    if (argc == 2) { std::ifstream file(argv[1]); if (!file) throw std::runtime_error("cannot open semantic report"); input << file.rdbuf(); }
+    if (!options.report_path.empty()) { std::ifstream file(options.report_path); if (!file) throw std::runtime_error("cannot open semantic report"); input << file.rdbuf(); }
     else input << std::cin.rdbuf();
     return input.str();
+}
+
+std::vector<Grant> read_policy(const std::string& path) {
+    std::vector<Grant> grants;
+    if (path.empty()) return grants;
+    std::ifstream file(path);
+    if (!file) throw std::runtime_error("cannot open binding policy");
+    std::string line;
+    while (std::getline(file, line)) {
+        if (line.empty() || line.front() == '#') continue;
+        std::istringstream words(line);
+        std::string verb; Grant grant;
+        words >> verb >> grant.library >> grant.symbol >> grant.convention >> grant.effect;
+        if (!words || verb != "allow") throw std::runtime_error("invalid binding policy line");
+        grants.push_back(std::move(grant));
+    }
+    return grants;
+}
+
+bool granted(const std::vector<Grant>& grants, const Requirement& requirement) {
+    for (const auto& grant : grants) if (grant.library == requirement.library && grant.symbol == requirement.symbol && grant.convention == requirement.convention && grant.effect == requirement.effect) return true;
+    return false;
 }
 
 std::string value(const std::string& object, const std::string& key) {
@@ -48,7 +92,7 @@ std::vector<Requirement> requirements(const std::string& report) {
     return result;
 }
 
-int verify(const std::string& report) {
+int verify(const std::string& report, const std::string& policy_path) {
     if (report.find("\"format\": \"flowanalyst.semantic_report\"") == std::string::npos && report.find("\"format\":\"flowanalyst.semantic_report\"") == std::string::npos) throw std::runtime_error("input is not a Flowanalyst semantic report");
     if (report.find("\"version\": 1") == std::string::npos && report.find("\"version\":1") == std::string::npos) throw std::runtime_error("unsupported Flowanalyst report version");
     if (report.find("\"status\": \"ok\"") == std::string::npos && report.find("\"status\":\"ok\"") == std::string::npos) {
@@ -56,11 +100,13 @@ int verify(const std::string& report) {
         return 2;
     }
     const auto needed = requirements(report);
+    const auto grants = read_policy(policy_path);
     const std::vector<std::string> supported_types = {"c_int", "c_long", "c_size_t", "c_string"};
     auto supported_type = [&](const std::string& type) { for (const auto& candidate : supported_types) if (candidate == type) return true; return false; };
     std::map<std::string, void*> handles;
     std::vector<std::string> failures;
     for (const auto& item : needed) {
+        if (!granted(grants, item)) failures.push_back(item.library + ": symbol '" + item.symbol + "' denied by capability policy");
         if (item.convention != "c") failures.push_back(item.symbol + ": unsupported calling convention '" + item.convention + "'");
         if (!supported_type(item.return_type)) failures.push_back(item.symbol + ": unsupported return ABI type '" + item.return_type + "'");
         std::size_t start = 0;
@@ -71,6 +117,7 @@ int verify(const std::string& report) {
             if (end == std::string::npos) break;
             start = end + 1;
         }
+        if (!granted(grants, item)) continue;
         if (!handles.count(item.library)) handles[item.library] = dlopen(item.library.c_str(), RTLD_LAZY | RTLD_LOCAL);
         if (!handles[item.library]) { failures.push_back(item.library + ": library unavailable"); continue; }
         if (!dlsym(handles[item.library], item.symbol.c_str())) failures.push_back(item.library + ": symbol '" + item.symbol + "' unavailable");
@@ -82,7 +129,7 @@ int verify(const std::string& report) {
         std::cout << "]\n}\n";
         return 2;
     }
-    std::cout << "{\n  \"format\": \"flowbind.binding_report\",\n  \"version\": 1,\n  \"status\": \"ready\",\n  \"provider\": {\"name\": \"dlopen+dlsym\", \"requirements\": " << needed.size() << "},\n  \"abi\": {\"convention\": \"c\", \"signature_verified\": true, \"sizeof_int\": " << sizeof(int) << ", \"sizeof_long\": " << sizeof(long) << ", \"sizeof_size_t\": " << sizeof(std::size_t) << ", \"sizeof_pointer\": " << sizeof(void*) << "},\n  \"execution\": \"not-performed\"\n}\n";
+    std::cout << "{\n  \"format\": \"flowbind.binding_report\",\n  \"version\": 1,\n  \"status\": \"ready\",\n  \"provider\": {\"name\": \"dlopen+dlsym\", \"requirements\": " << needed.size() << "},\n  \"policy\": {\"status\": \"authorized\", \"grants\": " << grants.size() << "},\n  \"abi\": {\"convention\": \"c\", \"signature_verified\": true, \"sizeof_int\": " << sizeof(int) << ", \"sizeof_long\": " << sizeof(long) << ", \"sizeof_size_t\": " << sizeof(std::size_t) << ", \"sizeof_pointer\": " << sizeof(void*) << "},\n  \"execution\": \"not-performed\"\n}\n";
     return 0;
 }
 
@@ -90,12 +137,13 @@ int verify(const std::string& report) {
 
 int main(int argc, char** argv) {
     try {
-        if (argc == 2) {
+        const auto options = parse_options(argc, argv);
+        if (argc >= 2) {
             const std::string option = argv[1];
-            if (option == "-h" || option == "--help" || option == "-?") { std::cout << "flowbind - verify external provider bindings\n\nUsage: flowbind [semantic-report.json]\n       flowmini ... | flowanalyst | flowbind\n\nOptions: -h, -?, --help  show help\n         -a, --about    show about information\n         -v, --version  print the raw version number\n\nMore help: Flowbind/README.md\n"; return 0; }
+            if (option == "-h" || option == "--help" || option == "-?") { std::cout << "flowbind - verify and authorize external provider bindings\n\nUsage: flowbind [--policy policy.conf] [semantic-report.json]\n       flowmini ... | flowanalyst | flowbind --policy policy.conf\n\nPolicy: one exact grant per line: allow LIBRARY SYMBOL CONVENTION EFFECT\n\nOptions: -h, -?, --help  show help\n         -a, --about    show about information\n         -v, --version  print the raw version number\n\nMore help: Flowbind/README.md\n"; return 0; }
             if (option == "-a" || option == "--about") { std::cout << "Flowbind verifies declared external libraries and symbols without executing them.\nMore help: Flowbind/README.md\n"; return 0; }
             if (option == "-v" || option == "--version") { std::cout << VERSION << '\n'; return 0; }
         }
-        return verify(read_input(argc, argv));
+        return verify(read_input(options), options.policy_path);
     } catch (const std::exception& error) { std::cerr << "flowbind error: " << error.what() << '\n'; return 1; }
 }
