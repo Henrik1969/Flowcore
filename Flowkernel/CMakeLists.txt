@@ -19,5 +19,7 @@ add_test(NAME flowkernel_socket_ipc
     COMMAND $<TARGET_FILE:flowkernel> --probe socket_ipc)
 add_test(NAME flowkernel_loopback
     COMMAND $<TARGET_FILE:flowkernel> --probe loopback)
+add_test(NAME flowkernel_namespaces
+    COMMAND $<TARGET_FILE:flowkernel> --probe namespaces)
 add_test(NAME flowkernel_all
     COMMAND $<TARGET_FILE:flowkernel> --probe all)

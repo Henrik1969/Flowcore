@@ -5,6 +5,7 @@
 #include <fcntl.h>
 #include <iostream>
 #include <sys/socket.h>
+#include <sched.h>
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include <poll.h>
@@ -152,6 +153,31 @@ Result loopback_probe() {
     return {"loopback", true, 0};
 }
 
+Result namespaces_probe() {
+    int channel[2]{};
+    if (pipe2(channel, O_CLOEXEC) < 0) return {"namespace result pipe", false, errno};
+    const pid_t child = fork();
+    if (child < 0) { const int saved = errno; close(channel[0]); close(channel[1]); return {"namespace fork", false, saved}; }
+    if (child == 0) {
+        close(channel[0]);
+        const int result = unshare(CLONE_NEWUSER | CLONE_NEWUTS | CLONE_NEWIPC);
+        const int child_errno = result == 0 ? 0 : errno;
+        write(channel[1], &child_errno, sizeof(child_errno));
+        close(channel[1]);
+        _exit(result == 0 ? 0 : (child_errno == EPERM || child_errno == EACCES ? 125 : 126));
+    }
+    close(channel[1]);
+    int child_errno = 0;
+    const auto received = read(channel[0], &child_errno, sizeof(child_errno));
+    close(channel[0]);
+    int child_status = 0;
+    if (waitpid(child, &child_status, 0) < 0) return {"namespace waitpid", false, errno};
+    if (received != static_cast<ssize_t>(sizeof(child_errno))) return {"namespace result", false, EIO};
+    if (WIFEXITED(child_status) && WEXITSTATUS(child_status) == 125) return {"namespaces", true, child_errno, true};
+    if (!WIFEXITED(child_status) || WEXITSTATUS(child_status) != 0) return {"unshare", false, child_errno == 0 ? EIO : child_errno};
+    return {"namespaces", true, 0};
+}
+
 void print_result(const Result& result) {
     std::cout << "{\"name\":\"" << result.name << "\",\"status\":\"" << (result.skipped ? "skipped" : (result.ok ? "ok" : "error")) << "\"";
     if (!result.ok || result.skipped) std::cout << ",\"errno\":" << result.error << ",\"message\":\"" << std::strerror(result.error) << "\"";
@@ -159,26 +185,29 @@ void print_result(const Result& result) {
 }
 
 int run(std::string_view probe) {
-    if (probe != "readonly" && probe != "tempfs" && probe != "ipc" && probe != "socket_ipc" && probe != "loopback" && probe != "all") throw std::runtime_error("unknown probe; choose readonly, tempfs, ipc, socket_ipc, loopback, or all");
+    if (probe != "readonly" && probe != "tempfs" && probe != "ipc" && probe != "socket_ipc" && probe != "loopback" && probe != "namespaces" && probe != "all") throw std::runtime_error("unknown probe; choose readonly, tempfs, ipc, socket_ipc, loopback, namespaces, or all");
     const bool run_readonly = probe == "readonly" || probe == "all";
     const bool run_tempfs = probe == "tempfs" || probe == "all";
     const bool run_ipc = probe == "ipc" || probe == "all";
     const bool run_socket_ipc = probe == "socket_ipc" || probe == "all";
     const bool run_loopback = probe == "loopback" || probe == "all";
+    const bool run_namespaces = probe == "namespaces" || probe == "all";
     const auto readonly = run_readonly ? readonly_probe() : Result{"", true, 0};
     const auto tempfs = run_tempfs ? tempfs_probe() : Result{"", true, 0};
     const auto ipc = run_ipc ? ipc_probe() : Result{"", true, 0};
     const auto socket_ipc = run_socket_ipc ? socket_ipc_probe() : Result{"", true, 0};
     const auto loopback = run_loopback ? loopback_probe() : Result{"", true, 0};
-    std::cout << "{\"format\":\"flowkernel.probe_report\",\"version\":1,\"probe\":\"" << probe << "\",\"effects\":[\"read-only-kernel\"" << (run_tempfs ? ",\"private-tempfs\"" : "") << (run_ipc ? ",\"child-process-ipc\"" : "") << (run_socket_ipc ? ",\"local-socket-ipc\"" : "") << (run_loopback ? ",\"local-loopback-network\"" : "") << "],\"results\":[";
+    const auto namespaces = run_namespaces ? namespaces_probe() : Result{"", true, 0};
+    std::cout << "{\"format\":\"flowkernel.probe_report\",\"version\":1,\"probe\":\"" << probe << "\",\"effects\":[\"read-only-kernel\"" << (run_tempfs ? ",\"private-tempfs\"" : "") << (run_ipc ? ",\"child-process-ipc\"" : "") << (run_socket_ipc ? ",\"local-socket-ipc\"" : "") << (run_loopback ? ",\"local-loopback-network\"" : "") << (run_namespaces ? ",\"child-namespaces\"" : "") << "],\"results\":[";
     bool first = true;
     if (run_readonly) { print_result(readonly); first = false; }
     if (run_tempfs) { if (!first) std::cout << ','; print_result(tempfs); }
     if (run_ipc) { if (!first || run_tempfs) std::cout << ','; print_result(ipc); }
     if (run_socket_ipc) { if (!first || run_tempfs || run_ipc) std::cout << ','; print_result(socket_ipc); }
     if (run_loopback) { if (!first || run_tempfs || run_ipc || run_socket_ipc) std::cout << ','; print_result(loopback); }
-    const bool all_ok = readonly.ok && tempfs.ok && ipc.ok && socket_ipc.ok && loopback.ok;
-    const bool any_skipped = readonly.skipped || tempfs.skipped || ipc.skipped || socket_ipc.skipped || loopback.skipped;
+    if (run_namespaces) { if (!first || run_tempfs || run_ipc || run_socket_ipc || run_loopback) std::cout << ','; print_result(namespaces); }
+    const bool all_ok = readonly.ok && tempfs.ok && ipc.ok && socket_ipc.ok && loopback.ok && namespaces.ok;
+    const bool any_skipped = readonly.skipped || tempfs.skipped || ipc.skipped || socket_ipc.skipped || loopback.skipped || namespaces.skipped;
     std::cout << "] ,\"status\":\"" << (all_ok ? (any_skipped ? "ok-with-skips" : "ok") : "error") << "\"}\n";
     return all_ok ? 0 : 2;
 }
@@ -193,7 +222,7 @@ int main(int argc, char** argv) {
             if (option == "-a" || option == "--about") { std::cout << "Flowkernel runs explicitly scoped, non-privileged Linux boundary probes.\nMore help: Flowkernel/README.md\n"; return 0; }
             if (option == "-v" || option == "--version") { std::cout << VERSION << '\n'; return 0; }
         }
-        if (argc != 3 || std::string(argv[1]) != "--probe") throw std::runtime_error("usage: flowkernel --probe readonly|tempfs|ipc|socket_ipc|loopback|all");
+        if (argc != 3 || std::string(argv[1]) != "--probe") throw std::runtime_error("usage: flowkernel --probe readonly|tempfs|ipc|socket_ipc|loopback|namespaces|all");
         return run(argv[2]);
     } catch (const std::exception& error) { std::cerr << "flowkernel error: " << error.what() << '\n'; return 1; }
 }
