@@ -29,7 +29,7 @@ abi_report=$("$flowmini" --dump-frontend-bundle "$abi_fixture" | "$bin")
 printf '%s\n' "$abi_report" | grep -q '"binding_requirements"'
 printf '%s\n' "$abi_report" | grep -q '"symbol":"strlen"'
 
-flowcat_fixture="$root/Flowmini/flowmini_v25_symboltable_projection/examples/apps/flowcat.flow"
+flowcat_fixture="$root/Flowmini/flowmini_v25_symboltable_projection/examples/apps/flowcat/flowcat.flow"
 flowcat_report=$("$flowmini" --dump-frontend-bundle "$flowcat_fixture" | "$bin")
 printf '%s\n' "$flowcat_report" | grep -q '"lowering_profile": "flowcat_argv_main"'
 printf '%s\n' "$flowcat_report" | grep -q '"name":"args"'

@@ -1,0 +1,6 @@
+program flowcat
+
+// First executable application specimen.
+main(args : list<string>) {
+    print args
+}

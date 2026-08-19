@@ -62,7 +62,7 @@ strlen_rc=$?
 set -e
 test "$strlen_rc" -eq 8
 
-flowcat_source="$root/Flowmini/flowmini_v25_symboltable_projection/examples/apps/flowcat.flow"
+flowcat_source="$root/Flowmini/flowmini_v25_symboltable_projection/examples/apps/flowcat/flowcat.flow"
 "$flowmini" --dump-frontend-bundle "$flowcat_source" > "$tmpdir/flowcat.bundle.json"
 "$analyst" < "$tmpdir/flowcat.bundle.json" > "$tmpdir/flowcat.semantic.json"
 grep -q '"lowering_profile": "flowcat_argv_main"' "$tmpdir/flowcat.semantic.json"

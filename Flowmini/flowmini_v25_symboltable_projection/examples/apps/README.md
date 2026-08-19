@@ -1,20 +1,18 @@
-# Application specimens
+# Application examples
 
-These examples are intentionally placed after the language-chain probes. They
-are end-to-end application candidates, not yet promises of a complete runtime.
+These examples are complete, reproducible vertical slices through the current
+Flowcore language and compiler chain. Each application directory owns its
+source, capability policy, expected output, and runner.
 
-## `flowcat`
+## Directory contract
 
-`flowcat` establishes the first application contract:
+- `*.flow` — application source;
+- `policy.conf` — exact Flowbind capability grants;
+- `expected-*.txt` — checked-in observable output;
+- `run-*.sh` — reproducible pipeline runner using temporary intermediates;
+- `README.md` — scope, stage contracts, and known limitations.
 
-```flow
-main(args : list<string>) {
-    print args
-}
-```
+## Applications
 
-The current chain accepts and analyses the typed entry point. The remaining
-boundary is the standard-library and lowering contract for turning process
-arguments into a Flowcore `list<string>` and streaming them to output. Until
-that exists, this specimen is expected to stop at the semantic report rather
-than claim to be an executable `cat` replacement.
+- [`flowcat`](flowcat/README.md) — typed argv entry point with policy-authorized
+  output lowering.
