@@ -1,0 +1,18 @@
+cmake_minimum_required(VERSION 3.22)
+project(flowbind LANGUAGES CXX)
+
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+add_executable(flowbind src/main.cpp)
+target_compile_options(flowbind PRIVATE -Wall -Wextra -Wpedantic)
+target_link_libraries(flowbind PRIVATE ${CMAKE_DL_LIBS})
+
+enable_testing()
+add_test(NAME flowbind_provider
+    COMMAND ${CMAKE_COMMAND} -E env
+        FLOWBIND_BIN=$<TARGET_FILE:flowbind>
+        FLOWMINI_BIN=${CMAKE_CURRENT_SOURCE_DIR}/../Flowmini/flowmini_v25_symboltable_projection/cmake-build-debug/flowmini
+        FLOWANALYST_BIN=${CMAKE_CURRENT_SOURCE_DIR}/../Flowanalyst/build/flowanalyst
+        ${CMAKE_CURRENT_SOURCE_DIR}/tests/run-flowbind-tests.sh)

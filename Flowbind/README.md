@@ -1,0 +1,27 @@
+# Flowbind
+
+Flowbind is the first external-world boundary after Flowanalyst. It consumes a
+`flowanalyst.semantic_report` and verifies the report's declared external
+library and symbol requirements with the host dynamic loader.
+
+The v0.1 provider performs discovery only:
+
+```text
+FlowMini → Flowanalyst → Flowbind
+```
+
+It uses `dlopen` and `dlsym` to prove that a declared library and symbol are
+available. It never calls a foreign function and does not claim ABI safety or
+lowering readiness yet.
+
+Required CLI invariants:
+
+```text
+-h, -?, --help
+-a, --about
+-v, --version
+```
+
+The binding report is a versioned consumer boundary. A ready report means only
+that provider discovery succeeded; `execution` is explicitly
+`not-performed`.

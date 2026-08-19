@@ -24,6 +24,11 @@ refined_report=$("$flowmini" --dump-frontend-bundle "$refined_fixture" | "$bin")
 printf '%s\n' "$refined_report" | grep -q '"status": "ok"'
 printf '%s\n' "$refined_report" | grep -q '"refined_types":2'
 
+abi_fixture="$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass/abi_libc_demo.flow"
+abi_report=$("$flowmini" --dump-frontend-bundle "$abi_fixture" | "$bin")
+printf '%s\n' "$abi_report" | grep -q '"binding_requirements"'
+printf '%s\n' "$abi_report" | grep -q '"symbol":"strlen"'
+
 bad_field_fixture="$root/Flowmini/flowmini_v25_symboltable_projection/examples/fail/bad_record_no_such_field.flow"
 set +e
 bad_field_report=$("$flowmini" --dump-frontend-bundle "$bad_field_fixture" | "$bin")
