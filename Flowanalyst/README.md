@@ -11,6 +11,11 @@ link Flowmini internals, or rewrite the structural AST/SymbolTable projection.
 Its output is a separate, versioned semantic report containing diagnostics and
 facts established by analysis.
 
+Every semantic report also carries `source.path`, copied from the frontend
+bundle. This downstream provenance field is preserved by Flowoptimize and
+Flowlower, so consumers can identify the source artifact without reopening
+Flowmini internals.
+
 ## Try it
 
 From the Flowcore repository:
@@ -34,6 +39,11 @@ invariants, record fields, external ABI requirements, and named-target
 entrypoint shape. It emits analysis regions and a Boolean dependency matrix.
 More checks will be added as explicit semantic contracts, without moving
 semantic meaning backward into Flowmini.
+
+It also emits `effect_facts`. The first proven effect is `pure` for function
+bodies consisting only of return expressions over literals, parameters, and
+pure unary/binary operators. Calls, mutation, control-state constructs,
+external effects, and unsupported forms remain `unknown`.
 
 The independent consumer boundary is specified in
 [`docs/flowanalyst/v0.1-consumer-contract.md`](../docs/flowanalyst/v0.1-consumer-contract.md).

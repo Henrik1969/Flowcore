@@ -64,7 +64,10 @@ std::string quote(std::string_view value) { std::ostringstream out; out << '"'; 
 struct Diagnostic { std::string code, severity, message, ast_path, region, source; int symbol = -1, line = -1, column = -1; };
 struct Target { int symbol = -1, mains = 0; std::string name; };
 struct BindingRequirement { std::string contract, library, convention, symbol, effect, parameter_types, return_type; };
+struct AggregateLayout { std::string contract, name; std::vector<std::pair<std::string, std::string>> fields; };
 struct Region { std::string id, kind, status; std::vector<std::string> prerequisites; };
+struct EffectFact { int declaration = -1, symbol = -1; std::string name, effect, certainty, reason; };
+struct CallSite { int expression = -1, statement = -1, scope = -1, callee_symbol = -1, write_symbol = -1; std::string callee; bool pure = false; std::set<int> reads; std::string writes; std::vector<int> independent_with; };
 struct Resolution { int expression = -1, statement = -1, scope = -1, symbol = -1; std::string name; };
 
 std::string trim_copy(std::string value) {
@@ -114,6 +117,17 @@ int run(const Json& bundle) {
     for (const auto& entry : list(field(bundle, "diagnostics"))) add_diagnostic("FLOWMINI_FRONTEND_DIAGNOSTIC", text(field(entry, "message"), "FlowMini frontend diagnostic"), -1);
     std::vector<Target> targets;
     std::vector<BindingRequirement> binding_requirements;
+    std::vector<AggregateLayout> aggregate_layouts;
+    const auto source_unit = field(*ast, "source_unit");
+    std::set<std::string> called_names;
+    for (const auto& [expression_id, expression] : expressions) {
+        if (text(field(*expression, "kind")) != "call") continue;
+        const auto* payload = field(*expression, "payload");
+        const int base = integer(field(payload, "base"));
+        if (expressions.count(base) && text(field(*expressions[base], "kind")) == "identifier") {
+            called_names.insert(text(field(field(*expressions[base], "payload"), "name")));
+        }
+    }
     auto fact_value = [&](const Json& symbol, const std::string& key) {
         for (const auto& fact : list(field(symbol, "facts"))) if (text(field(fact, "key")) == key) return text(field(field(fact, "value"), "value"));
         return std::string{};
@@ -126,6 +140,10 @@ int run(const Json& bundle) {
         for (const auto& child : list(field(*scopes[contract_scope], "symbol_ids"))) {
             const int child_id = integer(&child); if (!symbols.count(child_id) || text(field(*symbols[child_id], "kind")) != "Function") continue;
             const auto external = fact_value(*symbols[child_id], "external_symbol_spelling"); if (external.empty()) continue;
+            const auto function_name = text(field(*symbols[child_id], "name"));
+            const bool flowcat_file_contract = text(field(*source_unit, "name")) == "flowcat" &&
+                (function_name == "open" || function_name == "read" || function_name == "write" || function_name == "close");
+            if (!called_names.count(function_name) && !flowcat_file_contract) continue;
             std::string parameter_types;
             const int function_scope = integer(field(*symbols[child_id], "introduced_scope_id"));
             if (scopes.count(function_scope)) for (const auto& parameter : list(field(*scopes[function_scope], "symbol_ids"))) {
@@ -135,11 +153,23 @@ int run(const Json& bundle) {
             }
             binding_requirements.push_back({text(field(*contract, "name")), library, convention, external, fact_value(*symbols[child_id], "effect_spelling"), parameter_types, fact_value(*symbols[child_id], "return_type_spelling")});
         }
+        for (const auto& child : list(field(*scopes[contract_scope], "symbol_ids"))) {
+            const int child_id = integer(&child);
+            if (!symbols.count(child_id) || text(field(*symbols[child_id], "kind")) != "Struct") continue;
+            AggregateLayout layout{text(field(*contract, "name")), text(field(*symbols[child_id], "name")), {}};
+            const int struct_scope = integer(field(*symbols[child_id], "introduced_scope_id"));
+            if (scopes.count(struct_scope)) for (const auto& field_id_json : list(field(*scopes[struct_scope], "symbol_ids"))) {
+                const int field_id = integer(&field_id_json);
+                if (!symbols.count(field_id) || text(field(*symbols[field_id], "kind")) != "Field") continue;
+                layout.fields.emplace_back(text(field(*symbols[field_id], "name")), fact_value(*symbols[field_id], "declared_type_spelling"));
+            }
+            aggregate_layouts.push_back(std::move(layout));
+        }
     }
     int resolved_types = 0, unresolved_types = 0;
     const std::vector<std::string> builtin = {"bool", "Bool", "int8", "int16", "int32", "int64", "int128", "uint8", "uint16", "uint32", "uint64", "uint128", "float16", "float32", "float64", "float128", "char8", "char16", "char32", "int", "float", "string", "void"};
     auto is_builtin = [&](const std::string& value) { for (const auto& item : builtin) if (item == value) return true; return false; };
-    const std::vector<std::string> abi_types = {"c_int", "c_long", "c_size_t"};
+    const std::vector<std::string> abi_types = {"c_int", "c_long", "c_size_t", "c_string", "c_pointer"};
     auto is_abi_type = [&](const std::string& value) { for (const auto& item : abi_types) if (item == value) return true; return false; };
     const std::vector<std::string> intrinsic_types = {"stdin.text", "start.record"};
     auto is_intrinsic_type = [&](const std::string& value) { for (const auto& item : intrinsic_types) if (item == value) return true; return false; };
@@ -283,9 +313,25 @@ int run(const Json& bundle) {
     }
     if (declarations.empty()) empty_main_profile = false;
     std::string lowering_profile = empty_main_profile ? "empty_program_main" : "none";
-    const auto source_unit = field(*ast, "source_unit");
     if (text(field(*source_unit, "name")) == "abi_abs_main") for (const auto& requirement : binding_requirements) if (requirement.symbol == "abs" && requirement.parameter_types == "c_int" && requirement.return_type == "c_int") lowering_profile = "abi_abs_main";
     if (text(field(*source_unit, "name")) == "abi_strlen_main") for (const auto& requirement : binding_requirements) if (requirement.symbol == "strlen" && requirement.parameter_types == "c_string" && requirement.return_type == "c_size_t") lowering_profile = "abi_strlen_main";
+    if (text(field(*source_unit, "name")) == "abi_kernel_getpid_main") for (const auto& requirement : binding_requirements) if (requirement.symbol == "getpid" && requirement.parameter_types.empty() && requirement.return_type == "c_int") lowering_profile = "abi_kernel_getpid_main";
+    if (text(field(*source_unit, "name")) == "abi_kernel_clock_main") for (const auto& requirement : binding_requirements) if (requirement.symbol == "clock_gettime" && requirement.parameter_types == "c_int,c_pointer" && requirement.return_type == "c_int") lowering_profile = "abi_kernel_clock_main";
+    if (text(field(*source_unit, "name")) == "abi_kernel_random_main") for (const auto& requirement : binding_requirements) if (requirement.symbol == "getrandom" && requirement.parameter_types == "c_pointer,c_size_t,c_int" && requirement.return_type == "c_long") lowering_profile = "abi_kernel_random_main";
+    if (text(field(*source_unit, "name")) == "abi_kernel_uname_main") for (const auto& requirement : binding_requirements) if (requirement.symbol == "uname" && requirement.parameter_types == "c_pointer" && requirement.return_type == "c_int") lowering_profile = "abi_kernel_uname_main";
+    if (text(field(*source_unit, "name")) == "abi_kernel_openat_main") for (const auto& requirement : binding_requirements) if (requirement.symbol == "openat" && requirement.parameter_types == "c_int,c_string,c_int,c_int" && requirement.return_type == "c_int") lowering_profile = "abi_kernel_openat_main";
+    if (text(field(*source_unit, "name")) == "abi_kernel_read_main") for (const auto& requirement : binding_requirements) if (requirement.symbol == "read" && requirement.parameter_types == "c_int,c_pointer,c_size_t" && requirement.return_type == "c_long") lowering_profile = "abi_kernel_read_main";
+    if (text(field(*source_unit, "name")) == "abi_kernel_write_main") for (const auto& requirement : binding_requirements) if (requirement.symbol == "write" && requirement.parameter_types == "c_int,c_pointer,c_size_t" && requirement.return_type == "c_long") lowering_profile = "abi_kernel_write_main";
+    if (text(field(*source_unit, "name")) == "abi_kernel_lseek_main") for (const auto& requirement : binding_requirements) if (requirement.symbol == "lseek" && requirement.parameter_types == "c_int,c_long,c_int" && requirement.return_type == "c_long") lowering_profile = "abi_kernel_lseek_main";
+    if (text(field(*source_unit, "name")) == "abi_kernel_unlinkat_main") for (const auto& requirement : binding_requirements) if (requirement.symbol == "unlinkat" && requirement.parameter_types == "c_int,c_string,c_int" && requirement.return_type == "c_int") lowering_profile = "abi_kernel_unlinkat_main";
+    const std::map<std::string, std::pair<std::string, std::string>> kernel_profiles = {
+        {"abi_kernel_rmdir_main", {"rmdir", "c_string"}}, {"abi_kernel_pipe2_main", {"pipe2", "c_pointer,c_int"}}, {"abi_kernel_fork_main", {"fork", ""}},
+        {"abi_kernel_waitpid_main", {"waitpid", "c_int,c_pointer,c_int"}}, {"abi_kernel_socketpair_main", {"socketpair", "c_int,c_int,c_int,c_pointer"}}, {"abi_kernel_socket_main", {"socket", "c_int,c_int,c_int"}},
+        {"abi_kernel_bind_main", {"bind", "c_int,c_pointer,c_size_t"}}, {"abi_kernel_listen_main", {"listen", "c_int,c_int"}}, {"abi_kernel_poll_main", {"poll", "c_pointer,c_size_t,c_int"}},
+        {"abi_kernel_accept4_main", {"accept4", "c_int,c_pointer,c_pointer,c_int"}}, {"abi_kernel_connect_main", {"connect", "c_int,c_pointer,c_size_t"}}, {"abi_kernel_unshare_main", {"unshare", "c_int"}},
+        {"abi_kernel_sethostname_main", {"sethostname", "c_string,c_size_t"}}, {"abi_kernel_gethostname_main", {"gethostname", "c_pointer,c_size_t"}}
+    };
+    for (const auto& [profile, signature] : kernel_profiles) if (text(field(*source_unit, "name")) == profile) for (const auto& requirement : binding_requirements) if (requirement.symbol == signature.first && requirement.parameter_types == signature.second) lowering_profile = profile;
     bool flowcat_entrypoint = false;
     if (text(field(*source_unit, "name")) == "flowcat") {
         for (const auto& [declaration_id, declaration] : declarations) {
@@ -301,8 +347,89 @@ int run(const Json& bundle) {
     bool flowcat_prints_args = false;
     for (const auto& resolution : resolutions) if (resolution.symbol >= 0 && resolution.name == "args") flowcat_prints_args = true;
     if (flowcat_entrypoint && flowcat_prints_args) {
-        lowering_profile = "flowcat_argv_main";
-        binding_requirements.push_back({"flowcore.argv_output", "libc.so.6", "c", "puts", "io", "c_string", "c_int"});
+        std::set<std::string> file_symbols;
+        for (const auto& requirement : binding_requirements) file_symbols.insert(requirement.symbol);
+        if (file_symbols.count("open") && file_symbols.count("read") && file_symbols.count("write") && file_symbols.count("close")) lowering_profile = "flowcat_file_main";
+        else {
+            lowering_profile = "flowcat_argv_main";
+            binding_requirements.push_back({"flowcore.argv_output", "libc.so.6", "c", "puts", "io", "c_string", "c_int"});
+        }
+    }
+    std::function<bool(int)> expression_is_pure = [&](int expression_id) {
+        if (!expressions.count(expression_id)) return false;
+        const auto* expression = expressions[expression_id];
+        const auto kind = text(field(*expression, "kind"));
+        if (kind == "integer_literal" || kind == "float_literal" || kind == "bool_literal" || kind == "string_literal" || kind == "identifier") return true;
+        if (kind != "binary" && kind != "unary") return false;
+        for (const auto& child : list(field(*expression, "child_expressions"))) if (!expression_is_pure(integer(&child))) return false;
+        return true;
+    };
+    std::vector<EffectFact> effect_facts;
+    for (const auto& [declaration_id, declaration] : declarations) {
+        if (text(field(*declaration, "kind")) != "function") continue;
+        EffectFact fact;
+        fact.declaration = declaration_id;
+        fact.name = text(field(*declaration, "name"), "<anonymous>");
+        for (const auto& [symbol_id, origin] : origins) if (text(field(*origin, "ast_path")) == "/declaration_pool/" + std::to_string(declaration_id)) { fact.symbol = symbol_id; break; }
+        const int body = integer(field(*declaration, "body_block"));
+        const auto& body_statements = blocks.count(body) ? list(field(*blocks[body], "statements")) : list(nullptr);
+        bool pure = !body_statements.empty();
+        for (const auto& statement_id : body_statements) {
+            if (!statements.count(integer(&statement_id)) || text(field(*statements[integer(&statement_id)], "kind")) != "return") { pure = false; break; }
+            const auto* payload = field(*statements[integer(&statement_id)], "payload");
+            const int value = integer(field(payload, "value_expression"));
+            if (!expression_is_pure(value)) { pure = false; break; }
+        }
+        fact.effect = pure ? "pure" : "unknown";
+        fact.certainty = pure ? "proven" : "unresolved";
+        fact.reason = pure ? "return-only expression with no calls or external effects" : "body contains mutation, control state, calls, or unsupported effects";
+        effect_facts.push_back(std::move(fact));
+    }
+    std::map<int, bool> pure_symbols;
+    for (const auto& fact : effect_facts) if (fact.symbol >= 0) pure_symbols[fact.symbol] = fact.effect == "pure" && fact.certainty == "proven";
+    std::function<void(int, std::set<int>&)> collect_reads = [&](int expression_id, std::set<int>& reads) {
+        if (!expressions.count(expression_id)) return;
+        const auto* expression = expressions[expression_id];
+        if (text(field(*expression, "kind")) == "identifier" && resolved_expression_symbols.count(expression_id)) reads.insert(resolved_expression_symbols[expression_id]);
+        for (const auto& child : list(field(*expression, "child_expressions"))) collect_reads(integer(&child), reads);
+    };
+    std::vector<CallSite> call_sites;
+    for (const auto& [expression_id, expression] : expressions) {
+        if (text(field(*expression, "kind")) != "call") continue;
+        const auto* payload = field(*expression, "payload");
+        const int base = integer(field(payload, "base"));
+        const Resolution* base_resolution = nullptr;
+        for (const auto& resolution : resolutions) if (resolution.expression == base) { base_resolution = &resolution; break; }
+        if (!base_resolution) continue;
+        CallSite site;
+        site.expression = expression_id;
+        site.statement = base_resolution->statement;
+        site.scope = base_resolution->scope;
+        site.callee_symbol = base_resolution->symbol;
+        site.callee = base_resolution->name;
+        site.pure = pure_symbols.count(site.callee_symbol) && pure_symbols[site.callee_symbol];
+        for (const auto& argument : list(field(payload, "arguments"))) collect_reads(integer(&argument), site.reads);
+        if (statements.count(site.statement)) {
+            const auto* statement = statements[site.statement];
+            site.writes = text(field(*statement, "name"));
+            if (!site.writes.empty() && scopes.count(site.scope)) for (const auto& symbol_id : list(field(*scopes[site.scope], "symbol_ids"))) {
+                const int candidate = integer(&symbol_id);
+                if (symbols.count(candidate) && text(field(*symbols[candidate], "name")) == site.writes) { site.write_symbol = candidate; break; }
+            }
+        }
+        call_sites.push_back(std::move(site));
+    }
+    for (std::size_t left = 0; left < call_sites.size(); ++left) for (std::size_t right = left + 1; right < call_sites.size(); ++right) {
+        auto& first = call_sites[left]; auto& second = call_sites[right];
+        if (!first.pure || !second.pure || first.scope != second.scope || first.statement == second.statement) continue;
+        bool shared_read = false;
+        for (const auto symbol : first.reads) if (second.reads.count(symbol)) shared_read = true;
+        const bool output_conflict = first.write_symbol >= 0 && first.write_symbol == second.write_symbol;
+        const bool read_after_write = (first.write_symbol >= 0 && second.reads.count(first.write_symbol)) || (second.write_symbol >= 0 && first.reads.count(second.write_symbol));
+        if (!shared_read && !output_conflict && !read_after_write) {
+            first.independent_with.push_back(second.expression);
+            second.independent_with.push_back(first.expression);
+        }
     }
     std::vector<Region> regions;
     for (const auto& [id, scope] : scopes) regions.push_back({"scope:" + std::to_string(id), "scope", "sane", {}});
@@ -325,10 +452,35 @@ int run(const Json& bundle) {
     for (const auto& diagnostic : diagnostics) for (auto& region : regions) if (region.id == diagnostic.region) region.status = "rejected";
     std::map<std::string, int> region_index;
     for (std::size_t index = 0; index < regions.size(); ++index) region_index[regions[index].id] = static_cast<int>(index);
-    std::cout << "{\n  \"format\": \"flowanalyst.semantic_report\",\n  \"version\": 1,\n  \"status\": \"" << (diagnostics.empty() ? "ok" : "error") << "\",\n  \"frontend_bundle\": {\"format\": \"flowmini.frontend_bundle\", \"version\": 2},\n  \"lowering_profile\": \"" << lowering_profile << "\",\n  \"diagnostics\": [";
+    std::cout << "{\n  \"format\": \"flowanalyst.semantic_report\",\n  \"version\": 1,\n  \"status\": \"" << (diagnostics.empty() ? "ok" : "error") << "\",\n  \"source\": {\"path\": " << quote(text(field(field(bundle, "source"), "path"))) << "},\n  \"frontend_bundle\": {\"format\": \"flowmini.frontend_bundle\", \"version\": 2},\n  \"lowering_profile\": \"" << lowering_profile << "\",\n  \"diagnostics\": [";
     for (std::size_t i = 0; i < diagnostics.size(); ++i) { const auto& d = diagnostics[i]; if (i) std::cout << ','; std::cout << "{\"code\":" << quote(d.code) << ",\"severity\":" << quote(d.severity) << ",\"message\":" << quote(d.message) << ",\"root_cause\":true"; if (d.symbol >= 0) { std::cout << ",\"subject\":{\"kind\":\"symbol\",\"id\":" << d.symbol << "}"; std::cout << ",\"provenance\":{\"source\":" << quote(d.source) << ",\"ast_path\":" << quote(d.ast_path) << ",\"line\":" << d.line << ",\"column\":" << d.column << "}"; } if (!d.region.empty()) std::cout << ",\"region\":" << quote(d.region); std::cout << '}'; }
     std::cout << "],\n  \"binding_requirements\": [";
     for (std::size_t i = 0; i < binding_requirements.size(); ++i) { if (i) std::cout << ','; const auto& requirement = binding_requirements[i]; std::cout << "{\"contract\":" << quote(requirement.contract) << ",\"library\":" << quote(requirement.library) << ",\"convention\":" << quote(requirement.convention) << ",\"symbol\":" << quote(requirement.symbol) << ",\"effect\":" << quote(requirement.effect) << ",\"parameter_types\":" << quote(requirement.parameter_types) << ",\"return_type\":" << quote(requirement.return_type) << "}"; }
+    std::cout << "],\n  \"aggregate_abi_layouts\": [";
+    for (std::size_t i = 0; i < aggregate_layouts.size(); ++i) {
+        if (i) std::cout << ',';
+        const auto& layout = aggregate_layouts[i];
+        std::cout << "{\"contract\":" << quote(layout.contract)
+                  << ",\"name\":" << quote(layout.name)
+                  << ",\"version\":1,\"status\":\"declared\",\"layout_policy\":\"provider_verified_required\",\"fields\":[";
+        for (std::size_t field_index = 0; field_index < layout.fields.size(); ++field_index) {
+            if (field_index) std::cout << ',';
+            std::cout << "{\"name\":" << quote(layout.fields[field_index].first)
+                      << ",\"type\":" << quote(layout.fields[field_index].second) << "}";
+        }
+        std::cout << "]}";
+    }
+    std::cout << "],\n  \"effect_facts\": [";
+    for (std::size_t i = 0; i < effect_facts.size(); ++i) { if (i) std::cout << ','; const auto& fact = effect_facts[i]; std::cout << "{\"declaration_id\":" << fact.declaration << ",\"symbol_id\":" << fact.symbol << ",\"name\":" << quote(fact.name) << ",\"effect\":" << quote(fact.effect) << ",\"certainty\":" << quote(fact.certainty) << ",\"reason\":" << quote(fact.reason) << "}"; }
+    std::cout << "],\n  \"parallel_candidates\": [";
+    bool first_candidate = true;
+    for (const auto& site : call_sites) if (!site.independent_with.empty()) {
+        if (!first_candidate) std::cout << ',';
+        first_candidate = false;
+        std::cout << "{\"call_expression\":" << site.expression << ",\"statement_id\":" << site.statement << ",\"callee\":" << quote(site.callee) << ",\"proof\":\"pure-callee-disjoint-inputs\",\"status\":\"deferred\",\"independent_with\":[";
+        for (std::size_t i = 0; i < site.independent_with.size(); ++i) { if (i) std::cout << ','; std::cout << site.independent_with[i]; }
+        std::cout << "]}";
+    }
     std::cout << "],\n  \"facts\": [{\"kind\":\"semantic_summary\",\"scopes\":" << scopes.size() << ",\"symbols\":" << symbols.size() << ",\"resolved_types\":" << resolved_types << ",\"unresolved_types\":" << unresolved_types << ",\"refined_types\":" << refined_types << ",\"resolved_names\":" << resolutions.size() << ",\"targets\":" << targets.size() << ",\"regions\":" << regions.size() << "}],\n  \"resolved_names\": [";
     bool first_resolution = true; for (const auto& resolution : resolutions) if (resolution.symbol >= 0) { if (!first_resolution) std::cout << ','; first_resolution = false; std::cout << "{\"expression_id\":" << resolution.expression << ",\"statement_id\":" << resolution.statement << ",\"name\":" << quote(resolution.name) << ",\"symbol_id\":" << resolution.symbol << ",\"scope_id\":" << resolution.scope << "}"; }
     std::cout << "],\n  \"analysis_regions\": [";

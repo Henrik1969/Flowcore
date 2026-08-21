@@ -1,6 +1,8 @@
+import "../../../std/abi/file_io.flow"
+
 program flowcat
 
-// First executable application specimen.
+// First executable application specimen with an explicit file-I/O boundary.
 main(args : list<string>) {
     print args
 }

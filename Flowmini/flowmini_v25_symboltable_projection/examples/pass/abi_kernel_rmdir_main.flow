@@ -1,0 +1,7 @@
+import "../../std/abi/kernel.flow"
+program abi_kernel_rmdir_main
+main {
+    path : c_string("/flowcore-nonexistent")
+    result : c_int(0)
+    rmdir(path) -> result
+}

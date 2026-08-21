@@ -117,6 +117,21 @@ _archive/
 
 ## Build quickstart
 
+The repository root now provides the canonical clean-tree superbuild for the
+current sibling chain and Frankencore reference tools:
+
+```bash
+cmake -S . -B /tmp/flowcore-build -G Ninja
+cmake --build /tmp/flowcore-build
+ctest --test-dir /tmp/flowcore-build --output-on-failure
+```
+
+The clean root build currently registers 42 tests, including the larger
+integration corpus, pipeline matrix, pass corpus, sibling CTest suites, CUDA
+provider contracts, and Frankencore conformance probes.
+
+Individual sibling builds remain valid for focused development:
+
 ```bash
 cd Flowmini/flowmini_v25_symboltable_projection
 
@@ -126,11 +141,9 @@ cmake --build cmake-build-debug -j20
 
 Adjust `-j20` to match your machine.
 
-The canonical v25 build and test scope is
-`Flowmini/flowmini_v25_symboltable_projection` and its CMake targets. A repository-root
-build tree is not a canonical v25 build. References there to `Handwritten_V1`,
-`flowcheck`, or `flowoptimize` smoke scripts belong to a legacy root-superbuild
-configuration and are not active v25 test requirements.
+The root superbuild does not replace the individual project contracts. It
+assembles them into one build graph so clean-tree dependencies and cross-stage
+tests are visible to CMake, Ninja, and IDEs.
 
 ## Test quickstart
 
@@ -151,6 +164,16 @@ flowmini_symbol_projection:    PASS (12/12)
 flowmini_frontend_bundle:      PASS (7 golden, 1 isolated, 19 negative)
 flowmini_suite:                PASS (78/78)
 CTest:                         PASS (2/2)
+
+For the complete root build, the current result is:
+
+```text
+root CTest:                    PASS (43/43)
+integration corpus:            PASS (3/3)
+pipeline matrix:               PASS (9 accepted, 1 blocked)
+pass corpus:                   PASS (43 programs)
+stdlib boundary:               PASS (6 ABI modules; libc/file I/O/memory/kernel ready at binding boundary)
+```
 ```
 
 ## Recommended reading

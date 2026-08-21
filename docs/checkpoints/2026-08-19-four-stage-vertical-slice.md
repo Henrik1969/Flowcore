@@ -34,7 +34,8 @@ main {
 FlowMini emits its versioned frontend bundle. Flowanalyst validates the bundle,
 resolves the available semantic facts, and identifies the explicit
 `empty_program_main` lowering profile. Flowoptimize accepts the semantic report
-and crosses its versioned optimization boundary with no transforms. Flowlower
+and crosses its versioned optimization boundary with the identity-preserving
+Boolean COO deduplication transform. Flowlower
 emits LLVM IR for that narrow, explicitly recognized profile. Clang compiles
 the IR to an ELF executable, and the executable exits successfully with code
 0.
@@ -77,7 +78,8 @@ This is a vertical model checkpoint, not a claim of a production compiler.
 FlowMini has the structural AST/SymbolTable export. Flowanalyst has the initial
 semantic graph, name/type/call/refined-type/record checks, diagnostics, and
 target entrypoint checks. Flowbind verifies and authorizes selected external
-capabilities. Flowoptimize currently performs no transformations. Flowlower
+capabilities. Flowoptimize currently performs only the identity-preserving COO
+deduplication transform; Flowlower
 emits only explicitly accepted profiles; `flowcat_argv_main` is the first
 application profile.
 

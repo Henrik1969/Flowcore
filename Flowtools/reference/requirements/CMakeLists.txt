@@ -1,0 +1,6 @@
+add_executable(frankencore_requirements_probe main.cpp)
+target_link_libraries(frankencore_requirements_probe PRIVATE Frankencore::Requirements)
+target_compile_features(frankencore_requirements_probe PRIVATE cxx_std_20)
+target_compile_options(frankencore_requirements_probe PRIVATE -Wall -Wextra -Wpedantic)
+
+add_test(NAME frankencore_requirements_probe COMMAND frankencore_requirements_probe)

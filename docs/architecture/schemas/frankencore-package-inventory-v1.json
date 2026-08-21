@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://flowcore.example/schemas/frankencore-package-inventory-v1.json",
+  "title": "Frankencore package inventory",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["format", "version", "provider", "source_path", "packages", "repositories", "apt_sources", "diagnostics"],
+  "properties": {
+    "format": {"const": "frankencore.package_inventory"},
+    "version": {"const": 1},
+    "provider": {"type": "string", "minLength": 1},
+    "provider_version": {"type": "string"},
+    "source_path": {"type": "string", "minLength": 1},
+    "packages": {"type": "array", "items": {"$ref": "#/$defs/package"}},
+    "repositories": {"type": "array", "items": {"$ref": "#/$defs/repository"}},
+    "apt_sources": {"type": "array", "items": {"$ref": "#/$defs/source"}},
+    "apt_index_targets": {"type": "array", "items": {"$ref": "#/$defs/index_target"}},
+    "diagnostics": {"type": "array", "items": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "message", "line"],
+      "properties": {
+        "code": {"type": "string", "minLength": 1},
+        "message": {"type": "string", "minLength": 1},
+        "line": {"type": "integer", "minimum": 0}
+      }
+    }}
+  },
+  "$defs": {
+    "package": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "status"],
+      "properties": {
+        "name": {"type": "string", "minLength": 1},
+        "status": {"type": "string", "minLength": 1},
+        "version": {"type": "string"},
+        "architecture": {"type": "string"},
+        "source": {"type": "string"},
+        "maintainer": {"type": "string"}
+      }
+    },
+    "repository": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["identity", "metadata_path", "authentication"],
+      "properties": {
+        "identity": {"type": "string", "minLength": 1},
+        "origin": {"type": "string"},
+        "suite": {"type": "string"},
+        "codename": {"type": "string"},
+        "components": {"type": "string"},
+        "architectures": {"type": "string"},
+        "metadata_path": {"type": "string", "minLength": 1},
+        "authentication": {"type": "string", "minLength": 1}
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["configuration_path", "type", "uri", "enabled", "trusted_override"],
+      "properties": {
+        "configuration_path": {"type": "string", "minLength": 1},
+        "type": {"enum": ["deb", "deb-src"]},
+        "uri": {"type": "string", "minLength": 1},
+        "suites": {"type": "string"},
+        "components": {"type": "string"},
+        "signed_by": {"type": "string"},
+        "enabled": {"type": "boolean"},
+        "trusted_override": {"type": "boolean"}
+      }
+    },
+    "index_target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["identifier", "meta_key", "short_description", "filename", "uri"],
+      "properties": {
+        "identifier": {"type": "string", "minLength": 1},
+        "meta_key": {"type": "string", "minLength": 1},
+        "short_description": {"type": "string", "minLength": 1},
+        "filename": {"type": "string", "minLength": 1},
+        "uri": {"type": "string", "minLength": 1}
+      }
+    }
+  }
+}

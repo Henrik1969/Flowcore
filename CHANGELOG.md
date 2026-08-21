@@ -5,6 +5,14 @@ stages are intentionally preserved as implementation checkpoints.
 
 ## Current checkpoint
 
+- Added the first executable read-only kernel profiles: `getpid` and
+  `clock_gettime`, followed by the one-byte `getrandom` profile; each is
+  policy-gated and tested through native LLVM-to-ELF execution. The remaining
+  kernel declarations remain binding-ready but lowering-deferred.
+
+- First real I/O capability slice: `flowcat_file_main` reads argv-supplied
+  files through policy-authorized `open`/`read`/`write`/`close` bindings.
+
 - Active milestone: Flowcore v0.26 language-chain vertical slice
 - Implementation base: `Flowmini/flowmini_v25_symboltable_projection`
 - Active branch retained for continuity: `v25-symboltable-projection`

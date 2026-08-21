@@ -1,0 +1,7 @@
+if (TARGET Frankencore::PolicyConfigResolve)
+    add_executable(frankencore_policy_probe main.cpp)
+    target_link_libraries(frankencore_policy_probe PRIVATE Frankencore::PolicyConfigResolve)
+    target_compile_features(frankencore_policy_probe PRIVATE cxx_std_20)
+    target_compile_options(frankencore_policy_probe PRIVATE -Wall -Wextra -Wpedantic)
+    add_test(NAME frankencore_policy_probe COMMAND frankencore_policy_probe)
+endif()

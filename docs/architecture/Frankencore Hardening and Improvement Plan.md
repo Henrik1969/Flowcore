@@ -1,0 +1,4 @@
+The Markdown file is structured so Codex can treat it as an architectural hardening proposal rather than a vague design discussion. In particular, it tells Codex to **audit the real repository first**, report mismatches, and only then propose minimal patch sets instead of immediately rewriting things.
+
+The most important addition is the final **“Instructions for Codex”** section, which asks it to inspect repository structure, dependencies, substrate leaks, Flowcore coupling, capability/provider abstractions, lifecycle/error semantics, tests, and conflicts with the proposed constitution before touching architecture.
+::: ​​

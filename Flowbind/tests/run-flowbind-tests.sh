@@ -3,9 +3,12 @@ set -eu
 
 root=$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)
 bin=${FLOWBIND_BIN:?FLOWBIND_BIN is required}
-flowmini=${FLOWMINI_BIN:?FLOWMINI_BIN is required}
-flowanalyst=${FLOWANALYST_BIN:?FLOWANALYST_BIN is required}
+flowmini=${FLOWMINI_BIN:-$root/Flowmini/flowmini_v25_symboltable_projection/cmake-build-debug/flowmini}
+flowanalyst=${FLOWANALYST_BIN:-$root/Flowanalyst/build/flowanalyst}
 fixture=$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass/abi_libc_demo.flow
+test -x "$flowmini"
+test -x "$flowanalyst"
+test -x "$bin"
 policy=$(mktemp)
 trap 'rm -f "$policy"' EXIT
 printf '%s\n' \
@@ -13,12 +16,24 @@ printf '%s\n' \
   'allow libc.so.6 abs c pure' \
   'allow libc.so.6 labs c pure' \
   'allow libc.so.6 puts c io' \
+  'allow libc.so.6 open c io' \
+  'allow libc.so.6 read c io' \
+  'allow libc.so.6 write c io' \
+  'allow libc.so.6 close c io' \
   'allow libc.so.6 flowcore_symbol_that_does_not_exist c pure' > "$policy"
 
 report=$("$flowmini" --dump-frontend-bundle "$fixture" | "$flowanalyst" | "$bin" --policy "$policy")
 printf '%s\n' "$report" | grep -q '"status": "ready"'
 printf '%s\n' "$report" | grep -q '"execution": "not-performed"'
 printf '%s\n' "$report" | grep -q '"signature_verified": true'
+
+file_fixture=$root/Flowmini/flowmini_v25_symboltable_projection/examples/apps/flowcat/flowcat.flow
+file_report=$(
+  "$flowmini" --dump-frontend-bundle "$file_fixture" |
+  "$flowanalyst" |
+  "$bin" --policy "$policy"
+)
+printf '%s\n' "$file_report" | jq -e '.status == "ready" and .lowering_profile == "flowcat_file_main" and .lowering_plan.kind == "capability_sequence" and (.symbols | index("open")) != null and (.symbols | index("read")) != null and (.symbols | index("write")) != null and (.symbols | index("close")) != null' >/dev/null
 
 set +e
 bad=$(printf '%s' '{"format":"flowanalyst.semantic_report","version":1,"status":"ok","binding_requirements":[{"contract":"bad","library":"libc.so.6","convention":"c","symbol":"flowcore_symbol_that_does_not_exist","effect":"pure","parameter_types":"","return_type":"c_int"}]}' | "$bin" --policy "$policy")

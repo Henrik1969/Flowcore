@@ -1,0 +1,7 @@
+import "../../std/abi/kernel.flow"
+program abi_kernel_unshare_main
+main {
+    flags : c_int(0)
+    result : c_int(0)
+    unshare(flags) -> result
+}

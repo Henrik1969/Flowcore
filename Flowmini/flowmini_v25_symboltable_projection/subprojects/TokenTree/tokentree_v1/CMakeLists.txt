@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.22)
 project(TokenTree VERSION 0.1.0 LANGUAGES CXX)
 
 include(CTest)
+include(GNUInstallDirs)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -38,10 +39,10 @@ set_target_properties(TokenTree_static PROPERTIES
 
 install(TARGETS TokenTree TokenTree_static
         EXPORT TokenTreeTargets
-        ARCHIVE DESTINATION lib
-        LIBRARY DESTINATION lib
-        RUNTIME DESTINATION bin)
-install(FILES include/tokentree.h DESTINATION include/TokenTree)
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}/flowcore
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/flowcore
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(FILES include/tokentree.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/flowcore/tokentree)
 
 if(BUILD_TESTING)
         add_executable(TokenTree_smoke_tests

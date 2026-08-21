@@ -1,0 +1,47 @@
+import "../../std/abi/libc.flow"
+
+program multi_target_service
+
+type Request {
+    code : int
+    payload : string
+}
+
+fn render(request : Request): int {
+    size : c_size_t(0)
+    strlen(request.payload) -> size
+    print size
+    request.code -> return
+}
+
+fn shared_status(code : int): Bool {
+    ok : Bool(false)
+    zero : int(0)
+    code > zero -> ok
+    ok -> return
+}
+
+target cli {
+    fn parse_args() {
+    }
+
+    main {
+        request : Request({code:1, payload:"cli request"})
+        code : int(0)
+        healthy : Bool(false)
+        render(request) -> code
+        shared_status(code) -> healthy
+        if healthy {
+            puts("cli: ready")
+        }
+    }
+}
+
+target daemon {
+    main {
+        request : Request({code:2, payload:"daemon request"})
+        code : int(0)
+        render(request) -> code
+        print code
+    }
+}

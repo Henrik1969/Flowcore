@@ -12,6 +12,4 @@ enable_testing()
 add_test(NAME flowoptimize_pipeline
     COMMAND ${CMAKE_COMMAND} -E env
         FLOWOPTIMIZE_BIN=$<TARGET_FILE:flowoptimize>
-        FLOWANALYST_BIN=${CMAKE_CURRENT_SOURCE_DIR}/../Flowanalyst/build/flowanalyst
         ${CMAKE_CURRENT_SOURCE_DIR}/tests/run-flowoptimize-tests.sh)
-

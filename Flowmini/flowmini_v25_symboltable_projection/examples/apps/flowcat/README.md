@@ -21,14 +21,16 @@ main(args : list<string>) {
 }
 ```
 
-For this first vertical slice, `flowcat` prints each process argument after
-the executable name on its own line. The `puts` capability is granted only by
-the adjacent `policy.conf`; Flowbind verifies that `libc.so.6` exports the
-authorized C ABI symbol before LLVM is emitted.
+For this vertical slice, `flowcat` treats each process argument after the
+executable name as a path. The explicit `file_io` ABI contract authorizes
+`open`, `read`, `write`, and `close` through the adjacent `policy.conf`;
+Flowbind verifies the exact C symbols before LLVM is emitted. The generated
+program reads each file in bounded chunks and writes the bytes to stdout.
 
-This is intentionally an argv-output application, not yet a full file-content
-`cat` implementation. File opening, reading, buffering, and error reporting
-are the next standard-library capability boundary.
+The current gate rejects an open failure, read failure, close failure, or
+short/failed write with exit status 1. It does not yet preserve errno details,
+metadata, file permissions, or a configurable buffer size; those belong to
+later capability slices.
 
 ## Run it
 
@@ -58,6 +60,7 @@ The runner accepts tool overrides for alternate builds:
 ```sh
 FLOWMINI_BIN=/path/to/flowmini \
 FLOWANALYST_BIN=/path/to/flowanalyst \
+FLOWPARALLEL_BIN=/path/to/flowparallel \
 FLOWBIND_BIN=/path/to/flowbind \
 FLOWOPTIMIZE_BIN=/path/to/flowoptimize \
 FLOWLOWER_BIN=/path/to/flowlower \

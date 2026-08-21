@@ -1,0 +1,88 @@
+{
+  "format": "frankencore.contract_inventory",
+  "version": 1,
+  "status": "experimental-baseline",
+  "contracts": [
+    {
+      "id": "flowmini.frontend_bundle",
+      "version": 2,
+      "kind": "projection",
+      "producer": "Flowmini",
+      "consumers": ["Flowanalyst", "independent tools"],
+      "authority": "Flowmini structural facts",
+      "failure": "reject unsupported or malformed bundle"
+    },
+    {
+      "id": "flowanalyst.semantic_report",
+      "version": 1,
+      "kind": "semantic-report",
+      "producer": "Flowanalyst",
+      "consumers": ["Flowbind", "Flowoptimize", "IDE/debugger/AI tools"],
+      "authority": "analysis facts and diagnostics",
+      "failure": "status error or consumer rejection"
+    },
+    {
+      "id": "flowbind.binding_report",
+      "version": 1,
+      "kind": "capability-authorization",
+      "producer": "Flowbind",
+      "consumers": ["Flowlower"],
+      "authority": "verified provider availability and policy result",
+      "failure": "blocked report; foreign execution not performed"
+    },
+    {
+      "id": "flowoptimize.optimization_report",
+      "version": 1,
+      "kind": "transformed-projection",
+      "producer": "Flowoptimize",
+      "consumers": ["Flowlower"],
+      "authority": "none over input; derived optimization state only",
+      "failure": "blocked report"
+    },
+    {
+      "id": "flowlower.lowering_report",
+      "version": 1,
+      "kind": "target-projection",
+      "producer": "Flowlower",
+      "consumers": ["clang", "build tools", "runtime users"],
+      "authority": "lowering result and backend status",
+      "failure": "blocked report or lowering error"
+    },
+    {
+      "id": "flowcore.argv_output",
+      "version": 1,
+      "kind": "capability-requirement",
+      "producer": "Flowanalyst",
+      "consumers": ["Flowbind", "Flowlower"],
+      "authority": "declared external requirement only",
+      "failure": "policy/provider rejection"
+    },
+    {
+      "id": "flowcore.file_io",
+      "version": 1,
+      "kind": "capability-requirement",
+      "producer": "Flowanalyst",
+      "consumers": ["Flowbind", "Flowlower"],
+      "authority": "declared open/read/write/close requirement",
+      "failure": "policy/provider rejection or executable status 1"
+    },
+    {
+      "id": "frankencore.clock.read",
+      "version": 1,
+      "kind": "reference-capability",
+      "producer": "frankencore_clock",
+      "consumers": ["CLI", "future Flowcore/GUI projections"],
+      "authority": "Clock reference report",
+      "failure": "structured clock error report or CLI failure"
+    },
+    {
+      "id": "frankencore.mutation_record",
+      "version": 1,
+      "kind": "provenance-evidence",
+      "producer": "frankencore_revision_probe",
+      "consumers": ["conformance harness", "audit and replay tooling"],
+      "authority": "recorded mutation evidence only; no storage authority",
+      "failure": "reject incomplete or non-monotonic revision evidence"
+    }
+  ]
+}

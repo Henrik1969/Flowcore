@@ -1,0 +1,111 @@
+unit std_abi_kernel
+
+abi kernel {
+    library "libc.so.6"
+    convention c
+
+    type c_pointer {
+        repr "void*"
+        ownership borrowed
+        access read_write
+        lifetime call
+        nullable false
+    }
+
+    extern fn getpid(): c_int {
+        symbol "getpid"
+        effect readonly
+    }
+    extern fn clock_gettime(clock : c_int, value : c_pointer): c_int {
+        symbol "clock_gettime"
+        effect readonly
+    }
+    extern fn uname(value : c_pointer): c_int {
+        symbol "uname"
+        effect readonly
+    }
+    extern fn getrandom(buffer : c_pointer, count : c_size_t, flags : c_int): c_long {
+        symbol "getrandom"
+        effect readonly
+    }
+
+    extern fn openat(directory : c_int, path : c_string, flags : c_int, mode : c_int): c_int {
+        symbol "openat"
+        effect filesystem
+    }
+    extern fn read(fd : c_int, buffer : c_pointer, count : c_size_t): c_long {
+        symbol "read"
+        effect filesystem
+    }
+    extern fn write(fd : c_int, buffer : c_pointer, count : c_size_t): c_long {
+        symbol "write"
+        effect filesystem
+    }
+    extern fn lseek(fd : c_int, offset : c_long, whence : c_int): c_long {
+        symbol "lseek"
+        effect filesystem
+    }
+    extern fn unlinkat(directory : c_int, path : c_string, flags : c_int): c_int {
+        symbol "unlinkat"
+        effect filesystem
+    }
+    extern fn rmdir(path : c_string): c_int {
+        symbol "rmdir"
+        effect filesystem
+    }
+
+    extern fn pipe2(channel : c_pointer, flags : c_int): c_int {
+        symbol "pipe2"
+        effect process_ipc
+    }
+    extern fn fork(): c_int {
+        symbol "fork"
+        effect process_ipc
+    }
+    extern fn waitpid(process : c_int, status : c_pointer, options : c_int): c_int {
+        symbol "waitpid"
+        effect process_ipc
+    }
+    extern fn socketpair(domain : c_int, kind : c_int, protocol : c_int, sockets : c_pointer): c_int {
+        symbol "socketpair"
+        effect socket_ipc
+    }
+
+    extern fn socket(domain : c_int, kind : c_int, protocol : c_int): c_int {
+        symbol "socket"
+        effect loopback
+    }
+    extern fn bind(fd : c_int, address : c_pointer, length : c_size_t): c_int {
+        symbol "bind"
+        effect loopback
+    }
+    extern fn listen(fd : c_int, backlog : c_int): c_int {
+        symbol "listen"
+        effect loopback
+    }
+    extern fn poll(fds : c_pointer, count : c_size_t, timeout : c_int): c_int {
+        symbol "poll"
+        effect loopback
+    }
+    extern fn accept4(fd : c_int, address : c_pointer, length : c_pointer, flags : c_int): c_int {
+        symbol "accept4"
+        effect loopback
+    }
+    extern fn connect(fd : c_int, address : c_pointer, length : c_size_t): c_int {
+        symbol "connect"
+        effect loopback
+    }
+
+    extern fn unshare(flags : c_int): c_int {
+        symbol "unshare"
+        effect namespace
+    }
+    extern fn sethostname(name : c_string, length : c_size_t): c_int {
+        symbol "sethostname"
+        effect namespace
+    }
+    extern fn gethostname(name : c_pointer, length : c_size_t): c_int {
+        symbol "gethostname"
+        effect namespace
+    }
+}

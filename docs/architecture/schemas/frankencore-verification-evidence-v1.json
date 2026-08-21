@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://flowcore.example/schemas/frankencore-verification-evidence-v1.json",
+  "title": "Frankencore normalized verification evidence",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["format", "version", "artifact", "substrate", "integrity", "authenticity", "policy_outcome"],
+  "properties": {
+    "format": {"const": "frankencore.verification_evidence"},
+    "version": {"const": 1},
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["identity"],
+      "properties": {
+        "identity": {"type": "string", "minLength": 1},
+        "version": {"type": "string"},
+        "kind": {"type": "string"},
+        "platform": {"type": "string"},
+        "digest": {"type": "string"}
+      }
+    },
+    "substrate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["provider", "method"],
+      "properties": {
+        "provider": {"type": "string", "minLength": 1},
+        "version": {"type": "string"},
+        "method": {"type": "string", "minLength": 1}
+      }
+    },
+    "source": {"type": "string"},
+    "signer": {"type": "string"},
+    "key_state": {"enum": ["trusted", "unknown", "expired", "revoked", "invalid", "unavailable"]},
+    "integrity": {"enum": ["matched", "mismatched", "absent", "not_applicable"]},
+    "authenticity": {"enum": ["supplier_authenticated", "owner_attested", "unverified", "unknown"]},
+    "operator_override": {"type": "boolean"},
+    "provenance": {"type": "array", "items": {"type": "string"}},
+    "diagnostics": {"type": "array", "items": {"type": "string"}},
+    "policy_outcome": {"enum": ["allowed", "allowed_with_isolation", "requires_confirmation", "quarantined", "rejected", "unresolved"]}
+  }
+}

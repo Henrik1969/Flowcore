@@ -4,6 +4,7 @@ set -eu
 root=${FLOWCORE_ROOT:-$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)}
 flowmini=${FLOWMINI_BIN:-$root/Flowmini/flowmini_v25_symboltable_projection/cmake-build-debug/flowmini}
 analyst=${FLOWANALYST_BIN:-$root/Flowanalyst/build/flowanalyst}
+parallel=${FLOWPARALLEL_BIN:-$root/Flowparallel/build/flowparallel}
 optimizer=${FLOWOPTIMIZE_BIN:-$root/Flowoptimize/build/flowoptimize}
 lowerer=${FLOWLOWER_BIN:-$root/Flowlower/build/flowlower}
 ast_root=$root/Flowmini/flowmini_v25_symboltable_projection/examples/ast
@@ -27,13 +28,18 @@ run_accepted() {
     test "$analyst_rc" -eq 0
     grep -q '"status": "ok"' "$semantic"
     set +e
-    "$optimizer" < "$semantic" > "$optimized"
+    "$parallel" < "$semantic" > "$tmpdir/$name.parallel.json"
+    "$optimizer" < "$tmpdir/$name.parallel.json" > "$optimized"
     optimizer_rc=$?
     set -e
     test "$optimizer_rc" -eq 0
     grep -q '"status": "ready"' "$optimized"
     set +e
-    "$lowerer" < "$optimized" > "$lowered"
+    if [ "$name" = "target_projection_probe" ] && jq -e '.targets | length > 0' "$optimized" >/dev/null; then
+        "$lowerer" --target cli < "$optimized" > "$lowered"
+    else
+        "$lowerer" < "$optimized" > "$lowered"
+    fi
     lowerer_rc=$?
     set -e
     test "$lowerer_rc" -eq 0
@@ -55,7 +61,8 @@ run_blocked() {
     test "$analyst_rc" -eq 2
     grep -q '"status": "error"' "$semantic"
     set +e
-    "$optimizer" < "$semantic" > "$optimized"
+    "$parallel" < "$semantic" > "$tmpdir/$name.parallel.json"
+    "$optimizer" < "$tmpdir/$name.parallel.json" > "$optimized"
     optimizer_rc=$?
     set -e
     test "$optimizer_rc" -eq 2
@@ -73,7 +80,8 @@ run_semantic_accepted() {
     "$flowmini" --dump-frontend-bundle "$ast_root/$name.flow" > "$bundle"
     "$analyst" < "$bundle" > "$semantic"
     grep -q '"status": "ok"' "$semantic"
-    "$optimizer" < "$semantic" > "$optimized"
+    "$parallel" < "$semantic" > "$tmpdir/$name.parallel.json"
+    "$optimizer" < "$tmpdir/$name.parallel.json" > "$optimized"
     grep -q '"status": "ready"' "$optimized"
     "$lowerer" < "$optimized" > "$lowered"
     grep -q '"status": "ready"' "$lowered"

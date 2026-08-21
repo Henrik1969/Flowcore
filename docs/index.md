@@ -27,6 +27,10 @@ This is the soul of Flowcore.
 - [Current v0.26 language-chain status](checkpoints/2026-08-19-language-chain-status.md)
 - [FrankenCore conformance declaration](architecture/frankencore-conformance.md)
 - [Prerequisites](architecture/prerequisites.md)
+- [Frankencore Constitution v0.1](architecture/FRANKENCORE-CONSTITUTION.md)
+- [Frankencore contract inventory](architecture/frankencore-contract-inventory.json)
+- [Current Frankencore conformance](architecture/frankencore-current-conformance.md)
+- [Frankencore repository audit](architecture/FRANKENCORE-AUDIT-2026-08-20.md)
 
 ## Development policy
 

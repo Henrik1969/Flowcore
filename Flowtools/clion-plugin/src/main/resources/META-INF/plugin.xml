@@ -1,0 +1,18 @@
+<idea-plugin>
+    <id>org.flowcore.language</id>
+    <name>Flowcore Language Support</name>
+    <vendor email="henriksorensen1969@gmail.com">Henrik Sørensen</vendor>
+    <description><![CDATA[
+        Flowcore language recognition and CMake/Ninja project support.
+        Semantic truth remains provided by the Flowcore compiler stages.
+    ]]></description>
+    <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.modules.clion</depends>
+    <extensions defaultExtensionNs="com.intellij">
+        <fileType name="Flowcore" language="Flowcore"
+                  implementationClass="org.flowcore.clion.FlowcoreFileType"
+                  extensions="flow" />
+        <syntaxHighlighterFactory language="Flowcore"
+                  implementationClass="org.flowcore.clion.FlowcoreSyntaxHighlighterFactory" />
+    </extensions>
+</idea-plugin>

@@ -1,0 +1,6 @@
+add_executable(frankencore_language_probe main.cpp)
+target_link_libraries(frankencore_language_probe PRIVATE Frankencore::Language)
+target_compile_features(frankencore_language_probe PRIVATE cxx_std_20)
+target_compile_options(frankencore_language_probe PRIVATE -Wall -Wextra -Wpedantic)
+
+add_test(NAME frankencore_language_probe COMMAND frankencore_language_probe)

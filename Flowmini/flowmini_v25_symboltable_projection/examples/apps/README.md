@@ -15,4 +15,4 @@ source, capability policy, expected output, and runner.
 ## Applications
 
 - [`flowcat`](flowcat/README.md) — typed argv entry point with policy-authorized
-  output lowering.
+  native ELF file-reading through the `file_io` capability contract.

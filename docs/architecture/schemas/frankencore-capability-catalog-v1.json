@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://flowcore.example/schemas/frankencore-capability-catalog-v1.json",
+  "title": "Frankencore project-local informative capability catalog entry",
+  "type": "object",
+  "required": ["format", "version", "informative_only", "capability", "source", "state"],
+  "additionalProperties": false,
+  "properties": {
+    "format": { "const": "frankencore.capability_catalog_entry" },
+    "version": { "const": 1 },
+    "informative_only": { "const": true },
+    "capability": {
+      "type": "object",
+      "required": ["id", "meaning", "scope"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "meaning": { "type": "string", "minLength": 1 },
+        "scope": { "type": "string", "minLength": 1 },
+        "contract": { "type": "string", "minLength": 1 },
+        "contract_version": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "source": {
+      "type": "object",
+      "required": ["project", "owner", "evidence"],
+      "additionalProperties": false,
+      "properties": {
+        "project": { "type": "string", "minLength": 1 },
+        "owner": { "type": "string", "minLength": 1 },
+        "provider": { "type": "string", "minLength": 1 },
+        "policy": { "type": "string", "minLength": 1 },
+        "evidence": { "type": "string", "minLength": 1 }
+      }
+    },
+    "state": {
+      "enum": ["candidate", "supported", "superseded", "withdrawn"]
+    }
+  }
+}

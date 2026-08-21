@@ -12,10 +12,21 @@ FlowMini → Flowanalyst → Flowbind
 
 It uses `dlopen` and `dlsym` to prove that a declared library and symbol are
 available. It also verifies the v0.1 supported C signature family
-(`c_int`, `c_long`, `c_size_t`, and `c_string`) and reports host layout facts.
+(`c_int`, `c_long`, `c_size_t`, `c_string`, and `c_pointer`) and reports host
+layout facts.
 It never calls a foreign function. A ready report is the authorization input
 for a later lowering profile; the `flowcat_argv_main` example demonstrates this
-with an exact `libc.so.6 puts c io` grant.
+The `flowcat_file_main` example uses exact `libc.so.6` grants for `open`,
+`read`, `write`, and `close`.
+
+Ready reports also contain a `capabilities` array. Each entry preserves the
+declared contract, provider library, symbol, calling convention, effect, ABI
+types, and authorization status for downstream inspectors and lowerers.
+
+An optional `--abi-manifest manifest.json` consumes provider-owned aggregate
+layout evidence. Flowbind reports `aggregate_abi: verified` when the manifest
+matches the semantic aggregate declaration, but aggregate calls remain blocked
+until aggregate lowering is separately implemented and tested.
 
 Required CLI invariants:
 
