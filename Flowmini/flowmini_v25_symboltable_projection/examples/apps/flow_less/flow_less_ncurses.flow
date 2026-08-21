@@ -1,0 +1,15 @@
+program flow_less_ncurses
+
+producer source : pager.file.ncurses
+node display : pager.render
+sink halt : halt.record
+
+policy source.path = "__FLOW_LESS_PATH__"
+policy source.page_size = 2
+
+wire source.out => display.in
+wire display.out => halt.in
+
+main {
+    marker : int(1)
+}

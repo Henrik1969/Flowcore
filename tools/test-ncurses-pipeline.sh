@@ -25,10 +25,13 @@ printf '%s\n' \
 "$flowmini" --dump-frontend-bundle "$fixture" > "$tmpdir/frontend.json"
 "$analyst" < "$tmpdir/frontend.json" > "$tmpdir/semantic.json"
 grep -q '"lowering_profile": "abi_ncurses_main"' "$tmpdir/semantic.json"
+jq -e '.abi_type_contracts | any(.contract == "ncurses" and .name == "c_pointer" and .ownership == "external" and .access == "opaque" and .lifetime == "external" and .nullable == "true" and .opaque == "true")' "$tmpdir/semantic.json" >/dev/null
+jq -e '.lowering_plan.format == "flowcore.lowering_plan" and .lowering_plan.version == 1 and (.lowering_plan.operations | any(.kind == "external_call" and .provider.symbol == "initscr"))' "$tmpdir/semantic.json" >/dev/null
 "$parallel" < "$tmpdir/semantic.json" > "$tmpdir/parallel.json"
 "$optimizer" < "$tmpdir/parallel.json" > "$tmpdir/optimized.json"
 "$bind" --policy "$tmpdir/policy" < "$tmpdir/semantic.json" > "$tmpdir/binding.json"
 jq -e '.status == "ready" and .lowering_profile == "abi_ncurses_main" and .lowering_plan.kind == "external_call" and (.symbols | index("initscr")) != null' "$tmpdir/binding.json" >/dev/null
+jq -e '.lowering_plan.contract == "flowcore.lowering_plan" and .lowering_plan.operation_count > 0' "$tmpdir/binding.json" >/dev/null
 "$lower" --emit-llvm "$tmpdir/program.ll" --binding-report "$tmpdir/binding.json" < "$tmpdir/optimized.json" > "$tmpdir/lowering.json"
 grep -q '"status": "emitted"' "$tmpdir/lowering.json"
 grep -q 'call ptr @initscr' "$tmpdir/program.ll"

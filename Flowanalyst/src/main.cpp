@@ -64,10 +64,12 @@ std::string quote(std::string_view value) { std::ostringstream out; out << '"'; 
 struct Diagnostic { std::string code, severity, message, ast_path, region, source; int symbol = -1, line = -1, column = -1; };
 struct Target { int symbol = -1, mains = 0; std::string name; };
 struct BindingRequirement { std::string contract, library, convention, symbol, effect, parameter_types, return_type; };
+struct AbiTypeContract { std::string contract, name, repr, ownership, access, lifetime, nullable, opaque; };
 struct AggregateLayout { std::string contract, name; std::vector<std::pair<std::string, std::string>> fields; };
 struct Region { std::string id, kind, status; std::vector<std::string> prerequisites; };
 struct EffectFact { int declaration = -1, symbol = -1; std::string name, effect, certainty, reason; };
 struct CallSite { int expression = -1, statement = -1, scope = -1, callee_symbol = -1, write_symbol = -1; std::string callee; bool pure = false; std::set<int> reads; std::string writes; std::vector<int> arguments; std::vector<int> independent_with; };
+struct LoweringOperation { int expression = -1, statement = -1, scope = -1, callee_symbol = -1, result_symbol = -1; std::string callee, kind, library, convention, symbol, effect, parameter_types, return_type; std::vector<int> arguments; };
 struct Resolution { int expression = -1, statement = -1, scope = -1, symbol = -1; std::string name; };
 
 std::string trim_copy(std::string value) {
@@ -117,6 +119,7 @@ int run(const Json& bundle) {
     for (const auto& entry : list(field(bundle, "diagnostics"))) add_diagnostic("FLOWMINI_FRONTEND_DIAGNOSTIC", text(field(entry, "message"), "FlowMini frontend diagnostic"), -1);
     std::vector<Target> targets;
     std::vector<BindingRequirement> binding_requirements;
+    std::vector<AbiTypeContract> abi_type_contracts;
     std::vector<AggregateLayout> aggregate_layouts;
     const auto source_unit = field(*ast, "source_unit");
     std::set<std::string> called_names;
@@ -166,6 +169,17 @@ int run(const Json& bundle) {
                 layout.fields.emplace_back(text(field(*symbols[field_id], "name")), fact_value(*symbols[field_id], "declared_type_spelling"));
             }
             aggregate_layouts.push_back(std::move(layout));
+        }
+        for (const auto& child : list(field(*scopes[contract_scope], "symbol_ids"))) {
+            const int child_id = integer(&child);
+            if (!symbols.count(child_id) || text(field(*symbols[child_id], "kind")) != "Type") continue;
+            const auto& type = *symbols[child_id];
+            abi_type_contracts.push_back({
+                text(field(*contract, "name")), text(field(type, "name")),
+                fact_value(type, "repr_spelling"), fact_value(type, "ownership_spelling"),
+                fact_value(type, "access_spelling"), fact_value(type, "lifetime_spelling"),
+                fact_value(type, "nullable_spelling"), fact_value(type, "opaque_spelling")
+            });
         }
     }
     int resolved_types = 0, unresolved_types = 0;
@@ -522,6 +536,33 @@ int run(const Json& bundle) {
             second.independent_with.push_back(first.expression);
         }
     }
+    std::vector<LoweringOperation> lowering_operations;
+    for (const auto& site : call_sites) {
+        LoweringOperation operation;
+        operation.expression = site.expression;
+        operation.statement = site.statement;
+        operation.scope = site.scope;
+        operation.callee_symbol = site.callee_symbol;
+        operation.result_symbol = site.write_symbol;
+        operation.callee = site.callee;
+        operation.kind = "call";
+        operation.arguments = site.arguments;
+        std::string leaf = site.callee;
+        const auto separator = leaf.rfind('.');
+        if (separator != std::string::npos) leaf = leaf.substr(separator + 1);
+        for (const auto& requirement : binding_requirements) {
+            if (requirement.symbol != leaf) continue;
+            operation.kind = "external_call";
+            operation.library = requirement.library;
+            operation.convention = requirement.convention;
+            operation.symbol = requirement.symbol;
+            operation.effect = requirement.effect;
+            operation.parameter_types = requirement.parameter_types;
+            operation.return_type = requirement.return_type;
+            break;
+        }
+        lowering_operations.push_back(std::move(operation));
+    }
     std::vector<Region> regions;
     for (const auto& [id, scope] : scopes) regions.push_back({"scope:" + std::to_string(id), "scope", "sane", {}});
     for (const auto& [id, symbol] : symbols) {
@@ -561,7 +602,49 @@ int run(const Json& bundle) {
         }
         std::cout << "]}";
     }
-    std::cout << "],\n  \"effect_facts\": [";
+    std::cout << "],\n  \"abi_type_contracts\": [";
+    for (std::size_t i = 0; i < abi_type_contracts.size(); ++i) {
+        if (i) std::cout << ',';
+        const auto& type = abi_type_contracts[i];
+        std::cout << "{\"contract\":" << quote(type.contract)
+                  << ",\"name\":" << quote(type.name)
+                  << ",\"repr\":" << quote(type.repr)
+                  << ",\"ownership\":" << quote(type.ownership)
+                  << ",\"access\":" << quote(type.access)
+                  << ",\"lifetime\":" << quote(type.lifetime)
+                  << ",\"nullable\":" << quote(type.nullable)
+                  << ",\"opaque\":" << quote(type.opaque) << "}";
+    }
+    std::cout << "],\n  \"lowering_plan\": {\"format\":\"flowcore.lowering_plan\",\"version\":1,\"status\":\""
+              << (diagnostics.empty() ? "ready" : "blocked") << "\",\"operations\":[";
+    for (std::size_t i = 0; i < lowering_operations.size(); ++i) {
+        if (i) std::cout << ',';
+        const auto& operation = lowering_operations[i];
+        std::cout << "{\"id\":" << i
+                  << ",\"kind\":" << quote(operation.kind)
+                  << ",\"expression_id\":" << operation.expression
+                  << ",\"statement_id\":" << operation.statement
+                  << ",\"scope_id\":" << operation.scope
+                  << ",\"callee\":" << quote(operation.callee)
+                  << ",\"callee_symbol_id\":" << operation.callee_symbol
+                  << ",\"arguments\":[";
+        for (std::size_t argument = 0; argument < operation.arguments.size(); ++argument) {
+            if (argument) std::cout << ',';
+            std::cout << operation.arguments[argument];
+        }
+        std::cout << "]";
+        if (operation.result_symbol >= 0) std::cout << ",\"result_symbol_id\":" << operation.result_symbol;
+        if (operation.kind == "external_call") {
+            std::cout << ",\"provider\":{\"library\":" << quote(operation.library)
+                      << ",\"convention\":" << quote(operation.convention)
+                      << ",\"symbol\":" << quote(operation.symbol)
+                      << ",\"effect\":" << quote(operation.effect)
+                      << ",\"parameter_types\":" << quote(operation.parameter_types)
+                      << ",\"return_type\":" << quote(operation.return_type) << "}";
+        }
+        std::cout << "}";
+    }
+    std::cout << "]},\n  \"effect_facts\": [";
     for (std::size_t i = 0; i < effect_facts.size(); ++i) { if (i) std::cout << ','; const auto& fact = effect_facts[i]; std::cout << "{\"declaration_id\":" << fact.declaration << ",\"symbol_id\":" << fact.symbol << ",\"name\":" << quote(fact.name) << ",\"effect\":" << quote(fact.effect) << ",\"certainty\":" << quote(fact.certainty) << ",\"reason\":" << quote(fact.reason) << "}"; }
     std::cout << "],\n  \"external_operations\": [";
     for (std::size_t i = 0; i < call_sites.size(); ++i) {

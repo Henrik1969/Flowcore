@@ -44,7 +44,7 @@ private:
 class RuntimeGraph {
 public:
     void addNode(std::string id, std::unique_ptr<INode> node);
-    void connect(std::string fromNode, std::string fromPort, std::string toNode);
+    void connect(std::string fromNode, std::string fromPort, std::string toNode, std::string toPort, std::string wireId);
 
     void startAt(const std::string& nodeId, MiniEnvelope env);
 
@@ -56,11 +56,17 @@ private:
 
     [[nodiscard]] static std::string wireKey(const std::string& node, const std::string& port);
 
+    struct Connection {
+        std::string node;
+        std::string port;
+        std::string wire_id;
+    };
+
     void deliver(const std::string& fromNode, const std::string& fromPort, MiniEnvelope env);
     void trace(const std::string& message, MiniEnvelope& env) const;
 
     std::map<std::string, std::unique_ptr<INode>> nodes_;
-    std::map<std::string, std::vector<std::string>> wires_;
+    std::map<std::string, std::vector<Connection>> wires_;
     std::queue<Pending> queue_;
 };
 

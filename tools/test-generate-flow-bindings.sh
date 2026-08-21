@@ -89,6 +89,11 @@ printf '%s\n' \
 "$analyst" < "$tmpdir/login.bundle.json" > "$tmpdir/login.semantic.json"
 jq -e '.status == "ok" and .lowering_profile == "generated_getlogin_main"' "$tmpdir/login.semantic.json" >/dev/null
 "$bind" --policy "$tmpdir/login.policy" < "$tmpdir/login.semantic.json" > "$tmpdir/login.binding.json"
+sed 's/ c_string$/ c_long/' "$tmpdir/login.policy" > "$tmpdir/login-hostile.policy"
+if "$bind" --policy "$tmpdir/login-hostile.policy" < "$tmpdir/login.semantic.json" > "$tmpdir/login-hostile.binding.json" 2>/dev/null; then
+    echo 'hostile generated signature policy unexpectedly accepted' >&2
+    exit 1
+fi
 "$parallel" < "$tmpdir/login.semantic.json" > "$tmpdir/login.parallel.json"
 "$optimizer" < "$tmpdir/login.parallel.json" > "$tmpdir/login.optimized.json"
 "$lowerer" --emit-llvm "$tmpdir/login.ll" --binding-report "$tmpdir/login.binding.json" < "$tmpdir/login.optimized.json" > "$tmpdir/login.lowering.json"

@@ -80,6 +80,11 @@ template <typename Payload>
 struct Envelope {
     Payload payload;
     PipelineContext* ctx = nullptr;
+    // Graph routing metadata is carried separately from the payload. Providers
+    // may inspect the destination port and stable wire identity without
+    // polluting the semantic value being transported.
+    std::string input_port;
+    std::string wire_id;
 };
 
 class StdinProducer {

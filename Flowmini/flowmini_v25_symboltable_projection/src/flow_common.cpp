@@ -108,7 +108,9 @@ Envelope<ByteBuffer> StdinProducer::produce() const {
 
     return Envelope<ByteBuffer>{
         ByteBuffer{buffer.str()},
-        ctx_
+        ctx_,
+        {},
+        {}
     };
 }
 

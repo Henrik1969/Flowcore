@@ -112,6 +112,27 @@ add_test(NAME sel_tui_pipeline
 set_tests_properties(sel_tui_pipeline PROPERTIES
     DEPENDS "ncurses_flow_pipeline")
 
+add_test(NAME flowcore_graph_routing
+    COMMAND ${CMAKE_COMMAND} -E env
+        FLOWMINI_BIN=$<TARGET_FILE:flowmini>
+        ${CMAKE_CURRENT_SOURCE_DIR}/tools/test-flowcore-graph-routing.sh)
+set_tests_properties(flowcore_graph_routing PROPERTIES
+    DEPENDS "flowcore_pass_corpus")
+
+add_test(NAME flow_less_pager
+    COMMAND ${CMAKE_COMMAND} -E env
+        FLOWMINI_BIN=$<TARGET_FILE:flowmini>
+        ${CMAKE_CURRENT_SOURCE_DIR}/tools/test-flow-less.sh)
+set_tests_properties(flow_less_pager PROPERTIES
+    DEPENDS "flowcore_graph_routing")
+
+add_test(NAME flow_less_ncurses_pager
+    COMMAND ${CMAKE_COMMAND} -E env
+        FLOWMINI_BIN=$<TARGET_FILE:flowmini>
+        ${CMAKE_CURRENT_SOURCE_DIR}/tools/test-flow-less-ncurses.sh)
+set_tests_properties(flow_less_ncurses_pager PROPERTIES
+    DEPENDS "flow_less_pager")
+
 # Canonical installed shape. Debian packaging consumes this staged install and
 # splits runtime, development, and documentation payloads without depending on
 # the source-tree layout.

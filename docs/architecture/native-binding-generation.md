@@ -33,6 +33,11 @@ function for execution and never modifies the C++ pipeline. A later contract
 change is handled by regenerating artifacts and rerunning the normal Flowmini
 → Flowanalyst → Flowbind → Flowparallel → Flowoptimize → Flowlower gates.
 
+Generated capability policies include the exact declared parameter carriers and
+return carrier. Flowbind therefore binds generated authorization to that
+declared signature. This remains declaration/policy evidence; it is not a claim
+that ELF symbol inspection independently proves the provider's C prototype.
+
 Provider changes require regeneration and review. A changed provider hash is
 evidence of substrate drift; it is not an automatic authorization to accept a
 new ABI.

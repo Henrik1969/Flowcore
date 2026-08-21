@@ -16,3 +16,5 @@ source, capability policy, expected output, and runner.
 
 - [`flowcat`](flowcat/README.md) — typed argv entry point with policy-authorized
   native ELF file-reading through the `file_io` capability contract.
+- [`flow_less`](flow_less/README.md) — a deterministic pager graph using a
+  provider-neutral page record and plain renderer.

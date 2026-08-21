@@ -83,7 +83,7 @@ mkdir -p "$(dirname "$flow_output")" "$(dirname "$policy_output")" "$(dirname "$
     printf '}\n'
 } > "$flow_output"
 
-jq -r '. as $root | .functions[] | "allow " + $root.provider.soname + " " + .symbol + " c " + .effect' "$spec" > "$policy_output"
+jq -r '. as $root | .functions[] | "allow " + $root.provider.soname + " " + .symbol + " c " + .effect + " " + (if (.parameters | length) == 0 then "-" else ([.parameters[].type] | join(",")) end) + " " + .return_type' "$spec" > "$policy_output"
 
 jq --arg generated_at "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
    --arg spec_sha256 "$(sha256sum "$spec" | awk '{print $1}')" \

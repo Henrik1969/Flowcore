@@ -8,6 +8,8 @@
 #include <stdexcept>
 #include <string>
 #include <string_view>
+#include <tuple>
+#include <variant>
 #include <vector>
 
 namespace {
@@ -15,9 +17,101 @@ namespace {
 constexpr std::string_view VERSION = "0.1.0";
 
 struct Requirement { std::string contract, library, convention, symbol, effect, parameter_types, return_type; };
-struct Grant { std::string library, symbol, convention, effect, parameter_types, return_type; };
+struct Grant { std::string library, symbol, convention, effect, parameter_types, return_type; bool exact_signature = false; };
 
 struct Options { std::string report_path, policy_path, abi_manifest_path; };
+
+struct Json;
+using JsonArray = std::vector<Json>;
+using JsonObject = std::map<std::string, Json>;
+struct Json : std::variant<std::nullptr_t, bool, double, std::string, JsonArray, JsonObject> {
+    using variant::variant;
+};
+
+class JsonParser {
+public:
+    explicit JsonParser(std::string text) : text_(std::move(text)) {}
+    Json parse() { skip(); Json result = value(); skip(); if (at() != '\0') fail("trailing input"); return result; }
+private:
+    std::string text_;
+    std::size_t position_ = 0;
+    char at() const { return position_ < text_.size() ? text_[position_] : '\0'; }
+    void skip() { while (std::isspace(static_cast<unsigned char>(at()))) ++position_; }
+    [[noreturn]] void fail(const std::string& message) const { throw std::runtime_error("JSON: " + message); }
+    void expect(char expected) { if (at() != expected) fail(std::string("expected '") + expected + "'"); ++position_; }
+    void literal(std::string_view expected) { if (text_.compare(position_, expected.size(), expected) != 0) fail("invalid literal"); position_ += expected.size(); }
+    Json value() {
+        skip();
+        switch (at()) {
+            case '{': return object();
+            case '[': return array();
+            case '"': return string();
+            case 't': literal("true"); return true;
+            case 'f': literal("false"); return false;
+            case 'n': literal("null"); return nullptr;
+            default: return number();
+        }
+    }
+    Json object() {
+        JsonObject result; expect('{'); skip(); if (at() == '}') { ++position_; return result; }
+        for (;;) {
+            skip(); if (at() != '"') fail("object key must be a string");
+            auto key = std::get<std::string>(string()); skip(); expect(':');
+            if (!result.emplace(std::move(key), value()).second) fail("duplicate object key");
+            skip(); if (at() == '}') { ++position_; return result; } expect(',');
+        }
+    }
+    Json array() {
+        JsonArray result; expect('['); skip(); if (at() == ']') { ++position_; return result; }
+        for (;;) { result.push_back(value()); skip(); if (at() == ']') { ++position_; return result; } expect(','); }
+    }
+    Json string() {
+        expect('"'); std::string result;
+        while (at() != '"') {
+            if (at() == '\0') fail("unterminated string");
+            if (at() == '\\') {
+                ++position_;
+                switch (at()) {
+                    case '"': case '\\': case '/': result += at(); ++position_; break;
+                    case 'n': result += '\n'; ++position_; break;
+                    case 'r': result += '\r'; ++position_; break;
+                    case 't': result += '\t'; ++position_; break;
+                    default: fail("unsupported string escape");
+                }
+            } else { result += at(); ++position_; }
+        }
+        ++position_; return result;
+    }
+    Json number() {
+        const auto begin = position_; if (at() == '-') ++position_;
+        while (std::isdigit(static_cast<unsigned char>(at()))) ++position_;
+        if (at() == '.') { ++position_; while (std::isdigit(static_cast<unsigned char>(at()))) ++position_; }
+        if (at() == 'e' || at() == 'E') { ++position_; if (at() == '+' || at() == '-') ++position_; while (std::isdigit(static_cast<unsigned char>(at()))) ++position_; }
+        if (begin == position_) fail("expected value");
+        return std::stod(text_.substr(begin, position_ - begin));
+    }
+};
+
+const Json* json_field(const Json& value, std::string_view name) {
+    const auto* object = std::get_if<JsonObject>(&value);
+    if (!object) return nullptr;
+    const auto it = object->find(std::string{name});
+    return it == object->end() ? nullptr : &it->second;
+}
+
+std::string json_text(const Json* value) {
+    return value && std::holds_alternative<std::string>(*value) ? std::get<std::string>(*value) : std::string{};
+}
+
+long long json_integer(const Json* value, const char* field_name) {
+    if (!value || !std::holds_alternative<double>(*value)) throw std::runtime_error(std::string("JSON field '") + field_name + "' must be numeric");
+    return static_cast<long long>(std::get<double>(*value));
+}
+
+const JsonArray& json_array(const Json* value, const char* field_name) {
+    if (!value || !std::holds_alternative<JsonArray>(*value)) throw std::runtime_error(std::string("JSON field '") + field_name + "' must be an array");
+    return std::get<JsonArray>(*value);
+}
 
 Options parse_options(int argc, char** argv) {
     Options options;
@@ -69,7 +163,9 @@ std::vector<Grant> read_policy(const std::string& path) {
         std::string verb; Grant grant;
         words >> verb >> grant.library >> grant.symbol >> grant.convention >> grant.effect;
         if (!words || verb != "allow") throw std::runtime_error("invalid binding policy line");
-        words >> grant.parameter_types >> grant.return_type;
+        const bool has_parameter_types = static_cast<bool>(words >> grant.parameter_types);
+        const bool has_return_type = static_cast<bool>(words >> grant.return_type);
+        grant.exact_signature = has_parameter_types || has_return_type;
         if (!grant.parameter_types.empty() && grant.parameter_types == "-") grant.parameter_types.clear();
         if (!grant.return_type.empty() && grant.return_type == "-") grant.return_type.clear();
         grants.push_back(std::move(grant));
@@ -78,7 +174,7 @@ std::vector<Grant> read_policy(const std::string& path) {
 }
 
 bool granted(const std::vector<Grant>& grants, const Requirement& requirement) {
-    for (const auto& grant : grants) if (grant.library == requirement.library && grant.symbol == requirement.symbol && grant.convention == requirement.convention && grant.effect == requirement.effect && (grant.parameter_types.empty() || grant.parameter_types == requirement.parameter_types) && (grant.return_type.empty() || grant.return_type == requirement.return_type)) return true;
+    for (const auto& grant : grants) if (grant.library == requirement.library && grant.symbol == requirement.symbol && grant.convention == requirement.convention && grant.effect == requirement.effect && (!grant.exact_signature || (grant.parameter_types == requirement.parameter_types && grant.return_type == requirement.return_type))) return true;
     return false;
 }
 
@@ -99,47 +195,99 @@ std::string json_string(const std::string& text) {
 }
 
 std::vector<Requirement> requirements(const std::string& report) {
+    const Json root = JsonParser{report}.parse();
     std::vector<Requirement> result;
-    const auto begin = report.find("\"binding_requirements\"");
-    if (begin == std::string::npos) return result;
-    const auto open = report.find('[', begin);
-    const auto close = report.find(']', open);
-    if (open == std::string::npos || close == std::string::npos) return result;
-    const std::string body = report.substr(open + 1, close - open - 1);
-    std::size_t cursor = 0;
-    while ((cursor = body.find('{', cursor)) != std::string::npos) {
-        const auto end = body.find('}', cursor);
-        if (end == std::string::npos) break;
-        const auto object = body.substr(cursor, end - cursor + 1);
-        result.push_back({value(object, "contract"), value(object, "library"), value(object, "convention"), value(object, "symbol"), value(object, "effect"), value(object, "parameter_types"), value(object, "return_type")});
-        cursor = end + 1;
+    for (const auto& item : json_array(json_field(root, "binding_requirements"), "binding_requirements")) {
+        result.push_back({
+            json_text(json_field(item, "contract")),
+            json_text(json_field(item, "library")),
+            json_text(json_field(item, "convention")),
+            json_text(json_field(item, "symbol")),
+            json_text(json_field(item, "effect")),
+            json_text(json_field(item, "parameter_types")),
+            json_text(json_field(item, "return_type"))
+        });
     }
     return result;
 }
 
+void validate_lowering_plan(const std::string& report, const std::vector<Requirement>& needed) {
+    const Json root = JsonParser{report}.parse();
+    const Json* plan = json_field(root, "lowering_plan");
+    if (plan == nullptr) return;
+    if (json_text(json_field(*plan, "format")) != "flowcore.lowering_plan" ||
+        json_integer(json_field(*plan, "version"), "lowering_plan.version") != 1) {
+        throw std::runtime_error("unsupported lowering plan contract");
+    }
+    for (const auto& operation : json_array(json_field(*plan, "operations"), "lowering_plan.operations")) {
+        if (json_text(json_field(operation, "kind")) != "external_call") continue;
+        const Json* provider = json_field(operation, "provider");
+        if (provider == nullptr) throw std::runtime_error("external lowering operation has no provider identity");
+        const auto library = json_text(json_field(*provider, "library"));
+        const auto convention = json_text(json_field(*provider, "convention"));
+        const auto symbol = json_text(json_field(*provider, "symbol"));
+        const auto effect = json_text(json_field(*provider, "effect"));
+        const auto parameter_types = json_text(json_field(*provider, "parameter_types"));
+        const auto return_type = json_text(json_field(*provider, "return_type"));
+        bool found = false;
+        for (const auto& requirement : needed) {
+            if (requirement.library == library && requirement.convention == convention &&
+                requirement.symbol == symbol && requirement.effect == effect &&
+                requirement.parameter_types == parameter_types && requirement.return_type == return_type) {
+                found = true;
+                break;
+            }
+        }
+        if (!found) throw std::runtime_error("lowering operation provider does not match a semantic binding requirement");
+    }
+}
+
 bool manifest_verifies_aggregates(const std::string& report, const std::string& manifest) {
-    const auto manifest_format = value(manifest, "format");
-    if (manifest_format != "flowcore.abi_manifest") throw std::runtime_error("unsupported ABI manifest format");
-    if (value(manifest, "provider") != "flowmini_testabi") throw std::runtime_error("unsupported ABI manifest provider");
-    if (value(manifest, "version") != "") throw std::runtime_error("ABI manifest version must be numeric");
-    if (manifest.find("\"version\"\\s*:\\s*1") == std::string::npos && manifest.find("\"version\":1") == std::string::npos && manifest.find("\"version\": 1") == std::string::npos) throw std::runtime_error("unsupported ABI manifest version");
-    const auto layouts = report.find("\"aggregate_abi_layouts\"");
-    if (layouts == std::string::npos) return false;
-    const auto point = report.find("\"name\":\"Point\"", layouts);
-    if (point == std::string::npos) return false;
-    auto count = [](const std::string& input, const std::string& needle) { std::size_t result = 0; for (std::size_t at = 0; (at = input.find(needle, at)) != std::string::npos; at += needle.size()) ++result; return result; };
-    if (count(manifest, "\"name\":\"Point\"") + count(manifest, "\"name\": \"Point\"") != 1) throw std::runtime_error("ABI manifest must contain exactly one Point layout");
-    const auto number = [](const std::string& input, const std::string& key) -> long long {
-        const std::regex pattern("\\\"" + key + "\\\"\\s*:\\s*(-?[0-9]+)"); std::smatch match;
-        if (!std::regex_search(input, match, pattern)) throw std::runtime_error("ABI manifest is missing numeric field '" + key + "'");
-        return std::stoll(match[1].str());
+    const Json report_root = JsonParser{report}.parse();
+    const Json manifest_root = JsonParser{manifest}.parse();
+    if (json_text(json_field(manifest_root, "format")) != "flowcore.abi_manifest") throw std::runtime_error("unsupported ABI manifest format");
+    if (json_text(json_field(manifest_root, "provider")) != "flowmini_testabi") throw std::runtime_error("unsupported ABI manifest provider");
+    if (json_integer(json_field(manifest_root, "version"), "version") != 1) throw std::runtime_error("unsupported ABI manifest version");
+
+    const Json* point_layout = nullptr;
+    for (const auto& layout : json_array(json_field(report_root, "aggregate_abi_layouts"), "aggregate_abi_layouts")) {
+        if (json_text(json_field(layout, "name")) == "Point") {
+            if (point_layout != nullptr) throw std::runtime_error("semantic report contains duplicate Point layouts");
+            point_layout = &layout;
+        }
+    }
+    if (point_layout == nullptr) return false;
+
+    const auto& types = json_array(json_field(manifest_root, "types"), "types");
+    if (types.size() != 1 || json_text(json_field(types.front(), "name")) != "Point") throw std::runtime_error("ABI manifest must contain exactly one Point layout");
+    const Json& point = types.front();
+    if (json_integer(json_field(point, "size"), "size") != static_cast<long long>(2 * sizeof(int)) ||
+        json_integer(json_field(point, "alignment"), "alignment") != static_cast<long long>(alignof(int))) {
+        throw std::runtime_error("ABI manifest Point size/alignment does not match the provider ABI");
+    }
+
+    const auto& manifest_fields = json_array(json_field(point, "fields"), "fields");
+    if (manifest_fields.size() != 2) throw std::runtime_error("ABI manifest Point must contain exactly two fields");
+    const std::vector<std::tuple<std::string, std::string, long long>> expected = {
+        {"x", "c_int", 0}, {"y", "c_int", static_cast<long long>(sizeof(int))}
     };
-    if (number(manifest, "version") != 1 || number(manifest, "size") != static_cast<long long>(2 * sizeof(int)) || number(manifest, "alignment") != static_cast<long long>(alignof(int))) throw std::runtime_error("ABI manifest Point size/alignment does not match the provider ABI");
-    const auto x = manifest.find("\"name\":\"x\",\"type\":\"c_int\",\"offset\":0");
-    const auto y = manifest.find("\"name\":\"y\",\"type\":\"c_int\",\"offset\":" + std::to_string(sizeof(int)));
-    if (x == std::string::npos || y == std::string::npos || x > y) throw std::runtime_error("ABI manifest Point fields do not match ordered provider layout");
-    if (count(manifest, "\"name\":\"x\"") + count(manifest, "\"name\": \"x\"") != 1 || count(manifest, "\"name\":\"y\"") + count(manifest, "\"name\": \"y\"") != 1) throw std::runtime_error("ABI manifest Point fields must be unique");
-    if (report.find("\"name\":\"x\"", point) == std::string::npos || report.find("\"name\":\"y\"", point) == std::string::npos) throw std::runtime_error("ABI manifest fields do not match semantic aggregate layout");
+    for (std::size_t index = 0; index < expected.size(); ++index) {
+        const auto& field = manifest_fields[index];
+        if (json_text(json_field(field, "name")) != std::get<0>(expected[index]) ||
+            json_text(json_field(field, "type")) != std::get<1>(expected[index]) ||
+            json_integer(json_field(field, "offset"), "offset") != std::get<2>(expected[index])) {
+            throw std::runtime_error("ABI manifest Point fields do not match ordered provider layout");
+        }
+    }
+
+    const auto& semantic_fields = json_array(json_field(*point_layout, "fields"), "fields");
+    if (semantic_fields.size() != manifest_fields.size()) throw std::runtime_error("ABI manifest field count does not match semantic aggregate layout");
+    for (std::size_t index = 0; index < semantic_fields.size(); ++index) {
+        if (json_text(json_field(semantic_fields[index], "name")) != json_text(json_field(manifest_fields[index], "name")) ||
+            json_text(json_field(semantic_fields[index], "type")) != json_text(json_field(manifest_fields[index], "type"))) {
+            throw std::runtime_error("ABI manifest fields do not match semantic aggregate layout");
+        }
+    }
     return true;
 }
 
@@ -151,6 +299,7 @@ int verify(const std::string& report, const std::string& policy_path, const std:
         return 2;
     }
     const auto needed = requirements(report);
+    validate_lowering_plan(report, needed);
     const bool aggregate_manifest_verified = !abi_manifest_path.empty() && manifest_verifies_aggregates(report, read_path(abi_manifest_path, "ABI manifest"));
     const auto profile = value(report, "lowering_profile");
     const Requirement* lowering_requirement = nullptr;
@@ -234,7 +383,17 @@ int verify(const std::string& report, const std::string& policy_path, const std:
                   << ",\"return_type\":" << json_string(item.return_type)
                   << ",\"status\":\"authorized\"}";
     }
-    std::cout << "],\n  \"lowering_plan\": {\"kind\": " << (file_profile ? "\"capability_sequence\"" : (lowering_requirement ? "\"external_call\"" : "\"none\""));
+    std::size_t generic_operation_count = 0;
+    try {
+        const Json semantic_root = JsonParser{report}.parse();
+        if (const auto* plan = json_field(semantic_root, "lowering_plan")) {
+            generic_operation_count = json_array(json_field(*plan, "operations"), "lowering_plan.operations").size();
+        }
+    } catch (const std::exception&) {
+        generic_operation_count = 0;
+    }
+    std::cout << "],\n  \"lowering_plan\": {\"kind\": " << (file_profile ? "\"capability_sequence\"" : (lowering_requirement ? "\"external_call\"" : "\"none\""))
+              << ",\"contract\":\"flowcore.lowering_plan\",\"operation_count\":" << generic_operation_count;
     if (lowering_requirement) std::cout << ",\"symbol\":" << json_string(lowering_requirement->symbol) << ",\"parameter_types\":" << json_string(lowering_requirement->parameter_types) << ",\"return_type\":" << json_string(lowering_requirement->return_type);
     std::cout << "},\n  \"policy\": {\"status\": \"authorized\", \"grants\": " << grants.size() << "},\n  \"abi\": {\"convention\": \"c\", \"carrier_types_supported\": true, \"provider_signature_evidence\": \"not-provided\", \"sizeof_int\": " << sizeof(int) << ", \"sizeof_long\": " << sizeof(long) << ", \"sizeof_size_t\": " << sizeof(std::size_t) << ", \"sizeof_pointer\": " << sizeof(void*) << "},\n  \"execution\": \"not-performed\"\n}\n";
     return 0;

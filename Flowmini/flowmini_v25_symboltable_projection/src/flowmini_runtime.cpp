@@ -4,7 +4,10 @@
 #include "flow_common.h"
 
 #include <cctype>
+#include <algorithm>
+#include <cstring>
 #include <dlfcn.h>
+#include <fstream>
 #include <iostream>
 #include <limits>
 #include <sstream>
@@ -235,6 +238,21 @@ namespace {
     return result;
 }
 
+[[nodiscard]] std::vector<std::string> splitPagerPolicy(const std::string& text, char separator) {
+    std::vector<std::string> result;
+    std::string current;
+    for (const char c : text) {
+        if (c == separator) {
+            result.push_back(current);
+            current.clear();
+        } else {
+            current.push_back(c);
+        }
+    }
+    result.push_back(std::move(current));
+    return result;
+}
+
 [[nodiscard]] std::vector<std::int64_t> readIndexPaths(const RecordPayload& record, const std::string& paths, const std::string& stage) {
     std::vector<std::int64_t> result;
     for (const auto& path : splitPathList(paths)) { result.push_back(getPathInt(record, path, stage)); }
@@ -308,6 +326,15 @@ public:
     }
 };
 
+class RecordPortProbeNode final : public INode {
+public:
+    std::vector<Route> run(MiniEnvelope env) override {
+        auto& record = requirePayload<RecordPayload>(env, "record.port_probe");
+        record.values["__flow_input_port"] = env.input_port;
+        return {Route{"out", std::move(env)}};
+    }
+};
+
 class StdinTextNode final : public INode {
 public:
     std::vector<Route> run(MiniEnvelope env) override {
@@ -318,6 +345,185 @@ public:
         std::ostringstream buffer;
         buffer << std::cin.rdbuf();
         env.payload = TextPayload{buffer.str()};
+        return {Route{"out", std::move(env)}};
+    }
+};
+
+class FakePagerNode final : public ConfiguredNode {
+public:
+    using ConfiguredNode::ConfiguredNode;
+
+    std::vector<Route> run(MiniEnvelope env) override {
+        const std::string linesText = getPolicyString(config_, "lines", "");
+        const auto lines = splitPagerPolicy(linesText, '|');
+        const int pageSize = getPolicyInt(config_, "page_size", 1);
+        if (pageSize <= 0) {
+            throw flow::DiagnosticError{"pager.fake", "page_size must be positive"};
+        }
+
+        const std::size_t pageCount = lines.empty() ? 1U : (lines.size() + static_cast<std::size_t>(pageSize) - 1U) /
+            static_cast<std::size_t>(pageSize);
+        std::size_t page = 0;
+        const auto commands = splitPagerPolicy(getPolicyString(config_, "commands", "q"), ',');
+        for (const auto& command : commands) {
+            if (command == "down" || command == "pgdown") {
+                if (page + 1U < pageCount) { ++page; }
+            } else if (command == "up" || command == "pgup") {
+                if (page > 0U) { --page; }
+            } else if (command == "home") {
+                page = 0;
+            } else if (command == "end") {
+                page = pageCount - 1U;
+            } else if (command == "q") {
+                break;
+            } else if (!command.empty()) {
+                throw flow::DiagnosticError{"pager.fake", "unknown command: " + command};
+            }
+        }
+
+        RecordPayload record;
+        setPathInt(record, "page", static_cast<std::int64_t>(page + 1U), "pager.fake");
+        setPathInt(record, "page_count", static_cast<std::int64_t>(pageCount), "pager.fake");
+        setPathValue(record, "lines", Value{joinPage(lines, page, static_cast<std::size_t>(pageSize))}, "pager.fake");
+        env.payload = std::move(record);
+        return {Route{"out", std::move(env)}};
+    }
+
+private:
+    static std::string joinPage(const std::vector<std::string>& lines, std::size_t page, std::size_t pageSize) {
+        const std::size_t first = page * pageSize;
+        std::string result;
+        for (std::size_t index = first; index < lines.size() && index < first + pageSize; ++index) {
+            if (!result.empty()) { result.push_back('\n'); }
+            result += lines[index];
+        }
+        return result;
+    }
+};
+
+class NcursesPagerNode final : public ConfiguredNode {
+public:
+    using ConfiguredNode::ConfiguredNode;
+
+    std::vector<Route> run(MiniEnvelope env) override {
+        std::vector<std::string> lines;
+        const std::string path = getPolicyString(config_, "path", "");
+        if (!path.empty()) {
+            std::ifstream input(path);
+            if (!input) {
+                throw flow::DiagnosticError{"pager.ncurses", "unable to open text file: " + path};
+            }
+            std::string line;
+            while (std::getline(input, line)) { lines.push_back(std::move(line)); }
+            if (!input.eof()) {
+                throw flow::DiagnosticError{"pager.ncurses", "failed while reading text file: " + path};
+            }
+        } else {
+            lines = splitPagerPolicy(getPolicyString(config_, "lines", ""), '|');
+        }
+        const int pageSize = getPolicyInt(config_, "page_size", 1);
+        if (pageSize <= 0) {
+            throw flow::DiagnosticError{"pager.ncurses", "page_size must be positive"};
+        }
+        const std::size_t pageCount = lines.empty() ? 1U : (lines.size() + static_cast<std::size_t>(pageSize) - 1U) /
+            static_cast<std::size_t>(pageSize);
+
+        void* library = dlopen("libncursesw.so.6", RTLD_NOW | RTLD_LOCAL);
+        if (library == nullptr) {
+            throw flow::DiagnosticError{"pager.ncurses", "unable to load libncursesw.so.6"};
+        }
+        try {
+            using Init = void* (*)();
+            using End = int (*)();
+            using Noecho = int (*)();
+            using Cbreak = int (*)();
+            using Keypad = int (*)(void*, int);
+            using Clear = int (*)(void*);
+            using Addnstr = int (*)(void*, const char*, int);
+            using Refresh = int (*)(void*);
+            using Getch = int (*)(void*);
+
+            const auto init = symbol<Init>(library, "initscr");
+            const auto end = symbol<End>(library, "endwin");
+            const auto noecho = symbol<Noecho>(library, "noecho");
+            const auto cbreak = symbol<Cbreak>(library, "cbreak");
+            const auto keypad = symbol<Keypad>(library, "keypad");
+            const auto clear = symbol<Clear>(library, "werase");
+            const auto addnstr = symbol<Addnstr>(library, "waddnstr");
+            const auto refresh = symbol<Refresh>(library, "wrefresh");
+            const auto getch = symbol<Getch>(library, "wgetch");
+
+            void* window = init();
+            if (window == nullptr) { throw flow::DiagnosticError{"pager.ncurses", "initscr returned null"}; }
+            noecho();
+            cbreak();
+            keypad(window, 1);
+            std::size_t page = 0;
+            for (;;) {
+                const std::string visible = joinPage(lines, page, static_cast<std::size_t>(pageSize));
+                clear(window);
+                if (!visible.empty()) {
+                    const auto count = static_cast<int>(std::min<std::size_t>(visible.size(), static_cast<std::size_t>(std::numeric_limits<int>::max())));
+                    addnstr(window, visible.c_str(), count);
+                }
+                refresh(window);
+                const int key = getch(window);
+                if (key == 'q' || key == 'Q') { break; }
+                if (key == 258 || key == 338) { if (page + 1U < pageCount) { ++page; } }
+                if (key == 259 || key == 339) { if (page > 0U) { --page; } }
+                if (key == 262) { page = 0; }
+                if (key == 360) { page = pageCount - 1U; }
+                refresh(window);
+            }
+            end();
+
+            RecordPayload record;
+            setPathInt(record, "page", static_cast<std::int64_t>(page + 1U), "pager.ncurses");
+            setPathInt(record, "page_count", static_cast<std::int64_t>(pageCount), "pager.ncurses");
+            setPathValue(record, "lines", Value{joinPage(lines, page, static_cast<std::size_t>(pageSize))}, "pager.ncurses");
+            env.payload = std::move(record);
+            dlclose(library);
+            return {Route{"out", std::move(env)}};
+        } catch (...) {
+            dlclose(library);
+            throw;
+        }
+    }
+
+private:
+    template <typename Function>
+    static Function symbol(void* library, const char* name) {
+        void* address = dlsym(library, name);
+        if (address == nullptr) {
+            throw flow::DiagnosticError{"pager.ncurses", std::string{"missing ncurses symbol: "} + name};
+        }
+        Function function{};
+        static_assert(sizeof(function) == sizeof(address));
+        std::memcpy(&function, &address, sizeof(function));
+        return function;
+    }
+
+    static std::string joinPage(const std::vector<std::string>& lines, std::size_t page, std::size_t pageSize) {
+        const std::size_t first = page * pageSize;
+        std::string result;
+        for (std::size_t index = first; index < lines.size() && index < first + pageSize; ++index) {
+            if (!result.empty()) { result.push_back('\n'); }
+            result += lines[index];
+        }
+        return result;
+    }
+};
+
+class PagerPlainRendererNode final : public ConfiguredNode {
+public:
+    using ConfiguredNode::ConfiguredNode;
+
+    std::vector<Route> run(MiniEnvelope env) override {
+        const auto record = requirePayloadConst<RecordPayload>(env, "pager.render");
+        const auto page = getPathInt(record, "page", "pager.render");
+        const auto pageCount = getPathInt(record, "page_count", "pager.render");
+        const auto lines = valueAsString(getPathValue(record, "lines", "pager.render"), "pager.render");
+        std::cout << "-- page " << page << "/" << pageCount << " --\n" << lines << '\n';
         return {Route{"out", std::move(env)}};
     }
 };
@@ -1082,6 +1288,15 @@ AtomRegistry makeCoreAtomRegistry() {
     registry.registerAtom(AtomContract{"stdin.text", {{"in", "Unit"}}, {{"out", "Text"}}, {"stdin.read"}},
         [](NodeConfig) { return std::make_unique<StdinTextNode>(); });
 
+    registry.registerAtom(AtomContract{"pager.fake", {{"in", "Unit"}}, {{"out", "Record"}}, {"pager.provider.fake"}},
+        [](NodeConfig config) { return std::make_unique<FakePagerNode>(std::move(config)); });
+    registry.registerAtom(AtomContract{"pager.ncurses", {{"in", "Unit"}}, {{"out", "Record"}}, {"pager.provider.ncurses", "terminal.input"}},
+        [](NodeConfig config) { return std::make_unique<NcursesPagerNode>(std::move(config)); });
+    registry.registerAtom(AtomContract{"pager.file.ncurses", {{"in", "Unit"}}, {{"out", "Record"}}, {"filesystem.read", "pager.provider.ncurses", "terminal.input"}},
+        [](NodeConfig config) { return std::make_unique<NcursesPagerNode>(std::move(config)); });
+    registry.registerAtom(AtomContract{"pager.render", {{"in", "Record"}}, {{"out", "Record"}}, {"pager.render"}},
+        [](NodeConfig config) { return std::make_unique<PagerPlainRendererNode>(std::move(config)); });
+
     registry.registerAtom(AtomContract{"parse.int", {{"in", "Text"}}, {{"out", "Int"}}, {}},
         [](NodeConfig) { return std::make_unique<ParseIntNode>(); });
 
@@ -1169,6 +1384,8 @@ AtomRegistry makeCoreAtomRegistry() {
 
     registry.registerAtom(AtomContract{"record.nop", {{"in", "Record"}}, {{"out", "Record"}}, {}},
         [](NodeConfig) { return std::make_unique<RecordNopNode>(); });
+    registry.registerAtom(AtomContract{"record.port_probe", {{"left", "Record"}, {"right", "Record"}}, {{"out", "Record"}}, {"diagnostic.routing"}},
+        [](NodeConfig) { return std::make_unique<RecordPortProbeNode>(); });
 
     registry.registerAtom(AtomContract{"record.copy", {{"in", "Record"}}, {{"out", "Record"}}, {}},
         [](NodeConfig config) { return std::make_unique<RecordCopyNode>(std::move(config)); });
@@ -1191,8 +1408,8 @@ void RuntimeGraph::addNode(std::string id, std::unique_ptr<INode> node) {
     nodes_[std::move(id)] = std::move(node);
 }
 
-void RuntimeGraph::connect(std::string fromNode, std::string fromPort, std::string toNode) {
-    wires_[wireKey(fromNode, fromPort)].push_back(std::move(toNode));
+void RuntimeGraph::connect(std::string fromNode, std::string fromPort, std::string toNode, std::string toPort, std::string wireId) {
+    wires_[wireKey(fromNode, fromPort)].push_back(Connection{std::move(toNode), std::move(toPort), std::move(wireId)});
 }
 
 void RuntimeGraph::startAt(const std::string& nodeId, MiniEnvelope env) {
@@ -1238,8 +1455,11 @@ void RuntimeGraph::deliver(const std::string& fromNode, const std::string& fromP
     }
 
     for (const auto& target : it->second) {
-        trace("route " + key + " => " + target + ".in", env);
-        queue_.push(Pending{target, env});
+        MiniEnvelope routed = env;
+        routed.input_port = target.port;
+        routed.wire_id = target.wire_id;
+        trace("route " + key + " => " + target.node + "." + target.port + " [" + target.wire_id + "]", routed);
+        queue_.push(Pending{target.node, std::move(routed)});
     }
 }
 
@@ -1348,8 +1568,9 @@ BuildResult buildCheckedGraph(const ModuleSpec& module, const AtomRegistry& regi
         result.graph.addNode(item.first, registry.create(std::move(config)));
     }
 
-    for (const auto& wire : resolvedWires) {
-        result.graph.connect(wire.from.node, wire.from.port, wire.to.node);
+    for (std::size_t index = 0; index < resolvedWires.size(); ++index) {
+        const auto& wire = resolvedWires[index];
+        result.graph.connect(wire.from.node, wire.from.port, wire.to.node, wire.to.port, "wire:" + std::to_string(index));
     }
 
     return result;
@@ -1359,7 +1580,7 @@ void runModule(const ModuleSpec& module, flow::PipelineContext& ctx, const AtomR
     BuildResult build = buildCheckedGraph(module, registry);
 
     for (const auto& producerId : build.producerIds) {
-        build.graph.startAt(producerId, MiniEnvelope{UnitPayload{}, &ctx});
+        build.graph.startAt(producerId, MiniEnvelope{UnitPayload{}, &ctx, {}, {}});
     }
 }
 
