@@ -5,7 +5,7 @@ Flowmini is the executable prototype/lab language used to explore Flowcore ideas
 Current active version:
 
 ```text
-Flowmini v0.26 language-chain vertical slice
+Flowmini v0.27 namespaced provider language-chain slice
 
 Implementation base: `Flowmini/flowmini_v25_symboltable_projection`
 ```
@@ -27,7 +27,7 @@ TokenTree remembers what the source looked like.
 AST states what the source means.
 ```
 
-The v0.24 frontend-export border is closed. The active v0.26 line makes its
+The v0.24 frontend-export border is closed. The active v0.27 line makes its
 factual SymbolTable projection consumable by Flowanalyst, Flowbind,
 Flowoptimize, and Flowlower, with `flowcat` proving a native ELF artifact.
 

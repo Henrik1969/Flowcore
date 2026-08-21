@@ -1,8 +1,18 @@
 # Flowmini Changelog
 
-## v26_language_chain — active
+## v27_namespaced_provider_chain — active
 
-- Promoted the verified vertical language chain to the active v0.26 milestone.
+- Promoted the language-chain slice to the active v0.27 milestone.
+- Added explicit namespace aliases for imports and qualified ABI calls such as
+  `curses.initscr()`, `libc.puts()`, and `linux.read()`.
+- Preserved provider ownership in AST, semantic reports, and binding
+  requirements, with ambiguity diagnostics for unqualified collisions.
+- Added the ncurses-backed `sel` application proof and native-provider
+  inventory/selection maintenance artifacts.
+
+## v26_language_chain — historical
+
+- Established the verified vertical language chain as the v0.26 milestone.
 - Added semantic analysis, capability/ABI verification, optimization boundary,
   explicit LLVM lowering profiles, and a native ELF application proof.
 - Added named-target semantic entrypoint checks while leaving target selection

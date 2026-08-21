@@ -326,6 +326,8 @@ struct FunctionDecl {
 
 struct ImportDecl {
     std::string module_name;
+    // Source-level namespace alias. Empty means legacy unaliased import.
+    std::string alias;
     SourceLocation location;
 };
 

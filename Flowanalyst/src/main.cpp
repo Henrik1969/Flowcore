@@ -67,7 +67,7 @@ struct BindingRequirement { std::string contract, library, convention, symbol, e
 struct AggregateLayout { std::string contract, name; std::vector<std::pair<std::string, std::string>> fields; };
 struct Region { std::string id, kind, status; std::vector<std::string> prerequisites; };
 struct EffectFact { int declaration = -1, symbol = -1; std::string name, effect, certainty, reason; };
-struct CallSite { int expression = -1, statement = -1, scope = -1, callee_symbol = -1, write_symbol = -1; std::string callee; bool pure = false; std::set<int> reads; std::string writes; std::vector<int> independent_with; };
+struct CallSite { int expression = -1, statement = -1, scope = -1, callee_symbol = -1, write_symbol = -1; std::string callee; bool pure = false; std::set<int> reads; std::string writes; std::vector<int> arguments; std::vector<int> independent_with; };
 struct Resolution { int expression = -1, statement = -1, scope = -1, symbol = -1; std::string name; };
 
 std::string trim_copy(std::string value) {
@@ -126,6 +126,8 @@ int run(const Json& bundle) {
         const int base = integer(field(payload, "base"));
         if (expressions.count(base) && text(field(*expressions[base], "kind")) == "identifier") {
             called_names.insert(text(field(field(*expressions[base], "payload"), "name")));
+        } else if (expressions.count(base) && text(field(*expressions[base], "kind")) == "field_access") {
+            called_names.insert(text(field(field(*expressions[base], "payload"), "field")));
         }
     }
     auto fact_value = [&](const Json& symbol, const std::string& key) {
@@ -210,29 +212,73 @@ int run(const Json& bundle) {
     };
     for (const auto& [declaration_id, declaration] : declarations) { int scope_id = declaration_scopes.count(declaration_id) ? declaration_scopes[declaration_id] : -1; int body = integer(field(*declaration, "body_block")); if (scope_id >= 0 && body >= 0) assign_statements(body, scope_id); }
     std::vector<Resolution> resolutions;
+    std::map<int, std::pair<int, int>> expression_context;
     std::set<std::pair<int, int>> visited_expressions;
     std::function<void(int, int, int)> resolve_expression = [&](int expression_id, int statement_id, int scope_id) {
         if (!expressions.count(expression_id) || scope_id < 0 || !visited_expressions.emplace(expression_id, scope_id).second) return;
+        expression_context[expression_id] = {statement_id, scope_id};
         const auto* expression = expressions[expression_id]; if (text(field(*expression, "kind")) == "identifier") {
-            const auto name = text(field(field(*expression, "payload"), "name")); int current = scope_id, found = -1;
+            const auto name = text(field(field(*expression, "payload"), "name")); int current = scope_id, found = -1; bool ambiguous = false;
             while (current >= 0 && scopes.count(current) && found < 0) {
                 for (const auto& candidate : list(field(*scopes[current], "symbol_ids"))) { int candidate_id = integer(&candidate); if (symbols.count(candidate_id) && text(field(*symbols[candidate_id], "name")) == name) { found = candidate_id; break; } }
-                if (found < 0) for (const auto& child : list(field(*scopes[current], "child_scope_ids"))) {
-                    const int child_id = integer(&child); if (!scopes.count(child_id) || text(field(*scopes[child_id], "kind")) != "Contract") continue;
-                    for (const auto& candidate : list(field(*scopes[child_id], "symbol_ids"))) { int candidate_id = integer(&candidate); if (symbols.count(candidate_id) && text(field(*symbols[candidate_id], "name")) == name) { found = candidate_id; break; } }
-                    if (found >= 0) break;
+                if (found < 0) {
+                    std::vector<int> contract_matches;
+                    for (const auto& child : list(field(*scopes[current], "child_scope_ids"))) {
+                        const int child_id = integer(&child); if (!scopes.count(child_id) || text(field(*scopes[child_id], "kind")) != "Contract") continue;
+                        for (const auto& candidate : list(field(*scopes[child_id], "symbol_ids"))) {
+                            const int candidate_id = integer(&candidate);
+                            if (symbols.count(candidate_id) && text(field(*symbols[candidate_id], "name")) == name) contract_matches.push_back(candidate_id);
+                        }
+                    }
+                    if (contract_matches.size() == 1) found = contract_matches.front();
+                    else if (contract_matches.size() > 1) {
+                        ambiguous = true;
+                        add_diagnostic("FLOWANALYST_AMBIGUOUS_NAME", "unqualified name '" + name + "' is provided by multiple imported contracts; qualify it with its namespace", -1, "scope:" + std::to_string(scope_id));
+                        break;
+                    }
                 }
                 current = integer(field(*scopes[current], "parent_id"));
             }
             resolutions.push_back({expression_id, statement_id, scope_id, found, name});
             bool intrinsic = false; for (const auto& item : intrinsic_roots) if (item == name) intrinsic = true; for (const auto& item : intrinsic_functions) if (item == name) intrinsic = true;
-            if (found < 0 && !intrinsic) add_diagnostic("FLOWANALYST_UNRESOLVED_NAME", "name '" + name + "' cannot be resolved", -1, "scope:" + std::to_string(scope_id));
+            if (found < 0 && !intrinsic && !ambiguous) add_diagnostic("FLOWANALYST_UNRESOLVED_NAME", "name '" + name + "' cannot be resolved", -1, "scope:" + std::to_string(scope_id));
         }
         for (const auto& child : list(field(*expression, "child_expressions"))) resolve_expression(integer(&child), statement_id, scope_id);
     };
     for (const auto& [statement_id, statement] : statements) { int scope_id = statement_scopes.count(statement_id) ? statement_scopes[statement_id] : -1; for (const auto& expression : list(field(*statement, "expression_ids"))) resolve_expression(integer(&expression), statement_id, scope_id); }
     std::map<int, int> resolved_expression_symbols;
     for (const auto& resolution : resolutions) if (resolution.symbol >= 0) resolved_expression_symbols[resolution.expression] = resolution.symbol;
+    // A qualified call is represented by the AST as call(field_access(namespace, member)).
+    // Resolve that field against the imported contract scope so downstream stages
+    // receive the actual provider function symbol, not merely the namespace root.
+    for (const auto& [expression_id, expression] : expressions) {
+        if (text(field(*expression, "kind")) != "field_access") continue;
+        const auto* payload = field(*expression, "payload");
+        const int base = integer(field(*payload, "base"));
+        if (!resolved_expression_symbols.count(base)) continue;
+        const int namespace_symbol = resolved_expression_symbols[base];
+        const auto member_name = text(field(*payload, "field"));
+        int member_symbol = -1;
+        for (const auto& [scope_id, scope] : scopes) {
+            if (integer(field(*scope, "owner_symbol_id")) != namespace_symbol) continue;
+            for (const auto& candidate : list(field(*scope, "symbol_ids"))) {
+                const int candidate_id = integer(&candidate);
+                if (symbols.count(candidate_id) && text(field(*symbols[candidate_id], "name")) == member_name) {
+                    member_symbol = candidate_id;
+                    break;
+                }
+            }
+            if (member_symbol >= 0) break;
+        }
+        if (member_symbol >= 0) {
+            const auto context = expression_context.count(expression_id)
+                ? expression_context[expression_id]
+                : std::pair<int, int>{-1, -1};
+            resolutions.push_back({expression_id, context.first, context.second, member_symbol,
+                                   text(field(*expression, "text"), member_name)});
+            resolved_expression_symbols[expression_id] = member_symbol;
+        }
+    }
     std::map<int, std::string> symbol_types;
     for (const auto& [id, symbol] : symbols) for (const auto& fact : list(field(*symbol, "facts"))) {
         const auto key = text(field(fact, "key"));
@@ -318,6 +364,14 @@ int run(const Json& bundle) {
     if (text(field(*source_unit, "name")) == "test_licbinds") {
         std::set<std::string> libc_symbols; for (const auto& requirement : binding_requirements) libc_symbols.insert(requirement.symbol);
         if (libc_symbols.count("strlen") && libc_symbols.count("abs") && libc_symbols.count("puts")) lowering_profile = "test_licbinds_main";
+    }
+    if (text(field(*source_unit, "name")) == "abi_ncurses_main") {
+        std::set<std::string> ncurses_symbols; for (const auto& requirement : binding_requirements) ncurses_symbols.insert(requirement.symbol);
+        if (ncurses_symbols.count("initscr") && ncurses_symbols.count("endwin") && ncurses_symbols.count("waddnstr") && ncurses_symbols.count("wrefresh")) lowering_profile = "abi_ncurses_main";
+    }
+    if (text(field(*source_unit, "name")) == "sel") {
+        std::set<std::string> sel_symbols; for (const auto& requirement : binding_requirements) sel_symbols.insert(requirement.symbol);
+        if (sel_symbols.count("initscr") && sel_symbols.count("endwin") && sel_symbols.count("wgetch") && sel_symbols.count("keypad")) lowering_profile = "sel_main";
     }
     if (text(field(*source_unit, "name")) == "abi_kernel_getpid_main") for (const auto& requirement : binding_requirements) if (requirement.symbol == "getpid" && requirement.parameter_types.empty() && requirement.return_type == "c_int") lowering_profile = "abi_kernel_getpid_main";
     if (text(field(*source_unit, "name")) == "abi_kernel_clock_main") for (const auto& requirement : binding_requirements) if (requirement.symbol == "clock_gettime" && requirement.parameter_types == "c_int,c_pointer" && requirement.return_type == "c_int") lowering_profile = "abi_kernel_clock_main";
@@ -410,12 +464,14 @@ int run(const Json& bundle) {
         site.statement = base_resolution->statement;
         site.scope = base_resolution->scope;
         site.callee_symbol = base_resolution->symbol;
-        site.callee = base_resolution->name;
+        site.callee = text(field(*expression, "text"), base_resolution->name);
         site.pure = pure_symbols.count(site.callee_symbol) && pure_symbols[site.callee_symbol];
-        for (const auto& argument : list(field(payload, "arguments"))) collect_reads(integer(&argument), site.reads);
+        for (const auto& argument : list(field(payload, "arguments"))) { const int argument_id = integer(&argument); site.arguments.push_back(argument_id); collect_reads(argument_id, site.reads); }
         if (statements.count(site.statement)) {
             const auto* statement = statements[site.statement];
+            const auto* statement_payload = field(*statement, "payload");
             site.writes = text(field(*statement, "name"));
+            if (site.writes.empty()) site.writes = text(field(field(statement_payload, "target"), "name"));
             if (!site.writes.empty() && scopes.count(site.scope)) for (const auto& symbol_id : list(field(*scopes[site.scope], "symbol_ids"))) {
                 const int candidate = integer(&symbol_id);
                 if (symbols.count(candidate) && text(field(*symbols[candidate], "name")) == site.writes) { site.write_symbol = candidate; break; }
@@ -476,6 +532,21 @@ int run(const Json& bundle) {
     }
     std::cout << "],\n  \"effect_facts\": [";
     for (std::size_t i = 0; i < effect_facts.size(); ++i) { if (i) std::cout << ','; const auto& fact = effect_facts[i]; std::cout << "{\"declaration_id\":" << fact.declaration << ",\"symbol_id\":" << fact.symbol << ",\"name\":" << quote(fact.name) << ",\"effect\":" << quote(fact.effect) << ",\"certainty\":" << quote(fact.certainty) << ",\"reason\":" << quote(fact.reason) << "}"; }
+    std::cout << "],\n  \"external_operations\": [";
+    for (std::size_t i = 0; i < call_sites.size(); ++i) {
+        if (i) std::cout << ',';
+        const auto& site = call_sites[i];
+        std::cout << "{\"operation\":\"call\",\"expression_id\":" << site.expression
+                  << ",\"statement_id\":" << site.statement
+                  << ",\"scope_id\":" << site.scope
+                  << ",\"callee\":" << quote(site.callee)
+                  << ",\"callee_symbol_id\":" << site.callee_symbol
+                  << ",\"arguments\":[";
+        for (std::size_t argument = 0; argument < site.arguments.size(); ++argument) { if (argument) std::cout << ','; std::cout << site.arguments[argument]; }
+        std::cout << "]";
+        if (site.write_symbol >= 0) std::cout << ",\"result_symbol_id\":" << site.write_symbol;
+        std::cout << ",\"purity\":" << (site.pure ? "\"pure\"" : "\"effectful\"") << "}";
+    }
     std::cout << "],\n  \"parallel_candidates\": [";
     bool first_candidate = true;
     for (const auto& site : call_sites) if (!site.independent_with.empty()) {

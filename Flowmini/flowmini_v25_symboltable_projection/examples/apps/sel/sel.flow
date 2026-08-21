@@ -1,0 +1,30 @@
+import "../../../std/abi/ncurses.flow" as curses
+import "../../../std/abi/libc.flow" as libc
+import "../../../std/abi/kernel.flow" as linux
+
+program sel
+
+main(args : list<string>) {
+    window : c_pointer(0)
+    status : c_int(0)
+    key : c_int(0)
+    enabled : c_int(1)
+    count : c_int(58)
+    message : c_string("Flowcore sel\n\n> alpha\n  beta\n  gamma\n\nUp/Down: move  Enter: select  q: quit")
+    selected : c_string("selected: alpha")
+    input : c_pointer(0)
+    input_count : c_size_t(4095)
+    input_result : c_long(0)
+    stdin_fd : c_int(0)
+
+    curses.initscr() -> window
+    curses.noecho() -> status
+    curses.cbreak() -> status
+    curses.keypad(window, enabled) -> status
+    curses.waddnstr(window, message, count) -> status
+    curses.wrefresh(window) -> status
+    curses.wgetch(window) -> key
+    curses.endwin() -> status
+    libc.puts(selected) -> status
+    linux.read(stdin_fd, input, input_count) -> input_result
+}

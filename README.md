@@ -5,7 +5,7 @@ Flowcore is experimental language and system-architecture work.
 The current active implementation is:
 
 ```text
-Flowcore v0.26 language-chain vertical slice
+Flowcore v0.27 namespaced provider language-chain slice
 ```
 
 Active implementation path:
@@ -22,7 +22,7 @@ This repository is not a finished language or runtime. It is a design and implem
 status: experimental
 production-ready: no
 active branch: v25-symboltable-projection
-active prototype: Flowmini v0.26 language-chain vertical slice
+active prototype: Flowmini v0.27 namespaced provider language-chain slice
 current milestone: verified frontend-to-ELF chain with explicit lowering profiles
 ```
 

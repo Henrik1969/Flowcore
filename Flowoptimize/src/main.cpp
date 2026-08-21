@@ -57,6 +57,19 @@ std::string quote(std::string_view value) {
     return result;
 }
 
+std::string json_array_field(std::string_view input, std::string_view field) {
+    const auto marker = input.find("\"" + std::string(field) + "\"");
+    if (marker == std::string_view::npos) return "[]";
+    auto position = input.find('[', marker); if (position == std::string_view::npos) return "[]";
+    const auto start = position; int depth = 0; bool string = false; bool escaped = false;
+    for (; position < input.size(); ++position) {
+        const char c = input[position];
+        if (string) { if (escaped) escaped = false; else if (c == '\\') escaped = true; else if (c == '"') string = false; continue; }
+        if (c == '"') string = true; else if (c == '[') ++depth; else if (c == ']' && --depth == 0) return std::string(input.substr(start, position - start + 1));
+    }
+    return "[]";
+}
+
 std::string source_path(std::string_view input) {
     const auto key = input.find("\"source\":");
     if (key == std::string_view::npos) return {};
@@ -169,7 +182,7 @@ int analyze(std::string_view report, std::string_view provider_decision) {
     // claimed until the accepted semantic bundle and transformation contract
     // are complete.
     std::string profile = "none";
-    for (const auto candidate : {"empty_program_main", "abi_abs_main", "abi_strlen_main", "test_licbinds_main", "abi_kernel_getpid_main", "abi_kernel_clock_main", "abi_kernel_random_main", "abi_kernel_uname_main", "abi_kernel_openat_main", "abi_kernel_read_main", "abi_kernel_write_main", "abi_kernel_lseek_main", "abi_kernel_unlinkat_main", "abi_kernel_rmdir_main", "abi_kernel_pipe2_main", "abi_kernel_fork_main", "abi_kernel_waitpid_main", "abi_kernel_socketpair_main", "abi_kernel_socket_main", "abi_kernel_bind_main", "abi_kernel_listen_main", "abi_kernel_poll_main", "abi_kernel_accept4_main", "abi_kernel_connect_main", "abi_kernel_unshare_main", "abi_kernel_sethostname_main", "abi_kernel_gethostname_main", "flowcat_argv_main", "flowcat_file_main"}) if (has_field(report, "lowering_profile", candidate)) profile = candidate;
+    for (const auto candidate : {"empty_program_main", "abi_abs_main", "abi_strlen_main", "test_licbinds_main", "abi_ncurses_main", "sel_main", "abi_kernel_getpid_main", "abi_kernel_clock_main", "abi_kernel_random_main", "abi_kernel_uname_main", "abi_kernel_openat_main", "abi_kernel_read_main", "abi_kernel_write_main", "abi_kernel_lseek_main", "abi_kernel_unlinkat_main", "abi_kernel_rmdir_main", "abi_kernel_pipe2_main", "abi_kernel_fork_main", "abi_kernel_waitpid_main", "abi_kernel_socketpair_main", "abi_kernel_socket_main", "abi_kernel_bind_main", "abi_kernel_listen_main", "abi_kernel_poll_main", "abi_kernel_accept4_main", "abi_kernel_connect_main", "abi_kernel_unshare_main", "abi_kernel_sethostname_main", "abi_kernel_gethostname_main", "flowcat_argv_main", "flowcat_file_main"}) if (has_field(report, "lowering_profile", candidate)) profile = candidate;
     const auto input_format = parallel_input ? "flowparallel.execution_plan" : "flowanalyst.semantic_report";
     const bool has_region_matrix = report.find("\"name\":\"region_dependency\"") != std::string_view::npos || report.find("\"name\": \"region_dependency\"") != std::string_view::npos;
     const auto matrix_rows = has_region_matrix ? number_after(report, "\"rows\":") : 0;
@@ -180,6 +193,7 @@ int analyze(std::string_view report, std::string_view provider_decision) {
     const auto selected_provider = has_decision ? string_after(provider_decision, "\"provider\":") : "";
     const auto representation = has_decision ? string_after(provider_decision, "\"representation\":") : "";
     const auto decision_reason = has_decision ? string_after(provider_decision, "\"reason\":") : "";
+    const auto external_operations = json_array_field(report, "external_operations");
     std::cout << "{\n  \"format\": \"flowoptimize.optimization_report\",\n"
                  "  \"version\": 1,\n"
                  "  \"status\": \"ready\",\n"
@@ -187,6 +201,7 @@ int analyze(std::string_view report, std::string_view provider_decision) {
                  "  \"targets\": " << targets_projection(report) << ",\n"
                  "  \"input\": {\"format\": \"" << input_format << "\", \"version\": 1},\n"
                  "  \"lowering_profile\": \"" << profile << "\",\n"
+                 "  \"external_operations\": " << external_operations << ",\n"
                  "  \"projections\": [{\"kind\": \"graph_to_matrix\", \"name\": \"region_dependency\", \"status\": \"" << (has_region_matrix ? "available" : "not-present") << "\", \"rows\": " << matrix_rows << ", \"columns\": " << matrix_columns << ", \"semiring\": \"boolean\", \"storage\": \"coo\"}],\n"
                  "  \"provider_policy\": {\"selection\": \"runtime\", \"candidates\": [\"cpu\", \"cuda\"], \"cuda\": {\"requires\": [\"runtime capability\", \"measured cost benefit\", \"provider contract\"], \"fallback\": \"cpu\"}, \"decision\": {\"status\": \"" << (has_decision ? "verified" : "deferred") << "\", \"provider\": " << quote(selected_provider) << ", \"representation\": " << quote(representation) << ", \"reason\": " << quote(decision_reason) << "}},\n"
                  "  \"state\": {\"canonical_graph\": \"unchanged\", \"transformation\": \"identity\", \"decision_effect\": \"advisory_policy_only\"},\n"

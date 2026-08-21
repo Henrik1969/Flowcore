@@ -813,6 +813,10 @@ namespace flowmini::ast {
                 dump_json_string(out, importDecl->module_name);
                 out << ",\n";
                 dump_indent(out, indent + 2);
+                out << "\"alias\": ";
+                dump_json_string(out, importDecl->alias);
+                out << ",\n";
+                dump_indent(out, indent + 2);
                 out << "\"location\": ";
                 dump_source_location_json(out, importDecl->location);
                 out << "\n";

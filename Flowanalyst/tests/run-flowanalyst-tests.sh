@@ -37,6 +37,7 @@ abi_report=$("$flowmini" --dump-frontend-bundle "$abi_fixture" | "$bin")
 printf '%s\n' "$abi_report" | grep -q '"binding_requirements"'
 printf '%s\n' "$abi_report" | grep -q '"symbol":"strlen"'
 printf '%s\n' "$abi_report" | jq -e '.aggregate_abi_layouts == []' >/dev/null
+printf '%s\n' "$abi_report" | jq -e '(.external_operations | length) == 4 and ([.external_operations[].callee] | index("strlen")) != null and ([.external_operations[].callee] | index("abs")) != null and ([.external_operations[].callee] | index("puts")) != null and ([.external_operations[].result_symbol_id] | length) == 4' >/dev/null
 
 struct_fixture="$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass/abi_struct_demo.flow"
 struct_report=$("$flowmini" --dump-frontend-bundle "$struct_fixture" | "$bin")

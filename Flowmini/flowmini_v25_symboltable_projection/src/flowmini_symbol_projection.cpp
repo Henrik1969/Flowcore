@@ -160,9 +160,11 @@ void project_import_decl(symboltable::SymbolTable& table,
                          std::vector<SymbolAstOrigin>& symbolOrigins,
                          const std::string& astPath,
                          const DeclarationId declarationId) {
-    const auto name = decl.module_name.empty()
+    const auto name = !decl.alias.empty()
+        ? std::string{"<import:"} + decl.alias + ">"
+        : (decl.module_name.empty()
         ? std::string{"<anonymous-import>"}
-        : decl.module_name;
+        : decl.module_name);
 
     const auto importSymbol =
         table.insertSymbol(moduleScope, name, symboltable::SymbolKind::Import);

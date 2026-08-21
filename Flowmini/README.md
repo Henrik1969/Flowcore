@@ -15,10 +15,10 @@ Flowmini/flowmini_v25_symboltable_projection
 Current stage theme:
 
 ```text
-Flowmini v0.26 language-chain vertical slice
+Flowmini v0.27 namespaced provider language-chain slice
 ```
 
-The v0.26 line now carries a source program through AST, SymbolTable,
+The v0.27 line now carries a source program through AST, SymbolTable,
 Flowanalyst, Flowoptimize, Flowlower, LLVM, and a native ELF executable for a
 small accepted application subset.
 

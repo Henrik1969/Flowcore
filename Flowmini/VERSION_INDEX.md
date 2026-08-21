@@ -7,19 +7,20 @@ Earlier stages are historical snapshots. They are useful for understanding devel
 Current active version:
 
 ```text
-v26 — language-chain vertical slice
+v27 — namespaced provider language-chain slice
 ```
 
 ## Active version
 
 | Version | Directory | Main purpose |
 |---:|---|---|
-| v26 | `flowmini_v25_symboltable_projection` | Verified language chain from frontend export through semantic analysis, capability binding, LLVM, and native ELF |
+| v27 | `flowmini_v25_symboltable_projection` | Namespaced provider language chain from frontend export through semantic analysis, capability binding, LLVM, and native ELF |
 
 ## Recent historical versions
 
 | Version | Directory | Main purpose |
 |---:|---|---|
+| v26 | `flowmini_v25_symboltable_projection` | Historical verified language chain retained as the implementation base for v27 |
 | v25 | `flowmini_v25_symboltable_projection` | Historical projection milestone retained as the implementation base for v26 |
 | v24 | `flowmini_v24_explicit_ast` | Closed raw frontend/export border with typed explicit AST |
 | v23 | `flowmini_v23_token_tree_bridge` | TokenTree bridge made visible and trustworthy |

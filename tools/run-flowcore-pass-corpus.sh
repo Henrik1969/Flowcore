@@ -19,6 +19,12 @@ printf '%s\n' \
     'allow libc.so.6 puts c io' \
     'allow libc.so.6 strlen c pure' \
     'allow libc.so.6 abs c pure' \
+    'allow libncursesw.so.6 initscr c terminal' \
+    'allow libncursesw.so.6 endwin c terminal' \
+    'allow libncursesw.so.6 noecho c terminal' \
+    'allow libncursesw.so.6 cbreak c terminal' \
+    'allow libncursesw.so.6 waddnstr c terminal' \
+    'allow libncursesw.so.6 wrefresh c terminal' \
     'allow libc.so.6 getpid c readonly' \
     'allow libc.so.6 clock_gettime c readonly' \
     'allow libc.so.6 getrandom c readonly' \
@@ -53,7 +59,7 @@ for source in "$pass_root"/*.flow; do
     "$optimizer" < "$tmpdir/$name.parallel.json" > "$optimized"
     grep -q '"status": "ready"' "$optimized"
     case "$name" in
-        abi_abs_main|abi_strlen_main|test_licbinds|abi_kernel_getpid_main|abi_kernel_clock_main|abi_kernel_random_main|abi_kernel_uname_main|abi_kernel_openat_main|abi_kernel_read_main|abi_kernel_write_main|abi_kernel_lseek_main|abi_kernel_unlinkat_main|abi_kernel_rmdir_main|abi_kernel_pipe2_main|abi_kernel_fork_main|abi_kernel_waitpid_main|abi_kernel_socketpair_main|abi_kernel_socket_main|abi_kernel_bind_main|abi_kernel_listen_main|abi_kernel_poll_main|abi_kernel_accept4_main|abi_kernel_connect_main|abi_kernel_unshare_main|abi_kernel_sethostname_main|abi_kernel_gethostname_main)
+        abi_abs_main|abi_strlen_main|test_licbinds|abi_ncurses_main|abi_kernel_getpid_main|abi_kernel_clock_main|abi_kernel_random_main|abi_kernel_uname_main|abi_kernel_openat_main|abi_kernel_read_main|abi_kernel_write_main|abi_kernel_lseek_main|abi_kernel_unlinkat_main|abi_kernel_rmdir_main|abi_kernel_pipe2_main|abi_kernel_fork_main|abi_kernel_waitpid_main|abi_kernel_socketpair_main|abi_kernel_socket_main|abi_kernel_bind_main|abi_kernel_listen_main|abi_kernel_poll_main|abi_kernel_accept4_main|abi_kernel_connect_main|abi_kernel_unshare_main|abi_kernel_sethostname_main|abi_kernel_gethostname_main)
         binding=$tmpdir/$name.binding.json
         "$bind" --policy "$policy" < "$semantic" > "$binding"
         "$lowerer" --binding-report "$binding" < "$optimized" > "$lowered"

@@ -86,6 +86,8 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
     const bool abi_abs_profile = has(report, "\"lowering_profile\": \"abi_abs_main\"") || has(report, "\"lowering_profile\":\"abi_abs_main\"");
     const bool abi_strlen_profile = has(report, "\"lowering_profile\": \"abi_strlen_main\"") || has(report, "\"lowering_profile\":\"abi_strlen_main\"");
     const bool test_licbinds_profile = has(report, "\"lowering_profile\": \"test_licbinds_main\"") || has(report, "\"lowering_profile\":\"test_licbinds_main\"");
+    const bool abi_ncurses_profile = has(report, "\"lowering_profile\": \"abi_ncurses_main\"") || has(report, "\"lowering_profile\":\"abi_ncurses_main\"");
+    const bool sel_profile = has(report, "\"lowering_profile\": \"sel_main\"") || has(report, "\"lowering_profile\":\"sel_main\"");
     const bool abi_kernel_getpid_profile = has(report, "\"lowering_profile\": \"abi_kernel_getpid_main\"") || has(report, "\"lowering_profile\":\"abi_kernel_getpid_main\"");
     const bool abi_kernel_clock_profile = has(report, "\"lowering_profile\": \"abi_kernel_clock_main\"") || has(report, "\"lowering_profile\":\"abi_kernel_clock_main\"");
     const bool abi_kernel_random_profile = has(report, "\"lowering_profile\": \"abi_kernel_random_main\"") || has(report, "\"lowering_profile\":\"abi_kernel_random_main\"");
@@ -101,6 +103,8 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
     if (abi_abs_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"abi_abs_main\"") || !has(binding_report, "\"kind\": \"external_call\"") || !has(binding_report, "\"abs\""))) throw std::runtime_error("ABI binding report does not authorize the abi_abs_main lowering profile");
     if (abi_strlen_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"abi_strlen_main\"") || !has(binding_report, "\"kind\": \"external_call\"") || !has(binding_report, "\"strlen\""))) throw std::runtime_error("ABI binding report does not authorize the abi_strlen_main lowering profile");
     if (test_licbinds_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"test_licbinds_main\"") || !has(binding_report, "\"strlen\"") || !has(binding_report, "\"abs\"") || !has(binding_report, "\"puts\""))) throw std::runtime_error("ABI binding report does not authorize the test_licbinds_main lowering profile");
+    if (abi_ncurses_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"abi_ncurses_main\"") || !has(binding_report, "\"initscr\"") || !has(binding_report, "\"endwin\"") || !has(binding_report, "\"waddnstr\"") || !has(binding_report, "\"wrefresh\""))) throw std::runtime_error("ABI binding report does not authorize the abi_ncurses_main lowering profile");
+    if (sel_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"sel_main\"") || !has(binding_report, "\"initscr\"") || !has(binding_report, "\"endwin\"") || !has(binding_report, "\"wgetch\"") || !has(binding_report, "\"keypad\"") || !has(binding_report, "\"puts\"") || !has(binding_report, "\"read\""))) throw std::runtime_error("ABI binding report does not authorize the sel_main lowering profile");
     if (abi_kernel_getpid_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"abi_kernel_getpid_main\"") || !has(binding_report, "\"kind\": \"external_call\"") || !has(binding_report, "\"getpid\""))) throw std::runtime_error("ABI binding report does not authorize the abi_kernel_getpid_main lowering profile");
     if (abi_kernel_clock_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"abi_kernel_clock_main\"") || !has(binding_report, "\"kind\": \"external_call\"") || !has(binding_report, "\"clock_gettime\""))) throw std::runtime_error("ABI binding report does not authorize the abi_kernel_clock_main lowering profile");
     if (abi_kernel_random_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"abi_kernel_random_main\"") || !has(binding_report, "\"kind\": \"external_call\"") || !has(binding_report, "\"getrandom\""))) throw std::runtime_error("ABI binding report does not authorize the abi_kernel_random_main lowering profile");
@@ -113,7 +117,7 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
     if (remaining_kernel_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"kind\": \"external_call\""))) throw std::runtime_error("ABI binding report does not authorize the remaining kernel lowering profile");
     if (flowcat_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"flowcat_argv_main\"") || !has(binding_report, "\"kind\": \"external_call\"") || !has(binding_report, "\"puts\""))) throw std::runtime_error("ABI binding report does not authorize the flowcat_argv_main lowering profile");
     if (flowcat_file_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"flowcat_file_main\"") || !has(binding_report, "\"kind\": \"capability_sequence\"") || !has(binding_report, "\"open\"") || !has(binding_report, "\"read\"") || !has(binding_report, "\"write\"") || !has(binding_report, "\"close\""))) throw std::runtime_error("ABI binding report does not authorize the flowcat_file_main lowering profile");
-    if (!llvm_path.empty() && !trial_profile && !abi_abs_profile && !abi_strlen_profile && !test_licbinds_profile && !abi_kernel_getpid_profile && !abi_kernel_clock_profile && !abi_kernel_random_profile && !abi_kernel_uname_profile && !abi_kernel_openat_profile && !abi_kernel_read_profile && !abi_kernel_write_profile && !abi_kernel_lseek_profile && !abi_kernel_unlinkat_profile && !remaining_kernel_profile && !flowcat_profile && !flowcat_file_profile) throw std::runtime_error("LLVM emission requires an accepted lowering profile");
+    if (!llvm_path.empty() && !trial_profile && !abi_abs_profile && !abi_strlen_profile && !test_licbinds_profile && !abi_ncurses_profile && !sel_profile && !abi_kernel_getpid_profile && !abi_kernel_clock_profile && !abi_kernel_random_profile && !abi_kernel_uname_profile && !abi_kernel_openat_profile && !abi_kernel_read_profile && !abi_kernel_write_profile && !abi_kernel_lseek_profile && !abi_kernel_unlinkat_profile && !remaining_kernel_profile && !flowcat_profile && !flowcat_file_profile) throw std::runtime_error("LLVM emission requires an accepted lowering profile");
     if (!llvm_path.empty()) {
         std::ofstream llvm(llvm_path); if (!llvm) throw std::runtime_error("cannot open LLVM output");
         llvm << "; Flowcore target artifact: " << selected_target << "\n";
@@ -150,6 +154,78 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
                     "  %absolute = call i32 @abs(i32 -42)\n"
                     "  %printed = call i32 @puts(ptr @flowcore_libc_message)\n"
                     "  ret i32 0\n"
+                    "}\n";
+        } else if (abi_ncurses_profile) {
+            llvm << "; Flowcore ncurses binding integration: initialize, write, refresh, restore\n"
+                    "target triple = \"x86_64-pc-linux-gnu\"\n"
+                    "@flowcore_ncurses_message = private unnamed_addr constant [25 x i8] c\"Flowcore ncurses binding\\00\"\n"
+                    "declare ptr @initscr()\n"
+                    "declare i32 @noecho()\n"
+                    "declare i32 @cbreak()\n"
+                    "declare i32 @waddnstr(ptr, ptr, i32)\n"
+                    "declare i32 @wrefresh(ptr)\n"
+                    "declare i32 @endwin()\n"
+                    "define i32 @main() {\n"
+                    "entry:\n"
+                    "  %window = call ptr @initscr()\n"
+                    "  %echo = call i32 @noecho()\n"
+                    "  %break = call i32 @cbreak()\n"
+                    "  %write = call i32 @waddnstr(ptr %window, ptr @flowcore_ncurses_message, i32 24)\n"
+                    "  %refresh = call i32 @wrefresh(ptr %window)\n"
+                    "  %end = call i32 @endwin()\n"
+                    "  ret i32 0\n"
+                    "}\n";
+        } else if (sel_profile) {
+            llvm << "; Flowcore sel first TUI slice: ncurses input and selected output\n"
+                    "target triple = \"x86_64-pc-linux-gnu\"\n"
+                    "@flowcore_sel_message = private unnamed_addr constant [26 x i8] c\"Flowcore sel\\0A\\0ACandidate: \\00\"\n"
+                    "@flowcore_sel_default = private unnamed_addr constant [6 x i8] c\"alpha\\00\"\n"
+                    "@flowcore_sel_cancel = private unnamed_addr constant [16 x i8] c\"selection: none\\00\"\n"
+                    "declare ptr @initscr()\n"
+                    "declare i32 @noecho()\n"
+                    "declare i32 @cbreak()\n"
+                    "declare i32 @keypad(ptr, i32)\n"
+                    "declare i32 @waddnstr(ptr, ptr, i32)\n"
+                    "declare i32 @wrefresh(ptr)\n"
+                    "declare i32 @wgetch(ptr)\n"
+                    "declare i32 @endwin()\n"
+                    "declare i32 @puts(ptr)\n"
+                    "declare i64 @read(i32, ptr, i64)\n"
+                    "define i32 @main(i32 %argc, ptr %argv) {\n"
+                    "entry:\n"
+                    "  %window = call ptr @initscr()\n"
+                    "  %echo = call i32 @noecho()\n"
+                    "  %break = call i32 @cbreak()\n"
+                    "  %keys = call i32 @keypad(ptr %window, i32 1)\n"
+                    "  %write = call i32 @waddnstr(ptr %window, ptr @flowcore_sel_message, i32 25)\n"
+                    "  %has_arg = icmp sgt i32 %argc, 1\n"
+                    "  br i1 %has_arg, label %argument, label %stdin\n"
+                    "argument:\n"
+                    "  %arg_ptr = getelementptr ptr, ptr %argv, i64 1\n"
+                    "  %argument_value = load ptr, ptr %arg_ptr\n"
+                    "  br label %candidate\n"
+                    "stdin:\n"
+                    "  %input = alloca [4096 x i8], align 1\n"
+                    "  %input_ptr = getelementptr [4096 x i8], ptr %input, i64 0, i64 0\n"
+                    "  %input_count = call i64 @read(i32 0, ptr %input_ptr, i64 4095)\n"
+                    "  %terminator = getelementptr i8, ptr %input_ptr, i64 %input_count\n"
+                    "  store i8 0, ptr %terminator\n"
+                    "  br label %candidate\n"
+                    "candidate:\n"
+                    "  %selected = phi ptr [%argument_value, %argument], [%input_ptr, %stdin]\n"
+                    "  %selected_length = phi i64 [-1, %argument], [%input_count, %stdin]\n"
+                    "  %candidate_write = call i32 @waddnstr(ptr %window, ptr %selected, i32 -1)\n"
+                    "  %refresh = call i32 @wrefresh(ptr %window)\n"
+                    "  %key = call i32 @wgetch(ptr %window)\n"
+                    "  %end = call i32 @endwin()\n"
+                    "  %quit = icmp eq i32 %key, 113\n"
+                    "  br i1 %quit, label %cancel, label %selected_output\n"
+                    "selected_output:\n"
+                    "  %selected_printed = call i32 @puts(ptr %selected)\n"
+                    "  ret i32 0\n"
+                    "cancel:\n"
+                    "  %cancel_printed = call i32 @puts(ptr @flowcore_sel_cancel)\n"
+                    "  ret i32 1\n"
                     "}\n";
         } else if (abi_kernel_getpid_profile) {
             llvm << "; Flowcore kernel ABI lowering: getpid\n"

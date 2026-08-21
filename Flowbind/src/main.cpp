@@ -157,6 +157,8 @@ int verify(const std::string& report, const std::string& policy_path, const std:
     if (profile == "abi_abs_main") for (const auto& item : needed) if (item.symbol == "abs") lowering_requirement = &item;
     if (profile == "abi_strlen_main") for (const auto& item : needed) if (item.symbol == "strlen") lowering_requirement = &item;
     if (profile == "test_licbinds_main") for (const auto& item : needed) if (item.symbol == "strlen" || item.symbol == "abs" || item.symbol == "puts") lowering_requirement = &item;
+    if (profile == "abi_ncurses_main") for (const auto& item : needed) if (item.symbol == "initscr" || item.symbol == "endwin" || item.symbol == "waddnstr" || item.symbol == "wrefresh") lowering_requirement = &item;
+    if (profile == "sel_main") for (const auto& item : needed) if (item.symbol == "initscr" || item.symbol == "endwin" || item.symbol == "wgetch" || item.symbol == "keypad") lowering_requirement = &item;
     if (profile == "abi_kernel_getpid_main") for (const auto& item : needed) if (item.symbol == "getpid") lowering_requirement = &item;
     if (profile == "abi_kernel_clock_main") for (const auto& item : needed) if (item.symbol == "clock_gettime") lowering_requirement = &item;
     if (profile == "abi_kernel_random_main") for (const auto& item : needed) if (item.symbol == "getrandom") lowering_requirement = &item;

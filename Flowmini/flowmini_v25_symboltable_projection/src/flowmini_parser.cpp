@@ -546,10 +546,26 @@ private:
 
             if (match(TokenKind::Dot)) {
                 Expr expr;
-                expr.kind = ExprKind::FieldAccess;
                 expr.ident = std::move(id);
                 expr.fields.push_back(expectIdentifier("expected field name after '.'").text);
                 while (match(TokenKind::Dot)) { expr.fields.push_back(expectIdentifier("expected field name after '.'").text); }
+                if (match(TokenKind::LeftParen)) {
+                    expr.kind = ExprKind::FunctionCall;
+                    std::ostringstream qualified;
+                    qualified << expr.ident;
+                    for (const auto& field : expr.fields) { qualified << '.' << field; }
+                    expr.ident = qualified.str();
+                    expr.fields.clear();
+                    if (!check(TokenKind::RightParen)) {
+                        while (true) {
+                            expr.args.push_back(parsePredicateExpr());
+                            if (!match(TokenKind::Comma)) { break; }
+                        }
+                    }
+                    expect(TokenKind::RightParen, "expected ')' after qualified function call arguments");
+                    return expr;
+                }
+                expr.kind = ExprKind::FieldAccess;
                 return expr;
             }
 
@@ -1208,7 +1224,8 @@ private:
         expect(TokenKind::KeywordFn, "expected 'fn' after extern");
         const Token& nameToken = expectIdentifier("expected extern function name");
         FunctionDef def;
-        def.name = nameToken.text;
+        const std::string shortName = nameToken.text;
+        def.name = abiName + "." + shortName;
         if (functions_.count(def.name) != 0) { fail(nameToken, "duplicate function declaration '" + def.name + "'"); }
         def.isExtern = true;
         def.library = library;
@@ -1246,7 +1263,16 @@ private:
         expect(TokenKind::RightBrace, "expected '}' after extern body");
         if (def.symbol.empty()) { fail(nameToken, "extern function requires symbol declaration"); }
         if (def.effect.empty()) { fail(nameToken, "extern function requires effect declaration"); }
+        const FunctionDef compatibilityCopy = def;
         functions_[def.name] = std::move(def);
+        // Keep old unqualified source working when it is unambiguous. A later
+        // provider with the same short name removes that compatibility alias;
+        // qualified calls remain deterministic.
+        if (functions_.contains(shortName)) {
+            functions_.erase(shortName);
+        } else {
+            functions_[shortName] = compatibilityCopy;
+        }
     }
 
     // -------- Function declarations --------

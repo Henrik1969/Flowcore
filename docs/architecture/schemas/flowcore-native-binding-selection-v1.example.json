@@ -1,0 +1,55 @@
+{
+  "format": "flowcore.native_binding_selection",
+  "version": 1,
+  "status": "review-required",
+  "inventory_format": "flowcore.native_binding_inventory",
+  "selections": [
+    {
+      "id": "linux-glibc-file-io",
+      "namespace": "flowcore.std.file",
+      "capability": "file-descriptor-io",
+      "strategy": "bind-existing",
+      "provider": {
+        "soname": "libc.so.6",
+        "path": "/lib/x86_64-linux-gnu/libc.so.6",
+        "architecture": "(libc6,x86-64)"
+      },
+      "contract": "Flowmini/flowmini_v25_symboltable_projection/std/abi/file_io.flow",
+      "rationale": "Use the host C runtime for the already-defined Linux file I/O contract."
+    },
+    {
+      "id": "flowcore.text",
+      "namespace": "flowcore.std.text",
+      "capability": "text-operations",
+      "strategy": "implement-flowcore",
+      "contract": "Flowmini/flowmini_v25_symboltable_projection/std/text.flow",
+      "rationale": "Keep portable semantic text operations Flowcore-owned instead of inheriting host-specific behavior."
+    },
+    {
+      "id": "flowcore.parallel.runtime",
+      "namespace": "flowcore.parallel",
+      "capability": "worker-runtime",
+      "strategy": "internal-substrate-adapter",
+      "contract": "docs/architecture/NATIVE-PROVIDER-BINDING-AND-MAINTENANCE-PLAN.md",
+      "rationale": "Keep scheduling semantics Flowcore-owned while allowing the runtime to use host worker primitives internally."
+    },
+    {
+      "id": "llvm-backend",
+      "namespace": "flowcore.toolchain.llvm",
+      "capability": "target-code-generation",
+      "strategy": "external-toolchain",
+      "provider": {
+        "soname": "libLLVM.so.18.1",
+        "path": "/lib/x86_64-linux-gnu/libLLVM.so.18.1",
+        "architecture": "(libc6,x86-64)"
+      },
+      "contract": "Flowlower/README.md",
+      "rationale": "Use LLVM as external lowering infrastructure, not as a Flowcore runtime semantic provider."
+    }
+  ],
+  "policy": {
+    "authorization": "not-performed",
+    "execution": "not-performed",
+    "binding_generation": "not-performed"
+  }
+}

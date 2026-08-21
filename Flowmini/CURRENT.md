@@ -9,9 +9,9 @@ flowmini_v25_symboltable_projection
 Current milestone:
 
 ```text
-Flowmini v0.26 language-chain vertical slice
+Flowmini v0.27 namespaced provider language-chain slice
 frontend export, semantic analysis, policy binding, optimization boundary,
-LLVM lowering, and executable application proof
+LLVM lowering, executable application proof, and qualified provider imports
 ```
 
 ## Status

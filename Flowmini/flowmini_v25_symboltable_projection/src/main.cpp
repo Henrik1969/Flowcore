@@ -7,12 +7,14 @@
 #include "flowmini_token_tree_bridge.h"
 
 #include <algorithm>
+#include <cctype>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <map>
 #include <sstream>
 #include <string>
+#include <string_view>
 #include <vector>
 
 #include "flowmini_ast_builder.h"
@@ -166,7 +168,12 @@ namespace {
         return out;
     }
 
-    [[nodiscard]] bool parseImportLine(const std::string& line, std::string& importedPath) {
+    struct ParsedImport final {
+        std::string path;
+        std::string alias;
+    };
+
+    [[nodiscard]] bool parseImportLine(const std::string& line, ParsedImport& parsed) {
         const std::string t = trimCopy(line);
         if (!startsWithWord(t, "import")) { return false; }
 
@@ -188,9 +195,40 @@ namespace {
         }
         if (path.empty()) { throw flow::DiagnosticError{"import", "empty import path"}; }
         while (i < t.size() && (t[i] == ' ' || t[i] == '\t')) { ++i; }
-        if (i != t.size()) { throw flow::DiagnosticError{"import", "unexpected text after import path: " + t.substr(i)}; }
-        importedPath = path;
+        if (i != t.size()) {
+            constexpr std::string_view asWord = "as";
+            if (t.compare(i, asWord.size(), asWord) != 0 ||
+                (i + asWord.size() < t.size() &&
+                 std::isalnum(static_cast<unsigned char>(t[i + asWord.size()])))) {
+                throw flow::DiagnosticError{"import", "unexpected text after import path: " + t.substr(i)};
+            }
+            i += asWord.size();
+            while (i < t.size() && (t[i] == ' ' || t[i] == '\t')) { ++i; }
+            const std::size_t aliasStart = i;
+            if (i >= t.size() || !(std::isalpha(static_cast<unsigned char>(t[i])) || t[i] == '_')) {
+                throw flow::DiagnosticError{"import", "expected identifier after import 'as'"};
+            }
+            ++i;
+            while (i < t.size() && (std::isalnum(static_cast<unsigned char>(t[i])) || t[i] == '_')) { ++i; }
+            parsed.alias = t.substr(aliasStart, i - aliasStart);
+            while (i < t.size() && (t[i] == ' ' || t[i] == '\t')) { ++i; }
+            if (i != t.size()) { throw flow::DiagnosticError{"import", "unexpected text after import alias: " + t.substr(i)}; }
+        }
+        parsed.path = std::move(path);
         return true;
+    }
+
+    [[nodiscard]] std::string namespaceAbiHeader(const std::string& line, const std::string& alias) {
+        if (alias.empty()) { return line; }
+        const std::string trimmed = trimCopy(line);
+        if (!startsWithWord(trimmed, "abi")) { return line; }
+        std::size_t nameStart = 3;
+        while (nameStart < trimmed.size() && (trimmed[nameStart] == ' ' || trimmed[nameStart] == '\t')) { ++nameStart; }
+        const std::size_t nameEnd = trimmed.find_first_of(" \t{", nameStart);
+        if (nameStart == trimmed.size() || nameEnd == std::string::npos) { return line; }
+        const std::size_t indent = line.find_first_not_of(" \t");
+        return line.substr(0, indent == std::string::npos ? 0 : indent) +
+               "abi " + alias + line.substr(nameEnd);
     }
 
     [[nodiscard]] std::filesystem::path canonicalImportPath(const std::filesystem::path& importerPath, const std::string& importText) {
@@ -309,9 +347,9 @@ namespace {
 
             std::string scanLine;
             while (std::getline(input, line) && std::getline(scanInput, scanLine)) {
-                std::string importText;
+                ParsedImport importSpec;
                 const std::string trimmed = trimCopy(scanLine);
-                if (parseImportLine(scanLine, importText)) {
+                if (parseImportLine(scanLine, importSpec)) {
                     if (sawHeader) {
                         throw flow::DiagnosticError{"import", "import statements must appear before program/unit declaration in: " + rootPath.string()};
                     }
@@ -324,7 +362,7 @@ namespace {
                             },
                         });
                     }
-                    importExpansions.push_back(expandLibrary(canonicalImportPath(rootPath, importText)));
+                    importExpansions.push_back(expandLibrary(canonicalImportPath(rootPath, importSpec.path), importSpec.alias));
                     ++lineNumber;
                     continue;
                 }
@@ -400,7 +438,8 @@ namespace {
             return result;
         }
 
-        [[nodiscard]] ExpandedSource expandLibrary(const std::filesystem::path& libPath) {
+        [[nodiscard]] ExpandedSource expandLibrary(const std::filesystem::path& libPath,
+                                                   const std::string& namespaceAlias = {}) {
             const std::string key = libPath.string();
             const auto found = states.find(key);
             if (found != states.end()) {
@@ -434,10 +473,10 @@ namespace {
 
             std::string scanLine;
             while (std::getline(input, line) && std::getline(scanInput, scanLine)) {
-                std::string importText;
+                ParsedImport importSpec;
                 const std::string trimmed = trimCopy(scanLine);
 
-                if (parseImportLine(scanLine, importText)) {
+                if (parseImportLine(scanLine, importSpec)) {
                     if (sawHeader) {
                         throw flow::DiagnosticError{"import", "import statements must appear before unit declaration in imported file: " + key};
                     }
@@ -447,7 +486,7 @@ namespace {
                             flowmini::ast::FrontendSourceLineOrigin{displayPath, lineNumber},
                         });
                     }
-                    importExpansions.push_back(expandLibrary(canonicalImportPath(libPath, importText)));
+                    importExpansions.push_back(expandLibrary(canonicalImportPath(libPath, importSpec.path), importSpec.alias));
                     ++lineNumber;
                     continue;
                 }
@@ -467,7 +506,7 @@ namespace {
 
                 if (!trimmed.empty() || sawHeader) {
                     bodyLines.push_back(ExpandedSourceLine{
-                        line,
+                        namespaceAbiHeader(line, namespaceAlias),
                         flowmini::ast::FrontendSourceLineOrigin{displayPath, lineNumber},
                     });
                 }

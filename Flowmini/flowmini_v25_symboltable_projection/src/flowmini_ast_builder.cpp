@@ -1,5 +1,6 @@
 #include <cstddef>
 #include <memory>
+#include "flow_common.h"
 #include "flowmini_ast_builder.h"
 
 namespace flowmini::ast {
@@ -307,6 +308,16 @@ namespace flowmini::ast {
 
             if (i < tokens.size() && tokens[i].kind == flowmini::TokenKind::String) {
                 importDecl.module_name = tokens[i].text;
+                ++i;
+            }
+
+            if (i < tokens.size() && tokens[i].kind == flowmini::TokenKind::Identifier &&
+                tokens[i].text == "as") {
+                ++i;
+                if (i >= tokens.size() || tokens[i].kind != flowmini::TokenKind::Identifier) {
+                    throw flow::DiagnosticError{"ast", "expected namespace alias after import 'as'"};
+                }
+                importDecl.alias = tokens[i].text;
                 ++i;
             }
 

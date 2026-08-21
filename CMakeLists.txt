@@ -61,6 +61,45 @@ add_test(NAME flowcore_stdlib_boundary
 set_tests_properties(flowcore_stdlib_boundary PROPERTIES
     DEPENDS "flowbind_provider")
 
+add_test(NAME native_binding_inventory
+    COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/tools/test-native-binding-inventory.sh)
+
+add_test(NAME native_binding_selection
+    COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/tools/test-native-binding-selection.sh)
+
+add_test(NAME native_ncurses_binding
+    COMMAND ${CMAKE_COMMAND} -E env
+        FLOWBIND_BIN=$<TARGET_FILE:flowbind>
+        ${CMAKE_CURRENT_SOURCE_DIR}/tools/test-ncurses-binding.sh)
+set_tests_properties(native_ncurses_binding PROPERTIES
+    DEPENDS "flowbind_provider")
+
+add_test(NAME ncurses_flow_pipeline
+    COMMAND ${CMAKE_COMMAND} -E env
+        FLOWCORE_ROOT=${CMAKE_CURRENT_SOURCE_DIR}
+        FLOWMINI_BIN=$<TARGET_FILE:flowmini>
+        FLOWANALYST_BIN=$<TARGET_FILE:flowanalyst>
+        FLOWPARALLEL_BIN=$<TARGET_FILE:flowparallel>
+        FLOWOPTIMIZE_BIN=$<TARGET_FILE:flowoptimize>
+        FLOWBIND_BIN=$<TARGET_FILE:flowbind>
+        FLOWLOWER_BIN=$<TARGET_FILE:flowlower>
+        ${CMAKE_CURRENT_SOURCE_DIR}/tools/test-ncurses-pipeline.sh)
+set_tests_properties(ncurses_flow_pipeline PROPERTIES
+    DEPENDS "flowcore_pass_corpus;flowlower_pipeline")
+
+add_test(NAME sel_tui_pipeline
+    COMMAND ${CMAKE_COMMAND} -E env
+        FLOWCORE_ROOT=${CMAKE_CURRENT_SOURCE_DIR}
+        FLOWMINI_BIN=$<TARGET_FILE:flowmini>
+        FLOWANALYST_BIN=$<TARGET_FILE:flowanalyst>
+        FLOWPARALLEL_BIN=$<TARGET_FILE:flowparallel>
+        FLOWOPTIMIZE_BIN=$<TARGET_FILE:flowoptimize>
+        FLOWBIND_BIN=$<TARGET_FILE:flowbind>
+        FLOWLOWER_BIN=$<TARGET_FILE:flowlower>
+        ${CMAKE_CURRENT_SOURCE_DIR}/tools/test-sel-pipeline.sh)
+set_tests_properties(sel_tui_pipeline PROPERTIES
+    DEPENDS "ncurses_flow_pipeline")
+
 # Canonical installed shape. Debian packaging consumes this staged install and
 # splits runtime, development, and documentation payloads without depending on
 # the source-tree layout.
