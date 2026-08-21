@@ -1,0 +1,8 @@
+import "../../std/abi/kernel.flow" as linux
+
+program abi_kernel_getuid_main
+
+main {
+    user : c_int(0)
+    linux.getuid() -> user
+}

@@ -1012,6 +1012,11 @@ public:
             auto fn = reinterpret_cast<Fn>(raw);
             const auto arg0 = static_cast<long>(getPathAbiInt(record, argPaths[0], "abi.call"));
             setPathInt(record, out, static_cast<std::int64_t>(fn(arg0)), "abi.call");
+        } else if (argTypes.size() == 1 && argTypes[0] == "c_ulong" && returnType == "c_ulong") {
+            using Fn = unsigned long (*)(unsigned long);
+            auto fn = reinterpret_cast<Fn>(raw);
+            const auto arg0 = static_cast<unsigned long>(getPathAbiInt(record, argPaths[0], "abi.call"));
+            setPathInt(record, out, static_cast<std::int64_t>(fn(arg0)), "abi.call");
         } else if (argTypes.size() == 1 && argTypes[0] == "Point" && returnType == "c_int") {
             using Fn = int (*)(FlowminiTestAbiPoint);
             auto fn = reinterpret_cast<Fn>(raw);

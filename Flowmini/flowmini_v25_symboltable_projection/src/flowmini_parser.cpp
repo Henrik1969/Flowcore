@@ -137,6 +137,7 @@ public:
         types_.emplace("Bool", TypeDef{"Bool", "", {}, {}});
         types_.emplace("c_int", TypeDef{"c_int", "int", {}, {}});
         types_.emplace("c_long", TypeDef{"c_long", "int", {}, {}});
+        types_.emplace("c_ulong", TypeDef{"c_ulong", "int", {}, {}});
         types_.emplace("c_size_t", TypeDef{"c_size_t", "int", {{TokenKind::GreaterEqual, 0}}, {}});
         types_.emplace("c_string", TypeDef{"c_string", "", {}, {}});
         abiTypes_.emplace("c_string", AbiTypeDef{"c_string", "const char*", "borrowed", "read", "call", "false", "nul", false});
@@ -403,7 +404,7 @@ private:
     }
 
     [[nodiscard]] bool isCAbiType(const std::string& type) const {
-        return type == "c_int" || type == "c_long" || type == "c_size_t" || isAbiPointerType(type) || isAbiStructType(type);
+        return type == "c_int" || type == "c_long" || type == "c_ulong" || type == "c_size_t" || isAbiPointerType(type) || isAbiStructType(type);
     }
 
     [[nodiscard]] bool isCallableType(const std::string& type) const {
@@ -1138,7 +1139,7 @@ private:
         const Token& nameToken = expectIdentifier("expected ABI type name");
         AbiTypeDef def;
         def.name = nameToken.text;
-        if (def.name == "c_int" || def.name == "c_long" || def.name == "c_size_t") {
+        if (def.name == "c_int" || def.name == "c_long" || def.name == "c_ulong" || def.name == "c_size_t") {
             fail(nameToken, "ABI scalar type '" + def.name + "' is built in and may not be redeclared");
         }
         expect(TokenKind::LeftBrace, "expected '{' before abi type body");
@@ -1236,7 +1237,7 @@ private:
                 const Token& argToken = expectIdentifier("expected extern argument name");
                 expect(TokenKind::Colon, "expected ':' after argument name");
                 const std::string argType = expectIdentifier("expected ABI argument type").text;
-                if (!isCAbiType(argType)) { fail(argToken, "flowmini v17 extern arguments require c_int, c_long, c_size_t, a declared ABI pointer-shaped type, or a declared ABI struct"); }
+                if (!isCAbiType(argType)) { fail(argToken, "flowmini v17 extern arguments require c_int, c_long, c_ulong, c_size_t, a declared ABI pointer-shaped type, or a declared ABI struct"); }
                 for (const auto& existing : def.args) { if (existing.name == argToken.text) { fail(argToken, "duplicate extern argument '" + argToken.text + "'"); } }
                 def.args.push_back(FunctionArg{argToken.text, argType});
                 if (!match(TokenKind::Comma)) { break; }
@@ -1245,7 +1246,7 @@ private:
         expect(TokenKind::RightParen, "expected ')' after extern arguments");
         expect(TokenKind::Colon, "expected ':' before extern return type");
         def.returnType = expectIdentifier("expected extern return type").text;
-        if (!(def.returnType == "c_int" || def.returnType == "c_long" || def.returnType == "c_size_t")) { fail(nameToken, "flowmini v17 extern return type must be c_int, c_long, or c_size_t"); }
+        if (!(def.returnType == "c_int" || def.returnType == "c_long" || def.returnType == "c_ulong" || def.returnType == "c_size_t")) { fail(nameToken, "flowmini v17 extern return type must be c_int, c_long, c_ulong, or c_size_t"); }
         expect(TokenKind::LeftBrace, "expected '{' before extern body");
         skipNewlines();
         while (!check(TokenKind::RightBrace) && !check(TokenKind::End)) {

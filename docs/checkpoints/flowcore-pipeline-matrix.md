@@ -58,7 +58,7 @@ generic/container/shape types:
 
 General ABI lowering remains future work even though the canonical ABI spellings now
 resolve:
-  c_int, c_long, c_size_t
+  c_int, c_long, c_ulong, c_size_t
 
 qualified/domain types:
   Point is now structurally projected from standalone `record` declarations;

@@ -18,6 +18,7 @@ add_subdirectory(Flowtools ${CMAKE_CURRENT_BINARY_DIR}/flowtools)
 add_subdirectory(Flowlower ${CMAKE_CURRENT_BINARY_DIR}/flowlower)
 add_subdirectory(Flowkernel ${CMAKE_CURRENT_BINARY_DIR}/flowkernel)
 
+
 add_test(NAME flowcore_integration_corpus
     COMMAND ${CMAKE_COMMAND} -E env
         FLOWMINI_BIN=$<TARGET_FILE:flowmini>
@@ -56,6 +57,9 @@ add_test(NAME flowcore_stdlib_boundary
         FLOWMINI_BIN=$<TARGET_FILE:flowmini>
         FLOWANALYST_BIN=$<TARGET_FILE:flowanalyst>
         FLOWBIND_BIN=$<TARGET_FILE:flowbind>
+        FLOWPARALLEL_BIN=$<TARGET_FILE:flowparallel>
+        FLOWOPTIMIZE_BIN=$<TARGET_FILE:flowoptimize>
+        FLOWLOWER_BIN=$<TARGET_FILE:flowlower>
         FLOWTESTABI_LAYOUT_BIN=$<TARGET_FILE:flowmini_testabi_layout>
         ${CMAKE_CURRENT_SOURCE_DIR}/tools/run-flowcore-stdlib-boundary.sh)
 set_tests_properties(flowcore_stdlib_boundary PROPERTIES
@@ -66,6 +70,14 @@ add_test(NAME native_binding_inventory
 
 add_test(NAME native_binding_selection
     COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/tools/test-native-binding-selection.sh)
+
+add_test(NAME native_binding_generation
+    COMMAND ${CMAKE_COMMAND} -E env
+        FLOWCORE_ROOT=${CMAKE_CURRENT_SOURCE_DIR}
+        FLOWMINI_BIN=$<TARGET_FILE:flowmini>
+        FLOWANALYST_BIN=$<TARGET_FILE:flowanalyst>
+        FLOWBIND_BIN=$<TARGET_FILE:flowbind>
+        ${CMAKE_CURRENT_SOURCE_DIR}/tools/test-generate-flow-bindings.sh)
 
 add_test(NAME native_ncurses_binding
     COMMAND ${CMAKE_COMMAND} -E env

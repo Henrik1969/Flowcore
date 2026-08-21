@@ -17,6 +17,13 @@ if(TARGET flowmini AND TARGET flowanalyst AND TARGET flowparallel AND TARGET flo
     set_tests_properties(flowlower_pipeline PROPERTIES
         ENVIRONMENT "FLOWMINI_BIN=$<TARGET_FILE:flowmini>;FLOWANALYST_BIN=$<TARGET_FILE:flowanalyst>;FLOWPARALLEL_BIN=$<TARGET_FILE:flowparallel>;FLOWOPTIMIZE_BIN=$<TARGET_FILE:flowoptimize>;FLOWBIND_BIN=$<TARGET_FILE:flowbind>")
 endif()
+if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
+    set_tests_properties(flowlower_pipeline PROPERTIES
+        ENVIRONMENT "FLOWMINI_BIN=$<TARGET_FILE:flowmini>;FLOWANALYST_BIN=$<TARGET_FILE:flowanalyst>;FLOWPARALLEL_BIN=$<TARGET_FILE:flowparallel>;FLOWOPTIMIZE_BIN=$<TARGET_FILE:flowoptimize>;FLOWBIND_BIN=$<TARGET_FILE:flowbind>")
+elseif(EXISTS "${CMAKE_BINARY_DIR}/flowmini/flowmini")
+    set_tests_properties(flowlower_pipeline PROPERTIES
+        ENVIRONMENT "FLOWMINI_BIN=${CMAKE_BINARY_DIR}/flowmini/flowmini;FLOWANALYST_BIN=${CMAKE_BINARY_DIR}/flowanalyst/flowanalyst;FLOWPARALLEL_BIN=${CMAKE_BINARY_DIR}/flowtools/flowparallel/flowparallel;FLOWOPTIMIZE_BIN=${CMAKE_BINARY_DIR}/flowoptimize/flowoptimize;FLOWBIND_BIN=${CMAKE_BINARY_DIR}/flowbind/flowbind")
+endif()
 
 add_test(NAME flowcore_pipeline_matrix
     COMMAND ${CMAKE_COMMAND} -E env

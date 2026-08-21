@@ -40,6 +40,15 @@ printf '%s\n' \
     'allow libc.so.6 labs c pure' \
     'allow libc.so.6 puts c io' \
     'allow libc.so.6 getpid c readonly' \
+    'allow libc.so.6 getuid c readonly' \
+    'allow libc.so.6 getgid c readonly' \
+    'allow libc.so.6 geteuid c readonly' \
+    'allow libc.so.6 getegid c readonly' \
+    'allow libc.so.6 getppid c readonly' \
+    'allow libc.so.6 getpgrp c readonly' \
+    'allow libc.so.6 getpgid c readonly' \
+    'allow libc.so.6 getsid c readonly' \
+    'allow libc.so.6 getpriority c readonly' \
     'allow libc.so.6 clock_gettime c readonly' \
     'allow libc.so.6 getrandom c readonly' \
     'allow libc.so.6 uname c readonly' \
@@ -128,6 +137,168 @@ grep -q '"status": "emitted"' "$tmpdir/kernel-getpid.lowering.json"
 grep -q 'call i32 @getpid' "$tmpdir/kernel-getpid.ll"
 clang "$tmpdir/kernel-getpid.ll" -o "$tmpdir/kernel-getpid"
 "$tmpdir/kernel-getpid"
+
+kernel_getuid_source="$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass/abi_kernel_getuid_main.flow"
+"$flowmini" --dump-frontend-bundle "$kernel_getuid_source" > "$tmpdir/kernel-getuid.bundle.json"
+"$analyst" < "$tmpdir/kernel-getuid.bundle.json" > "$tmpdir/kernel-getuid.semantic.json"
+grep -q '"lowering_profile": "abi_kernel_getuid_main"' "$tmpdir/kernel-getuid.semantic.json"
+"$bind" --policy "$policy" < "$tmpdir/kernel-getuid.semantic.json" > "$tmpdir/kernel-getuid.binding.json"
+"$parallel" < "$tmpdir/kernel-getuid.semantic.json" > "$tmpdir/kernel-getuid.parallel.json"
+"$optimizer" < "$tmpdir/kernel-getuid.parallel.json" > "$tmpdir/kernel-getuid.optimized.json"
+"$lowerer" --emit-llvm "$tmpdir/kernel-getuid.ll" --binding-report "$tmpdir/kernel-getuid.binding.json" < "$tmpdir/kernel-getuid.optimized.json" > "$tmpdir/kernel-getuid.lowering.json"
+grep -q '"status": "emitted"' "$tmpdir/kernel-getuid.lowering.json"
+grep -q 'call i32 @getuid' "$tmpdir/kernel-getuid.ll"
+clang "$tmpdir/kernel-getuid.ll" -o "$tmpdir/kernel-getuid"
+expected_uid=$(id -u)
+set +e
+"$tmpdir/kernel-getuid"
+actual_uid=$?
+set -e
+test "$actual_uid" -eq $((expected_uid % 256))
+
+kernel_getgid_source="$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass/abi_kernel_getgid_main.flow"
+"$flowmini" --dump-frontend-bundle "$kernel_getgid_source" > "$tmpdir/kernel-getgid.bundle.json"
+"$analyst" < "$tmpdir/kernel-getgid.bundle.json" > "$tmpdir/kernel-getgid.semantic.json"
+grep -q '"lowering_profile": "abi_kernel_getgid_main"' "$tmpdir/kernel-getgid.semantic.json"
+"$bind" --policy "$policy" < "$tmpdir/kernel-getgid.semantic.json" > "$tmpdir/kernel-getgid.binding.json"
+"$parallel" < "$tmpdir/kernel-getgid.semantic.json" > "$tmpdir/kernel-getgid.parallel.json"
+"$optimizer" < "$tmpdir/kernel-getgid.parallel.json" > "$tmpdir/kernel-getgid.optimized.json"
+"$lowerer" --emit-llvm "$tmpdir/kernel-getgid.ll" --binding-report "$tmpdir/kernel-getgid.binding.json" < "$tmpdir/kernel-getgid.optimized.json" > "$tmpdir/kernel-getgid.lowering.json"
+grep -q '"status": "emitted"' "$tmpdir/kernel-getgid.lowering.json"
+grep -q 'call i32 @getgid' "$tmpdir/kernel-getgid.ll"
+clang "$tmpdir/kernel-getgid.ll" -o "$tmpdir/kernel-getgid"
+expected_gid=$(id -g)
+set +e
+"$tmpdir/kernel-getgid"
+actual_gid=$?
+set -e
+test "$actual_gid" -eq $((expected_gid % 256))
+
+kernel_geteuid_source="$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass/abi_kernel_geteuid_main.flow"
+"$flowmini" --dump-frontend-bundle "$kernel_geteuid_source" > "$tmpdir/kernel-geteuid.bundle.json"
+"$analyst" < "$tmpdir/kernel-geteuid.bundle.json" > "$tmpdir/kernel-geteuid.semantic.json"
+grep -q '"lowering_profile": "abi_kernel_geteuid_main"' "$tmpdir/kernel-geteuid.semantic.json"
+"$bind" --policy "$policy" < "$tmpdir/kernel-geteuid.semantic.json" > "$tmpdir/kernel-geteuid.binding.json"
+"$parallel" < "$tmpdir/kernel-geteuid.semantic.json" > "$tmpdir/kernel-geteuid.parallel.json"
+"$optimizer" < "$tmpdir/kernel-geteuid.parallel.json" > "$tmpdir/kernel-geteuid.optimized.json"
+"$lowerer" --emit-llvm "$tmpdir/kernel-geteuid.ll" --binding-report "$tmpdir/kernel-geteuid.binding.json" < "$tmpdir/kernel-geteuid.optimized.json" > "$tmpdir/kernel-geteuid.lowering.json"
+grep -q '"status": "emitted"' "$tmpdir/kernel-geteuid.lowering.json"
+grep -q 'call i32 @geteuid' "$tmpdir/kernel-geteuid.ll"
+clang "$tmpdir/kernel-geteuid.ll" -o "$tmpdir/kernel-geteuid"
+expected_euid=$(id -u)
+set +e
+"$tmpdir/kernel-geteuid"
+actual_euid=$?
+set -e
+test "$actual_euid" -eq $((expected_euid % 256))
+
+kernel_getegid_source="$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass/abi_kernel_getegid_main.flow"
+"$flowmini" --dump-frontend-bundle "$kernel_getegid_source" > "$tmpdir/kernel-getegid.bundle.json"
+"$analyst" < "$tmpdir/kernel-getegid.bundle.json" > "$tmpdir/kernel-getegid.semantic.json"
+grep -q '"lowering_profile": "abi_kernel_getegid_main"' "$tmpdir/kernel-getegid.semantic.json"
+"$bind" --policy "$policy" < "$tmpdir/kernel-getegid.semantic.json" > "$tmpdir/kernel-getegid.binding.json"
+"$parallel" < "$tmpdir/kernel-getegid.semantic.json" > "$tmpdir/kernel-getegid.parallel.json"
+"$optimizer" < "$tmpdir/kernel-getegid.parallel.json" > "$tmpdir/kernel-getegid.optimized.json"
+"$lowerer" --emit-llvm "$tmpdir/kernel-getegid.ll" --binding-report "$tmpdir/kernel-getegid.binding.json" < "$tmpdir/kernel-getegid.optimized.json" > "$tmpdir/kernel-getegid.lowering.json"
+grep -q '"status": "emitted"' "$tmpdir/kernel-getegid.lowering.json"
+grep -q 'call i32 @getegid' "$tmpdir/kernel-getegid.ll"
+clang "$tmpdir/kernel-getegid.ll" -o "$tmpdir/kernel-getegid"
+expected_egid=$(id -g)
+set +e
+"$tmpdir/kernel-getegid"
+actual_egid=$?
+set -e
+test "$actual_egid" -eq $((expected_egid % 256))
+
+kernel_getppid_source="$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass/abi_kernel_getppid_main.flow"
+"$flowmini" --dump-frontend-bundle "$kernel_getppid_source" > "$tmpdir/kernel-getppid.bundle.json"
+"$analyst" < "$tmpdir/kernel-getppid.bundle.json" > "$tmpdir/kernel-getppid.semantic.json"
+grep -q '"lowering_profile": "abi_kernel_getppid_main"' "$tmpdir/kernel-getppid.semantic.json"
+"$bind" --policy "$policy" < "$tmpdir/kernel-getppid.semantic.json" > "$tmpdir/kernel-getppid.binding.json"
+"$parallel" < "$tmpdir/kernel-getppid.semantic.json" > "$tmpdir/kernel-getppid.parallel.json"
+"$optimizer" < "$tmpdir/kernel-getppid.parallel.json" > "$tmpdir/kernel-getppid.optimized.json"
+"$lowerer" --emit-llvm "$tmpdir/kernel-getppid.ll" --binding-report "$tmpdir/kernel-getppid.binding.json" < "$tmpdir/kernel-getppid.optimized.json" > "$tmpdir/kernel-getppid.lowering.json"
+grep -q '"status": "emitted"' "$tmpdir/kernel-getppid.lowering.json"
+grep -q 'call i32 @getppid' "$tmpdir/kernel-getppid.ll"
+clang "$tmpdir/kernel-getppid.ll" -o "$tmpdir/kernel-getppid"
+expected_ppid=$$
+set +e
+"$tmpdir/kernel-getppid"
+actual_ppid=$?
+set -e
+test "$actual_ppid" -eq $((expected_ppid % 256))
+
+kernel_getpgrp_source="$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass/abi_kernel_getpgrp_main.flow"
+"$flowmini" --dump-frontend-bundle "$kernel_getpgrp_source" > "$tmpdir/kernel-getpgrp.bundle.json"
+"$analyst" < "$tmpdir/kernel-getpgrp.bundle.json" > "$tmpdir/kernel-getpgrp.semantic.json"
+grep -q '"lowering_profile": "abi_kernel_getpgrp_main"' "$tmpdir/kernel-getpgrp.semantic.json"
+"$bind" --policy "$policy" < "$tmpdir/kernel-getpgrp.semantic.json" > "$tmpdir/kernel-getpgrp.binding.json"
+"$parallel" < "$tmpdir/kernel-getpgrp.semantic.json" > "$tmpdir/kernel-getpgrp.parallel.json"
+"$optimizer" < "$tmpdir/kernel-getpgrp.parallel.json" > "$tmpdir/kernel-getpgrp.optimized.json"
+"$lowerer" --emit-llvm "$tmpdir/kernel-getpgrp.ll" --binding-report "$tmpdir/kernel-getpgrp.binding.json" < "$tmpdir/kernel-getpgrp.optimized.json" > "$tmpdir/kernel-getpgrp.lowering.json"
+grep -q '"status": "emitted"' "$tmpdir/kernel-getpgrp.lowering.json"
+grep -q 'call i32 @getpgrp' "$tmpdir/kernel-getpgrp.ll"
+clang "$tmpdir/kernel-getpgrp.ll" -o "$tmpdir/kernel-getpgrp"
+expected_pgrp=$(ps -o pgid= -p $$ | tr -d ' ')
+set +e
+"$tmpdir/kernel-getpgrp"
+actual_pgrp=$?
+set -e
+test "$actual_pgrp" -eq $((expected_pgrp % 256))
+
+kernel_getpgid_source="$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass/abi_kernel_getpgid_main.flow"
+"$flowmini" --dump-frontend-bundle "$kernel_getpgid_source" > "$tmpdir/kernel-getpgid.bundle.json"
+"$analyst" < "$tmpdir/kernel-getpgid.bundle.json" > "$tmpdir/kernel-getpgid.semantic.json"
+grep -q '"lowering_profile": "abi_kernel_getpgid_main"' "$tmpdir/kernel-getpgid.semantic.json"
+"$bind" --policy "$policy" < "$tmpdir/kernel-getpgid.semantic.json" > "$tmpdir/kernel-getpgid.binding.json"
+"$parallel" < "$tmpdir/kernel-getpgid.semantic.json" > "$tmpdir/kernel-getpgid.parallel.json"
+"$optimizer" < "$tmpdir/kernel-getpgid.parallel.json" > "$tmpdir/kernel-getpgid.optimized.json"
+"$lowerer" --emit-llvm "$tmpdir/kernel-getpgid.ll" --binding-report "$tmpdir/kernel-getpgid.binding.json" < "$tmpdir/kernel-getpgid.optimized.json" > "$tmpdir/kernel-getpgid.lowering.json"
+grep -q '"status": "emitted"' "$tmpdir/kernel-getpgid.lowering.json"
+grep -q 'call i32 @getpgid' "$tmpdir/kernel-getpgid.ll"
+clang "$tmpdir/kernel-getpgid.ll" -o "$tmpdir/kernel-getpgid"
+expected_pgpid=$(ps -o pgid= -p $$ | tr -d ' ')
+set +e
+"$tmpdir/kernel-getpgid"
+actual_pgpid=$?
+set -e
+test "$actual_pgpid" -eq $((expected_pgpid % 256))
+
+kernel_getsid_source="$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass/abi_kernel_getsid_main.flow"
+"$flowmini" --dump-frontend-bundle "$kernel_getsid_source" > "$tmpdir/kernel-getsid.bundle.json"
+"$analyst" < "$tmpdir/kernel-getsid.bundle.json" > "$tmpdir/kernel-getsid.semantic.json"
+grep -q '"lowering_profile": "abi_kernel_getsid_main"' "$tmpdir/kernel-getsid.semantic.json"
+"$bind" --policy "$policy" < "$tmpdir/kernel-getsid.semantic.json" > "$tmpdir/kernel-getsid.binding.json"
+"$parallel" < "$tmpdir/kernel-getsid.semantic.json" > "$tmpdir/kernel-getsid.parallel.json"
+"$optimizer" < "$tmpdir/kernel-getsid.parallel.json" > "$tmpdir/kernel-getsid.optimized.json"
+"$lowerer" --emit-llvm "$tmpdir/kernel-getsid.ll" --binding-report "$tmpdir/kernel-getsid.binding.json" < "$tmpdir/kernel-getsid.optimized.json" > "$tmpdir/kernel-getsid.lowering.json"
+grep -q '"status": "emitted"' "$tmpdir/kernel-getsid.lowering.json"
+grep -q 'call i32 @getsid' "$tmpdir/kernel-getsid.ll"
+clang "$tmpdir/kernel-getsid.ll" -o "$tmpdir/kernel-getsid"
+expected_sid=$(ps -o sid= -p $$ | tr -d ' ')
+set +e
+"$tmpdir/kernel-getsid"
+actual_sid=$?
+set -e
+test "$actual_sid" -eq $((expected_sid % 256))
+
+kernel_getpriority_source="$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass/abi_kernel_getpriority_main.flow"
+"$flowmini" --dump-frontend-bundle "$kernel_getpriority_source" > "$tmpdir/kernel-getpriority.bundle.json"
+"$analyst" < "$tmpdir/kernel-getpriority.bundle.json" > "$tmpdir/kernel-getpriority.semantic.json"
+grep -q '"lowering_profile": "abi_kernel_getpriority_main"' "$tmpdir/kernel-getpriority.semantic.json"
+"$bind" --policy "$policy" < "$tmpdir/kernel-getpriority.semantic.json" > "$tmpdir/kernel-getpriority.binding.json"
+"$parallel" < "$tmpdir/kernel-getpriority.semantic.json" > "$tmpdir/kernel-getpriority.parallel.json"
+"$optimizer" < "$tmpdir/kernel-getpriority.parallel.json" > "$tmpdir/kernel-getpriority.optimized.json"
+"$lowerer" --emit-llvm "$tmpdir/kernel-getpriority.ll" --binding-report "$tmpdir/kernel-getpriority.binding.json" < "$tmpdir/kernel-getpriority.optimized.json" > "$tmpdir/kernel-getpriority.lowering.json"
+grep -q '"status": "emitted"' "$tmpdir/kernel-getpriority.lowering.json"
+grep -q 'call i32 @getpriority' "$tmpdir/kernel-getpriority.ll"
+clang "$tmpdir/kernel-getpriority.ll" -o "$tmpdir/kernel-getpriority"
+expected_priority=$(ps -o ni= -p $$ | tr -d ' ')
+set +e
+"$tmpdir/kernel-getpriority"
+actual_priority=$?
+set -e
+test "$actual_priority" -eq "$expected_priority"
 
 kernel_clock_source="$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass/abi_kernel_clock_main.flow"
 "$flowmini" --dump-frontend-bundle "$kernel_clock_source" > "$tmpdir/kernel-clock.bundle.json"

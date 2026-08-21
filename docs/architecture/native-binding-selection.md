@@ -9,7 +9,8 @@ host inventory
         -> namespace assignment
             -> bind an existing provider OR implement Flowcore-owned behavior
                 -> contract and policy review
-                    -> binding/lowering implementation
+                    -> generated binding artifacts
+                        -> binding/lowering implementation
 ```
 
 Each selection has a canonical namespace, a capability identity, a contract,
@@ -23,6 +24,17 @@ Neither choice authorizes execution, loads a library, or generates a binding.
 Those remain later policy and implementation stages. This prevents discovery
 from silently becoming authority and lets us choose portability, correctness,
 or substrate compatibility capability by capability.
+
+For explicit ABI facts, `tools/generate-flow-bindings.sh` is the canonical
+artifact-generation step. It verifies the selected provider and exported
+symbols, then emits a Flow namespace module, policy grants, and a hashed
+provider-evidence manifest. Signatures, effects, and ownership remain explicit
+review inputs; the generator does not guess them from ELF names.
+
+Its specification contract is:
+
+* `docs/architecture/schemas/flowcore-native-binding-spec-v1.json`;
+* `docs/architecture/schemas/flowcore-native-binding-spec-v1.example.json`.
 
 The machine-readable schema and example are:
 

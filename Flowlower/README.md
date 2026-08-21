@@ -8,7 +8,15 @@ source -> Flowmini -> Flowanalyst -> Flowparallel -> Flowoptimize -> Flowlower
 
 The first target provider is `llvm`. The implementation supports narrow
 source-derived profiles, including the executable `flowcat_file_main`,
-`abi_kernel_getpid_main`, `abi_kernel_clock_main`, and
+`abi_kernel_getpid_main`, `abi_kernel_getuid_main`, `abi_kernel_getgid_main`,
+`abi_kernel_geteuid_main`,
+`abi_kernel_getegid_main`,
+`abi_kernel_getppid_main`,
+`abi_kernel_getpgrp_main`,
+`abi_kernel_getpgid_main`,
+`abi_kernel_getsid_main`,
+`abi_kernel_getpriority_main`,
+`abi_kernel_clock_main`, and
 `abi_kernel_random_main` profiles, and emits valid
 LLVM modules for them. General source lowering remains a later expansion; every
 emitted profile must be explicit, policy-authorized where it uses external

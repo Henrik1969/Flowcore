@@ -1,0 +1,9 @@
+import "../../std/abi/kernel.flow" as linux
+
+program abi_kernel_getsid_main
+
+main {
+    process : c_int(0)
+    session : c_int(0)
+    linux.getsid(process) -> session
+}

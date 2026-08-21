@@ -89,6 +89,20 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
     const bool abi_ncurses_profile = has(report, "\"lowering_profile\": \"abi_ncurses_main\"") || has(report, "\"lowering_profile\":\"abi_ncurses_main\"");
     const bool sel_profile = has(report, "\"lowering_profile\": \"sel_main\"") || has(report, "\"lowering_profile\":\"sel_main\"");
     const bool abi_kernel_getpid_profile = has(report, "\"lowering_profile\": \"abi_kernel_getpid_main\"") || has(report, "\"lowering_profile\":\"abi_kernel_getpid_main\"");
+    const bool abi_kernel_getuid_profile = has(report, "\"lowering_profile\": \"abi_kernel_getuid_main\"") || has(report, "\"lowering_profile\":\"abi_kernel_getuid_main\"");
+    const bool abi_kernel_getgid_profile = has(report, "\"lowering_profile\": \"abi_kernel_getgid_main\"") || has(report, "\"lowering_profile\":\"abi_kernel_getgid_main\"");
+    const bool abi_kernel_geteuid_profile = has(report, "\"lowering_profile\": \"abi_kernel_geteuid_main\"") || has(report, "\"lowering_profile\":\"abi_kernel_geteuid_main\"");
+    const bool abi_kernel_getegid_profile = has(report, "\"lowering_profile\": \"abi_kernel_getegid_main\"") || has(report, "\"lowering_profile\":\"abi_kernel_getegid_main\"");
+    const bool abi_kernel_getppid_profile = has(report, "\"lowering_profile\": \"abi_kernel_getppid_main\"") || has(report, "\"lowering_profile\":\"abi_kernel_getppid_main\"");
+    const bool abi_kernel_getpgrp_profile = has(report, "\"lowering_profile\": \"abi_kernel_getpgrp_main\"") || has(report, "\"lowering_profile\":\"abi_kernel_getpgrp_main\"");
+    const bool abi_kernel_getpgid_profile = has(report, "\"lowering_profile\": \"abi_kernel_getpgid_main\"") || has(report, "\"lowering_profile\":\"abi_kernel_getpgid_main\"");
+    const bool abi_kernel_getsid_profile = has(report, "\"lowering_profile\": \"abi_kernel_getsid_main\"") || has(report, "\"lowering_profile\":\"abi_kernel_getsid_main\"");
+    const bool abi_kernel_getpriority_profile = has(report, "\"lowering_profile\": \"abi_kernel_getpriority_main\"") || has(report, "\"lowering_profile\":\"abi_kernel_getpriority_main\"");
+    const bool generated_getlogin_profile = has(report, "\"lowering_profile\": \"generated_getlogin_main\"") || has(report, "\"lowering_profile\":\"generated_getlogin_main\"");
+    const bool generated_gettid_profile = has(report, "\"lowering_profile\": \"generated_gettid_main\"") || has(report, "\"lowering_profile\":\"generated_gettid_main\"");
+    const bool generated_sysconf_profile = has(report, "\"lowering_profile\": \"generated_sysconf_main\"") || has(report, "\"lowering_profile\":\"generated_sysconf_main\"");
+    const bool generated_getauxval_profile = has(report, "\"lowering_profile\": \"generated_getauxval_main\"") || has(report, "\"lowering_profile\":\"generated_getauxval_main\"");
+    const bool generated_system_info_profile = has(report, "\"lowering_profile\": \"generated_system_info_main\"") || has(report, "\"lowering_profile\":\"generated_system_info_main\"");
     const bool abi_kernel_clock_profile = has(report, "\"lowering_profile\": \"abi_kernel_clock_main\"") || has(report, "\"lowering_profile\":\"abi_kernel_clock_main\"");
     const bool abi_kernel_random_profile = has(report, "\"lowering_profile\": \"abi_kernel_random_main\"") || has(report, "\"lowering_profile\":\"abi_kernel_random_main\"");
     const bool abi_kernel_uname_profile = has(report, "\"lowering_profile\": \"abi_kernel_uname_main\"") || has(report, "\"lowering_profile\":\"abi_kernel_uname_main\"");
@@ -106,6 +120,20 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
     if (abi_ncurses_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"abi_ncurses_main\"") || !has(binding_report, "\"initscr\"") || !has(binding_report, "\"endwin\"") || !has(binding_report, "\"waddnstr\"") || !has(binding_report, "\"wrefresh\""))) throw std::runtime_error("ABI binding report does not authorize the abi_ncurses_main lowering profile");
     if (sel_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"sel_main\"") || !has(binding_report, "\"initscr\"") || !has(binding_report, "\"endwin\"") || !has(binding_report, "\"wgetch\"") || !has(binding_report, "\"keypad\"") || !has(binding_report, "\"puts\"") || !has(binding_report, "\"read\""))) throw std::runtime_error("ABI binding report does not authorize the sel_main lowering profile");
     if (abi_kernel_getpid_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"abi_kernel_getpid_main\"") || !has(binding_report, "\"kind\": \"external_call\"") || !has(binding_report, "\"getpid\""))) throw std::runtime_error("ABI binding report does not authorize the abi_kernel_getpid_main lowering profile");
+    if (abi_kernel_getuid_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"abi_kernel_getuid_main\"") || !has(binding_report, "\"kind\": \"external_call\"") || !has(binding_report, "\"getuid\""))) throw std::runtime_error("ABI binding report does not authorize the abi_kernel_getuid_main lowering profile");
+    if (abi_kernel_getgid_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"abi_kernel_getgid_main\"") || !has(binding_report, "\"kind\": \"external_call\"") || !has(binding_report, "\"getgid\""))) throw std::runtime_error("ABI binding report does not authorize the abi_kernel_getgid_main lowering profile");
+    if (abi_kernel_geteuid_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"abi_kernel_geteuid_main\"") || !has(binding_report, "\"kind\": \"external_call\"") || !has(binding_report, "\"geteuid\""))) throw std::runtime_error("ABI binding report does not authorize the abi_kernel_geteuid_main lowering profile");
+    if (abi_kernel_getegid_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"abi_kernel_getegid_main\"") || !has(binding_report, "\"kind\": \"external_call\"") || !has(binding_report, "\"getegid\""))) throw std::runtime_error("ABI binding report does not authorize the abi_kernel_getegid_main lowering profile");
+    if (abi_kernel_getppid_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"abi_kernel_getppid_main\"") || !has(binding_report, "\"kind\": \"external_call\"") || !has(binding_report, "\"getppid\""))) throw std::runtime_error("ABI binding report does not authorize the abi_kernel_getppid_main lowering profile");
+    if (abi_kernel_getpgrp_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"abi_kernel_getpgrp_main\"") || !has(binding_report, "\"kind\": \"external_call\"") || !has(binding_report, "\"getpgrp\""))) throw std::runtime_error("ABI binding report does not authorize the abi_kernel_getpgrp_main lowering profile");
+    if (abi_kernel_getpgid_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"abi_kernel_getpgid_main\"") || !has(binding_report, "\"kind\": \"external_call\"") || !has(binding_report, "\"getpgid\""))) throw std::runtime_error("ABI binding report does not authorize the abi_kernel_getpgid_main lowering profile");
+    if (abi_kernel_getsid_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"abi_kernel_getsid_main\"") || !has(binding_report, "\"kind\": \"external_call\"") || !has(binding_report, "\"getsid\""))) throw std::runtime_error("ABI binding report does not authorize the abi_kernel_getsid_main lowering profile");
+    if (abi_kernel_getpriority_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"abi_kernel_getpriority_main\"") || !has(binding_report, "\"kind\": \"external_call\"") || !has(binding_report, "\"getpriority\""))) throw std::runtime_error("ABI binding report does not authorize the abi_kernel_getpriority_main lowering profile");
+    if (generated_getlogin_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"generated_getlogin_main\"") || !has(binding_report, "\"getlogin\"") || !has(binding_report, "\"puts\""))) throw std::runtime_error("ABI binding report does not authorize the generated_getlogin_main lowering profile");
+    if (generated_gettid_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"generated_gettid_main\"") || !has(binding_report, "\"gettid\""))) throw std::runtime_error("ABI binding report does not authorize the generated_gettid_main lowering profile");
+    if (generated_sysconf_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"generated_sysconf_main\"") || !has(binding_report, "\"sysconf\""))) throw std::runtime_error("ABI binding report does not authorize the generated_sysconf_main lowering profile");
+    if (generated_getauxval_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"generated_getauxval_main\"") || !has(binding_report, "\"getauxval\""))) throw std::runtime_error("ABI binding report does not authorize the generated_getauxval_main lowering profile");
+    if (generated_system_info_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"generated_system_info_main\"") || !has(binding_report, "\"getpagesize\"") || !has(binding_report, "\"get_nprocs\"") || !has(binding_report, "\"get_nprocs_conf\"") || !has(binding_report, "\"get_phys_pages\"") || !has(binding_report, "\"get_avphys_pages\""))) throw std::runtime_error("ABI binding report does not authorize the generated_system_info_main lowering profile");
     if (abi_kernel_clock_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"abi_kernel_clock_main\"") || !has(binding_report, "\"kind\": \"external_call\"") || !has(binding_report, "\"clock_gettime\""))) throw std::runtime_error("ABI binding report does not authorize the abi_kernel_clock_main lowering profile");
     if (abi_kernel_random_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"abi_kernel_random_main\"") || !has(binding_report, "\"kind\": \"external_call\"") || !has(binding_report, "\"getrandom\""))) throw std::runtime_error("ABI binding report does not authorize the abi_kernel_random_main lowering profile");
     if (abi_kernel_uname_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"abi_kernel_uname_main\"") || !has(binding_report, "\"kind\": \"external_call\"") || !has(binding_report, "\"uname\""))) throw std::runtime_error("ABI binding report does not authorize the abi_kernel_uname_main lowering profile");
@@ -117,7 +145,7 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
     if (remaining_kernel_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"kind\": \"external_call\""))) throw std::runtime_error("ABI binding report does not authorize the remaining kernel lowering profile");
     if (flowcat_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"flowcat_argv_main\"") || !has(binding_report, "\"kind\": \"external_call\"") || !has(binding_report, "\"puts\""))) throw std::runtime_error("ABI binding report does not authorize the flowcat_argv_main lowering profile");
     if (flowcat_file_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"flowcat_file_main\"") || !has(binding_report, "\"kind\": \"capability_sequence\"") || !has(binding_report, "\"open\"") || !has(binding_report, "\"read\"") || !has(binding_report, "\"write\"") || !has(binding_report, "\"close\""))) throw std::runtime_error("ABI binding report does not authorize the flowcat_file_main lowering profile");
-    if (!llvm_path.empty() && !trial_profile && !abi_abs_profile && !abi_strlen_profile && !test_licbinds_profile && !abi_ncurses_profile && !sel_profile && !abi_kernel_getpid_profile && !abi_kernel_clock_profile && !abi_kernel_random_profile && !abi_kernel_uname_profile && !abi_kernel_openat_profile && !abi_kernel_read_profile && !abi_kernel_write_profile && !abi_kernel_lseek_profile && !abi_kernel_unlinkat_profile && !remaining_kernel_profile && !flowcat_profile && !flowcat_file_profile) throw std::runtime_error("LLVM emission requires an accepted lowering profile");
+    if (!llvm_path.empty() && !trial_profile && !abi_abs_profile && !abi_strlen_profile && !test_licbinds_profile && !abi_ncurses_profile && !sel_profile && !abi_kernel_getpid_profile && !abi_kernel_getuid_profile && !abi_kernel_getgid_profile && !abi_kernel_geteuid_profile && !abi_kernel_getegid_profile && !abi_kernel_getppid_profile && !abi_kernel_getpgrp_profile && !abi_kernel_getpgid_profile && !abi_kernel_getsid_profile && !abi_kernel_getpriority_profile && !generated_getlogin_profile && !generated_gettid_profile && !generated_sysconf_profile && !generated_getauxval_profile && !generated_system_info_profile && !abi_kernel_clock_profile && !abi_kernel_random_profile && !abi_kernel_uname_profile && !abi_kernel_openat_profile && !abi_kernel_read_profile && !abi_kernel_write_profile && !abi_kernel_lseek_profile && !abi_kernel_unlinkat_profile && !remaining_kernel_profile && !flowcat_profile && !flowcat_file_profile) throw std::runtime_error("LLVM emission requires an accepted lowering profile");
     if (!llvm_path.empty()) {
         std::ofstream llvm(llvm_path); if (!llvm) throw std::runtime_error("cannot open LLVM output");
         llvm << "; Flowcore target artifact: " << selected_target << "\n";
@@ -226,6 +254,174 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
                     "cancel:\n"
                     "  %cancel_printed = call i32 @puts(ptr @flowcore_sel_cancel)\n"
                     "  ret i32 1\n"
+                    "}\n";
+        } else if (abi_kernel_getuid_profile) {
+            llvm << "; Flowcore kernel ABI lowering: getuid\n"
+                    "target triple = \"x86_64-pc-linux-gnu\"\n"
+                    "declare i32 @getuid()\n"
+                    "define i32 @main() {\n"
+                    "entry:\n"
+                    "  %user = call i32 @getuid()\n"
+                    "  ret i32 %user\n"
+                    "}\n";
+        } else if (abi_kernel_geteuid_profile) {
+            llvm << "; Flowcore kernel ABI lowering: geteuid\n"
+                    "target triple = \"x86_64-pc-linux-gnu\"\n"
+                    "declare i32 @geteuid()\n"
+                    "define i32 @main() {\n"
+                    "entry:\n"
+                    "  %effective_user = call i32 @geteuid()\n"
+                    "  ret i32 %effective_user\n"
+                    "}\n";
+        } else if (abi_kernel_getegid_profile) {
+            llvm << "; Flowcore kernel ABI lowering: getegid\n"
+                    "target triple = \"x86_64-pc-linux-gnu\"\n"
+                    "declare i32 @getegid()\n"
+                    "define i32 @main() {\n"
+                    "entry:\n"
+                    "  %effective_group = call i32 @getegid()\n"
+                    "  ret i32 %effective_group\n"
+                    "}\n";
+        } else if (abi_kernel_getppid_profile) {
+            llvm << "; Flowcore kernel ABI lowering: getppid\n"
+                    "target triple = \"x86_64-pc-linux-gnu\"\n"
+                    "declare i32 @getppid()\n"
+                    "define i32 @main() {\n"
+                    "entry:\n"
+                    "  %parent = call i32 @getppid()\n"
+                    "  ret i32 %parent\n"
+                    "}\n";
+        } else if (abi_kernel_getpgrp_profile) {
+            llvm << "; Flowcore kernel ABI lowering: getpgrp\n"
+                    "target triple = \"x86_64-pc-linux-gnu\"\n"
+                    "declare i32 @getpgrp()\n"
+                    "define i32 @main() {\n"
+                    "entry:\n"
+                    "  %group = call i32 @getpgrp()\n"
+                    "  ret i32 %group\n"
+                    "}\n";
+        } else if (abi_kernel_getpgid_profile) {
+            llvm << "; Flowcore kernel ABI lowering: getpgid\n"
+                    "target triple = \"x86_64-pc-linux-gnu\"\n"
+                    "declare i32 @getpgid(i32)\n"
+                    "define i32 @main() {\n"
+                    "entry:\n"
+                    "  %group = call i32 @getpgid(i32 0)\n"
+                    "  ret i32 %group\n"
+                    "}\n";
+        } else if (abi_kernel_getsid_profile) {
+            llvm << "; Flowcore kernel ABI lowering: getsid\n"
+                    "target triple = \"x86_64-pc-linux-gnu\"\n"
+                    "declare i32 @getsid(i32)\n"
+                    "define i32 @main() {\n"
+                    "entry:\n"
+                    "  %session = call i32 @getsid(i32 0)\n"
+                    "  ret i32 %session\n"
+                    "}\n";
+        } else if (abi_kernel_getpriority_profile) {
+            llvm << "; Flowcore kernel ABI lowering: getpriority\n"
+                    "target triple = \"x86_64-pc-linux-gnu\"\n"
+                    "declare i32 @getpriority(i32, i32)\n"
+                    "define i32 @main() {\n"
+                    "entry:\n"
+                    "  %priority = call i32 @getpriority(i32 0, i32 0)\n"
+                    "  ret i32 %priority\n"
+                    "}\n";
+        } else if (generated_getlogin_profile) {
+            llvm << "; Flowcore generated ABI lowering: getlogin + puts\n"
+                    "target triple = \"x86_64-pc-linux-gnu\"\n"
+                    "@flowcore_login_fallback = private unnamed_addr constant [9 x i8] c\"no-login\\00\"\n"
+                    "declare ptr @getlogin()\n"
+                    "declare i32 @puts(ptr)\n"
+                    "define i32 @main() {\n"
+                    "entry:\n"
+                    "  %login = call ptr @getlogin()\n"
+                    "  %missing = icmp eq ptr %login, null\n"
+                    "  %fallback = getelementptr [9 x i8], ptr @flowcore_login_fallback, i64 0, i64 0\n"
+                    "  %selected = select i1 %missing, ptr %fallback, ptr %login\n"
+                    "  call i32 @puts(ptr %selected)\n"
+                    "  ret i32 0\n"
+                    "}\n";
+        } else if (generated_gettid_profile) {
+            llvm << "; Flowcore generated ABI lowering: gettid\n"
+                    "target triple = \"x86_64-pc-linux-gnu\"\n"
+                    "declare i32 @gettid()\n"
+                    "define i32 @main() {\n"
+                    "entry:\n"
+                    "  %thread = call i32 @gettid()\n"
+                    "  %valid = icmp sge i32 %thread, 0\n"
+                    "  br i1 %valid, label %ok, label %error\n"
+                    "ok:\n"
+                    "  ret i32 0\n"
+                    "error:\n"
+                    "  ret i32 1\n"
+                    "}\n";
+        } else if (generated_sysconf_profile) {
+            llvm << "; Flowcore generated ABI lowering: sysconf\n"
+                    "target triple = \"x86_64-pc-linux-gnu\"\n"
+                    "declare i64 @sysconf(i32)\n"
+                    "define i32 @main() {\n"
+                    "entry:\n"
+                    "  %pagesize = call i64 @sysconf(i32 30)\n"
+                    "  %valid = icmp sgt i64 %pagesize, 0\n"
+                    "  br i1 %valid, label %ok, label %error\n"
+                    "ok:\n"
+                    "  ret i32 0\n"
+                    "error:\n"
+                    "  ret i32 1\n"
+                    "}\n";
+        } else if (generated_getauxval_profile) {
+            llvm << "; Flowcore generated ABI lowering: getauxval\n"
+                    "target triple = \"x86_64-pc-linux-gnu\"\n"
+                    "declare i64 @getauxval(i64)\n"
+                    "define i32 @main() {\n"
+                    "entry:\n"
+                    "  %pagesize = call i64 @getauxval(i64 6)\n"
+                    "  %valid = icmp sgt i64 %pagesize, 0\n"
+                    "  br i1 %valid, label %ok, label %error\n"
+                    "ok:\n"
+                    "  ret i32 0\n"
+                    "error:\n"
+                    "  ret i32 1\n"
+                    "}\n";
+        } else if (generated_system_info_profile) {
+            llvm << "; Flowcore generated ABI lowering: system information\n"
+                    "target triple = \"x86_64-pc-linux-gnu\"\n"
+                    "declare i32 @getpagesize()\n"
+                    "declare i32 @get_nprocs()\n"
+                    "declare i32 @get_nprocs_conf()\n"
+                    "declare i64 @get_phys_pages()\n"
+                    "declare i64 @get_avphys_pages()\n"
+                    "define i32 @main() {\n"
+                    "entry:\n"
+                    "  %pagesize = call i32 @getpagesize()\n"
+                    "  %nprocs = call i32 @get_nprocs()\n"
+                    "  %nprocs_conf = call i32 @get_nprocs_conf()\n"
+                    "  %phys = call i64 @get_phys_pages()\n"
+                    "  %avphys = call i64 @get_avphys_pages()\n"
+                    "  %pagesize_ok = icmp sgt i32 %pagesize, 0\n"
+                    "  %nprocs_ok = icmp sgt i32 %nprocs, 0\n"
+                    "  %nprocs_conf_ok = icmp sgt i32 %nprocs_conf, 0\n"
+                    "  %phys_ok = icmp sgt i64 %phys, 0\n"
+                    "  %avphys_ok = icmp sgt i64 %avphys, 0\n"
+                    "  %a = and i1 %pagesize_ok, %nprocs_ok\n"
+                    "  %b = and i1 %nprocs_conf_ok, %phys_ok\n"
+                    "  %c = and i1 %a, %b\n"
+                    "  %valid = and i1 %c, %avphys_ok\n"
+                    "  br i1 %valid, label %ok, label %error\n"
+                    "ok:\n"
+                    "  ret i32 0\n"
+                    "error:\n"
+                    "  ret i32 1\n"
+                    "}\n";
+        } else if (abi_kernel_getgid_profile) {
+            llvm << "; Flowcore kernel ABI lowering: getgid\n"
+                    "target triple = \"x86_64-pc-linux-gnu\"\n"
+                    "declare i32 @getgid()\n"
+                    "define i32 @main() {\n"
+                    "entry:\n"
+                    "  %group = call i32 @getgid()\n"
+                    "  ret i32 %group\n"
                     "}\n";
         } else if (abi_kernel_getpid_profile) {
             llvm << "; Flowcore kernel ABI lowering: getpid\n"

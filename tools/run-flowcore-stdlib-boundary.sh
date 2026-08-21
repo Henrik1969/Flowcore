@@ -25,6 +25,15 @@ printf '%s\n' \
   'allow libc.so.6 memset c io' \
   'allow libc.so.6 memcmp c pure' \
   'allow libc.so.6 getpid c readonly' \
+  'allow libc.so.6 getuid c readonly' \
+  'allow libc.so.6 getgid c readonly' \
+  'allow libc.so.6 geteuid c readonly' \
+  'allow libc.so.6 getegid c readonly' \
+  'allow libc.so.6 getppid c readonly' \
+  'allow libc.so.6 getpgrp c readonly' \
+  'allow libc.so.6 getpgid c readonly' \
+  'allow libc.so.6 getsid c readonly' \
+  'allow libc.so.6 getpriority c readonly' \
   'allow libc.so.6 clock_gettime c readonly' \
   'allow libc.so.6 uname c readonly' \
   'allow libc.so.6 getrandom c readonly' \
@@ -63,7 +72,7 @@ check_module libc c_string strlen abs labs puts
 check_module file_io c_pointer open read write close
 check_module pointers c_buffer_read c_buffer_mut c_opaque_handle
 check_module memory c_pointer memcpy memset memcmp
-check_module kernel c_pointer getpid clock_gettime uname getrandom openat read write lseek unlinkat rmdir pipe2 fork waitpid socketpair socket bind listen poll accept4 connect unshare sethostname gethostname
+check_module kernel c_pointer getpid getuid getgid geteuid getegid getppid getpgrp getpgid getsid getpriority clock_gettime uname getrandom openat read write lseek unlinkat rmdir pipe2 fork waitpid socketpair socket bind listen poll accept4 connect unshare sethostname gethostname
 check_module testabi Point point_sum point_weighted_sum
 
 "$testabi_layout" > "$tmpdir/testabi.layout.json"
@@ -115,10 +124,10 @@ kernel_fixture="$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass
 jq -e '
     .status == "ready" and
     .lowering_profile == "none" and
-    (.capabilities | length) == 23 and
+    (.capabilities | length) == 32 and
     ([.capabilities[].symbol] | sort) == [
-      "accept4", "bind", "clock_gettime", "connect", "fork", "gethostname",
-      "getpid", "getrandom", "listen", "lseek", "openat", "pipe2", "poll", "read",
+      "accept4", "bind", "clock_gettime", "connect", "fork", "getegid", "geteuid", "getgid", "gethostname",
+      "getpgid", "getpgrp", "getpid", "getppid", "getpriority", "getrandom", "getsid", "getuid", "listen", "lseek", "openat", "pipe2", "poll", "read",
       "rmdir", "sethostname", "socket", "socketpair", "uname", "unlinkat", "unshare", "waitpid", "write"
     ]
 ' "$tmpdir/kernel.binding.json" >/dev/null
@@ -153,6 +162,6 @@ echo '  declared ABI modules: 6/6 parsed and symbol/type inventories verified'
 echo '  libc capability calls: 4/4 authorized'
 echo '  file I/O capability calls: 4/4 authorized'
 echo '  memory capability calls: 3/3 authorized at binding boundary'
-echo '  kernel capability calls: 23/23 authorized at binding boundary'
+echo '  kernel capability calls: 32/32 authorized at binding boundary'
 echo '  struct provider layout: verified by provider-owned ABI manifest'
 echo '  struct call lowering: intentionally deferred at Flowbind boundary'

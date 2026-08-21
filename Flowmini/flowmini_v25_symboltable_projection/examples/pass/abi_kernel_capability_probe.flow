@@ -10,6 +10,15 @@ main {
     pointer : c_pointer(0)
 
     getpid() -> integer
+    getuid() -> integer
+    getgid() -> integer
+    geteuid() -> integer
+    getegid() -> integer
+    getppid() -> integer
+    getpgrp() -> integer
+    getpgid(integer) -> integer
+    getsid(integer) -> integer
+    getpriority(integer, integer) -> integer
     clock_gettime(integer, pointer) -> integer
     uname(pointer) -> integer
     getrandom(pointer, count, integer) -> long

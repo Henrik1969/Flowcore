@@ -16,6 +16,51 @@ abi kernel {
         symbol "getpid"
         effect readonly
     }
+
+    extern fn getuid(): c_int {
+        symbol "getuid"
+        effect readonly
+    }
+
+    extern fn getgid(): c_int {
+        symbol "getgid"
+        effect readonly
+    }
+
+    extern fn geteuid(): c_int {
+        symbol "geteuid"
+        effect readonly
+    }
+
+    extern fn getegid(): c_int {
+        symbol "getegid"
+        effect readonly
+    }
+
+    extern fn getppid(): c_int {
+        symbol "getppid"
+        effect readonly
+    }
+
+    extern fn getpgrp(): c_int {
+        symbol "getpgrp"
+        effect readonly
+    }
+
+    extern fn getpgid(pid : c_int): c_int {
+        symbol "getpgid"
+        effect readonly
+    }
+
+    extern fn getsid(pid : c_int): c_int {
+        symbol "getsid"
+        effect readonly
+    }
+
+    extern fn getpriority(which : c_int, who : c_int): c_int {
+        symbol "getpriority"
+        effect readonly
+    }
     extern fn clock_gettime(clock : c_int, value : c_pointer): c_int {
         symbol "clock_gettime"
         effect readonly

@@ -171,7 +171,7 @@ int run(const Json& bundle) {
     int resolved_types = 0, unresolved_types = 0;
     const std::vector<std::string> builtin = {"bool", "Bool", "int8", "int16", "int32", "int64", "int128", "uint8", "uint16", "uint32", "uint64", "uint128", "float16", "float32", "float64", "float128", "char8", "char16", "char32", "int", "float", "string", "void"};
     auto is_builtin = [&](const std::string& value) { for (const auto& item : builtin) if (item == value) return true; return false; };
-    const std::vector<std::string> abi_types = {"c_int", "c_long", "c_size_t", "c_string", "c_pointer"};
+    const std::vector<std::string> abi_types = {"c_int", "c_long", "c_ulong", "c_size_t", "c_string", "c_pointer"};
     auto is_abi_type = [&](const std::string& value) { for (const auto& item : abi_types) if (item == value) return true; return false; };
     const std::vector<std::string> intrinsic_types = {"stdin.text", "start.record"};
     auto is_intrinsic_type = [&](const std::string& value) { for (const auto& item : intrinsic_types) if (item == value) return true; return false; };
@@ -374,6 +374,37 @@ int run(const Json& bundle) {
         if (sel_symbols.count("initscr") && sel_symbols.count("endwin") && sel_symbols.count("wgetch") && sel_symbols.count("keypad")) lowering_profile = "sel_main";
     }
     if (text(field(*source_unit, "name")) == "abi_kernel_getpid_main") for (const auto& requirement : binding_requirements) if (requirement.symbol == "getpid" && requirement.parameter_types.empty() && requirement.return_type == "c_int") lowering_profile = "abi_kernel_getpid_main";
+    if (text(field(*source_unit, "name")) == "abi_kernel_getuid_main") for (const auto& requirement : binding_requirements) if (requirement.symbol == "getuid" && requirement.parameter_types.empty() && requirement.return_type == "c_int") lowering_profile = "abi_kernel_getuid_main";
+    if (text(field(*source_unit, "name")) == "abi_kernel_getgid_main") for (const auto& requirement : binding_requirements) if (requirement.symbol == "getgid" && requirement.parameter_types.empty() && requirement.return_type == "c_int") lowering_profile = "abi_kernel_getgid_main";
+    if (text(field(*source_unit, "name")) == "abi_kernel_geteuid_main") for (const auto& requirement : binding_requirements) if (requirement.symbol == "geteuid" && requirement.parameter_types.empty() && requirement.return_type == "c_int") lowering_profile = "abi_kernel_geteuid_main";
+    if (text(field(*source_unit, "name")) == "abi_kernel_getegid_main") for (const auto& requirement : binding_requirements) if (requirement.symbol == "getegid" && requirement.parameter_types.empty() && requirement.return_type == "c_int") lowering_profile = "abi_kernel_getegid_main";
+    if (text(field(*source_unit, "name")) == "abi_kernel_getppid_main") for (const auto& requirement : binding_requirements) if (requirement.symbol == "getppid" && requirement.parameter_types.empty() && requirement.return_type == "c_int") lowering_profile = "abi_kernel_getppid_main";
+    if (text(field(*source_unit, "name")) == "abi_kernel_getpgrp_main") for (const auto& requirement : binding_requirements) if (requirement.symbol == "getpgrp" && requirement.parameter_types.empty() && requirement.return_type == "c_int") lowering_profile = "abi_kernel_getpgrp_main";
+    if (text(field(*source_unit, "name")) == "abi_kernel_getpgid_main") for (const auto& requirement : binding_requirements) if (requirement.symbol == "getpgid" && requirement.parameter_types == "c_int" && requirement.return_type == "c_int") lowering_profile = "abi_kernel_getpgid_main";
+    if (text(field(*source_unit, "name")) == "abi_kernel_getsid_main") for (const auto& requirement : binding_requirements) if (requirement.symbol == "getsid" && requirement.parameter_types == "c_int" && requirement.return_type == "c_int") lowering_profile = "abi_kernel_getsid_main";
+    if (text(field(*source_unit, "name")) == "abi_kernel_getpriority_main") for (const auto& requirement : binding_requirements) if (requirement.symbol == "getpriority" && requirement.parameter_types == "c_int,c_int" && requirement.return_type == "c_int") lowering_profile = "abi_kernel_getpriority_main";
+    if (text(field(*source_unit, "name")) == "generated_getlogin_main") {
+        bool login = false, output = false;
+        for (const auto& requirement : binding_requirements) {
+            login = login || (requirement.symbol == "getlogin" && requirement.parameter_types.empty() && requirement.return_type == "c_string");
+            output = output || (requirement.symbol == "puts" && requirement.parameter_types == "c_string" && requirement.return_type == "c_int");
+        }
+        if (login && output) lowering_profile = "generated_getlogin_main";
+    }
+    if (text(field(*source_unit, "name")) == "generated_gettid_main") for (const auto& requirement : binding_requirements) if (requirement.symbol == "gettid" && requirement.parameter_types.empty() && requirement.return_type == "c_int") lowering_profile = "generated_gettid_main";
+    if (text(field(*source_unit, "name")) == "generated_sysconf_main") for (const auto& requirement : binding_requirements) if (requirement.symbol == "sysconf" && requirement.parameter_types == "c_int" && requirement.return_type == "c_long") lowering_profile = "generated_sysconf_main";
+    if (text(field(*source_unit, "name")) == "generated_getauxval_main") for (const auto& requirement : binding_requirements) if (requirement.symbol == "getauxval" && requirement.parameter_types == "c_ulong" && requirement.return_type == "c_ulong") lowering_profile = "generated_getauxval_main";
+    if (text(field(*source_unit, "name")) == "generated_system_info_main") {
+        bool pagesize = false, nprocs = false, nprocs_conf = false, phys = false, avphys = false;
+        for (const auto& requirement : binding_requirements) {
+            pagesize = pagesize || (requirement.symbol == "getpagesize" && requirement.parameter_types.empty() && requirement.return_type == "c_int");
+            nprocs = nprocs || (requirement.symbol == "get_nprocs" && requirement.parameter_types.empty() && requirement.return_type == "c_int");
+            nprocs_conf = nprocs_conf || (requirement.symbol == "get_nprocs_conf" && requirement.parameter_types.empty() && requirement.return_type == "c_int");
+            phys = phys || (requirement.symbol == "get_phys_pages" && requirement.parameter_types.empty() && requirement.return_type == "c_long");
+            avphys = avphys || (requirement.symbol == "get_avphys_pages" && requirement.parameter_types.empty() && requirement.return_type == "c_long");
+        }
+        if (pagesize && nprocs && nprocs_conf && phys && avphys) lowering_profile = "generated_system_info_main";
+    }
     if (text(field(*source_unit, "name")) == "abi_kernel_clock_main") for (const auto& requirement : binding_requirements) if (requirement.symbol == "clock_gettime" && requirement.parameter_types == "c_int,c_pointer" && requirement.return_type == "c_int") lowering_profile = "abi_kernel_clock_main";
     if (text(field(*source_unit, "name")) == "abi_kernel_random_main") for (const auto& requirement : binding_requirements) if (requirement.symbol == "getrandom" && requirement.parameter_types == "c_pointer,c_size_t,c_int" && requirement.return_type == "c_long") lowering_profile = "abi_kernel_random_main";
     if (text(field(*source_unit, "name")) == "abi_kernel_uname_main") for (const auto& requirement : binding_requirements) if (requirement.symbol == "uname" && requirement.parameter_types == "c_pointer" && requirement.return_type == "c_int") lowering_profile = "abi_kernel_uname_main";
