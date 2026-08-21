@@ -124,15 +124,29 @@ jq -e '
 ' "$tmpdir/kernel.binding.json" >/dev/null
 
 testabi_fixture="$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass/abi_struct_demo.flow"
+"$flowmini" --dump-frontend-bundle "$testabi_fixture" | "$flowanalyst" > "$tmpdir/testabi.semantic.json"
 set +e
-"$flowmini" --dump-frontend-bundle "$testabi_fixture" |
-    "$flowanalyst" |
-    "$flowbind" --policy "$policy" --abi-manifest "$tmpdir/testabi.layout.json" > "$tmpdir/testabi.binding.json"
+"$flowbind" --policy "$policy" --abi-manifest "$tmpdir/testabi.layout.json" < "$tmpdir/testabi.semantic.json" > "$tmpdir/testabi.binding.json"
 testabi_rc=$?
 set -e
 test "$testabi_rc" -eq 2
 jq -e '.status == "blocked" and .aggregate_abi == "verified" and any(.failures[]; contains("aggregate call lowering is not implemented"))' \
     "$tmpdir/testabi.binding.json" >/dev/null
+
+for hostile in wrong-size wrong-offset wrong-order wrong-type wrong-provider duplicate-field; do
+    case "$hostile" in
+        wrong-size) jq '.types[0].size = 16' "$tmpdir/testabi.layout.json" > "$tmpdir/$hostile.json" ;;
+        wrong-offset) jq '.types[0].fields[1].offset = 8' "$tmpdir/testabi.layout.json" > "$tmpdir/$hostile.json" ;;
+        wrong-order) jq '.types[0].fields = [.types[0].fields[1], .types[0].fields[0]]' "$tmpdir/testabi.layout.json" > "$tmpdir/$hostile.json" ;;
+        wrong-type) jq '.types[0].fields[0].type = "c_long"' "$tmpdir/testabi.layout.json" > "$tmpdir/$hostile.json" ;;
+        wrong-provider) jq '.provider = "untrusted-provider"' "$tmpdir/testabi.layout.json" > "$tmpdir/$hostile.json" ;;
+        duplicate-field) jq '.types[0].fields += [.types[0].fields[0]]' "$tmpdir/testabi.layout.json" > "$tmpdir/$hostile.json" ;;
+    esac
+    if "$flowbind" --policy "$policy" --abi-manifest "$tmpdir/$hostile.json" < "$tmpdir/testabi.semantic.json" > "$tmpdir/$hostile.binding.json" 2>/dev/null; then
+        echo "hostile ABI manifest unexpectedly accepted: $hostile" >&2
+        exit 1
+    fi
+done
 
 echo 'Flowcore standard-library boundary: PASS'
 echo '  declared ABI modules: 6/6 parsed and symbol/type inventories verified'

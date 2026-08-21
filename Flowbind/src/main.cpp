@@ -1,4 +1,5 @@
 #include <dlfcn.h>
+#include <cstddef>
 #include <fstream>
 #include <iostream>
 #include <map>
@@ -114,13 +115,29 @@ std::vector<Requirement> requirements(const std::string& report) {
 }
 
 bool manifest_verifies_aggregates(const std::string& report, const std::string& manifest) {
-    if (manifest.find("\"format\":\"flowcore.abi_manifest\"") == std::string::npos && manifest.find("\"format\": \"flowcore.abi_manifest\"") == std::string::npos) throw std::runtime_error("unsupported ABI manifest format");
-    if (manifest.find("\"version\":1") == std::string::npos && manifest.find("\"version\": 1") == std::string::npos) throw std::runtime_error("unsupported ABI manifest version");
+    const auto manifest_format = value(manifest, "format");
+    if (manifest_format != "flowcore.abi_manifest") throw std::runtime_error("unsupported ABI manifest format");
+    if (value(manifest, "provider") != "flowmini_testabi") throw std::runtime_error("unsupported ABI manifest provider");
+    if (value(manifest, "version") != "") throw std::runtime_error("ABI manifest version must be numeric");
+    if (manifest.find("\"version\"\\s*:\\s*1") == std::string::npos && manifest.find("\"version\":1") == std::string::npos && manifest.find("\"version\": 1") == std::string::npos) throw std::runtime_error("unsupported ABI manifest version");
     const auto layouts = report.find("\"aggregate_abi_layouts\"");
     if (layouts == std::string::npos) return false;
     const auto point = report.find("\"name\":\"Point\"", layouts);
-    if (point != std::string::npos && manifest.find("\"name\":\"Point\"") == std::string::npos && manifest.find("\"name\": \"Point\"") == std::string::npos) throw std::runtime_error("ABI manifest does not declare aggregate Point");
-    return point != std::string::npos;
+    if (point == std::string::npos) return false;
+    auto count = [](const std::string& input, const std::string& needle) { std::size_t result = 0; for (std::size_t at = 0; (at = input.find(needle, at)) != std::string::npos; at += needle.size()) ++result; return result; };
+    if (count(manifest, "\"name\":\"Point\"") + count(manifest, "\"name\": \"Point\"") != 1) throw std::runtime_error("ABI manifest must contain exactly one Point layout");
+    const auto number = [](const std::string& input, const std::string& key) -> long long {
+        const std::regex pattern("\\\"" + key + "\\\"\\s*:\\s*(-?[0-9]+)"); std::smatch match;
+        if (!std::regex_search(input, match, pattern)) throw std::runtime_error("ABI manifest is missing numeric field '" + key + "'");
+        return std::stoll(match[1].str());
+    };
+    if (number(manifest, "version") != 1 || number(manifest, "size") != static_cast<long long>(2 * sizeof(int)) || number(manifest, "alignment") != static_cast<long long>(alignof(int))) throw std::runtime_error("ABI manifest Point size/alignment does not match the provider ABI");
+    const auto x = manifest.find("\"name\":\"x\",\"type\":\"c_int\",\"offset\":0");
+    const auto y = manifest.find("\"name\":\"y\",\"type\":\"c_int\",\"offset\":" + std::to_string(sizeof(int)));
+    if (x == std::string::npos || y == std::string::npos || x > y) throw std::runtime_error("ABI manifest Point fields do not match ordered provider layout");
+    if (count(manifest, "\"name\":\"x\"") + count(manifest, "\"name\": \"x\"") != 1 || count(manifest, "\"name\":\"y\"") + count(manifest, "\"name\": \"y\"") != 1) throw std::runtime_error("ABI manifest Point fields must be unique");
+    if (report.find("\"name\":\"x\"", point) == std::string::npos || report.find("\"name\":\"y\"", point) == std::string::npos) throw std::runtime_error("ABI manifest fields do not match semantic aggregate layout");
+    return true;
 }
 
 int verify(const std::string& report, const std::string& policy_path, const std::string& abi_manifest_path) {
