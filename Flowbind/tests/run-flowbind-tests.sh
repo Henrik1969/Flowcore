@@ -12,7 +12,7 @@ test -x "$bin"
 policy=$(mktemp)
 trap 'rm -f "$policy"' EXIT
 printf '%s\n' \
-  'allow libc.so.6 strlen c pure' \
+  'allow libc.so.6 strlen c pure c_string c_size_t' \
   'allow libc.so.6 abs c pure' \
   'allow libc.so.6 labs c pure' \
   'allow libc.so.6 puts c io' \
@@ -25,7 +25,15 @@ printf '%s\n' \
 report=$("$flowmini" --dump-frontend-bundle "$fixture" | "$flowanalyst" | "$bin" --policy "$policy")
 printf '%s\n' "$report" | grep -q '"status": "ready"'
 printf '%s\n' "$report" | grep -q '"execution": "not-performed"'
-printf '%s\n' "$report" | grep -q '"signature_verified": true'
+printf '%s\n' "$report" | grep -q '"carrier_types_supported": true'
+printf '%s\n' "$report" | grep -q '"provider_signature_evidence": "not-provided"'
+
+set +e
+wrong_signature=$(printf '%s' '{"format":"flowanalyst.semantic_report","version":1,"status":"ok","binding_requirements":[{"contract":"bad","library":"libc.so.6","convention":"c","symbol":"strlen","effect":"pure","parameter_types":"c_string","return_type":"c_int"}]}' | "$bin" --policy "$policy")
+wrong_signature_rc=$?
+set -e
+test "$wrong_signature_rc" -eq 2
+printf '%s\n' "$wrong_signature" | grep -q 'denied by capability policy'
 
 file_fixture=$root/Flowmini/flowmini_v25_symboltable_projection/examples/apps/flowcat/flowcat.flow
 file_report=$(

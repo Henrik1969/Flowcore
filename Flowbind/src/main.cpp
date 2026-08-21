@@ -15,7 +15,7 @@ namespace {
 constexpr std::string_view VERSION = "0.1.0";
 
 struct Requirement { std::string contract, library, convention, symbol, effect, parameter_types, return_type; };
-struct Grant { std::string library, symbol, convention, effect; };
+struct Grant { std::string library, symbol, convention, effect, parameter_types, return_type; };
 
 struct Options { std::string report_path, policy_path, abi_manifest_path; };
 
@@ -69,13 +69,16 @@ std::vector<Grant> read_policy(const std::string& path) {
         std::string verb; Grant grant;
         words >> verb >> grant.library >> grant.symbol >> grant.convention >> grant.effect;
         if (!words || verb != "allow") throw std::runtime_error("invalid binding policy line");
+        words >> grant.parameter_types >> grant.return_type;
+        if (!grant.parameter_types.empty() && grant.parameter_types == "-") grant.parameter_types.clear();
+        if (!grant.return_type.empty() && grant.return_type == "-") grant.return_type.clear();
         grants.push_back(std::move(grant));
     }
     return grants;
 }
 
 bool granted(const std::vector<Grant>& grants, const Requirement& requirement) {
-    for (const auto& grant : grants) if (grant.library == requirement.library && grant.symbol == requirement.symbol && grant.convention == requirement.convention && grant.effect == requirement.effect) return true;
+    for (const auto& grant : grants) if (grant.library == requirement.library && grant.symbol == requirement.symbol && grant.convention == requirement.convention && grant.effect == requirement.effect && (grant.parameter_types.empty() || grant.parameter_types == requirement.parameter_types) && (grant.return_type.empty() || grant.return_type == requirement.return_type)) return true;
     return false;
 }
 
@@ -216,7 +219,7 @@ int verify(const std::string& report, const std::string& policy_path, const std:
     }
     std::cout << "],\n  \"lowering_plan\": {\"kind\": " << (file_profile ? "\"capability_sequence\"" : (lowering_requirement ? "\"external_call\"" : "\"none\""));
     if (lowering_requirement) std::cout << ",\"symbol\":" << json_string(lowering_requirement->symbol) << ",\"parameter_types\":" << json_string(lowering_requirement->parameter_types) << ",\"return_type\":" << json_string(lowering_requirement->return_type);
-    std::cout << "},\n  \"policy\": {\"status\": \"authorized\", \"grants\": " << grants.size() << "},\n  \"abi\": {\"convention\": \"c\", \"signature_verified\": true, \"sizeof_int\": " << sizeof(int) << ", \"sizeof_long\": " << sizeof(long) << ", \"sizeof_size_t\": " << sizeof(std::size_t) << ", \"sizeof_pointer\": " << sizeof(void*) << "},\n  \"execution\": \"not-performed\"\n}\n";
+    std::cout << "},\n  \"policy\": {\"status\": \"authorized\", \"grants\": " << grants.size() << "},\n  \"abi\": {\"convention\": \"c\", \"carrier_types_supported\": true, \"provider_signature_evidence\": \"not-provided\", \"sizeof_int\": " << sizeof(int) << ", \"sizeof_long\": " << sizeof(long) << ", \"sizeof_size_t\": " << sizeof(std::size_t) << ", \"sizeof_pointer\": " << sizeof(void*) << "},\n  \"execution\": \"not-performed\"\n}\n";
     return 0;
 }
 

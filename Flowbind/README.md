@@ -43,9 +43,17 @@ that provider discovery succeeded; `execution` is explicitly
 External use is denied unless an exact capability grant is supplied:
 
 ```text
-allow libc.so.6 strlen c pure
+allow libc.so.6 strlen c pure c_string c_size_t
 allow libc.so.6 puts c io
 ```
+
+The optional final two fields bind a grant to the declared parameter and
+return ABI types. Older four-field grants remain accepted for compatibility,
+but do not make a signature-specific claim.
+
+The ABI summary reports carrier-type support as `carrier_types_supported`.
+Provider-exact signature evidence is explicitly reported as `not-provided`
+until a provider manifest supplies it.
 
 Pass the policy with `--policy path`. The policy is intentionally small and
 explicit; environment and configuration discovery belong to a later policy
