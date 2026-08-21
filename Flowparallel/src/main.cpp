@@ -39,7 +39,7 @@ std::string source_path(std::string_view input) {
 }
 
 std::string lowering_profile(std::string_view input) {
-    for (const auto candidate : {"empty_program_main", "abi_abs_main", "abi_strlen_main", "abi_kernel_getpid_main", "abi_kernel_clock_main", "abi_kernel_random_main", "abi_kernel_uname_main", "abi_kernel_openat_main", "abi_kernel_read_main", "abi_kernel_write_main", "abi_kernel_lseek_main", "abi_kernel_unlinkat_main", "abi_kernel_rmdir_main", "abi_kernel_pipe2_main", "abi_kernel_fork_main", "abi_kernel_waitpid_main", "abi_kernel_socketpair_main", "abi_kernel_socket_main", "abi_kernel_bind_main", "abi_kernel_listen_main", "abi_kernel_poll_main", "abi_kernel_accept4_main", "abi_kernel_connect_main", "abi_kernel_unshare_main", "abi_kernel_sethostname_main", "abi_kernel_gethostname_main", "flowcat_argv_main", "flowcat_file_main"}) if (has_field(input, "lowering_profile", candidate)) return candidate;
+    for (const auto candidate : {"empty_program_main", "abi_abs_main", "abi_strlen_main", "test_licbinds_main", "abi_kernel_getpid_main", "abi_kernel_clock_main", "abi_kernel_random_main", "abi_kernel_uname_main", "abi_kernel_openat_main", "abi_kernel_read_main", "abi_kernel_write_main", "abi_kernel_lseek_main", "abi_kernel_unlinkat_main", "abi_kernel_rmdir_main", "abi_kernel_pipe2_main", "abi_kernel_fork_main", "abi_kernel_waitpid_main", "abi_kernel_socketpair_main", "abi_kernel_socket_main", "abi_kernel_bind_main", "abi_kernel_listen_main", "abi_kernel_poll_main", "abi_kernel_accept4_main", "abi_kernel_connect_main", "abi_kernel_unshare_main", "abi_kernel_sethostname_main", "abi_kernel_gethostname_main", "flowcat_argv_main", "flowcat_file_main"}) if (has_field(input, "lowering_profile", candidate)) return candidate;
     return "none";
 }
 

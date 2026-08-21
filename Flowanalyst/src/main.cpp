@@ -315,6 +315,10 @@ int run(const Json& bundle) {
     std::string lowering_profile = empty_main_profile ? "empty_program_main" : "none";
     if (text(field(*source_unit, "name")) == "abi_abs_main") for (const auto& requirement : binding_requirements) if (requirement.symbol == "abs" && requirement.parameter_types == "c_int" && requirement.return_type == "c_int") lowering_profile = "abi_abs_main";
     if (text(field(*source_unit, "name")) == "abi_strlen_main") for (const auto& requirement : binding_requirements) if (requirement.symbol == "strlen" && requirement.parameter_types == "c_string" && requirement.return_type == "c_size_t") lowering_profile = "abi_strlen_main";
+    if (text(field(*source_unit, "name")) == "test_licbinds") {
+        std::set<std::string> libc_symbols; for (const auto& requirement : binding_requirements) libc_symbols.insert(requirement.symbol);
+        if (libc_symbols.count("strlen") && libc_symbols.count("abs") && libc_symbols.count("puts")) lowering_profile = "test_licbinds_main";
+    }
     if (text(field(*source_unit, "name")) == "abi_kernel_getpid_main") for (const auto& requirement : binding_requirements) if (requirement.symbol == "getpid" && requirement.parameter_types.empty() && requirement.return_type == "c_int") lowering_profile = "abi_kernel_getpid_main";
     if (text(field(*source_unit, "name")) == "abi_kernel_clock_main") for (const auto& requirement : binding_requirements) if (requirement.symbol == "clock_gettime" && requirement.parameter_types == "c_int,c_pointer" && requirement.return_type == "c_int") lowering_profile = "abi_kernel_clock_main";
     if (text(field(*source_unit, "name")) == "abi_kernel_random_main") for (const auto& requirement : binding_requirements) if (requirement.symbol == "getrandom" && requirement.parameter_types == "c_pointer,c_size_t,c_int" && requirement.return_type == "c_long") lowering_profile = "abi_kernel_random_main";

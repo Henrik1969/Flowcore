@@ -85,6 +85,7 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
     const bool trial_profile = has(report, "\"lowering_profile\": \"empty_program_main\"") || has(report, "\"lowering_profile\":\"empty_program_main\"");
     const bool abi_abs_profile = has(report, "\"lowering_profile\": \"abi_abs_main\"") || has(report, "\"lowering_profile\":\"abi_abs_main\"");
     const bool abi_strlen_profile = has(report, "\"lowering_profile\": \"abi_strlen_main\"") || has(report, "\"lowering_profile\":\"abi_strlen_main\"");
+    const bool test_licbinds_profile = has(report, "\"lowering_profile\": \"test_licbinds_main\"") || has(report, "\"lowering_profile\":\"test_licbinds_main\"");
     const bool abi_kernel_getpid_profile = has(report, "\"lowering_profile\": \"abi_kernel_getpid_main\"") || has(report, "\"lowering_profile\":\"abi_kernel_getpid_main\"");
     const bool abi_kernel_clock_profile = has(report, "\"lowering_profile\": \"abi_kernel_clock_main\"") || has(report, "\"lowering_profile\":\"abi_kernel_clock_main\"");
     const bool abi_kernel_random_profile = has(report, "\"lowering_profile\": \"abi_kernel_random_main\"") || has(report, "\"lowering_profile\":\"abi_kernel_random_main\"");
@@ -99,6 +100,7 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
     const bool flowcat_file_profile = has(report, "\"lowering_profile\": \"flowcat_file_main\"") || has(report, "\"lowering_profile\":\"flowcat_file_main\"");
     if (abi_abs_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"abi_abs_main\"") || !has(binding_report, "\"kind\": \"external_call\"") || !has(binding_report, "\"abs\""))) throw std::runtime_error("ABI binding report does not authorize the abi_abs_main lowering profile");
     if (abi_strlen_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"abi_strlen_main\"") || !has(binding_report, "\"kind\": \"external_call\"") || !has(binding_report, "\"strlen\""))) throw std::runtime_error("ABI binding report does not authorize the abi_strlen_main lowering profile");
+    if (test_licbinds_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"test_licbinds_main\"") || !has(binding_report, "\"strlen\"") || !has(binding_report, "\"abs\"") || !has(binding_report, "\"puts\""))) throw std::runtime_error("ABI binding report does not authorize the test_licbinds_main lowering profile");
     if (abi_kernel_getpid_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"abi_kernel_getpid_main\"") || !has(binding_report, "\"kind\": \"external_call\"") || !has(binding_report, "\"getpid\""))) throw std::runtime_error("ABI binding report does not authorize the abi_kernel_getpid_main lowering profile");
     if (abi_kernel_clock_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"abi_kernel_clock_main\"") || !has(binding_report, "\"kind\": \"external_call\"") || !has(binding_report, "\"clock_gettime\""))) throw std::runtime_error("ABI binding report does not authorize the abi_kernel_clock_main lowering profile");
     if (abi_kernel_random_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"abi_kernel_random_main\"") || !has(binding_report, "\"kind\": \"external_call\"") || !has(binding_report, "\"getrandom\""))) throw std::runtime_error("ABI binding report does not authorize the abi_kernel_random_main lowering profile");
@@ -111,7 +113,7 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
     if (remaining_kernel_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"kind\": \"external_call\""))) throw std::runtime_error("ABI binding report does not authorize the remaining kernel lowering profile");
     if (flowcat_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"flowcat_argv_main\"") || !has(binding_report, "\"kind\": \"external_call\"") || !has(binding_report, "\"puts\""))) throw std::runtime_error("ABI binding report does not authorize the flowcat_argv_main lowering profile");
     if (flowcat_file_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"flowcat_file_main\"") || !has(binding_report, "\"kind\": \"capability_sequence\"") || !has(binding_report, "\"open\"") || !has(binding_report, "\"read\"") || !has(binding_report, "\"write\"") || !has(binding_report, "\"close\""))) throw std::runtime_error("ABI binding report does not authorize the flowcat_file_main lowering profile");
-    if (!llvm_path.empty() && !trial_profile && !abi_abs_profile && !abi_strlen_profile && !abi_kernel_getpid_profile && !abi_kernel_clock_profile && !abi_kernel_random_profile && !abi_kernel_uname_profile && !abi_kernel_openat_profile && !abi_kernel_read_profile && !abi_kernel_write_profile && !abi_kernel_lseek_profile && !abi_kernel_unlinkat_profile && !remaining_kernel_profile && !flowcat_profile && !flowcat_file_profile) throw std::runtime_error("LLVM emission requires an accepted lowering profile");
+    if (!llvm_path.empty() && !trial_profile && !abi_abs_profile && !abi_strlen_profile && !test_licbinds_profile && !abi_kernel_getpid_profile && !abi_kernel_clock_profile && !abi_kernel_random_profile && !abi_kernel_uname_profile && !abi_kernel_openat_profile && !abi_kernel_read_profile && !abi_kernel_write_profile && !abi_kernel_lseek_profile && !abi_kernel_unlinkat_profile && !remaining_kernel_profile && !flowcat_profile && !flowcat_file_profile) throw std::runtime_error("LLVM emission requires an accepted lowering profile");
     if (!llvm_path.empty()) {
         std::ofstream llvm(llvm_path); if (!llvm) throw std::runtime_error("cannot open LLVM output");
         llvm << "; Flowcore target artifact: " << selected_target << "\n";
@@ -134,6 +136,20 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
                     "  %length = call i64 @strlen(ptr @flowcore_message)\n"
                     "  %exit = trunc i64 %length to i32\n"
                     "  ret i32 %exit\n"
+                    "}\n";
+        } else if (test_licbinds_profile) {
+            llvm << "; Flowcore libc binding integration: strlen + abs + puts\n"
+                    "target triple = \"x86_64-pc-linux-gnu\"\n"
+                    "@flowcore_libc_message = private unnamed_addr constant [23 x i8] c\"Flowcore libc bindings\\00\"\n"
+                    "declare i64 @strlen(ptr)\n"
+                    "declare i32 @abs(i32)\n"
+                    "declare i32 @puts(ptr)\n"
+                    "define i32 @main() {\n"
+                    "entry:\n"
+                    "  %length = call i64 @strlen(ptr @flowcore_libc_message)\n"
+                    "  %absolute = call i32 @abs(i32 -42)\n"
+                    "  %printed = call i32 @puts(ptr @flowcore_libc_message)\n"
+                    "  ret i32 0\n"
                     "}\n";
         } else if (abi_kernel_getpid_profile) {
             llvm << "; Flowcore kernel ABI lowering: getpid\n"

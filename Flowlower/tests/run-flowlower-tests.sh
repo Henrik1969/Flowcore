@@ -96,6 +96,26 @@ strlen_rc=$?
 set -e
 test "$strlen_rc" -eq 8
 
+licbinds_source="$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass/test_licbinds.flow"
+"$flowmini" --dump-frontend-bundle "$licbinds_source" > "$tmpdir/licbinds.bundle.json"
+"$analyst" < "$tmpdir/licbinds.bundle.json" > "$tmpdir/licbinds.semantic.json"
+grep -q '"lowering_profile": "test_licbinds_main"' "$tmpdir/licbinds.semantic.json"
+"$bind" --policy "$policy" < "$tmpdir/licbinds.semantic.json" > "$tmpdir/licbinds.binding.json"
+"$parallel" < "$tmpdir/licbinds.semantic.json" > "$tmpdir/licbinds.parallel.json"
+"$optimizer" < "$tmpdir/licbinds.parallel.json" > "$tmpdir/licbinds.optimized.json"
+"$lowerer" --emit-llvm "$tmpdir/licbinds.ll" --binding-report "$tmpdir/licbinds.binding.json" < "$tmpdir/licbinds.optimized.json" > "$tmpdir/licbinds.lowering.json"
+grep -q '"status": "emitted"' "$tmpdir/licbinds.lowering.json"
+clang -g "$tmpdir/licbinds.ll" -o "$tmpdir/licbinds"
+"$tmpdir/licbinds" > "$tmpdir/licbinds.output"
+printf '%s\n' 'Flowcore libc bindings' | cmp -s - "$tmpdir/licbinds.output"
+gdb -q -batch -ex 'set pagination off' -ex 'break main' -ex run -ex bt -ex quit "$tmpdir/licbinds" > "$tmpdir/licbinds.gdb.txt" 2>&1
+grep -q 'Breakpoint 1' "$tmpdir/licbinds.gdb.txt"
+if grep -q 'ptrace: Operation not permitted' "$tmpdir/licbinds.gdb.txt"; then
+    grep -q 'During startup program exited' "$tmpdir/licbinds.gdb.txt"
+else
+    grep -q 'main' "$tmpdir/licbinds.gdb.txt"
+fi
+
 kernel_getpid_source="$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass/abi_kernel_getpid_main.flow"
 "$flowmini" --dump-frontend-bundle "$kernel_getpid_source" > "$tmpdir/kernel-getpid.bundle.json"
 "$analyst" < "$tmpdir/kernel-getpid.bundle.json" > "$tmpdir/kernel-getpid.semantic.json"
