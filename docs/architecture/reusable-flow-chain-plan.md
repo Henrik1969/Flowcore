@@ -54,3 +54,8 @@ Flowanalyst emits one operation per resolved call site. An operation records its
 callee, resolved provider symbol when present, ABI signature/effect facts,
 argument expression IDs, result symbol, and source identity. This is additive to
 semantic report v1 and is the input contract for the generic lowerer migration.
+
+The first profile-free executable proof is `profile_free_getpid`. It has an
+arbitrary program name, retains `lowering_profile: none`, carries its generic
+operation through Flowparallel and Flowoptimize, receives exact Flowbind
+authorization, and is emitted and executed by Flowlower.

@@ -31,13 +31,20 @@
   report-local call operations and exact provider/signature facts.
 - Flowbind validates every external operation in that plan against semantic
   requirements before authorizing the binding.
+- Flowparallel and Flowoptimize preserve the structured lowering plan.
+- Added the first profile-free native proof: `profile_free_getpid` uses an
+  arbitrary program name and generic zero-argument `c_int` lowering to emit and
+  execute an ELF binary without a matching source-name profile.
 
 ## Evidence
 
 - Focused binding checkpoint: `flowbind_provider`, `flowcore_stdlib_boundary`,
   and `native_binding_generation` passed.
 - Focused graph checkpoint: `flowcore_graph_routing` passed.
-- Current complete checkpoint: **52/52 CTest tests passed**.
+- Current complete checkpoint: **53/53 CTest tests passed** after the profile-free
+  lowering test was added; the initial run exposed legacy-profile interception in
+  Flowlower, which was corrected by limiting generic lowering to plans whose
+  semantic profile is explicitly `none`.
 - Focused ncurses checkpoint: `ncurses_flow_pipeline`, `flow_less_pager`, and
   `flow_less_ncurses_pager` passed.
 
@@ -45,9 +52,11 @@
 
 - Complete namespace law by replacing or explicitly fencing legacy unqualified
   import flattening and add selective-opening semantics only where unambiguous.
-- Replace profile/source-name lowering dispatch with reusable lowering plans.
-- Make Flowparallel, Flowoptimize, and Flowlower consume the generic lowering
-  plan while retaining legacy profile compatibility during migration.
+- Replace the remaining profile/source-name lowering dispatch with reusable
+  lowering plans; the first profile-free path is now additive and proven, while
+  legacy profiles remain transitional compatibility machinery.
+- Extend generic lowering beyond zero-argument scalar calls to arguments,
+  values, control flow, and capability sequences.
 - Expand effects into external effect, argument-memory effect, determinism,
   resource, ownership, nullability, and lifetime facts.
 - Model typed ncurses session/window resources.
@@ -62,6 +71,5 @@
 
 ## Exact next action
 
-Next action: add generic scalar external-call emission in Flowlower from the
-authorized lowering plan, with a new source program that has no recognized
-profile name.
+Next action: generalize the lowering plan with typed operands and result/value
+placement, then add a profile-free one-argument external-call ELF proof.

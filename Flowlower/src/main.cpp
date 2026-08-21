@@ -1,3 +1,4 @@
+#include <cctype>
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -33,6 +34,54 @@ std::string read_file_or_stdin(const std::string& path) {
 }
 
 bool has(std::string_view input, std::string_view fragment) { return input.find(fragment) != std::string_view::npos; }
+
+std::string object_field(std::string_view input, std::string_view field) {
+    const auto marker = input.find("\"" + std::string(field) + "\"");
+    if (marker == std::string_view::npos) return "{}";
+    auto position = input.find('{', marker); if (position == std::string_view::npos) return "{}";
+    const auto start = position; int depth = 0; bool string = false; bool escaped = false;
+    for (; position < input.size(); ++position) {
+        const char c = input[position];
+        if (string) { if (escaped) escaped = false; else if (c == '\\') escaped = true; else if (c == '"') string = false; continue; }
+        if (c == '"') string = true; else if (c == '{') ++depth; else if (c == '}' && --depth == 0) return std::string(input.substr(start, position - start + 1));
+    }
+    return "{}";
+}
+
+std::string array_field(std::string_view input, std::string_view field) {
+    const auto marker = input.find("\"" + std::string(field) + "\"");
+    if (marker == std::string_view::npos) return "[]";
+    auto position = input.find(':', marker);
+    if (position == std::string_view::npos) return "[]";
+    position = input.find('[', position);
+    if (position == std::string_view::npos) return "[]";
+    const auto start = position; int depth = 0; bool string = false; bool escaped = false;
+    for (; position < input.size(); ++position) {
+        const char c = input[position];
+        if (string) { if (escaped) escaped = false; else if (c == '\\') escaped = true; else if (c == '"') string = false; continue; }
+        if (c == '"') string = true; else if (c == '[') ++depth; else if (c == ']' && --depth == 0) return std::string(input.substr(start, position - start + 1));
+    }
+    return "[]";
+}
+
+std::string quoted_field(std::string_view input, std::string_view field) {
+    const auto marker = input.find("\"" + std::string(field) + "\"");
+    if (marker == std::string_view::npos) return {};
+    auto position = input.find(':', marker); if (position == std::string_view::npos) return {};
+    position = input.find('"', position); if (position == std::string_view::npos) return {};
+    ++position; std::string result;
+    for (; position < input.size(); ++position) {
+        if (input[position] == '"' && (position == 0 || input[position - 1] != '\\')) return result;
+        result.push_back(input[position]);
+    }
+    return {};
+}
+
+bool valid_c_symbol(std::string_view symbol) {
+    if (symbol.empty() || (!std::isalpha(static_cast<unsigned char>(symbol.front())) && symbol.front() != '_')) return false;
+    for (const char c : symbol) if (!std::isalnum(static_cast<unsigned char>(c)) && c != '_') return false;
+    return true;
+}
 
 std::string quote(std::string_view value) {
     std::string result = "\"";
@@ -114,6 +163,15 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
     const bool remaining_kernel_profile = abi_kernel_unlinkat_profile || has(report, "abi_kernel_rmdir_main") || has(report, "abi_kernel_pipe2_main") || has(report, "abi_kernel_fork_main") || has(report, "abi_kernel_waitpid_main") || has(report, "abi_kernel_socketpair_main") || has(report, "abi_kernel_socket_main") || has(report, "abi_kernel_bind_main") || has(report, "abi_kernel_listen_main") || has(report, "abi_kernel_poll_main") || has(report, "abi_kernel_accept4_main") || has(report, "abi_kernel_connect_main") || has(report, "abi_kernel_unshare_main") || has(report, "abi_kernel_sethostname_main") || has(report, "abi_kernel_gethostname_main");
     const bool flowcat_profile = has(report, "\"lowering_profile\": \"flowcat_argv_main\"") || has(report, "\"lowering_profile\":\"flowcat_argv_main\"");
     const bool flowcat_file_profile = has(report, "\"lowering_profile\": \"flowcat_file_main\"") || has(report, "\"lowering_profile\":\"flowcat_file_main\"");
+    const bool profile_free_plan = has(report, "\"lowering_profile\": \"none\"") || has(report, "\"lowering_profile\":\"none\"");
+    const auto lowering_plan = object_field(report, "lowering_plan");
+    const auto plan_operations = array_field(lowering_plan, "operations");
+    const auto generic_kind = quoted_field(plan_operations, "kind");
+    const auto generic_symbol = quoted_field(plan_operations, "symbol");
+    const auto generic_parameters = quoted_field(plan_operations, "parameter_types");
+    const auto generic_return = quoted_field(plan_operations, "return_type");
+    const bool generic_external_scalar = profile_free_plan && generic_kind == "external_call" && valid_c_symbol(generic_symbol) &&
+        generic_parameters.empty() && generic_return == "c_int" && has(plan_operations, "\"arguments\":[]");
     if (abi_abs_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"abi_abs_main\"") || !has(binding_report, "\"kind\": \"external_call\"") || !has(binding_report, "\"abs\""))) throw std::runtime_error("ABI binding report does not authorize the abi_abs_main lowering profile");
     if (abi_strlen_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"abi_strlen_main\"") || !has(binding_report, "\"kind\": \"external_call\"") || !has(binding_report, "\"strlen\""))) throw std::runtime_error("ABI binding report does not authorize the abi_strlen_main lowering profile");
     if (test_licbinds_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"test_licbinds_main\"") || !has(binding_report, "\"strlen\"") || !has(binding_report, "\"abs\"") || !has(binding_report, "\"puts\""))) throw std::runtime_error("ABI binding report does not authorize the test_licbinds_main lowering profile");
@@ -145,11 +203,26 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
     if (remaining_kernel_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"kind\": \"external_call\""))) throw std::runtime_error("ABI binding report does not authorize the remaining kernel lowering profile");
     if (flowcat_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"flowcat_argv_main\"") || !has(binding_report, "\"kind\": \"external_call\"") || !has(binding_report, "\"puts\""))) throw std::runtime_error("ABI binding report does not authorize the flowcat_argv_main lowering profile");
     if (flowcat_file_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"flowcat_file_main\"") || !has(binding_report, "\"kind\": \"capability_sequence\"") || !has(binding_report, "\"open\"") || !has(binding_report, "\"read\"") || !has(binding_report, "\"write\"") || !has(binding_report, "\"close\""))) throw std::runtime_error("ABI binding report does not authorize the flowcat_file_main lowering profile");
-    if (!llvm_path.empty() && !trial_profile && !abi_abs_profile && !abi_strlen_profile && !test_licbinds_profile && !abi_ncurses_profile && !sel_profile && !abi_kernel_getpid_profile && !abi_kernel_getuid_profile && !abi_kernel_getgid_profile && !abi_kernel_geteuid_profile && !abi_kernel_getegid_profile && !abi_kernel_getppid_profile && !abi_kernel_getpgrp_profile && !abi_kernel_getpgid_profile && !abi_kernel_getsid_profile && !abi_kernel_getpriority_profile && !generated_getlogin_profile && !generated_gettid_profile && !generated_sysconf_profile && !generated_getauxval_profile && !generated_system_info_profile && !abi_kernel_clock_profile && !abi_kernel_random_profile && !abi_kernel_uname_profile && !abi_kernel_openat_profile && !abi_kernel_read_profile && !abi_kernel_write_profile && !abi_kernel_lseek_profile && !abi_kernel_unlinkat_profile && !remaining_kernel_profile && !flowcat_profile && !flowcat_file_profile) throw std::runtime_error("LLVM emission requires an accepted lowering profile");
+    if (generic_external_scalar && (!binding_report.empty() && !has(binding_report, "\"status\": \"ready\"") && !has(binding_report, "\"status\":\"ready\""))) throw std::runtime_error("generic lowering operation is not authorized");
+    if (!llvm_path.empty() && !generic_external_scalar && !trial_profile && !abi_abs_profile && !abi_strlen_profile && !test_licbinds_profile && !abi_ncurses_profile && !sel_profile && !abi_kernel_getpid_profile && !abi_kernel_getuid_profile && !abi_kernel_getgid_profile && !abi_kernel_geteuid_profile && !abi_kernel_getegid_profile && !abi_kernel_getppid_profile && !abi_kernel_getpgrp_profile && !abi_kernel_getpgid_profile && !abi_kernel_getsid_profile && !abi_kernel_getpriority_profile && !generated_getlogin_profile && !generated_gettid_profile && !generated_sysconf_profile && !generated_getauxval_profile && !generated_system_info_profile && !abi_kernel_clock_profile && !abi_kernel_random_profile && !abi_kernel_uname_profile && !abi_kernel_openat_profile && !abi_kernel_read_profile && !abi_kernel_write_profile && !abi_kernel_lseek_profile && !abi_kernel_unlinkat_profile && !remaining_kernel_profile && !flowcat_profile && !flowcat_file_profile) throw std::runtime_error("LLVM emission requires an accepted lowering profile or supported generic lowering plan");
     if (!llvm_path.empty()) {
         std::ofstream llvm(llvm_path); if (!llvm) throw std::runtime_error("cannot open LLVM output");
         llvm << "; Flowcore target artifact: " << selected_target << "\n";
-        if (abi_abs_profile) {
+        if (generic_external_scalar) {
+            llvm << "; Flowcore generic lowering plan: zero-argument c_int external call\n"
+                    "target triple = \"x86_64-pc-linux-gnu\"\n"
+                    "declare i32 @" << generic_symbol << "()\n"
+                    "define i32 @main() {\n"
+                    "entry:\n"
+                    "  %result = call i32 @" << generic_symbol << "()\n"
+                    "  %valid = icmp sge i32 %result, 0\n"
+                    "  br i1 %valid, label %ok, label %error\n"
+                    "ok:\n"
+                    "  ret i32 0\n"
+                    "error:\n"
+                    "  ret i32 1\n"
+                    "}\n";
+        } else if (abi_abs_profile) {
             llvm << "; Flowcore ABI trial lowering: abs\n"
                     "target triple = \"x86_64-pc-linux-gnu\"\n"
                     "declare i32 @abs(i32)\n"

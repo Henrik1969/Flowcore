@@ -70,6 +70,19 @@ std::string json_array_field(std::string_view input, std::string_view field) {
     return "[]";
 }
 
+std::string json_object_field(std::string_view input, std::string_view field) {
+    const auto marker = input.find("\"" + std::string(field) + "\"");
+    if (marker == std::string_view::npos) return "{}";
+    auto position = input.find('{', marker); if (position == std::string_view::npos) return "{}";
+    const auto start = position; int depth = 0; bool string = false; bool escaped = false;
+    for (; position < input.size(); ++position) {
+        const char c = input[position];
+        if (string) { if (escaped) escaped = false; else if (c == '\\') escaped = true; else if (c == '"') string = false; continue; }
+        if (c == '"') string = true; else if (c == '{') ++depth; else if (c == '}' && --depth == 0) return std::string(input.substr(start, position - start + 1));
+    }
+    return "{}";
+}
+
 std::string source_path(std::string_view input) {
     const auto key = input.find("\"source\":");
     if (key == std::string_view::npos) return {};
@@ -194,6 +207,7 @@ int analyze(std::string_view report, std::string_view provider_decision) {
     const auto representation = has_decision ? string_after(provider_decision, "\"representation\":") : "";
     const auto decision_reason = has_decision ? string_after(provider_decision, "\"reason\":") : "";
     const auto external_operations = json_array_field(report, "external_operations");
+    const auto lowering_plan = json_object_field(report, "lowering_plan");
     std::cout << "{\n  \"format\": \"flowoptimize.optimization_report\",\n"
                  "  \"version\": 1,\n"
                  "  \"status\": \"ready\",\n"
@@ -202,6 +216,7 @@ int analyze(std::string_view report, std::string_view provider_decision) {
                  "  \"input\": {\"format\": \"" << input_format << "\", \"version\": 1},\n"
                  "  \"lowering_profile\": \"" << profile << "\",\n"
                  "  \"external_operations\": " << external_operations << ",\n"
+                 "  \"lowering_plan\": " << lowering_plan << ",\n"
                  "  \"projections\": [{\"kind\": \"graph_to_matrix\", \"name\": \"region_dependency\", \"status\": \"" << (has_region_matrix ? "available" : "not-present") << "\", \"rows\": " << matrix_rows << ", \"columns\": " << matrix_columns << ", \"semiring\": \"boolean\", \"storage\": \"coo\"}],\n"
                  "  \"provider_policy\": {\"selection\": \"runtime\", \"candidates\": [\"cpu\", \"cuda\"], \"cuda\": {\"requires\": [\"runtime capability\", \"measured cost benefit\", \"provider contract\"], \"fallback\": \"cpu\"}, \"decision\": {\"status\": \"" << (has_decision ? "verified" : "deferred") << "\", \"provider\": " << quote(selected_provider) << ", \"representation\": " << quote(representation) << ", \"reason\": " << quote(decision_reason) << "}},\n"
                  "  \"state\": {\"canonical_graph\": \"unchanged\", \"transformation\": \"identity\", \"decision_effect\": \"advisory_policy_only\"},\n"
