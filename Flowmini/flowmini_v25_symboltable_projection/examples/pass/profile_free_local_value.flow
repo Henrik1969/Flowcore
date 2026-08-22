@@ -1,0 +1,6 @@
+program profile_free_local_value
+
+main {
+    value : c_int(40)
+    return value + 2
+}

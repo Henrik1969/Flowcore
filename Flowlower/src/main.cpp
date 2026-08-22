@@ -1,10 +1,12 @@
 #include <cctype>
 #include <fstream>
 #include <iostream>
+#include <map>
 #include <sstream>
 #include <stdexcept>
 #include <string>
 #include <string_view>
+#include <vector>
 
 namespace {
 
@@ -76,6 +78,31 @@ std::string first_array_object(std::string_view input) {
     return "{}";
 }
 
+std::vector<std::string> array_objects(std::string_view input) {
+    std::vector<std::string> result;
+    for (std::size_t position = 0; position < input.size();) {
+        position = input.find('{', position);
+        if (position == std::string_view::npos) break;
+        const auto start = position; int depth = 0; bool string = false; bool escaped = false;
+        for (; position < input.size(); ++position) {
+            const char c = input[position];
+            if (string) { if (escaped) escaped = false; else if (c == '\\') escaped = true; else if (c == '"') string = false; continue; }
+            if (c == '"') string = true; else if (c == '{') ++depth; else if (c == '}' && --depth == 0) { result.emplace_back(input.substr(start, position - start + 1)); ++position; break; }
+        }
+    }
+    return result;
+}
+
+std::string numeric_field(std::string_view input, std::string_view field) {
+    const auto marker = input.find("\"" + std::string(field) + "\"");
+    if (marker == std::string_view::npos) return {};
+    auto position = input.find(':', marker); if (position == std::string_view::npos) return {};
+    ++position; while (position < input.size() && std::isspace(static_cast<unsigned char>(input[position]))) ++position;
+    const auto start = position;
+    while (position < input.size() && (std::isdigit(static_cast<unsigned char>(input[position])) || input[position] == '-')) ++position;
+    return std::string(input.substr(start, position - start));
+}
+
 std::string quoted_field(std::string_view input, std::string_view field) {
     const auto marker = input.find("\"" + std::string(field) + "\"");
     if (marker == std::string_view::npos) return {};
@@ -103,11 +130,16 @@ bool valid_integer_literal(std::string_view value) {
     return true;
 }
 
-std::string emit_integer_expression(std::string_view expression, std::ostringstream& instructions, int& temporary) {
+std::string emit_integer_expression(std::string_view expression, std::ostringstream& instructions, int& temporary, const std::map<int, std::string>& values) {
     const auto kind = quoted_field(expression, "kind");
     if (kind == "integer_literal") {
         const auto value = quoted_field(expression, "value");
         return valid_integer_literal(value) ? value : std::string{};
+    }
+    if (kind == "identifier") {
+        const auto symbol = numeric_field(expression, "symbol_id");
+        if (symbol.empty()) return {};
+        try { return values.at(std::stoi(symbol)); } catch (const std::exception&) { return {}; }
     }
     if (kind != "binary") return {};
     const auto operator_name = quoted_field(expression, "operator");
@@ -119,8 +151,8 @@ std::string emit_integer_expression(std::string_view expression, std::ostringstr
     else return {};
     const auto left = object_field(expression, "left");
     const auto right = object_field(expression, "right");
-    const auto left_value = emit_integer_expression(left, instructions, temporary);
-    const auto right_value = emit_integer_expression(right, instructions, temporary);
+    const auto left_value = emit_integer_expression(left, instructions, temporary, values);
+    const auto right_value = emit_integer_expression(right, instructions, temporary, values);
     if (left_value.empty() || right_value.empty()) return {};
     const auto result = "%flow_expr" + std::to_string(temporary++);
     instructions << "  " << result << " = " << instruction << " i32 " << left_value << ", " << right_value << "\n";
@@ -209,20 +241,35 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
     const bool profile_free_plan = has(report, "\"lowering_profile\": \"none\"") || has(report, "\"lowering_profile\":\"none\"");
     const auto lowering_plan = object_field(report, "lowering_plan");
     const auto plan_operations = array_field(lowering_plan, "operations");
-    const auto first_operation = first_array_object(plan_operations);
-    const auto generic_kind = quoted_field(first_operation, "kind");
-    const auto generic_symbol = quoted_field(first_operation, "symbol");
-    const auto generic_parameters = quoted_field(first_operation, "parameter_types");
-    const auto generic_return = quoted_field(first_operation, "return_type");
-    const auto generic_operands = array_field(first_operation, "operands");
+    const auto operation_objects = array_objects(plan_operations);
+    const auto first_operation = operation_objects.empty() ? std::string("{}") : operation_objects.front();
+    std::string return_operation = "{}";
+    for (const auto& operation : operation_objects) if (quoted_field(operation, "kind") == "return_value") { return_operation = operation; break; }
+    std::string value_operation = "{}";
+    for (const auto& operation : operation_objects) if (quoted_field(operation, "kind") == "value_definition") { value_operation = operation; break; }
+    const auto selected_operation = return_operation == "{}" ? first_operation : return_operation;
+    const auto generic_kind = quoted_field(selected_operation, "kind");
+    const auto generic_symbol = quoted_field(selected_operation, "symbol");
+    const auto generic_parameters = quoted_field(selected_operation, "parameter_types");
+    const auto generic_return = quoted_field(selected_operation, "return_type");
+    const auto generic_operands = array_field(selected_operation, "operands");
     const auto first_operand = first_array_object(generic_operands);
     const auto operand_kind = quoted_field(first_operand, "kind");
     const auto operand_type = quoted_field(first_operand, "type");
     const auto operand_value = quoted_field(first_operand, "value");
     std::ostringstream generic_expression_instructions;
     int generic_expression_temporary = 0;
+    std::map<int, std::string> generic_values;
+    const auto value_operands = array_field(value_operation, "operands");
+    const auto value_operand = first_array_object(value_operands);
+    const auto value_symbol = numeric_field(value_operation, "result_symbol_id");
+    if (!value_symbol.empty() && quoted_field(value_operand, "kind") == "integer_literal" && valid_integer_literal(quoted_field(value_operand, "value"))) {
+        const auto value_name = "%flow_value_" + value_symbol;
+        generic_expression_instructions << "  " << value_name << " = add i32 0, " << quoted_field(value_operand, "value") << "\n";
+        generic_values[std::stoi(value_symbol)] = value_name;
+    }
     const auto generic_return_expression = generic_kind == "return_value"
-        ? emit_integer_expression(first_operand, generic_expression_instructions, generic_expression_temporary)
+        ? emit_integer_expression(first_operand, generic_expression_instructions, generic_expression_temporary, generic_values)
         : std::string{};
     const bool generic_zero_arg = generic_parameters.empty() && has(first_operation, "\"arguments\":[]");
     const bool generic_one_int_arg = generic_parameters == "c_int" && operand_kind == "integer_literal" && operand_type == "c_int" && !operand_value.empty();

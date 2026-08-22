@@ -13,7 +13,7 @@ unit $namespace
 abi $namespace {
     library "libc.so.6"
     convention c
-    type c_string {
+    type ${namespace}_string {
         repr "const char*"
         ownership borrowed
         access read
@@ -21,7 +21,7 @@ abi $namespace {
         nullable false
         terminator nul
     }
-    extern fn shared(text : c_string): c_int {
+    extern fn shared(text : ${namespace}_string): c_int {
         symbol "puts"
         effect io
     }
@@ -66,6 +66,6 @@ main {
 EOF
 "$flowmini" --dump-frontend-bundle "$tmpdir/qualified.flow" |
     "$analyst" > "$tmpdir/qualified.json"
-jq -e '.status == "ok" and (.diagnostics | length) == 0 and (.lowering_plan.operations | length) == 3' "$tmpdir/qualified.json" >/dev/null
+jq -e '.status == "ok" and (.diagnostics | length) == 0 and ((.lowering_plan.operations | map(select(.callee == "first.shared" or .callee == "second.shared" or .callee == "third.shared")) | length) == 3)' "$tmpdir/qualified.json" >/dev/null
 
 printf '%s\n' 'Namespace ambiguity (three providers): PASS'

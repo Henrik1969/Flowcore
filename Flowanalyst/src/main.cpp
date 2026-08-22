@@ -563,6 +563,27 @@ int run(const Json& bundle) {
         lowering_operations.push_back(std::move(operation));
     }
     for (const auto& [statement_id, statement] : statements) {
+        if (text(field(*statement, "kind")) != "let") continue;
+        const auto* payload = field(*statement, "payload");
+        const int initializer = integer(field(payload, "initializer_expression"));
+        if (initializer < 0) continue;
+        const auto name = text(field(*statement, "name"));
+        const int scope_id = statement_scopes.count(statement_id) ? statement_scopes.at(statement_id) : -1;
+        int result_symbol = -1;
+        if (scopes.count(scope_id)) for (const auto& candidate : list(field(*scopes.at(scope_id), "symbol_ids"))) {
+            const int candidate_id = integer(&candidate);
+            if (symbols.count(candidate_id) && text(field(*symbols.at(candidate_id), "name")) == name) { result_symbol = candidate_id; break; }
+        }
+        LoweringOperation operation;
+        operation.expression = initializer;
+        operation.statement = statement_id;
+        operation.scope = scope_id;
+        operation.result_symbol = result_symbol;
+        operation.kind = "value_definition";
+        operation.arguments.push_back(initializer);
+        lowering_operations.push_back(std::move(operation));
+    }
+    for (const auto& [statement_id, statement] : statements) {
         if (text(field(*statement, "kind")) != "return") continue;
         const auto* payload = field(*statement, "payload");
         const int value_expression = integer(field(payload, "value_expression"));

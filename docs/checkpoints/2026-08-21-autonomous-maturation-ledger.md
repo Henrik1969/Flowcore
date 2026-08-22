@@ -56,6 +56,10 @@
 - Extended generic return lowering to nested integer binary expressions. A
   profile-free `40 + 2` program now produces an LLVM `add` and executes with the
   expected result.
+- Added generic local value flow: `let` initializers become
+  `value_definition` operations with symbol identity, and return expressions
+  can consume those values through the plan. The profile-free local-value ELF
+  test executes successfully.
 
 ## Evidence
 
