@@ -110,16 +110,10 @@ rmdir_fixture="$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass/
 rmdir_report=$("$flowmini" --dump-frontend-bundle "$rmdir_fixture" | "$bin")
 printf '%s\n' "$rmdir_report" | jq -e '.lowering_profile == "none" and ([.binding_requirements[] | .symbol] == ["rmdir"])' >/dev/null
 
-for kernel_name in fork socket listen unshare; do
+for kernel_name in fork socket listen unshare sethostname pipe2 waitpid socketpair bind poll accept4 connect gethostname; do
     kernel_fixture="$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass/abi_kernel_${kernel_name}_main.flow"
     kernel_report=$("$flowmini" --dump-frontend-bundle "$kernel_fixture" | "$bin")
     printf '%s\n' "$kernel_report" | jq -e --arg symbol "$kernel_name" '.lowering_profile == "none" and ([.binding_requirements[] | .symbol] == [$symbol])' >/dev/null
-done
-
-for kernel_name in pipe2 waitpid socketpair bind poll accept4 connect sethostname gethostname; do
-    kernel_fixture="$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass/abi_kernel_${kernel_name}_main.flow"
-    kernel_report=$("$flowmini" --dump-frontend-bundle "$kernel_fixture" | "$bin")
-    printf '%s\n' "$kernel_report" | jq -e --arg profile "abi_kernel_${kernel_name}_main" --arg symbol "$kernel_name" '.lowering_profile == $profile and ([.binding_requirements[] | .symbol] == [$symbol])' >/dev/null
 done
 
 flowcat_fixture="$root/Flowmini/flowmini_v25_symboltable_projection/examples/apps/flowcat/flowcat.flow"

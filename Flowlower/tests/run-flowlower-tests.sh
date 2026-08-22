@@ -423,7 +423,7 @@ fi
 clang "$tmpdir/kernel-rmdir.ll" -o "$tmpdir/kernel-rmdir"
 "$tmpdir/kernel-rmdir"
 
-for kernel_name in fork socket listen unshare; do
+for kernel_name in fork socket listen unshare sethostname pipe2 waitpid socketpair bind poll accept4 connect gethostname; do
     kernel_source="$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass/abi_kernel_${kernel_name}_main.flow"
     "$flowmini" --dump-frontend-bundle "$kernel_source" | "$analyst" > "$tmpdir/kernel-${kernel_name}.semantic.json"
     grep -q '"lowering_profile": "none"' "$tmpdir/kernel-${kernel_name}.semantic.json"
@@ -431,20 +431,6 @@ for kernel_name in fork socket listen unshare; do
     "$parallel" < "$tmpdir/kernel-${kernel_name}.semantic.json" | "$optimizer" > "$tmpdir/kernel-${kernel_name}.optimized.json"
     "$lowerer" --emit-llvm "$tmpdir/kernel-${kernel_name}.ll" --binding-report "$tmpdir/kernel-${kernel_name}.binding.json" < "$tmpdir/kernel-${kernel_name}.optimized.json" > "$tmpdir/kernel-${kernel_name}.lowering.json"
     grep -q "call i32 @${kernel_name}" "$tmpdir/kernel-${kernel_name}.ll"
-    clang "$tmpdir/kernel-${kernel_name}.ll" -o "$tmpdir/kernel-${kernel_name}"
-    "$tmpdir/kernel-${kernel_name}"
-done
-
-for kernel_name in pipe2 waitpid socketpair bind poll accept4 connect sethostname gethostname; do
-    kernel_source="$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass/abi_kernel_${kernel_name}_main.flow"
-    "$flowmini" --dump-frontend-bundle "$kernel_source" > "$tmpdir/kernel-${kernel_name}.bundle.json"
-    "$analyst" < "$tmpdir/kernel-${kernel_name}.bundle.json" > "$tmpdir/kernel-${kernel_name}.semantic.json"
-    grep -q "\"lowering_profile\": \"abi_kernel_${kernel_name}_main\"" "$tmpdir/kernel-${kernel_name}.semantic.json"
-    "$bind" --policy "$policy" < "$tmpdir/kernel-${kernel_name}.semantic.json" > "$tmpdir/kernel-${kernel_name}.binding.json"
-    "$parallel" < "$tmpdir/kernel-${kernel_name}.semantic.json" > "$tmpdir/kernel-${kernel_name}.parallel.json"
-    "$optimizer" < "$tmpdir/kernel-${kernel_name}.parallel.json" > "$tmpdir/kernel-${kernel_name}.optimized.json"
-    "$lowerer" --emit-llvm "$tmpdir/kernel-${kernel_name}.ll" --binding-report "$tmpdir/kernel-${kernel_name}.binding.json" < "$tmpdir/kernel-${kernel_name}.optimized.json" > "$tmpdir/kernel-${kernel_name}.lowering.json"
-    grep -q '"status": "emitted"' "$tmpdir/kernel-${kernel_name}.lowering.json"
     clang "$tmpdir/kernel-${kernel_name}.ll" -o "$tmpdir/kernel-${kernel_name}"
     "$tmpdir/kernel-${kernel_name}"
 done

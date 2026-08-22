@@ -130,6 +130,11 @@
   `listen`, and `unshare`) to generic single-operation lowering. Their exact
   `c_int` operands now come from Flow initializers and their source-name profile
   branches are removed.
+- Migrated `sethostname` and all remaining explicit-null `c_pointer` kernel
+  fixtures to generic mixed-carrier lowering. `c_pointer(0)` is represented as
+  LLVM `null`; nonzero integer-to-pointer conversion remains unsupported rather
+  than guessed. The corresponding source-name profile table and handwritten
+  emitters are removed.
 
 ## Evidence
 
@@ -183,6 +188,10 @@
   `flowanalyst_pipeline`, `flowbind_provider`, `profile_free_generic_lowering`,
   and both pass-corpus gates passed, including all four native ELFs. The
   canonical build and suite passed **54/54**.
+- Focused pointer-carrier checkpoint: `flowlower_pipeline`,
+  `flowanalyst_pipeline`, `flowbind_provider`, `profile_free_generic_lowering`,
+  and both pass-corpus gates passed, including native execution of all migrated
+  fixtures. The canonical build and suite passed **54/54**.
 
 ## Remaining work
 
@@ -207,6 +216,7 @@
 
 ## Exact next action
 
-Next action: migrate `sethostname(c_string,c_size_t)` to generic mixed-carrier
-lowering, then introduce explicit generic storage for `c_pointer` operands
-before migrating the remaining pointer-backed kernel fixtures.
+Next action: migrate the remaining dedicated kernel profiles (`clock_gettime`,
+`getrandom`, `uname`, `openat`, `read`, `write`, `lseek`, and `unlinkat`) using
+their source-declared scalar, string, and explicit-null pointer operands, then
+remove the obsolete binder and LLVM profile branches.
