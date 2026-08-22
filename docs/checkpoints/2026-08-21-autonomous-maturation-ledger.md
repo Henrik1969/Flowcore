@@ -88,6 +88,11 @@
   path. Generic external operands can now consume initialized local symbols,
   with initializer, call, and result-dependent expression instructions emitted
   in dependency order.
+- Generic `c_int` result calls now accept an arbitrary non-empty sequence of
+  `c_int` literal or initialized-local operands, derive the LLVM declaration
+  and call argument lists from the exact plan signature, and reject mismatched
+  carrier lists. `getpriority(c_int,c_int)` is migrated to this path with its
+  native return behavior expressed in Flow source.
 
 ## Evidence
 
@@ -100,6 +105,9 @@
 - Focused identity migration checkpoint: `profile_free_generic_lowering` and
   `flowlower_pipeline` passed, including native observable-result checks for all
   six newly migrated identity examples.
+- Focused multi-operand checkpoint: `profile_free_generic_lowering`,
+  `flowbind_provider`, and `flowlower_pipeline` passed, including the native
+  `getpriority` result assertion.
 - Focused ncurses checkpoint: `ncurses_flow_pipeline`, `flow_less_pager`, and
   `flow_less_ncurses_pager` passed.
 
@@ -126,6 +134,5 @@
 
 ## Exact next action
 
-Next action: extend generic external-call lowering from one to multiple typed
-integer operands, then migrate `getpriority` while preserving its native
-observable-result assertion.
+Next action: migrate the generated zero-argument `gettid` `c_int` example to
+the generic result path and remove its remaining source-name profile branches.

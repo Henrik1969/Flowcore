@@ -387,7 +387,6 @@ int run(const Json& bundle) {
         std::set<std::string> sel_symbols; for (const auto& requirement : binding_requirements) sel_symbols.insert(requirement.symbol);
         if (sel_symbols.count("initscr") && sel_symbols.count("endwin") && sel_symbols.count("wgetch") && sel_symbols.count("keypad")) lowering_profile = "sel_main";
     }
-    if (text(field(*source_unit, "name")) == "abi_kernel_getpriority_main") for (const auto& requirement : binding_requirements) if (requirement.symbol == "getpriority" && requirement.parameter_types == "c_int,c_int" && requirement.return_type == "c_int") lowering_profile = "abi_kernel_getpriority_main";
     if (text(field(*source_unit, "name")) == "generated_getlogin_main") {
         bool login = false, output = false;
         for (const auto& requirement : binding_requirements) {

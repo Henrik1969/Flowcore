@@ -7,4 +7,5 @@ main {
     who : c_int(0)
     priority : c_int(0)
     linux.getpriority(which, who) -> priority
+    return priority
 }

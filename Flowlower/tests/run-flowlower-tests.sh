@@ -286,7 +286,7 @@ test "$actual_sid" -eq $((expected_sid % 256))
 kernel_getpriority_source="$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass/abi_kernel_getpriority_main.flow"
 "$flowmini" --dump-frontend-bundle "$kernel_getpriority_source" > "$tmpdir/kernel-getpriority.bundle.json"
 "$analyst" < "$tmpdir/kernel-getpriority.bundle.json" > "$tmpdir/kernel-getpriority.semantic.json"
-grep -q '"lowering_profile": "abi_kernel_getpriority_main"' "$tmpdir/kernel-getpriority.semantic.json"
+grep -q '"lowering_profile": "none"' "$tmpdir/kernel-getpriority.semantic.json"
 "$bind" --policy "$policy" < "$tmpdir/kernel-getpriority.semantic.json" > "$tmpdir/kernel-getpriority.binding.json"
 "$parallel" < "$tmpdir/kernel-getpriority.semantic.json" > "$tmpdir/kernel-getpriority.parallel.json"
 "$optimizer" < "$tmpdir/kernel-getpriority.parallel.json" > "$tmpdir/kernel-getpriority.optimized.json"
