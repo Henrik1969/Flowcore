@@ -309,7 +309,6 @@ int verify(const std::string& report, const std::string& policy_path, const std:
     if (profile == "abi_ncurses_main") for (const auto& item : needed) if (item.symbol == "initscr" || item.symbol == "endwin" || item.symbol == "waddnstr" || item.symbol == "wrefresh") lowering_requirement = &item;
     if (profile == "sel_main") for (const auto& item : needed) if (item.symbol == "initscr" || item.symbol == "endwin" || item.symbol == "wgetch" || item.symbol == "keypad") lowering_requirement = &item;
     if (profile == "abi_kernel_getpid_main") for (const auto& item : needed) if (item.symbol == "getpid") lowering_requirement = &item;
-    if (profile == "abi_kernel_getuid_main") for (const auto& item : needed) if (item.symbol == "getuid") lowering_requirement = &item;
     if (profile == "abi_kernel_getgid_main") for (const auto& item : needed) if (item.symbol == "getgid") lowering_requirement = &item;
     if (profile == "abi_kernel_geteuid_main") for (const auto& item : needed) if (item.symbol == "geteuid") lowering_requirement = &item;
     if (profile == "abi_kernel_getegid_main") for (const auto& item : needed) if (item.symbol == "getegid") lowering_requirement = &item;

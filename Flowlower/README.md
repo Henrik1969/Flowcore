@@ -8,7 +8,7 @@ source -> Flowmini -> Flowanalyst -> Flowparallel -> Flowoptimize -> Flowlower
 
 The first target provider is `llvm`. The implementation supports narrow
 source-derived profiles, including the executable `flowcat_file_main`,
-`abi_kernel_getpid_main`, `abi_kernel_getuid_main`, `abi_kernel_getgid_main`,
+`abi_kernel_getgid_main`,
 `abi_kernel_geteuid_main`,
 `abi_kernel_getegid_main`,
 `abi_kernel_getppid_main`,
@@ -20,7 +20,9 @@ source-derived profiles, including the executable `flowcat_file_main`,
 `abi_kernel_random_main` profiles, and emits valid
 LLVM modules for them. General source lowering remains a later expansion; every
 emitted profile must be explicit, policy-authorized where it uses external
-capabilities, and executable-tested.
+capabilities, and executable-tested. Profile-free lowering currently covers
+`c_int` calls with zero or one integer argument, typed result placement,
+integer values and expressions, returns, and boolean/comparison branches.
 
 The lowering report preserves the source path carried by the upstream semantic
 and optimization reports. This keeps emitted IR attributable to its source

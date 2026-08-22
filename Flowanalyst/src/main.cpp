@@ -387,7 +387,6 @@ int run(const Json& bundle) {
         std::set<std::string> sel_symbols; for (const auto& requirement : binding_requirements) sel_symbols.insert(requirement.symbol);
         if (sel_symbols.count("initscr") && sel_symbols.count("endwin") && sel_symbols.count("wgetch") && sel_symbols.count("keypad")) lowering_profile = "sel_main";
     }
-    if (text(field(*source_unit, "name")) == "abi_kernel_getuid_main") for (const auto& requirement : binding_requirements) if (requirement.symbol == "getuid" && requirement.parameter_types.empty() && requirement.return_type == "c_int") lowering_profile = "abi_kernel_getuid_main";
     if (text(field(*source_unit, "name")) == "abi_kernel_getgid_main") for (const auto& requirement : binding_requirements) if (requirement.symbol == "getgid" && requirement.parameter_types.empty() && requirement.return_type == "c_int") lowering_profile = "abi_kernel_getgid_main";
     if (text(field(*source_unit, "name")) == "abi_kernel_geteuid_main") for (const auto& requirement : binding_requirements) if (requirement.symbol == "geteuid" && requirement.parameter_types.empty() && requirement.return_type == "c_int") lowering_profile = "abi_kernel_geteuid_main";
     if (text(field(*source_unit, "name")) == "abi_kernel_getegid_main") for (const auto& requirement : binding_requirements) if (requirement.symbol == "getegid" && requirement.parameter_types.empty() && requirement.return_type == "c_int") lowering_profile = "abi_kernel_getegid_main";

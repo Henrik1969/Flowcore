@@ -65,6 +65,13 @@
   executes the selected return path.
 - Extended branch conditions to source-derived integer comparisons. Local SSA
   values can now feed an `icmp` predicate in a profile-free conditional ELF.
+- External `c_int` call results now retain their result-symbol identity and can
+  feed later generic return operations. LLVM emission requires a ready binding
+  report containing the authorized symbol; missing and mismatched reports are
+  rejected.
+- Migrated the getuid native example to this result-placement path. Its program
+  name is arbitrary, its lowering profile is `none`, and the handwritten
+  getuid profile branches were removed from analysis, binding, and lowering.
 
 ## Evidence
 
@@ -101,5 +108,5 @@
 ## Exact next action
 
 Next action: generalize profile-free external-call result placement so a call's
-typed result symbol can feed later value and return operations, then migrate one
-existing scalar native example away from its source-name profile.
+typed result can feed integer expressions and branches, then migrate the
+remaining zero-argument scalar identity examples in one reversible group.
