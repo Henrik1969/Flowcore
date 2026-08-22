@@ -1443,6 +1443,7 @@ void RuntimeGraph::deliver(const std::string& fromNode, const std::string& fromP
     }
 
     const std::string key = wireKey(fromNode, fromPort);
+    env.signal_id = "signal:" + std::to_string(next_signal_id_++);
     const auto it = wires_.find(key);
 
     if (it == wires_.end()) {
@@ -1458,7 +1459,7 @@ void RuntimeGraph::deliver(const std::string& fromNode, const std::string& fromP
         MiniEnvelope routed = env;
         routed.input_port = target.port;
         routed.wire_id = target.wire_id;
-        trace("route " + key + " => " + target.node + "." + target.port + " [" + target.wire_id + "]", routed);
+        trace("route " + key + " => " + target.node + "." + target.port + " [" + target.wire_id + "] [" + routed.signal_id + "]", routed);
         queue_.push(Pending{target.node, std::move(routed)});
     }
 }
@@ -1580,7 +1581,7 @@ void runModule(const ModuleSpec& module, flow::PipelineContext& ctx, const AtomR
     BuildResult build = buildCheckedGraph(module, registry);
 
     for (const auto& producerId : build.producerIds) {
-        build.graph.startAt(producerId, MiniEnvelope{UnitPayload{}, &ctx, {}, {}});
+        build.graph.startAt(producerId, MiniEnvelope{UnitPayload{}, &ctx, {}, {}, {}});
     }
 }
 

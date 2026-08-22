@@ -85,6 +85,9 @@ struct Envelope {
     // polluting the semantic value being transported.
     std::string input_port;
     std::string wire_id;
+    // One output activation creates one signal identity; fan-out deliveries
+    // retain it while each destination keeps its own wire identity.
+    std::string signal_id;
 };
 
 class StdinProducer {

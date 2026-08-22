@@ -110,6 +110,7 @@ Envelope<ByteBuffer> StdinProducer::produce() const {
         ByteBuffer{buffer.str()},
         ctx_,
         {},
+        {},
         {}
     };
 }

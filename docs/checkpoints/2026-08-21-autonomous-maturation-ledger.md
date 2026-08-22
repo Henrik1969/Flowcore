@@ -171,6 +171,11 @@
 - Removed the empty-program lowering profile. A valid version-1 generic plan
   with zero operations now emits a minimal native `main`, including independent
   explicitly selected target artifacts.
+- Added stable runtime signal identities distinct from wire identities. Each
+  output activation creates one signal, fan-out deliveries retain it across
+  distinct wires, and traces preserve full source/destination port identity.
+- Expanded graph coverage for deterministic fan-out order, multiple destination
+  ports, unconnected-output diagnostics, and invalid-port contract rejection.
 
 ## Evidence
 
@@ -256,6 +261,8 @@
 - Focused empty-plan checkpoint: `flowanalyst_pipeline`,
   `profile_free_generic_lowering`, `flowlower_pipeline`, and both pass-corpus
   registrations passed, including two separately attributed native targets.
+- Focused graph-law checkpoint: `flowcore_graph_routing` and both pass-corpus
+  registrations passed with wire/signal provenance and fan-out assertions.
 
 ## Remaining work
 
@@ -275,7 +282,9 @@
 - Add call-site resource propagation and cleanup diagnostics using the exported
   ABI type facts.
 - Add graph fan-out, multiple destination ports, required/optional/terminal
-  connectivity, contract rejection, provenance, and failure-routing tests.
+  connectivity and failure-routing tests. Fan-out, port identity, contract
+  rejection, unconnected-output diagnostics, and wire/signal provenance are
+  now covered.
 - Reconcile documentation and test counts after the implementation stabilizes.
 
 ## Exact next action
