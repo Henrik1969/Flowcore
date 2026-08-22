@@ -43,6 +43,24 @@ jq -e '
 "$parallel" < "$tmpdir/semantic.json" > "$tmpdir/parallel.json"
 "$optimizer" < "$tmpdir/parallel.json" > "$tmpdir/optimized.json"
 "$bind" --policy "$tmpdir/policy" < "$tmpdir/semantic.json" > "$tmpdir/binding.json"
+
+# Resource lifetime is a path property, not merely a capability-set property.
+# The read-error branch exits early and therefore must retain its own cleanup.
+jq '.lowering_plan.operations |= map(select(.provider.symbol != "endwin" or .block_id != 3))' \
+    "$tmpdir/semantic.json" > "$tmpdir/missing-branch-cleanup.json"
+if "$bind" --policy "$tmpdir/policy" < "$tmpdir/missing-branch-cleanup.json" >/dev/null 2>&1; then
+    echo 'ncurses error branch without cleanup unexpectedly authorized' >&2
+    exit 1
+fi
+
+# A second cleanup on the ordinary path must be rejected even though both calls
+# are individually authorized by the exact provider contract.
+jq '.lowering_plan.operations += [(.lowering_plan.operations[] | select(.provider.symbol == "endwin" and .block_id == 0) | .id += 1000)]' \
+    "$tmpdir/semantic.json" > "$tmpdir/double-cleanup.json"
+if "$bind" --policy "$tmpdir/policy" < "$tmpdir/double-cleanup.json" >/dev/null 2>&1; then
+    echo 'ncurses path with double cleanup unexpectedly authorized' >&2
+    exit 1
+fi
 jq -e '.status == "ready" and .lowering_profile == "none" and (.symbols | index("wgetch")) != null and (.symbols | index("puts")) != null' "$tmpdir/binding.json" >/dev/null
 
 # The backend recognizes the structured capability plan, not this fixture's

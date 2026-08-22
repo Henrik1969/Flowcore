@@ -259,6 +259,12 @@
   carriers from their exact `repr` contract instead of adding the ncurses type
   name to compiler dispatch. Hostile lifetime and cleanup mutations are
   rejected, and both the standalone ncurses ELF and `sel` remain executable.
+- Flowbind now validates acquired-resource cleanup path-sensitively across
+  structured branches. Every reachable exit after `initscr` must execute
+  exactly one contract-matched `endwin`; cleanup before acquisition, repeated
+  acquisition, double cleanup, and resource actions in loops without an
+  explicit lifetime proof are rejected. Adversarial `sel` plans cover an early
+  error exit with missing cleanup and an ordinary path with duplicate cleanup.
 
 ## Evidence
 
@@ -406,23 +412,26 @@
   `flowbind_provider`, `flowlower_pipeline`, `flowanalyst_pipeline`, and both
   pass-corpus registrations passed. The canonical build and suite then passed
   **54/54** tests in 19.58 seconds.
+- Focused path-sensitive resource checkpoint: `flowbind_provider`,
+  `ncurses_flow_pipeline`, and `sel_tui_pipeline` passed, including missing
+  branch-cleanup and double-cleanup rejection. The complete canonical build and
+  suite then passed **54/54** tests in 17.75 seconds.
 
 ## Remaining work
 
 - The unqualified single-provider import alias remains explicitly transitional;
   selective-opening syntax is not yet part of the language.
-- Add path-sensitive resource-state validation so every exit reachable after
-  ncurses acquisition proves exactly one compatible cleanup; current binding
-  validation proves the cleanup operation is present and exactly identified,
-  but does not yet prove dominance or reject double cleanup.
 - Add graph fan-out, multiple destination ports, required/optional/terminal
   connectivity and failure-routing tests. Fan-out, port identity, contract
   rejection, unconnected-output diagnostics, and wire/signal provenance are
   now covered.
+- Remove the obsolete substring-based Flowlower compatibility implementation
+  that still reads `lowering_profile`; the typed structured lowerer is the only
+  accepted backend path and must remain green after the dead machinery is gone.
 - Reconcile documentation and test counts after the implementation stabilizes.
 
 ## Exact next action
 
-Next action: propagate acquired-resource identity through structured blocks and
-reject an exit after `initscr` unless its path executes exactly one authorized
-`endwin`, including adversarial missing-cleanup and double-cleanup branches.
+Next action: delete Flowlower's unreachable legacy substring/profile parser and
+emitters, retaining only typed structured-plan parsing, exact binding
+authorization, generic LLVM emission, and structured refusal.

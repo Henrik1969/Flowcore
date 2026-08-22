@@ -1,9 +1,12 @@
 #include <dlfcn.h>
+#include <algorithm>
 #include <cstddef>
 #include <fstream>
+#include <functional>
 #include <iostream>
 #include <map>
 #include <regex>
+#include <set>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -324,6 +327,76 @@ void validate_lowering_plan(const std::string& report, const std::vector<Require
         } else if (resource != nullptr) {
             throw std::runtime_error("lowering operation invents an undeclared result resource");
         }
+    }
+
+    struct ResourceContract { const Json* acquisition; std::string contract, cleanup; };
+    std::vector<ResourceContract> resources;
+    for (const auto& operation : operations) {
+        const auto* resource = json_field(operation, "result_resource");
+        const auto* provider = json_field(operation, "provider");
+        if (resource != nullptr && provider != nullptr)
+            resources.push_back({&operation, json_text(json_field(*provider, "contract")), json_text(json_field(*resource, "cleanup_capability"))});
+    }
+    auto optional_integer = [](const Json& value, std::string_view field_name, long long fallback) {
+        const auto* item = json_field(value, field_name);
+        return item == nullptr ? fallback : json_integer(item, "lowering operation identity");
+    };
+    std::map<long long, std::vector<const Json*>> blocks;
+    for (const auto& operation : operations) blocks[optional_integer(operation, "block_id", 0)].push_back(&operation);
+    for (auto& [block, items] : blocks) std::stable_sort(items.begin(), items.end(), [&](const Json* left, const Json* right) {
+        const auto left_statement = optional_integer(*left, "statement_id", -1);
+        const auto right_statement = optional_integer(*right, "statement_id", -1);
+        if (left_statement != right_statement) return left_statement < right_statement;
+        return optional_integer(*left, "id", -1) < optional_integer(*right, "id", -1);
+    });
+    for (const auto& resource : resources) {
+        auto is_cleanup = [&](const Json& operation) {
+            const auto* provider = json_field(operation, "provider");
+            return provider != nullptr && json_text(json_field(*provider, "contract")) == resource.contract &&
+                json_text(json_field(*provider, "symbol")) == resource.cleanup;
+        };
+        std::function<bool(long long)> block_has_resource_action = [&](long long block) {
+            for (const auto* operation : blocks[block]) {
+                if (operation == resource.acquisition || is_cleanup(*operation)) return true;
+                if (json_text(json_field(*operation, "kind")) == "branch") {
+                    const auto then_block = optional_integer(*operation, "then_block_id", -1);
+                    const auto else_block = optional_integer(*operation, "else_block_id", -1);
+                    if ((then_block >= 0 && block_has_resource_action(then_block)) || (else_block >= 0 && block_has_resource_action(else_block))) return true;
+                }
+            }
+            return false;
+        };
+        std::function<std::set<int>(long long, std::set<int>)> walk = [&](long long block, std::set<int> states) {
+            for (const auto* operation : blocks[block]) {
+                const auto kind = json_text(json_field(*operation, "kind"));
+                if (operation == resource.acquisition) {
+                    if (states.count(0)) throw std::runtime_error("resource acquired again before its declared cleanup");
+                    states = {0};
+                } else if (is_cleanup(*operation)) {
+                    if (states.count(-1)) throw std::runtime_error("resource cleanup is reachable before acquisition");
+                    if (states.count(1)) throw std::runtime_error("resource path executes its declared cleanup more than once");
+                    states = {1};
+                } else if (kind == "branch") {
+                    const auto then_block = optional_integer(*operation, "then_block_id", -1);
+                    const auto else_block = optional_integer(*operation, "else_block_id", -1);
+                    auto joined = then_block >= 0 ? walk(then_block, states) : states;
+                    const auto alternative = else_block >= 0 ? walk(else_block, states) : states;
+                    joined.insert(alternative.begin(), alternative.end());
+                    states = std::move(joined);
+                } else if (kind == "loop") {
+                    const auto body_block = optional_integer(*operation, "body_block_id", -1);
+                    if (body_block >= 0 && block_has_resource_action(body_block))
+                        throw std::runtime_error("resource acquisition or cleanup inside a loop requires an explicit lifetime proof");
+                } else if (kind == "return_value") {
+                    if (states.count(0)) throw std::runtime_error("resource path exits without its declared cleanup capability");
+                    return std::set<int>{};
+                }
+                if (states.empty()) break;
+            }
+            return states;
+        };
+        const auto exits = walk(0, {-1});
+        if (exits.count(0)) throw std::runtime_error("resource path reaches program exit without its declared cleanup capability");
     }
 }
 
