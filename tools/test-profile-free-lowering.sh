@@ -113,6 +113,23 @@ compare_rc=$?
 set -e
 test "$compare_rc" -eq 42
 
+args_source="$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass/profile_free_args_length.flow"
+"$flowmini" --dump-frontend-bundle "$args_source" | "$analyst" > "$tmpdir/args.semantic.json"
+jq -e '.status == "ok" and .lowering_profile == "none" and any(.lowering_plan.operations[]; .kind == "value_definition" and .operands[0].intrinsic == "list_length")' "$tmpdir/args.semantic.json" >/dev/null
+"$parallel" < "$tmpdir/args.semantic.json" | "$optimizer" > "$tmpdir/args.optimized.json"
+"$lower" --emit-llvm "$tmpdir/args.ll" < "$tmpdir/args.optimized.json" > "$tmpdir/args.lowering.json"
+grep -Fq 'define i32 @main(i32 %argc, ptr %argv)' "$tmpdir/args.ll"
+grep -Fq 'icmp sgt i32 %flow_value_' "$tmpdir/args.ll"
+clang "$tmpdir/args.ll" -o "$tmpdir/args"
+set +e
+"$tmpdir/args" selected
+args_with_value_rc=$?
+"$tmpdir/args"
+args_without_value_rc=$?
+set -e
+test "$args_with_value_rc" -eq 42
+test "$args_without_value_rc" -eq 7
+
 result_source="$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass/profile_free_external_result.flow"
 printf '%s\n' 'allow libc.so.6 getppid c readonly - c_int' > "$tmpdir/result.policy"
 "$flowmini" --dump-frontend-bundle "$result_source" | "$analyst" > "$tmpdir/result.semantic.json"

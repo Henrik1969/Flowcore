@@ -133,6 +133,7 @@ bool valid_integer_literal(std::string_view value) {
 
 std::string emit_integer_expression(std::string_view expression, std::ostringstream& instructions, int& temporary, const std::map<int, std::string>& values) {
     const auto kind = quoted_field(expression, "kind");
+    if (kind == "call" && quoted_field(expression, "intrinsic") == "list_length" && quoted_field(expression, "type") == "c_int") return "%argc";
     if (kind == "integer_literal") {
         const auto value = quoted_field(expression, "value");
         return valid_integer_literal(value) ? value : std::string{};
@@ -600,7 +601,7 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
                     "target triple = \"x86_64-pc-linux-gnu\"\n"
                  << (generic_external_result_branch ? "declare i32 @" + external_symbol + "(" + external_declaration_parameters + ")\n" : "")
                  <<
-                    "define i32 @main() {\n"
+                    "define i32 @main(i32 %argc, ptr %argv) {\n"
                     "entry:\n"
                  << value_initialization_instructions.str()
                  << external_instructions.str()

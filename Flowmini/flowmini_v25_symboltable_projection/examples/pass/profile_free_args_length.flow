@@ -1,0 +1,10 @@
+program arbitrary_args_length
+
+main(args : list<string>) {
+    count : c_int(length(args))
+    if count > 1 {
+        return 42
+    } else {
+        return 7
+    }
+}

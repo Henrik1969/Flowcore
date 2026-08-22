@@ -181,6 +181,10 @@
   plan containing the required external operations, and every operation is
   checked against the ready binding report. An arbitrarily renamed copy follows
   the same path, while a binding with a mutated `wgetch` identity is rejected.
+- Added a generic `length(list<string>)` lowering operand for parameterized
+  entry points. A profile-free arbitrary program now branches on its actual
+  native argument count and produces distinct tested exit statuses with and
+  without an application argument.
 
 ## Evidence
 
@@ -272,6 +276,9 @@
   `flowanalyst_pipeline`, `flowbind_provider`, `flowlower_pipeline`, and both
   pass-corpus registrations passed. The gate includes renamed-source and
   hostile-binding cases plus positive input, EOF, and read-error execution.
+- Focused entry-argument checkpoint: `profile_free_generic_lowering` and
+  `flowlower_pipeline` passed, including native execution of both argc branch
+  outcomes.
 
 ## Remaining work
 
@@ -300,6 +307,7 @@
 
 ## Exact next action
 
-Next action: express `sel` argument/input choice, key handling, and output
-branches in structured Flow operations, then replace the transitional
-capability-set emitter without losing cleanup and read-result laws.
+Next action: lower checked `list<string>` indexing to native argv access, then
+express `sel` argument/input choice, key handling, and output branches in
+structured Flow operations and replace the transitional capability-set emitter
+without losing cleanup and read-result laws.

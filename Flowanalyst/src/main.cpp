@@ -629,6 +629,20 @@ int run(const Json& bundle) {
             const int symbol = resolved_expression_symbols.count(expression_id) ? resolved_expression_symbols.at(expression_id) : -1;
             const auto type = symbol_types.count(symbol) ? symbol_types.at(symbol) : std::string{};
             std::cout << ",\"type\":" << quote(type) << ",\"symbol_id\":" << symbol;
+        } else if (kind == "call") {
+            const auto* payload = field(expression, "payload");
+            const int base = integer(field(payload, "base"));
+            const auto callee = expressions.count(base) && text(field(*expressions.at(base), "kind")) == "identifier"
+                ? text(field(field(*expressions.at(base), "payload"), "name")) : std::string{};
+            const auto arguments = list(field(payload, "arguments"));
+            if (callee == "length" && arguments.size() == 1) {
+                const int argument = integer(&arguments.front());
+                const int symbol = resolved_expression_symbols.count(argument) ? resolved_expression_symbols.at(argument) : -1;
+                const auto type = symbol_types.count(symbol) ? symbol_types.at(symbol) : std::string{};
+                if (type == "list<string>")
+                    std::cout << ",\"intrinsic\":\"list_length\",\"type\":\"c_int\",\"symbol_id\":" << symbol;
+                else std::cout << ",\"type\":\"unsupported\"";
+            } else std::cout << ",\"type\":\"unsupported\"";
         } else if (kind == "unary") {
             const auto* payload = field(expression, "payload");
             std::cout << ",\"type\":\"c_int\",\"operator\":" << quote(text(field(payload, "operator"))) << ",\"operand\":";
