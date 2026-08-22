@@ -121,7 +121,6 @@ int run(const Json& bundle) {
     std::vector<BindingRequirement> binding_requirements;
     std::vector<AbiTypeContract> abi_type_contracts;
     std::vector<AggregateLayout> aggregate_layouts;
-    const auto source_unit = field(*ast, "source_unit");
     std::set<std::string> called_names;
     for (const auto& [expression_id, expression] : expressions) {
         if (text(field(*expression, "kind")) != "call") continue;
@@ -146,9 +145,7 @@ int run(const Json& bundle) {
             const int child_id = integer(&child); if (!symbols.count(child_id) || text(field(*symbols[child_id], "kind")) != "Function") continue;
             const auto external = fact_value(*symbols[child_id], "external_symbol_spelling"); if (external.empty()) continue;
             const auto function_name = text(field(*symbols[child_id], "name"));
-            const bool flowcat_file_contract = text(field(*source_unit, "name")) == "flowcat" &&
-                (function_name == "open" || function_name == "read" || function_name == "write" || function_name == "close");
-            if (!called_names.count(function_name) && !flowcat_file_contract) continue;
+            if (!called_names.count(function_name)) continue;
             std::string parameter_types;
             const int function_scope = integer(field(*symbols[child_id], "introduced_scope_id"));
             if (scopes.count(function_scope)) for (const auto& parameter : list(field(*scopes[function_scope], "symbol_ids"))) {

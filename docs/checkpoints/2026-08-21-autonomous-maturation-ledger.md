@@ -210,6 +210,11 @@
   loop comparison on every iteration, applies a source assignment through
   mutable storage, and returns the final value without any source-name or
   capability selector.
+- Removed the last source-unit exception from Flowanalyst capability discovery
+  and the obsolete `sel_main`/`abi_kernel_getpid_main` branches from Flowbind.
+  Requirements are now derived only from actual calls, binding reports describe
+  the versioned plan as generic, and Flowlower public wording no longer calls
+  accepted plans profiles.
 
 ## Evidence
 

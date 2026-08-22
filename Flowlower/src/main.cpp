@@ -968,7 +968,7 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
                  "  \"artifact\": {\"backend\": \"llvm\", \"target_specific\": true, \"status\": \"" << (llvm_path.empty() ? "not-emitted" : "emitted") << "\"},\n"
                  "  \"backend\": {\"name\": \"llvm\", \"provider_status\": \"available\"},\n"
                  "  \"ir\": {\"format\": \"llvm-ir\", \"status\": \"" << (llvm_path.empty() ? "not-emitted" : "emitted") << "\"},\n"
-                 "  \"message\": \"LLVM lowering boundary reached for the accepted profile\"\n"
+                 "  \"message\": \"LLVM lowering boundary reached for the accepted lowering plan\"\n"
                  "}\n";
     return 0;
 }
