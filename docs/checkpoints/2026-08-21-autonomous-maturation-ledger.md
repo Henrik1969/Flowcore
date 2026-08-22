@@ -152,6 +152,10 @@
 - Migrated `clock_gettime` and `uname` to generic mixed-carrier lowering using
   explicit 16-byte and 390-byte source allocations. Their analyst, binder, and
   handwritten LLVM profile branches are removed, and both native ELFs execute.
+- Replaced the imported short-name toggle with a permanent ambiguity set. One
+  provider retains the diagnosed compatibility alias; two, three, and four
+  colliding providers remain ambiguous, while four qualified calls remain
+  stable and distinct.
 
 ## Evidence
 
@@ -224,11 +228,14 @@
   and `flowlower_pipeline` passed, including native execution of
   `clock_gettime` and `uname` and rejection of a zero-byte descriptor. The
   canonical build and suite passed **54/54**.
+- Focused namespace checkpoint: `namespace_ambiguity`, `flowanalyst_pipeline`,
+  and both `flowcore_pass_corpus` registrations passed with one-through-four
+  provider coverage.
 
 ## Remaining work
 
-- Complete namespace law by replacing or explicitly fencing legacy unqualified
-  import flattening and add selective-opening semantics only where unambiguous.
+- The unqualified single-provider import alias remains explicitly transitional;
+  selective-opening syntax is not yet part of the language.
 - Replace the remaining ncurses, `sel`, flowcat, and empty-program profile or
   source-name lowering dispatch with reusable lowering plans. Kernel ABI
   examples no longer use compiler profiles.
@@ -246,7 +253,6 @@
 
 ## Exact next action
 
-Next action: complete the imported short-name candidate-set audit and fence the
-legacy unqualified-import compatibility path with one-, two-, three-, and
-four-provider collision coverage before continuing the remaining application
-profile migrations.
+Next action: make `sel` read/error handling source-derived and safe, then remove
+its source-name profile only after error, EOF, positive-read, native, and
+pseudo-terminal coverage passes.

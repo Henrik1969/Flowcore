@@ -1266,11 +1266,14 @@ private:
         if (def.effect.empty()) { fail(nameToken, "extern function requires effect declaration"); }
         const FunctionDef compatibilityCopy = def;
         functions_[def.name] = std::move(def);
-        // Keep old unqualified source working when it is unambiguous. A later
-        // provider with the same short name removes that compatibility alias;
-        // qualified calls remain deterministic.
-        if (functions_.contains(shortName)) {
+        // Transitional compatibility: retain an unqualified alias only while
+        // exactly one provider exports the short name. Ambiguity is permanent;
+        // a third or later provider must never recreate the alias.
+        if (ambiguousFunctionNames_.contains(shortName)) {
             functions_.erase(shortName);
+        } else if (functions_.contains(shortName)) {
+            functions_.erase(shortName);
+            ambiguousFunctionNames_.insert(shortName);
         } else {
             functions_[shortName] = compatibilityCopy;
         }
@@ -1917,6 +1920,7 @@ private:
     int ifCounter_ = 0;
     std::vector<LoopContext> loopStack_;
     std::map<std::string, FunctionDef> functions_;
+    std::set<std::string> ambiguousFunctionNames_;
     std::map<std::string, TypeDef> types_;
     std::map<std::string, AbiTypeDef> abiTypes_;
     std::map<std::string, AbiStructDef> abiStructs_;
