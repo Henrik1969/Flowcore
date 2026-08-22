@@ -60,7 +60,7 @@ printf '%s\n' "$kernel_clock_report" | jq -e '
 kernel_random_fixture="$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass/abi_kernel_random_main.flow"
 kernel_random_report=$("$flowmini" --dump-frontend-bundle "$kernel_random_fixture" | "$bin")
 printf '%s\n' "$kernel_random_report" | jq -e '
-    .lowering_profile == "abi_kernel_random_main" and
+    .lowering_profile == "none" and
     ([.binding_requirements[] | .symbol] == ["getrandom"])
 ' >/dev/null
 
@@ -81,14 +81,14 @@ printf '%s\n' "$kernel_openat_report" | jq -e '
 kernel_read_fixture="$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass/abi_kernel_read_main.flow"
 kernel_read_report=$("$flowmini" --dump-frontend-bundle "$kernel_read_fixture" | "$bin")
 printf '%s\n' "$kernel_read_report" | jq -e '
-    .lowering_profile == "abi_kernel_read_main" and
+    .lowering_profile == "none" and
     ([.binding_requirements[] | .symbol] == ["read"])
 ' >/dev/null
 
 kernel_write_fixture="$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass/abi_kernel_write_main.flow"
 kernel_write_report=$("$flowmini" --dump-frontend-bundle "$kernel_write_fixture" | "$bin")
 printf '%s\n' "$kernel_write_report" | jq -e '
-    .lowering_profile == "abi_kernel_write_main" and
+    .lowering_profile == "none" and
     ([.binding_requirements[] | .symbol] == ["write"])
 ' >/dev/null
 

@@ -382,10 +382,7 @@ int run(const Json& bundle) {
         if (sel_symbols.count("initscr") && sel_symbols.count("endwin") && sel_symbols.count("wgetch") && sel_symbols.count("keypad")) lowering_profile = "sel_main";
     }
     if (text(field(*source_unit, "name")) == "abi_kernel_clock_main") for (const auto& requirement : binding_requirements) if (requirement.symbol == "clock_gettime" && requirement.parameter_types == "c_int,c_pointer" && requirement.return_type == "c_int") lowering_profile = "abi_kernel_clock_main";
-    if (text(field(*source_unit, "name")) == "abi_kernel_random_main") for (const auto& requirement : binding_requirements) if (requirement.symbol == "getrandom" && requirement.parameter_types == "c_pointer,c_size_t,c_int" && requirement.return_type == "c_long") lowering_profile = "abi_kernel_random_main";
     if (text(field(*source_unit, "name")) == "abi_kernel_uname_main") for (const auto& requirement : binding_requirements) if (requirement.symbol == "uname" && requirement.parameter_types == "c_pointer" && requirement.return_type == "c_int") lowering_profile = "abi_kernel_uname_main";
-    if (text(field(*source_unit, "name")) == "abi_kernel_read_main") for (const auto& requirement : binding_requirements) if (requirement.symbol == "read" && requirement.parameter_types == "c_int,c_pointer,c_size_t" && requirement.return_type == "c_long") lowering_profile = "abi_kernel_read_main";
-    if (text(field(*source_unit, "name")) == "abi_kernel_write_main") for (const auto& requirement : binding_requirements) if (requirement.symbol == "write" && requirement.parameter_types == "c_int,c_pointer,c_size_t" && requirement.return_type == "c_long") lowering_profile = "abi_kernel_write_main";
     bool flowcat_entrypoint = false;
     if (text(field(*source_unit, "name")) == "flowcat") {
         for (const auto& [declaration_id, declaration] : declarations) {

@@ -141,6 +141,11 @@
   through the source-declared null pointer; the five buffer-writing profiles
   were retained pending explicit storage semantics rather than hiding an
   application-specific allocation in generic lowering.
+- Migrated the safe explicit-null probes `getrandom`, invalid-descriptor `read`,
+  and invalid-descriptor `write` to generic lowering. Only `clock_gettime` and
+  `uname` remain among the kernel compatibility profiles because successful
+  execution requires sized writable storage absent from their current Flow
+  declarations.
 
 ## Evidence
 
@@ -205,6 +210,9 @@
   generic `clock_gettime(c_int,c_pointer(0))` execution produced a segmentation
   fault, confirming that typed writable storage must be represented before its
   compatibility profile can be removed.
+- Focused null-probe checkpoint: the same six focused gates passed, including
+  native execution of `getrandom`, `read`, and `write`; the canonical build and
+  suite passed **54/54**.
 
 ## Remaining work
 
@@ -229,8 +237,7 @@
 
 ## Exact next action
 
-Next action: distinguish nullable pointer probes from writable storage in the
-lowering plan and provider ABI facts. Migrate safe null-probe operations
-(`getrandom`, invalid-fd `read`, and invalid-fd `write`) first, while keeping
-`clock_gettime` and `uname` transitional until their writable buffer size and
-lifetime are source/contract-derived.
+Next action: introduce a source/contract-derived sized writable-storage
+descriptor in the lowering plan, use it for `clock_gettime` and `uname`, and
+remove those final kernel profiles only after malformed-size and native-write
+coverage passes.
