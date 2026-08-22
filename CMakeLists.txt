@@ -146,6 +146,14 @@ add_test(NAME profile_free_generic_lowering
 set_tests_properties(profile_free_generic_lowering PROPERTIES
     DEPENDS "flow_less_ncurses_pager")
 
+add_test(NAME namespace_ambiguity
+    COMMAND ${CMAKE_COMMAND} -E env
+        FLOWMINI_BIN=$<TARGET_FILE:flowmini>
+        FLOWANALYST_BIN=$<TARGET_FILE:flowanalyst>
+        ${CMAKE_CURRENT_SOURCE_DIR}/tools/test-namespace-ambiguity.sh)
+set_tests_properties(namespace_ambiguity PROPERTIES
+    DEPENDS "flowanalyst_pipeline")
+
 # Canonical installed shape. Debian packaging consumes this staged install and
 # splits runtime, development, and documentation payloads without depending on
 # the source-tree layout.

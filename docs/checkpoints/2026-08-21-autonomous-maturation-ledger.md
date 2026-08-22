@@ -46,6 +46,10 @@
   its source name is now arbitrary, the analyst emits no special profile, and
   the dedicated getpid lowerer dispatch was removed. Existing corpus and native
   execution checks still pass.
+- Added a namespace adversarial gate with three independent providers exposing
+  the same function name. The unqualified call is rejected with provenance-aware
+  ambiguity diagnostics, while three explicit aliases compile to three distinct
+  qualified operations.
 
 ## Evidence
 
