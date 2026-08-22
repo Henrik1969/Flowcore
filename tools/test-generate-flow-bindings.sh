@@ -184,7 +184,7 @@ grep -Fq 'call i32 @get_nprocs' "$tmpdir/system-info.ll"
 grep -Fq 'call i32 @get_nprocs_conf' "$tmpdir/system-info.ll"
 grep -Fq 'call i64 @get_phys_pages' "$tmpdir/system-info.ll"
 grep -Fq 'call i64 @get_avphys_pages' "$tmpdir/system-info.ll"
-grep -Fq 'generic lowering plan: ordered scalar capability sequence' "$tmpdir/system-info.ll"
+grep -Fq 'generic lowering plan: ordered mixed-carrier capability sequence' "$tmpdir/system-info.ll"
 clang "$tmpdir/system-info.ll" -o "$tmpdir/system-info"
 "$tmpdir/system-info"
 

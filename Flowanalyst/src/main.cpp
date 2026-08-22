@@ -373,10 +373,6 @@ int run(const Json& bundle) {
     }
     if (declarations.empty()) empty_main_profile = false;
     std::string lowering_profile = empty_main_profile ? "empty_program_main" : "none";
-    if (text(field(*source_unit, "name")) == "test_licbinds") {
-        std::set<std::string> libc_symbols; for (const auto& requirement : binding_requirements) libc_symbols.insert(requirement.symbol);
-        if (libc_symbols.count("strlen") && libc_symbols.count("abs") && libc_symbols.count("puts")) lowering_profile = "test_licbinds_main";
-    }
     if (text(field(*source_unit, "name")) == "abi_ncurses_main") {
         std::set<std::string> ncurses_symbols; for (const auto& requirement : binding_requirements) ncurses_symbols.insert(requirement.symbol);
         if (ncurses_symbols.count("initscr") && ncurses_symbols.count("endwin") && ncurses_symbols.count("waddnstr") && ncurses_symbols.count("wrefresh")) lowering_profile = "abi_ncurses_main";

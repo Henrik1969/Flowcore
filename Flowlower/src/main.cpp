@@ -243,7 +243,6 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
         if (report.find(spaced_target_marker, targets_marker) == std::string_view::npos && report.find(compact_target_marker, targets_marker) == std::string_view::npos) throw std::runtime_error("requested target is not present in the optimization report");
     } else if (!target_name.empty()) throw std::runtime_error("requested target is not present in the optimization report");
     const bool trial_profile = has(report, "\"lowering_profile\": \"empty_program_main\"") || has(report, "\"lowering_profile\":\"empty_program_main\"");
-    const bool test_licbinds_profile = has(report, "\"lowering_profile\": \"test_licbinds_main\"") || has(report, "\"lowering_profile\":\"test_licbinds_main\"");
     const bool abi_ncurses_profile = has(report, "\"lowering_profile\": \"abi_ncurses_main\"") || has(report, "\"lowering_profile\":\"abi_ncurses_main\"");
     const bool sel_profile = has(report, "\"lowering_profile\": \"sel_main\"") || has(report, "\"lowering_profile\":\"sel_main\"");
     const bool abi_kernel_clock_profile = has(report, "\"lowering_profile\": \"abi_kernel_clock_main\"") || has(report, "\"lowering_profile\":\"abi_kernel_clock_main\"");
@@ -411,6 +410,12 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
     std::set<std::string> sequence_symbols;
     std::size_t sequence_call_count = 0;
     bool generic_scalar_sequence = profile_free_plan && return_operation == "{}" && branch_operation == "{}";
+    auto llvm_carrier = [](const std::string& carrier) {
+        if (carrier == "c_int") return std::string("i32");
+        if (carrier == "c_long" || carrier == "c_ulong" || carrier == "c_size_t") return std::string("i64");
+        if (carrier == "c_string" || carrier == "c_pointer") return std::string("ptr");
+        return std::string{};
+    };
     for (const auto& operation : operation_objects) {
         const auto kind = quoted_field(operation, "kind");
         if (kind == "value_definition") continue;
@@ -420,14 +425,38 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
         const auto parameters = quoted_field(provider, "parameter_types");
         const auto return_type = quoted_field(provider, "return_type");
         const auto result_symbol = numeric_field(operation, "result_symbol_id");
-        if (!valid_c_symbol(symbol) || !parameters.empty() || !has(operation, "\"arguments\":[]") ||
-            (return_type != "c_int" && return_type != "c_long") || result_symbol.empty()) {
+        const auto result_type = llvm_carrier(return_type);
+        const auto operands = array_objects(array_field(operation, "operands"));
+        std::vector<std::string> parameter_carriers;
+        for (std::size_t start = 0; start < parameters.size();) {
+            const auto comma = parameters.find(',', start);
+            parameter_carriers.push_back(parameters.substr(start, comma == std::string::npos ? std::string::npos : comma - start));
+            if (comma == std::string::npos) break;
+            start = comma + 1;
+        }
+        if (!valid_c_symbol(symbol) || result_type.empty() || result_symbol.empty() || parameter_carriers.size() != operands.size()) {
             generic_scalar_sequence = false;
             continue;
         }
-        const auto llvm_type = return_type == "c_long" ? "i64" : "i32";
-        if (sequence_symbols.insert(symbol).second) sequence_declarations << "declare " << llvm_type << " @" << symbol << "()\n";
-        sequence_calls << "  %flow_call_" << result_symbol << " = call " << llvm_type << " @" << symbol << "()\n";
+        std::ostringstream declaration_parameters;
+        std::ostringstream call_arguments;
+        bool valid_arguments = true;
+        for (std::size_t index = 0; index < operands.size(); ++index) {
+            const auto parameter_type = llvm_carrier(parameter_carriers[index]);
+            const auto operand_symbol = numeric_field(operands[index], "symbol_id");
+            std::string argument;
+            if (quoted_field(operands[index], "kind") == "integer_literal") argument = quoted_field(operands[index], "value");
+            else if (!operand_symbol.empty() && generic_values.count(std::stoi(operand_symbol))) argument = generic_values.at(std::stoi(operand_symbol));
+            if (parameter_type.empty() || argument.empty() || quoted_field(operands[index], "type") != parameter_carriers[index]) valid_arguments = false;
+            if (index) { declaration_parameters << ','; call_arguments << ','; }
+            declaration_parameters << parameter_type;
+            call_arguments << parameter_type << ' ' << argument;
+        }
+        if (!valid_arguments) { generic_scalar_sequence = false; continue; }
+        if (sequence_symbols.insert(symbol).second) sequence_declarations << "declare " << result_type << " @" << symbol << '(' << declaration_parameters.str() << ")\n";
+        const auto result_name = "%flow_call_" + result_symbol;
+        sequence_calls << "  " << result_name << " = call " << result_type << " @" << symbol << '(' << call_arguments.str() << ")\n";
+        generic_values[std::stoi(result_symbol)] = result_name;
         ++sequence_call_count;
     }
     generic_scalar_sequence = generic_scalar_sequence && sequence_call_count > 1;
@@ -476,7 +505,6 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
         !nullable_consumer_symbol.empty() && !nullable_then_argument.empty() && !nullable_else_argument.empty() &&
         ((nullable_then_argument == nullable_result_symbol && generic_values.count(std::stoi(nullable_else_argument))) ||
          (nullable_else_argument == nullable_result_symbol && generic_values.count(std::stoi(nullable_then_argument))));
-    if (test_licbinds_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"test_licbinds_main\"") || !has(binding_report, "\"strlen\"") || !has(binding_report, "\"abs\"") || !has(binding_report, "\"puts\""))) throw std::runtime_error("ABI binding report does not authorize the test_licbinds_main lowering profile");
     if (abi_ncurses_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"abi_ncurses_main\"") || !has(binding_report, "\"initscr\"") || !has(binding_report, "\"endwin\"") || !has(binding_report, "\"waddnstr\"") || !has(binding_report, "\"wrefresh\""))) throw std::runtime_error("ABI binding report does not authorize the abi_ncurses_main lowering profile");
     if (sel_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"sel_main\"") || !has(binding_report, "\"initscr\"") || !has(binding_report, "\"endwin\"") || !has(binding_report, "\"wgetch\"") || !has(binding_report, "\"keypad\"") || !has(binding_report, "\"puts\"") || !has(binding_report, "\"read\""))) throw std::runtime_error("ABI binding report does not authorize the sel_main lowering profile");
     if (abi_kernel_clock_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"abi_kernel_clock_main\"") || !has(binding_report, "\"kind\": \"external_call\"") || !has(binding_report, "\"clock_gettime\""))) throw std::runtime_error("ABI binding report does not authorize the abi_kernel_clock_main lowering profile");
@@ -501,7 +529,7 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
         if (binding_report.empty() || (!has(binding_report, "\"status\": \"ready\"") && !has(binding_report, "\"status\":\"ready\""))) throw std::runtime_error("generic nullable string lowering is not authorized");
         for (const auto& symbol : nullable_authorized_symbols) if (!has(binding_report, "\"symbol\":" + quote(symbol)) && !has(binding_report, "\"symbol\": " + quote(symbol))) throw std::runtime_error("generic nullable string operation is not authorized: " + symbol);
     }
-    if (!llvm_path.empty() && !generic_external_scalar && !generic_external_long && !generic_external_ulong && !generic_external_size_return && !generic_scalar_sequence && !generic_return_value && !generic_branch && !nullable_string_branch && !trial_profile && !test_licbinds_profile && !abi_ncurses_profile && !sel_profile && !abi_kernel_clock_profile && !abi_kernel_random_profile && !abi_kernel_uname_profile && !abi_kernel_openat_profile && !abi_kernel_read_profile && !abi_kernel_write_profile && !abi_kernel_lseek_profile && !abi_kernel_unlinkat_profile && !remaining_kernel_profile && !flowcat_profile && !flowcat_file_profile) throw std::runtime_error("LLVM emission requires an accepted lowering profile or supported generic lowering plan");
+    if (!llvm_path.empty() && !generic_external_scalar && !generic_external_long && !generic_external_ulong && !generic_external_size_return && !generic_scalar_sequence && !generic_return_value && !generic_branch && !nullable_string_branch && !trial_profile && !abi_ncurses_profile && !sel_profile && !abi_kernel_clock_profile && !abi_kernel_random_profile && !abi_kernel_uname_profile && !abi_kernel_openat_profile && !abi_kernel_read_profile && !abi_kernel_write_profile && !abi_kernel_lseek_profile && !abi_kernel_unlinkat_profile && !remaining_kernel_profile && !flowcat_profile && !flowcat_file_profile) throw std::runtime_error("LLVM emission requires an accepted lowering profile or supported generic lowering plan");
     if (!llvm_path.empty()) {
         std::ofstream llvm(llvm_path); if (!llvm) throw std::runtime_error("cannot open LLVM output");
         llvm << "; Flowcore target artifact: " << selected_target << "\n";
@@ -539,8 +567,9 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
                     "  ret i32 %flow_exit\n"
                     "}\n";
         } else if (generic_scalar_sequence) {
-            llvm << "; Flowcore generic lowering plan: ordered scalar capability sequence\n"
+            llvm << "; Flowcore generic lowering plan: ordered mixed-carrier capability sequence\n"
                     "target triple = \"x86_64-pc-linux-gnu\"\n"
+                 << string_globals.str()
                  << sequence_declarations.str()
                  << "define i32 @main() {\n"
                     "entry:\n"
@@ -620,20 +649,6 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
                     "  ret i32 0\n"
                     "error:\n"
                     "  ret i32 1\n"
-                    "}\n";
-        } else if (test_licbinds_profile) {
-            llvm << "; Flowcore libc binding integration: strlen + abs + puts\n"
-                    "target triple = \"x86_64-pc-linux-gnu\"\n"
-                    "@flowcore_libc_message = private unnamed_addr constant [23 x i8] c\"Flowcore libc bindings\\00\"\n"
-                    "declare i64 @strlen(ptr)\n"
-                    "declare i32 @abs(i32)\n"
-                    "declare i32 @puts(ptr)\n"
-                    "define i32 @main() {\n"
-                    "entry:\n"
-                    "  %length = call i64 @strlen(ptr @flowcore_libc_message)\n"
-                    "  %absolute = call i32 @abs(i32 -42)\n"
-                    "  %printed = call i32 @puts(ptr @flowcore_libc_message)\n"
-                    "  ret i32 0\n"
                     "}\n";
         } else if (abi_ncurses_profile) {
             llvm << "; Flowcore ncurses binding integration: initialize, write, refresh, restore\n"
