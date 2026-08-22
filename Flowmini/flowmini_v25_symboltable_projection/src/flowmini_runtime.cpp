@@ -413,7 +413,7 @@ private:
     }
 };
 
-class NcursesPagerNode final : public ConfiguredNode {
+class NcursesPagerInputNode final : public ConfiguredNode {
 public:
     using ConfiguredNode::ConfiguredNode;
 
@@ -423,26 +423,23 @@ public:
         if (!path.empty()) {
             std::ifstream input(path);
             if (!input) {
-                throw flow::DiagnosticError{"pager.ncurses", "unable to open text file: " + path};
+                throw flow::DiagnosticError{"pager.input.file.ncurses", "unable to open text file: " + path};
             }
             std::string line;
             while (std::getline(input, line)) { lines.push_back(std::move(line)); }
             if (!input.eof()) {
-                throw flow::DiagnosticError{"pager.ncurses", "failed while reading text file: " + path};
+                throw flow::DiagnosticError{"pager.input.file.ncurses", "failed while reading text file: " + path};
             }
         } else {
             lines = splitPagerPolicy(getPolicyString(config_, "lines", ""), '|');
         }
         const int pageSize = getPolicyInt(config_, "page_size", 1);
         if (pageSize <= 0) {
-            throw flow::DiagnosticError{"pager.ncurses", "page_size must be positive"};
+            throw flow::DiagnosticError{"pager.input.file.ncurses", "page_size must be positive"};
         }
-        const std::size_t pageCount = lines.empty() ? 1U : (lines.size() + static_cast<std::size_t>(pageSize) - 1U) /
-            static_cast<std::size_t>(pageSize);
-
         void* library = dlopen("libncursesw.so.6", RTLD_NOW | RTLD_LOCAL);
         if (library == nullptr) {
-            throw flow::DiagnosticError{"pager.ncurses", "unable to load libncursesw.so.6"};
+            throw flow::DiagnosticError{"pager.input.file.ncurses", "unable to load libncursesw.so.6"};
         }
         try {
             using Init = void* (*)();
@@ -466,13 +463,13 @@ public:
             const auto getch = symbol<Getch>(library, "wgetch");
 
             void* window = init();
-            if (window == nullptr) { throw flow::DiagnosticError{"pager.ncurses", "initscr returned null"}; }
+            if (window == nullptr) { throw flow::DiagnosticError{"pager.input.file.ncurses", "initscr returned null"}; }
             noecho();
             cbreak();
             keypad(window, 1);
-            std::size_t page = 0;
+            std::vector<std::string> commands;
             for (;;) {
-                const std::string visible = joinPage(lines, page, static_cast<std::size_t>(pageSize));
+                const std::string visible = joinPage(lines, 0, static_cast<std::size_t>(pageSize));
                 clear(window);
                 if (!visible.empty()) {
                     const auto count = static_cast<int>(std::min<std::size_t>(visible.size(), static_cast<std::size_t>(std::numeric_limits<int>::max())));
@@ -480,19 +477,25 @@ public:
                 }
                 refresh(window);
                 const int key = getch(window);
-                if (key == 'q' || key == 'Q') { break; }
-                if (key == 258 || key == 338) { if (page + 1U < pageCount) { ++page; } }
-                if (key == 259 || key == 339) { if (page > 0U) { --page; } }
-                if (key == 262) { page = 0; }
-                if (key == 360) { page = pageCount - 1U; }
+                if (key == 'q' || key == 'Q') { commands.emplace_back("q"); break; }
+                if (key == 258) commands.emplace_back("down");
+                if (key == 338) commands.emplace_back("pgdown");
+                if (key == 259) commands.emplace_back("up");
+                if (key == 339) commands.emplace_back("pgup");
+                if (key == 262) commands.emplace_back("home");
+                if (key == 360) commands.emplace_back("end");
                 refresh(window);
             }
             end();
 
             RecordPayload record;
-            setPathInt(record, "page", static_cast<std::int64_t>(page + 1U), "pager.ncurses");
-            setPathInt(record, "page_count", static_cast<std::int64_t>(pageCount), "pager.ncurses");
-            setPathValue(record, "lines", Value{joinPage(lines, page, static_cast<std::size_t>(pageSize))}, "pager.ncurses");
+            std::string sourceLines;
+            for (const auto& line : lines) { if (!sourceLines.empty()) sourceLines.push_back('|'); sourceLines += line; }
+            std::string commandText;
+            for (const auto& command : commands) { if (!commandText.empty()) commandText.push_back(','); commandText += command; }
+            setPathValue(record, "source_lines", Value{sourceLines}, "pager.input.file.ncurses");
+            setPathValue(record, "commands", Value{commandText}, "pager.input.file.ncurses");
+            setPathInt(record, "page_size", pageSize, "pager.input.file.ncurses");
             env.payload = std::move(record);
             dlclose(library);
             return {Route{"out", std::move(env)}};
@@ -507,7 +510,7 @@ private:
     static Function symbol(void* library, const char* name) {
         void* address = dlsym(library, name);
         if (address == nullptr) {
-            throw flow::DiagnosticError{"pager.ncurses", std::string{"missing ncurses symbol: "} + name};
+            throw flow::DiagnosticError{"pager.input.file.ncurses", std::string{"missing ncurses symbol: "} + name};
         }
         Function function{};
         static_assert(sizeof(function) == sizeof(address));
@@ -1304,10 +1307,8 @@ AtomRegistry makeCoreAtomRegistry() {
         [](NodeConfig config) { return std::make_unique<FakePagerInputNode>(std::move(config)); });
     registry.registerAtom(AtomContract{"pager.navigate", {{"in", "Record"}}, {{"out", "Record"}}, {}},
         [](NodeConfig) { return std::make_unique<PagerNavigateNode>(); });
-    registry.registerAtom(AtomContract{"pager.ncurses", {{"in", "Unit"}}, {{"out", "Record"}}, {"pager.provider.ncurses", "terminal.input"}},
-        [](NodeConfig config) { return std::make_unique<NcursesPagerNode>(std::move(config)); });
-    registry.registerAtom(AtomContract{"pager.file.ncurses", {{"in", "Unit"}}, {{"out", "Record"}}, {"filesystem.read", "pager.provider.ncurses", "terminal.input"}},
-        [](NodeConfig config) { return std::make_unique<NcursesPagerNode>(std::move(config)); });
+    registry.registerAtom(AtomContract{"pager.input.file.ncurses", {{"in", "Unit"}}, {{"out", "Record"}}, {"filesystem.read", "terminal.input"}},
+        [](NodeConfig config) { return std::make_unique<NcursesPagerInputNode>(std::move(config)); });
     registry.registerAtom(AtomContract{"pager.render", {{"in", "Record"}}, {{"out", "Record"}}, {"pager.render"}},
         [](NodeConfig config) { return std::make_unique<PagerPlainRendererNode>(std::move(config)); });
 
