@@ -629,6 +629,27 @@ int run(const Json& bundle) {
     }
     std::cout << "],\n  \"lowering_plan\": {\"format\":\"flowcore.lowering_plan\",\"version\":1,\"status\":\""
               << (diagnostics.empty() ? "ready" : "blocked") << "\",\"operations\":[";
+    std::function<void(int)> emit_operand = [&](int expression_id) {
+        const auto* expression = expressions.count(expression_id) ? expressions.at(expression_id) : nullptr;
+        const auto kind = text(field(expression, "kind"));
+        std::cout << "{\"expression_id\":" << expression_id << ",\"kind\":" << quote(kind);
+        if (kind == "integer_literal") {
+            std::cout << ",\"type\":\"c_int\",\"value\":" << quote(text(field(field(expression, "payload"), "value_text"), "0"));
+        } else if (kind == "identifier") {
+            const int symbol = resolved_expression_symbols.count(expression_id) ? resolved_expression_symbols.at(expression_id) : -1;
+            const auto type = symbol_types.count(symbol) ? symbol_types.at(symbol) : std::string{};
+            std::cout << ",\"type\":" << quote(type) << ",\"symbol_id\":" << symbol;
+        } else if (kind == "binary") {
+            const auto* payload = field(expression, "payload");
+            std::cout << ",\"type\":\"c_int\",\"operator\":" << quote(text(field(payload, "operator"))) << ",\"left\":";
+            emit_operand(integer(field(payload, "left")));
+            std::cout << ",\"right\":";
+            emit_operand(integer(field(payload, "right")));
+        } else {
+            std::cout << ",\"type\":\"unsupported\"";
+        }
+        std::cout << "}";
+    };
     for (std::size_t i = 0; i < lowering_operations.size(); ++i) {
         if (i) std::cout << ',';
         const auto& operation = lowering_operations[i];
@@ -647,20 +668,7 @@ int run(const Json& bundle) {
         std::cout << "],\"operands\":[";
         for (std::size_t argument = 0; argument < operation.arguments.size(); ++argument) {
             if (argument) std::cout << ',';
-            const int expression_id = operation.arguments[argument];
-            const auto* expression = expressions.count(expression_id) ? expressions.at(expression_id) : nullptr;
-            const auto kind = text(field(expression, "kind"));
-            std::cout << "{\"expression_id\":" << expression_id << ",\"kind\":" << quote(kind);
-            if (kind == "integer_literal") {
-                std::cout << ",\"type\":\"c_int\",\"value\":" << quote(text(field(field(expression, "payload"), "value_text"), "0"));
-            } else if (kind == "identifier") {
-                const int symbol = resolved_expression_symbols.count(expression_id) ? resolved_expression_symbols.at(expression_id) : -1;
-                const auto type = symbol_types.count(symbol) ? symbol_types.at(symbol) : std::string{};
-                std::cout << ",\"type\":" << quote(type) << ",\"symbol_id\":" << symbol;
-            } else {
-                std::cout << ",\"type\":\"unsupported\"";
-            }
-            std::cout << "}";
+            emit_operand(operation.arguments[argument]);
         }
         std::cout << "]";
         if (operation.result_symbol >= 0) std::cout << ",\"result_symbol_id\":" << operation.result_symbol;

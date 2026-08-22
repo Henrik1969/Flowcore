@@ -53,6 +53,9 @@
 - Added generic profile-free `return_value` lowering for typed integer literals.
   The plan carries the value through both intermediate stages and Flowlower
   emits an executable ELF whose exit status is 42.
+- Extended generic return lowering to nested integer binary expressions. A
+  profile-free `40 + 2` program now produces an LLVM `add` and executes with the
+  expected result.
 
 ## Evidence
 

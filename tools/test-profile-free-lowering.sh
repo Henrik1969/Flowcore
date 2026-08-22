@@ -60,4 +60,17 @@ set +e
 return_rc=$?
 set -e
 test "$return_rc" -eq 42
+
+expression_source="$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass/profile_free_expression.flow"
+"$flowmini" --dump-frontend-bundle "$expression_source" | "$analyst" > "$tmpdir/expression.semantic.json"
+jq -e '.status == "ok" and .lowering_profile == "none" and .lowering_plan.operations[0].operands[0].kind == "binary" and .lowering_plan.operations[0].operands[0].operator == "+"' "$tmpdir/expression.semantic.json" >/dev/null
+"$parallel" < "$tmpdir/expression.semantic.json" | "$optimizer" > "$tmpdir/expression.optimized.json"
+"$lower" --emit-llvm "$tmpdir/expression.ll" < "$tmpdir/expression.optimized.json" > "$tmpdir/expression.lowering.json"
+grep -Fq 'add i32 40, 2' "$tmpdir/expression.ll"
+clang "$tmpdir/expression.ll" -o "$tmpdir/expression"
+set +e
+"$tmpdir/expression"
+expression_rc=$?
+set -e
+test "$expression_rc" -eq 42
 printf '%s\n' 'Profile-free generic lowering: PASS'

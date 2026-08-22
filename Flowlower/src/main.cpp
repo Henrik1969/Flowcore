@@ -103,6 +103,30 @@ bool valid_integer_literal(std::string_view value) {
     return true;
 }
 
+std::string emit_integer_expression(std::string_view expression, std::ostringstream& instructions, int& temporary) {
+    const auto kind = quoted_field(expression, "kind");
+    if (kind == "integer_literal") {
+        const auto value = quoted_field(expression, "value");
+        return valid_integer_literal(value) ? value : std::string{};
+    }
+    if (kind != "binary") return {};
+    const auto operator_name = quoted_field(expression, "operator");
+    std::string instruction;
+    if (operator_name == "+") instruction = "add";
+    else if (operator_name == "-") instruction = "sub";
+    else if (operator_name == "*") instruction = "mul";
+    else if (operator_name == "/") instruction = "sdiv";
+    else return {};
+    const auto left = object_field(expression, "left");
+    const auto right = object_field(expression, "right");
+    const auto left_value = emit_integer_expression(left, instructions, temporary);
+    const auto right_value = emit_integer_expression(right, instructions, temporary);
+    if (left_value.empty() || right_value.empty()) return {};
+    const auto result = "%flow_expr" + std::to_string(temporary++);
+    instructions << "  " << result << " = " << instruction << " i32 " << left_value << ", " << right_value << "\n";
+    return result;
+}
+
 std::string quote(std::string_view value) {
     std::string result = "\"";
     for (const char character : value) {
@@ -195,12 +219,17 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
     const auto operand_kind = quoted_field(first_operand, "kind");
     const auto operand_type = quoted_field(first_operand, "type");
     const auto operand_value = quoted_field(first_operand, "value");
+    std::ostringstream generic_expression_instructions;
+    int generic_expression_temporary = 0;
+    const auto generic_return_expression = generic_kind == "return_value"
+        ? emit_integer_expression(first_operand, generic_expression_instructions, generic_expression_temporary)
+        : std::string{};
     const bool generic_zero_arg = generic_parameters.empty() && has(first_operation, "\"arguments\":[]");
     const bool generic_one_int_arg = generic_parameters == "c_int" && operand_kind == "integer_literal" && operand_type == "c_int" && !operand_value.empty();
     const bool generic_external_scalar = profile_free_plan && generic_kind == "external_call" && valid_c_symbol(generic_symbol) &&
         generic_return == "c_int" && (generic_zero_arg || generic_one_int_arg);
-    const bool generic_return_value = profile_free_plan && generic_kind == "return_value" && operand_kind == "integer_literal" &&
-        operand_type == "c_int" && valid_integer_literal(operand_value);
+    const bool generic_return_value = profile_free_plan && generic_kind == "return_value" && operand_type == "c_int" &&
+        !generic_return_expression.empty();
     if (abi_abs_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"abi_abs_main\"") || !has(binding_report, "\"kind\": \"external_call\"") || !has(binding_report, "\"abs\""))) throw std::runtime_error("ABI binding report does not authorize the abi_abs_main lowering profile");
     if (abi_strlen_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"abi_strlen_main\"") || !has(binding_report, "\"kind\": \"external_call\"") || !has(binding_report, "\"strlen\""))) throw std::runtime_error("ABI binding report does not authorize the abi_strlen_main lowering profile");
     if (test_licbinds_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"test_licbinds_main\"") || !has(binding_report, "\"strlen\"") || !has(binding_report, "\"abs\"") || !has(binding_report, "\"puts\""))) throw std::runtime_error("ABI binding report does not authorize the test_licbinds_main lowering profile");
@@ -241,7 +270,8 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
                     "target triple = \"x86_64-pc-linux-gnu\"\n"
                     "define i32 @main() {\n"
                     "entry:\n"
-                 << "  ret i32 " << operand_value << "\n"
+                 << generic_expression_instructions.str()
+                 << "  ret i32 " << generic_return_expression << "\n"
                     "}\n";
         } else if (generic_external_scalar) {
             llvm << "; Flowcore generic lowering plan: " << (generic_zero_arg ? "zero-argument" : "one-integer-argument") << " c_int external call\n"
