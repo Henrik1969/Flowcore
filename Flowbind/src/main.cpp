@@ -309,12 +309,8 @@ int verify(const std::string& report, const std::string& policy_path, const std:
     if (profile == "abi_kernel_clock_main") for (const auto& item : needed) if (item.symbol == "clock_gettime") lowering_requirement = &item;
     if (profile == "abi_kernel_random_main") for (const auto& item : needed) if (item.symbol == "getrandom") lowering_requirement = &item;
     if (profile == "abi_kernel_uname_main") for (const auto& item : needed) if (item.symbol == "uname") lowering_requirement = &item;
-    if (profile == "abi_kernel_openat_main") for (const auto& item : needed) if (item.symbol == "openat") lowering_requirement = &item;
     if (profile == "abi_kernel_read_main") for (const auto& item : needed) if (item.symbol == "read") lowering_requirement = &item;
     if (profile == "abi_kernel_write_main") for (const auto& item : needed) if (item.symbol == "write") lowering_requirement = &item;
-    if (profile == "abi_kernel_lseek_main") for (const auto& item : needed) if (item.symbol == "lseek") lowering_requirement = &item;
-    if (profile == "abi_kernel_unlinkat_main") for (const auto& item : needed) if (item.symbol == "unlinkat") lowering_requirement = &item;
-    for (const auto& item : needed) if (item.symbol == "rmdir" || item.symbol == "pipe2" || item.symbol == "fork" || item.symbol == "waitpid" || item.symbol == "socketpair" || item.symbol == "socket" || item.symbol == "bind" || item.symbol == "listen" || item.symbol == "poll" || item.symbol == "accept4" || item.symbol == "connect" || item.symbol == "unshare" || item.symbol == "sethostname" || item.symbol == "gethostname") if (profile.find("abi_kernel_") == 0) lowering_requirement = &item;
     if (profile == "flowcat_argv_main") for (const auto& item : needed) if (item.symbol == "puts") lowering_requirement = &item;
     const auto grants = read_policy(policy_path);
     const std::vector<std::string> supported_types = {"c_int", "c_long", "c_ulong", "c_size_t", "c_string", "c_pointer"};

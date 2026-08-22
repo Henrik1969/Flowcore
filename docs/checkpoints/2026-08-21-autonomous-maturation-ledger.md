@@ -135,6 +135,12 @@
   LLVM `null`; nonzero integer-to-pointer conversion remains unsupported rather
   than guessed. The corresponding source-name profile table and handwritten
   emitters are removed.
+- Migrated `openat`, `lseek`, and `unlinkat` to generic source-derived calls and
+  removed their analyst, binder, and LLVM profiles. A trial migration of all
+  remaining kernel profiles correctly exposed that `clock_gettime` cannot write
+  through the source-declared null pointer; the five buffer-writing profiles
+  were retained pending explicit storage semantics rather than hiding an
+  application-specific allocation in generic lowering.
 
 ## Evidence
 
@@ -192,6 +198,13 @@
   `flowanalyst_pipeline`, `flowbind_provider`, `profile_free_generic_lowering`,
   and both pass-corpus gates passed, including native execution of all migrated
   fixtures. The canonical build and suite passed **54/54**.
+- Focused final scalar/string kernel checkpoint: `flowlower_pipeline`,
+  `flowanalyst_pipeline`, `flowbind_provider`, `profile_free_generic_lowering`,
+  and both pass-corpus gates passed. Native `openat`, `lseek`, and `unlinkat`
+  ELFs executed. The canonical build and suite passed **54/54**. The attempted
+  generic `clock_gettime(c_int,c_pointer(0))` execution produced a segmentation
+  fault, confirming that typed writable storage must be represented before its
+  compatibility profile can be removed.
 
 ## Remaining work
 
@@ -216,7 +229,8 @@
 
 ## Exact next action
 
-Next action: migrate the remaining dedicated kernel profiles (`clock_gettime`,
-`getrandom`, `uname`, `openat`, `read`, `write`, `lseek`, and `unlinkat`) using
-their source-declared scalar, string, and explicit-null pointer operands, then
-remove the obsolete binder and LLVM profile branches.
+Next action: distinguish nullable pointer probes from writable storage in the
+lowering plan and provider ABI facts. Migrate safe null-probe operations
+(`getrandom`, invalid-fd `read`, and invalid-fd `write`) first, while keeping
+`clock_gettime` and `uname` transitional until their writable buffer size and
+lifetime are source/contract-derived.

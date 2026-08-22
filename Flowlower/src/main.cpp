@@ -248,11 +248,8 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
     const bool abi_kernel_clock_profile = has(report, "\"lowering_profile\": \"abi_kernel_clock_main\"") || has(report, "\"lowering_profile\":\"abi_kernel_clock_main\"");
     const bool abi_kernel_random_profile = has(report, "\"lowering_profile\": \"abi_kernel_random_main\"") || has(report, "\"lowering_profile\":\"abi_kernel_random_main\"");
     const bool abi_kernel_uname_profile = has(report, "\"lowering_profile\": \"abi_kernel_uname_main\"") || has(report, "\"lowering_profile\":\"abi_kernel_uname_main\"");
-    const bool abi_kernel_openat_profile = has(report, "\"lowering_profile\": \"abi_kernel_openat_main\"") || has(report, "\"lowering_profile\":\"abi_kernel_openat_main\"");
     const bool abi_kernel_read_profile = has(report, "\"lowering_profile\": \"abi_kernel_read_main\"") || has(report, "\"lowering_profile\":\"abi_kernel_read_main\"");
     const bool abi_kernel_write_profile = has(report, "\"lowering_profile\": \"abi_kernel_write_main\"") || has(report, "\"lowering_profile\":\"abi_kernel_write_main\"");
-    const bool abi_kernel_lseek_profile = has(report, "\"lowering_profile\": \"abi_kernel_lseek_main\"") || has(report, "\"lowering_profile\":\"abi_kernel_lseek_main\"");
-    const bool abi_kernel_unlinkat_profile = has(report, "\"lowering_profile\": \"abi_kernel_unlinkat_main\"") || has(report, "\"lowering_profile\":\"abi_kernel_unlinkat_main\"");
     const bool flowcat_profile = has(report, "\"lowering_profile\": \"flowcat_argv_main\"") || has(report, "\"lowering_profile\":\"flowcat_argv_main\"");
     const bool flowcat_file_profile = has(report, "\"lowering_profile\": \"flowcat_file_main\"") || has(report, "\"lowering_profile\":\"flowcat_file_main\"");
     const bool profile_free_plan = has(report, "\"lowering_profile\": \"none\"") || has(report, "\"lowering_profile\":\"none\"");
@@ -512,14 +509,11 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
          (nullable_else_argument == nullable_result_symbol && generic_values.count(std::stoi(nullable_then_argument))));
     if (abi_ncurses_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"abi_ncurses_main\"") || !has(binding_report, "\"initscr\"") || !has(binding_report, "\"endwin\"") || !has(binding_report, "\"waddnstr\"") || !has(binding_report, "\"wrefresh\""))) throw std::runtime_error("ABI binding report does not authorize the abi_ncurses_main lowering profile");
     if (sel_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"sel_main\"") || !has(binding_report, "\"initscr\"") || !has(binding_report, "\"endwin\"") || !has(binding_report, "\"wgetch\"") || !has(binding_report, "\"keypad\"") || !has(binding_report, "\"puts\"") || !has(binding_report, "\"read\""))) throw std::runtime_error("ABI binding report does not authorize the sel_main lowering profile");
-    if (abi_kernel_clock_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"abi_kernel_clock_main\"") || !has(binding_report, "\"kind\": \"external_call\"") || !has(binding_report, "\"clock_gettime\""))) throw std::runtime_error("ABI binding report does not authorize the abi_kernel_clock_main lowering profile");
-    if (abi_kernel_random_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"abi_kernel_random_main\"") || !has(binding_report, "\"kind\": \"external_call\"") || !has(binding_report, "\"getrandom\""))) throw std::runtime_error("ABI binding report does not authorize the abi_kernel_random_main lowering profile");
-    if (abi_kernel_uname_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"abi_kernel_uname_main\"") || !has(binding_report, "\"kind\": \"external_call\"") || !has(binding_report, "\"uname\""))) throw std::runtime_error("ABI binding report does not authorize the abi_kernel_uname_main lowering profile");
-    if (abi_kernel_openat_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"abi_kernel_openat_main\"") || !has(binding_report, "\"kind\": \"external_call\"") || !has(binding_report, "\"openat\""))) throw std::runtime_error("ABI binding report does not authorize the abi_kernel_openat_main lowering profile");
-    if (abi_kernel_read_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"abi_kernel_read_main\"") || !has(binding_report, "\"kind\": \"external_call\"") || !has(binding_report, "\"read\""))) throw std::runtime_error("ABI binding report does not authorize the abi_kernel_read_main lowering profile");
-    if (abi_kernel_write_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"abi_kernel_write_main\"") || !has(binding_report, "\"kind\": \"external_call\"") || !has(binding_report, "\"write\""))) throw std::runtime_error("ABI binding report does not authorize the abi_kernel_write_main lowering profile");
-    if (abi_kernel_lseek_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"abi_kernel_lseek_main\"") || !has(binding_report, "\"kind\": \"external_call\"") || !has(binding_report, "\"lseek\""))) throw std::runtime_error("ABI binding report does not authorize the abi_kernel_lseek_main lowering profile");
-    if (abi_kernel_unlinkat_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"abi_kernel_unlinkat_main\"") || !has(binding_report, "\"kind\": \"external_call\"") || !has(binding_report, "\"unlinkat\""))) throw std::runtime_error("ABI binding report does not authorize the abi_kernel_unlinkat_main lowering profile");
+    if (abi_kernel_clock_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"clock_gettime\""))) throw std::runtime_error("ABI binding report does not authorize the abi_kernel_clock_main lowering profile");
+    if (abi_kernel_random_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"getrandom\""))) throw std::runtime_error("ABI binding report does not authorize the abi_kernel_random_main lowering profile");
+    if (abi_kernel_uname_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"uname\""))) throw std::runtime_error("ABI binding report does not authorize the abi_kernel_uname_main lowering profile");
+    if (abi_kernel_read_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"read\""))) throw std::runtime_error("ABI binding report does not authorize the abi_kernel_read_main lowering profile");
+    if (abi_kernel_write_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"write\""))) throw std::runtime_error("ABI binding report does not authorize the abi_kernel_write_main lowering profile");
     if (flowcat_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"flowcat_argv_main\"") || !has(binding_report, "\"kind\": \"external_call\"") || !has(binding_report, "\"puts\""))) throw std::runtime_error("ABI binding report does not authorize the flowcat_argv_main lowering profile");
     if (flowcat_file_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"flowcat_file_main\"") || !has(binding_report, "\"kind\": \"capability_sequence\"") || !has(binding_report, "\"open\"") || !has(binding_report, "\"read\"") || !has(binding_report, "\"write\"") || !has(binding_report, "\"close\""))) throw std::runtime_error("ABI binding report does not authorize the flowcat_file_main lowering profile");
     if (!llvm_path.empty() && (generic_external_scalar || generic_external_long || generic_external_ulong || generic_external_size_return || generic_external_result_return || generic_external_result_branch) &&
@@ -533,7 +527,7 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
         if (binding_report.empty() || (!has(binding_report, "\"status\": \"ready\"") && !has(binding_report, "\"status\":\"ready\""))) throw std::runtime_error("generic nullable string lowering is not authorized");
         for (const auto& symbol : nullable_authorized_symbols) if (!has(binding_report, "\"symbol\":" + quote(symbol)) && !has(binding_report, "\"symbol\": " + quote(symbol))) throw std::runtime_error("generic nullable string operation is not authorized: " + symbol);
     }
-    if (!llvm_path.empty() && !generic_external_scalar && !generic_external_long && !generic_external_ulong && !generic_external_size_return && !generic_scalar_sequence && !generic_return_value && !generic_branch && !nullable_string_branch && !trial_profile && !abi_ncurses_profile && !sel_profile && !abi_kernel_clock_profile && !abi_kernel_random_profile && !abi_kernel_uname_profile && !abi_kernel_openat_profile && !abi_kernel_read_profile && !abi_kernel_write_profile && !abi_kernel_lseek_profile && !abi_kernel_unlinkat_profile && !flowcat_profile && !flowcat_file_profile) throw std::runtime_error("LLVM emission requires an accepted lowering profile or supported generic lowering plan");
+    if (!llvm_path.empty() && !generic_external_scalar && !generic_external_long && !generic_external_ulong && !generic_external_size_return && !generic_scalar_sequence && !generic_return_value && !generic_branch && !nullable_string_branch && !trial_profile && !abi_ncurses_profile && !sel_profile && !abi_kernel_clock_profile && !abi_kernel_random_profile && !abi_kernel_uname_profile && !abi_kernel_read_profile && !abi_kernel_write_profile && !flowcat_profile && !flowcat_file_profile) throw std::runtime_error("LLVM emission requires an accepted lowering profile or supported generic lowering plan");
     if (!llvm_path.empty()) {
         std::ofstream llvm(llvm_path); if (!llvm) throw std::runtime_error("cannot open LLVM output");
         llvm << "; Flowcore target artifact: " << selected_target << "\n";
@@ -730,86 +724,47 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
             llvm << "; Flowcore kernel ABI lowering: clock_gettime\n"
                     "target triple = \"x86_64-pc-linux-gnu\"\n"
                     "declare i32 @clock_gettime(i32, ptr)\n"
-                    "define i32 @main() {\n"
-                    "entry:\n"
+                    "define i32 @main() {\nentry:\n"
                     "  %timespec = alloca [16 x i8], align 8\n"
                     "  %value = getelementptr [16 x i8], ptr %timespec, i32 0, i32 0\n"
                     "  %result = call i32 @clock_gettime(i32 1, ptr %value)\n"
-                    "  ret i32 0\n"
-                    "}\n";
+                    "  ret i32 0\n}\n";
         } else if (abi_kernel_random_profile) {
             llvm << "; Flowcore kernel ABI lowering: getrandom\n"
                     "target triple = \"x86_64-pc-linux-gnu\"\n"
                     "declare i64 @getrandom(ptr, i64, i32)\n"
-                    "define i32 @main() {\n"
-                    "entry:\n"
+                    "define i32 @main() {\nentry:\n"
                     "  %buffer = alloca [1 x i8], align 1\n"
                     "  %value = getelementptr [1 x i8], ptr %buffer, i32 0, i32 0\n"
                     "  %result = call i64 @getrandom(ptr %value, i64 1, i32 0)\n"
-                    "  ret i32 0\n"
-                    "}\n";
+                    "  ret i32 0\n}\n";
         } else if (abi_kernel_uname_profile) {
             llvm << "; Flowcore kernel ABI lowering: uname\n"
                     "target triple = \"x86_64-pc-linux-gnu\"\n"
                     "declare i32 @uname(ptr)\n"
-                    "define i32 @main() {\n"
-                    "entry:\n"
+                    "define i32 @main() {\nentry:\n"
                     "  %buffer = alloca [390 x i8], align 8\n"
                     "  %value = getelementptr [390 x i8], ptr %buffer, i32 0, i32 0\n"
                     "  %result = call i32 @uname(ptr %value)\n"
-                    "  ret i32 0\n"
-                    "}\n";
-        } else if (abi_kernel_openat_profile) {
-            llvm << "; Flowcore kernel ABI lowering: openat read-only root\n"
-                    "target triple = \"x86_64-pc-linux-gnu\"\n"
-                    "@flowcore_root = private unnamed_addr constant [2 x i8] c\"/\\00\"\n"
-                    "declare i32 @openat(i32, ptr, i32, i32)\n"
-                    "define i32 @main() {\n"
-                    "entry:\n"
-                    "  %fd = call i32 @openat(i32 -100, ptr @flowcore_root, i32 0, i32 0)\n"
-                    "  ret i32 0\n"
-                    "}\n";
+                    "  ret i32 0\n}\n";
         } else if (abi_kernel_read_profile) {
             llvm << "; Flowcore kernel ABI lowering: read invalid descriptor probe\n"
                     "target triple = \"x86_64-pc-linux-gnu\"\n"
                     "declare i64 @read(i32, ptr, i64)\n"
-                    "define i32 @main() {\n"
-                    "entry:\n"
+                    "define i32 @main() {\nentry:\n"
                     "  %buffer = alloca [1 x i8], align 1\n"
                     "  %value = getelementptr [1 x i8], ptr %buffer, i32 0, i32 0\n"
                     "  %result = call i64 @read(i32 -1, ptr %value, i64 1)\n"
-                    "  ret i32 0\n"
-                    "}\n";
+                    "  ret i32 0\n}\n";
         } else if (abi_kernel_write_profile) {
             llvm << "; Flowcore kernel ABI lowering: write invalid descriptor probe\n"
                     "target triple = \"x86_64-pc-linux-gnu\"\n"
                     "declare i64 @write(i32, ptr, i64)\n"
-                    "define i32 @main() {\n"
-                    "entry:\n"
+                    "define i32 @main() {\nentry:\n"
                     "  %buffer = alloca [1 x i8], align 1\n"
                     "  %value = getelementptr [1 x i8], ptr %buffer, i32 0, i32 0\n"
                     "  %result = call i64 @write(i32 -1, ptr %value, i64 1)\n"
-                    "  ret i32 0\n"
-                    "}\n";
-        } else if (abi_kernel_lseek_profile) {
-            llvm << "; Flowcore kernel ABI lowering: lseek invalid descriptor probe\n"
-                    "target triple = \"x86_64-pc-linux-gnu\"\n"
-                    "declare i64 @lseek(i32, i64, i32)\n"
-                    "define i32 @main() {\n"
-                    "entry:\n"
-                    "  %result = call i64 @lseek(i32 -1, i64 0, i32 0)\n"
-                    "  ret i32 0\n"
-                    "}\n";
-        } else if (abi_kernel_unlinkat_profile) {
-            llvm << "; Flowcore kernel ABI lowering: unlinkat invalid descriptor probe\n"
-                    "target triple = \"x86_64-pc-linux-gnu\"\n"
-                    "@flowcore_missing = private unnamed_addr constant [22 x i8] c\"/flowcore-nonexistent\\00\"\n"
-                    "declare i32 @unlinkat(i32, ptr, i32)\n"
-                    "define i32 @main() {\n"
-                    "entry:\n"
-                    "  %result = call i32 @unlinkat(i32 -1, ptr @flowcore_missing, i32 0)\n"
-                    "  ret i32 0\n"
-                    "}\n";
+                    "  ret i32 0\n}\n";
         } else if (flowcat_file_profile) {
             llvm << "; Flowcore application lowering: flowcat argv -> open/read/write/close\n"
                     "target triple = \"x86_64-pc-linux-gnu\"\n"

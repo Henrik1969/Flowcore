@@ -74,7 +74,7 @@ printf '%s\n' "$kernel_uname_report" | jq -e '
 kernel_openat_fixture="$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass/abi_kernel_openat_main.flow"
 kernel_openat_report=$("$flowmini" --dump-frontend-bundle "$kernel_openat_fixture" | "$bin")
 printf '%s\n' "$kernel_openat_report" | jq -e '
-    .lowering_profile == "abi_kernel_openat_main" and
+    .lowering_profile == "none" and
     ([.binding_requirements[] | .symbol] == ["openat"])
 ' >/dev/null
 
@@ -95,14 +95,14 @@ printf '%s\n' "$kernel_write_report" | jq -e '
 kernel_lseek_fixture="$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass/abi_kernel_lseek_main.flow"
 kernel_lseek_report=$("$flowmini" --dump-frontend-bundle "$kernel_lseek_fixture" | "$bin")
 printf '%s\n' "$kernel_lseek_report" | jq -e '
-    .lowering_profile == "abi_kernel_lseek_main" and
+    .lowering_profile == "none" and
     ([.binding_requirements[] | .symbol] == ["lseek"])
 ' >/dev/null
 
 kernel_unlinkat_fixture="$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass/abi_kernel_unlinkat_main.flow"
 kernel_unlinkat_report=$("$flowmini" --dump-frontend-bundle "$kernel_unlinkat_fixture" | "$bin")
 printf '%s\n' "$kernel_unlinkat_report" | jq -e '
-    .lowering_profile == "abi_kernel_unlinkat_main" and
+    .lowering_profile == "none" and
     ([.binding_requirements[] | .symbol] == ["unlinkat"])
 ' >/dev/null
 
