@@ -385,14 +385,6 @@ int run(const Json& bundle) {
         std::set<std::string> sel_symbols; for (const auto& requirement : binding_requirements) sel_symbols.insert(requirement.symbol);
         if (sel_symbols.count("initscr") && sel_symbols.count("endwin") && sel_symbols.count("wgetch") && sel_symbols.count("keypad")) lowering_profile = "sel_main";
     }
-    if (text(field(*source_unit, "name")) == "generated_getlogin_main") {
-        bool login = false, output = false;
-        for (const auto& requirement : binding_requirements) {
-            login = login || (requirement.symbol == "getlogin" && requirement.parameter_types.empty() && requirement.return_type == "c_string");
-            output = output || (requirement.symbol == "puts" && requirement.parameter_types == "c_string" && requirement.return_type == "c_int");
-        }
-        if (login && output) lowering_profile = "generated_getlogin_main";
-    }
     if (text(field(*source_unit, "name")) == "abi_kernel_clock_main") for (const auto& requirement : binding_requirements) if (requirement.symbol == "clock_gettime" && requirement.parameter_types == "c_int,c_pointer" && requirement.return_type == "c_int") lowering_profile = "abi_kernel_clock_main";
     if (text(field(*source_unit, "name")) == "abi_kernel_random_main") for (const auto& requirement : binding_requirements) if (requirement.symbol == "getrandom" && requirement.parameter_types == "c_pointer,c_size_t,c_int" && requirement.return_type == "c_long") lowering_profile = "abi_kernel_random_main";
     if (text(field(*source_unit, "name")) == "abi_kernel_uname_main") for (const auto& requirement : binding_requirements) if (requirement.symbol == "uname" && requirement.parameter_types == "c_pointer" && requirement.return_type == "c_int") lowering_profile = "abi_kernel_uname_main";

@@ -115,6 +115,10 @@
 - Added generic ASCII string-literal storage, `c_string` argument flow, and
   `c_size_t` result-to-return lowering. The libc `strlen` example now returns 8
   from explicit Flow source with no source-name selection or handwritten LLVM.
+- Added generic nullable `c_string` result flow and branch-local string-call
+  lowering. The generated getlogin/puts proof now has an arbitrary program
+  name, expresses its null fallback as a Flow `if`, retains
+  `lowering_profile: none`, and has no analyst, binder, or LLVM profile branch.
 
 ## Evidence
 
@@ -149,6 +153,11 @@
   **54/54** tests.
 - Focused string/size migration checkpoint: the same six focused gates passed,
   followed by the complete canonical suite at **54/54**.
+- Focused nullable-string checkpoint: `native_binding_generation`,
+  `profile_free_generic_lowering`, `flowbind_provider`, and
+  `flowlower_pipeline` passed, including hostile signature-policy rejection and
+  execution of the generated ELF. The complete canonical build and suite then
+  passed **54/54**.
 
 ## Remaining work
 
@@ -173,7 +182,7 @@
 
 ## Exact next action
 
-Next action: generalize ordered capability sequences to carry `c_string`
-results into later `c_string` arguments, and introduce source-level
-nullable-string selection before removing the generated getlogin/puts fallback
-profile.
+Next action: generalize ordered mixed-carrier capability sequences so the
+existing libc integration fixture carries its source-defined `strlen`, `abs`,
+and `puts` operands/results without the `test_licbinds_main` profile, then
+remove that profile after focused and native-execution coverage passes.

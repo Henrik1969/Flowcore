@@ -77,17 +77,22 @@ jq -n --arg provider "$provider" '
 printf '%s\n' \
   'import "login.flow" as login' \
   '' \
-  'program generated_getlogin_main' \
+  'program arbitrary_nullable_identity' \
   '' \
   'main {' \
+  '    fallback : c_string("no-login")' \
   '    name : c_string("")' \
   '    status : c_int(0)' \
   '    login.getlogin() -> name' \
-  '    login.puts(name) -> status' \
+  '    if name == "" {' \
+  '        login.puts(fallback) -> status' \
+  '    } else {' \
+  '        login.puts(name) -> status' \
+  '    }' \
   '}' > "$tmpdir/login.consumer.flow"
 "$flowmini" --dump-frontend-bundle "$tmpdir/login.consumer.flow" > "$tmpdir/login.bundle.json"
 "$analyst" < "$tmpdir/login.bundle.json" > "$tmpdir/login.semantic.json"
-jq -e '.status == "ok" and .lowering_profile == "generated_getlogin_main"' "$tmpdir/login.semantic.json" >/dev/null
+jq -e '.status == "ok" and .lowering_profile == "none" and any(.lowering_plan.operations[]; .kind == "branch")' "$tmpdir/login.semantic.json" >/dev/null
 "$bind" --policy "$tmpdir/login.policy" < "$tmpdir/login.semantic.json" > "$tmpdir/login.binding.json"
 sed 's/ c_string$/ c_long/' "$tmpdir/login.policy" > "$tmpdir/login-hostile.policy"
 if "$bind" --policy "$tmpdir/login-hostile.policy" < "$tmpdir/login.semantic.json" > "$tmpdir/login-hostile.binding.json" 2>/dev/null; then
@@ -99,6 +104,7 @@ fi
 "$lowerer" --emit-llvm "$tmpdir/login.ll" --binding-report "$tmpdir/login.binding.json" < "$tmpdir/login.optimized.json" > "$tmpdir/login.lowering.json"
 grep -q '"status": "emitted"' "$tmpdir/login.lowering.json"
 grep -Fq 'call ptr @getlogin' "$tmpdir/login.ll"
+grep -Fq 'source-derived nullable string branch' "$tmpdir/login.ll"
 clang "$tmpdir/login.ll" -o "$tmpdir/login"
 "$tmpdir/login" > "$tmpdir/login.output"
 test -s "$tmpdir/login.output"

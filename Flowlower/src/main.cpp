@@ -246,7 +246,6 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
     const bool test_licbinds_profile = has(report, "\"lowering_profile\": \"test_licbinds_main\"") || has(report, "\"lowering_profile\":\"test_licbinds_main\"");
     const bool abi_ncurses_profile = has(report, "\"lowering_profile\": \"abi_ncurses_main\"") || has(report, "\"lowering_profile\":\"abi_ncurses_main\"");
     const bool sel_profile = has(report, "\"lowering_profile\": \"sel_main\"") || has(report, "\"lowering_profile\":\"sel_main\"");
-    const bool generated_getlogin_profile = has(report, "\"lowering_profile\": \"generated_getlogin_main\"") || has(report, "\"lowering_profile\":\"generated_getlogin_main\"");
     const bool abi_kernel_clock_profile = has(report, "\"lowering_profile\": \"abi_kernel_clock_main\"") || has(report, "\"lowering_profile\":\"abi_kernel_clock_main\"");
     const bool abi_kernel_random_profile = has(report, "\"lowering_profile\": \"abi_kernel_random_main\"") || has(report, "\"lowering_profile\":\"abi_kernel_random_main\"");
     const bool abi_kernel_uname_profile = has(report, "\"lowering_profile\": \"abi_kernel_uname_main\"") || has(report, "\"lowering_profile\":\"abi_kernel_uname_main\"");
@@ -432,10 +431,54 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
         ++sequence_call_count;
     }
     generic_scalar_sequence = generic_scalar_sequence && sequence_call_count > 1;
+    std::string nullable_producer_symbol;
+    std::string nullable_result_symbol;
+    std::string nullable_consumer_symbol;
+    std::string nullable_then_argument;
+    std::string nullable_else_argument;
+    std::set<std::string> nullable_authorized_symbols;
+    bool nullable_string_branch = profile_free_plan && generic_kind == "branch" &&
+        quoted_field(branch_operand, "kind") == "binary" && quoted_field(branch_operand, "operator") == "==";
+    const auto nullable_left = object_field(branch_operand, "left");
+    const auto nullable_right = object_field(branch_operand, "right");
+    const auto nullable_identifier = quoted_field(nullable_left, "kind") == "identifier" ? nullable_left : nullable_right;
+    const auto nullable_literal = quoted_field(nullable_left, "kind") == "string_literal" ? nullable_left : nullable_right;
+    const auto nullable_test_symbol = numeric_field(nullable_identifier, "symbol_id");
+    nullable_string_branch = nullable_string_branch && quoted_field(nullable_identifier, "type") == "c_string" &&
+        quoted_field(nullable_literal, "kind") == "string_literal" && quoted_field(nullable_literal, "value").empty() &&
+        !nullable_test_symbol.empty() && !branch_then.empty() && !branch_else.empty();
+    for (const auto& operation : operation_objects) {
+        if (!nullable_string_branch || quoted_field(operation, "kind") != "external_call") continue;
+        const auto provider = object_field(operation, "provider");
+        const auto symbol = quoted_field(provider, "symbol");
+        const auto parameters = quoted_field(provider, "parameter_types");
+        const auto return_type = quoted_field(provider, "return_type");
+        const auto result_symbol = numeric_field(operation, "result_symbol_id");
+        const auto block = numeric_field(operation, "block_id");
+        if (parameters.empty() && return_type == "c_string" && result_symbol == nullable_test_symbol && valid_c_symbol(symbol)) {
+            nullable_producer_symbol = symbol;
+            nullable_result_symbol = result_symbol;
+            nullable_authorized_symbols.insert(symbol);
+            continue;
+        }
+        if (parameters != "c_string" || return_type != "c_int" || !valid_c_symbol(symbol)) continue;
+        const auto operand = first_array_object(array_field(operation, "operands"));
+        const auto argument_symbol = numeric_field(operand, "symbol_id");
+        if (quoted_field(operand, "kind") != "identifier" || quoted_field(operand, "type") != "c_string" || argument_symbol.empty()) continue;
+        if (block == branch_then) nullable_then_argument = argument_symbol;
+        else if (block == branch_else) nullable_else_argument = argument_symbol;
+        else continue;
+        if (nullable_consumer_symbol.empty()) nullable_consumer_symbol = symbol;
+        else if (nullable_consumer_symbol != symbol) nullable_string_branch = false;
+        nullable_authorized_symbols.insert(symbol);
+    }
+    nullable_string_branch = nullable_string_branch && !nullable_producer_symbol.empty() &&
+        !nullable_consumer_symbol.empty() && !nullable_then_argument.empty() && !nullable_else_argument.empty() &&
+        ((nullable_then_argument == nullable_result_symbol && generic_values.count(std::stoi(nullable_else_argument))) ||
+         (nullable_else_argument == nullable_result_symbol && generic_values.count(std::stoi(nullable_then_argument))));
     if (test_licbinds_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"test_licbinds_main\"") || !has(binding_report, "\"strlen\"") || !has(binding_report, "\"abs\"") || !has(binding_report, "\"puts\""))) throw std::runtime_error("ABI binding report does not authorize the test_licbinds_main lowering profile");
     if (abi_ncurses_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"abi_ncurses_main\"") || !has(binding_report, "\"initscr\"") || !has(binding_report, "\"endwin\"") || !has(binding_report, "\"waddnstr\"") || !has(binding_report, "\"wrefresh\""))) throw std::runtime_error("ABI binding report does not authorize the abi_ncurses_main lowering profile");
     if (sel_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"sel_main\"") || !has(binding_report, "\"initscr\"") || !has(binding_report, "\"endwin\"") || !has(binding_report, "\"wgetch\"") || !has(binding_report, "\"keypad\"") || !has(binding_report, "\"puts\"") || !has(binding_report, "\"read\""))) throw std::runtime_error("ABI binding report does not authorize the sel_main lowering profile");
-    if (generated_getlogin_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"generated_getlogin_main\"") || !has(binding_report, "\"getlogin\"") || !has(binding_report, "\"puts\""))) throw std::runtime_error("ABI binding report does not authorize the generated_getlogin_main lowering profile");
     if (abi_kernel_clock_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"abi_kernel_clock_main\"") || !has(binding_report, "\"kind\": \"external_call\"") || !has(binding_report, "\"clock_gettime\""))) throw std::runtime_error("ABI binding report does not authorize the abi_kernel_clock_main lowering profile");
     if (abi_kernel_random_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"abi_kernel_random_main\"") || !has(binding_report, "\"kind\": \"external_call\"") || !has(binding_report, "\"getrandom\""))) throw std::runtime_error("ABI binding report does not authorize the abi_kernel_random_main lowering profile");
     if (abi_kernel_uname_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"abi_kernel_uname_main\"") || !has(binding_report, "\"kind\": \"external_call\"") || !has(binding_report, "\"uname\""))) throw std::runtime_error("ABI binding report does not authorize the abi_kernel_uname_main lowering profile");
@@ -454,11 +497,37 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
         if (binding_report.empty() || (!has(binding_report, "\"status\": \"ready\"") && !has(binding_report, "\"status\":\"ready\""))) throw std::runtime_error("generic lowering sequence is not authorized");
         for (const auto& symbol : sequence_symbols) if (!has(binding_report, "\"symbol\":" + quote(symbol)) && !has(binding_report, "\"symbol\": " + quote(symbol))) throw std::runtime_error("generic lowering sequence operation is not authorized: " + symbol);
     }
-    if (!llvm_path.empty() && !generic_external_scalar && !generic_external_long && !generic_external_ulong && !generic_external_size_return && !generic_scalar_sequence && !generic_return_value && !generic_branch && !trial_profile && !test_licbinds_profile && !abi_ncurses_profile && !sel_profile && !generated_getlogin_profile && !abi_kernel_clock_profile && !abi_kernel_random_profile && !abi_kernel_uname_profile && !abi_kernel_openat_profile && !abi_kernel_read_profile && !abi_kernel_write_profile && !abi_kernel_lseek_profile && !abi_kernel_unlinkat_profile && !remaining_kernel_profile && !flowcat_profile && !flowcat_file_profile) throw std::runtime_error("LLVM emission requires an accepted lowering profile or supported generic lowering plan");
+    if (!llvm_path.empty() && nullable_string_branch) {
+        if (binding_report.empty() || (!has(binding_report, "\"status\": \"ready\"") && !has(binding_report, "\"status\":\"ready\""))) throw std::runtime_error("generic nullable string lowering is not authorized");
+        for (const auto& symbol : nullable_authorized_symbols) if (!has(binding_report, "\"symbol\":" + quote(symbol)) && !has(binding_report, "\"symbol\": " + quote(symbol))) throw std::runtime_error("generic nullable string operation is not authorized: " + symbol);
+    }
+    if (!llvm_path.empty() && !generic_external_scalar && !generic_external_long && !generic_external_ulong && !generic_external_size_return && !generic_scalar_sequence && !generic_return_value && !generic_branch && !nullable_string_branch && !trial_profile && !test_licbinds_profile && !abi_ncurses_profile && !sel_profile && !abi_kernel_clock_profile && !abi_kernel_random_profile && !abi_kernel_uname_profile && !abi_kernel_openat_profile && !abi_kernel_read_profile && !abi_kernel_write_profile && !abi_kernel_lseek_profile && !abi_kernel_unlinkat_profile && !remaining_kernel_profile && !flowcat_profile && !flowcat_file_profile) throw std::runtime_error("LLVM emission requires an accepted lowering profile or supported generic lowering plan");
     if (!llvm_path.empty()) {
         std::ofstream llvm(llvm_path); if (!llvm) throw std::runtime_error("cannot open LLVM output");
         llvm << "; Flowcore target artifact: " << selected_target << "\n";
-        if (generic_external_size_return) {
+        if (nullable_string_branch) {
+            const auto then_argument = nullable_then_argument == nullable_result_symbol ? "%flow_nullable" : generic_values.at(std::stoi(nullable_then_argument));
+            const auto else_argument = nullable_else_argument == nullable_result_symbol ? "%flow_nullable" : generic_values.at(std::stoi(nullable_else_argument));
+            llvm << "; Flowcore generic lowering plan: source-derived nullable string branch\n"
+                    "target triple = \"x86_64-pc-linux-gnu\"\n"
+                 << string_globals.str()
+                 << "declare ptr @" << nullable_producer_symbol << "()\n"
+                 << "declare i32 @" << nullable_consumer_symbol << "(ptr)\n"
+                    "define i32 @main() {\n"
+                    "entry:\n"
+                 << "  %flow_nullable = call ptr @" << nullable_producer_symbol << "()\n"
+                    "  %flow_missing = icmp eq ptr %flow_nullable, null\n"
+                    "  br i1 %flow_missing, label %then, label %else\n"
+                    "then:\n"
+                 << "  %flow_then_status = call i32 @" << nullable_consumer_symbol << "(ptr " << then_argument << ")\n"
+                    "  br label %done\n"
+                    "else:\n"
+                 << "  %flow_else_status = call i32 @" << nullable_consumer_symbol << "(ptr " << else_argument << ")\n"
+                    "  br label %done\n"
+                    "done:\n"
+                    "  ret i32 0\n"
+                    "}\n";
+        } else if (generic_external_size_return) {
             llvm << "; Flowcore generic lowering plan: c_string to c_size_t result flow\n"
                     "target triple = \"x86_64-pc-linux-gnu\"\n"
                  << string_globals.str()
@@ -637,21 +706,6 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
                     "cancel:\n"
                     "  %cancel_printed = call i32 @puts(ptr @flowcore_sel_cancel)\n"
                     "  ret i32 1\n"
-                    "}\n";
-        } else if (generated_getlogin_profile) {
-            llvm << "; Flowcore generated ABI lowering: getlogin + puts\n"
-                    "target triple = \"x86_64-pc-linux-gnu\"\n"
-                    "@flowcore_login_fallback = private unnamed_addr constant [9 x i8] c\"no-login\\00\"\n"
-                    "declare ptr @getlogin()\n"
-                    "declare i32 @puts(ptr)\n"
-                    "define i32 @main() {\n"
-                    "entry:\n"
-                    "  %login = call ptr @getlogin()\n"
-                    "  %missing = icmp eq ptr %login, null\n"
-                    "  %fallback = getelementptr [9 x i8], ptr @flowcore_login_fallback, i64 0, i64 0\n"
-                    "  %selected = select i1 %missing, ptr %fallback, ptr %login\n"
-                    "  call i32 @puts(ptr %selected)\n"
-                    "  ret i32 0\n"
                     "}\n";
         } else if (abi_kernel_clock_profile) {
             llvm << "; Flowcore kernel ABI lowering: clock_gettime\n"
