@@ -265,6 +265,13 @@
   acquisition, double cleanup, and resource actions in loops without an
   explicit lifetime proof are rejected. Adversarial `sel` plans cover an early
   error exit with missing cleanup and an ordinary path with duplicate cleanup.
+- Removed Flowlower's 750-line substring-based compatibility parser and all
+  fallback LLVM emitters. A typed JSON driver now validates optimization report
+  identity, version, status and target selection, while the structured-plan
+  emitter handles empty plans, scalar calls, nullable pointers, values,
+  branches, checked argv indexing, loops, assignments, cleanup and returns.
+  Missing loop bodies and controlling blocks are rejected instead of silently
+  emitting altered behavior.
 
 ## Evidence
 
@@ -416,6 +423,12 @@
   `ncurses_flow_pipeline`, and `sel_tui_pipeline` passed, including missing
   branch-cleanup and double-cleanup rejection. The complete canonical build and
   suite then passed **54/54** tests in 17.75 seconds.
+- Focused typed-only lowering checkpoint: `flowlower_pipeline`,
+  `profile_free_generic_lowering`, `native_binding_generation`,
+  `ncurses_flow_pipeline`, `sel_tui_pipeline`, `flowcat_flowcore_pipeline`, and
+  both pass-corpus registrations passed. The complete canonical suite passed
+  **54/54** tests in 18.93 seconds after all legacy Flowlower emitters were
+  removed.
 
 ## Remaining work
 
@@ -425,13 +438,12 @@
   connectivity and failure-routing tests. Fan-out, port identity, contract
   rejection, unconnected-output diagnostics, and wire/signal provenance are
   now covered.
-- Remove the obsolete substring-based Flowlower compatibility implementation
-  that still reads `lowering_profile`; the typed structured lowerer is the only
-  accepted backend path and must remain green after the dead machinery is gone.
+- Remove the passive `lowering_profile: none` field from Flowanalyst, Flowbind,
+  Flowparallel, Flowoptimize and their tests so the transitional profile
+  vocabulary is absent from every required compiler stage.
 - Reconcile documentation and test counts after the implementation stabilizes.
 
 ## Exact next action
 
-Next action: delete Flowlower's unreachable legacy substring/profile parser and
-emitters, retaining only typed structured-plan parsing, exact binding
-authorization, generic LLVM emission, and structured refusal.
+Next action: remove the passive `lowering_profile` report field end to end and
+update gates to assert the versioned lowering plan directly.

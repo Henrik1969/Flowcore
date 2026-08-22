@@ -131,8 +131,8 @@ inline std::string slot(int symbol) { return "%flow_slot_" + std::to_string(symb
 class Emitter {
 public:
     Emitter(const Json& root, const Json& binding) : root_(root), binding_(binding) { load(); }
-    bool applicable() const { return (has_branch_ || has_declared_carrier_) && !invalid_control_ && !unsupported_ && !operations_.empty(); }
-    bool requires_structured_control() const { return has_nonroot_block_ && !unsupported_; }
+    bool applicable() const { return !invalid_control_ && !unsupported_; }
+    bool requires_structured_control() const { return invalid_control_ || (has_nonroot_block_ && !unsupported_); }
     std::string emit() {
         authorize();
         std::ostringstream out;
@@ -141,7 +141,11 @@ public:
         emit_globals(out); emit_declarations(out);
         out << (uses_args_ ? "define i32 @main(i32 %argc, ptr %argv) {\n" : "define i32 @main() {\n") << "entry:\n";
         emit_allocations(out);
-        out << "  br label %flow_block_0\n";
+        if (required_argc_ > 0) {
+            out << "  %flow_args_ready = icmp sge i32 %argc, " << required_argc_ << "\n"
+                   "  br i1 %flow_args_ready, label %flow_block_0, label %flow_args_error\n"
+                   "flow_args_error:\n  ret i32 64\n";
+        } else out << "  br label %flow_block_0\n";
         emit_block(0, out, "flow_exit");
         out << "flow_exit:\n  ret i32 0\n}\n";
         return out.str();
@@ -155,7 +159,8 @@ private:
     std::map<std::string, std::string> carrier_representations_;
     std::set<Provider> providers_, authorized_;
     bool has_branch_ = false, has_declared_carrier_ = false, has_nonroot_block_ = false, invalid_control_ = false, unsupported_ = false, uses_args_ = false;
-    int temporary_ = 0, label_ = 0;
+    int temporary_ = 0, label_ = 0, required_argc_ = 0;
+    bool has_list_length_ = false;
 
     static Provider provider(const Json& value) {
         return {text(field(value,"contract")), text(field(value,"library")), text(field(value,"convention")),
@@ -170,11 +175,12 @@ private:
     }
     void load() {
         if (text(field(root_, "format")) != "flowoptimize.optimization_report" || integer(field(root_, "version"), "version") != 1) return;
-        for (const auto& item : array(field(root_, "abi_type_contracts"), "abi_type_contracts")) {
-            const auto name = text(field(item, "name"));
-            const auto representation = text(field(item, "repr"));
-            if (!name.empty() && !representation.empty()) carrier_representations_[name] = representation;
-        }
+        if (const auto* contracts = field(root_, "abi_type_contracts"))
+            for (const auto& item : array(contracts, "abi_type_contracts")) {
+                const auto name = text(field(item, "name"));
+                const auto representation = text(field(item, "repr"));
+                if (!name.empty() && !representation.empty()) carrier_representations_[name] = representation;
+            }
         const auto* plan = field(root_, "lowering_plan");
         if (!plan || text(field(*plan,"format")) != "flowcore.lowering_plan" || integer(field(*plan,"version"),"lowering_plan.version") != 1) return;
         for (const auto& item : array(field(*plan,"operations"), "lowering_plan.operations")) {
@@ -194,17 +200,16 @@ private:
             if (op.kind=="value_definition" && op.result_symbol>=0 && op.operand) { definitions_[op.result_symbol]=op.operand; symbol_types_[op.result_symbol]=text(field(*op.operand,"type")); }
             if (op.kind=="branch") {
                 has_branch_=true;
-                if (op.operand) {
-                    const auto* left=field(*op.operand,"left");
-                    const auto left_type=left?text(field(*left,"type")):std::string{};
-                    if (llvm_type(left_type)=="ptr") unsupported_=true;
-                }
             }
             if (op.block!=0) has_nonroot_block_=true;
             if (op.kind!="call" && op.kind!="external_call" && op.kind!="value_definition" && op.kind!="branch" && op.kind!="return_value" && op.kind!="loop" && op.kind!="assignment") unsupported_=true;
             operations_.push_back(std::move(op));
         }
         for (auto& op:operations_) if (op.kind!="call") blocks_[op.block].push_back(&op);
+        for (const auto& op : operations_) {
+            if (op.kind=="branch" && (op.then_block<0 || !blocks_.count(op.then_block) || (op.else_block>=0 && !blocks_.count(op.else_block)))) invalid_control_=true;
+            if (op.kind=="loop" && (op.body_block<0 || !blocks_.count(op.body_block))) invalid_control_=true;
+        }
         std::map<int,int> block_start;
         for (const auto& [block,ops]:blocks_) for (const auto* op:ops)
             if (op->kind!="loop" && (!block_start.count(block) || op->statement<block_start[block])) block_start[block]=op->statement;
@@ -229,10 +234,17 @@ private:
         for (const auto& [symbol, definition]:definitions_) {
             const auto kind=text(field(*definition,"kind")); const auto intrinsic=text(field(*definition,"intrinsic"));
             if (intrinsic=="list_length" || intrinsic=="list_index") uses_args_=true;
+            if (intrinsic=="list_length") has_list_length_=true;
+            if (intrinsic=="list_index") {
+                const auto* index = field(*definition,"index");
+                const auto value = index ? text(field(*index,"value")) : std::string{};
+                if (!value.empty()) required_argc_=std::max(required_argc_,std::stoi(value)+1);
+            }
         }
+        if (has_list_length_) required_argc_=0;
     }
     void authorize() const {
-        if (authorized_.empty()) throw std::runtime_error("generic structured plan requires a ready typed binding report");
+        if (!providers_.empty() && authorized_.empty()) throw std::runtime_error("generic structured plan requires a ready typed binding report");
         for (const auto& required:providers_) if (!authorized_.count(required)) throw std::runtime_error("generic structured operation is not exactly authorized: "+required.symbol);
     }
     static std::string escaped_string(std::string_view value) {
@@ -276,6 +288,13 @@ private:
             if (llvm_type(type)=="ptr" && literal=="0") return {"ptr","null"};
             return {llvm_type(type),literal};
         }
+        if(kind=="bool_literal") {
+            const auto literal=text(field(value,"value"));
+            if(literal=="true") return {"i1","true"};
+            if(literal=="false") return {"i1","false"};
+            return {};
+        }
+        if(kind=="string_literal" && text(field(value,"value")).empty()) return {"ptr","null"};
         if(kind=="identifier") {
             const int symbol=integer(field(value,"symbol_id"),"symbol_id"); const auto native_type=llvm_type(symbol_types_[symbol]); auto loaded=load_symbol(symbol,out);
             const auto wanted=expected.empty()?native_type:llvm_type(expected); if(wanted==native_type) return {native_type,loaded};
@@ -364,7 +383,7 @@ private:
 };
 
 inline std::optional<std::string> emit(std::string_view report,std::string_view binding) {
-    const auto root=Parser{std::string(report)}.parse(); const auto auth=Parser{std::string(binding)}.parse(); Emitter emitter(root,auth);
+    const auto root=Parser{std::string(report)}.parse(); const auto auth=Parser{binding.empty()?"{}":std::string(binding)}.parse(); Emitter emitter(root,auth);
     if(!emitter.applicable()) {
         if (emitter.requires_structured_control()) throw std::runtime_error("structured plan lost its controlling branch operation");
         return std::nullopt;

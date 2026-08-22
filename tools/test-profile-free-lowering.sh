@@ -105,7 +105,7 @@ compare_source="$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass
 jq -e '.status == "ok" and .lowering_profile == "none" and any(.lowering_plan.operations[]; .kind == "branch" and .operands[0].operator == ">")' "$tmpdir/compare.semantic.json" >/dev/null
 "$parallel" < "$tmpdir/compare.semantic.json" | "$optimizer" > "$tmpdir/compare.optimized.json"
 "$lower" --emit-llvm "$tmpdir/compare.ll" < "$tmpdir/compare.optimized.json" > "$tmpdir/compare.lowering.json"
-grep -Fq 'icmp sgt i32 %flow_value_' "$tmpdir/compare.ll"
+grep -Fq 'icmp sgt i32 %flow_load_' "$tmpdir/compare.ll"
 clang "$tmpdir/compare.ll" -o "$tmpdir/compare"
 set +e
 "$tmpdir/compare"
@@ -118,8 +118,8 @@ loop_source="$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass/pr
 jq -e '.status == "ok" and .lowering_profile == "none" and any(.lowering_plan.operations[]; .kind == "loop") and any(.lowering_plan.operations[]; .kind == "assignment")' "$tmpdir/loop.semantic.json" >/dev/null
 "$parallel" < "$tmpdir/loop.semantic.json" | "$optimizer" > "$tmpdir/loop.optimized.json"
 "$lower" --emit-llvm "$tmpdir/loop.ll" < "$tmpdir/loop.optimized.json" >/dev/null
-grep -Fq 'generic lowering plan: integer loop and mutation' "$tmpdir/loop.ll"
-grep -Fq 'br label %flow_loop' "$tmpdir/loop.ll"
+grep -Fq 'generic structured lowering plan' "$tmpdir/loop.ll"
+grep -Fq 'br label %flow_loop_condition_' "$tmpdir/loop.ll"
 clang "$tmpdir/loop.ll" -o "$tmpdir/loop"
 set +e
 "$tmpdir/loop"
@@ -139,7 +139,7 @@ jq -e '.status == "ok" and .lowering_profile == "none" and any(.lowering_plan.op
 "$parallel" < "$tmpdir/args.semantic.json" | "$optimizer" > "$tmpdir/args.optimized.json"
 "$lower" --emit-llvm "$tmpdir/args.ll" < "$tmpdir/args.optimized.json" > "$tmpdir/args.lowering.json"
 grep -Fq 'define i32 @main(i32 %argc, ptr %argv)' "$tmpdir/args.ll"
-grep -Fq 'icmp sgt i32 %flow_value_' "$tmpdir/args.ll"
+grep -Fq 'icmp sgt i32 %flow_load_' "$tmpdir/args.ll"
 clang "$tmpdir/args.ll" -o "$tmpdir/args"
 set +e
 "$tmpdir/args" selected
@@ -158,7 +158,7 @@ jq -e '.status == "ok" and .lowering_profile == "none" and any(.lowering_plan.op
 "$bind" --policy "$tmpdir/args-index.policy" < "$tmpdir/args-index.semantic.json" > "$tmpdir/args-index.binding.json"
 "$lower" --emit-llvm "$tmpdir/args-index.ll" --binding-report "$tmpdir/args-index.binding.json" < "$tmpdir/args-index.optimized.json" > "$tmpdir/args-index.lowering.json"
 grep -Fq '%flow_args_ready = icmp sge i32 %argc, 2' "$tmpdir/args-index.ll"
-grep -Fq 'getelementptr ptr, ptr %argv, i64 1' "$tmpdir/args-index.ll"
+grep -Fq 'getelementptr ptr, ptr %argv, i32 1' "$tmpdir/args-index.ll"
 clang "$tmpdir/args-index.ll" -o "$tmpdir/args-index"
 "$tmpdir/args-index" source-selected > "$tmpdir/args-index.out"
 grep -Fxq 'source-selected' "$tmpdir/args-index.out"
@@ -188,8 +188,8 @@ test "$wrong_binding_rc" -ne 0
 "$lower" --emit-llvm "$tmpdir/result.ll" --binding-report "$tmpdir/result.binding.json" < "$tmpdir/result.optimized.json" > "$tmpdir/result.lowering.json"
 grep -Fq 'declare i32 @getppid()' "$tmpdir/result.ll"
 grep -Fq '%flow_call_' "$tmpdir/result.ll"
-grep -Fq 'add i32 %flow_call_' "$tmpdir/result.ll"
-grep -Fq 'ret i32 %flow_expr' "$tmpdir/result.ll"
+grep -Fq 'add i32 %flow_load_' "$tmpdir/result.ll"
+grep -Fq 'ret i32 %flow_arithmetic_' "$tmpdir/result.ll"
 clang "$tmpdir/result.ll" -o "$tmpdir/result"
 set +e
 "$tmpdir/result"

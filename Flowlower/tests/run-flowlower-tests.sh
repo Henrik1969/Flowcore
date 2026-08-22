@@ -120,7 +120,7 @@ grep -q '"lowering_profile": "none"' "$tmpdir/licbinds.semantic.json"
 "$optimizer" < "$tmpdir/licbinds.parallel.json" > "$tmpdir/licbinds.optimized.json"
 "$lowerer" --emit-llvm "$tmpdir/licbinds.ll" --binding-report "$tmpdir/licbinds.binding.json" < "$tmpdir/licbinds.optimized.json" > "$tmpdir/licbinds.lowering.json"
 grep -q '"status": "emitted"' "$tmpdir/licbinds.lowering.json"
-grep -q 'ordered mixed-carrier capability sequence' "$tmpdir/licbinds.ll"
+grep -q 'generic structured lowering plan' "$tmpdir/licbinds.ll"
 clang -g "$tmpdir/licbinds.ll" -o "$tmpdir/licbinds"
 "$tmpdir/licbinds" > "$tmpdir/licbinds.output"
 printf '%s\n' 'Flowcore libc bindings' | cmp -s - "$tmpdir/licbinds.output"
@@ -430,7 +430,7 @@ grep -q '"lowering_profile": "none"' "$tmpdir/kernel-rmdir.semantic.json"
 "$bind" --policy "$policy" < "$tmpdir/kernel-rmdir.semantic.json" > "$tmpdir/kernel-rmdir.binding.json"
 "$parallel" < "$tmpdir/kernel-rmdir.semantic.json" | "$optimizer" > "$tmpdir/kernel-rmdir.optimized.json"
 "$lowerer" --emit-llvm "$tmpdir/kernel-rmdir.ll" --binding-report "$tmpdir/kernel-rmdir.binding.json" < "$tmpdir/kernel-rmdir.optimized.json" > "$tmpdir/kernel-rmdir.lowering.json"
-grep -q 'call i32 @rmdir(ptr @flow_string_' "$tmpdir/kernel-rmdir.ll"
+grep -q 'call i32 @rmdir(ptr %flow_load_' "$tmpdir/kernel-rmdir.ll"
 if grep -q 'call i32 @rmdir(ptr null)' "$tmpdir/kernel-rmdir.ll"; then
     echo 'generic rmdir lowering discarded the source path' >&2
     exit 1
