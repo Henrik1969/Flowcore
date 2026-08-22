@@ -368,12 +368,7 @@ int run(const Json& bundle) {
         int scope_id = integer(field(*symbol, "introduced_scope_id")); int mains = 0; if (scopes.count(scope_id)) for (const auto& child : list(field(*scopes[scope_id], "symbol_ids"))) { int child_id = integer(&child); if (symbols.count(child_id) && text(field(*symbols[child_id], "name")) == "main" && text(field(*symbols[child_id], "kind")) == "Procedure") ++mains; }
         targets.push_back({id, mains, text(field(*symbol, "name"))}); if (mains != 1) add_diagnostic("FLOWANALYST_TARGET_ENTRYPOINT", "target '" + targets.back().name + "' must contain exactly one main procedure", id, "target:" + targets.back().name);
     }
-    bool empty_main_profile = declarations.size() == 1;
-    for (const auto& [declaration_id, declaration] : declarations) if (text(field(*declaration, "kind")) == "main_block") {
-        const int body = integer(field(*declaration, "body_block")); empty_main_profile = empty_main_profile && blocks.count(body) && list(field(*blocks[body], "statements")).empty();
-    }
-    if (declarations.empty()) empty_main_profile = false;
-    std::string lowering_profile = empty_main_profile ? "empty_program_main" : "none";
+    std::string lowering_profile = "none";
     if (text(field(*source_unit, "name")) == "sel") {
         std::set<std::string> sel_symbols; for (const auto& requirement : binding_requirements) sel_symbols.insert(requirement.symbol);
         if (sel_symbols.count("initscr") && sel_symbols.count("endwin") && sel_symbols.count("wgetch") && sel_symbols.count("keypad")) lowering_profile = "sel_main";

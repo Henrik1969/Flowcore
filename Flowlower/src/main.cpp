@@ -242,7 +242,6 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
         const std::string compact_target_marker = "\"name\":\"" + target_name + "\"";
         if (report.find(spaced_target_marker, targets_marker) == std::string_view::npos && report.find(compact_target_marker, targets_marker) == std::string_view::npos) throw std::runtime_error("requested target is not present in the optimization report");
     } else if (!target_name.empty()) throw std::runtime_error("requested target is not present in the optimization report");
-    const bool trial_profile = has(report, "\"lowering_profile\": \"empty_program_main\"") || has(report, "\"lowering_profile\":\"empty_program_main\"");
     const bool sel_profile = has(report, "\"lowering_profile\": \"sel_main\"") || has(report, "\"lowering_profile\":\"sel_main\"");
     const bool flowcat_profile = has(report, "\"lowering_profile\": \"flowcat_argv_main\"") || has(report, "\"lowering_profile\":\"flowcat_argv_main\"");
     const bool flowcat_file_profile = has(report, "\"lowering_profile\": \"flowcat_file_main\"") || has(report, "\"lowering_profile\":\"flowcat_file_main\"");
@@ -250,6 +249,8 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
     const auto lowering_plan = object_field(report, "lowering_plan");
     const auto plan_operations = array_field(lowering_plan, "operations");
     const auto operation_objects = array_objects(plan_operations);
+    const bool generic_empty_plan = profile_free_plan && operation_objects.empty() &&
+        quoted_field(lowering_plan, "format") == "flowcore.lowering_plan" && numeric_field(lowering_plan, "version") == "1";
     const auto first_operation = operation_objects.empty() ? std::string("{}") : operation_objects.front();
     std::string return_operation = "{}";
     for (const auto& operation : operation_objects) if (quoted_field(operation, "kind") == "return_value") { return_operation = operation; break; }
@@ -528,7 +529,7 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
         if (binding_report.empty() || (!has(binding_report, "\"status\": \"ready\"") && !has(binding_report, "\"status\":\"ready\""))) throw std::runtime_error("generic nullable string lowering is not authorized");
         for (const auto& symbol : nullable_authorized_symbols) if (!has(binding_report, "\"symbol\":" + quote(symbol)) && !has(binding_report, "\"symbol\": " + quote(symbol))) throw std::runtime_error("generic nullable string operation is not authorized: " + symbol);
     }
-    if (!llvm_path.empty() && !generic_external_scalar && !generic_external_long && !generic_external_ulong && !generic_external_size_return && !generic_scalar_sequence && !generic_return_value && !generic_branch && !nullable_string_branch && !trial_profile && !sel_profile && !flowcat_profile && !flowcat_file_profile) throw std::runtime_error("LLVM emission requires an accepted lowering profile or supported generic lowering plan");
+    if (!llvm_path.empty() && !generic_external_scalar && !generic_external_long && !generic_external_ulong && !generic_external_size_return && !generic_scalar_sequence && !generic_return_value && !generic_branch && !nullable_string_branch && !generic_empty_plan && !sel_profile && !flowcat_profile && !flowcat_file_profile) throw std::runtime_error("LLVM emission requires an accepted lowering profile or supported generic lowering plan");
     if (!llvm_path.empty()) {
         std::ofstream llvm(llvm_path); if (!llvm) throw std::runtime_error("cannot open LLVM output");
         llvm << "; Flowcore target artifact: " << selected_target << "\n";
@@ -791,7 +792,7 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
                     "done:\n"
                     "  ret i32 0\n"
                     "}\n";
-        } else llvm << "; Flowcore trial lowering: empty_program_main\n"
+        } else if (generic_empty_plan) llvm << "; Flowcore generic lowering plan: empty program\n"
                 "target triple = \"x86_64-pc-linux-gnu\"\n"
                 "define i32 @main() {\n"
                 "entry:\n"

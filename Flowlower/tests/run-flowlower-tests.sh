@@ -27,7 +27,10 @@ fi
 tmpdir=$(mktemp -d)
 trap 'rm -rf "$tmpdir"' EXIT
 trial="$root/Flowlower/tests/empty_program_main.flow"
-"$flowmini" --dump-frontend-bundle "$trial" | "$analyst" | "$parallel" | "$optimizer" | "$lowerer" --emit-llvm "$tmpdir/trial.ll" > "$tmpdir/lowering-report.json"
+"$flowmini" --dump-frontend-bundle "$trial" | "$analyst" > "$tmpdir/trial.semantic.json"
+grep -q '"lowering_profile": "none"' "$tmpdir/trial.semantic.json"
+jq -e '.lowering_plan.format == "flowcore.lowering_plan" and .lowering_plan.version == 1 and (.lowering_plan.operations | length) == 0' "$tmpdir/trial.semantic.json" >/dev/null
+"$parallel" < "$tmpdir/trial.semantic.json" | "$optimizer" | "$lowerer" --emit-llvm "$tmpdir/trial.ll" > "$tmpdir/lowering-report.json"
 grep -q '"status": "emitted"' "$tmpdir/lowering-report.json"
 test -s "$tmpdir/trial.ll"
 clang "$tmpdir/trial.ll" -o "$tmpdir/trial"
@@ -469,7 +472,7 @@ target_rc=$?
 set -e
 test "$target_rc" -eq 2
 jq -e '.status == "blocked" and (.reason | contains("explicit --target"))' "$tmpdir/target-missing.json" >/dev/null
-target_artifact_report='{"format": "flowoptimize.optimization_report", "version": 1, "status": "ready", "lowering_profile": "empty_program_main", "targets": [{"name":"cli","main_count":1},{"name":"daemon","main_count":1}]}'
+target_artifact_report='{"format": "flowoptimize.optimization_report", "version": 1, "status": "ready", "lowering_profile": "none", "lowering_plan":{"format":"flowcore.lowering_plan","version":1,"operations":[]}, "targets": [{"name":"cli","main_count":1},{"name":"daemon","main_count":1}]}'
 printf '%s\n' "$target_artifact_report" | "$lowerer" --target cli --emit-llvm "$tmpdir/cli.ll" > "$tmpdir/cli-lowering.json"
 printf '%s\n' "$target_artifact_report" | "$lowerer" --target daemon --emit-llvm "$tmpdir/daemon.ll" > "$tmpdir/daemon-lowering.json"
 jq -e '.status == "ready" and .target.name == "cli" and .artifact.target_specific == true and .artifact.status == "emitted"' "$tmpdir/cli-lowering.json" >/dev/null

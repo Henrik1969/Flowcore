@@ -29,8 +29,8 @@ flowlower --target cli < optimization-report.json
 
 An absent or unknown target is rejected. A report without named targets keeps
 the compatibility default `main`. This establishes target selection as a
-separate artifact boundary. For the currently accepted `empty_program_main`
-profile, independent target artifact emission is proven with separate
+separate artifact boundary. For a generic empty lowering plan, independent
+target artifact emission is proven with separate
 `--emit-llvm` paths. Each output contains an attributable target marker and
 the lowering report records `artifact.target_specific: true`. Unsupported
 target profiles remain blocked.

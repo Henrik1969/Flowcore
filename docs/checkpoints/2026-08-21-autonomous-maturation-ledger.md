@@ -168,6 +168,9 @@
   declared cleanup operation. The standalone ncurses example now lowers as a
   generic ordered mixed-carrier sequence; its source-name profile and
   handwritten LLVM emitter are removed.
+- Removed the empty-program lowering profile. A valid version-1 generic plan
+  with zero operations now emits a minimal native `main`, including independent
+  explicitly selected target artifacts.
 
 ## Evidence
 
@@ -250,12 +253,15 @@
   `flowbind_provider`, `flowlower_pipeline`, and both pass-corpus registrations
   passed. Adversarial cases reject invented cleanup identity and missing
   cleanup, and the profile-free ncurses ELF runs in a pseudo-terminal.
+- Focused empty-plan checkpoint: `flowanalyst_pipeline`,
+  `profile_free_generic_lowering`, `flowlower_pipeline`, and both pass-corpus
+  registrations passed, including two separately attributed native targets.
 
 ## Remaining work
 
 - The unqualified single-provider import alias remains explicitly transitional;
   selective-opening syntax is not yet part of the language.
-- Replace the remaining `sel`, flowcat, and empty-program profile or
+- Replace the remaining `sel` and flowcat profile or
   source-name lowering dispatch with reusable lowering plans. Kernel ABI
   examples no longer use compiler profiles.
 - `sel` input safety is repaired, but its TUI control flow and argv selection
