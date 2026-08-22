@@ -1384,7 +1384,7 @@ AtomRegistry makeCoreAtomRegistry() {
 
     registry.registerAtom(AtomContract{"record.nop", {{"in", "Record"}}, {{"out", "Record"}}, {}},
         [](NodeConfig) { return std::make_unique<RecordNopNode>(); });
-    registry.registerAtom(AtomContract{"record.port_probe", {{"left", "Record"}, {"right", "Record"}}, {{"out", "Record"}}, {"diagnostic.routing"}},
+    registry.registerAtom(AtomContract{"record.port_probe", {{"left", "Record"}, {"right", "Record"}}, {{"out", "Record"}}, {"diagnostic.routing"}, {"left", "right"}},
         [](NodeConfig) { return std::make_unique<RecordPortProbeNode>(); });
 
     registry.registerAtom(AtomContract{"record.copy", {{"in", "Record"}}, {{"out", "Record"}}, {}},
@@ -1398,7 +1398,7 @@ AtomRegistry makeCoreAtomRegistry() {
         [](NodeConfig config) { return std::make_unique<IntCompareSwapNode>(std::move(config), IntCompareSwapNode::Order::Desc, "int.compare_swap_desc"); });
 
 
-        registry.registerAtom(AtomContract{"halt.record", {{"in", "Record"}}, {}, {}},
+        registry.registerAtom(AtomContract{"halt.record", {{"in", "Record"}}, {}, {}, {}, true},
         [](NodeConfig) { return std::make_unique<HaltNode>(); });
 
     return registry;
@@ -1426,7 +1426,25 @@ void RuntimeGraph::startAt(const std::string& nodeId, MiniEnvelope env) {
 
         trace("enter " + pending.nodeId + " with " + payloadTypeName(pending.envelope.payload), pending.envelope);
 
-        std::vector<Route> routes = it->second->run(std::move(pending.envelope));
+        auto* const failureContext = pending.envelope.ctx;
+        const auto failureInputPort = pending.envelope.input_port;
+        const auto failureWire = pending.envelope.wire_id;
+        const auto failureSignal = pending.envelope.signal_id;
+        std::vector<Route> routes;
+        try {
+            routes = it->second->run(std::move(pending.envelope));
+        } catch (const flow::DiagnosticError& error) {
+            if (failureContext != nullptr) {
+                failureContext->diagnostics.push_back({
+                    flow::Severity::Error,
+                    "runtime",
+                    "failure at " + pending.nodeId + "." + failureInputPort +
+                        " via " + failureWire + " " + failureSignal +
+                        ": " + error.what()
+                });
+            }
+            throw;
+        }
         for (auto& route : routes) {
             deliver(pending.nodeId, route.port, std::move(route.envelope));
         }
@@ -1514,6 +1532,7 @@ BuildResult buildCheckedGraph(const ModuleSpec& module, const AtomRegistry& regi
     }
 
     std::vector<WireDecl> resolvedWires;
+    std::set<std::string> connectedInputs;
 
     for (const auto& wire : module.wires) {
         const auto fromNodeIt = nodesById.find(wire.from.node);
@@ -1556,6 +1575,19 @@ BuildResult buildCheckedGraph(const ModuleSpec& module, const AtomRegistry& regi
         }
 
         resolvedWires.push_back(std::move(resolved));
+        connectedInputs.insert(endpointText(resolvedWires.back().to));
+    }
+
+    for (const auto& [id, node] : nodesById) {
+        if (node.role == "producer" || id.rfind("__", 0) == 0) continue;
+        const auto& contract = registry.contractFor(node.kind);
+        if (contract.terminal && !contract.outputs.empty())
+            throw flow::DiagnosticError{"validator", "terminal atom exposes output ports: " + node.kind};
+        for (const auto& [port, type] : contract.inputs) {
+            (void)type;
+            if (!contract.optional_inputs.count(port) && !connectedInputs.count(id + "." + port))
+                throw flow::DiagnosticError{"validator", "required input is not connected: " + id + "." + port};
+        }
     }
 
     BuildResult result;

@@ -276,6 +276,12 @@
   Flowparallel and Flowoptimize. Tests now assert the versioned lowering-plan
   contract and source-derived operations directly; no required compiler stage
   contains or consumes profile vocabulary.
+- Atom contracts now distinguish required inputs, optional activation inputs
+  and terminal nodes. Graph validation rejects an unconnected required sink
+  input, accepts either optional port of the routing probe, and rejects a
+  terminal contract that exposes outputs. Runtime node failures retain the
+  receiving node/input plus wire and signal identity in diagnostics before the
+  original failure propagates.
 
 ## Evidence
 
@@ -436,19 +442,22 @@
 - Profile-field removal checkpoint: the complete canonical build succeeded and
   **54/54** CTest tests passed in 18.46 seconds with no `lowering_profile`
   identifier remaining outside historical mission/ledger documentation.
+- Focused connectivity/failure checkpoint: `flowcore_graph_routing`, both
+  pass-corpus registrations, `flow_less_pager`, and
+  `flow_less_ncurses_pager` passed. The complete canonical build and suite then
+  passed **54/54** tests in 17.95 seconds.
 
 ## Remaining work
 
 - The unqualified single-provider import alias remains explicitly transitional;
   selective-opening syntax is not yet part of the language.
-- Add graph fan-out, multiple destination ports, required/optional/terminal
-  connectivity and failure-routing tests. Fan-out, port identity, contract
-  rejection, unconnected-output diagnostics, and wire/signal provenance are
-  now covered.
+- Split navigation/state transitions out of the `flow_less` input/terminal
+  providers so Flow source owns the pager graph behavior and providers remain
+  injectable at explicit input, terminal and output boundaries.
 - Reconcile documentation and test counts after the implementation stabilizes.
 
 ## Exact next action
 
-Next action: close the remaining graph-law coverage gap for required, optional
-and terminal connectivity plus failure routing, then reconcile `flow_less`
-against the mission's Flow-owned `=>` acceptance requirements.
+Next action: refactor `flow_less` into Flow-selected input, provider-neutral
+navigation/state and output stages, preserving fake and ncurses acceptance
+behavior through explicit `=>` connections.

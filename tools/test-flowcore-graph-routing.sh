@@ -68,4 +68,47 @@ if "$flowmini" "$tmpdir/bad-port.flow" >/dev/null 2> "$tmpdir/bad-port.stderr"; 
 fi
 grep -Fq 'source endpoint start.missing is not an output port' "$tmpdir/bad-port.stderr"
 
+cat > "$tmpdir/missing-required.flow" <<'EOF'
+program missing_required
+producer start : start.record
+sink halt : halt.record
+main { marker : int(1) }
+EOF
+if "$flowmini" "$tmpdir/missing-required.flow" >/dev/null 2> "$tmpdir/missing-required.stderr"; then
+    echo 'unconnected required input unexpectedly accepted' >&2
+    exit 1
+fi
+grep -Fq 'required input is not connected: halt.in' "$tmpdir/missing-required.stderr"
+
+# The two probe inputs are alternative activation ports. Either may be absent,
+# while the terminal sink's required input remains connected.
+cat > "$tmpdir/optional-input.flow" <<'EOF'
+program optional_input
+producer start : start.record
+node probe : record.port_probe
+sink halt : halt.record
+wire start.out => probe.right
+wire probe.out => halt.in
+main { marker : int(1) }
+EOF
+"$flowmini" --trace true "$tmpdir/optional-input.flow" >/dev/null 2> "$tmpdir/optional-input.stderr"
+grep -Fq 'route start.out => probe.right' "$tmpdir/optional-input.stderr"
+grep -Fq 'route probe.out => halt.in' "$tmpdir/optional-input.stderr"
+
+cat > "$tmpdir/failure.flow" <<'EOF'
+program failure_route
+producer input : stdin.text
+node parse : parse.int.to_record
+sink halt : halt.record
+wire input.out => parse.in
+wire parse.out => halt.in
+main { marker : int(1) }
+EOF
+if printf 'not-an-integer\n' | "$flowmini" "$tmpdir/failure.flow" >/dev/null 2> "$tmpdir/failure.stderr"; then
+    echo 'failing graph node unexpectedly succeeded' >&2
+    exit 1
+fi
+grep -Eq 'failure at parse\.in via wire:0 signal:[0-9]+: expected integer input' "$tmpdir/failure.stderr"
+grep -Fq 'fatal in parse.int: expected integer input' "$tmpdir/failure.stderr"
+
 echo 'Flowcore graph routing: PASS'
