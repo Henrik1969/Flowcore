@@ -307,15 +307,24 @@ test "$actual_priority" -eq "$expected_priority"
 kernel_clock_source="$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass/abi_kernel_clock_main.flow"
 "$flowmini" --dump-frontend-bundle "$kernel_clock_source" > "$tmpdir/kernel-clock.bundle.json"
 "$analyst" < "$tmpdir/kernel-clock.bundle.json" > "$tmpdir/kernel-clock.semantic.json"
-grep -q '"lowering_profile": "abi_kernel_clock_main"' "$tmpdir/kernel-clock.semantic.json"
+grep -q '"lowering_profile": "none"' "$tmpdir/kernel-clock.semantic.json"
+jq -e 'any(.lowering_plan.operations[]; .operands[0].kind == "writable_storage" and .operands[0].storage.bytes == 16)' "$tmpdir/kernel-clock.semantic.json" >/dev/null
 "$bind" --policy "$policy" < "$tmpdir/kernel-clock.semantic.json" > "$tmpdir/kernel-clock.binding.json"
 "$parallel" < "$tmpdir/kernel-clock.semantic.json" > "$tmpdir/kernel-clock.parallel.json"
 "$optimizer" < "$tmpdir/kernel-clock.parallel.json" > "$tmpdir/kernel-clock.optimized.json"
 "$lowerer" --emit-llvm "$tmpdir/kernel-clock.ll" --binding-report "$tmpdir/kernel-clock.binding.json" < "$tmpdir/kernel-clock.optimized.json" > "$tmpdir/kernel-clock.lowering.json"
 grep -q '"status": "emitted"' "$tmpdir/kernel-clock.lowering.json"
 grep -q 'call i32 @clock_gettime' "$tmpdir/kernel-clock.ll"
+grep -q 'alloca \[16 x i8\]' "$tmpdir/kernel-clock.ll"
 clang "$tmpdir/kernel-clock.ll" -o "$tmpdir/kernel-clock"
 "$tmpdir/kernel-clock"
+
+jq '(.lowering_plan.operations[] | select(.operands[0].kind == "writable_storage") | .operands[0].storage.bytes) = 0' \
+    "$tmpdir/kernel-clock.semantic.json" > "$tmpdir/kernel-clock-invalid-storage.json"
+if "$bind" --policy "$policy" < "$tmpdir/kernel-clock-invalid-storage.json" >/dev/null 2>&1; then
+    echo 'zero-sized writable storage unexpectedly authorized' >&2
+    exit 1
+fi
 
 kernel_random_source="$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass/abi_kernel_random_main.flow"
 "$flowmini" --dump-frontend-bundle "$kernel_random_source" > "$tmpdir/kernel-random.bundle.json"
@@ -333,13 +342,15 @@ clang "$tmpdir/kernel-random.ll" -o "$tmpdir/kernel-random"
 kernel_uname_source="$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass/abi_kernel_uname_main.flow"
 "$flowmini" --dump-frontend-bundle "$kernel_uname_source" > "$tmpdir/kernel-uname.bundle.json"
 "$analyst" < "$tmpdir/kernel-uname.bundle.json" > "$tmpdir/kernel-uname.semantic.json"
-grep -q '"lowering_profile": "abi_kernel_uname_main"' "$tmpdir/kernel-uname.semantic.json"
+grep -q '"lowering_profile": "none"' "$tmpdir/kernel-uname.semantic.json"
+jq -e 'any(.lowering_plan.operations[]; .operands[0].kind == "writable_storage" and .operands[0].storage.bytes == 390)' "$tmpdir/kernel-uname.semantic.json" >/dev/null
 "$bind" --policy "$policy" < "$tmpdir/kernel-uname.semantic.json" > "$tmpdir/kernel-uname.binding.json"
 "$parallel" < "$tmpdir/kernel-uname.semantic.json" > "$tmpdir/kernel-uname.parallel.json"
 "$optimizer" < "$tmpdir/kernel-uname.parallel.json" > "$tmpdir/kernel-uname.optimized.json"
 "$lowerer" --emit-llvm "$tmpdir/kernel-uname.ll" --binding-report "$tmpdir/kernel-uname.binding.json" < "$tmpdir/kernel-uname.optimized.json" > "$tmpdir/kernel-uname.lowering.json"
 grep -q '"status": "emitted"' "$tmpdir/kernel-uname.lowering.json"
 grep -q 'call i32 @uname' "$tmpdir/kernel-uname.ll"
+grep -q 'alloca \[390 x i8\]' "$tmpdir/kernel-uname.ll"
 clang "$tmpdir/kernel-uname.ll" -o "$tmpdir/kernel-uname"
 "$tmpdir/kernel-uname"
 

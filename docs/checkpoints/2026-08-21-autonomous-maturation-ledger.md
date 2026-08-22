@@ -146,6 +146,12 @@
   `uname` remain among the kernel compatibility profiles because successful
   execution requires sized writable storage absent from their current Flow
   declarations.
+- Added source-derived writable-storage descriptors for positive `c_pointer(N)`
+  initializers. The lowering plan records exact byte count, read/write access,
+  and call lifetime; Flowbind rejects malformed or zero-sized descriptors.
+- Migrated `clock_gettime` and `uname` to generic mixed-carrier lowering using
+  explicit 16-byte and 390-byte source allocations. Their analyst, binder, and
+  handwritten LLVM profile branches are removed, and both native ELFs execute.
 
 ## Evidence
 
@@ -213,16 +219,19 @@
 - Focused null-probe checkpoint: the same six focused gates passed, including
   native execution of `getrandom`, `read`, and `write`; the canonical build and
   suite passed **54/54**.
+- Focused writable-storage checkpoint: `flowcore_pass_corpus`,
+  `profile_free_generic_lowering`, `flowanalyst_pipeline`, `flowbind_provider`,
+  and `flowlower_pipeline` passed, including native execution of
+  `clock_gettime` and `uname` and rejection of a zero-byte descriptor. The
+  canonical build and suite passed **54/54**.
 
 ## Remaining work
 
 - Complete namespace law by replacing or explicitly fencing legacy unqualified
   import flattening and add selective-opening semantics only where unambiguous.
-- Replace the remaining profile/source-name lowering dispatch with reusable
-  lowering plans; the first profile-free path is now additive and proven, while
-  legacy profiles remain transitional compatibility machinery.
-- Extend generic lowering beyond zero-argument scalar calls to arguments,
-  values, control flow, and capability sequences.
+- Replace the remaining ncurses, `sel`, flowcat, and empty-program profile or
+  source-name lowering dispatch with reusable lowering plans. Kernel ABI
+  examples no longer use compiler profiles.
 - Expand effects into external effect, argument-memory effect, determinism,
   resource, ownership, nullability, and lifetime facts.
 - Model typed ncurses session/window resources.
@@ -237,7 +246,7 @@
 
 ## Exact next action
 
-Next action: introduce a source/contract-derived sized writable-storage
-descriptor in the lowering plan, use it for `clock_gettime` and `uname`, and
-remove those final kernel profiles only after malformed-size and native-write
-coverage passes.
+Next action: complete the imported short-name candidate-set audit and fence the
+legacy unqualified-import compatibility path with one-, two-, three-, and
+four-provider collision coverage before continuing the remaining application
+profile migrations.

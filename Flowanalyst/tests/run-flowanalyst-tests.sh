@@ -53,8 +53,9 @@ printf '%s\n' "$struct_report" | jq -e '
 kernel_clock_fixture="$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass/abi_kernel_clock_main.flow"
 kernel_clock_report=$("$flowmini" --dump-frontend-bundle "$kernel_clock_fixture" | "$bin")
 printf '%s\n' "$kernel_clock_report" | jq -e '
-    .lowering_profile == "abi_kernel_clock_main" and
-    ([.binding_requirements[] | .symbol] == ["clock_gettime"])
+    .lowering_profile == "none" and
+    ([.binding_requirements[] | .symbol] == ["clock_gettime"]) and
+    any(.lowering_plan.operations[]; .kind == "value_definition" and .operands[0].kind == "writable_storage" and .operands[0].storage.bytes == 16)
 ' >/dev/null
 
 kernel_random_fixture="$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass/abi_kernel_random_main.flow"
@@ -67,8 +68,9 @@ printf '%s\n' "$kernel_random_report" | jq -e '
 kernel_uname_fixture="$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass/abi_kernel_uname_main.flow"
 kernel_uname_report=$("$flowmini" --dump-frontend-bundle "$kernel_uname_fixture" | "$bin")
 printf '%s\n' "$kernel_uname_report" | jq -e '
-    .lowering_profile == "abi_kernel_uname_main" and
-    ([.binding_requirements[] | .symbol] == ["uname"])
+    .lowering_profile == "none" and
+    ([.binding_requirements[] | .symbol] == ["uname"]) and
+    any(.lowering_plan.operations[]; .kind == "value_definition" and .operands[0].kind == "writable_storage" and .operands[0].storage.bytes == 390)
 ' >/dev/null
 
 kernel_openat_fixture="$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass/abi_kernel_openat_main.flow"

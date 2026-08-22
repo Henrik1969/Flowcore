@@ -381,8 +381,6 @@ int run(const Json& bundle) {
         std::set<std::string> sel_symbols; for (const auto& requirement : binding_requirements) sel_symbols.insert(requirement.symbol);
         if (sel_symbols.count("initscr") && sel_symbols.count("endwin") && sel_symbols.count("wgetch") && sel_symbols.count("keypad")) lowering_profile = "sel_main";
     }
-    if (text(field(*source_unit, "name")) == "abi_kernel_clock_main") for (const auto& requirement : binding_requirements) if (requirement.symbol == "clock_gettime" && requirement.parameter_types == "c_int,c_pointer" && requirement.return_type == "c_int") lowering_profile = "abi_kernel_clock_main";
-    if (text(field(*source_unit, "name")) == "abi_kernel_uname_main") for (const auto& requirement : binding_requirements) if (requirement.symbol == "uname" && requirement.parameter_types == "c_pointer" && requirement.return_type == "c_int") lowering_profile = "abi_kernel_uname_main";
     bool flowcat_entrypoint = false;
     if (text(field(*source_unit, "name")) == "flowcat") {
         for (const auto& [declaration_id, declaration] : declarations) {
@@ -620,12 +618,19 @@ int run(const Json& bundle) {
     }
     std::cout << "],\n  \"lowering_plan\": {\"format\":\"flowcore.lowering_plan\",\"version\":1,\"status\":\""
               << (diagnostics.empty() ? "ready" : "blocked") << "\",\"operations\":[";
-    std::function<void(int)> emit_operand = [&](int expression_id) {
+    std::function<void(int, const std::string&)> emit_operand = [&](int expression_id, const std::string& declared_type) {
         const auto* expression = expressions.count(expression_id) ? expressions.at(expression_id) : nullptr;
         const auto kind = text(field(expression, "kind"));
-        std::cout << "{\"expression_id\":" << expression_id << ",\"kind\":" << quote(kind);
+        const auto literal = text(field(field(expression, "payload"), "value_text"), "0");
+        const bool writable_storage = kind == "integer_literal" && declared_type == "c_pointer" &&
+            !literal.empty() && literal != "0" && literal.front() != '-';
+        std::cout << "{\"expression_id\":" << expression_id << ",\"kind\":" << quote(writable_storage ? "writable_storage" : kind);
+        if (writable_storage) {
+            std::cout << ",\"type\":\"c_pointer\",\"storage\":{\"bytes\":" << literal
+                      << ",\"access\":\"read_write\",\"lifetime\":\"call\"}";
+        } else
         if (kind == "integer_literal") {
-            std::cout << ",\"type\":\"c_int\",\"value\":" << quote(text(field(field(expression, "payload"), "value_text"), "0"));
+            std::cout << ",\"type\":" << quote(declared_type.empty() ? "c_int" : declared_type) << ",\"value\":" << quote(literal);
         } else if (kind == "string_literal") {
             std::cout << ",\"type\":\"c_string\",\"value\":" << quote(text(field(field(expression, "payload"), "value_text")));
         } else if (kind == "bool_literal") {
@@ -637,15 +642,15 @@ int run(const Json& bundle) {
         } else if (kind == "unary") {
             const auto* payload = field(expression, "payload");
             std::cout << ",\"type\":\"c_int\",\"operator\":" << quote(text(field(payload, "operator"))) << ",\"operand\":";
-            emit_operand(integer(field(payload, "operand")));
+            emit_operand(integer(field(payload, "operand")), {});
         } else if (kind == "binary") {
             const auto* payload = field(expression, "payload");
             const auto operator_name = text(field(payload, "operator"));
             const bool comparison = operator_name == "==" || operator_name == "!=" || operator_name == "<" || operator_name == "<=" || operator_name == ">" || operator_name == ">=";
             std::cout << ",\"type\":" << (comparison ? "\"bool\"" : "\"c_int\"") << ",\"operator\":" << quote(operator_name) << ",\"left\":";
-            emit_operand(integer(field(payload, "left")));
+            emit_operand(integer(field(payload, "left")), {});
             std::cout << ",\"right\":";
-            emit_operand(integer(field(payload, "right")));
+            emit_operand(integer(field(payload, "right")), {});
         } else {
             std::cout << ",\"type\":\"unsupported\"";
         }
@@ -670,7 +675,9 @@ int run(const Json& bundle) {
         std::cout << "],\"operands\":[";
         for (std::size_t argument = 0; argument < operation.arguments.size(); ++argument) {
             if (argument) std::cout << ',';
-            emit_operand(operation.arguments[argument]);
+            const auto declared_type = operation.kind == "value_definition" && operation.result_symbol >= 0 && symbol_types.count(operation.result_symbol)
+                ? symbol_types.at(operation.result_symbol) : std::string{};
+            emit_operand(operation.arguments[argument], declared_type);
         }
         std::cout << "]";
         if (operation.result_symbol >= 0) std::cout << ",\"result_symbol_id\":" << operation.result_symbol;

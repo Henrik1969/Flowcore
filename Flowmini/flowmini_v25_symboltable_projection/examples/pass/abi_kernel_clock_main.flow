@@ -4,7 +4,7 @@ program abi_kernel_clock_main
 
 main {
     clock : c_int(1)
-    value : c_pointer(0)
+    value : c_pointer(16)
     result : c_int(0)
     clock_gettime(clock, value) -> result
 }

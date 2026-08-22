@@ -220,6 +220,16 @@ void validate_lowering_plan(const std::string& report, const std::vector<Require
         throw std::runtime_error("unsupported lowering plan contract");
     }
     for (const auto& operation : json_array(json_field(*plan, "operations"), "lowering_plan.operations")) {
+        for (const auto& operand : json_array(json_field(operation, "operands"), "lowering operation operands")) {
+            if (json_text(json_field(operand, "kind")) != "writable_storage") continue;
+            if (json_text(json_field(operand, "type")) != "c_pointer") throw std::runtime_error("writable storage must have c_pointer carrier type");
+            const Json* storage = json_field(operand, "storage");
+            if (storage == nullptr || json_integer(json_field(*storage, "bytes"), "writable storage bytes") <= 0 ||
+                json_text(json_field(*storage, "access")) != "read_write" ||
+                json_text(json_field(*storage, "lifetime")) != "call") {
+                throw std::runtime_error("invalid writable storage descriptor");
+            }
+        }
         if (json_text(json_field(operation, "kind")) != "external_call") continue;
         const Json* provider = json_field(operation, "provider");
         if (provider == nullptr) throw std::runtime_error("external lowering operation has no provider identity");
@@ -306,8 +316,6 @@ int verify(const std::string& report, const std::string& policy_path, const std:
     if (profile == "abi_ncurses_main") for (const auto& item : needed) if (item.symbol == "initscr" || item.symbol == "endwin" || item.symbol == "waddnstr" || item.symbol == "wrefresh") lowering_requirement = &item;
     if (profile == "sel_main") for (const auto& item : needed) if (item.symbol == "initscr" || item.symbol == "endwin" || item.symbol == "wgetch" || item.symbol == "keypad") lowering_requirement = &item;
     if (profile == "abi_kernel_getpid_main") for (const auto& item : needed) if (item.symbol == "getpid") lowering_requirement = &item;
-    if (profile == "abi_kernel_clock_main") for (const auto& item : needed) if (item.symbol == "clock_gettime") lowering_requirement = &item;
-    if (profile == "abi_kernel_uname_main") for (const auto& item : needed) if (item.symbol == "uname") lowering_requirement = &item;
     if (profile == "flowcat_argv_main") for (const auto& item : needed) if (item.symbol == "puts") lowering_requirement = &item;
     const auto grants = read_policy(policy_path);
     const std::vector<std::string> supported_types = {"c_int", "c_long", "c_ulong", "c_size_t", "c_string", "c_pointer"};
