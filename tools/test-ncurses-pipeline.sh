@@ -24,7 +24,6 @@ printf '%s\n' \
 
 "$flowmini" --dump-frontend-bundle "$fixture" > "$tmpdir/frontend.json"
 "$analyst" < "$tmpdir/frontend.json" > "$tmpdir/semantic.json"
-grep -q '"lowering_profile": "none"' "$tmpdir/semantic.json"
 jq -e '.abi_type_contracts | any(.contract == "ncurses" and .name == "ncurses_window" and .repr == "void*" and .ownership == "external" and .access == "opaque" and .lifetime == "external" and .nullable == "true" and .opaque == "true" and .cleanup == "endwin")' "$tmpdir/semantic.json" >/dev/null
 jq -e '.lowering_plan.operations | any(.kind == "external_call" and .provider.contract == "ncurses" and .provider.symbol == "initscr" and .provider.return_type == "ncurses_window" and .result_resource.type == "ncurses_window" and .result_resource.ownership == "external" and .result_resource.nullable == "true" and .result_resource.cleanup_capability == "endwin")' "$tmpdir/semantic.json" >/dev/null
 jq -e '.lowering_plan.format == "flowcore.lowering_plan" and .lowering_plan.version == 1 and (.lowering_plan.operations | any(.kind == "external_call" and .provider.symbol == "initscr"))' "$tmpdir/semantic.json" >/dev/null
@@ -32,7 +31,7 @@ jq -e '.lowering_plan.format == "flowcore.lowering_plan" and .lowering_plan.vers
 "$optimizer" < "$tmpdir/parallel.json" > "$tmpdir/optimized.json"
 jq -e '.abi_type_contracts | any(.name == "ncurses_window" and .repr == "void*")' "$tmpdir/optimized.json" >/dev/null
 "$bind" --policy "$tmpdir/policy" < "$tmpdir/semantic.json" > "$tmpdir/binding.json"
-jq -e '.status == "ready" and .lowering_profile == "none" and (.symbols | index("initscr")) != null' "$tmpdir/binding.json" >/dev/null
+jq -e '.status == "ready" and (.symbols | index("initscr")) != null' "$tmpdir/binding.json" >/dev/null
 jq -e '.lowering_plan.contract == "flowcore.lowering_plan" and .lowering_plan.operation_count > 0' "$tmpdir/binding.json" >/dev/null
 
 jq '(.lowering_plan.operations[] | select(.provider.symbol == "initscr") | .result_resource.cleanup_capability) = "invented_cleanup"' \

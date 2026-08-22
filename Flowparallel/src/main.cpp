@@ -64,16 +64,6 @@ std::string source_path(std::string_view input) {
     return {};
 }
 
-std::string string_field(std::string_view input, std::string_view field) {
-    const auto marker = input.find("\"" + std::string(field) + "\"");
-    if (marker == std::string_view::npos) return {};
-    auto position = input.find(':', marker); if (position == std::string_view::npos) return {};
-    position = input.find('"', position); if (position == std::string_view::npos) return {};
-    ++position; std::string value;
-    for (; position < input.size(); ++position) { if (input[position] == '"' && (position == 0 || input[position - 1] != '\\')) return value; value.push_back(input[position]); }
-    return {};
-}
-
 std::size_t proven_pure_count(std::string_view input) {
     std::size_t count = 0;
     for (const auto& marker : {std::string("\"certainty\": \"proven\""), std::string("\"certainty\":\"proven\"")})
@@ -144,7 +134,6 @@ int analyze(std::string_view report) {
                  "  \"source\": {\"path\": " << quote(source_path(report)) << "},\n"
                  "  \"targets\": " << targets_projection(report) << ",\n"
                  "  \"input\": {\"format\": \"flowanalyst.semantic_report\", \"version\": 1},\n"
-                 "  \"lowering_profile\": " << quote(string_field(report, "lowering_profile")) << ",\n"
                  "  \"external_operations\": " << external_operations << ",\n"
                  "  \"abi_type_contracts\": " << abi_type_contracts << ",\n"
                  "  \"lowering_plan\": " << lowering_plan << ",\n"

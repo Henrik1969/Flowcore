@@ -92,7 +92,7 @@ printf '%s\n' \
   '}' > "$tmpdir/login.consumer.flow"
 "$flowmini" --dump-frontend-bundle "$tmpdir/login.consumer.flow" > "$tmpdir/login.bundle.json"
 "$analyst" < "$tmpdir/login.bundle.json" > "$tmpdir/login.semantic.json"
-jq -e '.status == "ok" and .lowering_profile == "none" and any(.lowering_plan.operations[]; .kind == "branch")' "$tmpdir/login.semantic.json" >/dev/null
+jq -e '.status == "ok" and any(.lowering_plan.operations[]; .kind == "branch")' "$tmpdir/login.semantic.json" >/dev/null
 "$bind" --policy "$tmpdir/login.policy" < "$tmpdir/login.semantic.json" > "$tmpdir/login.binding.json"
 sed 's/ c_string$/ c_long/' "$tmpdir/login.policy" > "$tmpdir/login-hostile.policy"
 if "$bind" --policy "$tmpdir/login-hostile.policy" < "$tmpdir/login.semantic.json" > "$tmpdir/login-hostile.binding.json" 2>/dev/null; then
@@ -130,7 +130,7 @@ printf '%s\n' \
   '}' > "$tmpdir/tid.consumer.flow"
 "$flowmini" --dump-frontend-bundle "$tmpdir/tid.consumer.flow" |
     "$analyst" > "$tmpdir/tid.semantic.json"
-jq -e '.status == "ok" and .lowering_profile == "none"' "$tmpdir/tid.semantic.json" >/dev/null
+jq -e '.status == "ok" and .lowering_plan.format == "flowcore.lowering_plan"' "$tmpdir/tid.semantic.json" >/dev/null
 "$bind" --policy "$tmpdir/tid.policy" < "$tmpdir/tid.semantic.json" > "$tmpdir/tid.binding.json"
 "$parallel" < "$tmpdir/tid.semantic.json" | "$optimizer" > "$tmpdir/tid.optimized.json"
 "$lowerer" --emit-llvm "$tmpdir/tid.ll" --binding-report "$tmpdir/tid.binding.json" < "$tmpdir/tid.optimized.json" > "$tmpdir/tid.lowering.json"
@@ -174,7 +174,7 @@ printf '%s\n' \
   '}' > "$tmpdir/system-info.consumer.flow"
 "$flowmini" --dump-frontend-bundle "$tmpdir/system-info.consumer.flow" |
     "$analyst" > "$tmpdir/system-info.semantic.json"
-jq -e '.status == "ok" and .lowering_profile == "none" and ([.lowering_plan.operations[] | select(.kind == "external_call")] | length) == 5' "$tmpdir/system-info.semantic.json" >/dev/null
+jq -e '.status == "ok" and ([.lowering_plan.operations[] | select(.kind == "external_call")] | length) == 5' "$tmpdir/system-info.semantic.json" >/dev/null
 "$bind" --policy "$tmpdir/system-info.policy" < "$tmpdir/system-info.semantic.json" > "$tmpdir/system-info.binding.json"
 "$parallel" < "$tmpdir/system-info.semantic.json" | "$optimizer" > "$tmpdir/system-info.optimized.json"
 "$lowerer" --emit-llvm "$tmpdir/system-info.ll" --binding-report "$tmpdir/system-info.binding.json" < "$tmpdir/system-info.optimized.json" > "$tmpdir/system-info.lowering.json"
@@ -210,7 +210,7 @@ printf '%s\n' \
   '}' > "$tmpdir/sysconf.consumer.flow"
 "$flowmini" --dump-frontend-bundle "$tmpdir/sysconf.consumer.flow" |
     "$analyst" > "$tmpdir/sysconf.semantic.json"
-jq -e '.status == "ok" and .lowering_profile == "none"' "$tmpdir/sysconf.semantic.json" >/dev/null
+jq -e '.status == "ok" and .lowering_plan.format == "flowcore.lowering_plan"' "$tmpdir/sysconf.semantic.json" >/dev/null
 "$bind" --policy "$tmpdir/sysconf.policy" < "$tmpdir/sysconf.semantic.json" > "$tmpdir/sysconf.binding.json"
 "$parallel" < "$tmpdir/sysconf.semantic.json" | "$optimizer" > "$tmpdir/sysconf.optimized.json"
 "$lowerer" --emit-llvm "$tmpdir/sysconf.ll" --binding-report "$tmpdir/sysconf.binding.json" < "$tmpdir/sysconf.optimized.json" > "$tmpdir/sysconf.lowering.json"
@@ -241,7 +241,7 @@ printf '%s\n' \
   '}' > "$tmpdir/getauxval.consumer.flow"
 "$flowmini" --dump-frontend-bundle "$tmpdir/getauxval.consumer.flow" |
     "$analyst" > "$tmpdir/getauxval.semantic.json"
-jq -e '.status == "ok" and .lowering_profile == "none"' "$tmpdir/getauxval.semantic.json" >/dev/null
+jq -e '.status == "ok" and .lowering_plan.format == "flowcore.lowering_plan"' "$tmpdir/getauxval.semantic.json" >/dev/null
 "$bind" --policy "$tmpdir/getauxval.policy" < "$tmpdir/getauxval.semantic.json" > "$tmpdir/getauxval.binding.json"
 "$parallel" < "$tmpdir/getauxval.semantic.json" | "$optimizer" > "$tmpdir/getauxval.optimized.json"
 "$lowerer" --emit-llvm "$tmpdir/getauxval.ll" --binding-report "$tmpdir/getauxval.binding.json" < "$tmpdir/getauxval.optimized.json" > "$tmpdir/getauxval.lowering.json"

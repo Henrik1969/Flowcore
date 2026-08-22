@@ -181,12 +181,6 @@ bool granted(const std::vector<Grant>& grants, const Requirement& requirement) {
     return false;
 }
 
-std::string value(const std::string& object, const std::string& key) {
-    const std::regex pattern("\\\"" + key + "\\\"\\s*:\\s*\\\"([^\\\"]*)\\\"");
-    std::smatch match;
-    return std::regex_search(object, match, pattern) ? match[1].str() : std::string{};
-}
-
 std::string json_string(const std::string& text) {
     std::string result = "\"";
     for (const char character : text) {
@@ -459,7 +453,6 @@ int verify(const std::string& report, const std::string& policy_path, const std:
     const auto needed = requirements(report);
     validate_lowering_plan(report, needed);
     const bool aggregate_manifest_verified = !abi_manifest_path.empty() && manifest_verifies_aggregates(report, read_path(abi_manifest_path, "ABI manifest"));
-    const auto profile = value(report, "lowering_profile");
     const auto grants = read_policy(policy_path);
     const Json semantic_root = JsonParser{report}.parse();
     std::map<std::string, std::string> declared_representations;
@@ -502,7 +495,7 @@ int verify(const std::string& report, const std::string& policy_path, const std:
         std::cout << "\n}\n";
         return 2;
     }
-    std::cout << "{\n  \"format\": \"flowbind.binding_report\",\n  \"version\": 1,\n  \"status\": \"ready\",\n  \"lowering_profile\": " << (profile.empty() ? "\"none\"" : "\"" + profile + "\"") << ",\n  \"provider\": {\"name\": \"dlopen+dlsym\", \"requirements\": " << needed.size() << "},\n  \"symbols\": [";
+    std::cout << "{\n  \"format\": \"flowbind.binding_report\",\n  \"version\": 1,\n  \"status\": \"ready\",\n  \"provider\": {\"name\": \"dlopen+dlsym\", \"requirements\": " << needed.size() << "},\n  \"symbols\": [";
     for (std::size_t i = 0; i < needed.size(); ++i) { if (i) std::cout << ','; std::cout << '"' << needed[i].symbol << '"'; }
     std::cout << "],\n  \"capabilities\": [";
     for (std::size_t i = 0; i < needed.size(); ++i) {

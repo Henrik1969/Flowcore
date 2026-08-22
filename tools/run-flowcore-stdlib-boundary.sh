@@ -103,7 +103,6 @@ flowcat_fixture="$root/Flowmini/flowmini_v25_symboltable_projection/examples/app
     "$flowbind" --policy "$policy" > "$tmpdir/flowcat.binding.json"
 jq -e '
     .status == "ready" and
-    .lowering_profile == "none" and
     ([.capabilities[].symbol] | sort) == ["close", "open", "sendfile"]
 ' "$tmpdir/flowcat.binding.json" >/dev/null
 
@@ -123,7 +122,6 @@ kernel_fixture="$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass
     "$flowbind" --policy "$policy" > "$tmpdir/kernel.binding.json"
 jq -e '
     .status == "ready" and
-    .lowering_profile == "none" and
     (.capabilities | length) == 32 and
     ([.capabilities[].symbol] | sort) == [
       "accept4", "bind", "clock_gettime", "connect", "fork", "getegid", "geteuid", "getgid", "gethostname",

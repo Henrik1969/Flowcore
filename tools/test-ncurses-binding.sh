@@ -18,7 +18,6 @@ printf '%s\n' \
 
 report=$(jq -n '{
   format:"flowanalyst.semantic_report", version:1, status:"ok",
-  lowering_profile:"none",
   binding_requirements:[
     {contract:"std_abi_ncurses",library:"libncursesw.so.6",convention:"c",symbol:"initscr",effect:"terminal",parameter_types:"",return_type:"c_pointer"},
     {contract:"std_abi_ncurses",library:"libncursesw.so.6",convention:"c",symbol:"endwin",effect:"terminal",parameter_types:"",return_type:"c_int"},

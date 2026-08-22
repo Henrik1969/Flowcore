@@ -15,7 +15,7 @@ trap 'rm -rf "$tmpdir"' EXIT
 printf '%s\n' 'allow libc.so.6 getpid c readonly - c_int' > "$tmpdir/policy"
 "$flowmini" --dump-frontend-bundle "$source" > "$tmpdir/frontend.json"
 "$analyst" < "$tmpdir/frontend.json" > "$tmpdir/semantic.json"
-jq -e '.status == "ok" and .lowering_profile == "none" and .lowering_plan.operations[0].kind == "external_call" and .lowering_plan.operations[0].provider.symbol == "getpid"' "$tmpdir/semantic.json" >/dev/null
+jq -e '.status == "ok" and .lowering_plan.operations[0].kind == "external_call" and .lowering_plan.operations[0].provider.symbol == "getpid"' "$tmpdir/semantic.json" >/dev/null
 "$parallel" < "$tmpdir/semantic.json" > "$tmpdir/parallel.json"
 jq -e '.lowering_plan.operations[0].provider.symbol == "getpid"' "$tmpdir/parallel.json" >/dev/null
 "$optimizer" < "$tmpdir/parallel.json" > "$tmpdir/optimized.json"
@@ -38,7 +38,7 @@ jq -n --arg provider "$(ldconfig -p | awk '$1 == "libc.so.6" && $NF ~ /^\// { pr
 printf '%s\n' 'import "generated.flow" as linux' '' 'program arbitrary_profile_free_name' '' 'main {' \
     '    group : c_int(0)' '    linux.getpgid(0) -> group' '}' > "$tmpdir/argument.flow"
 "$flowmini" --dump-frontend-bundle "$tmpdir/argument.flow" | "$analyst" > "$tmpdir/argument.semantic.json"
-jq -e '.status == "ok" and .lowering_profile == "none" and .lowering_plan.operations[0].operands[0].kind == "integer_literal" and .lowering_plan.operations[0].operands[0].type == "c_int"' "$tmpdir/argument.semantic.json" >/dev/null
+jq -e '.status == "ok" and .lowering_plan.operations[0].operands[0].kind == "integer_literal" and .lowering_plan.operations[0].operands[0].type == "c_int"' "$tmpdir/argument.semantic.json" >/dev/null
 "$parallel" < "$tmpdir/argument.semantic.json" | "$optimizer" > "$tmpdir/argument.optimized.json"
 "$bind" --policy "$tmpdir/policy-arg" < "$tmpdir/argument.semantic.json" > "$tmpdir/argument.binding.json"
 "$lower" --emit-llvm "$tmpdir/argument.ll" --binding-report "$tmpdir/argument.binding.json" < "$tmpdir/argument.optimized.json" > "$tmpdir/argument.lowering.json"
@@ -50,7 +50,7 @@ clang "$tmpdir/argument.ll" -o "$tmpdir/argument"
 return_source="$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass/profile_free_return.flow"
 "$flowmini" --dump-frontend-bundle "$return_source" > "$tmpdir/return.frontend.json"
 "$analyst" < "$tmpdir/return.frontend.json" > "$tmpdir/return.semantic.json"
-jq -e '.status == "ok" and .lowering_profile == "none" and .lowering_plan.operations[0].kind == "return_value" and .lowering_plan.operations[0].operands[0].value == "42"' "$tmpdir/return.semantic.json" >/dev/null
+jq -e '.status == "ok" and .lowering_plan.operations[0].kind == "return_value" and .lowering_plan.operations[0].operands[0].value == "42"' "$tmpdir/return.semantic.json" >/dev/null
 "$parallel" < "$tmpdir/return.semantic.json" | "$optimizer" > "$tmpdir/return.optimized.json"
 "$lower" --emit-llvm "$tmpdir/return.ll" < "$tmpdir/return.optimized.json" > "$tmpdir/return.lowering.json"
 grep -Fq 'ret i32 42' "$tmpdir/return.ll"
@@ -63,7 +63,7 @@ test "$return_rc" -eq 42
 
 expression_source="$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass/profile_free_expression.flow"
 "$flowmini" --dump-frontend-bundle "$expression_source" | "$analyst" > "$tmpdir/expression.semantic.json"
-jq -e '.status == "ok" and .lowering_profile == "none" and .lowering_plan.operations[0].operands[0].kind == "binary" and .lowering_plan.operations[0].operands[0].operator == "+"' "$tmpdir/expression.semantic.json" >/dev/null
+jq -e '.status == "ok" and .lowering_plan.operations[0].operands[0].kind == "binary" and .lowering_plan.operations[0].operands[0].operator == "+"' "$tmpdir/expression.semantic.json" >/dev/null
 "$parallel" < "$tmpdir/expression.semantic.json" | "$optimizer" > "$tmpdir/expression.optimized.json"
 "$lower" --emit-llvm "$tmpdir/expression.ll" < "$tmpdir/expression.optimized.json" > "$tmpdir/expression.lowering.json"
 grep -Fq 'add i32 40, 2' "$tmpdir/expression.ll"
@@ -76,7 +76,7 @@ test "$expression_rc" -eq 42
 
 local_source="$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass/profile_free_local_value.flow"
 "$flowmini" --dump-frontend-bundle "$local_source" | "$analyst" > "$tmpdir/local.semantic.json"
-jq -e '.status == "ok" and .lowering_profile == "none" and any(.lowering_plan.operations[]; .kind == "value_definition") and any(.lowering_plan.operations[]; .kind == "return_value" and .operands[0].kind == "binary")' "$tmpdir/local.semantic.json" >/dev/null
+jq -e '.status == "ok" and any(.lowering_plan.operations[]; .kind == "value_definition") and any(.lowering_plan.operations[]; .kind == "return_value" and .operands[0].kind == "binary")' "$tmpdir/local.semantic.json" >/dev/null
 "$parallel" < "$tmpdir/local.semantic.json" | "$optimizer" > "$tmpdir/local.optimized.json"
 "$lower" --emit-llvm "$tmpdir/local.ll" < "$tmpdir/local.optimized.json" > "$tmpdir/local.lowering.json"
 grep -Fq 'ret i32' "$tmpdir/local.ll"
@@ -89,7 +89,7 @@ test "$local_rc" -eq 42
 
 branch_source="$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass/profile_free_branch.flow"
 "$flowmini" --dump-frontend-bundle "$branch_source" | "$analyst" > "$tmpdir/branch.semantic.json"
-jq -e '.status == "ok" and .lowering_profile == "none" and any(.lowering_plan.operations[]; .kind == "branch" and .operands[0].kind == "bool_literal")' "$tmpdir/branch.semantic.json" >/dev/null
+jq -e '.status == "ok" and any(.lowering_plan.operations[]; .kind == "branch" and .operands[0].kind == "bool_literal")' "$tmpdir/branch.semantic.json" >/dev/null
 "$parallel" < "$tmpdir/branch.semantic.json" | "$optimizer" > "$tmpdir/branch.optimized.json"
 "$lower" --emit-llvm "$tmpdir/branch.ll" < "$tmpdir/branch.optimized.json" > "$tmpdir/branch.lowering.json"
 grep -Fq 'br i1 true' "$tmpdir/branch.ll"
@@ -102,7 +102,7 @@ test "$branch_rc" -eq 42
 
 compare_source="$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass/profile_free_branch_compare.flow"
 "$flowmini" --dump-frontend-bundle "$compare_source" | "$analyst" > "$tmpdir/compare.semantic.json"
-jq -e '.status == "ok" and .lowering_profile == "none" and any(.lowering_plan.operations[]; .kind == "branch" and .operands[0].operator == ">")' "$tmpdir/compare.semantic.json" >/dev/null
+jq -e '.status == "ok" and any(.lowering_plan.operations[]; .kind == "branch" and .operands[0].operator == ">")' "$tmpdir/compare.semantic.json" >/dev/null
 "$parallel" < "$tmpdir/compare.semantic.json" | "$optimizer" > "$tmpdir/compare.optimized.json"
 "$lower" --emit-llvm "$tmpdir/compare.ll" < "$tmpdir/compare.optimized.json" > "$tmpdir/compare.lowering.json"
 grep -Fq 'icmp sgt i32 %flow_load_' "$tmpdir/compare.ll"
@@ -115,7 +115,7 @@ test "$compare_rc" -eq 42
 
 loop_source="$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass/profile_free_integer_loop.flow"
 "$flowmini" --dump-frontend-bundle "$loop_source" | "$analyst" > "$tmpdir/loop.semantic.json"
-jq -e '.status == "ok" and .lowering_profile == "none" and any(.lowering_plan.operations[]; .kind == "loop") and any(.lowering_plan.operations[]; .kind == "assignment")' "$tmpdir/loop.semantic.json" >/dev/null
+jq -e '.status == "ok" and any(.lowering_plan.operations[]; .kind == "loop") and any(.lowering_plan.operations[]; .kind == "assignment")' "$tmpdir/loop.semantic.json" >/dev/null
 "$parallel" < "$tmpdir/loop.semantic.json" | "$optimizer" > "$tmpdir/loop.optimized.json"
 "$lower" --emit-llvm "$tmpdir/loop.ll" < "$tmpdir/loop.optimized.json" >/dev/null
 grep -Fq 'generic structured lowering plan' "$tmpdir/loop.ll"
@@ -135,7 +135,7 @@ fi
 
 args_source="$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass/profile_free_args_length.flow"
 "$flowmini" --dump-frontend-bundle "$args_source" | "$analyst" > "$tmpdir/args.semantic.json"
-jq -e '.status == "ok" and .lowering_profile == "none" and any(.lowering_plan.operations[]; .kind == "value_definition" and .operands[0].intrinsic == "list_length")' "$tmpdir/args.semantic.json" >/dev/null
+jq -e '.status == "ok" and any(.lowering_plan.operations[]; .kind == "value_definition" and .operands[0].intrinsic == "list_length")' "$tmpdir/args.semantic.json" >/dev/null
 "$parallel" < "$tmpdir/args.semantic.json" | "$optimizer" > "$tmpdir/args.optimized.json"
 "$lower" --emit-llvm "$tmpdir/args.ll" < "$tmpdir/args.optimized.json" > "$tmpdir/args.lowering.json"
 grep -Fq 'define i32 @main(i32 %argc, ptr %argv)' "$tmpdir/args.ll"
@@ -153,7 +153,7 @@ test "$args_without_value_rc" -eq 7
 args_index_source="$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass/profile_free_args_index.flow"
 printf '%s\n' 'allow libc.so.6 puts c io c_string c_int' > "$tmpdir/args-index.policy"
 "$flowmini" --dump-frontend-bundle "$args_index_source" | "$analyst" > "$tmpdir/args-index.semantic.json"
-jq -e '.status == "ok" and .lowering_profile == "none" and any(.lowering_plan.operations[]; .kind == "value_definition" and .operands[0].intrinsic == "list_index" and .operands[0].index.value == "1")' "$tmpdir/args-index.semantic.json" >/dev/null
+jq -e '.status == "ok" and any(.lowering_plan.operations[]; .kind == "value_definition" and .operands[0].intrinsic == "list_index" and .operands[0].index.value == "1")' "$tmpdir/args-index.semantic.json" >/dev/null
 "$parallel" < "$tmpdir/args-index.semantic.json" | "$optimizer" > "$tmpdir/args-index.optimized.json"
 "$bind" --policy "$tmpdir/args-index.policy" < "$tmpdir/args-index.semantic.json" > "$tmpdir/args-index.binding.json"
 "$lower" --emit-llvm "$tmpdir/args-index.ll" --binding-report "$tmpdir/args-index.binding.json" < "$tmpdir/args-index.optimized.json" > "$tmpdir/args-index.lowering.json"
@@ -171,7 +171,7 @@ test "$args_index_missing_rc" -eq 64
 result_source="$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass/profile_free_external_result.flow"
 printf '%s\n' 'allow libc.so.6 getppid c readonly - c_int' > "$tmpdir/result.policy"
 "$flowmini" --dump-frontend-bundle "$result_source" | "$analyst" > "$tmpdir/result.semantic.json"
-jq -e '.status == "ok" and .lowering_profile == "none" and any(.lowering_plan.operations[]; .kind == "external_call" and .provider.symbol == "getppid" and has("result_symbol_id")) and any(.lowering_plan.operations[]; .kind == "return_value" and .operands[0].kind == "binary" and .operands[0].left.kind == "identifier")' "$tmpdir/result.semantic.json" >/dev/null
+jq -e '.status == "ok" and any(.lowering_plan.operations[]; .kind == "external_call" and .provider.symbol == "getppid" and has("result_symbol_id")) and any(.lowering_plan.operations[]; .kind == "return_value" and .operands[0].kind == "binary" and .operands[0].left.kind == "identifier")' "$tmpdir/result.semantic.json" >/dev/null
 "$parallel" < "$tmpdir/result.semantic.json" | "$optimizer" > "$tmpdir/result.optimized.json"
 "$bind" --policy "$tmpdir/result.policy" < "$tmpdir/result.semantic.json" > "$tmpdir/result.binding.json"
 set +e
@@ -197,7 +197,7 @@ set -e
 
 external_branch_source="$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass/profile_free_external_branch.flow"
 "$flowmini" --dump-frontend-bundle "$external_branch_source" | "$analyst" > "$tmpdir/external-branch.semantic.json"
-jq -e '.status == "ok" and .lowering_profile == "none" and any(.lowering_plan.operations[]; .kind == "external_call" and .provider.symbol == "getppid") and any(.lowering_plan.operations[]; .kind == "branch" and .operands[0].operator == ">")' "$tmpdir/external-branch.semantic.json" >/dev/null
+jq -e '.status == "ok" and any(.lowering_plan.operations[]; .kind == "external_call" and .provider.symbol == "getppid") and any(.lowering_plan.operations[]; .kind == "branch" and .operands[0].operator == ">")' "$tmpdir/external-branch.semantic.json" >/dev/null
 "$parallel" < "$tmpdir/external-branch.semantic.json" | "$optimizer" > "$tmpdir/external-branch.optimized.json"
 "$bind" --policy "$tmpdir/result.policy" < "$tmpdir/external-branch.semantic.json" > "$tmpdir/external-branch.binding.json"
 "$lower" --emit-llvm "$tmpdir/external-branch.ll" --binding-report "$tmpdir/external-branch.binding.json" < "$tmpdir/external-branch.optimized.json" > "$tmpdir/external-branch.lowering.json"

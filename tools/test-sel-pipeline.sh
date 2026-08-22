@@ -29,7 +29,6 @@ printf '%s\n' 'allow libc.so.6 memset c io' >> "$tmpdir/policy"
 "$flowmini" --dump-frontend-bundle "$fixture" > "$tmpdir/frontend.json"
 jq -e '[.ast.declaration_pool[] | select(.kind == "import") | .alias] == ["curses", "libc", "linux", "memory"]' "$tmpdir/frontend.json" >/dev/null
 "$analyst" < "$tmpdir/frontend.json" > "$tmpdir/semantic.json"
-grep -q '"lowering_profile": "none"' "$tmpdir/semantic.json"
  jq -e '(.external_operations | map(.callee) | index("curses.initscr")) != null and (.external_operations | map(.callee) | index("libc.puts")) != null and (.external_operations | map(.callee) | index("linux.read")) != null' "$tmpdir/semantic.json" >/dev/null
 jq -e '.lowering_plan.operations | any(.provider.contract == "curses" and .provider.symbol == "initscr" and .provider.return_type == "ncurses_window" and .result_resource.type == "ncurses_window" and .result_resource.cleanup_capability == "endwin")' "$tmpdir/semantic.json" >/dev/null
 jq -e '
@@ -61,7 +60,7 @@ if "$bind" --policy "$tmpdir/policy" < "$tmpdir/double-cleanup.json" >/dev/null 
     echo 'ncurses path with double cleanup unexpectedly authorized' >&2
     exit 1
 fi
-jq -e '.status == "ready" and .lowering_profile == "none" and (.symbols | index("wgetch")) != null and (.symbols | index("puts")) != null' "$tmpdir/binding.json" >/dev/null
+jq -e '.status == "ready" and (.symbols | index("wgetch")) != null and (.symbols | index("puts")) != null' "$tmpdir/binding.json" >/dev/null
 
 # The backend recognizes the structured capability plan, not this fixture's
 # source-unit identity. An arbitrary program name must retain the same path.
@@ -71,7 +70,7 @@ sed \
     "$fixture" > "$tmpdir/renamed.flow"
 "$flowmini" --dump-frontend-bundle "$tmpdir/renamed.flow" |
     "$analyst" > "$tmpdir/renamed.semantic.json"
-jq -e '.lowering_profile == "none" and (.lowering_plan.operations | any(.provider.symbol == "wgetch"))' "$tmpdir/renamed.semantic.json" >/dev/null
+jq -e '.lowering_plan.operations | any(.provider.symbol == "wgetch")' "$tmpdir/renamed.semantic.json" >/dev/null
 "$parallel" < "$tmpdir/renamed.semantic.json" |
     "$optimizer" > "$tmpdir/renamed.optimized.json"
 "$bind" --policy "$tmpdir/policy" < "$tmpdir/renamed.semantic.json" > "$tmpdir/renamed.binding.json"

@@ -272,6 +272,10 @@
   branches, checked argv indexing, loops, assignments, cleanup and returns.
   Missing loop bodies and controlling blocks are rejected instead of silently
   emitting altered behavior.
+- Removed the transitional `lowering_profile` field from Flowanalyst, Flowbind,
+  Flowparallel and Flowoptimize. Tests now assert the versioned lowering-plan
+  contract and source-derived operations directly; no required compiler stage
+  contains or consumes profile vocabulary.
 
 ## Evidence
 
@@ -429,6 +433,9 @@
   both pass-corpus registrations passed. The complete canonical suite passed
   **54/54** tests in 18.93 seconds after all legacy Flowlower emitters were
   removed.
+- Profile-field removal checkpoint: the complete canonical build succeeded and
+  **54/54** CTest tests passed in 18.46 seconds with no `lowering_profile`
+  identifier remaining outside historical mission/ledger documentation.
 
 ## Remaining work
 
@@ -438,12 +445,10 @@
   connectivity and failure-routing tests. Fan-out, port identity, contract
   rejection, unconnected-output diagnostics, and wire/signal provenance are
   now covered.
-- Remove the passive `lowering_profile: none` field from Flowanalyst, Flowbind,
-  Flowparallel, Flowoptimize and their tests so the transitional profile
-  vocabulary is absent from every required compiler stage.
 - Reconcile documentation and test counts after the implementation stabilizes.
 
 ## Exact next action
 
-Next action: remove the passive `lowering_profile` report field end to end and
-update gates to assert the versioned lowering plan directly.
+Next action: close the remaining graph-law coverage gap for required, optional
+and terminal connectivity plus failure routing, then reconcile `flow_less`
+against the mission's Flow-owned `=>` acceptance requirements.

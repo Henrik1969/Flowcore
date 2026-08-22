@@ -53,7 +53,6 @@ printf '%s\n' "$struct_report" | jq -e '
 kernel_clock_fixture="$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass/abi_kernel_clock_main.flow"
 kernel_clock_report=$("$flowmini" --dump-frontend-bundle "$kernel_clock_fixture" | "$bin")
 printf '%s\n' "$kernel_clock_report" | jq -e '
-    .lowering_profile == "none" and
     ([.binding_requirements[] | .symbol] == ["clock_gettime"]) and
     any(.lowering_plan.operations[]; .kind == "value_definition" and .operands[0].kind == "writable_storage" and .operands[0].storage.bytes == 16)
 ' >/dev/null
@@ -61,14 +60,12 @@ printf '%s\n' "$kernel_clock_report" | jq -e '
 kernel_random_fixture="$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass/abi_kernel_random_main.flow"
 kernel_random_report=$("$flowmini" --dump-frontend-bundle "$kernel_random_fixture" | "$bin")
 printf '%s\n' "$kernel_random_report" | jq -e '
-    .lowering_profile == "none" and
     ([.binding_requirements[] | .symbol] == ["getrandom"])
 ' >/dev/null
 
 kernel_uname_fixture="$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass/abi_kernel_uname_main.flow"
 kernel_uname_report=$("$flowmini" --dump-frontend-bundle "$kernel_uname_fixture" | "$bin")
 printf '%s\n' "$kernel_uname_report" | jq -e '
-    .lowering_profile == "none" and
     ([.binding_requirements[] | .symbol] == ["uname"]) and
     any(.lowering_plan.operations[]; .kind == "value_definition" and .operands[0].kind == "writable_storage" and .operands[0].storage.bytes == 390)
 ' >/dev/null
@@ -76,52 +73,46 @@ printf '%s\n' "$kernel_uname_report" | jq -e '
 kernel_openat_fixture="$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass/abi_kernel_openat_main.flow"
 kernel_openat_report=$("$flowmini" --dump-frontend-bundle "$kernel_openat_fixture" | "$bin")
 printf '%s\n' "$kernel_openat_report" | jq -e '
-    .lowering_profile == "none" and
     ([.binding_requirements[] | .symbol] == ["openat"])
 ' >/dev/null
 
 kernel_read_fixture="$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass/abi_kernel_read_main.flow"
 kernel_read_report=$("$flowmini" --dump-frontend-bundle "$kernel_read_fixture" | "$bin")
 printf '%s\n' "$kernel_read_report" | jq -e '
-    .lowering_profile == "none" and
     ([.binding_requirements[] | .symbol] == ["read"])
 ' >/dev/null
 
 kernel_write_fixture="$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass/abi_kernel_write_main.flow"
 kernel_write_report=$("$flowmini" --dump-frontend-bundle "$kernel_write_fixture" | "$bin")
 printf '%s\n' "$kernel_write_report" | jq -e '
-    .lowering_profile == "none" and
     ([.binding_requirements[] | .symbol] == ["write"])
 ' >/dev/null
 
 kernel_lseek_fixture="$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass/abi_kernel_lseek_main.flow"
 kernel_lseek_report=$("$flowmini" --dump-frontend-bundle "$kernel_lseek_fixture" | "$bin")
 printf '%s\n' "$kernel_lseek_report" | jq -e '
-    .lowering_profile == "none" and
     ([.binding_requirements[] | .symbol] == ["lseek"])
 ' >/dev/null
 
 kernel_unlinkat_fixture="$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass/abi_kernel_unlinkat_main.flow"
 kernel_unlinkat_report=$("$flowmini" --dump-frontend-bundle "$kernel_unlinkat_fixture" | "$bin")
 printf '%s\n' "$kernel_unlinkat_report" | jq -e '
-    .lowering_profile == "none" and
     ([.binding_requirements[] | .symbol] == ["unlinkat"])
 ' >/dev/null
 
 rmdir_fixture="$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass/abi_kernel_rmdir_main.flow"
 rmdir_report=$("$flowmini" --dump-frontend-bundle "$rmdir_fixture" | "$bin")
-printf '%s\n' "$rmdir_report" | jq -e '.lowering_profile == "none" and ([.binding_requirements[] | .symbol] == ["rmdir"])' >/dev/null
+printf '%s\n' "$rmdir_report" | jq -e '([.binding_requirements[] | .symbol] == ["rmdir"])' >/dev/null
 
 for kernel_name in fork socket listen unshare sethostname pipe2 waitpid socketpair bind poll accept4 connect gethostname; do
     kernel_fixture="$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass/abi_kernel_${kernel_name}_main.flow"
     kernel_report=$("$flowmini" --dump-frontend-bundle "$kernel_fixture" | "$bin")
-    printf '%s\n' "$kernel_report" | jq -e --arg symbol "$kernel_name" '.lowering_profile == "none" and ([.binding_requirements[] | .symbol] == [$symbol])' >/dev/null
+    printf '%s\n' "$kernel_report" | jq -e --arg symbol "$kernel_name" '([.binding_requirements[] | .symbol] == [$symbol])' >/dev/null
 done
 
 flowcat_fixture="$root/Flowmini/flowmini_v25_symboltable_projection/examples/apps/flowcat/flowcat.flow"
 flowcat_report=$("$flowmini" --dump-frontend-bundle "$flowcat_fixture" | "$bin")
 printf '%s\n' "$flowcat_report" | jq -e '
-  .lowering_profile == "none" and
   ([.lowering_plan.operations[] | select(.kind == "loop")] | length) == 2 and
   any(.lowering_plan.operations[]; .kind == "assignment") and
   any(.lowering_plan.operations[]; .kind == "external_call" and .provider.symbol == "sendfile")

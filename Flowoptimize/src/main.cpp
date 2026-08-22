@@ -194,7 +194,6 @@ int analyze(std::string_view report, std::string_view provider_decision) {
     // This is deliberately a boundary implementation. No optimization is
     // claimed until the accepted semantic bundle and transformation contract
     // are complete.
-    const auto profile = string_after(report, "\"lowering_profile\":");
     const auto input_format = parallel_input ? "flowparallel.execution_plan" : "flowanalyst.semantic_report";
     const bool has_region_matrix = report.find("\"name\":\"region_dependency\"") != std::string_view::npos || report.find("\"name\": \"region_dependency\"") != std::string_view::npos;
     const auto matrix_rows = has_region_matrix ? number_after(report, "\"rows\":") : 0;
@@ -214,7 +213,6 @@ int analyze(std::string_view report, std::string_view provider_decision) {
                  "  \"source\": {\"path\": " << quote(source_path(report)) << "},\n"
                  "  \"targets\": " << targets_projection(report) << ",\n"
                  "  \"input\": {\"format\": \"" << input_format << "\", \"version\": 1},\n"
-                 "  \"lowering_profile\": \"" << profile << "\",\n"
                  "  \"external_operations\": " << external_operations << ",\n"
                  "  \"abi_type_contracts\": " << abi_type_contracts << ",\n"
                  "  \"lowering_plan\": " << lowering_plan << ",\n"
