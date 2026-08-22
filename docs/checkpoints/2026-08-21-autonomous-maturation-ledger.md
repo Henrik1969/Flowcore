@@ -109,6 +109,9 @@
   zero-argument `c_int`/`c_long` calls through the plan, requires authorization
   for every native symbol, and emits and executes without a handwritten LLVM
   block or source-name selection.
+- Added generic unary integer operand propagation and migrated the libc `abs`
+  example off its source-name profile. Its `-42` initializer, result placement,
+  and explicit return now drive the emitted LLVM and native exit status 42.
 
 ## Evidence
 
@@ -137,6 +140,10 @@
   `profile_free_generic_lowering`, `flowbind_provider`, and
   `flowlower_pipeline` passed. The complete canonical suite then passed
   **54/54** tests.
+- Focused unary migration checkpoint: `flowlower_pipeline`,
+  `flowanalyst_pipeline`, `flowbind_provider`, both pass-corpus gates, and
+  `profile_free_generic_lowering` passed. The complete suite again passed
+  **54/54** tests.
 
 ## Remaining work
 
@@ -161,6 +168,7 @@
 
 ## Exact next action
 
-Next action: migrate the generated getlogin/puts capability sequence to generic
-string and result-flow operations, keeping its null fallback behavior in Flow
-source rather than in a handwritten LLVM profile.
+Next action: add generic string literal/value and `c_size_t` result flow, then
+migrate the libc `strlen` example off its handwritten profile. The generated
+getlogin/puts migration remains queued behind source-level nullable-string
+selection so its current fallback is not silently lost.

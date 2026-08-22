@@ -142,6 +142,16 @@ std::string emit_integer_expression(std::string_view expression, std::ostringstr
         if (symbol.empty()) return {};
         try { return values.at(std::stoi(symbol)); } catch (const std::exception&) { return {}; }
     }
+    if (kind == "unary") {
+        const auto operator_name = quoted_field(expression, "operator");
+        const auto operand = emit_integer_expression(object_field(expression, "operand"), instructions, temporary, values);
+        if (operand.empty()) return {};
+        if (operator_name == "+") return operand;
+        if (operator_name != "-") return {};
+        const auto result = "%flow_expr" + std::to_string(temporary++);
+        instructions << "  " << result << " = sub i32 0, " << operand << "\n";
+        return result;
+    }
     if (kind != "binary") return {};
     const auto operator_name = quoted_field(expression, "operator");
     std::string instruction;
@@ -233,7 +243,6 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
         if (report.find(spaced_target_marker, targets_marker) == std::string_view::npos && report.find(compact_target_marker, targets_marker) == std::string_view::npos) throw std::runtime_error("requested target is not present in the optimization report");
     } else if (!target_name.empty()) throw std::runtime_error("requested target is not present in the optimization report");
     const bool trial_profile = has(report, "\"lowering_profile\": \"empty_program_main\"") || has(report, "\"lowering_profile\":\"empty_program_main\"");
-    const bool abi_abs_profile = has(report, "\"lowering_profile\": \"abi_abs_main\"") || has(report, "\"lowering_profile\":\"abi_abs_main\"");
     const bool abi_strlen_profile = has(report, "\"lowering_profile\": \"abi_strlen_main\"") || has(report, "\"lowering_profile\":\"abi_strlen_main\"");
     const bool test_licbinds_profile = has(report, "\"lowering_profile\": \"test_licbinds_main\"") || has(report, "\"lowering_profile\":\"test_licbinds_main\"");
     const bool abi_ncurses_profile = has(report, "\"lowering_profile\": \"abi_ncurses_main\"") || has(report, "\"lowering_profile\":\"abi_ncurses_main\"");
@@ -289,10 +298,12 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
         if (quoted_field(operation, "kind") != "value_definition") continue;
         const auto value_operand = first_array_object(array_field(operation, "operands"));
         const auto value_symbol = numeric_field(operation, "result_symbol_id");
-        if (!value_symbol.empty() && quoted_field(value_operand, "kind") == "integer_literal" && valid_integer_literal(quoted_field(value_operand, "value"))) {
+        const auto initialized_value = emit_integer_expression(value_operand, value_initialization_instructions, generic_expression_temporary, generic_values);
+        const bool wide_value = !value_symbol.empty() && wide_value_symbols.count(std::stoi(value_symbol));
+        if (!value_symbol.empty() && !initialized_value.empty() && (!wide_value || quoted_field(value_operand, "kind") == "integer_literal")) {
             const auto value_name = "%flow_value_" + value_symbol;
-            const auto llvm_type = wide_value_symbols.count(std::stoi(value_symbol)) ? "i64" : "i32";
-            value_initialization_instructions << "  " << value_name << " = add " << llvm_type << " 0, " << quoted_field(value_operand, "value") << "\n";
+            const auto llvm_type = wide_value ? "i64" : "i32";
+            value_initialization_instructions << "  " << value_name << " = add " << llvm_type << " 0, " << initialized_value << "\n";
             generic_values[std::stoi(value_symbol)] = value_name;
         }
     }
@@ -399,7 +410,6 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
         ++sequence_call_count;
     }
     generic_scalar_sequence = generic_scalar_sequence && sequence_call_count > 1;
-    if (abi_abs_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"abi_abs_main\"") || !has(binding_report, "\"kind\": \"external_call\"") || !has(binding_report, "\"abs\""))) throw std::runtime_error("ABI binding report does not authorize the abi_abs_main lowering profile");
     if (abi_strlen_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"abi_strlen_main\"") || !has(binding_report, "\"kind\": \"external_call\"") || !has(binding_report, "\"strlen\""))) throw std::runtime_error("ABI binding report does not authorize the abi_strlen_main lowering profile");
     if (test_licbinds_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"test_licbinds_main\"") || !has(binding_report, "\"strlen\"") || !has(binding_report, "\"abs\"") || !has(binding_report, "\"puts\""))) throw std::runtime_error("ABI binding report does not authorize the test_licbinds_main lowering profile");
     if (abi_ncurses_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"abi_ncurses_main\"") || !has(binding_report, "\"initscr\"") || !has(binding_report, "\"endwin\"") || !has(binding_report, "\"waddnstr\"") || !has(binding_report, "\"wrefresh\""))) throw std::runtime_error("ABI binding report does not authorize the abi_ncurses_main lowering profile");
@@ -423,7 +433,7 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
         if (binding_report.empty() || (!has(binding_report, "\"status\": \"ready\"") && !has(binding_report, "\"status\":\"ready\""))) throw std::runtime_error("generic lowering sequence is not authorized");
         for (const auto& symbol : sequence_symbols) if (!has(binding_report, "\"symbol\":" + quote(symbol)) && !has(binding_report, "\"symbol\": " + quote(symbol))) throw std::runtime_error("generic lowering sequence operation is not authorized: " + symbol);
     }
-    if (!llvm_path.empty() && !generic_external_scalar && !generic_external_long && !generic_external_ulong && !generic_scalar_sequence && !generic_return_value && !generic_branch && !trial_profile && !abi_abs_profile && !abi_strlen_profile && !test_licbinds_profile && !abi_ncurses_profile && !sel_profile && !generated_getlogin_profile && !abi_kernel_clock_profile && !abi_kernel_random_profile && !abi_kernel_uname_profile && !abi_kernel_openat_profile && !abi_kernel_read_profile && !abi_kernel_write_profile && !abi_kernel_lseek_profile && !abi_kernel_unlinkat_profile && !remaining_kernel_profile && !flowcat_profile && !flowcat_file_profile) throw std::runtime_error("LLVM emission requires an accepted lowering profile or supported generic lowering plan");
+    if (!llvm_path.empty() && !generic_external_scalar && !generic_external_long && !generic_external_ulong && !generic_scalar_sequence && !generic_return_value && !generic_branch && !trial_profile && !abi_strlen_profile && !test_licbinds_profile && !abi_ncurses_profile && !sel_profile && !generated_getlogin_profile && !abi_kernel_clock_profile && !abi_kernel_random_profile && !abi_kernel_uname_profile && !abi_kernel_openat_profile && !abi_kernel_read_profile && !abi_kernel_write_profile && !abi_kernel_lseek_profile && !abi_kernel_unlinkat_profile && !remaining_kernel_profile && !flowcat_profile && !flowcat_file_profile) throw std::runtime_error("LLVM emission requires an accepted lowering profile or supported generic lowering plan");
     if (!llvm_path.empty()) {
         std::ofstream llvm(llvm_path); if (!llvm) throw std::runtime_error("cannot open LLVM output");
         llvm << "; Flowcore target artifact: " << selected_target << "\n";
@@ -509,15 +519,6 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
                     "  ret i32 0\n"
                     "error:\n"
                     "  ret i32 1\n"
-                    "}\n";
-        } else if (abi_abs_profile) {
-            llvm << "; Flowcore ABI trial lowering: abs\n"
-                    "target triple = \"x86_64-pc-linux-gnu\"\n"
-                    "declare i32 @abs(i32)\n"
-                    "define i32 @main() {\n"
-                    "entry:\n"
-                    "  %result = call i32 @abs(i32 -42)\n"
-                    "  ret i32 %result\n"
                     "}\n";
         } else if (abi_strlen_profile) {
             llvm << "; Flowcore ABI trial lowering: strlen\n"

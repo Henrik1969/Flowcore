@@ -78,6 +78,7 @@ printf '%s\n' \
 abs_source="$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass/abi_abs_main.flow"
 "$flowmini" --dump-frontend-bundle "$abs_source" > "$tmpdir/abs.bundle.json"
 "$analyst" < "$tmpdir/abs.bundle.json" > "$tmpdir/abs.semantic.json"
+jq -e '.lowering_profile == "none"' "$tmpdir/abs.semantic.json" >/dev/null
 "$bind" --policy "$policy" < "$tmpdir/abs.semantic.json" > "$tmpdir/abs.binding.json"
 "$parallel" < "$tmpdir/abs.semantic.json" > "$tmpdir/abs.parallel.json"
 "$optimizer" < "$tmpdir/abs.parallel.json" > "$tmpdir/abs.optimized.json"

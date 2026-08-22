@@ -303,7 +303,6 @@ int verify(const std::string& report, const std::string& policy_path, const std:
     const bool aggregate_manifest_verified = !abi_manifest_path.empty() && manifest_verifies_aggregates(report, read_path(abi_manifest_path, "ABI manifest"));
     const auto profile = value(report, "lowering_profile");
     const Requirement* lowering_requirement = nullptr;
-    if (profile == "abi_abs_main") for (const auto& item : needed) if (item.symbol == "abs") lowering_requirement = &item;
     if (profile == "abi_strlen_main") for (const auto& item : needed) if (item.symbol == "strlen") lowering_requirement = &item;
     if (profile == "test_licbinds_main") for (const auto& item : needed) if (item.symbol == "strlen" || item.symbol == "abs" || item.symbol == "puts") lowering_requirement = &item;
     if (profile == "abi_ncurses_main") for (const auto& item : needed) if (item.symbol == "initscr" || item.symbol == "endwin" || item.symbol == "waddnstr" || item.symbol == "wrefresh") lowering_requirement = &item;

@@ -373,7 +373,6 @@ int run(const Json& bundle) {
     }
     if (declarations.empty()) empty_main_profile = false;
     std::string lowering_profile = empty_main_profile ? "empty_program_main" : "none";
-    if (text(field(*source_unit, "name")) == "abi_abs_main") for (const auto& requirement : binding_requirements) if (requirement.symbol == "abs" && requirement.parameter_types == "c_int" && requirement.return_type == "c_int") lowering_profile = "abi_abs_main";
     if (text(field(*source_unit, "name")) == "abi_strlen_main") for (const auto& requirement : binding_requirements) if (requirement.symbol == "strlen" && requirement.parameter_types == "c_string" && requirement.return_type == "c_size_t") lowering_profile = "abi_strlen_main";
     if (text(field(*source_unit, "name")) == "test_licbinds") {
         std::set<std::string> libc_symbols; for (const auto& requirement : binding_requirements) libc_symbols.insert(requirement.symbol);
@@ -660,6 +659,10 @@ int run(const Json& bundle) {
             const int symbol = resolved_expression_symbols.count(expression_id) ? resolved_expression_symbols.at(expression_id) : -1;
             const auto type = symbol_types.count(symbol) ? symbol_types.at(symbol) : std::string{};
             std::cout << ",\"type\":" << quote(type) << ",\"symbol_id\":" << symbol;
+        } else if (kind == "unary") {
+            const auto* payload = field(expression, "payload");
+            std::cout << ",\"type\":\"c_int\",\"operator\":" << quote(text(field(payload, "operator"))) << ",\"operand\":";
+            emit_operand(integer(field(payload, "operand")));
         } else if (kind == "binary") {
             const auto* payload = field(expression, "payload");
             const auto operator_name = text(field(payload, "operator"));

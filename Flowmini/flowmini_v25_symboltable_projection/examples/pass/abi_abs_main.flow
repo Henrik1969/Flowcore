@@ -7,4 +7,5 @@ main {
     result   : c_int(0)
 
     abs(negative) -> result
+    return result
 }
