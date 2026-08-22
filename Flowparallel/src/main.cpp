@@ -64,9 +64,14 @@ std::string source_path(std::string_view input) {
     return {};
 }
 
-std::string lowering_profile(std::string_view input) {
-    for (const auto candidate : {"empty_program_main", "abi_abs_main", "abi_strlen_main", "test_licbinds_main", "abi_ncurses_main", "sel_main", "abi_kernel_getpid_main", "abi_kernel_getuid_main", "abi_kernel_getgid_main", "abi_kernel_geteuid_main", "abi_kernel_getegid_main", "abi_kernel_getppid_main", "abi_kernel_getpgrp_main", "abi_kernel_getpgid_main", "abi_kernel_getsid_main", "abi_kernel_getpriority_main", "generated_getlogin_main", "generated_gettid_main", "generated_sysconf_main", "generated_getauxval_main", "generated_system_info_main", "abi_kernel_clock_main", "abi_kernel_random_main", "abi_kernel_uname_main", "abi_kernel_openat_main", "abi_kernel_read_main", "abi_kernel_write_main", "abi_kernel_lseek_main", "abi_kernel_unlinkat_main", "abi_kernel_rmdir_main", "abi_kernel_pipe2_main", "abi_kernel_fork_main", "abi_kernel_waitpid_main", "abi_kernel_socketpair_main", "abi_kernel_socket_main", "abi_kernel_bind_main", "abi_kernel_listen_main", "abi_kernel_poll_main", "abi_kernel_accept4_main", "abi_kernel_connect_main", "abi_kernel_unshare_main", "abi_kernel_sethostname_main", "abi_kernel_gethostname_main", "flowcat_argv_main", "flowcat_file_main"}) if (has_field(input, "lowering_profile", candidate)) return candidate;
-    return "none";
+std::string string_field(std::string_view input, std::string_view field) {
+    const auto marker = input.find("\"" + std::string(field) + "\"");
+    if (marker == std::string_view::npos) return {};
+    auto position = input.find(':', marker); if (position == std::string_view::npos) return {};
+    position = input.find('"', position); if (position == std::string_view::npos) return {};
+    ++position; std::string value;
+    for (; position < input.size(); ++position) { if (input[position] == '"' && (position == 0 || input[position - 1] != '\\')) return value; value.push_back(input[position]); }
+    return {};
 }
 
 std::size_t proven_pure_count(std::string_view input) {
@@ -138,7 +143,7 @@ int analyze(std::string_view report) {
                  "  \"source\": {\"path\": " << quote(source_path(report)) << "},\n"
                  "  \"targets\": " << targets_projection(report) << ",\n"
                  "  \"input\": {\"format\": \"flowanalyst.semantic_report\", \"version\": 1},\n"
-                 "  \"lowering_profile\": " << quote(lowering_profile(report)) << ",\n"
+                 "  \"lowering_profile\": " << quote(string_field(report, "lowering_profile")) << ",\n"
                  "  \"external_operations\": " << external_operations << ",\n"
                  "  \"lowering_plan\": " << lowering_plan << ",\n"
                  "  \"dependency_analysis\": {\"status\": \"available\", \"pure_callables\": " << pure_count << ", \"parallel_candidates\": " << independent_count << ", \"candidate_kind\": \"pure-callee-disjoint-inputs\"},\n"

@@ -39,6 +39,9 @@
   literals and identifiers. A second arbitrary profile-free proof generates a
   `getpgid(c_int)` binding, preserves its operand through Flowparallel and
   Flowoptimize, and executes the resulting ELF without a compiler change.
+- Flowparallel and Flowoptimize no longer enumerate known profile names to
+  preserve a report's lowering profile; they mechanically carry the declared
+  value and structured lowering plan forward.
 
 ## Evidence
 
