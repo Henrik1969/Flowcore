@@ -123,6 +123,9 @@
   `c_long`, `c_ulong`, `c_size_t`, and pointer LLVM carriers. The libc
   integration fixture now emits its source-defined `strlen`, `abs`, and `puts`
   sequence generically and no longer has compiler profile dispatch.
+- Admitted single mixed-carrier calls on the same generic path and migrated
+  `rmdir(c_string)`. Its emitted call now uses the Flow source literal instead
+  of the legacy handwritten emitter's null pointer.
 
 ## Evidence
 
@@ -167,6 +170,11 @@
   `profile_free_generic_lowering`, and both pass-corpus gates passed. Native
   stdout remained exactly `Flowcore libc bindings`; the complete canonical
   build and suite then passed **54/54**.
+- Focused rmdir checkpoint: `flowlower_pipeline`, `flowanalyst_pipeline`,
+  `flowbind_provider`, `profile_free_generic_lowering`, and both pass-corpus
+  gates passed. The native ELF executed, the LLVM call referenced the
+  source-derived string global, and an adversarial assertion rejected the old
+  null-pointer shape. The canonical build and suite passed **54/54**.
 
 ## Remaining work
 
@@ -191,7 +199,7 @@
 
 ## Exact next action
 
-Next action: admit a single mixed-carrier call as a generic capability sequence
-and migrate `rmdir(c_string)` off its handwritten profile, asserting that the
-LLVM call uses the Flow source path rather than the current hard-coded null
-pointer.
+Next action: migrate the remaining scalar-only kernel fixtures (`fork`,
+`socket`, `listen`, and `unshare`) onto the single-operation generic path, with
+their argument values taken from Flow source and their profile branches removed
+only after native execution remains green.

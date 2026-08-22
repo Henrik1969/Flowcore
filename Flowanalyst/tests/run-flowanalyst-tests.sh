@@ -106,7 +106,11 @@ printf '%s\n' "$kernel_unlinkat_report" | jq -e '
     ([.binding_requirements[] | .symbol] == ["unlinkat"])
 ' >/dev/null
 
-for kernel_name in rmdir pipe2 fork waitpid socketpair socket bind listen poll accept4 connect unshare sethostname gethostname; do
+rmdir_fixture="$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass/abi_kernel_rmdir_main.flow"
+rmdir_report=$("$flowmini" --dump-frontend-bundle "$rmdir_fixture" | "$bin")
+printf '%s\n' "$rmdir_report" | jq -e '.lowering_profile == "none" and ([.binding_requirements[] | .symbol] == ["rmdir"])' >/dev/null
+
+for kernel_name in pipe2 fork waitpid socketpair socket bind listen poll accept4 connect unshare sethostname gethostname; do
     kernel_fixture="$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass/abi_kernel_${kernel_name}_main.flow"
     kernel_report=$("$flowmini" --dump-frontend-bundle "$kernel_fixture" | "$bin")
     printf '%s\n' "$kernel_report" | jq -e --arg profile "abi_kernel_${kernel_name}_main" --arg symbol "$kernel_name" '.lowering_profile == $profile and ([.binding_requirements[] | .symbol] == [$symbol])' >/dev/null
