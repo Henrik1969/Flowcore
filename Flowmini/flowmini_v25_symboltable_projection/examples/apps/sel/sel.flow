@@ -6,7 +6,7 @@ import "../../../std/abi/memory.flow" as memory
 program sel
 
 main(args : list<string>) {
-    window : c_pointer(0)
+    window : ncurses_window(0)
     status : c_int(0)
     key : c_int(0)
     enabled : c_int(1)

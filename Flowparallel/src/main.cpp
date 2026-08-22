@@ -132,6 +132,7 @@ int analyze(std::string_view report) {
     const auto pure_count = proven_pure_count(report);
     const auto independent_count = independent_candidate_count(report);
     const auto external_operations = json_array_field(report, "external_operations");
+    const auto abi_type_contracts = json_array_field(report, "abi_type_contracts");
     const auto lowering_plan = json_object_field(report, "lowering_plan");
     const bool has_region_matrix = report.find("\"name\":\"region_dependency\"") != std::string_view::npos || report.find("\"name\": \"region_dependency\"") != std::string_view::npos;
     const auto matrix_rows = has_region_matrix ? number_after(report, "\"rows\":") : 0;
@@ -145,6 +146,7 @@ int analyze(std::string_view report) {
                  "  \"input\": {\"format\": \"flowanalyst.semantic_report\", \"version\": 1},\n"
                  "  \"lowering_profile\": " << quote(string_field(report, "lowering_profile")) << ",\n"
                  "  \"external_operations\": " << external_operations << ",\n"
+                 "  \"abi_type_contracts\": " << abi_type_contracts << ",\n"
                  "  \"lowering_plan\": " << lowering_plan << ",\n"
                  "  \"dependency_analysis\": {\"status\": \"available\", \"pure_callables\": " << pure_count << ", \"parallel_candidates\": " << independent_count << ", \"candidate_kind\": \"pure-callee-disjoint-inputs\"},\n"
                  "  \"graph_projection\": {\"kind\": \"graph_to_matrix\", \"name\": \"region_dependency\", \"status\": \"" << (has_region_matrix ? "available" : "not-present") << "\", \"rows\": " << matrix_rows << ", \"columns\": " << matrix_columns << ", \"semiring\": \"boolean\", \"storage\": \"coo\", \"entries\": " << matrix_entries(report) << "},\n"

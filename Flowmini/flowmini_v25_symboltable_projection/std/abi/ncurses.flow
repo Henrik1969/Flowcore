@@ -4,7 +4,7 @@ abi ncurses {
     library "libncursesw.so.6"
     convention c
 
-    type c_pointer {
+    type ncurses_window {
         repr "void*"
         ownership external
         access opaque
@@ -23,7 +23,7 @@ abi ncurses {
         terminator nul
     }
 
-    extern fn initscr(): c_pointer {
+    extern fn initscr(): ncurses_window {
         symbol "initscr"
         effect terminal
     }
@@ -43,22 +43,22 @@ abi ncurses {
         effect terminal
     }
 
-    extern fn waddnstr(window : c_pointer, text : c_string, count : c_int): c_int {
+    extern fn waddnstr(window : ncurses_window, text : c_string, count : c_int): c_int {
         symbol "waddnstr"
         effect terminal
     }
 
-    extern fn wrefresh(window : c_pointer): c_int {
+    extern fn wrefresh(window : ncurses_window): c_int {
         symbol "wrefresh"
         effect terminal
     }
 
-    extern fn wgetch(window : c_pointer): c_int {
+    extern fn wgetch(window : ncurses_window): c_int {
         symbol "wgetch"
         effect terminal
     }
 
-    extern fn keypad(window : c_pointer, enabled : c_int): c_int {
+    extern fn keypad(window : ncurses_window, enabled : c_int): c_int {
         symbol "keypad"
         effect terminal
     }

@@ -3,7 +3,7 @@ import "../../std/abi/ncurses.flow"
 program abi_ncurses_main
 
 main {
-    window : c_pointer(0)
+    window : ncurses_window(0)
     message : c_string("Flowcore ncurses binding")
     count : c_int(24)
     status : c_int(0)

@@ -250,6 +250,15 @@
 - Flowbind now verifies those effect and argument-resource facts against the
   provider declaration and exported ABI type contract. Adversarial mutations
   of `sendfile` determinism and pointer memory access are rejected.
+- Replaced ncurses' generic `c_pointer` handle with a distinct
+  `ncurses_window` ABI carrier. Its external ownership, opaque access, external
+  lifetime, nullability, and `endwin` cleanup identity now remain distinct from
+  ordinary pointer authority at acquisition and every window-consuming call.
+- Flowparallel and Flowoptimize now preserve ABI type contracts alongside the
+  lowering plan. Flowbind and typed Flowlower accept provider-declared pointer
+  carriers from their exact `repr` contract instead of adding the ncurses type
+  name to compiler dispatch. Hostile lifetime and cleanup mutations are
+  rejected, and both the standalone ncurses ELF and `sel` remain executable.
 
 ## Evidence
 
@@ -393,17 +402,19 @@
   including hostile effect and argument-memory mutations.
 - Canonical typed-effect checkpoint: the complete build succeeded and
   **54/54** CTest tests passed in 19.43 seconds.
+- Focused typed-window checkpoint: `ncurses_flow_pipeline`, `sel_tui_pipeline`,
+  `flowbind_provider`, `flowlower_pipeline`, `flowanalyst_pipeline`, and both
+  pass-corpus registrations passed. The canonical build and suite then passed
+  **54/54** tests in 19.58 seconds.
 
 ## Remaining work
 
 - The unqualified single-provider import alias remains explicitly transitional;
   selective-opening syntax is not yet part of the language.
-- Model typed ncurses session/window resources.
-- Extend the ncurses provider with explicit typed session/window resource facts
-  and failure cleanup diagnostics; its current dynamic provider is executable
-  evidence, but the resource model is not yet represented in semantic reports.
-- Add call-site resource propagation and cleanup diagnostics using the exported
-  ABI type facts.
+- Add path-sensitive resource-state validation so every exit reachable after
+  ncurses acquisition proves exactly one compatible cleanup; current binding
+  validation proves the cleanup operation is present and exactly identified,
+  but does not yet prove dominance or reject double cleanup.
 - Add graph fan-out, multiple destination ports, required/optional/terminal
   connectivity and failure-routing tests. Fan-out, port identity, contract
   rejection, unconnected-output diagnostics, and wire/signal provenance are
@@ -412,6 +423,6 @@
 
 ## Exact next action
 
-Next action: introduce and propagate a distinct typed ncurses session/window
-resource carrier, including exact failure cleanup diagnostics, without treating
-generic `c_pointer` identity as sufficient resource authority.
+Next action: propagate acquired-resource identity through structured blocks and
+reject an exit after `initscr` unless its path executes exactly one authorized
+`endwin`, including adversarial missing-cleanup and double-cleanup branches.

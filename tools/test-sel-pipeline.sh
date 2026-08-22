@@ -31,7 +31,7 @@ jq -e '[.ast.declaration_pool[] | select(.kind == "import") | .alias] == ["curse
 "$analyst" < "$tmpdir/frontend.json" > "$tmpdir/semantic.json"
 grep -q '"lowering_profile": "none"' "$tmpdir/semantic.json"
  jq -e '(.external_operations | map(.callee) | index("curses.initscr")) != null and (.external_operations | map(.callee) | index("libc.puts")) != null and (.external_operations | map(.callee) | index("linux.read")) != null' "$tmpdir/semantic.json" >/dev/null
-jq -e '.lowering_plan.operations | any(.provider.contract == "curses" and .provider.symbol == "initscr" and .result_resource.cleanup_capability == "endwin")' "$tmpdir/semantic.json" >/dev/null
+jq -e '.lowering_plan.operations | any(.provider.contract == "curses" and .provider.symbol == "initscr" and .provider.return_type == "ncurses_window" and .result_resource.type == "ncurses_window" and .result_resource.cleanup_capability == "endwin")' "$tmpdir/semantic.json" >/dev/null
 jq -e '
     ([.lowering_plan.operations[].operands[]? | select(.intrinsic == "list_length")] | length) >= 1 and
     ([.lowering_plan.operations[].operands[]? | select(.intrinsic == "list_index")] | length) >= 1 and

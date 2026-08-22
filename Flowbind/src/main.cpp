@@ -388,8 +388,16 @@ int verify(const std::string& report, const std::string& policy_path, const std:
     const bool aggregate_manifest_verified = !abi_manifest_path.empty() && manifest_verifies_aggregates(report, read_path(abi_manifest_path, "ABI manifest"));
     const auto profile = value(report, "lowering_profile");
     const auto grants = read_policy(policy_path);
-    const std::vector<std::string> supported_types = {"c_int", "c_long", "c_ulong", "c_size_t", "c_string", "c_pointer"};
-    auto supported_type = [&](const std::string& type) { for (const auto& candidate : supported_types) if (candidate == type) return true; return false; };
+    const Json semantic_root = JsonParser{report}.parse();
+    std::map<std::string, std::string> declared_representations;
+    if (const auto* contracts = json_field(semantic_root, "abi_type_contracts"))
+        for (const auto& type : json_array(contracts, "abi_type_contracts"))
+            declared_representations[json_text(json_field(type, "name"))] = json_text(json_field(type, "repr"));
+    auto supported_type = [&](const std::string& type) {
+        if (type == "c_int" || type == "c_long" || type == "c_ulong" || type == "c_size_t" || type == "c_string" || type == "c_pointer") return true;
+        const auto found = declared_representations.find(type);
+        return found != declared_representations.end() && (found->second == "void*" || found->second == "const void*");
+    };
     std::map<std::string, void*> handles;
     std::vector<std::string> failures;
     for (const auto& item : needed) {

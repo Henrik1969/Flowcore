@@ -206,6 +206,7 @@ int analyze(std::string_view report, std::string_view provider_decision) {
     const auto representation = has_decision ? string_after(provider_decision, "\"representation\":") : "";
     const auto decision_reason = has_decision ? string_after(provider_decision, "\"reason\":") : "";
     const auto external_operations = json_array_field(report, "external_operations");
+    const auto abi_type_contracts = json_array_field(report, "abi_type_contracts");
     const auto lowering_plan = json_object_field(report, "lowering_plan");
     std::cout << "{\n  \"format\": \"flowoptimize.optimization_report\",\n"
                  "  \"version\": 1,\n"
@@ -215,6 +216,7 @@ int analyze(std::string_view report, std::string_view provider_decision) {
                  "  \"input\": {\"format\": \"" << input_format << "\", \"version\": 1},\n"
                  "  \"lowering_profile\": \"" << profile << "\",\n"
                  "  \"external_operations\": " << external_operations << ",\n"
+                 "  \"abi_type_contracts\": " << abi_type_contracts << ",\n"
                  "  \"lowering_plan\": " << lowering_plan << ",\n"
                  "  \"projections\": [{\"kind\": \"graph_to_matrix\", \"name\": \"region_dependency\", \"status\": \"" << (has_region_matrix ? "available" : "not-present") << "\", \"rows\": " << matrix_rows << ", \"columns\": " << matrix_columns << ", \"semiring\": \"boolean\", \"storage\": \"coo\"}],\n"
                  "  \"provider_policy\": {\"selection\": \"runtime\", \"candidates\": [\"cpu\", \"cuda\"], \"cuda\": {\"requires\": [\"runtime capability\", \"measured cost benefit\", \"provider contract\"], \"fallback\": \"cpu\"}, \"decision\": {\"status\": \"" << (has_decision ? "verified" : "deferred") << "\", \"provider\": " << quote(selected_provider) << ", \"representation\": " << quote(representation) << ", \"reason\": " << quote(decision_reason) << "}},\n"

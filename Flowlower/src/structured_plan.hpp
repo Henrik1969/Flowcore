@@ -131,7 +131,7 @@ inline std::string slot(int symbol) { return "%flow_slot_" + std::to_string(symb
 class Emitter {
 public:
     Emitter(const Json& root, const Json& binding) : root_(root), binding_(binding) { load(); }
-    bool applicable() const { return has_branch_ && !invalid_control_ && !unsupported_ && !operations_.empty(); }
+    bool applicable() const { return (has_branch_ || has_declared_carrier_) && !invalid_control_ && !unsupported_ && !operations_.empty(); }
     bool requires_structured_control() const { return has_nonroot_block_ && !unsupported_; }
     std::string emit() {
         authorize();
@@ -152,16 +152,29 @@ private:
     std::map<int, std::vector<const Operation*>> blocks_;
     std::map<int, std::string> symbol_types_;
     std::map<int, const Json*> definitions_;
+    std::map<std::string, std::string> carrier_representations_;
     std::set<Provider> providers_, authorized_;
-    bool has_branch_ = false, has_nonroot_block_ = false, invalid_control_ = false, unsupported_ = false, uses_args_ = false;
+    bool has_branch_ = false, has_declared_carrier_ = false, has_nonroot_block_ = false, invalid_control_ = false, unsupported_ = false, uses_args_ = false;
     int temporary_ = 0, label_ = 0;
 
     static Provider provider(const Json& value) {
         return {text(field(value,"contract")), text(field(value,"library")), text(field(value,"convention")),
                 text(field(value,"symbol")), text(field(value,"effect")), text(field(value,"parameter_types")), text(field(value,"return_type"))};
     }
+    std::string llvm_type(std::string_view carrier) const {
+        const auto builtin = flowlower::structured::llvm_type(carrier);
+        if (!builtin.empty()) return builtin;
+        const auto found = carrier_representations_.find(std::string{carrier});
+        if (found != carrier_representations_.end() && (found->second == "void*" || found->second == "const void*")) return "ptr";
+        return {};
+    }
     void load() {
         if (text(field(root_, "format")) != "flowoptimize.optimization_report" || integer(field(root_, "version"), "version") != 1) return;
+        for (const auto& item : array(field(root_, "abi_type_contracts"), "abi_type_contracts")) {
+            const auto name = text(field(item, "name"));
+            const auto representation = text(field(item, "repr"));
+            if (!name.empty() && !representation.empty()) carrier_representations_[name] = representation;
+        }
         const auto* plan = field(root_, "lowering_plan");
         if (!plan || text(field(*plan,"format")) != "flowcore.lowering_plan" || integer(field(*plan,"version"),"lowering_plan.version") != 1) return;
         for (const auto& item : array(field(*plan,"operations"), "lowering_plan.operations")) {
@@ -171,14 +184,20 @@ private:
             op.then_block=integer(field(item,"then_block_id"),"then_block_id"); op.else_block=integer(field(item,"else_block_id"),"else_block_id");
             op.body_block=integer(field(item,"body_block_id"),"body_block_id");
             const auto& operands=array(field(item,"operands"),"operation.operands"); if (!operands.empty()) op.operand=&operands.front();
-            if (const auto* facts=field(item,"provider")) { op.provider=provider(*facts); providers_.insert(*op.provider); if (op.result_symbol>=0) symbol_types_[op.result_symbol]=op.provider->result; }
+            if (const auto* facts=field(item,"provider")) {
+                op.provider=provider(*facts); providers_.insert(*op.provider);
+                if (flowlower::structured::llvm_type(op.provider->result).empty() && !llvm_type(op.provider->result).empty()) has_declared_carrier_=true;
+                for (const auto& carrier : carriers(op.provider->parameters))
+                    if (flowlower::structured::llvm_type(carrier).empty() && !llvm_type(carrier).empty()) has_declared_carrier_=true;
+                if (op.result_symbol>=0) symbol_types_[op.result_symbol]=op.provider->result;
+            }
             if (op.kind=="value_definition" && op.result_symbol>=0 && op.operand) { definitions_[op.result_symbol]=op.operand; symbol_types_[op.result_symbol]=text(field(*op.operand,"type")); }
             if (op.kind=="branch") {
                 has_branch_=true;
                 if (op.operand) {
                     const auto* left=field(*op.operand,"left");
                     const auto left_type=left?text(field(*left,"type")):std::string{};
-                    if (left_type=="c_string" || left_type=="c_pointer") unsupported_=true;
+                    if (llvm_type(left_type)=="ptr") unsupported_=true;
                 }
             }
             if (op.block!=0) has_nonroot_block_=true;
