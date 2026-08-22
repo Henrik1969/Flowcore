@@ -326,6 +326,12 @@
   registrations passed. The native arbitrary counter loop exited 4, its LLVM
   contains the reusable loop back-edge, and deleting the mutation operation
   caused structured refusal.
+- Independent sanitizer checkpoint: configured `/tmp/flowcore-reusable-chain-sanitize`
+  with `-fsanitize=address,undefined -fno-omit-frame-pointer`, built the complete
+  tree, and ran `ASAN_OPTIONS=detect_leaks=0 LSAN_OPTIONS=detect_leaks=0 ctest
+  --test-dir /tmp/flowcore-reusable-chain-sanitize --output-on-failure`.
+  **54/54** tests passed, including malformed-input fuzzing, native linking,
+  profile-free execution, terminal/resource, graph, and kernel gates.
 
 ## Remaining work
 
