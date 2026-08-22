@@ -99,4 +99,17 @@ set +e
 branch_rc=$?
 set -e
 test "$branch_rc" -eq 42
+
+compare_source="$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass/profile_free_branch_compare.flow"
+"$flowmini" --dump-frontend-bundle "$compare_source" | "$analyst" > "$tmpdir/compare.semantic.json"
+jq -e '.status == "ok" and .lowering_profile == "none" and any(.lowering_plan.operations[]; .kind == "branch" and .operands[0].operator == ">")' "$tmpdir/compare.semantic.json" >/dev/null
+"$parallel" < "$tmpdir/compare.semantic.json" | "$optimizer" > "$tmpdir/compare.optimized.json"
+"$lower" --emit-llvm "$tmpdir/compare.ll" < "$tmpdir/compare.optimized.json" > "$tmpdir/compare.lowering.json"
+grep -Fq 'icmp sgt i32 %flow_value_' "$tmpdir/compare.ll"
+clang "$tmpdir/compare.ll" -o "$tmpdir/compare"
+set +e
+"$tmpdir/compare"
+compare_rc=$?
+set -e
+test "$compare_rc" -eq 42
 printf '%s\n' 'Profile-free generic lowering: PASS'

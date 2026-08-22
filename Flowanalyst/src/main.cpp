@@ -685,7 +685,9 @@ int run(const Json& bundle) {
             std::cout << ",\"type\":" << quote(type) << ",\"symbol_id\":" << symbol;
         } else if (kind == "binary") {
             const auto* payload = field(expression, "payload");
-            std::cout << ",\"type\":\"c_int\",\"operator\":" << quote(text(field(payload, "operator"))) << ",\"left\":";
+            const auto operator_name = text(field(payload, "operator"));
+            const bool comparison = operator_name == "==" || operator_name == "!=" || operator_name == "<" || operator_name == "<=" || operator_name == ">" || operator_name == ">=";
+            std::cout << ",\"type\":" << (comparison ? "\"bool\"" : "\"c_int\"") << ",\"operator\":" << quote(operator_name) << ",\"left\":";
             emit_operand(integer(field(payload, "left")));
             std::cout << ",\"right\":";
             emit_operand(integer(field(payload, "right")));

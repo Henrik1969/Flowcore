@@ -63,6 +63,8 @@
 - Added generic boolean branch operations with explicit then/else block IDs.
   A profile-free conditional-return program now lowers to LLVM branches and
   executes the selected return path.
+- Extended branch conditions to source-derived integer comparisons. Local SSA
+  values can now feed an `icmp` predicate in a profile-free conditional ELF.
 
 ## Evidence
 
@@ -70,7 +72,8 @@
   and `native_binding_generation` passed.
 - Focused graph checkpoint: `flowcore_graph_routing` passed.
 - Current complete checkpoint: **54/54 CTest tests passed** after the namespace
-  ambiguity gate; the profile-free value-lowering gate is now also green.
+  ambiguity gate; the profile-free comparison-branch lowering gate is also
+  green and its native ELF returned the expected status 42.
 - Focused ncurses checkpoint: `ncurses_flow_pipeline`, `flow_less_pager`, and
   `flow_less_ncurses_pager` passed.
 
@@ -97,6 +100,6 @@
 
 ## Exact next action
 
-Next action: generalize Flowlower from the current profile-free scalar-call
-slice to generic result placement and simple value operations, then migrate one
-existing native example away from its source-name profile.
+Next action: generalize profile-free external-call result placement so a call's
+typed result symbol can feed later value and return operations, then migrate one
+existing scalar native example away from its source-name profile.

@@ -159,6 +159,30 @@ std::string emit_integer_expression(std::string_view expression, std::ostringstr
     return result;
 }
 
+std::string emit_boolean_expression(std::string_view expression, std::ostringstream& instructions, int& temporary, const std::map<int, std::string>& values) {
+    const auto kind = quoted_field(expression, "kind");
+    if (kind == "bool_literal") {
+        const auto value = quoted_field(expression, "value");
+        return value == "true" || value == "false" ? value : std::string{};
+    }
+    if (kind != "binary") return {};
+    const auto operator_name = quoted_field(expression, "operator");
+    std::string predicate;
+    if (operator_name == "==") predicate = "eq";
+    else if (operator_name == "!=") predicate = "ne";
+    else if (operator_name == "<") predicate = "slt";
+    else if (operator_name == "<=") predicate = "sle";
+    else if (operator_name == ">") predicate = "sgt";
+    else if (operator_name == ">=") predicate = "sge";
+    else return {};
+    const auto left = emit_integer_expression(object_field(expression, "left"), instructions, temporary, values);
+    const auto right = emit_integer_expression(object_field(expression, "right"), instructions, temporary, values);
+    if (left.empty() || right.empty()) return {};
+    const auto result = "%flow_cond" + std::to_string(temporary++);
+    instructions << "  " << result << " = icmp " << predicate << " i32 " << left << ", " << right << "\n";
+    return result;
+}
+
 std::string quote(std::string_view value) {
     std::string result = "\"";
     for (const char character : value) {
@@ -286,7 +310,11 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
     const auto else_operand = first_array_object(return_for_block(branch_else));
     const auto then_value = quoted_field(then_operand, "value");
     const auto else_value = quoted_field(else_operand, "value");
-    const bool generic_branch = profile_free_plan && generic_kind == "branch" && (branch_condition == "true" || branch_condition == "false") &&
+    std::ostringstream branch_condition_instructions;
+    const auto branch_condition_value = quoted_field(branch_operand, "kind") == "binary"
+        ? emit_boolean_expression(branch_operand, branch_condition_instructions, generic_expression_temporary, generic_values)
+        : branch_condition;
+    const bool generic_branch = profile_free_plan && generic_kind == "branch" && !branch_condition_value.empty() &&
         valid_integer_literal(then_value) && valid_integer_literal(else_value) && !branch_then.empty() && !branch_else.empty();
     const bool generic_zero_arg = generic_parameters.empty() && has(first_operation, "\"arguments\":[]");
     const bool generic_one_int_arg = generic_parameters == "c_int" && operand_kind == "integer_literal" && operand_type == "c_int" && !operand_value.empty();
@@ -334,7 +362,9 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
                     "target triple = \"x86_64-pc-linux-gnu\"\n"
                     "define i32 @main() {\n"
                     "entry:\n"
-                 << "  br i1 " << (branch_condition == "true" ? "true" : "false") << ", label %then, label %else\n"
+                 << generic_expression_instructions.str()
+                 << branch_condition_instructions.str()
+                 << "  br i1 " << branch_condition_value << ", label %then, label %else\n"
                     "then:\n"
                  << "  ret i32 " << then_value << "\n"
                     "else:\n"
