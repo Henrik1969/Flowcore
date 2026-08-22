@@ -10,10 +10,9 @@ main(args : list<string>) {
     flags : c_int(0)
     stdout_fd : c_int(1)
     fd : c_int(-1)
-    buffer : c_pointer(4096)
-    capacity : c_size_t(4096)
+    offset : c_pointer(0)
+    capacity : c_size_t(1048576)
     count : c_long(0)
-    written : c_long(0)
     closed : c_int(0)
 
     while index < argument_count {
@@ -22,15 +21,9 @@ main(args : list<string>) {
         if fd < zero {
             one -> return
         }
-        read(fd, buffer, capacity) -> count
+        sendfile(stdout_fd, fd, offset, capacity) -> count
         while count > zero {
-            write_count : c_size_t(count)
-            write(stdout_fd, buffer, write_count) -> written
-            if written < zero {
-                close(fd) -> closed
-                one -> return
-            }
-            read(fd, buffer, capacity) -> count
+            sendfile(stdout_fd, fd, offset, capacity) -> count
         }
         if count < zero {
             close(fd) -> closed

@@ -101,7 +101,7 @@ struct Provider {
     bool operator<(const Provider& other) const { return tie() < other.tie(); }
 };
 struct Operation {
-    int id = -1, statement = -1, block = -1, result_symbol = -1, then_block = -1, else_block = -1;
+    int id = -1, statement = -1, block = -1, result_symbol = -1, then_block = -1, else_block = -1, body_block = -1;
     std::string kind;
     const Json* operand = nullptr;
     std::optional<Provider> provider;
@@ -131,7 +131,7 @@ inline std::string slot(int symbol) { return "%flow_slot_" + std::to_string(symb
 class Emitter {
 public:
     Emitter(const Json& root, const Json& binding) : root_(root), binding_(binding) { load(); }
-    bool applicable() const { return has_branch_ && !unsupported_ && !operations_.empty(); }
+    bool applicable() const { return has_branch_ && !invalid_control_ && !unsupported_ && !operations_.empty(); }
     bool requires_structured_control() const { return has_nonroot_block_ && !unsupported_; }
     std::string emit() {
         authorize();
@@ -153,7 +153,7 @@ private:
     std::map<int, std::string> symbol_types_;
     std::map<int, const Json*> definitions_;
     std::set<Provider> providers_, authorized_;
-    bool has_branch_ = false, has_nonroot_block_ = false, unsupported_ = false, uses_args_ = false;
+    bool has_branch_ = false, has_nonroot_block_ = false, invalid_control_ = false, unsupported_ = false, uses_args_ = false;
     int temporary_ = 0, label_ = 0;
 
     static Provider provider(const Json& value) {
@@ -169,6 +169,7 @@ private:
             op.block=integer(field(item,"block_id"),"block_id"); op.kind=text(field(item,"kind"));
             op.result_symbol=integer(field(item,"result_symbol_id"),"result_symbol_id");
             op.then_block=integer(field(item,"then_block_id"),"then_block_id"); op.else_block=integer(field(item,"else_block_id"),"else_block_id");
+            op.body_block=integer(field(item,"body_block_id"),"body_block_id");
             const auto& operands=array(field(item,"operands"),"operation.operands"); if (!operands.empty()) op.operand=&operands.front();
             if (const auto* facts=field(item,"provider")) { op.provider=provider(*facts); providers_.insert(*op.provider); if (op.result_symbol>=0) symbol_types_[op.result_symbol]=op.provider->result; }
             if (op.kind=="value_definition" && op.result_symbol>=0 && op.operand) { definitions_[op.result_symbol]=op.operand; symbol_types_[op.result_symbol]=text(field(*op.operand,"type")); }
@@ -181,12 +182,29 @@ private:
                 }
             }
             if (op.block!=0) has_nonroot_block_=true;
-            if (op.kind=="loop" || op.kind=="assignment") unsupported_=true;
-            if (op.kind!="call" && op.kind!="external_call" && op.kind!="value_definition" && op.kind!="branch" && op.kind!="return_value") unsupported_=true;
+            if (op.kind!="call" && op.kind!="external_call" && op.kind!="value_definition" && op.kind!="branch" && op.kind!="return_value" && op.kind!="loop" && op.kind!="assignment") unsupported_=true;
             operations_.push_back(std::move(op));
         }
         for (auto& op:operations_) if (op.kind!="call") blocks_[op.block].push_back(&op);
-        for (auto& [block, ops]:blocks_) std::stable_sort(ops.begin(),ops.end(),[](auto* a,auto* b){ return a->statement < b->statement || (a->statement==b->statement && a->id<b->id); });
+        std::map<int,int> block_start;
+        for (const auto& [block,ops]:blocks_) for (const auto* op:ops)
+            if (op->kind!="loop" && (!block_start.count(block) || op->statement<block_start[block])) block_start[block]=op->statement;
+        for (auto& [block, ops]:blocks_) std::stable_sort(ops.begin(),ops.end(),[&](auto* a,auto* b){
+            const int a_statement=a->kind=="loop"&&block_start.count(a->body_block)?block_start[a->body_block]:a->statement;
+            const int b_statement=b->kind=="loop"&&block_start.count(b->body_block)?block_start[b->body_block]:b->statement;
+            return a_statement < b_statement || (a_statement==b_statement && a->id<b->id);
+        });
+        std::set<int> reachable{0};
+        bool changed=true;
+        while(changed) {
+            changed=false;
+            const auto snapshot=reachable;
+            for(int block:snapshot) for(const auto* op:blocks_[block]) {
+                const int children[]={op->then_block,op->else_block,op->body_block};
+                for(int child:children) if(child>=0 && reachable.insert(child).second) changed=true;
+            }
+        }
+        for(const auto& [block,ops]:blocks_) if(!ops.empty()&&!reachable.count(block)) invalid_control_=true;
         if (text(field(binding_,"format"))=="flowbind.binding_report" && text(field(binding_,"status"))=="ready")
             for (const auto& item:array(field(binding_,"capabilities"),"binding.capabilities")) if (text(field(item,"status"))=="authorized") authorized_.insert(provider(item));
         for (const auto& [symbol, definition]:definitions_) {
@@ -239,7 +257,14 @@ private:
             if (llvm_type(type)=="ptr" && literal=="0") return {"ptr","null"};
             return {llvm_type(type),literal};
         }
-        if(kind=="identifier") { const int symbol=integer(field(value,"symbol_id"),"symbol_id"); return {llvm_type(symbol_types_[symbol]),load_symbol(symbol,out)}; }
+        if(kind=="identifier") {
+            const int symbol=integer(field(value,"symbol_id"),"symbol_id"); const auto native_type=llvm_type(symbol_types_[symbol]); auto loaded=load_symbol(symbol,out);
+            const auto wanted=expected.empty()?native_type:llvm_type(expected); if(wanted==native_type) return {native_type,loaded};
+            const auto converted="%flow_promote_"+std::to_string(temporary_++);
+            if(native_type=="i32"&&wanted=="i64") out<<"  "<<converted<<" = sext i32 "<<loaded<<" to i64\n";
+            else if(native_type=="i64"&&wanted=="i32") out<<"  "<<converted<<" = trunc i64 "<<loaded<<" to i32\n"; else return {};
+            return {wanted,converted};
+        }
         if(kind=="call" && text(field(value,"intrinsic"))=="list_length") return {"i32","%argc"};
         if(kind=="index" && text(field(value,"intrinsic"))=="list_index") {
             const auto [index_type,index_value]=expression(*field(value,"index"),out,"c_int");
@@ -255,12 +280,22 @@ private:
             else if(from_type=="i32"&&to=="i64") out<<"  "<<result<<" = sext i32 "<<from<<" to i64\n"; else return {};
             return {to,result};
         }
+        if(kind=="unary") {
+            auto [operand_type,operand]=expression(*field(value,"operand"),out,type); const auto op=text(field(value,"operator"));
+            if(op=="+") return {operand_type,operand};
+            if(op!="-") return {};
+            const auto result="%flow_unary_"+std::to_string(temporary_++); out<<"  "<<result<<" = sub "<<operand_type<<" 0, "<<operand<<"\n"; return {operand_type,result};
+        }
         if(kind=="binary") {
             auto [left_type,left]=expression(*field(value,"left"),out); auto [right_type,right]=expression(*field(value,"right"),out,text(field(*field(value,"left"),"type")));
             const auto op=text(field(value,"operator")); std::string instruction;
             if(op=="==")instruction="eq"; else if(op=="!=")instruction="ne"; else if(op=="<")instruction="slt"; else if(op=="<=")instruction="sle"; else if(op==">")instruction="sgt"; else if(op==">=")instruction="sge";
-            if(instruction.empty()||left.empty()||right.empty()||left_type!=right_type) return {};
-            const auto result="%flow_condition_"+std::to_string(temporary_++); out<<"  "<<result<<" = icmp "<<instruction<<" "<<left_type<<" "<<left<<", "<<right<<"\n"; return {"i1",result};
+            if(!instruction.empty()&&!left.empty()&&!right.empty()&&left_type==right_type) {
+                const auto result="%flow_condition_"+std::to_string(temporary_++); out<<"  "<<result<<" = icmp "<<instruction<<" "<<left_type<<" "<<left<<", "<<right<<"\n"; return {"i1",result};
+            }
+            if(op=="+")instruction="add"; else if(op=="-")instruction="sub"; else if(op=="*")instruction="mul"; else if(op=="/")instruction="sdiv"; else return {};
+            if(left.empty()||right.empty()||left_type!=right_type) return {};
+            const auto result="%flow_arithmetic_"+std::to_string(temporary_++); out<<"  "<<result<<" = "<<instruction<<" "<<left_type<<" "<<left<<", "<<right<<"\n"; return {left_type,result};
         }
         return {};
     }
@@ -285,6 +320,16 @@ private:
                 const auto join="flow_join_"+std::to_string(label_++); const auto then_label="flow_block_"+std::to_string(op->then_block); const auto else_label=op->else_block>=0?"flow_block_"+std::to_string(op->else_block):join;
                 out<<"  br i1 "<<condition<<", label %"<<then_label<<", label %"<<else_label<<"\n";
                 emit_block(op->then_block,out,join); if(op->else_block>=0) emit_block(op->else_block,out,join); out<<join<<":\n";
+            } else if(op->kind=="loop") {
+                const auto condition_label="flow_loop_condition_"+std::to_string(label_++), exit_label="flow_loop_exit_"+std::to_string(label_++);
+                out<<"  br label %"<<condition_label<<"\n"<<condition_label<<":\n";
+                auto [type,condition]=expression(*op->operand,out); if(type!="i1"||condition.empty()) throw std::runtime_error("unsupported structured loop condition");
+                out<<"  br i1 "<<condition<<", label %flow_block_"<<op->body_block<<", label %"<<exit_label<<"\n";
+                emit_block(op->body_block,out,condition_label); out<<exit_label<<":\n";
+            } else if(op->kind=="assignment") {
+                auto [type,value]=expression(*op->operand,out); const auto target=symbol_types_.find(op->result_symbol);
+                if(target==symbol_types_.end()||type!=llvm_type(target->second)||value.empty()) throw std::runtime_error("unsupported structured assignment");
+                out<<"  store "<<type<<" "<<value<<", ptr "<<slot(op->result_symbol)<<"\n";
             } else if(op->kind=="return_value") {
                 auto [type,value]=expression(*op->operand,out,"c_int"); if(type!="i32"||value.empty()) throw std::runtime_error("unsupported structured return"); out<<"  ret i32 "<<value<<"\n"; terminated=true;
             }

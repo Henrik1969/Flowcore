@@ -18,23 +18,24 @@ The source declares the canonical typed entry point:
 ```flow
 main(args : list<string>) {
     while index < length(args) {
-        open/read/write/close the source-selected path
+        open/sendfile/close the source-selected path
     }
 }
 ```
 
-The real source spells out argv traversal, bounded storage, external calls,
-error branches, and return values; the abbreviated snippet above only shows
-the shape. Each process argument after the executable name is a path. The
-explicit `file_io` ABI contract authorizes
-`open`, `read`, `write`, and `close` through the adjacent `policy.conf`;
+The real source spells out argv traversal, nested transfer loops, external
+calls, error branches, cleanup, mutation, and return values; the abbreviated
+snippet above only shows the shape. Each process argument after the executable
+name is a path. The explicit `file_io` ABI contract authorizes
+`open`, `sendfile`, and `close` through the adjacent `policy.conf`;
 Flowbind verifies the exact C symbols before LLVM is emitted. The generated
-program reads each file in bounded chunks and writes the bytes to stdout.
+program transfers each file in bounded chunks to stdout. A short transfer
+advances the kernel-managed input offset and the Flow loop continues, avoiding
+implicit pointer arithmetic.
 
-The current gate rejects an open failure, read failure, close failure, or
-short/failed write with exit status 1. It does not yet preserve errno details,
-metadata, file permissions, or a configurable buffer size; those belong to
-later capability slices.
+The current gate rejects an open, transfer, or close failure with exit status
+1. It does not yet preserve errno details, metadata, file permissions, or a
+configurable transfer size; `sendfile` also makes this example Linux-specific.
 
 ## Run it
 

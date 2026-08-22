@@ -12,7 +12,7 @@ symbol exported by glibc or every platform ABI.
 | Module | Role | Current evidence | Status |
 |---|---|---|---|
 | `std/abi/libc.flow` | C string, scalar, and basic output calls | `strlen`, `abs`, `labs`, and `puts` are resolved through exact `libc.so.6` grants and emitted as authorized capability records | ready |
-| `std/abi/file_io.flow` | C file descriptor I/O | `open`, `read`, `write`, and `close` are resolved through exact grants; `flowcat` lowers through the capability-sequence profile | ready, narrow |
+| `std/abi/file_io.flow` | C file descriptor I/O | `open`, `read`, `write`, `sendfile`, and `close` resolve through exact grants; `flowcat` uses generic typed-plan loops, branches, mutation, and calls | ready, Linux-specific `sendfile` example |
 | `std/abi/memory.flow` | Bounded C memory operations | `memcpy`, `memset`, and `memcmp` resolve through exact `libc.so.6` grants and are emitted as authorized capability records; pointer execution remains outside this gate | binding-ready, lowering deferred |
 | `std/abi/kernel.flow` | Current Flowkernel communication matrix | all 32 symbols resolve through exact effect-aware grants and have individual narrow executable profiles with safe probes; process identity and priority queries are authorized through exact provider contracts and executable proofs | executable boundary verified; 32/32 |
 | `std/abi/pointers.flow` | Borrowed buffers and opaque-handle contracts | all three type contracts parse and appear in the symbol inventory; no external call is implied by the type-only module | declaration-only |
@@ -37,8 +37,8 @@ status instead of reducing the result to a list of symbol names.
 ## What is and is not claimed
 
 The ready boundary is sufficient for the current real integration example:
-`flowcat` reads files through declared libc capabilities and emits a native
-ELF artifact. It is not a promise that arbitrary Flow code can call arbitrary
+`flowcat` transfers files through declared libc capabilities and emits a native
+ELF artifact without an application-specific emitter. It is not a promise that arbitrary Flow code can call arbitrary
 native functions, pass arbitrary aggregates, or use the whole host C library.
 
 The struct provider remains visible and tested as a deliberate partial case.

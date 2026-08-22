@@ -124,12 +124,11 @@ printf '%s\n' "$flowcat_report" | jq -e '
   .lowering_profile == "none" and
   ([.lowering_plan.operations[] | select(.kind == "loop")] | length) == 2 and
   any(.lowering_plan.operations[]; .kind == "assignment") and
-  any(.lowering_plan.operations[].operands[]?; .kind == "conversion" and .from_type == "c_long" and .type == "c_size_t")
+  any(.lowering_plan.operations[]; .kind == "external_call" and .provider.symbol == "sendfile")
 ' >/dev/null
 printf '%s\n' "$flowcat_report" | grep -q '"name":"args"'
 printf '%s\n' "$flowcat_report" | grep -q '"symbol":"open"'
-printf '%s\n' "$flowcat_report" | grep -q '"symbol":"read"'
-printf '%s\n' "$flowcat_report" | grep -q '"symbol":"write"'
+printf '%s\n' "$flowcat_report" | grep -q '"symbol":"sendfile"'
 printf '%s\n' "$flowcat_report" | grep -q '"symbol":"close"'
 
 bad_field_fixture="$root/Flowmini/flowmini_v25_symboltable_projection/examples/fail/bad_record_no_such_field.flow"

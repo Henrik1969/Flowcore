@@ -19,6 +19,7 @@ printf '%s\n' \
   'allow libc.so.6 open c io' \
   'allow libc.so.6 read c io' \
   'allow libc.so.6 write c io' \
+  'allow libc.so.6 sendfile c io' \
   'allow libc.so.6 close c io' \
   'allow libc.so.6 flowcore_symbol_that_does_not_exist c pure' > "$policy"
 
@@ -38,9 +39,9 @@ printf '%s\n' "$wrong_signature" | grep -q 'denied by capability policy'
 file_fixture=$root/Flowmini/flowmini_v25_symboltable_projection/examples/apps/flowcat/flowcat.flow
 file_semantic=$("$flowmini" --dump-frontend-bundle "$file_fixture" | "$flowanalyst")
 file_report=$(printf '%s\n' "$file_semantic" | "$bin" --policy "$policy")
-printf '%s\n' "$file_report" | jq -e '.status == "ready" and .lowering_profile == "none" and (.symbols | index("open")) != null and (.symbols | index("read")) != null and (.symbols | index("write")) != null and (.symbols | index("close")) != null' >/dev/null
+printf '%s\n' "$file_report" | jq -e '.status == "ready" and .lowering_profile == "none" and (.symbols | index("open")) != null and (.symbols | index("sendfile")) != null and (.symbols | index("close")) != null' >/dev/null
 
-hostile_file_semantic=$(printf '%s\n' "$file_semantic" | jq '(.lowering_plan.operations[] | select(.provider.symbol == "write") | .operands[2].type) = "c_long"')
+hostile_file_semantic=$(printf '%s\n' "$file_semantic" | jq '(.lowering_plan.operations[] | select(.provider.symbol == "sendfile") | .operands[3].type) = "c_long"')
 set +e
 printf '%s\n' "$hostile_file_semantic" | "$bin" --policy "$policy" >/dev/null 2>&1
 hostile_file_rc=$?

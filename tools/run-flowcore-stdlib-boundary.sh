@@ -20,6 +20,7 @@ printf '%s\n' \
   'allow libc.so.6 open c io' \
   'allow libc.so.6 read c io' \
   'allow libc.so.6 write c io' \
+  'allow libc.so.6 sendfile c io' \
   'allow libc.so.6 close c io' \
   'allow libc.so.6 memcpy c io' \
   'allow libc.so.6 memset c io' \
@@ -69,7 +70,7 @@ check_module() {
 }
 
 check_module libc c_string strlen abs labs puts
-check_module file_io c_pointer open read write close
+check_module file_io c_pointer open read write sendfile close
 check_module pointers c_buffer_read c_buffer_mut c_opaque_handle
 check_module memory c_pointer memcpy memset memcmp
 check_module kernel c_pointer getpid getuid getgid geteuid getegid getppid getpgrp getpgid getsid getpriority clock_gettime uname getrandom openat read write lseek unlinkat rmdir pipe2 fork waitpid socketpair socket bind listen poll accept4 connect unshare sethostname gethostname
@@ -103,7 +104,7 @@ flowcat_fixture="$root/Flowmini/flowmini_v25_symboltable_projection/examples/app
 jq -e '
     .status == "ready" and
     .lowering_profile == "none" and
-    ([.capabilities[].symbol] | sort) == ["close", "open", "read", "write"]
+    ([.capabilities[].symbol] | sort) == ["close", "open", "sendfile"]
 ' "$tmpdir/flowcat.binding.json" >/dev/null
 
 memory_fixture="$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass/abi_memory_demo.flow"

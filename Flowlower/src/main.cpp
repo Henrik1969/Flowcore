@@ -250,33 +250,6 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
     const auto lowering_plan = object_field(report, "lowering_plan");
     const auto plan_operations = array_field(lowering_plan, "operations");
     const auto operation_objects = array_objects(plan_operations);
-    std::set<std::string> plan_external_symbols;
-    for (const auto& operation : operation_objects) {
-        if (quoted_field(operation, "kind") != "external_call") continue;
-        const auto symbol = quoted_field(object_field(operation, "provider"), "symbol");
-        if (!symbol.empty()) plan_external_symbols.insert(symbol);
-    }
-    const std::set<std::string> file_copy_symbols = {"open", "read", "write", "close"};
-    bool file_copy_plan = profile_free_plan;
-    for (const auto& symbol : file_copy_symbols) if (!plan_external_symbols.count(symbol)) file_copy_plan = false;
-    int file_copy_loops = 0;
-    bool file_copy_dynamic_argument = false;
-    bool file_copy_storage = false;
-    bool file_copy_index_assignment = false;
-    for (const auto& operation : operation_objects) {
-        const auto kind = quoted_field(operation, "kind");
-        if (kind == "loop") ++file_copy_loops;
-        if (kind == "assignment" && quoted_field(first_array_object(array_field(operation, "operands")), "operator") == "+")
-            file_copy_index_assignment = true;
-        for (const auto& operand : array_objects(array_field(operation, "operands"))) {
-            if (quoted_field(operand, "intrinsic") == "list_index" &&
-                quoted_field(object_field(operand, "index"), "kind") == "identifier") file_copy_dynamic_argument = true;
-            if (quoted_field(operand, "kind") == "writable_storage" &&
-                numeric_field(object_field(operand, "storage"), "bytes") == "4096") file_copy_storage = true;
-        }
-    }
-    file_copy_plan = file_copy_plan && file_copy_loops >= 2 && file_copy_dynamic_argument &&
-        file_copy_storage && file_copy_index_assignment;
     const auto structured_llvm = binding_report.empty()
         ? std::optional<std::string>{}
         : flowlower::structured::emit(report, binding_report);
@@ -630,13 +603,6 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
         !nullable_consumer_symbol.empty() && !nullable_then_argument.empty() && !nullable_else_argument.empty() &&
         ((nullable_then_argument == nullable_result_symbol && generic_values.count(std::stoi(nullable_else_argument))) ||
          (nullable_else_argument == nullable_result_symbol && generic_values.count(std::stoi(nullable_then_argument))));
-    if (file_copy_plan) {
-        if (binding_report.empty() || (!has(binding_report, "\"status\": \"ready\"") && !has(binding_report, "\"status\":\"ready\"")))
-            throw std::runtime_error("file-copy plan is not authorized");
-        for (const auto& symbol : file_copy_symbols)
-            if (!has(binding_report, "\"symbol\":" + quote(symbol)) && !has(binding_report, "\"symbol\": " + quote(symbol)))
-                throw std::runtime_error("file-copy operation is not authorized: " + symbol);
-    }
     if (!llvm_path.empty() && (generic_external_scalar || generic_external_long || generic_external_ulong || generic_external_size_return || generic_external_result_return || generic_external_result_branch) &&
         (binding_report.empty() || (!has(binding_report, "\"status\": \"ready\"") && !has(binding_report, "\"status\":\"ready\"")) ||
          (!has(binding_report, "\"symbol\":" + quote(external_symbol)) && !has(binding_report, "\"symbol\": " + quote(external_symbol))))) throw std::runtime_error("generic lowering operation is not authorized");
@@ -648,7 +614,7 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
         if (binding_report.empty() || (!has(binding_report, "\"status\": \"ready\"") && !has(binding_report, "\"status\":\"ready\""))) throw std::runtime_error("generic nullable string lowering is not authorized");
         for (const auto& symbol : nullable_authorized_symbols) if (!has(binding_report, "\"symbol\":" + quote(symbol)) && !has(binding_report, "\"symbol\": " + quote(symbol))) throw std::runtime_error("generic nullable string operation is not authorized: " + symbol);
     }
-    if (!llvm_path.empty() && !structured_llvm && !generic_external_scalar && !generic_external_long && !generic_external_ulong && !generic_external_size_return && !generic_scalar_sequence && !generic_return_value && !generic_branch && !generic_integer_loop && !nullable_string_branch && !generic_empty_plan && !file_copy_plan) throw std::runtime_error("LLVM emission requires a supported generic lowering plan");
+    if (!llvm_path.empty() && !structured_llvm && !generic_external_scalar && !generic_external_long && !generic_external_ulong && !generic_external_size_return && !generic_scalar_sequence && !generic_return_value && !generic_branch && !generic_integer_loop && !nullable_string_branch && !generic_empty_plan) throw std::runtime_error("LLVM emission requires a supported generic lowering plan");
     if (!llvm_path.empty()) {
         std::ofstream llvm(llvm_path); if (!llvm) throw std::runtime_error("cannot open LLVM output");
         llvm << "; Flowcore target artifact: " << selected_target << "\n";
@@ -795,64 +761,6 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
                     "  ret i32 0\n"
                     "error:\n"
                     "  ret i32 1\n"
-                    "}\n";
-        } else if (file_copy_plan) {
-            llvm << "; Flowcore structured file-copy plan: argv -> open/read/write/close\n"
-                    "target triple = \"x86_64-pc-linux-gnu\"\n"
-                    "declare i32 @open(ptr, i32)\n"
-                    "declare i64 @read(i32, ptr, i64)\n"
-                    "declare i64 @write(i32, ptr, i64)\n"
-                    "declare i32 @close(i32)\n"
-                    "declare i32 @__errno_location()\n"
-                    "define i32 @main(i32 %argc, ptr %argv) {\n"
-                    "entry:\n"
-                    "  %has_args = icmp sgt i32 %argc, 1\n"
-                    "  br i1 %has_args, label %next_file, label %done\n"
-                    "next_file:\n"
-                    "  %index = phi i32 [1, %entry], [%next_index, %next_after_close]\n"
-                    "  %slot = getelementptr ptr, ptr %argv, i32 %index\n"
-                    "  %path = load ptr, ptr %slot\n"
-                    "  %fd = call i32 @open(ptr %path, i32 0)\n"
-                    "  %opened = icmp sge i32 %fd, 0\n"
-                    "  br i1 %opened, label %read_file, label %error\n"
-                    "read_file:\n"
-                    "  %buffer = alloca [4096 x i8], align 16\n"
-                    "  %data = getelementptr [4096 x i8], ptr %buffer, i32 0, i32 0\n"
-                    "  br label %read_loop\n"
-                    "read_loop:\n"
-                    "  %count = call i64 @read(i32 %fd, ptr %data, i64 4096)\n"
-                    "  %has_data = icmp sgt i64 %count, 0\n"
-                    "  %eof = icmp eq i64 %count, 0\n"
-                    "  br i1 %has_data, label %write_loop, label %read_result\n"
-                    "read_result:\n"
-                    "  br i1 %eof, label %close_file, label %error_close\n"
-                    "write_loop:\n"
-                    "  %remaining = phi i64 [%count, %read_loop], [%remaining_after, %write_progress]\n"
-                    "  %offset = phi i64 [0, %read_loop], [%next_offset, %write_progress]\n"
-                    "  %write_data = getelementptr i8, ptr %data, i64 %offset\n"
-                    "  %written = call i64 @write(i32 1, ptr %write_data, i64 %remaining)\n"
-                    "  %write_ok = icmp sgt i64 %written, 0\n"
-                    "  br i1 %write_ok, label %write_progress, label %error_close\n"
-                    "write_progress:\n"
-                    "  %remaining_after = sub i64 %remaining, %written\n"
-                    "  %next_offset = add i64 %offset, %written\n"
-                    "  %more_output = icmp sgt i64 %remaining_after, 0\n"
-                    "  br i1 %more_output, label %write_loop, label %read_loop\n"
-                    "close_file:\n"
-                    "  %closed = call i32 @close(i32 %fd)\n"
-                    "  %close_ok = icmp sge i32 %closed, 0\n"
-                    "  br i1 %close_ok, label %next_after_close, label %error\n"
-                    "next_after_close:\n"
-                    "  %next_index = add i32 %index, 1\n"
-                    "  %more = icmp slt i32 %next_index, %argc\n"
-                    "  br i1 %more, label %next_file, label %done\n"
-                    "error_close:\n"
-                    "  call i32 @close(i32 %fd)\n"
-                    "  br label %error\n"
-                    "error:\n"
-                    "  ret i32 1\n"
-                    "done:\n"
-                    "  ret i32 0\n"
                     "}\n";
         } else if (generic_empty_plan) llvm << "; Flowcore generic lowering plan: empty program\n"
                 "target triple = \"x86_64-pc-linux-gnu\"\n"

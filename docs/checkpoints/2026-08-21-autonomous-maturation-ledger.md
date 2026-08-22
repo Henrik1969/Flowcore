@@ -231,6 +231,18 @@
 - Documented the temporary `c_pointer(N)` writable-allocation interpretation
   and the explicit public-language choice among bounded buffer, storage
   declaration, and allocation-operation designs.
+- Extended typed structured lowering with nested loops, assignments, dynamic
+  argv indices, integer promotion/conversion, loop-carried external results,
+  cleanup branches, early returns, and reachability validation. Removing a
+  controlling loop now rejects the plan instead of silently dropping child
+  blocks.
+- Removed the transitional file-copy capability recognizer and handwritten LLVM
+  emitter. `flowcat` now uses only generic typed-plan machinery and an explicit
+  Flow `sendfile` loop; short transfers advance the kernel-managed input offset
+  and continue without invented pointer arithmetic.
+- Added `sendfile` to the provider contract and exact policy boundary without
+  adding any compiler dispatch. The arbitrary renamed copy and a two-megabyte
+  multi-iteration native transfer pass with the already-built toolchain.
 
 ## Evidence
 
@@ -361,14 +373,19 @@
   unused-capability independence.
 - Canonical post-terminal checkpoint: the complete build succeeded and
   **54/54** CTest tests passed in 19.35 seconds.
+- Focused reusable file-loop checkpoint: `flowanalyst_pipeline`,
+  `flowbind_provider`, `flowcore_stdlib_boundary`,
+  `flowcat_flowcore_pipeline`, `flowlower_pipeline`,
+  `profile_free_generic_lowering`, and `sel_tui_pipeline` passed. Native tests
+  copied two small files and a two-megabyte file exactly, rejected a missing
+  file, retained cleanup/error returns, and rejected a plan with removed loops.
+- Canonical post-file-emitter checkpoint: the complete build succeeded and
+  **54/54** CTest tests passed in 17.96 seconds.
 
 ## Remaining work
 
 - The unqualified single-provider import alias remains explicitly transitional;
   selective-opening syntax is not yet part of the language.
-- Replace the transitional structured file-copy emitter with reusable loop,
-  mutation, dynamic-index, and failure-control-flow LLVM emission. No current
-  native example selects a compiler path by application identity.
 - Expand effects into external effect, argument-memory effect, determinism,
   resource, ownership, nullability, and lifetime facts.
 - Model typed ncurses session/window resources.
@@ -385,7 +402,6 @@
 
 ## Exact next action
 
-Next action: extend the typed structured emitter with loop and assignment
-operations, dynamic argv indexing, and reusable loop-carried values, then retire
-the transitional file-copy emitter without losing partial-write, cleanup, or
-error behavior.
+Next action: expand external effect facts into argument-memory effects,
+determinism, ownership, nullability, resource lifetime, and cleanup evidence;
+then propagate and diagnose typed ncurses session/window resources end to end.

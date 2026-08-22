@@ -77,6 +77,7 @@ printf '%s\n' \
     'allow libc.so.6 open c io' \
     'allow libc.so.6 read c io' \
     'allow libc.so.6 write c io' \
+    'allow libc.so.6 sendfile c io' \
     'allow libc.so.6 close c io' > "$policy"
 abs_source="$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass/abi_abs_main.flow"
 "$flowmini" --dump-frontend-bundle "$abs_source" > "$tmpdir/abs.bundle.json"
@@ -452,13 +453,12 @@ done
 flowcat_source="$root/Flowmini/flowmini_v25_symboltable_projection/examples/apps/flowcat/flowcat.flow"
 "$flowmini" --dump-frontend-bundle "$flowcat_source" > "$tmpdir/flowcat.bundle.json"
 "$analyst" < "$tmpdir/flowcat.bundle.json" > "$tmpdir/flowcat.semantic.json"
-jq -e '.lowering_profile == "none" and ([.lowering_plan.operations[] | select(.kind == "loop")] | length) == 2 and any(.lowering_plan.operations[]; .kind == "assignment") and any(.lowering_plan.operations[].operands[]?; .kind == "conversion" and .from_type == "c_long" and .type == "c_size_t")' "$tmpdir/flowcat.semantic.json" >/dev/null
+jq -e '.lowering_profile == "none" and ([.lowering_plan.operations[] | select(.kind == "loop")] | length) == 2 and any(.lowering_plan.operations[]; .kind == "assignment") and any(.lowering_plan.operations[]; .kind == "external_call" and .provider.symbol == "sendfile")' "$tmpdir/flowcat.semantic.json" >/dev/null
 "$bind" --policy "$policy" < "$tmpdir/flowcat.semantic.json" > "$tmpdir/flowcat.binding.json"
 "$parallel" < "$tmpdir/flowcat.semantic.json" > "$tmpdir/flowcat.parallel.json"
 "$optimizer" < "$tmpdir/flowcat.parallel.json" > "$tmpdir/flowcat.optimized.json"
 
-# File capabilities without the source loop are not an executable file-copy
-# contract, and must not select the transitional structured emitter.
+# Removing source loops leaves child blocks unreachable and must be rejected.
 jq '.lowering_plan.operations |= map(select(.kind != "loop"))' "$tmpdir/flowcat.optimized.json" > "$tmpdir/flowcat-loopless.optimized.json"
 if "$lowerer" --emit-llvm "$tmpdir/flowcat-loopless.ll" --binding-report "$tmpdir/flowcat.binding.json" < "$tmpdir/flowcat-loopless.optimized.json" >/dev/null 2>&1; then
     echo 'file-copy lowering accepted a capability set without source loops' >&2
@@ -467,12 +467,15 @@ fi
 
 "$lowerer" --emit-llvm "$tmpdir/flowcat.ll" --binding-report "$tmpdir/flowcat.binding.json" < "$tmpdir/flowcat.optimized.json" > "$tmpdir/flowcat.lowering.json"
 grep -q '"status": "emitted"' "$tmpdir/flowcat.lowering.json"
-grep -q 'structured file-copy plan' "$tmpdir/flowcat.ll"
+grep -q 'generic structured lowering plan' "$tmpdir/flowcat.ll"
 clang "$tmpdir/flowcat.ll" -o "$tmpdir/flowcat"
 printf '%s\n' alpha > "$tmpdir/alpha.txt"
 printf '%s\n' beta > "$tmpdir/beta.txt"
 "$tmpdir/flowcat" "$tmpdir/alpha.txt" "$tmpdir/beta.txt" > "$tmpdir/flowcat.output"
 printf '%s\n' alpha beta | cmp -s - "$tmpdir/flowcat.output"
+dd if=/dev/zero of="$tmpdir/large.bin" bs=1048576 count=2 status=none
+"$tmpdir/flowcat" "$tmpdir/large.bin" > "$tmpdir/large.output"
+cmp -s "$tmpdir/large.bin" "$tmpdir/large.output"
 
 sed \
     -e "s|\"../../../std/|\"$root/Flowmini/flowmini_v25_symboltable_projection/std/|" \
@@ -483,7 +486,7 @@ jq -e '.lowering_profile == "none" and ([.lowering_plan.operations[] | select(.k
 "$bind" --policy "$policy" < "$tmpdir/arbitrary-stream-copy.semantic.json" > "$tmpdir/arbitrary-stream-copy.binding.json"
 "$parallel" < "$tmpdir/arbitrary-stream-copy.semantic.json" | "$optimizer" > "$tmpdir/arbitrary-stream-copy.optimized.json"
 "$lowerer" --emit-llvm "$tmpdir/arbitrary-stream-copy.ll" --binding-report "$tmpdir/arbitrary-stream-copy.binding.json" < "$tmpdir/arbitrary-stream-copy.optimized.json" >/dev/null
-grep -q 'structured file-copy plan' "$tmpdir/arbitrary-stream-copy.ll"
+grep -q 'generic structured lowering plan' "$tmpdir/arbitrary-stream-copy.ll"
 target_report='{"format": "flowoptimize.optimization_report", "version": 1, "status": "ready", "targets": [{"name":"cli","main_count":1},{"name":"daemon","main_count":1}]}'
 printf '%s\n' "$target_report" | "$lowerer" --target cli > "$tmpdir/target-cli.json"
 jq -e '.status == "ready" and .target.name == "cli"' "$tmpdir/target-cli.json" >/dev/null

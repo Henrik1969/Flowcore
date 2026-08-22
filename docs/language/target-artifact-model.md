@@ -58,8 +58,7 @@ remote/service bindings as separate ecosystem projections.
 ## Boundary rule
 
 FlowMini v0.25 accepts one anonymous root `main` or multiple named targets.
-Flowanalyst validates named-target entrypoint shape. The current lowering slice
-can emit selected single-profile programs, including `flowcat`, but does not
-yet accept a target selector and produce one artifact per named target. Lazy
-loading, dispatcher implementation, dependency resolution, and generalized
-binding emission remain downstream work.
+Flowanalyst validates named-target entrypoint shape. Flowlower requires an
+explicit `--target` when a report contains multiple targets and attributes each
+emitted LLVM artifact to that selection. Runtime lazy loading, dispatcher
+implementation, and dependency resolution remain downstream work.
