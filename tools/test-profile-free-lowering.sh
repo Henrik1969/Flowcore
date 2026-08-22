@@ -130,6 +130,24 @@ set -e
 test "$args_with_value_rc" -eq 42
 test "$args_without_value_rc" -eq 7
 
+args_index_source="$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass/profile_free_args_index.flow"
+printf '%s\n' 'allow libc.so.6 puts c io c_string c_int' > "$tmpdir/args-index.policy"
+"$flowmini" --dump-frontend-bundle "$args_index_source" | "$analyst" > "$tmpdir/args-index.semantic.json"
+jq -e '.status == "ok" and .lowering_profile == "none" and any(.lowering_plan.operations[]; .kind == "value_definition" and .operands[0].intrinsic == "list_index" and .operands[0].index.value == "1")' "$tmpdir/args-index.semantic.json" >/dev/null
+"$parallel" < "$tmpdir/args-index.semantic.json" | "$optimizer" > "$tmpdir/args-index.optimized.json"
+"$bind" --policy "$tmpdir/args-index.policy" < "$tmpdir/args-index.semantic.json" > "$tmpdir/args-index.binding.json"
+"$lower" --emit-llvm "$tmpdir/args-index.ll" --binding-report "$tmpdir/args-index.binding.json" < "$tmpdir/args-index.optimized.json" > "$tmpdir/args-index.lowering.json"
+grep -Fq '%flow_args_ready = icmp sge i32 %argc, 2' "$tmpdir/args-index.ll"
+grep -Fq 'getelementptr ptr, ptr %argv, i64 1' "$tmpdir/args-index.ll"
+clang "$tmpdir/args-index.ll" -o "$tmpdir/args-index"
+"$tmpdir/args-index" source-selected > "$tmpdir/args-index.out"
+grep -Fxq 'source-selected' "$tmpdir/args-index.out"
+set +e
+"$tmpdir/args-index" >/dev/null
+args_index_missing_rc=$?
+set -e
+test "$args_index_missing_rc" -eq 64
+
 result_source="$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass/profile_free_external_result.flow"
 printf '%s\n' 'allow libc.so.6 getppid c readonly - c_int' > "$tmpdir/result.policy"
 "$flowmini" --dump-frontend-bundle "$result_source" | "$analyst" > "$tmpdir/result.semantic.json"

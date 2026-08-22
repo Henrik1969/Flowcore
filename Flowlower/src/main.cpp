@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <cctype>
 #include <fstream>
 #include <iostream>
@@ -288,6 +289,7 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
     std::ostringstream generic_expression_instructions;
     int generic_expression_temporary = 0;
     std::map<int, std::string> generic_values;
+    int required_entry_argc = 0;
     std::set<int> wide_value_symbols;
     std::set<int> pointer_value_symbols;
     for (const auto& operation : operation_objects) {
@@ -313,6 +315,21 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
                 const auto value_name = "%flow_value_" + value_symbol;
                 value_initialization_instructions << "  " << allocation << " = alloca [" << bytes << " x i8], align 1\n"
                                                   << "  " << value_name << " = getelementptr [" << bytes << " x i8], ptr " << allocation << ", i64 0, i64 0\n";
+                generic_values[std::stoi(value_symbol)] = value_name;
+            }
+            continue;
+        }
+        if (!value_symbol.empty() && quoted_field(value_operand, "kind") == "index" &&
+            quoted_field(value_operand, "intrinsic") == "list_index" && quoted_field(value_operand, "type") == "c_string") {
+            const auto index = object_field(value_operand, "index");
+            const auto index_value = quoted_field(index, "value");
+            if (quoted_field(index, "kind") == "integer_literal" && valid_integer_literal(index_value) && index_value.front() != '-') {
+                const int numeric_index = std::stoi(index_value);
+                required_entry_argc = std::max(required_entry_argc, numeric_index + 1);
+                const auto slot = "%flow_arg_slot_" + value_symbol;
+                const auto value_name = "%flow_value_" + value_symbol;
+                value_initialization_instructions << "  " << slot << " = getelementptr ptr, ptr %argv, i64 " << numeric_index << "\n"
+                                                  << "  " << value_name << " = load ptr, ptr " << slot << "\n";
                 generic_values[std::stoi(value_symbol)] = value_name;
             }
             continue;
@@ -590,8 +607,9 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
                     "target triple = \"x86_64-pc-linux-gnu\"\n"
                  << string_globals.str()
                  << sequence_declarations.str()
-                 << "define i32 @main() {\n"
-                    "entry:\n"
+                 << (required_entry_argc > 0 ? "define i32 @main(i32 %argc, ptr %argv) {\n" : "define i32 @main() {\n")
+                 << "entry:\n"
+                 << (required_entry_argc > 0 ? "  %flow_args_ready = icmp sge i32 %argc, " + std::to_string(required_entry_argc) + "\n  br i1 %flow_args_ready, label %args_ready, label %args_error\nargs_error:\n  ret i32 64\nargs_ready:\n" : "")
                  << value_initialization_instructions.str()
                  << sequence_calls.str()
                  << "  ret i32 0\n"

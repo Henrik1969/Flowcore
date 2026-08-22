@@ -185,6 +185,11 @@
   entry points. A profile-free arbitrary program now branches on its actual
   native argument count and produces distinct tested exit statuses with and
   without an application argument.
+- Added generic checked `list<string>` indexing for parameterized entry points.
+  The plan retains the source parameter and index expression; native lowering
+  guards argc before loading argv. An arbitrary profile-free program prints its
+  source-selected argument, while the missing-argument path exits 64 without
+  dereferencing argv out of bounds.
 
 ## Evidence
 
@@ -279,6 +284,8 @@
 - Focused entry-argument checkpoint: `profile_free_generic_lowering` and
   `flowlower_pipeline` passed, including native execution of both argc branch
   outcomes.
+- Focused checked-argv checkpoint: `profile_free_generic_lowering` passed with
+  native selected-argument output and missing-argument refusal.
 
 ## Remaining work
 
@@ -307,7 +314,7 @@
 
 ## Exact next action
 
-Next action: lower checked `list<string>` indexing to native argv access, then
-express `sel` argument/input choice, key handling, and output branches in
-structured Flow operations and replace the transitional capability-set emitter
-without losing cleanup and read-result laws.
+Next action: use the checked entry-argument operations to express `sel`
+argument/input choice, key handling, and output branches in structured Flow
+operations, then replace the transitional capability-set emitter without losing
+cleanup and read-result laws.

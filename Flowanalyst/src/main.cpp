@@ -629,6 +629,16 @@ int run(const Json& bundle) {
             const int symbol = resolved_expression_symbols.count(expression_id) ? resolved_expression_symbols.at(expression_id) : -1;
             const auto type = symbol_types.count(symbol) ? symbol_types.at(symbol) : std::string{};
             std::cout << ",\"type\":" << quote(type) << ",\"symbol_id\":" << symbol;
+        } else if (kind == "index") {
+            const auto* payload = field(expression, "payload");
+            const int base = integer(field(payload, "base"));
+            const int symbol = resolved_expression_symbols.count(base) ? resolved_expression_symbols.at(base) : -1;
+            const auto type = symbol_types.count(symbol) ? symbol_types.at(symbol) : std::string{};
+            const auto indexes = list(field(payload, "indexes"));
+            if (type == "list<string>" && indexes.size() == 1) {
+                std::cout << ",\"intrinsic\":\"list_index\",\"type\":\"c_string\",\"symbol_id\":" << symbol << ",\"index\":";
+                emit_operand(integer(&indexes.front()), "c_int");
+            } else std::cout << ",\"type\":\"unsupported\"";
         } else if (kind == "call") {
             const auto* payload = field(expression, "payload");
             const int base = integer(field(payload, "base"));
