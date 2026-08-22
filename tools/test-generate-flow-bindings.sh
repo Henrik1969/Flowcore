@@ -124,7 +124,7 @@ printf '%s\n' \
   '}' > "$tmpdir/tid.consumer.flow"
 "$flowmini" --dump-frontend-bundle "$tmpdir/tid.consumer.flow" |
     "$analyst" > "$tmpdir/tid.semantic.json"
-jq -e '.status == "ok" and .lowering_profile == "generated_gettid_main"' "$tmpdir/tid.semantic.json" >/dev/null
+jq -e '.status == "ok" and .lowering_profile == "none"' "$tmpdir/tid.semantic.json" >/dev/null
 "$bind" --policy "$tmpdir/tid.policy" < "$tmpdir/tid.semantic.json" > "$tmpdir/tid.binding.json"
 "$parallel" < "$tmpdir/tid.semantic.json" | "$optimizer" > "$tmpdir/tid.optimized.json"
 "$lowerer" --emit-llvm "$tmpdir/tid.ll" --binding-report "$tmpdir/tid.binding.json" < "$tmpdir/tid.optimized.json" > "$tmpdir/tid.lowering.json"

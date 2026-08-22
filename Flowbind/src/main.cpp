@@ -310,7 +310,6 @@ int verify(const std::string& report, const std::string& policy_path, const std:
     if (profile == "sel_main") for (const auto& item : needed) if (item.symbol == "initscr" || item.symbol == "endwin" || item.symbol == "wgetch" || item.symbol == "keypad") lowering_requirement = &item;
     if (profile == "abi_kernel_getpid_main") for (const auto& item : needed) if (item.symbol == "getpid") lowering_requirement = &item;
     if (profile == "generated_getlogin_main") for (const auto& item : needed) if (item.symbol == "getlogin" || item.symbol == "puts") lowering_requirement = &item;
-    if (profile == "generated_gettid_main") for (const auto& item : needed) if (item.symbol == "gettid") lowering_requirement = &item;
     if (profile == "generated_sysconf_main") for (const auto& item : needed) if (item.symbol == "sysconf") lowering_requirement = &item;
     if (profile == "generated_getauxval_main") for (const auto& item : needed) if (item.symbol == "getauxval") lowering_requirement = &item;
     if (profile == "generated_system_info_main") for (const auto& item : needed) if (item.symbol == "getpagesize" || item.symbol == "get_nprocs" || item.symbol == "get_nprocs_conf" || item.symbol == "get_phys_pages" || item.symbol == "get_avphys_pages") lowering_requirement = &item;

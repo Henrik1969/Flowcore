@@ -93,6 +93,10 @@
   and call argument lists from the exact plan signature, and reject mismatched
   carrier lists. `getpriority(c_int,c_int)` is migrated to this path with its
   native return behavior expressed in Flow source.
+- The generated `gettid` acceptance fixture now retains `lowering_profile:
+  none`; its binding is generated at test time, exactly authorized, lowered by
+  the generic zero-argument `c_int` machinery, linked, and executed without a
+  compiler profile branch.
 
 ## Evidence
 
@@ -108,6 +112,8 @@
 - Focused multi-operand checkpoint: `profile_free_generic_lowering`,
   `flowbind_provider`, and `flowlower_pipeline` passed, including the native
   `getpriority` result assertion.
+- Focused generated-binding checkpoint: `native_binding_generation`,
+  `flowbind_provider`, and `flowlower_pipeline` passed.
 - Focused ncurses checkpoint: `ncurses_flow_pipeline`, `flow_less_pager`, and
   `flow_less_ncurses_pager` passed.
 
@@ -134,5 +140,5 @@
 
 ## Exact next action
 
-Next action: migrate the generated zero-argument `gettid` `c_int` example to
-the generic result path and remove its remaining source-name profile branches.
+Next action: add generic `c_long` result and return lowering, then migrate the
+generated `sysconf(c_int)` example without changing its generated binding.

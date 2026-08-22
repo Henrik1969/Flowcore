@@ -238,7 +238,6 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
     const bool abi_ncurses_profile = has(report, "\"lowering_profile\": \"abi_ncurses_main\"") || has(report, "\"lowering_profile\":\"abi_ncurses_main\"");
     const bool sel_profile = has(report, "\"lowering_profile\": \"sel_main\"") || has(report, "\"lowering_profile\":\"sel_main\"");
     const bool generated_getlogin_profile = has(report, "\"lowering_profile\": \"generated_getlogin_main\"") || has(report, "\"lowering_profile\":\"generated_getlogin_main\"");
-    const bool generated_gettid_profile = has(report, "\"lowering_profile\": \"generated_gettid_main\"") || has(report, "\"lowering_profile\":\"generated_gettid_main\"");
     const bool generated_sysconf_profile = has(report, "\"lowering_profile\": \"generated_sysconf_main\"") || has(report, "\"lowering_profile\":\"generated_sysconf_main\"");
     const bool generated_getauxval_profile = has(report, "\"lowering_profile\": \"generated_getauxval_main\"") || has(report, "\"lowering_profile\":\"generated_getauxval_main\"");
     const bool generated_system_info_profile = has(report, "\"lowering_profile\": \"generated_system_info_main\"") || has(report, "\"lowering_profile\":\"generated_system_info_main\"");
@@ -367,7 +366,6 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
     if (abi_ncurses_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"abi_ncurses_main\"") || !has(binding_report, "\"initscr\"") || !has(binding_report, "\"endwin\"") || !has(binding_report, "\"waddnstr\"") || !has(binding_report, "\"wrefresh\""))) throw std::runtime_error("ABI binding report does not authorize the abi_ncurses_main lowering profile");
     if (sel_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"sel_main\"") || !has(binding_report, "\"initscr\"") || !has(binding_report, "\"endwin\"") || !has(binding_report, "\"wgetch\"") || !has(binding_report, "\"keypad\"") || !has(binding_report, "\"puts\"") || !has(binding_report, "\"read\""))) throw std::runtime_error("ABI binding report does not authorize the sel_main lowering profile");
     if (generated_getlogin_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"generated_getlogin_main\"") || !has(binding_report, "\"getlogin\"") || !has(binding_report, "\"puts\""))) throw std::runtime_error("ABI binding report does not authorize the generated_getlogin_main lowering profile");
-    if (generated_gettid_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"generated_gettid_main\"") || !has(binding_report, "\"gettid\""))) throw std::runtime_error("ABI binding report does not authorize the generated_gettid_main lowering profile");
     if (generated_sysconf_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"generated_sysconf_main\"") || !has(binding_report, "\"sysconf\""))) throw std::runtime_error("ABI binding report does not authorize the generated_sysconf_main lowering profile");
     if (generated_getauxval_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"generated_getauxval_main\"") || !has(binding_report, "\"getauxval\""))) throw std::runtime_error("ABI binding report does not authorize the generated_getauxval_main lowering profile");
     if (generated_system_info_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"generated_system_info_main\"") || !has(binding_report, "\"getpagesize\"") || !has(binding_report, "\"get_nprocs\"") || !has(binding_report, "\"get_nprocs_conf\"") || !has(binding_report, "\"get_phys_pages\"") || !has(binding_report, "\"get_avphys_pages\""))) throw std::runtime_error("ABI binding report does not authorize the generated_system_info_main lowering profile");
@@ -385,7 +383,7 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
     if (!llvm_path.empty() && (generic_external_scalar || generic_external_result_return || generic_external_result_branch) &&
         (binding_report.empty() || (!has(binding_report, "\"status\": \"ready\"") && !has(binding_report, "\"status\":\"ready\"")) ||
          (!has(binding_report, "\"symbol\":" + quote(external_symbol)) && !has(binding_report, "\"symbol\": " + quote(external_symbol))))) throw std::runtime_error("generic lowering operation is not authorized");
-    if (!llvm_path.empty() && !generic_external_scalar && !generic_return_value && !generic_branch && !trial_profile && !abi_abs_profile && !abi_strlen_profile && !test_licbinds_profile && !abi_ncurses_profile && !sel_profile && !generated_getlogin_profile && !generated_gettid_profile && !generated_sysconf_profile && !generated_getauxval_profile && !generated_system_info_profile && !abi_kernel_clock_profile && !abi_kernel_random_profile && !abi_kernel_uname_profile && !abi_kernel_openat_profile && !abi_kernel_read_profile && !abi_kernel_write_profile && !abi_kernel_lseek_profile && !abi_kernel_unlinkat_profile && !remaining_kernel_profile && !flowcat_profile && !flowcat_file_profile) throw std::runtime_error("LLVM emission requires an accepted lowering profile or supported generic lowering plan");
+    if (!llvm_path.empty() && !generic_external_scalar && !generic_return_value && !generic_branch && !trial_profile && !abi_abs_profile && !abi_strlen_profile && !test_licbinds_profile && !abi_ncurses_profile && !sel_profile && !generated_getlogin_profile && !generated_sysconf_profile && !generated_getauxval_profile && !generated_system_info_profile && !abi_kernel_clock_profile && !abi_kernel_random_profile && !abi_kernel_uname_profile && !abi_kernel_openat_profile && !abi_kernel_read_profile && !abi_kernel_write_profile && !abi_kernel_lseek_profile && !abi_kernel_unlinkat_profile && !remaining_kernel_profile && !flowcat_profile && !flowcat_file_profile) throw std::runtime_error("LLVM emission requires an accepted lowering profile or supported generic lowering plan");
     if (!llvm_path.empty()) {
         std::ofstream llvm(llvm_path); if (!llvm) throw std::runtime_error("cannot open LLVM output");
         llvm << "; Flowcore target artifact: " << selected_target << "\n";
@@ -552,20 +550,6 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
                     "  %selected = select i1 %missing, ptr %fallback, ptr %login\n"
                     "  call i32 @puts(ptr %selected)\n"
                     "  ret i32 0\n"
-                    "}\n";
-        } else if (generated_gettid_profile) {
-            llvm << "; Flowcore generated ABI lowering: gettid\n"
-                    "target triple = \"x86_64-pc-linux-gnu\"\n"
-                    "declare i32 @gettid()\n"
-                    "define i32 @main() {\n"
-                    "entry:\n"
-                    "  %thread = call i32 @gettid()\n"
-                    "  %valid = icmp sge i32 %thread, 0\n"
-                    "  br i1 %valid, label %ok, label %error\n"
-                    "ok:\n"
-                    "  ret i32 0\n"
-                    "error:\n"
-                    "  ret i32 1\n"
                     "}\n";
         } else if (generated_sysconf_profile) {
             llvm << "; Flowcore generated ABI lowering: sysconf\n"
