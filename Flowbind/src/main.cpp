@@ -251,6 +251,20 @@ void validate_lowering_plan(const std::string& report, const std::vector<Require
             }
         }
         if (!found) throw std::runtime_error("lowering operation provider does not match a semantic binding requirement");
+        std::vector<std::string> expected_parameters;
+        for (std::size_t start = 0; start < parameter_types.size();) {
+            const auto end = parameter_types.find(',', start);
+            expected_parameters.push_back(parameter_types.substr(start, end == std::string::npos ? std::string::npos : end - start));
+            if (end == std::string::npos) break;
+            start = end + 1;
+        }
+        const auto& operands = json_array(json_field(operation, "operands"), "external lowering operation operands");
+        if (operands.size() != expected_parameters.size())
+            throw std::runtime_error("external lowering operation operand count does not match its ABI contract");
+        for (std::size_t index = 0; index < operands.size(); ++index) {
+            if (json_text(json_field(operands[index], "type")) != expected_parameters[index])
+                throw std::runtime_error("external lowering operation operand carrier does not match its ABI contract");
+        }
         const Json* expected_resource = nullptr;
         for (const auto& type : json_array(json_field(root, "abi_type_contracts"), "abi_type_contracts")) {
             if (json_text(json_field(type, "contract")) == contract && json_text(json_field(type, "name")) == return_type &&

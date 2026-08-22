@@ -201,6 +201,10 @@
   generic `loop` and `assignment` operations and resolves placement results
   through parent scopes; Flowlower selects the transitional file-copy emitter
   from those structured facts and exact authorized capabilities.
+- Added explicit ABI carrier conversion operations for typed initializers.
+  Flowcat now converts the `c_long` read result to its declared `c_size_t`
+  write count in the plan, and Flowbind verifies every external operand count
+  and carrier type against the exact provider signature.
 
 ## Evidence
 
@@ -308,6 +312,10 @@
   same native path, removing loop operations was rejected, two files produced
   the expected output, and a missing file returned 1. The canonical build and
   suite passed **54/54** tests.
+- Focused operand-contract checkpoint: `flowanalyst_pipeline`,
+  `flowbind_provider`, and `flowlower_pipeline` passed. The semantic gate
+  asserts the explicit `c_long` to `c_size_t` conversion and an adversarial
+  write operation with a mutated operand carrier is rejected.
 
 ## Remaining work
 
@@ -333,10 +341,6 @@
   rejection, unconnected-output diagnostics, and wire/signal provenance are
   now covered.
 - Reconcile documentation and test counts after the implementation stabilizes.
-- Represent the `c_long` read result to `c_size_t` write-count conversion
-  explicitly in the plan. Both carriers are currently lowered to the verified
-  64-bit platform ABI, but their distinct source-level identities must not be
-  silently conflated by the final reusable argument validator.
 
 ## Exact next action
 

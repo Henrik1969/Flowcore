@@ -626,10 +626,19 @@ int run(const Json& bundle) {
         const auto* expression = expressions.count(expression_id) ? expressions.at(expression_id) : nullptr;
         const auto kind = text(field(expression, "kind"));
         const auto literal = text(field(field(expression, "payload"), "value_text"), "0");
+        const int identifier_symbol = kind == "identifier" && resolved_expression_symbols.count(expression_id)
+            ? resolved_expression_symbols.at(expression_id) : -1;
+        const auto identifier_type = symbol_types.count(identifier_symbol) ? symbol_types.at(identifier_symbol) : std::string{};
+        const bool carrier_conversion = kind == "identifier" && !declared_type.empty() &&
+            !identifier_type.empty() && identifier_type != declared_type;
         const bool writable_storage = kind == "integer_literal" && declared_type == "c_pointer" &&
             !literal.empty() && literal != "0" && literal.front() != '-';
-        std::cout << "{\"expression_id\":" << expression_id << ",\"kind\":" << quote(writable_storage ? "writable_storage" : kind);
-        if (writable_storage) {
+        std::cout << "{\"expression_id\":" << expression_id << ",\"kind\":" << quote(carrier_conversion ? "conversion" : (writable_storage ? "writable_storage" : kind));
+        if (carrier_conversion) {
+            std::cout << ",\"type\":" << quote(declared_type) << ",\"from_type\":" << quote(identifier_type)
+                      << ",\"conversion\":\"explicit_typed_initializer\",\"operand\":";
+            emit_operand(expression_id, {});
+        } else if (writable_storage) {
             std::cout << ",\"type\":\"c_pointer\",\"storage\":{\"bytes\":" << literal
                       << ",\"access\":\"read_write\",\"lifetime\":\"call\"}";
         } else
@@ -640,9 +649,7 @@ int run(const Json& bundle) {
         } else if (kind == "bool_literal") {
             std::cout << ",\"type\":\"bool\",\"value\":" << quote(text(field(field(expression, "payload"), "value_text"), "false"));
         } else if (kind == "identifier") {
-            const int symbol = resolved_expression_symbols.count(expression_id) ? resolved_expression_symbols.at(expression_id) : -1;
-            const auto type = symbol_types.count(symbol) ? symbol_types.at(symbol) : std::string{};
-            std::cout << ",\"type\":" << quote(type) << ",\"symbol_id\":" << symbol;
+            std::cout << ",\"type\":" << quote(identifier_type) << ",\"symbol_id\":" << identifier_symbol;
         } else if (kind == "index") {
             const auto* payload = field(expression, "payload");
             const int base = integer(field(payload, "base"));

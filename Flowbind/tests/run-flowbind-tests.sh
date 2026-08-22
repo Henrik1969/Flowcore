@@ -36,12 +36,16 @@ test "$wrong_signature_rc" -eq 2
 printf '%s\n' "$wrong_signature" | grep -q 'denied by capability policy'
 
 file_fixture=$root/Flowmini/flowmini_v25_symboltable_projection/examples/apps/flowcat/flowcat.flow
-file_report=$(
-  "$flowmini" --dump-frontend-bundle "$file_fixture" |
-  "$flowanalyst" |
-  "$bin" --policy "$policy"
-)
+file_semantic=$("$flowmini" --dump-frontend-bundle "$file_fixture" | "$flowanalyst")
+file_report=$(printf '%s\n' "$file_semantic" | "$bin" --policy "$policy")
 printf '%s\n' "$file_report" | jq -e '.status == "ready" and .lowering_profile == "none" and (.symbols | index("open")) != null and (.symbols | index("read")) != null and (.symbols | index("write")) != null and (.symbols | index("close")) != null' >/dev/null
+
+hostile_file_semantic=$(printf '%s\n' "$file_semantic" | jq '(.lowering_plan.operations[] | select(.provider.symbol == "write") | .operands[2].type) = "c_long"')
+set +e
+printf '%s\n' "$hostile_file_semantic" | "$bin" --policy "$policy" >/dev/null 2>&1
+hostile_file_rc=$?
+set -e
+test "$hostile_file_rc" -eq 1
 
 set +e
 bad=$(printf '%s' '{"format":"flowanalyst.semantic_report","version":1,"status":"ok","binding_requirements":[{"contract":"bad","library":"libc.so.6","convention":"c","symbol":"flowcore_symbol_that_does_not_exist","effect":"pure","parameter_types":"","return_type":"c_int"}]}' | "$bin" --policy "$policy")

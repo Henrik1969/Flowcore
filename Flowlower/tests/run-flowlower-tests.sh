@@ -452,7 +452,7 @@ done
 flowcat_source="$root/Flowmini/flowmini_v25_symboltable_projection/examples/apps/flowcat/flowcat.flow"
 "$flowmini" --dump-frontend-bundle "$flowcat_source" > "$tmpdir/flowcat.bundle.json"
 "$analyst" < "$tmpdir/flowcat.bundle.json" > "$tmpdir/flowcat.semantic.json"
-jq -e '.lowering_profile == "none" and ([.lowering_plan.operations[] | select(.kind == "loop")] | length) == 2 and any(.lowering_plan.operations[]; .kind == "assignment")' "$tmpdir/flowcat.semantic.json" >/dev/null
+jq -e '.lowering_profile == "none" and ([.lowering_plan.operations[] | select(.kind == "loop")] | length) == 2 and any(.lowering_plan.operations[]; .kind == "assignment") and any(.lowering_plan.operations[].operands[]?; .kind == "conversion" and .from_type == "c_long" and .type == "c_size_t")' "$tmpdir/flowcat.semantic.json" >/dev/null
 "$bind" --policy "$policy" < "$tmpdir/flowcat.semantic.json" > "$tmpdir/flowcat.binding.json"
 "$parallel" < "$tmpdir/flowcat.semantic.json" > "$tmpdir/flowcat.parallel.json"
 "$optimizer" < "$tmpdir/flowcat.parallel.json" > "$tmpdir/flowcat.optimized.json"

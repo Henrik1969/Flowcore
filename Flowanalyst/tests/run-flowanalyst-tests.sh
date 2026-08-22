@@ -123,7 +123,8 @@ flowcat_report=$("$flowmini" --dump-frontend-bundle "$flowcat_fixture" | "$bin")
 printf '%s\n' "$flowcat_report" | jq -e '
   .lowering_profile == "none" and
   ([.lowering_plan.operations[] | select(.kind == "loop")] | length) == 2 and
-  any(.lowering_plan.operations[]; .kind == "assignment")
+  any(.lowering_plan.operations[]; .kind == "assignment") and
+  any(.lowering_plan.operations[].operands[]?; .kind == "conversion" and .from_type == "c_long" and .type == "c_size_t")
 ' >/dev/null
 printf '%s\n' "$flowcat_report" | grep -q '"name":"args"'
 printf '%s\n' "$flowcat_report" | grep -q '"symbol":"open"'

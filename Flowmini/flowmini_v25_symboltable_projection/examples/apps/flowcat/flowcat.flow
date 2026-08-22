@@ -24,7 +24,8 @@ main(args : list<string>) {
         }
         read(fd, buffer, capacity) -> count
         while count > zero {
-            write(stdout_fd, buffer, count) -> written
+            write_count : c_size_t(count)
+            write(stdout_fd, buffer, write_count) -> written
             if written < zero {
                 close(fd) -> closed
                 one -> return
