@@ -203,12 +203,12 @@ printf '%s\n' \
   '}' > "$tmpdir/sysconf.consumer.flow"
 "$flowmini" --dump-frontend-bundle "$tmpdir/sysconf.consumer.flow" |
     "$analyst" > "$tmpdir/sysconf.semantic.json"
-jq -e '.status == "ok" and .lowering_profile == "generated_sysconf_main"' "$tmpdir/sysconf.semantic.json" >/dev/null
+jq -e '.status == "ok" and .lowering_profile == "none"' "$tmpdir/sysconf.semantic.json" >/dev/null
 "$bind" --policy "$tmpdir/sysconf.policy" < "$tmpdir/sysconf.semantic.json" > "$tmpdir/sysconf.binding.json"
 "$parallel" < "$tmpdir/sysconf.semantic.json" | "$optimizer" > "$tmpdir/sysconf.optimized.json"
 "$lowerer" --emit-llvm "$tmpdir/sysconf.ll" --binding-report "$tmpdir/sysconf.binding.json" < "$tmpdir/sysconf.optimized.json" > "$tmpdir/sysconf.lowering.json"
 grep -q '"status": "emitted"' "$tmpdir/sysconf.lowering.json"
-grep -Fq 'call i64 @sysconf(i32 30)' "$tmpdir/sysconf.ll"
+grep -Fq 'call i64 @sysconf(i32 %flow_value_' "$tmpdir/sysconf.ll"
 clang "$tmpdir/sysconf.ll" -o "$tmpdir/sysconf"
 "$tmpdir/sysconf"
 

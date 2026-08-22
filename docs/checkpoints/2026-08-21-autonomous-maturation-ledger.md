@@ -97,6 +97,10 @@
   none`; its binding is generated at test time, exactly authorized, lowered by
   the generic zero-argument `c_int` machinery, linked, and executed without a
   compiler profile branch.
+- Added generic profile-free `c_long` external-call lowering with source-derived
+  `c_int` arguments, exact binding authorization, positive-result validation,
+  and structured refusal outside the supported carrier shape. The generated
+  `sysconf` fixture now uses that path and has no source-name profile branches.
 
 ## Evidence
 
@@ -114,6 +118,9 @@
   `getpriority` result assertion.
 - Focused generated-binding checkpoint: `native_binding_generation`,
   `flowbind_provider`, and `flowlower_pipeline` passed.
+- Focused `c_long` checkpoint: `native_binding_generation` and
+  `flowlower_pipeline` passed, including compilation and execution of the
+  generated `sysconf` ELF.
 - Focused ncurses checkpoint: `ncurses_flow_pipeline`, `flow_less_pager`, and
   `flow_less_ncurses_pager` passed.
 
@@ -140,5 +147,5 @@
 
 ## Exact next action
 
-Next action: add generic `c_long` result and return lowering, then migrate the
-generated `sysconf(c_int)` example without changing its generated binding.
+Next action: generalize integer-width operand and result carriers to `c_ulong`
+and migrate the generated `getauxval(c_ulong)` fixture.
