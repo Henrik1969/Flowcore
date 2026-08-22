@@ -64,6 +64,18 @@ std::string array_field(std::string_view input, std::string_view field) {
     return "[]";
 }
 
+std::string first_array_object(std::string_view input) {
+    auto position = input.find('{');
+    if (position == std::string_view::npos) return "{}";
+    const auto start = position; int depth = 0; bool string = false; bool escaped = false;
+    for (; position < input.size(); ++position) {
+        const char c = input[position];
+        if (string) { if (escaped) escaped = false; else if (c == '\\') escaped = true; else if (c == '"') string = false; continue; }
+        if (c == '"') string = true; else if (c == '{') ++depth; else if (c == '}' && --depth == 0) return std::string(input.substr(start, position - start + 1));
+    }
+    return "{}";
+}
+
 std::string quoted_field(std::string_view input, std::string_view field) {
     const auto marker = input.find("\"" + std::string(field) + "\"");
     if (marker == std::string_view::npos) return {};
@@ -166,12 +178,20 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
     const bool profile_free_plan = has(report, "\"lowering_profile\": \"none\"") || has(report, "\"lowering_profile\":\"none\"");
     const auto lowering_plan = object_field(report, "lowering_plan");
     const auto plan_operations = array_field(lowering_plan, "operations");
-    const auto generic_kind = quoted_field(plan_operations, "kind");
-    const auto generic_symbol = quoted_field(plan_operations, "symbol");
-    const auto generic_parameters = quoted_field(plan_operations, "parameter_types");
-    const auto generic_return = quoted_field(plan_operations, "return_type");
+    const auto first_operation = first_array_object(plan_operations);
+    const auto generic_kind = quoted_field(first_operation, "kind");
+    const auto generic_symbol = quoted_field(first_operation, "symbol");
+    const auto generic_parameters = quoted_field(first_operation, "parameter_types");
+    const auto generic_return = quoted_field(first_operation, "return_type");
+    const auto generic_operands = array_field(first_operation, "operands");
+    const auto first_operand = first_array_object(generic_operands);
+    const auto operand_kind = quoted_field(first_operand, "kind");
+    const auto operand_type = quoted_field(first_operand, "type");
+    const auto operand_value = quoted_field(first_operand, "value");
+    const bool generic_zero_arg = generic_parameters.empty() && has(first_operation, "\"arguments\":[]");
+    const bool generic_one_int_arg = generic_parameters == "c_int" && operand_kind == "integer_literal" && operand_type == "c_int" && !operand_value.empty();
     const bool generic_external_scalar = profile_free_plan && generic_kind == "external_call" && valid_c_symbol(generic_symbol) &&
-        generic_parameters.empty() && generic_return == "c_int" && has(plan_operations, "\"arguments\":[]");
+        generic_return == "c_int" && (generic_zero_arg || generic_one_int_arg);
     if (abi_abs_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"abi_abs_main\"") || !has(binding_report, "\"kind\": \"external_call\"") || !has(binding_report, "\"abs\""))) throw std::runtime_error("ABI binding report does not authorize the abi_abs_main lowering profile");
     if (abi_strlen_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"abi_strlen_main\"") || !has(binding_report, "\"kind\": \"external_call\"") || !has(binding_report, "\"strlen\""))) throw std::runtime_error("ABI binding report does not authorize the abi_strlen_main lowering profile");
     if (test_licbinds_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"test_licbinds_main\"") || !has(binding_report, "\"strlen\"") || !has(binding_report, "\"abs\"") || !has(binding_report, "\"puts\""))) throw std::runtime_error("ABI binding report does not authorize the test_licbinds_main lowering profile");
@@ -209,12 +229,12 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
         std::ofstream llvm(llvm_path); if (!llvm) throw std::runtime_error("cannot open LLVM output");
         llvm << "; Flowcore target artifact: " << selected_target << "\n";
         if (generic_external_scalar) {
-            llvm << "; Flowcore generic lowering plan: zero-argument c_int external call\n"
+            llvm << "; Flowcore generic lowering plan: " << (generic_zero_arg ? "zero-argument" : "one-integer-argument") << " c_int external call\n"
                     "target triple = \"x86_64-pc-linux-gnu\"\n"
-                    "declare i32 @" << generic_symbol << "()\n"
+                    "declare i32 @" << generic_symbol << "(" << (generic_zero_arg ? "" : "i32") << ")\n"
                     "define i32 @main() {\n"
                     "entry:\n"
-                    "  %result = call i32 @" << generic_symbol << "()\n"
+                    "  %result = call i32 @" << generic_symbol << "(" << (generic_zero_arg ? "" : "i32 " + operand_value) << ")\n"
                     "  %valid = icmp sge i32 %result, 0\n"
                     "  br i1 %valid, label %ok, label %error\n"
                     "ok:\n"

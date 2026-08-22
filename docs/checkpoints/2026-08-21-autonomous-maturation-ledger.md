@@ -35,6 +35,10 @@
 - Added the first profile-free native proof: `profile_free_getpid` uses an
   arbitrary program name and generic zero-argument `c_int` lowering to emit and
   execute an ELF binary without a matching source-name profile.
+- Lowering-plan operations now export typed operand descriptors for integer
+  literals and identifiers. A second arbitrary profile-free proof generates a
+  `getpgid(c_int)` binding, preserves its operand through Flowparallel and
+  Flowoptimize, and executes the resulting ELF without a compiler change.
 
 ## Evidence
 
@@ -71,5 +75,6 @@
 
 ## Exact next action
 
-Next action: generalize the lowering plan with typed operands and result/value
-placement, then add a profile-free one-argument external-call ELF proof.
+Next action: generalize Flowlower from the current profile-free scalar-call
+slice to generic result placement and simple value operations, then migrate one
+existing native example away from its source-name profile.

@@ -632,6 +632,24 @@ int run(const Json& bundle) {
             if (argument) std::cout << ',';
             std::cout << operation.arguments[argument];
         }
+        std::cout << "],\"operands\":[";
+        for (std::size_t argument = 0; argument < operation.arguments.size(); ++argument) {
+            if (argument) std::cout << ',';
+            const int expression_id = operation.arguments[argument];
+            const auto* expression = expressions.count(expression_id) ? expressions.at(expression_id) : nullptr;
+            const auto kind = text(field(expression, "kind"));
+            std::cout << "{\"expression_id\":" << expression_id << ",\"kind\":" << quote(kind);
+            if (kind == "integer_literal") {
+                std::cout << ",\"type\":\"c_int\",\"value\":" << quote(text(field(field(expression, "payload"), "value_text"), "0"));
+            } else if (kind == "identifier") {
+                const int symbol = resolved_expression_symbols.count(expression_id) ? resolved_expression_symbols.at(expression_id) : -1;
+                const auto type = symbol_types.count(symbol) ? symbol_types.at(symbol) : std::string{};
+                std::cout << ",\"type\":" << quote(type) << ",\"symbol_id\":" << symbol;
+            } else {
+                std::cout << ",\"type\":\"unsupported\"";
+            }
+            std::cout << "}";
+        }
         std::cout << "]";
         if (operation.result_symbol >= 0) std::cout << ",\"result_symbol_id\":" << operation.result_symbol;
         if (operation.kind == "external_call") {
