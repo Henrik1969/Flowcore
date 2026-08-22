@@ -152,7 +152,7 @@ jq -n --arg provider "$provider" '
 printf '%s\n' \
   'import "system-info.flow" as linux' \
   '' \
-  'program generated_system_info_main' \
+  'program arbitrary_machine_facts' \
   '' \
   'main {' \
   '    pagesize : c_int(0)' \
@@ -168,7 +168,7 @@ printf '%s\n' \
   '}' > "$tmpdir/system-info.consumer.flow"
 "$flowmini" --dump-frontend-bundle "$tmpdir/system-info.consumer.flow" |
     "$analyst" > "$tmpdir/system-info.semantic.json"
-jq -e '.status == "ok" and .lowering_profile == "generated_system_info_main"' "$tmpdir/system-info.semantic.json" >/dev/null
+jq -e '.status == "ok" and .lowering_profile == "none" and ([.lowering_plan.operations[] | select(.kind == "external_call")] | length) == 5' "$tmpdir/system-info.semantic.json" >/dev/null
 "$bind" --policy "$tmpdir/system-info.policy" < "$tmpdir/system-info.semantic.json" > "$tmpdir/system-info.binding.json"
 "$parallel" < "$tmpdir/system-info.semantic.json" | "$optimizer" > "$tmpdir/system-info.optimized.json"
 "$lowerer" --emit-llvm "$tmpdir/system-info.ll" --binding-report "$tmpdir/system-info.binding.json" < "$tmpdir/system-info.optimized.json" > "$tmpdir/system-info.lowering.json"
@@ -178,6 +178,7 @@ grep -Fq 'call i32 @get_nprocs' "$tmpdir/system-info.ll"
 grep -Fq 'call i32 @get_nprocs_conf' "$tmpdir/system-info.ll"
 grep -Fq 'call i64 @get_phys_pages' "$tmpdir/system-info.ll"
 grep -Fq 'call i64 @get_avphys_pages' "$tmpdir/system-info.ll"
+grep -Fq 'generic lowering plan: ordered scalar capability sequence' "$tmpdir/system-info.ll"
 clang "$tmpdir/system-info.ll" -o "$tmpdir/system-info"
 "$tmpdir/system-info"
 

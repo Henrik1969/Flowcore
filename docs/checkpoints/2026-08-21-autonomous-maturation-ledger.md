@@ -104,6 +104,11 @@
 - Added profile-free `c_ulong` argument/result lowering with carrier-derived
   64-bit local initialization and unsigned result validation. The generated
   `getauxval` fixture now compiles and executes without source-name dispatch.
+- Replaced the generated system-information profile with generic ordered scalar
+  capability-sequence lowering. An arbitrarily named program now carries five
+  zero-argument `c_int`/`c_long` calls through the plan, requires authorization
+  for every native symbol, and emits and executes without a handwritten LLVM
+  block or source-name selection.
 
 ## Evidence
 
@@ -128,6 +133,10 @@
   `profile_free_generic_lowering`, and `flowlower_pipeline` passed.
 - Focused ncurses checkpoint: `ncurses_flow_pipeline`, `flow_less_pager`, and
   `flow_less_ncurses_pager` passed.
+- Focused ordered-sequence checkpoint: `native_binding_generation`,
+  `profile_free_generic_lowering`, `flowbind_provider`, and
+  `flowlower_pipeline` passed. The complete canonical suite then passed
+  **54/54** tests.
 
 ## Remaining work
 
@@ -152,5 +161,6 @@
 
 ## Exact next action
 
-Next action: replace the remaining generated multi-call system-information
-profile with generic ordered capability-sequence lowering.
+Next action: migrate the generated getlogin/puts capability sequence to generic
+string and result-flow operations, keeping its null fallback behavior in Flow
+source rather than in a handwritten LLVM profile.

@@ -395,17 +395,6 @@ int run(const Json& bundle) {
         }
         if (login && output) lowering_profile = "generated_getlogin_main";
     }
-    if (text(field(*source_unit, "name")) == "generated_system_info_main") {
-        bool pagesize = false, nprocs = false, nprocs_conf = false, phys = false, avphys = false;
-        for (const auto& requirement : binding_requirements) {
-            pagesize = pagesize || (requirement.symbol == "getpagesize" && requirement.parameter_types.empty() && requirement.return_type == "c_int");
-            nprocs = nprocs || (requirement.symbol == "get_nprocs" && requirement.parameter_types.empty() && requirement.return_type == "c_int");
-            nprocs_conf = nprocs_conf || (requirement.symbol == "get_nprocs_conf" && requirement.parameter_types.empty() && requirement.return_type == "c_int");
-            phys = phys || (requirement.symbol == "get_phys_pages" && requirement.parameter_types.empty() && requirement.return_type == "c_long");
-            avphys = avphys || (requirement.symbol == "get_avphys_pages" && requirement.parameter_types.empty() && requirement.return_type == "c_long");
-        }
-        if (pagesize && nprocs && nprocs_conf && phys && avphys) lowering_profile = "generated_system_info_main";
-    }
     if (text(field(*source_unit, "name")) == "abi_kernel_clock_main") for (const auto& requirement : binding_requirements) if (requirement.symbol == "clock_gettime" && requirement.parameter_types == "c_int,c_pointer" && requirement.return_type == "c_int") lowering_profile = "abi_kernel_clock_main";
     if (text(field(*source_unit, "name")) == "abi_kernel_random_main") for (const auto& requirement : binding_requirements) if (requirement.symbol == "getrandom" && requirement.parameter_types == "c_pointer,c_size_t,c_int" && requirement.return_type == "c_long") lowering_profile = "abi_kernel_random_main";
     if (text(field(*source_unit, "name")) == "abi_kernel_uname_main") for (const auto& requirement : binding_requirements) if (requirement.symbol == "uname" && requirement.parameter_types == "c_pointer" && requirement.return_type == "c_int") lowering_profile = "abi_kernel_uname_main";
