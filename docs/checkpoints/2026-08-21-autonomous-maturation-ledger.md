@@ -42,6 +42,10 @@
 - Flowparallel and Flowoptimize no longer enumerate known profile names to
   preserve a report's lowering profile; they mechanically carry the declared
   value and structured lowering plan forward.
+- Migrated the existing `getpid` native example to the generic lowering path:
+  its source name is now arbitrary, the analyst emits no special profile, and
+  the dedicated getpid lowerer dispatch was removed. Existing corpus and native
+  execution checks still pass.
 
 ## Evidence
 
