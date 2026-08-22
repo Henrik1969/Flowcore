@@ -160,6 +160,14 @@
   declares 4096 bytes of writable storage, the read reserves one byte for the
   terminator, and LLVM distinguishes positive reads, EOF, and errors before
   using the result as an offset. The error path restores ncurses and exits 2.
+- Added ABI type cleanup capability facts and exact provider contract identity
+  to lowering-plan operations. Ncurses pointer results now retain external
+  ownership, opaque access, external lifetime, nullability, and `endwin`
+  cleanup identity through the middle stages.
+- Flowbind rejects mutated resource facts and resource acquisition without the
+  declared cleanup operation. The standalone ncurses example now lowers as a
+  generic ordered mixed-carrier sequence; its source-name profile and
+  handwritten LLVM emitter are removed.
 
 ## Evidence
 
@@ -238,12 +246,16 @@
 - Focused `sel` read-safety checkpoint: `sel_tui_pipeline`,
   `flowlower_pipeline`, and both `flowcore_pass_corpus` registrations passed.
   The TUI gate covers positive input, EOF, and closed-stdin error behavior.
+- Focused resource checkpoint: `ncurses_flow_pipeline`, `sel_tui_pipeline`,
+  `flowbind_provider`, `flowlower_pipeline`, and both pass-corpus registrations
+  passed. Adversarial cases reject invented cleanup identity and missing
+  cleanup, and the profile-free ncurses ELF runs in a pseudo-terminal.
 
 ## Remaining work
 
 - The unqualified single-provider import alias remains explicitly transitional;
   selective-opening syntax is not yet part of the language.
-- Replace the remaining ncurses, `sel`, flowcat, and empty-program profile or
+- Replace the remaining `sel`, flowcat, and empty-program profile or
   source-name lowering dispatch with reusable lowering plans. Kernel ABI
   examples no longer use compiler profiles.
 - `sel` input safety is repaired, but its TUI control flow and argv selection
@@ -262,6 +274,6 @@
 
 ## Exact next action
 
-Next action: propagate ncurses resource acquisition, nullable window identity,
-and mandatory `endwin` cleanup facts through the lowering plan, then use those
-facts to replace the remaining ncurses and `sel` profile dispatch.
+Next action: express `sel` argument/input choice, key handling, and output
+branches in structured Flow operations so its remaining source-name profile can
+be removed without losing the newly covered cleanup and read-result laws.

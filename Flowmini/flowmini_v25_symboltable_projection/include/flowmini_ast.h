@@ -400,6 +400,11 @@ struct AbiOpaqueClause {
     SourceLocation location;
 };
 
+struct AbiCleanupClause {
+    std::string spelling;
+    SourceLocation location;
+};
+
 using AbiTypeProperty = std::variant<
     AbiReprClause,
     AbiOwnershipClause,
@@ -407,7 +412,8 @@ using AbiTypeProperty = std::variant<
     AbiLifetimeClause,
     AbiNullableClause,
     AbiTerminatorClause,
-    AbiOpaqueClause
+    AbiOpaqueClause,
+    AbiCleanupClause
 >;
 
 struct AbiTypeDecl {

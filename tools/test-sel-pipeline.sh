@@ -29,6 +29,7 @@ jq -e '[.ast.declaration_pool[] | select(.kind == "import") | .alias] == ["curse
 "$analyst" < "$tmpdir/frontend.json" > "$tmpdir/semantic.json"
 grep -q '"lowering_profile": "sel_main"' "$tmpdir/semantic.json"
  jq -e '(.external_operations | map(.callee) | index("curses.initscr")) != null and (.external_operations | map(.callee) | index("libc.puts")) != null and (.external_operations | map(.callee) | index("linux.read")) != null' "$tmpdir/semantic.json" >/dev/null
+jq -e '.lowering_plan.operations | any(.provider.contract == "curses" and .provider.symbol == "initscr" and .result_resource.cleanup_capability == "endwin")' "$tmpdir/semantic.json" >/dev/null
 "$parallel" < "$tmpdir/semantic.json" > "$tmpdir/parallel.json"
 "$optimizer" < "$tmpdir/parallel.json" > "$tmpdir/optimized.json"
 "$bind" --policy "$tmpdir/policy" < "$tmpdir/semantic.json" > "$tmpdir/binding.json"

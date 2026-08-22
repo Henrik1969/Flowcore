@@ -563,6 +563,8 @@ void project_abi_decl(symboltable::SymbolTable& table,
                             key = "terminator_spelling";
                         } else if constexpr (std::is_same_v<Clause, AbiOpaqueClause>) {
                             key = "opaque_spelling";
+                        } else if constexpr (std::is_same_v<Clause, AbiCleanupClause>) {
+                            key = "cleanup_spelling";
                         }
                         add_string_fact(table,
                                         typeSymbol,

@@ -219,7 +219,8 @@ void validate_lowering_plan(const std::string& report, const std::vector<Require
         json_integer(json_field(*plan, "version"), "lowering_plan.version") != 1) {
         throw std::runtime_error("unsupported lowering plan contract");
     }
-    for (const auto& operation : json_array(json_field(*plan, "operations"), "lowering_plan.operations")) {
+    const auto& operations = json_array(json_field(*plan, "operations"), "lowering_plan.operations");
+    for (const auto& operation : operations) {
         for (const auto& operand : json_array(json_field(operation, "operands"), "lowering operation operands")) {
             if (json_text(json_field(operand, "kind")) != "writable_storage") continue;
             if (json_text(json_field(operand, "type")) != "c_pointer") throw std::runtime_error("writable storage must have c_pointer carrier type");
@@ -233,6 +234,7 @@ void validate_lowering_plan(const std::string& report, const std::vector<Require
         if (json_text(json_field(operation, "kind")) != "external_call") continue;
         const Json* provider = json_field(operation, "provider");
         if (provider == nullptr) throw std::runtime_error("external lowering operation has no provider identity");
+        const auto contract = json_text(json_field(*provider, "contract"));
         const auto library = json_text(json_field(*provider, "library"));
         const auto convention = json_text(json_field(*provider, "convention"));
         const auto symbol = json_text(json_field(*provider, "symbol"));
@@ -241,7 +243,7 @@ void validate_lowering_plan(const std::string& report, const std::vector<Require
         const auto return_type = json_text(json_field(*provider, "return_type"));
         bool found = false;
         for (const auto& requirement : needed) {
-            if (requirement.library == library && requirement.convention == convention &&
+            if (requirement.contract == contract && requirement.library == library && requirement.convention == convention &&
                 requirement.symbol == symbol && requirement.effect == effect &&
                 requirement.parameter_types == parameter_types && requirement.return_type == return_type) {
                 found = true;
@@ -249,6 +251,39 @@ void validate_lowering_plan(const std::string& report, const std::vector<Require
             }
         }
         if (!found) throw std::runtime_error("lowering operation provider does not match a semantic binding requirement");
+        const Json* expected_resource = nullptr;
+        for (const auto& type : json_array(json_field(root, "abi_type_contracts"), "abi_type_contracts")) {
+            if (json_text(json_field(type, "contract")) == contract && json_text(json_field(type, "name")) == return_type &&
+                !json_text(json_field(type, "cleanup")).empty()) {
+                expected_resource = &type;
+                break;
+            }
+        }
+        const Json* resource = json_field(operation, "result_resource");
+        if (expected_resource != nullptr) {
+            if (resource == nullptr || json_text(json_field(*resource, "type")) != return_type ||
+                json_text(json_field(*resource, "ownership")) != json_text(json_field(*expected_resource, "ownership")) ||
+                json_text(json_field(*resource, "access")) != json_text(json_field(*expected_resource, "access")) ||
+                json_text(json_field(*resource, "lifetime")) != json_text(json_field(*expected_resource, "lifetime")) ||
+                json_text(json_field(*resource, "nullable")) != json_text(json_field(*expected_resource, "nullable")) ||
+                json_text(json_field(*resource, "opaque")) != json_text(json_field(*expected_resource, "opaque")) ||
+                json_text(json_field(*resource, "cleanup_capability")) != json_text(json_field(*expected_resource, "cleanup"))) {
+                throw std::runtime_error("lowering result resource does not match its ABI type contract");
+            }
+            bool cleanup_present = false;
+            const auto cleanup = json_text(json_field(*expected_resource, "cleanup"));
+            for (const auto& candidate : operations) {
+                const Json* candidate_provider = json_field(candidate, "provider");
+                if (candidate_provider != nullptr && json_text(json_field(*candidate_provider, "contract")) == contract &&
+                    json_text(json_field(*candidate_provider, "symbol")) == cleanup) {
+                    cleanup_present = true;
+                    break;
+                }
+            }
+            if (!cleanup_present) throw std::runtime_error("lowering plan acquires a resource without its declared cleanup capability");
+        } else if (resource != nullptr) {
+            throw std::runtime_error("lowering operation invents an undeclared result resource");
+        }
     }
 }
 
@@ -313,7 +348,6 @@ int verify(const std::string& report, const std::string& policy_path, const std:
     const bool aggregate_manifest_verified = !abi_manifest_path.empty() && manifest_verifies_aggregates(report, read_path(abi_manifest_path, "ABI manifest"));
     const auto profile = value(report, "lowering_profile");
     const Requirement* lowering_requirement = nullptr;
-    if (profile == "abi_ncurses_main") for (const auto& item : needed) if (item.symbol == "initscr" || item.symbol == "endwin" || item.symbol == "waddnstr" || item.symbol == "wrefresh") lowering_requirement = &item;
     if (profile == "sel_main") for (const auto& item : needed) if (item.symbol == "initscr" || item.symbol == "endwin" || item.symbol == "wgetch" || item.symbol == "keypad") lowering_requirement = &item;
     if (profile == "abi_kernel_getpid_main") for (const auto& item : needed) if (item.symbol == "getpid") lowering_requirement = &item;
     if (profile == "flowcat_argv_main") for (const auto& item : needed) if (item.symbol == "puts") lowering_requirement = &item;

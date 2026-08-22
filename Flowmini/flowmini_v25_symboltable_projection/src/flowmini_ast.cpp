@@ -278,6 +278,8 @@ namespace flowmini::ast {
                     dump_spelling_clause_json(out, "terminator", clause);
                 } else if constexpr (std::is_same_v<Clause, AbiOpaqueClause>) {
                     dump_spelling_clause_json(out, "opaque", clause);
+                } else if constexpr (std::is_same_v<Clause, AbiCleanupClause>) {
+                    dump_spelling_clause_json(out, "cleanup", clause);
                 }
             }, property);
         }

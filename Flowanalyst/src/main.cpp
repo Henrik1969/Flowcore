@@ -64,12 +64,12 @@ std::string quote(std::string_view value) { std::ostringstream out; out << '"'; 
 struct Diagnostic { std::string code, severity, message, ast_path, region, source; int symbol = -1, line = -1, column = -1; };
 struct Target { int symbol = -1, mains = 0; std::string name; };
 struct BindingRequirement { std::string contract, library, convention, symbol, effect, parameter_types, return_type; };
-struct AbiTypeContract { std::string contract, name, repr, ownership, access, lifetime, nullable, opaque; };
+struct AbiTypeContract { std::string contract, name, repr, ownership, access, lifetime, nullable, opaque, cleanup; };
 struct AggregateLayout { std::string contract, name; std::vector<std::pair<std::string, std::string>> fields; };
 struct Region { std::string id, kind, status; std::vector<std::string> prerequisites; };
 struct EffectFact { int declaration = -1, symbol = -1; std::string name, effect, certainty, reason; };
 struct CallSite { int expression = -1, statement = -1, scope = -1, callee_symbol = -1, write_symbol = -1; std::string callee; bool pure = false; std::set<int> reads; std::string writes; std::vector<int> arguments; std::vector<int> independent_with; };
-struct LoweringOperation { int expression = -1, statement = -1, scope = -1, block = -1, then_block = -1, else_block = -1, callee_symbol = -1, result_symbol = -1; std::string callee, kind, library, convention, symbol, effect, parameter_types, return_type; std::vector<int> arguments; };
+struct LoweringOperation { int expression = -1, statement = -1, scope = -1, block = -1, then_block = -1, else_block = -1, callee_symbol = -1, result_symbol = -1; std::string callee, kind, contract, library, convention, symbol, effect, parameter_types, return_type; std::vector<int> arguments; };
 struct Resolution { int expression = -1, statement = -1, scope = -1, symbol = -1; std::string name; };
 
 std::string trim_copy(std::string value) {
@@ -178,7 +178,8 @@ int run(const Json& bundle) {
                 text(field(*contract, "name")), text(field(type, "name")),
                 fact_value(type, "repr_spelling"), fact_value(type, "ownership_spelling"),
                 fact_value(type, "access_spelling"), fact_value(type, "lifetime_spelling"),
-                fact_value(type, "nullable_spelling"), fact_value(type, "opaque_spelling")
+                fact_value(type, "nullable_spelling"), fact_value(type, "opaque_spelling"),
+                fact_value(type, "cleanup_spelling")
             });
         }
     }
@@ -373,10 +374,6 @@ int run(const Json& bundle) {
     }
     if (declarations.empty()) empty_main_profile = false;
     std::string lowering_profile = empty_main_profile ? "empty_program_main" : "none";
-    if (text(field(*source_unit, "name")) == "abi_ncurses_main") {
-        std::set<std::string> ncurses_symbols; for (const auto& requirement : binding_requirements) ncurses_symbols.insert(requirement.symbol);
-        if (ncurses_symbols.count("initscr") && ncurses_symbols.count("endwin") && ncurses_symbols.count("waddnstr") && ncurses_symbols.count("wrefresh")) lowering_profile = "abi_ncurses_main";
-    }
     if (text(field(*source_unit, "name")) == "sel") {
         std::set<std::string> sel_symbols; for (const auto& requirement : binding_requirements) sel_symbols.insert(requirement.symbol);
         if (sel_symbols.count("initscr") && sel_symbols.count("endwin") && sel_symbols.count("wgetch") && sel_symbols.count("keypad")) lowering_profile = "sel_main";
@@ -504,6 +501,7 @@ int run(const Json& bundle) {
         for (const auto& requirement : binding_requirements) {
             if (requirement.symbol != leaf) continue;
             operation.kind = "external_call";
+            operation.contract = requirement.contract;
             operation.library = requirement.library;
             operation.convention = requirement.convention;
             operation.symbol = requirement.symbol;
@@ -614,7 +612,8 @@ int run(const Json& bundle) {
                   << ",\"access\":" << quote(type.access)
                   << ",\"lifetime\":" << quote(type.lifetime)
                   << ",\"nullable\":" << quote(type.nullable)
-                  << ",\"opaque\":" << quote(type.opaque) << "}";
+                  << ",\"opaque\":" << quote(type.opaque)
+                  << ",\"cleanup\":" << quote(type.cleanup) << "}";
     }
     std::cout << "],\n  \"lowering_plan\": {\"format\":\"flowcore.lowering_plan\",\"version\":1,\"status\":\""
               << (diagnostics.empty() ? "ready" : "blocked") << "\",\"operations\":[";
@@ -683,12 +682,23 @@ int run(const Json& bundle) {
         if (operation.result_symbol >= 0) std::cout << ",\"result_symbol_id\":" << operation.result_symbol;
         if (operation.kind == "branch") std::cout << ",\"then_block_id\":" << operation.then_block << ",\"else_block_id\":" << operation.else_block;
         if (operation.kind == "external_call") {
-            std::cout << ",\"provider\":{\"library\":" << quote(operation.library)
+            std::cout << ",\"provider\":{\"contract\":" << quote(operation.contract)
+                      << ",\"library\":" << quote(operation.library)
                       << ",\"convention\":" << quote(operation.convention)
                       << ",\"symbol\":" << quote(operation.symbol)
                       << ",\"effect\":" << quote(operation.effect)
                       << ",\"parameter_types\":" << quote(operation.parameter_types)
                       << ",\"return_type\":" << quote(operation.return_type) << "}";
+            for (const auto& type : abi_type_contracts) {
+                if (type.contract != operation.contract || type.name != operation.return_type || type.cleanup.empty()) continue;
+                std::cout << ",\"result_resource\":{\"type\":" << quote(type.name)
+                          << ",\"ownership\":" << quote(type.ownership)
+                          << ",\"access\":" << quote(type.access)
+                          << ",\"lifetime\":" << quote(type.lifetime)
+                          << ",\"nullable\":" << quote(type.nullable)
+                          << ",\"opaque\":" << quote(type.opaque)
+                          << ",\"cleanup_capability\":" << quote(type.cleanup) << "}";
+            }
         }
         std::cout << "}";
     }

@@ -568,6 +568,8 @@ namespace flowmini::ast {
                     declaration.properties.emplace_back(AbiTerminatorClause{spelling, propertyLocation});
                 } else if (propertyName == "opaque") {
                     declaration.properties.emplace_back(AbiOpaqueClause{spelling, propertyLocation});
+                } else if (propertyName == "cleanup") {
+                    declaration.properties.emplace_back(AbiCleanupClause{spelling, propertyLocation});
                 }
                 ++i;
                 i = skip_until_line_end(tokens, i);

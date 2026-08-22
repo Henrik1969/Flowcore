@@ -93,6 +93,7 @@ struct AbiTypeDef {
     std::string lifetime;
     std::string nullable;
     std::string terminator;
+    std::string cleanup;
     bool opaque = false;
 };
 
@@ -140,7 +141,7 @@ public:
         types_.emplace("c_ulong", TypeDef{"c_ulong", "int", {}, {}});
         types_.emplace("c_size_t", TypeDef{"c_size_t", "int", {{TokenKind::GreaterEqual, 0}}, {}});
         types_.emplace("c_string", TypeDef{"c_string", "", {}, {}});
-        abiTypes_.emplace("c_string", AbiTypeDef{"c_string", "const char*", "borrowed", "read", "call", "false", "nul", false});
+        abiTypes_.emplace("c_string", AbiTypeDef{"c_string", "const char*", "borrowed", "read", "call", "false", "nul", {}, false});
     }
 
     [[nodiscard]] ModuleSpec parse() {
@@ -1177,8 +1178,10 @@ private:
                 ++pos_;
                 if (!(val.text == "true" || val.text == "false")) { fail(val, "opaque must be true or false"); }
                 def.opaque = (val.text == "true");
+            } else if (prop.text == "cleanup") {
+                def.cleanup = expectIdentifier("expected cleanup capability name").text;
             } else {
-                fail(prop, "flowmini v16 ABI type blocks support repr, ownership, access, lifetime, nullable, terminator, and opaque");
+                fail(prop, "ABI type blocks support repr, ownership, access, lifetime, nullable, terminator, opaque, and cleanup");
             }
             expectLineEnd("expected newline after abi type property");
             skipNewlines();

@@ -11,6 +11,7 @@ abi ncurses {
         lifetime external
         nullable true
         opaque true
+        cleanup endwin
     }
 
     type c_string {

@@ -243,7 +243,6 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
         if (report.find(spaced_target_marker, targets_marker) == std::string_view::npos && report.find(compact_target_marker, targets_marker) == std::string_view::npos) throw std::runtime_error("requested target is not present in the optimization report");
     } else if (!target_name.empty()) throw std::runtime_error("requested target is not present in the optimization report");
     const bool trial_profile = has(report, "\"lowering_profile\": \"empty_program_main\"") || has(report, "\"lowering_profile\":\"empty_program_main\"");
-    const bool abi_ncurses_profile = has(report, "\"lowering_profile\": \"abi_ncurses_main\"") || has(report, "\"lowering_profile\":\"abi_ncurses_main\"");
     const bool sel_profile = has(report, "\"lowering_profile\": \"sel_main\"") || has(report, "\"lowering_profile\":\"sel_main\"");
     const bool flowcat_profile = has(report, "\"lowering_profile\": \"flowcat_argv_main\"") || has(report, "\"lowering_profile\":\"flowcat_argv_main\"");
     const bool flowcat_file_profile = has(report, "\"lowering_profile\": \"flowcat_file_main\"") || has(report, "\"lowering_profile\":\"flowcat_file_main\"");
@@ -462,7 +461,9 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
         }
         if (!valid_arguments) { generic_scalar_sequence = false; continue; }
         if (sequence_symbols.insert(symbol).second) sequence_declarations << "declare " << result_type << " @" << symbol << '(' << declaration_parameters.str() << ")\n";
-        const auto result_name = "%flow_call_" + result_symbol;
+        const auto operation_id = numeric_field(operation, "id");
+        if (operation_id.empty()) { generic_scalar_sequence = false; continue; }
+        const auto result_name = "%flow_call_" + result_symbol + "_" + operation_id;
         sequence_calls << "  " << result_name << " = call " << result_type << " @" << symbol << '(' << call_arguments.str() << ")\n";
         generic_values[std::stoi(result_symbol)] = result_name;
         ++sequence_call_count;
@@ -513,7 +514,6 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
         !nullable_consumer_symbol.empty() && !nullable_then_argument.empty() && !nullable_else_argument.empty() &&
         ((nullable_then_argument == nullable_result_symbol && generic_values.count(std::stoi(nullable_else_argument))) ||
          (nullable_else_argument == nullable_result_symbol && generic_values.count(std::stoi(nullable_then_argument))));
-    if (abi_ncurses_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"abi_ncurses_main\"") || !has(binding_report, "\"initscr\"") || !has(binding_report, "\"endwin\"") || !has(binding_report, "\"waddnstr\"") || !has(binding_report, "\"wrefresh\""))) throw std::runtime_error("ABI binding report does not authorize the abi_ncurses_main lowering profile");
     if (sel_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"sel_main\"") || !has(binding_report, "\"initscr\"") || !has(binding_report, "\"endwin\"") || !has(binding_report, "\"wgetch\"") || !has(binding_report, "\"keypad\"") || !has(binding_report, "\"puts\"") || !has(binding_report, "\"read\""))) throw std::runtime_error("ABI binding report does not authorize the sel_main lowering profile");
     if (flowcat_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"flowcat_argv_main\"") || !has(binding_report, "\"kind\": \"external_call\"") || !has(binding_report, "\"puts\""))) throw std::runtime_error("ABI binding report does not authorize the flowcat_argv_main lowering profile");
     if (flowcat_file_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"flowcat_file_main\"") || !has(binding_report, "\"kind\": \"capability_sequence\"") || !has(binding_report, "\"open\"") || !has(binding_report, "\"read\"") || !has(binding_report, "\"write\"") || !has(binding_report, "\"close\""))) throw std::runtime_error("ABI binding report does not authorize the flowcat_file_main lowering profile");
@@ -528,7 +528,7 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
         if (binding_report.empty() || (!has(binding_report, "\"status\": \"ready\"") && !has(binding_report, "\"status\":\"ready\""))) throw std::runtime_error("generic nullable string lowering is not authorized");
         for (const auto& symbol : nullable_authorized_symbols) if (!has(binding_report, "\"symbol\":" + quote(symbol)) && !has(binding_report, "\"symbol\": " + quote(symbol))) throw std::runtime_error("generic nullable string operation is not authorized: " + symbol);
     }
-    if (!llvm_path.empty() && !generic_external_scalar && !generic_external_long && !generic_external_ulong && !generic_external_size_return && !generic_scalar_sequence && !generic_return_value && !generic_branch && !nullable_string_branch && !trial_profile && !abi_ncurses_profile && !sel_profile && !flowcat_profile && !flowcat_file_profile) throw std::runtime_error("LLVM emission requires an accepted lowering profile or supported generic lowering plan");
+    if (!llvm_path.empty() && !generic_external_scalar && !generic_external_long && !generic_external_ulong && !generic_external_size_return && !generic_scalar_sequence && !generic_return_value && !generic_branch && !nullable_string_branch && !trial_profile && !sel_profile && !flowcat_profile && !flowcat_file_profile) throw std::runtime_error("LLVM emission requires an accepted lowering profile or supported generic lowering plan");
     if (!llvm_path.empty()) {
         std::ofstream llvm(llvm_path); if (!llvm) throw std::runtime_error("cannot open LLVM output");
         llvm << "; Flowcore target artifact: " << selected_target << "\n";
@@ -648,26 +648,6 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
                     "  ret i32 0\n"
                     "error:\n"
                     "  ret i32 1\n"
-                    "}\n";
-        } else if (abi_ncurses_profile) {
-            llvm << "; Flowcore ncurses binding integration: initialize, write, refresh, restore\n"
-                    "target triple = \"x86_64-pc-linux-gnu\"\n"
-                    "@flowcore_ncurses_message = private unnamed_addr constant [25 x i8] c\"Flowcore ncurses binding\\00\"\n"
-                    "declare ptr @initscr()\n"
-                    "declare i32 @noecho()\n"
-                    "declare i32 @cbreak()\n"
-                    "declare i32 @waddnstr(ptr, ptr, i32)\n"
-                    "declare i32 @wrefresh(ptr)\n"
-                    "declare i32 @endwin()\n"
-                    "define i32 @main() {\n"
-                    "entry:\n"
-                    "  %window = call ptr @initscr()\n"
-                    "  %echo = call i32 @noecho()\n"
-                    "  %break = call i32 @cbreak()\n"
-                    "  %write = call i32 @waddnstr(ptr %window, ptr @flowcore_ncurses_message, i32 24)\n"
-                    "  %refresh = call i32 @wrefresh(ptr %window)\n"
-                    "  %end = call i32 @endwin()\n"
-                    "  ret i32 0\n"
                     "}\n";
         } else if (sel_profile) {
             llvm << "; Flowcore sel first TUI slice: ncurses input and selected output\n"
