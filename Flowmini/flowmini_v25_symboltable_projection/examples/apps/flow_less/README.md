@@ -9,8 +9,11 @@ ordinary graph contracts:
 pager provider -> page record -> renderer -> sink
 ```
 
-The deterministic `pager.fake` slice remains a unit-test primitive. The
-application slice uses `pager.file.ncurses`, which opens the path declared by
+The deterministic slice is source-composed from `pager.input.fake`, the
+provider-neutral `pager.navigate` state transition, `pager.render`, and a
+terminal sink. Lines and commands belong to the injectable input provider;
+page selection belongs to the separately wired navigation stage rather than
+the provider. The interactive application slice uses `pager.file.ncurses`, which opens the path declared by
 its policy, reads the file, and renders pages in a pseudo-terminal. The source
 template uses `__FLOW_LESS_PATH__`; the runner substitutes the concrete file
 under test, keeping the checked-in source portable.

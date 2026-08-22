@@ -282,6 +282,12 @@
   terminal contract that exposes outputs. Runtime node failures retain the
   receiving node/input plus wire and signal identity in diagnostics before the
   original failure propagates.
+- `flow_less` no longer uses the bundled fake pager implementation. Its Flow
+  source explicitly connects `pager.input.fake => pager.navigate =>
+  pager.render => halt.record`; the input provider emits raw lines, commands
+  and page size, while the provider-neutral navigation node owns page-state
+  transitions. Source-selected command order changes observable output and an
+  unknown command fails with navigation-node wire/signal provenance.
 
 ## Evidence
 
@@ -446,18 +452,22 @@
   pass-corpus registrations, `flow_less_pager`, and
   `flow_less_ncurses_pager` passed. The complete canonical build and suite then
   passed **54/54** tests in 17.95 seconds.
+- Focused Flow-owned navigation checkpoint: `flow_less_pager`,
+  `flow_less_ncurses_pager`, `flowcore_graph_routing`, and both pass-corpus
+  registrations passed. The complete canonical build and suite then passed
+  **54/54** tests in 17.48 seconds.
 
 ## Remaining work
 
 - The unqualified single-provider import alias remains explicitly transitional;
   selective-opening syntax is not yet part of the language.
-- Split navigation/state transitions out of the `flow_less` input/terminal
-  providers so Flow source owns the pager graph behavior and providers remain
-  injectable at explicit input, terminal and output boundaries.
+- Split the ncurses compatibility provider's file/input and terminal behavior
+  around the same provider-neutral `pager.navigate` stage used by the fake
+  provider.
 - Reconcile documentation and test counts after the implementation stabilizes.
 
 ## Exact next action
 
-Next action: refactor `flow_less` into Flow-selected input, provider-neutral
-navigation/state and output stages, preserving fake and ncurses acceptance
-behavior through explicit `=>` connections.
+Next action: refactor the ncurses `flow_less` slice into explicit source input,
+provider-neutral navigation and terminal projection stages without changing
+its pseudo-terminal behavior.

@@ -349,22 +349,36 @@ public:
     }
 };
 
-class FakePagerNode final : public ConfiguredNode {
+class FakePagerInputNode final : public ConfiguredNode {
 public:
     using ConfiguredNode::ConfiguredNode;
 
     std::vector<Route> run(MiniEnvelope env) override {
-        const std::string linesText = getPolicyString(config_, "lines", "");
-        const auto lines = splitPagerPolicy(linesText, '|');
         const int pageSize = getPolicyInt(config_, "page_size", 1);
         if (pageSize <= 0) {
-            throw flow::DiagnosticError{"pager.fake", "page_size must be positive"};
+            throw flow::DiagnosticError{"pager.input.fake", "page_size must be positive"};
         }
+        RecordPayload record;
+        setPathValue(record, "source_lines", Value{getPolicyString(config_, "lines", "")}, "pager.input.fake");
+        setPathValue(record, "commands", Value{getPolicyString(config_, "commands", "q")}, "pager.input.fake");
+        setPathInt(record, "page_size", pageSize, "pager.input.fake");
+        env.payload = std::move(record);
+        return {Route{"out", std::move(env)}};
+    }
+};
+
+class PagerNavigateNode final : public INode {
+public:
+    std::vector<Route> run(MiniEnvelope env) override {
+        auto& record = requirePayload<RecordPayload>(env, "pager.navigate");
+        const auto lines = splitPagerPolicy(valueAsString(getPathValue(record, "source_lines", "pager.navigate"), "pager.navigate"), '|');
+        const auto pageSize = getPathInt(record, "page_size", "pager.navigate");
+        if (pageSize <= 0) throw flow::DiagnosticError{"pager.navigate", "page_size must be positive"};
 
         const std::size_t pageCount = lines.empty() ? 1U : (lines.size() + static_cast<std::size_t>(pageSize) - 1U) /
             static_cast<std::size_t>(pageSize);
         std::size_t page = 0;
-        const auto commands = splitPagerPolicy(getPolicyString(config_, "commands", "q"), ',');
+        const auto commands = splitPagerPolicy(valueAsString(getPathValue(record, "commands", "pager.navigate"), "pager.navigate"), ',');
         for (const auto& command : commands) {
             if (command == "down" || command == "pgdown") {
                 if (page + 1U < pageCount) { ++page; }
@@ -377,15 +391,13 @@ public:
             } else if (command == "q") {
                 break;
             } else if (!command.empty()) {
-                throw flow::DiagnosticError{"pager.fake", "unknown command: " + command};
+                throw flow::DiagnosticError{"pager.navigate", "unknown command: " + command};
             }
         }
 
-        RecordPayload record;
-        setPathInt(record, "page", static_cast<std::int64_t>(page + 1U), "pager.fake");
-        setPathInt(record, "page_count", static_cast<std::int64_t>(pageCount), "pager.fake");
-        setPathValue(record, "lines", Value{joinPage(lines, page, static_cast<std::size_t>(pageSize))}, "pager.fake");
-        env.payload = std::move(record);
+        setPathInt(record, "page", static_cast<std::int64_t>(page + 1U), "pager.navigate");
+        setPathInt(record, "page_count", static_cast<std::int64_t>(pageCount), "pager.navigate");
+        setPathValue(record, "lines", Value{joinPage(lines, page, static_cast<std::size_t>(pageSize))}, "pager.navigate");
         return {Route{"out", std::move(env)}};
     }
 
@@ -1288,8 +1300,10 @@ AtomRegistry makeCoreAtomRegistry() {
     registry.registerAtom(AtomContract{"stdin.text", {{"in", "Unit"}}, {{"out", "Text"}}, {"stdin.read"}},
         [](NodeConfig) { return std::make_unique<StdinTextNode>(); });
 
-    registry.registerAtom(AtomContract{"pager.fake", {{"in", "Unit"}}, {{"out", "Record"}}, {"pager.provider.fake"}},
-        [](NodeConfig config) { return std::make_unique<FakePagerNode>(std::move(config)); });
+    registry.registerAtom(AtomContract{"pager.input.fake", {{"in", "Unit"}}, {{"out", "Record"}}, {"pager.input.fake"}},
+        [](NodeConfig config) { return std::make_unique<FakePagerInputNode>(std::move(config)); });
+    registry.registerAtom(AtomContract{"pager.navigate", {{"in", "Record"}}, {{"out", "Record"}}, {}},
+        [](NodeConfig) { return std::make_unique<PagerNavigateNode>(); });
     registry.registerAtom(AtomContract{"pager.ncurses", {{"in", "Unit"}}, {{"out", "Record"}}, {"pager.provider.ncurses", "terminal.input"}},
         [](NodeConfig config) { return std::make_unique<NcursesPagerNode>(std::move(config)); });
     registry.registerAtom(AtomContract{"pager.file.ncurses", {{"in", "Unit"}}, {{"out", "Record"}}, {"filesystem.read", "pager.provider.ncurses", "terminal.input"}},
