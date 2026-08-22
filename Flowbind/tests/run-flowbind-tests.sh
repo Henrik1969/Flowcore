@@ -48,6 +48,20 @@ hostile_file_rc=$?
 set -e
 test "$hostile_file_rc" -eq 1
 
+hostile_memory_semantic=$(printf '%s\n' "$file_semantic" | jq '(.lowering_plan.operations[] | select(.provider.symbol == "sendfile") | .argument_resources[2].memory_effect) = "read"')
+set +e
+printf '%s\n' "$hostile_memory_semantic" | "$bin" --policy "$policy" >/dev/null 2>&1
+hostile_memory_rc=$?
+set -e
+test "$hostile_memory_rc" -eq 1
+
+hostile_effect_semantic=$(printf '%s\n' "$file_semantic" | jq '(.lowering_plan.operations[] | select(.provider.symbol == "sendfile") | .effect_contract.determinism) = "deterministic"')
+set +e
+printf '%s\n' "$hostile_effect_semantic" | "$bin" --policy "$policy" >/dev/null 2>&1
+hostile_effect_rc=$?
+set -e
+test "$hostile_effect_rc" -eq 1
+
 set +e
 bad=$(printf '%s' '{"format":"flowanalyst.semantic_report","version":1,"status":"ok","binding_requirements":[{"contract":"bad","library":"libc.so.6","convention":"c","symbol":"flowcore_symbol_that_does_not_exist","effect":"pure","parameter_types":"","return_type":"c_int"}]}' | "$bin" --policy "$policy")
 bad_rc=$?

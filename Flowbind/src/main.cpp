@@ -265,6 +265,32 @@ void validate_lowering_plan(const std::string& report, const std::vector<Require
             if (json_text(json_field(operands[index], "type")) != expected_parameters[index])
                 throw std::runtime_error("external lowering operation operand carrier does not match its ABI contract");
         }
+        const Json* effect_contract = json_field(operation, "effect_contract");
+        if (effect_contract == nullptr || json_text(json_field(*effect_contract, "external")) != effect ||
+            json_text(json_field(*effect_contract, "determinism")) != (effect == "pure" ? "deterministic" : "unspecified") ||
+            json_text(json_field(*effect_contract, "certainty")) != "declared") {
+            throw std::runtime_error("lowering operation effect contract does not match provider declaration");
+        }
+        const auto& argument_resources = json_array(json_field(operation, "argument_resources"), "external lowering argument resources");
+        if (argument_resources.size() != expected_parameters.size()) throw std::runtime_error("lowering argument resource count does not match ABI parameters");
+        for (std::size_t index = 0; index < expected_parameters.size(); ++index) {
+            const Json* expected_type = nullptr;
+            for (const auto& type : json_array(json_field(root, "abi_type_contracts"), "abi_type_contracts"))
+                if (json_text(json_field(type, "contract")) == contract && json_text(json_field(type, "name")) == expected_parameters[index]) { expected_type = &type; break; }
+            const auto expected_access = expected_type ? json_text(json_field(*expected_type, "access")) : "value";
+            const auto expected_memory = expected_type == nullptr ? "none" :
+                (expected_access == "read" ? "read" : (expected_access == "read_write" || expected_access == "write" ? "read_write" : "opaque"));
+            if (json_integer(json_field(argument_resources[index], "index"), "argument resource index") != static_cast<long long>(index) ||
+                json_text(json_field(argument_resources[index], "type")) != expected_parameters[index] ||
+                json_text(json_field(argument_resources[index], "memory_effect")) != expected_memory ||
+                json_text(json_field(argument_resources[index], "ownership")) != (expected_type ? json_text(json_field(*expected_type, "ownership")) : "none") ||
+                json_text(json_field(argument_resources[index], "access")) != expected_access ||
+                json_text(json_field(argument_resources[index], "lifetime")) != (expected_type ? json_text(json_field(*expected_type, "lifetime")) : "value") ||
+                json_text(json_field(argument_resources[index], "nullable")) != (expected_type ? json_text(json_field(*expected_type, "nullable")) : "not_applicable") ||
+                json_text(json_field(argument_resources[index], "opaque")) != (expected_type ? json_text(json_field(*expected_type, "opaque")) : "false")) {
+                throw std::runtime_error("lowering argument resource does not match its ABI type contract");
+            }
+        }
         const Json* expected_resource = nullptr;
         for (const auto& type : json_array(json_field(root, "abi_type_contracts"), "abi_type_contracts")) {
             if (json_text(json_field(type, "contract")) == contract && json_text(json_field(type, "name")) == return_type &&

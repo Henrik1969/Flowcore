@@ -243,6 +243,13 @@
 - Added `sendfile` to the provider contract and exact policy boundary without
   adding any compiler dispatch. The arbitrary renamed copy and a two-megabyte
   multi-iteration native transfer pass with the already-built toolchain.
+- Added typed call-site effect contracts to every external lowering operation.
+  They retain the declared external effect, declared certainty, determinism,
+  and one exact argument-resource record per ABI parameter with memory effect,
+  ownership, access, lifetime, nullability, and opacity.
+- Flowbind now verifies those effect and argument-resource facts against the
+  provider declaration and exported ABI type contract. Adversarial mutations
+  of `sendfile` determinism and pointer memory access are rejected.
 
 ## Evidence
 
@@ -381,13 +388,16 @@
   file, retained cleanup/error returns, and rejected a plan with removed loops.
 - Canonical post-file-emitter checkpoint: the complete build succeeded and
   **54/54** CTest tests passed in 17.96 seconds.
+- Focused typed-effect checkpoint: `flowanalyst_pipeline`,
+  `flowbind_provider`, `sel_tui_pipeline`, and `flowlower_pipeline` passed,
+  including hostile effect and argument-memory mutations.
+- Canonical typed-effect checkpoint: the complete build succeeded and
+  **54/54** CTest tests passed in 19.43 seconds.
 
 ## Remaining work
 
 - The unqualified single-provider import alias remains explicitly transitional;
   selective-opening syntax is not yet part of the language.
-- Expand effects into external effect, argument-memory effect, determinism,
-  resource, ownership, nullability, and lifetime facts.
 - Model typed ncurses session/window resources.
 - Extend the ncurses provider with explicit typed session/window resource facts
   and failure cleanup diagnostics; its current dynamic provider is executable
@@ -402,6 +412,6 @@
 
 ## Exact next action
 
-Next action: expand external effect facts into argument-memory effects,
-determinism, ownership, nullability, resource lifetime, and cleanup evidence;
-then propagate and diagnose typed ncurses session/window resources end to end.
+Next action: introduce and propagate a distinct typed ncurses session/window
+resource carrier, including exact failure cleanup diagnostics, without treating
+generic `c_pointer` identity as sufficient resource authority.

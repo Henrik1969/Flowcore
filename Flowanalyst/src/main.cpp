@@ -723,6 +723,27 @@ int run(const Json& bundle) {
                       << ",\"effect\":" << quote(operation.effect)
                       << ",\"parameter_types\":" << quote(operation.parameter_types)
                       << ",\"return_type\":" << quote(operation.return_type) << "}";
+            std::cout << ",\"effect_contract\":{\"external\":" << quote(operation.effect)
+                      << ",\"determinism\":" << quote(operation.effect == "pure" ? "deterministic" : "unspecified")
+                      << ",\"certainty\":\"declared\"}";
+            std::cout << ",\"argument_resources\":[";
+            const auto parameter_carriers = operation.parameter_types.empty()
+                ? std::vector<std::string>{} : split_generic_arguments(operation.parameter_types);
+            for (std::size_t parameter = 0; parameter < parameter_carriers.size(); ++parameter) {
+                if (parameter) std::cout << ',';
+                const AbiTypeContract* contract = nullptr;
+                for (const auto& type : abi_type_contracts) if (type.contract == operation.contract && type.name == parameter_carriers[parameter]) { contract = &type; break; }
+                const auto memory_effect = contract == nullptr ? "none" :
+                    (contract->access == "read" ? "read" : (contract->access == "read_write" || contract->access == "write" ? "read_write" : "opaque"));
+                std::cout << "{\"index\":" << parameter << ",\"type\":" << quote(parameter_carriers[parameter])
+                          << ",\"memory_effect\":" << quote(memory_effect)
+                          << ",\"ownership\":" << quote(contract ? contract->ownership : "none")
+                          << ",\"access\":" << quote(contract ? contract->access : "value")
+                          << ",\"lifetime\":" << quote(contract ? contract->lifetime : "value")
+                          << ",\"nullable\":" << quote(contract ? contract->nullable : "not_applicable")
+                          << ",\"opaque\":" << quote(contract ? contract->opaque : "false") << "}";
+            }
+            std::cout << "]";
             for (const auto& type : abi_type_contracts) {
                 if (type.contract != operation.contract || type.name != operation.return_type || type.cleanup.empty()) continue;
                 std::cout << ",\"result_resource\":{\"type\":" << quote(type.name)
