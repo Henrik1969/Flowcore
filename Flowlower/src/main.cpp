@@ -342,6 +342,7 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
     const bool generic_return_value = profile_free_plan && generic_kind == "return_value" && operand_type == "c_int" &&
         !generic_return_expression.empty();
     const bool generic_external_result_return = generic_return_value && supported_external_result;
+    const bool generic_external_result_branch = generic_branch && supported_external_result;
     if (abi_abs_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"abi_abs_main\"") || !has(binding_report, "\"kind\": \"external_call\"") || !has(binding_report, "\"abs\""))) throw std::runtime_error("ABI binding report does not authorize the abi_abs_main lowering profile");
     if (abi_strlen_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"abi_strlen_main\"") || !has(binding_report, "\"kind\": \"external_call\"") || !has(binding_report, "\"strlen\""))) throw std::runtime_error("ABI binding report does not authorize the abi_strlen_main lowering profile");
     if (test_licbinds_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"test_licbinds_main\"") || !has(binding_report, "\"strlen\"") || !has(binding_report, "\"abs\"") || !has(binding_report, "\"puts\""))) throw std::runtime_error("ABI binding report does not authorize the test_licbinds_main lowering profile");
@@ -370,7 +371,7 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
     if (remaining_kernel_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"kind\": \"external_call\""))) throw std::runtime_error("ABI binding report does not authorize the remaining kernel lowering profile");
     if (flowcat_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"flowcat_argv_main\"") || !has(binding_report, "\"kind\": \"external_call\"") || !has(binding_report, "\"puts\""))) throw std::runtime_error("ABI binding report does not authorize the flowcat_argv_main lowering profile");
     if (flowcat_file_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"flowcat_file_main\"") || !has(binding_report, "\"kind\": \"capability_sequence\"") || !has(binding_report, "\"open\"") || !has(binding_report, "\"read\"") || !has(binding_report, "\"write\"") || !has(binding_report, "\"close\""))) throw std::runtime_error("ABI binding report does not authorize the flowcat_file_main lowering profile");
-    if (!llvm_path.empty() && (generic_external_scalar || generic_external_result_return) &&
+    if (!llvm_path.empty() && (generic_external_scalar || generic_external_result_return || generic_external_result_branch) &&
         (binding_report.empty() || (!has(binding_report, "\"status\": \"ready\"") && !has(binding_report, "\"status\":\"ready\"")) ||
          (!has(binding_report, "\"symbol\":" + quote(external_symbol)) && !has(binding_report, "\"symbol\": " + quote(external_symbol))))) throw std::runtime_error("generic lowering operation is not authorized");
     if (!llvm_path.empty() && !generic_external_scalar && !generic_return_value && !generic_branch && !trial_profile && !abi_abs_profile && !abi_strlen_profile && !test_licbinds_profile && !abi_ncurses_profile && !sel_profile && !abi_kernel_getgid_profile && !abi_kernel_geteuid_profile && !abi_kernel_getegid_profile && !abi_kernel_getpgrp_profile && !abi_kernel_getpgid_profile && !abi_kernel_getsid_profile && !abi_kernel_getpriority_profile && !generated_getlogin_profile && !generated_gettid_profile && !generated_sysconf_profile && !generated_getauxval_profile && !generated_system_info_profile && !abi_kernel_clock_profile && !abi_kernel_random_profile && !abi_kernel_uname_profile && !abi_kernel_openat_profile && !abi_kernel_read_profile && !abi_kernel_write_profile && !abi_kernel_lseek_profile && !abi_kernel_unlinkat_profile && !remaining_kernel_profile && !flowcat_profile && !flowcat_file_profile) throw std::runtime_error("LLVM emission requires an accepted lowering profile or supported generic lowering plan");
@@ -380,9 +381,12 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
         if (generic_branch) {
             llvm << "; Flowcore generic lowering plan: boolean branch\n"
                     "target triple = \"x86_64-pc-linux-gnu\"\n"
+                 << (generic_external_result_branch ? "declare i32 @" + external_symbol + "(" + (external_zero_arg ? "" : "i32") + ")\n" : "")
+                 <<
                     "define i32 @main() {\n"
                     "entry:\n"
                  << generic_expression_instructions.str()
+                 << external_instructions.str()
                  << branch_condition_instructions.str()
                  << "  br i1 " << branch_condition_value << ", label %then, label %else\n"
                     "then:\n"

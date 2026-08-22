@@ -139,4 +139,19 @@ clang "$tmpdir/result.ll" -o "$tmpdir/result"
 set +e
 "$tmpdir/result"
 set -e
+
+external_branch_source="$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass/profile_free_external_branch.flow"
+"$flowmini" --dump-frontend-bundle "$external_branch_source" | "$analyst" > "$tmpdir/external-branch.semantic.json"
+jq -e '.status == "ok" and .lowering_profile == "none" and any(.lowering_plan.operations[]; .kind == "external_call" and .provider.symbol == "getppid") and any(.lowering_plan.operations[]; .kind == "branch" and .operands[0].operator == ">")' "$tmpdir/external-branch.semantic.json" >/dev/null
+"$parallel" < "$tmpdir/external-branch.semantic.json" | "$optimizer" > "$tmpdir/external-branch.optimized.json"
+"$bind" --policy "$tmpdir/result.policy" < "$tmpdir/external-branch.semantic.json" > "$tmpdir/external-branch.binding.json"
+"$lower" --emit-llvm "$tmpdir/external-branch.ll" --binding-report "$tmpdir/external-branch.binding.json" < "$tmpdir/external-branch.optimized.json" > "$tmpdir/external-branch.lowering.json"
+grep -Fq 'call i32 @getppid()' "$tmpdir/external-branch.ll"
+grep -Fq 'icmp sgt i32 %flow_call_' "$tmpdir/external-branch.ll"
+clang "$tmpdir/external-branch.ll" -o "$tmpdir/external-branch"
+set +e
+"$tmpdir/external-branch"
+external_branch_rc=$?
+set -e
+test "$external_branch_rc" -eq 42
 printf '%s\n' 'Profile-free generic lowering: PASS'

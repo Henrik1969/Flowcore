@@ -77,6 +77,9 @@
   and returns the derived SSA value.
 - Migrated the existing getppid native example to the generic result path and
   removed its source-name dispatch from all three compiler stages.
+- External result symbols can now drive generic comparison branches. An
+  arbitrary getppid program emits the authorized call and `icmp`, takes the
+  source-defined true branch, and exits 42.
 
 ## Evidence
 
@@ -112,6 +115,5 @@
 
 ## Exact next action
 
-Next action: allow generic external results to feed comparison branches, then
-migrate the remaining zero-argument scalar identity examples in a reversible
-group.
+Next action: migrate the remaining zero-argument `c_int` identity examples in a
+reversible group, preserving each native observable-result assertion.
