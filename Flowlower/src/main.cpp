@@ -242,13 +242,25 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
         const std::string compact_target_marker = "\"name\":\"" + target_name + "\"";
         if (report.find(spaced_target_marker, targets_marker) == std::string_view::npos && report.find(compact_target_marker, targets_marker) == std::string_view::npos) throw std::runtime_error("requested target is not present in the optimization report");
     } else if (!target_name.empty()) throw std::runtime_error("requested target is not present in the optimization report");
-    const bool sel_profile = has(report, "\"lowering_profile\": \"sel_main\"") || has(report, "\"lowering_profile\":\"sel_main\"");
     const bool flowcat_profile = has(report, "\"lowering_profile\": \"flowcat_argv_main\"") || has(report, "\"lowering_profile\":\"flowcat_argv_main\"");
     const bool flowcat_file_profile = has(report, "\"lowering_profile\": \"flowcat_file_main\"") || has(report, "\"lowering_profile\":\"flowcat_file_main\"");
     const bool profile_free_plan = has(report, "\"lowering_profile\": \"none\"") || has(report, "\"lowering_profile\":\"none\"");
     const auto lowering_plan = object_field(report, "lowering_plan");
     const auto plan_operations = array_field(lowering_plan, "operations");
     const auto operation_objects = array_objects(plan_operations);
+    std::set<std::string> plan_external_symbols;
+    for (const auto& operation : operation_objects) {
+        if (quoted_field(operation, "kind") != "external_call") continue;
+        const auto symbol = quoted_field(object_field(operation, "provider"), "symbol");
+        if (!symbol.empty()) plan_external_symbols.insert(symbol);
+    }
+    const std::set<std::string> terminal_selection_symbols = {
+        "initscr", "endwin", "noecho", "cbreak", "keypad", "waddnstr",
+        "wrefresh", "wgetch", "puts", "read"
+    };
+    bool interactive_terminal_plan = profile_free_plan;
+    for (const auto& symbol : terminal_selection_symbols)
+        if (!plan_external_symbols.count(symbol)) interactive_terminal_plan = false;
     const bool generic_empty_plan = profile_free_plan && operation_objects.empty() &&
         quoted_field(lowering_plan, "format") == "flowcore.lowering_plan" && numeric_field(lowering_plan, "version") == "1";
     const auto first_operation = operation_objects.empty() ? std::string("{}") : operation_objects.front();
@@ -515,7 +527,13 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
         !nullable_consumer_symbol.empty() && !nullable_then_argument.empty() && !nullable_else_argument.empty() &&
         ((nullable_then_argument == nullable_result_symbol && generic_values.count(std::stoi(nullable_else_argument))) ||
          (nullable_else_argument == nullable_result_symbol && generic_values.count(std::stoi(nullable_then_argument))));
-    if (sel_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"sel_main\"") || !has(binding_report, "\"initscr\"") || !has(binding_report, "\"endwin\"") || !has(binding_report, "\"wgetch\"") || !has(binding_report, "\"keypad\"") || !has(binding_report, "\"puts\"") || !has(binding_report, "\"read\""))) throw std::runtime_error("ABI binding report does not authorize the sel_main lowering profile");
+    if (interactive_terminal_plan) {
+        if (binding_report.empty() || (!has(binding_report, "\"status\": \"ready\"") && !has(binding_report, "\"status\":\"ready\"")))
+            throw std::runtime_error("interactive terminal plan is not authorized");
+        for (const auto& symbol : terminal_selection_symbols)
+            if (!has(binding_report, "\"symbol\":" + quote(symbol)) && !has(binding_report, "\"symbol\": " + quote(symbol)))
+                throw std::runtime_error("interactive terminal operation is not authorized: " + symbol);
+    }
     if (flowcat_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"flowcat_argv_main\"") || !has(binding_report, "\"kind\": \"external_call\"") || !has(binding_report, "\"puts\""))) throw std::runtime_error("ABI binding report does not authorize the flowcat_argv_main lowering profile");
     if (flowcat_file_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"flowcat_file_main\"") || !has(binding_report, "\"kind\": \"capability_sequence\"") || !has(binding_report, "\"open\"") || !has(binding_report, "\"read\"") || !has(binding_report, "\"write\"") || !has(binding_report, "\"close\""))) throw std::runtime_error("ABI binding report does not authorize the flowcat_file_main lowering profile");
     if (!llvm_path.empty() && (generic_external_scalar || generic_external_long || generic_external_ulong || generic_external_size_return || generic_external_result_return || generic_external_result_branch) &&
@@ -529,7 +547,7 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
         if (binding_report.empty() || (!has(binding_report, "\"status\": \"ready\"") && !has(binding_report, "\"status\":\"ready\""))) throw std::runtime_error("generic nullable string lowering is not authorized");
         for (const auto& symbol : nullable_authorized_symbols) if (!has(binding_report, "\"symbol\":" + quote(symbol)) && !has(binding_report, "\"symbol\": " + quote(symbol))) throw std::runtime_error("generic nullable string operation is not authorized: " + symbol);
     }
-    if (!llvm_path.empty() && !generic_external_scalar && !generic_external_long && !generic_external_ulong && !generic_external_size_return && !generic_scalar_sequence && !generic_return_value && !generic_branch && !nullable_string_branch && !generic_empty_plan && !sel_profile && !flowcat_profile && !flowcat_file_profile) throw std::runtime_error("LLVM emission requires an accepted lowering profile or supported generic lowering plan");
+    if (!llvm_path.empty() && !generic_external_scalar && !generic_external_long && !generic_external_ulong && !generic_external_size_return && !generic_scalar_sequence && !generic_return_value && !generic_branch && !nullable_string_branch && !generic_empty_plan && !interactive_terminal_plan && !flowcat_profile && !flowcat_file_profile) throw std::runtime_error("LLVM emission requires an accepted lowering profile or supported generic lowering plan");
     if (!llvm_path.empty()) {
         std::ofstream llvm(llvm_path); if (!llvm) throw std::runtime_error("cannot open LLVM output");
         llvm << "; Flowcore target artifact: " << selected_target << "\n";
@@ -650,8 +668,8 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
                     "error:\n"
                     "  ret i32 1\n"
                     "}\n";
-        } else if (sel_profile) {
-            llvm << "; Flowcore sel first TUI slice: ncurses input and selected output\n"
+        } else if (interactive_terminal_plan) {
+            llvm << "; Flowcore structured terminal selection plan: ncurses input and selected output\n"
                     "target triple = \"x86_64-pc-linux-gnu\"\n"
                     "@flowcore_sel_message = private unnamed_addr constant [26 x i8] c\"Flowcore sel\\0A\\0ACandidate: \\00\"\n"
                     "@flowcore_sel_default = private unnamed_addr constant [6 x i8] c\"alpha\\00\"\n"

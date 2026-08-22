@@ -369,10 +369,6 @@ int run(const Json& bundle) {
         targets.push_back({id, mains, text(field(*symbol, "name"))}); if (mains != 1) add_diagnostic("FLOWANALYST_TARGET_ENTRYPOINT", "target '" + targets.back().name + "' must contain exactly one main procedure", id, "target:" + targets.back().name);
     }
     std::string lowering_profile = "none";
-    if (text(field(*source_unit, "name")) == "sel") {
-        std::set<std::string> sel_symbols; for (const auto& requirement : binding_requirements) sel_symbols.insert(requirement.symbol);
-        if (sel_symbols.count("initscr") && sel_symbols.count("endwin") && sel_symbols.count("wgetch") && sel_symbols.count("keypad")) lowering_profile = "sel_main";
-    }
     bool flowcat_entrypoint = false;
     if (text(field(*source_unit, "name")) == "flowcat") {
         for (const auto& [declaration_id, declaration] : declarations) {

@@ -27,13 +27,35 @@ printf '%s\n' 'allow libc.so.6 read c filesystem' >> "$tmpdir/policy"
 "$flowmini" --dump-frontend-bundle "$fixture" > "$tmpdir/frontend.json"
 jq -e '[.ast.declaration_pool[] | select(.kind == "import") | .alias] == ["curses", "libc", "linux"]' "$tmpdir/frontend.json" >/dev/null
 "$analyst" < "$tmpdir/frontend.json" > "$tmpdir/semantic.json"
-grep -q '"lowering_profile": "sel_main"' "$tmpdir/semantic.json"
+grep -q '"lowering_profile": "none"' "$tmpdir/semantic.json"
  jq -e '(.external_operations | map(.callee) | index("curses.initscr")) != null and (.external_operations | map(.callee) | index("libc.puts")) != null and (.external_operations | map(.callee) | index("linux.read")) != null' "$tmpdir/semantic.json" >/dev/null
 jq -e '.lowering_plan.operations | any(.provider.contract == "curses" and .provider.symbol == "initscr" and .result_resource.cleanup_capability == "endwin")' "$tmpdir/semantic.json" >/dev/null
 "$parallel" < "$tmpdir/semantic.json" > "$tmpdir/parallel.json"
 "$optimizer" < "$tmpdir/parallel.json" > "$tmpdir/optimized.json"
 "$bind" --policy "$tmpdir/policy" < "$tmpdir/semantic.json" > "$tmpdir/binding.json"
-jq -e '.status == "ready" and .lowering_profile == "sel_main" and (.symbols | index("wgetch")) != null and (.symbols | index("puts")) != null' "$tmpdir/binding.json" >/dev/null
+jq -e '.status == "ready" and .lowering_profile == "none" and (.symbols | index("wgetch")) != null and (.symbols | index("puts")) != null' "$tmpdir/binding.json" >/dev/null
+
+# The backend recognizes the structured capability plan, not this fixture's
+# source-unit identity. An arbitrary program name must retain the same path.
+sed \
+    -e "s|\"../../../std/|\"$root/Flowmini/flowmini_v25_symboltable_projection/std/|" \
+    -e 's/^program sel$/program terminal_choice_probe/' \
+    "$fixture" > "$tmpdir/renamed.flow"
+"$flowmini" --dump-frontend-bundle "$tmpdir/renamed.flow" |
+    "$analyst" > "$tmpdir/renamed.semantic.json"
+jq -e '.lowering_profile == "none" and (.lowering_plan.operations | any(.provider.symbol == "wgetch"))' "$tmpdir/renamed.semantic.json" >/dev/null
+"$parallel" < "$tmpdir/renamed.semantic.json" |
+    "$optimizer" > "$tmpdir/renamed.optimized.json"
+"$bind" --policy "$tmpdir/policy" < "$tmpdir/renamed.semantic.json" > "$tmpdir/renamed.binding.json"
+"$lower" --emit-llvm "$tmpdir/renamed.ll" --binding-report "$tmpdir/renamed.binding.json" < "$tmpdir/renamed.optimized.json" >/dev/null
+grep -q 'structured terminal selection plan' "$tmpdir/renamed.ll"
+
+# Exact operation authorization remains mandatory on the profile-free path.
+sed 's/"wgetch"/"invented_wgetch"/g' "$tmpdir/binding.json" > "$tmpdir/hostile.binding.json"
+if "$lower" --emit-llvm "$tmpdir/hostile.ll" --binding-report "$tmpdir/hostile.binding.json" < "$tmpdir/optimized.json" >/dev/null 2>&1; then
+    echo 'profile-free terminal lowering accepted a mutated binding report' >&2
+    exit 1
+fi
 "$lower" --emit-llvm "$tmpdir/program.ll" --binding-report "$tmpdir/binding.json" < "$tmpdir/optimized.json" > "$tmpdir/lowering.json"
 grep -q '"status": "emitted"' "$tmpdir/lowering.json"
 clang "$tmpdir/program.ll" -lncursesw -o "$tmpdir/program"

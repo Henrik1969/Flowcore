@@ -176,6 +176,11 @@
   distinct wires, and traces preserve full source/destination port identity.
 - Expanded graph coverage for deterministic fan-out order, multiple destination
   ports, unconnected-output diagnostics, and invalid-port contract rejection.
+- Removed the `sel` source-unit/profile selector from Flowanalyst and Flowlower.
+  Its current terminal slice is now selected from a profile-free structured
+  plan containing the required external operations, and every operation is
+  checked against the ready binding report. An arbitrarily renamed copy follows
+  the same path, while a binding with a mutated `wgetch` identity is rejected.
 
 ## Evidence
 
@@ -263,16 +268,22 @@
   registrations passed, including two separately attributed native targets.
 - Focused graph-law checkpoint: `flowcore_graph_routing` and both pass-corpus
   registrations passed with wire/signal provenance and fan-out assertions.
+- Focused profile-free terminal checkpoint: `sel_tui_pipeline`,
+  `flowanalyst_pipeline`, `flowbind_provider`, `flowlower_pipeline`, and both
+  pass-corpus registrations passed. The gate includes renamed-source and
+  hostile-binding cases plus positive input, EOF, and read-error execution.
 
 ## Remaining work
 
 - The unqualified single-provider import alias remains explicitly transitional;
   selective-opening syntax is not yet part of the language.
-- Replace the remaining `sel` and flowcat profile or
-  source-name lowering dispatch with reusable lowering plans. Kernel ABI
-  examples no longer use compiler profiles.
-- `sel` input safety is repaired, but its TUI control flow and argv selection
-  still live in a transitional handwritten emitter rather than Flow source.
+- Replace the remaining flowcat profile/source-name lowering dispatch with a
+  reusable lowering plan. Kernel ABI examples and `sel` no longer select a
+  compiler path by application identity.
+- `sel` input safety is repaired and its backend selection is profile-free, but
+  its TUI control flow and argv selection still live in a transitional
+  capability-plan emitter rather than structured Flow branches. Capability-set
+  recognition is not yet the final generic control-flow contract.
 - Expand effects into external effect, argument-memory effect, determinism,
   resource, ownership, nullability, and lifetime facts.
 - Model typed ncurses session/window resources.
@@ -290,5 +301,5 @@
 ## Exact next action
 
 Next action: express `sel` argument/input choice, key handling, and output
-branches in structured Flow operations so its remaining source-name profile can
-be removed without losing the newly covered cleanup and read-result laws.
+branches in structured Flow operations, then replace the transitional
+capability-set emitter without losing cleanup and read-result laws.
