@@ -6,4 +6,5 @@ main {
     process : c_int(0)
     session : c_int(0)
     linux.getsid(process) -> session
+    return session
 }

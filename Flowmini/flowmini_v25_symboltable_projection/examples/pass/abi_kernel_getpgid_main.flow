@@ -6,4 +6,5 @@ main {
     process : c_int(0)
     group : c_int(0)
     linux.getpgid(process) -> group
+    return group
 }

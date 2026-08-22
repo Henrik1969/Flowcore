@@ -5,4 +5,5 @@ program abi_kernel_geteuid_main
 main {
     effective_user : c_int(0)
     linux.geteuid() -> effective_user
+    return effective_user
 }

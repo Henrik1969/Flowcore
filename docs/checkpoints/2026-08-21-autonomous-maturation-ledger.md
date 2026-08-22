@@ -80,6 +80,14 @@
 - External result symbols can now drive generic comparison branches. An
   arbitrary getppid program emits the authorized call and `icmp`, takes the
   source-defined true branch, and exits 42.
+- Migrated the remaining zero-argument `c_int` identity examples (`getgid`,
+  `geteuid`, `getegid`, and `getpgrp`) to the generic plan and removed their
+  analyst, binder, and LLVM profile branches. Their previously implicit result
+  behavior is now expressed by explicit Flow return statements.
+- Migrated the one-argument `getpgid` and `getsid` examples to the same generic
+  path. Generic external operands can now consume initialized local symbols,
+  with initializer, call, and result-dependent expression instructions emitted
+  in dependency order.
 
 ## Evidence
 
@@ -89,6 +97,9 @@
 - Current complete checkpoint: **54/54 CTest tests passed** after the namespace
   ambiguity gate; the profile-free comparison-branch lowering gate is also
   green and its native ELF returned the expected status 42.
+- Focused identity migration checkpoint: `profile_free_generic_lowering` and
+  `flowlower_pipeline` passed, including native observable-result checks for all
+  six newly migrated identity examples.
 - Focused ncurses checkpoint: `ncurses_flow_pipeline`, `flow_less_pager`, and
   `flow_less_ncurses_pager` passed.
 
@@ -115,5 +126,6 @@
 
 ## Exact next action
 
-Next action: migrate the remaining zero-argument `c_int` identity examples in a
-reversible group, preserving each native observable-result assertion.
+Next action: extend generic external-call lowering from one to multiple typed
+integer operands, then migrate `getpriority` while preserving its native
+observable-result assertion.
