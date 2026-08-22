@@ -562,6 +562,19 @@ int run(const Json& bundle) {
         }
         lowering_operations.push_back(std::move(operation));
     }
+    for (const auto& [statement_id, statement] : statements) {
+        if (text(field(*statement, "kind")) != "return") continue;
+        const auto* payload = field(*statement, "payload");
+        const int value_expression = integer(field(payload, "value_expression"));
+        if (value_expression < 0) continue;
+        LoweringOperation operation;
+        operation.expression = value_expression;
+        operation.statement = statement_id;
+        operation.scope = statement_scopes.count(statement_id) ? statement_scopes.at(statement_id) : -1;
+        operation.kind = "return_value";
+        operation.arguments.push_back(value_expression);
+        lowering_operations.push_back(std::move(operation));
+    }
     std::vector<Region> regions;
     for (const auto& [id, scope] : scopes) regions.push_back({"scope:" + std::to_string(id), "scope", "sane", {}});
     for (const auto& [id, symbol] : symbols) {

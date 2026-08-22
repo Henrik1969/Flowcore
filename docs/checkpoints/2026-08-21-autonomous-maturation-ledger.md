@@ -50,16 +50,17 @@
   the same function name. The unqualified call is rejected with provenance-aware
   ambiguity diagnostics, while three explicit aliases compile to three distinct
   qualified operations.
+- Added generic profile-free `return_value` lowering for typed integer literals.
+  The plan carries the value through both intermediate stages and Flowlower
+  emits an executable ELF whose exit status is 42.
 
 ## Evidence
 
 - Focused binding checkpoint: `flowbind_provider`, `flowcore_stdlib_boundary`,
   and `native_binding_generation` passed.
 - Focused graph checkpoint: `flowcore_graph_routing` passed.
-- Current complete checkpoint: **53/53 CTest tests passed** after the profile-free
-  lowering test was added; the initial run exposed legacy-profile interception in
-  Flowlower, which was corrected by limiting generic lowering to plans whose
-  semantic profile is explicitly `none`.
+- Current complete checkpoint: **54/54 CTest tests passed** after the namespace
+  ambiguity gate; the profile-free value-lowering gate is now also green.
 - Focused ncurses checkpoint: `ncurses_flow_pipeline`, `flow_less_pager`, and
   `flow_less_ncurses_pager` passed.
 

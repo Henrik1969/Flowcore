@@ -1,0 +1,5 @@
+program profile_free_return
+
+main {
+    return 42
+}

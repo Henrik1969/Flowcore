@@ -46,4 +46,18 @@ grep -Fq 'declare i32 @getpgid(i32)' "$tmpdir/argument.ll"
 grep -Fq 'call i32 @getpgid(i32 0)' "$tmpdir/argument.ll"
 clang "$tmpdir/argument.ll" -o "$tmpdir/argument"
 "$tmpdir/argument"
+
+return_source="$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass/profile_free_return.flow"
+"$flowmini" --dump-frontend-bundle "$return_source" > "$tmpdir/return.frontend.json"
+"$analyst" < "$tmpdir/return.frontend.json" > "$tmpdir/return.semantic.json"
+jq -e '.status == "ok" and .lowering_profile == "none" and .lowering_plan.operations[0].kind == "return_value" and .lowering_plan.operations[0].operands[0].value == "42"' "$tmpdir/return.semantic.json" >/dev/null
+"$parallel" < "$tmpdir/return.semantic.json" | "$optimizer" > "$tmpdir/return.optimized.json"
+"$lower" --emit-llvm "$tmpdir/return.ll" < "$tmpdir/return.optimized.json" > "$tmpdir/return.lowering.json"
+grep -Fq 'ret i32 42' "$tmpdir/return.ll"
+clang "$tmpdir/return.ll" -o "$tmpdir/return"
+set +e
+"$tmpdir/return"
+return_rc=$?
+set -e
+test "$return_rc" -eq 42
 printf '%s\n' 'Profile-free generic lowering: PASS'
