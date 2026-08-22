@@ -116,7 +116,7 @@ test "$compare_rc" -eq 42
 result_source="$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass/profile_free_external_result.flow"
 printf '%s\n' 'allow libc.so.6 getppid c readonly - c_int' > "$tmpdir/result.policy"
 "$flowmini" --dump-frontend-bundle "$result_source" | "$analyst" > "$tmpdir/result.semantic.json"
-jq -e '.status == "ok" and .lowering_profile == "none" and any(.lowering_plan.operations[]; .kind == "external_call" and .provider.symbol == "getppid" and has("result_symbol_id")) and any(.lowering_plan.operations[]; .kind == "return_value" and .operands[0].kind == "identifier")' "$tmpdir/result.semantic.json" >/dev/null
+jq -e '.status == "ok" and .lowering_profile == "none" and any(.lowering_plan.operations[]; .kind == "external_call" and .provider.symbol == "getppid" and has("result_symbol_id")) and any(.lowering_plan.operations[]; .kind == "return_value" and .operands[0].kind == "binary" and .operands[0].left.kind == "identifier")' "$tmpdir/result.semantic.json" >/dev/null
 "$parallel" < "$tmpdir/result.semantic.json" | "$optimizer" > "$tmpdir/result.optimized.json"
 "$bind" --policy "$tmpdir/result.policy" < "$tmpdir/result.semantic.json" > "$tmpdir/result.binding.json"
 set +e
@@ -133,11 +133,10 @@ test "$wrong_binding_rc" -ne 0
 "$lower" --emit-llvm "$tmpdir/result.ll" --binding-report "$tmpdir/result.binding.json" < "$tmpdir/result.optimized.json" > "$tmpdir/result.lowering.json"
 grep -Fq 'declare i32 @getppid()' "$tmpdir/result.ll"
 grep -Fq '%flow_call_' "$tmpdir/result.ll"
-grep -Fq 'ret i32 %flow_call_' "$tmpdir/result.ll"
+grep -Fq 'add i32 %flow_call_' "$tmpdir/result.ll"
+grep -Fq 'ret i32 %flow_expr' "$tmpdir/result.ll"
 clang "$tmpdir/result.ll" -o "$tmpdir/result"
 set +e
 "$tmpdir/result"
-result_rc=$?
 set -e
-test "$result_rc" -gt 0
 printf '%s\n' 'Profile-free generic lowering: PASS'

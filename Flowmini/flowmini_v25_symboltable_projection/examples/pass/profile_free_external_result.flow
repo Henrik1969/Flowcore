@@ -5,5 +5,5 @@ program arbitrary_external_result
 main {
     parent : c_int(0)
     linux.getppid() -> parent
-    return parent
+    return parent + 1
 }

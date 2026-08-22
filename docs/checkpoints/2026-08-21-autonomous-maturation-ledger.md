@@ -72,6 +72,11 @@
 - Migrated the getuid native example to this result-placement path. Its program
   name is arbitrary, its lowering profile is `none`, and the handwritten
   getuid profile branches were removed from analysis, binding, and lowering.
+- Generic external results can now feed subsequent integer expressions. The
+  arbitrary getppid acceptance program emits a call, adds one to its result,
+  and returns the derived SSA value.
+- Migrated the existing getppid native example to the generic result path and
+  removed its source-name dispatch from all three compiler stages.
 
 ## Evidence
 
@@ -107,6 +112,6 @@
 
 ## Exact next action
 
-Next action: generalize profile-free external-call result placement so a call's
-typed result can feed integer expressions and branches, then migrate the
-remaining zero-argument scalar identity examples in one reversible group.
+Next action: allow generic external results to feed comparison branches, then
+migrate the remaining zero-argument scalar identity examples in a reversible
+group.

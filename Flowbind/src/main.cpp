@@ -312,7 +312,6 @@ int verify(const std::string& report, const std::string& policy_path, const std:
     if (profile == "abi_kernel_getgid_main") for (const auto& item : needed) if (item.symbol == "getgid") lowering_requirement = &item;
     if (profile == "abi_kernel_geteuid_main") for (const auto& item : needed) if (item.symbol == "geteuid") lowering_requirement = &item;
     if (profile == "abi_kernel_getegid_main") for (const auto& item : needed) if (item.symbol == "getegid") lowering_requirement = &item;
-    if (profile == "abi_kernel_getppid_main") for (const auto& item : needed) if (item.symbol == "getppid") lowering_requirement = &item;
     if (profile == "abi_kernel_getpgrp_main") for (const auto& item : needed) if (item.symbol == "getpgrp") lowering_requirement = &item;
     if (profile == "abi_kernel_getpgid_main") for (const auto& item : needed) if (item.symbol == "getpgid") lowering_requirement = &item;
     if (profile == "abi_kernel_getsid_main") for (const auto& item : needed) if (item.symbol == "getsid") lowering_requirement = &item;

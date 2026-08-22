@@ -240,7 +240,6 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
     const bool abi_kernel_getgid_profile = has(report, "\"lowering_profile\": \"abi_kernel_getgid_main\"") || has(report, "\"lowering_profile\":\"abi_kernel_getgid_main\"");
     const bool abi_kernel_geteuid_profile = has(report, "\"lowering_profile\": \"abi_kernel_geteuid_main\"") || has(report, "\"lowering_profile\":\"abi_kernel_geteuid_main\"");
     const bool abi_kernel_getegid_profile = has(report, "\"lowering_profile\": \"abi_kernel_getegid_main\"") || has(report, "\"lowering_profile\":\"abi_kernel_getegid_main\"");
-    const bool abi_kernel_getppid_profile = has(report, "\"lowering_profile\": \"abi_kernel_getppid_main\"") || has(report, "\"lowering_profile\":\"abi_kernel_getppid_main\"");
     const bool abi_kernel_getpgrp_profile = has(report, "\"lowering_profile\": \"abi_kernel_getpgrp_main\"") || has(report, "\"lowering_profile\":\"abi_kernel_getpgrp_main\"");
     const bool abi_kernel_getpgid_profile = has(report, "\"lowering_profile\": \"abi_kernel_getpgid_main\"") || has(report, "\"lowering_profile\":\"abi_kernel_getpgid_main\"");
     const bool abi_kernel_getsid_profile = has(report, "\"lowering_profile\": \"abi_kernel_getsid_main\"") || has(report, "\"lowering_profile\":\"abi_kernel_getsid_main\"");
@@ -351,7 +350,6 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
     if (abi_kernel_getgid_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"abi_kernel_getgid_main\"") || !has(binding_report, "\"kind\": \"external_call\"") || !has(binding_report, "\"getgid\""))) throw std::runtime_error("ABI binding report does not authorize the abi_kernel_getgid_main lowering profile");
     if (abi_kernel_geteuid_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"abi_kernel_geteuid_main\"") || !has(binding_report, "\"kind\": \"external_call\"") || !has(binding_report, "\"geteuid\""))) throw std::runtime_error("ABI binding report does not authorize the abi_kernel_geteuid_main lowering profile");
     if (abi_kernel_getegid_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"abi_kernel_getegid_main\"") || !has(binding_report, "\"kind\": \"external_call\"") || !has(binding_report, "\"getegid\""))) throw std::runtime_error("ABI binding report does not authorize the abi_kernel_getegid_main lowering profile");
-    if (abi_kernel_getppid_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"abi_kernel_getppid_main\"") || !has(binding_report, "\"kind\": \"external_call\"") || !has(binding_report, "\"getppid\""))) throw std::runtime_error("ABI binding report does not authorize the abi_kernel_getppid_main lowering profile");
     if (abi_kernel_getpgrp_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"abi_kernel_getpgrp_main\"") || !has(binding_report, "\"kind\": \"external_call\"") || !has(binding_report, "\"getpgrp\""))) throw std::runtime_error("ABI binding report does not authorize the abi_kernel_getpgrp_main lowering profile");
     if (abi_kernel_getpgid_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"abi_kernel_getpgid_main\"") || !has(binding_report, "\"kind\": \"external_call\"") || !has(binding_report, "\"getpgid\""))) throw std::runtime_error("ABI binding report does not authorize the abi_kernel_getpgid_main lowering profile");
     if (abi_kernel_getsid_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"abi_kernel_getsid_main\"") || !has(binding_report, "\"kind\": \"external_call\"") || !has(binding_report, "\"getsid\""))) throw std::runtime_error("ABI binding report does not authorize the abi_kernel_getsid_main lowering profile");
@@ -375,7 +373,7 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
     if (!llvm_path.empty() && (generic_external_scalar || generic_external_result_return) &&
         (binding_report.empty() || (!has(binding_report, "\"status\": \"ready\"") && !has(binding_report, "\"status\":\"ready\"")) ||
          (!has(binding_report, "\"symbol\":" + quote(external_symbol)) && !has(binding_report, "\"symbol\": " + quote(external_symbol))))) throw std::runtime_error("generic lowering operation is not authorized");
-    if (!llvm_path.empty() && !generic_external_scalar && !generic_return_value && !generic_branch && !trial_profile && !abi_abs_profile && !abi_strlen_profile && !test_licbinds_profile && !abi_ncurses_profile && !sel_profile && !abi_kernel_getgid_profile && !abi_kernel_geteuid_profile && !abi_kernel_getegid_profile && !abi_kernel_getppid_profile && !abi_kernel_getpgrp_profile && !abi_kernel_getpgid_profile && !abi_kernel_getsid_profile && !abi_kernel_getpriority_profile && !generated_getlogin_profile && !generated_gettid_profile && !generated_sysconf_profile && !generated_getauxval_profile && !generated_system_info_profile && !abi_kernel_clock_profile && !abi_kernel_random_profile && !abi_kernel_uname_profile && !abi_kernel_openat_profile && !abi_kernel_read_profile && !abi_kernel_write_profile && !abi_kernel_lseek_profile && !abi_kernel_unlinkat_profile && !remaining_kernel_profile && !flowcat_profile && !flowcat_file_profile) throw std::runtime_error("LLVM emission requires an accepted lowering profile or supported generic lowering plan");
+    if (!llvm_path.empty() && !generic_external_scalar && !generic_return_value && !generic_branch && !trial_profile && !abi_abs_profile && !abi_strlen_profile && !test_licbinds_profile && !abi_ncurses_profile && !sel_profile && !abi_kernel_getgid_profile && !abi_kernel_geteuid_profile && !abi_kernel_getegid_profile && !abi_kernel_getpgrp_profile && !abi_kernel_getpgid_profile && !abi_kernel_getsid_profile && !abi_kernel_getpriority_profile && !generated_getlogin_profile && !generated_gettid_profile && !generated_sysconf_profile && !generated_getauxval_profile && !generated_system_info_profile && !abi_kernel_clock_profile && !abi_kernel_random_profile && !abi_kernel_uname_profile && !abi_kernel_openat_profile && !abi_kernel_read_profile && !abi_kernel_write_profile && !abi_kernel_lseek_profile && !abi_kernel_unlinkat_profile && !remaining_kernel_profile && !flowcat_profile && !flowcat_file_profile) throw std::runtime_error("LLVM emission requires an accepted lowering profile or supported generic lowering plan");
     if (!llvm_path.empty()) {
         std::ofstream llvm(llvm_path); if (!llvm) throw std::runtime_error("cannot open LLVM output");
         llvm << "; Flowcore target artifact: " << selected_target << "\n";
@@ -540,15 +538,6 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
                     "entry:\n"
                     "  %effective_group = call i32 @getegid()\n"
                     "  ret i32 %effective_group\n"
-                    "}\n";
-        } else if (abi_kernel_getppid_profile) {
-            llvm << "; Flowcore kernel ABI lowering: getppid\n"
-                    "target triple = \"x86_64-pc-linux-gnu\"\n"
-                    "declare i32 @getppid()\n"
-                    "define i32 @main() {\n"
-                    "entry:\n"
-                    "  %parent = call i32 @getppid()\n"
-                    "  ret i32 %parent\n"
                     "}\n";
         } else if (abi_kernel_getpgrp_profile) {
             llvm << "; Flowcore kernel ABI lowering: getpgrp\n"

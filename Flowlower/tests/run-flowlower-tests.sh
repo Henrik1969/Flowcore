@@ -214,7 +214,7 @@ test "$actual_egid" -eq $((expected_egid % 256))
 kernel_getppid_source="$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass/abi_kernel_getppid_main.flow"
 "$flowmini" --dump-frontend-bundle "$kernel_getppid_source" > "$tmpdir/kernel-getppid.bundle.json"
 "$analyst" < "$tmpdir/kernel-getppid.bundle.json" > "$tmpdir/kernel-getppid.semantic.json"
-grep -q '"lowering_profile": "abi_kernel_getppid_main"' "$tmpdir/kernel-getppid.semantic.json"
+grep -q '"lowering_profile": "none"' "$tmpdir/kernel-getppid.semantic.json"
 "$bind" --policy "$policy" < "$tmpdir/kernel-getppid.semantic.json" > "$tmpdir/kernel-getppid.binding.json"
 "$parallel" < "$tmpdir/kernel-getppid.semantic.json" > "$tmpdir/kernel-getppid.parallel.json"
 "$optimizer" < "$tmpdir/kernel-getppid.parallel.json" > "$tmpdir/kernel-getppid.optimized.json"
