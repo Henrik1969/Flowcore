@@ -45,6 +45,7 @@ core.*
 # Editors
 .vscode/
 .idea/
+.intellijPlatform/
 *.swp
 *.swo
 Session.vim
