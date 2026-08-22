@@ -113,6 +113,26 @@ compare_rc=$?
 set -e
 test "$compare_rc" -eq 42
 
+loop_source="$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass/profile_free_integer_loop.flow"
+"$flowmini" --dump-frontend-bundle "$loop_source" | "$analyst" > "$tmpdir/loop.semantic.json"
+jq -e '.status == "ok" and .lowering_profile == "none" and any(.lowering_plan.operations[]; .kind == "loop") and any(.lowering_plan.operations[]; .kind == "assignment")' "$tmpdir/loop.semantic.json" >/dev/null
+"$parallel" < "$tmpdir/loop.semantic.json" | "$optimizer" > "$tmpdir/loop.optimized.json"
+"$lower" --emit-llvm "$tmpdir/loop.ll" < "$tmpdir/loop.optimized.json" >/dev/null
+grep -Fq 'generic lowering plan: integer loop and mutation' "$tmpdir/loop.ll"
+grep -Fq 'br label %flow_loop' "$tmpdir/loop.ll"
+clang "$tmpdir/loop.ll" -o "$tmpdir/loop"
+set +e
+"$tmpdir/loop"
+loop_rc=$?
+set -e
+test "$loop_rc" -eq 4
+
+jq '.lowering_plan.operations |= map(select(.kind != "assignment"))' "$tmpdir/loop.optimized.json" > "$tmpdir/loop-without-mutation.optimized.json"
+if "$lower" --emit-llvm "$tmpdir/loop-without-mutation.ll" < "$tmpdir/loop-without-mutation.optimized.json" >/dev/null 2>&1; then
+    echo 'integer loop lowering accepted a plan without its source mutation' >&2
+    exit 1
+fi
+
 args_source="$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass/profile_free_args_length.flow"
 "$flowmini" --dump-frontend-bundle "$args_source" | "$analyst" > "$tmpdir/args.semantic.json"
 jq -e '.status == "ok" and .lowering_profile == "none" and any(.lowering_plan.operations[]; .kind == "value_definition" and .operands[0].intrinsic == "list_length")' "$tmpdir/args.semantic.json" >/dev/null

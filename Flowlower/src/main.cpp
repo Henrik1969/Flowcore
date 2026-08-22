@@ -483,7 +483,12 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
         external_return == "c_long" && (external_zero_arg || external_int_call);
     const bool generic_external_ulong = profile_free_plan && generic_kind == "external_call" && valid_c_symbol(external_symbol) &&
         external_return == "c_ulong" && external_ulong_call;
-    const bool generic_return_value = profile_free_plan && generic_kind == "return_value" && operand_type == "c_int" &&
+    bool has_loop_or_assignment = false;
+    for (const auto& operation : operation_objects) {
+        const auto kind = quoted_field(operation, "kind");
+        if (kind == "loop" || kind == "assignment") has_loop_or_assignment = true;
+    }
+    const bool generic_return_value = profile_free_plan && !has_loop_or_assignment && generic_kind == "return_value" && operand_type == "c_int" &&
         !generic_return_expression.empty();
     const bool generic_external_result_return = generic_return_value && supported_external_result;
     const bool generic_external_result_branch = generic_branch && supported_external_result;
@@ -491,6 +496,69 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
     const bool generic_external_size_return = profile_free_plan && generic_kind == "return_value" &&
         quoted_field(first_operand, "type") == "c_size_t" && !return_symbol.empty() && return_symbol == external_result_symbol &&
         valid_c_symbol(external_symbol) && external_return == "c_size_t" && external_string_call;
+    std::map<std::string, std::string> loop_initial_values;
+    std::string integer_loop_operation = "{}";
+    std::string integer_loop_assignment = "{}";
+    std::string integer_loop_return = "{}";
+    bool generic_integer_loop = profile_free_plan;
+    for (const auto& operation : operation_objects) {
+        const auto kind = quoted_field(operation, "kind");
+        if (kind == "value_definition") {
+            const auto symbol = numeric_field(operation, "result_symbol_id");
+            const auto operand = first_array_object(array_field(operation, "operands"));
+            if (symbol.empty() || quoted_field(operand, "kind") != "integer_literal" ||
+                quoted_field(operand, "type") != "c_int" || !valid_integer_literal(quoted_field(operand, "value"))) {
+                generic_integer_loop = false;
+            } else loop_initial_values[symbol] = quoted_field(operand, "value");
+        } else if (kind == "loop" && integer_loop_operation == "{}") integer_loop_operation = operation;
+        else if (kind == "assignment" && integer_loop_assignment == "{}") integer_loop_assignment = operation;
+        else if (kind == "return_value" && integer_loop_return == "{}") integer_loop_return = operation;
+        else generic_integer_loop = false;
+    }
+    const auto integer_loop_condition = first_array_object(array_field(integer_loop_operation, "operands"));
+    const auto integer_loop_left = object_field(integer_loop_condition, "left");
+    const auto integer_loop_right = object_field(integer_loop_condition, "right");
+    const auto integer_loop_left_symbol = numeric_field(integer_loop_left, "symbol_id");
+    const auto integer_loop_right_symbol = numeric_field(integer_loop_right, "symbol_id");
+    const auto integer_loop_body = numeric_field(integer_loop_operation, "body_block_id");
+    const auto integer_assignment_expression = first_array_object(array_field(integer_loop_assignment, "operands"));
+    const auto integer_assignment_left = object_field(integer_assignment_expression, "left");
+    const auto integer_assignment_right = object_field(integer_assignment_expression, "right");
+    const auto integer_assignment_left_symbol = numeric_field(integer_assignment_left, "symbol_id");
+    const auto integer_assignment_right_symbol = numeric_field(integer_assignment_right, "symbol_id");
+    const auto integer_assignment_target = numeric_field(integer_loop_assignment, "result_symbol_id");
+    const auto integer_return_operand = first_array_object(array_field(integer_loop_return, "operands"));
+    const auto integer_return_symbol = numeric_field(integer_return_operand, "symbol_id");
+    auto integer_predicate = [](const std::string& operation) {
+        if (operation == "==") return std::string("eq");
+        if (operation == "!=") return std::string("ne");
+        if (operation == "<") return std::string("slt");
+        if (operation == "<=") return std::string("sle");
+        if (operation == ">") return std::string("sgt");
+        if (operation == ">=") return std::string("sge");
+        return std::string{};
+    };
+    auto integer_instruction = [](const std::string& operation) {
+        if (operation == "+") return std::string("add");
+        if (operation == "-") return std::string("sub");
+        if (operation == "*") return std::string("mul");
+        if (operation == "/") return std::string("sdiv");
+        return std::string{};
+    };
+    const auto integer_loop_predicate = integer_predicate(quoted_field(integer_loop_condition, "operator"));
+    const auto integer_assignment_instruction = integer_instruction(quoted_field(integer_assignment_expression, "operator"));
+    generic_integer_loop = generic_integer_loop && integer_loop_operation != "{}" && integer_loop_assignment != "{}" &&
+        integer_loop_return != "{}" && loop_initial_values.size() >= 2 && !integer_loop_predicate.empty() &&
+        !integer_assignment_instruction.empty() && !integer_loop_body.empty() &&
+        numeric_field(integer_loop_assignment, "block_id") == integer_loop_body &&
+        quoted_field(integer_loop_left, "kind") == "identifier" && quoted_field(integer_loop_left, "type") == "c_int" &&
+        quoted_field(integer_loop_right, "kind") == "identifier" && quoted_field(integer_loop_right, "type") == "c_int" &&
+        quoted_field(integer_assignment_left, "kind") == "identifier" && quoted_field(integer_assignment_left, "type") == "c_int" &&
+        quoted_field(integer_assignment_right, "kind") == "identifier" && quoted_field(integer_assignment_right, "type") == "c_int" &&
+        quoted_field(integer_return_operand, "kind") == "identifier" && quoted_field(integer_return_operand, "type") == "c_int" &&
+        loop_initial_values.count(integer_loop_left_symbol) && loop_initial_values.count(integer_loop_right_symbol) &&
+        loop_initial_values.count(integer_assignment_left_symbol) && loop_initial_values.count(integer_assignment_right_symbol) &&
+        loop_initial_values.count(integer_assignment_target) && loop_initial_values.count(integer_return_symbol);
     std::ostringstream sequence_declarations;
     std::ostringstream sequence_calls;
     std::set<std::string> sequence_symbols;
@@ -618,7 +686,7 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
         if (binding_report.empty() || (!has(binding_report, "\"status\": \"ready\"") && !has(binding_report, "\"status\":\"ready\""))) throw std::runtime_error("generic nullable string lowering is not authorized");
         for (const auto& symbol : nullable_authorized_symbols) if (!has(binding_report, "\"symbol\":" + quote(symbol)) && !has(binding_report, "\"symbol\": " + quote(symbol))) throw std::runtime_error("generic nullable string operation is not authorized: " + symbol);
     }
-    if (!llvm_path.empty() && !generic_external_scalar && !generic_external_long && !generic_external_ulong && !generic_external_size_return && !generic_scalar_sequence && !generic_return_value && !generic_branch && !nullable_string_branch && !generic_empty_plan && !interactive_terminal_plan && !file_copy_plan) throw std::runtime_error("LLVM emission requires an accepted lowering profile or supported generic lowering plan");
+    if (!llvm_path.empty() && !generic_external_scalar && !generic_external_long && !generic_external_ulong && !generic_external_size_return && !generic_scalar_sequence && !generic_return_value && !generic_branch && !generic_integer_loop && !nullable_string_branch && !generic_empty_plan && !interactive_terminal_plan && !file_copy_plan) throw std::runtime_error("LLVM emission requires an accepted lowering profile or supported generic lowering plan");
     if (!llvm_path.empty()) {
         std::ofstream llvm(llvm_path); if (!llvm) throw std::runtime_error("cannot open LLVM output");
         llvm << "; Flowcore target artifact: " << selected_target << "\n";
@@ -666,6 +734,30 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
                  << value_initialization_instructions.str()
                  << sequence_calls.str()
                  << "  ret i32 0\n"
+                    "}\n";
+        } else if (generic_integer_loop) {
+            llvm << "; Flowcore generic lowering plan: integer loop and mutation\n"
+                    "target triple = \"x86_64-pc-linux-gnu\"\n"
+                    "define i32 @main() {\n"
+                    "entry:\n";
+            for (const auto& [symbol, value] : loop_initial_values)
+                llvm << "  %flow_slot_" << symbol << " = alloca i32, align 4\n"
+                     << "  store i32 " << value << ", ptr %flow_slot_" << symbol << ", align 4\n";
+            llvm << "  br label %flow_loop\n"
+                    "flow_loop:\n"
+                 << "  %flow_loop_left = load i32, ptr %flow_slot_" << integer_loop_left_symbol << ", align 4\n"
+                 << "  %flow_loop_right = load i32, ptr %flow_slot_" << integer_loop_right_symbol << ", align 4\n"
+                 << "  %flow_loop_condition = icmp " << integer_loop_predicate << " i32 %flow_loop_left, %flow_loop_right\n"
+                    "  br i1 %flow_loop_condition, label %flow_loop_body, label %flow_loop_exit\n"
+                    "flow_loop_body:\n"
+                 << "  %flow_assignment_left = load i32, ptr %flow_slot_" << integer_assignment_left_symbol << ", align 4\n"
+                 << "  %flow_assignment_right = load i32, ptr %flow_slot_" << integer_assignment_right_symbol << ", align 4\n"
+                 << "  %flow_assignment_value = " << integer_assignment_instruction << " i32 %flow_assignment_left, %flow_assignment_right\n"
+                 << "  store i32 %flow_assignment_value, ptr %flow_slot_" << integer_assignment_target << ", align 4\n"
+                    "  br label %flow_loop\n"
+                    "flow_loop_exit:\n"
+                 << "  %flow_loop_return = load i32, ptr %flow_slot_" << integer_return_symbol << ", align 4\n"
+                    "  ret i32 %flow_loop_return\n"
                     "}\n";
         } else if (generic_branch) {
             llvm << "; Flowcore generic lowering plan: boolean branch\n"

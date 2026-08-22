@@ -205,6 +205,11 @@
   Flowcat now converts the `c_long` read result to its declared `c_size_t`
   write count in the plan, and Flowbind verifies every external operand count
   and carrier type against the exact provider signature.
+- Added reusable profile-free integer loop and mutation lowering. A previously
+  unknown program initializes local `c_int` values, evaluates its structured
+  loop comparison on every iteration, applies a source assignment through
+  mutable storage, and returns the final value without any source-name or
+  capability selector.
 
 ## Evidence
 
@@ -316,6 +321,11 @@
   `flowbind_provider`, and `flowlower_pipeline` passed. The semantic gate
   asserts the explicit `c_long` to `c_size_t` conversion and an adversarial
   write operation with a mutated operand carrier is rejected.
+- Focused generic-loop checkpoint: `profile_free_generic_lowering`,
+  `flowlower_pipeline`, `flowanalyst_pipeline`, and both pass-corpus
+  registrations passed. The native arbitrary counter loop exited 4, its LLVM
+  contains the reusable loop back-edge, and deleting the mutation operation
+  caused structured refusal.
 
 ## Remaining work
 
@@ -344,7 +354,7 @@
 
 ## Exact next action
 
-Next action: generalize loop and assignment lowering from the new plan
-operations, including explicit compatible-carrier conversion, then retire the
-transitional file-copy emitter without losing partial-write, cleanup, or error
+Next action: extend reusable loop/mutation lowering to nested loops, external
+results, dynamic argv indexing, branches, cleanup, and early returns, then
+retire the transitional file-copy emitter without losing partial-write or error
 behavior.
