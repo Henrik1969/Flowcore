@@ -465,15 +465,33 @@
   `flow_less_ncurses_pager`, and both pass-corpus registrations passed. The
   complete canonical build and suite then passed **54/54** tests in 19.33
   seconds.
+- Final canonical verification: `cmake --build build -j4` succeeded and
+  `ctest --test-dir build --output-on-failure` passed **54/54** tests in 19.33
+  seconds. This includes generated-binding acceptance, native LLVM linking and
+  execution, malformed Flowbind input, `sel`, `flowcat`, ncurses ownership,
+  graph laws and both `flow_less` providers.
+- Final sanitizer verification rebuilt
+  `/tmp/flowcore-reusable-chain-sanitize` with
+  `-fsanitize=address,undefined -fno-omit-frame-pointer`; with leak detection
+  disabled for the external-provider test environment, the complete suite
+  passed **54/54** tests in 37.13 seconds.
+- Final dispatch inventory found no `lowering_profile`, application/source-name
+  selectors, terminal/file-copy capability-set recognizers, or handwritten
+  application emitters in Flowanalyst, Flowbind, Flowparallel, Flowoptimize or
+  Flowlower. The mission commit range is `a1b51d2^..HEAD` on
+  `v25-symboltable-projection`.
 
 ## Remaining work
 
 - The unqualified single-provider import alias remains explicitly transitional;
   selective-opening syntax is not yet part of the language.
-- Reconcile documentation and test counts after the implementation stabilizes.
+- Platform limitation: native demonstrations target the tested Linux
+  x86-64/libc/LLVM environment; ncurses acceptance requires
+  `libncursesw.so.6` and a pseudo-terminal. The current bounded-storage
+  compatibility representation still interprets positive `c_pointer(N)` as
+  call-lifetime writable storage pending the documented public-language choice.
 
 ## Exact next action
 
-Next action: perform the final definition-of-done inventory, rerun the sanitizer
-and native acceptance demonstrations, reconcile public documentation and exact
-test counts, then create and push the final clean checkpoint.
+Next action: commit and push this final reconciliation, set `.codex-run-state`
+to `DONE`, and verify the pushed branch and worktree are clean.

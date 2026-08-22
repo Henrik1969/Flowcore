@@ -20,13 +20,15 @@ Flow source
 
 ## Current facts
 
-- The chain is executable and regression-tested, but many native paths are
-  selected by source-unit names and handwritten `lowering_profile` lists.
-- Flowanalyst already knows call sites, resolved symbols, argument expression
-  identities, result symbols, ABI requirements, effects, and provenance.
-- Flowbind already authorizes provider/library/symbol/signature combinations.
-- The missing reusable artifact is a structured lowering plan connecting those
-  facts without fixture names.
+- Every required compiler stage consumes or preserves the versioned structured
+  lowering plan without application, source-unit or profile selection.
+- Flowbind authorizes exact provider, convention, carrier, effect, resource and
+  generated contract/evidence identities.
+- Flowlower uses one typed structured emitter for values, calls, branches,
+  loops, assignments, checked argv indexing, cleanup and returns; handwritten
+  application emitters have been removed.
+- The acceptance and migrated native examples build and execute through the
+  already-built compiler chain without adding compiler dispatch.
 
 ## Migration gates
 
@@ -48,14 +50,15 @@ Flow source
 - Unsupported lowering fails with a structured report and provenance.
 - Legacy compatibility is temporary and must not become the generic contract.
 
-## First implementation slice
+## Acceptance proof
 
 Flowanalyst emits one operation per resolved call site. An operation records its
 callee, resolved provider symbol when present, ABI signature/effect facts,
 argument expression IDs, result symbol, and source identity. This is additive to
 semantic report v1 and is the input contract for the generic lowerer migration.
 
-The first profile-free executable proof is `profile_free_getpid`. It has an
-arbitrary program name, retains `lowering_profile: none`, carries its generic
-operation through Flowparallel and Flowoptimize, receives exact Flowbind
-authorization, and is emitted and executed by Flowlower.
+`profile_free_getpid` and the generated `gettid` binding prove independent
+source and provider selection. Arbitrarily named programs carry their generic
+operations through Flowparallel and Flowoptimize, receive exact Flowbind
+authorization, and are emitted, linked and executed by Flowlower without a C++
+source change or toolchain rebuild.
