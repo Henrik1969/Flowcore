@@ -60,6 +60,9 @@
   `value_definition` operations with symbol identity, and return expressions
   can consume those values through the plan. The profile-free local-value ELF
   test executes successfully.
+- Added generic boolean branch operations with explicit then/else block IDs.
+  A profile-free conditional-return program now lowers to LLVM branches and
+  executes the selected return path.
 
 ## Evidence
 

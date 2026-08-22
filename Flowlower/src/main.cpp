@@ -245,9 +245,11 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
     const auto first_operation = operation_objects.empty() ? std::string("{}") : operation_objects.front();
     std::string return_operation = "{}";
     for (const auto& operation : operation_objects) if (quoted_field(operation, "kind") == "return_value") { return_operation = operation; break; }
+    std::string branch_operation = "{}";
+    for (const auto& operation : operation_objects) if (quoted_field(operation, "kind") == "branch") { branch_operation = operation; break; }
     std::string value_operation = "{}";
     for (const auto& operation : operation_objects) if (quoted_field(operation, "kind") == "value_definition") { value_operation = operation; break; }
-    const auto selected_operation = return_operation == "{}" ? first_operation : return_operation;
+    const auto selected_operation = branch_operation != "{}" ? branch_operation : (return_operation == "{}" ? first_operation : return_operation);
     const auto generic_kind = quoted_field(selected_operation, "kind");
     const auto generic_symbol = quoted_field(selected_operation, "symbol");
     const auto generic_parameters = quoted_field(selected_operation, "parameter_types");
@@ -271,6 +273,21 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
     const auto generic_return_expression = generic_kind == "return_value"
         ? emit_integer_expression(first_operand, generic_expression_instructions, generic_expression_temporary, generic_values)
         : std::string{};
+    const auto branch_operands = array_field(branch_operation, "operands");
+    const auto branch_operand = first_array_object(branch_operands);
+    const auto branch_condition = quoted_field(branch_operand, "value");
+    const auto branch_then = numeric_field(branch_operation, "then_block_id");
+    const auto branch_else = numeric_field(branch_operation, "else_block_id");
+    auto return_for_block = [&](const std::string& block) {
+        for (const auto& operation : operation_objects) if (quoted_field(operation, "kind") == "return_value" && numeric_field(operation, "block_id") == block) return array_field(operation, "operands");
+        return std::string("[]");
+    };
+    const auto then_operand = first_array_object(return_for_block(branch_then));
+    const auto else_operand = first_array_object(return_for_block(branch_else));
+    const auto then_value = quoted_field(then_operand, "value");
+    const auto else_value = quoted_field(else_operand, "value");
+    const bool generic_branch = profile_free_plan && generic_kind == "branch" && (branch_condition == "true" || branch_condition == "false") &&
+        valid_integer_literal(then_value) && valid_integer_literal(else_value) && !branch_then.empty() && !branch_else.empty();
     const bool generic_zero_arg = generic_parameters.empty() && has(first_operation, "\"arguments\":[]");
     const bool generic_one_int_arg = generic_parameters == "c_int" && operand_kind == "integer_literal" && operand_type == "c_int" && !operand_value.empty();
     const bool generic_external_scalar = profile_free_plan && generic_kind == "external_call" && valid_c_symbol(generic_symbol) &&
@@ -308,11 +325,22 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
     if (flowcat_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"flowcat_argv_main\"") || !has(binding_report, "\"kind\": \"external_call\"") || !has(binding_report, "\"puts\""))) throw std::runtime_error("ABI binding report does not authorize the flowcat_argv_main lowering profile");
     if (flowcat_file_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"flowcat_file_main\"") || !has(binding_report, "\"kind\": \"capability_sequence\"") || !has(binding_report, "\"open\"") || !has(binding_report, "\"read\"") || !has(binding_report, "\"write\"") || !has(binding_report, "\"close\""))) throw std::runtime_error("ABI binding report does not authorize the flowcat_file_main lowering profile");
     if (generic_external_scalar && (!binding_report.empty() && !has(binding_report, "\"status\": \"ready\"") && !has(binding_report, "\"status\":\"ready\""))) throw std::runtime_error("generic lowering operation is not authorized");
-    if (!llvm_path.empty() && !generic_external_scalar && !generic_return_value && !trial_profile && !abi_abs_profile && !abi_strlen_profile && !test_licbinds_profile && !abi_ncurses_profile && !sel_profile && !abi_kernel_getuid_profile && !abi_kernel_getgid_profile && !abi_kernel_geteuid_profile && !abi_kernel_getegid_profile && !abi_kernel_getppid_profile && !abi_kernel_getpgrp_profile && !abi_kernel_getpgid_profile && !abi_kernel_getsid_profile && !abi_kernel_getpriority_profile && !generated_getlogin_profile && !generated_gettid_profile && !generated_sysconf_profile && !generated_getauxval_profile && !generated_system_info_profile && !abi_kernel_clock_profile && !abi_kernel_random_profile && !abi_kernel_uname_profile && !abi_kernel_openat_profile && !abi_kernel_read_profile && !abi_kernel_write_profile && !abi_kernel_lseek_profile && !abi_kernel_unlinkat_profile && !remaining_kernel_profile && !flowcat_profile && !flowcat_file_profile) throw std::runtime_error("LLVM emission requires an accepted lowering profile or supported generic lowering plan");
+    if (!llvm_path.empty() && !generic_external_scalar && !generic_return_value && !generic_branch && !trial_profile && !abi_abs_profile && !abi_strlen_profile && !test_licbinds_profile && !abi_ncurses_profile && !sel_profile && !abi_kernel_getuid_profile && !abi_kernel_getgid_profile && !abi_kernel_geteuid_profile && !abi_kernel_getegid_profile && !abi_kernel_getppid_profile && !abi_kernel_getpgrp_profile && !abi_kernel_getpgid_profile && !abi_kernel_getsid_profile && !abi_kernel_getpriority_profile && !generated_getlogin_profile && !generated_gettid_profile && !generated_sysconf_profile && !generated_getauxval_profile && !generated_system_info_profile && !abi_kernel_clock_profile && !abi_kernel_random_profile && !abi_kernel_uname_profile && !abi_kernel_openat_profile && !abi_kernel_read_profile && !abi_kernel_write_profile && !abi_kernel_lseek_profile && !abi_kernel_unlinkat_profile && !remaining_kernel_profile && !flowcat_profile && !flowcat_file_profile) throw std::runtime_error("LLVM emission requires an accepted lowering profile or supported generic lowering plan");
     if (!llvm_path.empty()) {
         std::ofstream llvm(llvm_path); if (!llvm) throw std::runtime_error("cannot open LLVM output");
         llvm << "; Flowcore target artifact: " << selected_target << "\n";
-        if (generic_return_value) {
+        if (generic_branch) {
+            llvm << "; Flowcore generic lowering plan: boolean branch\n"
+                    "target triple = \"x86_64-pc-linux-gnu\"\n"
+                    "define i32 @main() {\n"
+                    "entry:\n"
+                 << "  br i1 " << (branch_condition == "true" ? "true" : "false") << ", label %then, label %else\n"
+                    "then:\n"
+                 << "  ret i32 " << then_value << "\n"
+                    "else:\n"
+                 << "  ret i32 " << else_value << "\n"
+                    "}\n";
+        } else if (generic_return_value) {
             llvm << "; Flowcore generic lowering plan: integer return value\n"
                     "target triple = \"x86_64-pc-linux-gnu\"\n"
                     "define i32 @main() {\n"

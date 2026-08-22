@@ -69,7 +69,7 @@ struct AggregateLayout { std::string contract, name; std::vector<std::pair<std::
 struct Region { std::string id, kind, status; std::vector<std::string> prerequisites; };
 struct EffectFact { int declaration = -1, symbol = -1; std::string name, effect, certainty, reason; };
 struct CallSite { int expression = -1, statement = -1, scope = -1, callee_symbol = -1, write_symbol = -1; std::string callee; bool pure = false; std::set<int> reads; std::string writes; std::vector<int> arguments; std::vector<int> independent_with; };
-struct LoweringOperation { int expression = -1, statement = -1, scope = -1, callee_symbol = -1, result_symbol = -1; std::string callee, kind, library, convention, symbol, effect, parameter_types, return_type; std::vector<int> arguments; };
+struct LoweringOperation { int expression = -1, statement = -1, scope = -1, block = -1, then_block = -1, else_block = -1, callee_symbol = -1, result_symbol = -1; std::string callee, kind, library, convention, symbol, effect, parameter_types, return_type; std::vector<int> arguments; };
 struct Resolution { int expression = -1, statement = -1, scope = -1, symbol = -1; std::string name; };
 
 std::string trim_copy(std::string value) {
@@ -536,11 +536,16 @@ int run(const Json& bundle) {
         }
     }
     std::vector<LoweringOperation> lowering_operations;
+    auto containing_block = [&](int statement_id) {
+        for (const auto& [block_id, block] : blocks) for (const auto& member : list(field(*block, "statements"))) if (integer(&member) == statement_id) return block_id;
+        return -1;
+    };
     for (const auto& site : call_sites) {
         LoweringOperation operation;
         operation.expression = site.expression;
         operation.statement = site.statement;
         operation.scope = site.scope;
+        operation.block = containing_block(site.statement);
         operation.callee_symbol = site.callee_symbol;
         operation.result_symbol = site.write_symbol;
         operation.callee = site.callee;
@@ -578,6 +583,7 @@ int run(const Json& bundle) {
         operation.expression = initializer;
         operation.statement = statement_id;
         operation.scope = scope_id;
+        operation.block = containing_block(statement_id);
         operation.result_symbol = result_symbol;
         operation.kind = "value_definition";
         operation.arguments.push_back(initializer);
@@ -592,8 +598,23 @@ int run(const Json& bundle) {
         operation.expression = value_expression;
         operation.statement = statement_id;
         operation.scope = statement_scopes.count(statement_id) ? statement_scopes.at(statement_id) : -1;
+        operation.block = containing_block(statement_id);
         operation.kind = "return_value";
         operation.arguments.push_back(value_expression);
+        lowering_operations.push_back(std::move(operation));
+    }
+    for (const auto& [statement_id, statement] : statements) {
+        if (text(field(*statement, "kind")) != "if") continue;
+        const auto* payload = field(*statement, "payload");
+        LoweringOperation operation;
+        operation.expression = integer(field(payload, "condition_expression"));
+        operation.statement = statement_id;
+        operation.scope = statement_scopes.count(statement_id) ? statement_scopes.at(statement_id) : -1;
+        operation.block = containing_block(statement_id);
+        operation.then_block = integer(field(payload, "then_block"));
+        operation.else_block = integer(field(field(payload, "else_arm"), "block"));
+        operation.kind = "branch";
+        if (operation.expression >= 0) operation.arguments.push_back(operation.expression);
         lowering_operations.push_back(std::move(operation));
     }
     std::vector<Region> regions;
@@ -656,6 +677,8 @@ int run(const Json& bundle) {
         std::cout << "{\"expression_id\":" << expression_id << ",\"kind\":" << quote(kind);
         if (kind == "integer_literal") {
             std::cout << ",\"type\":\"c_int\",\"value\":" << quote(text(field(field(expression, "payload"), "value_text"), "0"));
+        } else if (kind == "bool_literal") {
+            std::cout << ",\"type\":\"bool\",\"value\":" << quote(text(field(field(expression, "payload"), "value_text"), "false"));
         } else if (kind == "identifier") {
             const int symbol = resolved_expression_symbols.count(expression_id) ? resolved_expression_symbols.at(expression_id) : -1;
             const auto type = symbol_types.count(symbol) ? symbol_types.at(symbol) : std::string{};
@@ -679,6 +702,7 @@ int run(const Json& bundle) {
                   << ",\"expression_id\":" << operation.expression
                   << ",\"statement_id\":" << operation.statement
                   << ",\"scope_id\":" << operation.scope
+                  << (operation.block >= 0 ? ",\"block_id\":" + std::to_string(operation.block) : std::string{})
                   << ",\"callee\":" << quote(operation.callee)
                   << ",\"callee_symbol_id\":" << operation.callee_symbol
                   << ",\"arguments\":[";
@@ -693,6 +717,7 @@ int run(const Json& bundle) {
         }
         std::cout << "]";
         if (operation.result_symbol >= 0) std::cout << ",\"result_symbol_id\":" << operation.result_symbol;
+        if (operation.kind == "branch") std::cout << ",\"then_block_id\":" << operation.then_block << ",\"else_block_id\":" << operation.else_block;
         if (operation.kind == "external_call") {
             std::cout << ",\"provider\":{\"library\":" << quote(operation.library)
                       << ",\"convention\":" << quote(operation.convention)

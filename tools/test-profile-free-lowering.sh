@@ -86,4 +86,17 @@ set +e
 local_rc=$?
 set -e
 test "$local_rc" -eq 42
+
+branch_source="$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass/profile_free_branch.flow"
+"$flowmini" --dump-frontend-bundle "$branch_source" | "$analyst" > "$tmpdir/branch.semantic.json"
+jq -e '.status == "ok" and .lowering_profile == "none" and any(.lowering_plan.operations[]; .kind == "branch" and .operands[0].kind == "bool_literal")' "$tmpdir/branch.semantic.json" >/dev/null
+"$parallel" < "$tmpdir/branch.semantic.json" | "$optimizer" > "$tmpdir/branch.optimized.json"
+"$lower" --emit-llvm "$tmpdir/branch.ll" < "$tmpdir/branch.optimized.json" > "$tmpdir/branch.lowering.json"
+grep -Fq 'br i1 true' "$tmpdir/branch.ll"
+clang "$tmpdir/branch.ll" -o "$tmpdir/branch"
+set +e
+"$tmpdir/branch"
+branch_rc=$?
+set -e
+test "$branch_rc" -eq 42
 printf '%s\n' 'Profile-free generic lowering: PASS'
