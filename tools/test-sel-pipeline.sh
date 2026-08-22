@@ -38,9 +38,26 @@ grep -q '"status": "emitted"' "$tmpdir/lowering.json"
 clang "$tmpdir/program.ll" -lncursesw -o "$tmpdir/program"
 grep -q 'icmp eq i32 %key, 113' "$tmpdir/program.ll"
 grep -q 'getelementptr ptr, ptr %argv' "$tmpdir/program.ll"
+grep -q 'call i64 @read(i32 0, ptr %input_ptr, i64 4095)' "$tmpdir/program.ll"
+grep -q 'icmp sgt i64 %input_count, 0' "$tmpdir/program.ll"
+grep -q 'icmp eq i64 %input_count, 0' "$tmpdir/program.ll"
+grep -q 'input_error:' "$tmpdir/program.ll"
+if grep -q 'getelementptr i8, ptr %input_ptr, i64 %input_count' "$tmpdir/program.ll"; then
+    terminator_line=$(grep -n 'getelementptr i8, ptr %input_ptr, i64 %input_count' "$tmpdir/program.ll" | cut -d: -f1)
+    ready_line=$(grep -n '^input_ready:' "$tmpdir/program.ll" | cut -d: -f1)
+    test "$terminator_line" -gt "$ready_line"
+fi
 
 TERM=xterm script -qec "printf 'stdin-alpha\\nstdin-beta\\n' | '$tmpdir/program'" "$tmpdir/terminal.log" >/dev/null
 grep -q 'alpha' "$tmpdir/terminal.log"
 grep -q 'stdin-alpha' "$tmpdir/terminal.log"
+
+set +e
+TERM=xterm script -qec "'$tmpdir/program' 0<&-" "$tmpdir/read-error.log" >/dev/null
+read_error_status=$?
+set -e
+test "$read_error_status" -eq 2
+
+TERM=xterm script -qec "'$tmpdir/program' </dev/null" "$tmpdir/eof.log" >/dev/null
 
 printf '%s\n' 'Flowcore sel TUI: PASS'

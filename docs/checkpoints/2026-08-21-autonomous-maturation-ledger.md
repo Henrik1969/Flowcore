@@ -156,6 +156,10 @@
   provider retains the diagnosed compatibility alias; two, three, and four
   colliding providers remain ambiguous, while four qualified calls remain
   stable and distinct.
+- Repaired the transitional `sel` native emitter's input handling. Flow source
+  declares 4096 bytes of writable storage, the read reserves one byte for the
+  terminator, and LLVM distinguishes positive reads, EOF, and errors before
+  using the result as an offset. The error path restores ncurses and exits 2.
 
 ## Evidence
 
@@ -231,6 +235,9 @@
 - Focused namespace checkpoint: `namespace_ambiguity`, `flowanalyst_pipeline`,
   and both `flowcore_pass_corpus` registrations passed with one-through-four
   provider coverage.
+- Focused `sel` read-safety checkpoint: `sel_tui_pipeline`,
+  `flowlower_pipeline`, and both `flowcore_pass_corpus` registrations passed.
+  The TUI gate covers positive input, EOF, and closed-stdin error behavior.
 
 ## Remaining work
 
@@ -239,6 +246,8 @@
 - Replace the remaining ncurses, `sel`, flowcat, and empty-program profile or
   source-name lowering dispatch with reusable lowering plans. Kernel ABI
   examples no longer use compiler profiles.
+- `sel` input safety is repaired, but its TUI control flow and argv selection
+  still live in a transitional handwritten emitter rather than Flow source.
 - Expand effects into external effect, argument-memory effect, determinism,
   resource, ownership, nullability, and lifetime facts.
 - Model typed ncurses session/window resources.
@@ -253,6 +262,6 @@
 
 ## Exact next action
 
-Next action: make `sel` read/error handling source-derived and safe, then remove
-its source-name profile only after error, EOF, positive-read, native, and
-pseudo-terminal coverage passes.
+Next action: propagate ncurses resource acquisition, nullable window identity,
+and mandatory `endwin` cleanup facts through the lowering plan, then use those
+facts to replace the remaining ncurses and `sel` profile dispatch.

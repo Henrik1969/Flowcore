@@ -12,7 +12,7 @@ main(args : list<string>) {
     count : c_int(58)
     message : c_string("Flowcore sel\n\n> alpha\n  beta\n  gamma\n\nUp/Down: move  Enter: select  q: quit")
     selected : c_string("selected: alpha")
-    input : c_pointer(0)
+    input : c_pointer(4096)
     input_count : c_size_t(4095)
     input_result : c_long(0)
     stdin_fd : c_int(0)
