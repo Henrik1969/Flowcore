@@ -373,7 +373,6 @@ int run(const Json& bundle) {
     }
     if (declarations.empty()) empty_main_profile = false;
     std::string lowering_profile = empty_main_profile ? "empty_program_main" : "none";
-    if (text(field(*source_unit, "name")) == "abi_strlen_main") for (const auto& requirement : binding_requirements) if (requirement.symbol == "strlen" && requirement.parameter_types == "c_string" && requirement.return_type == "c_size_t") lowering_profile = "abi_strlen_main";
     if (text(field(*source_unit, "name")) == "test_licbinds") {
         std::set<std::string> libc_symbols; for (const auto& requirement : binding_requirements) libc_symbols.insert(requirement.symbol);
         if (libc_symbols.count("strlen") && libc_symbols.count("abs") && libc_symbols.count("puts")) lowering_profile = "test_licbinds_main";
@@ -653,6 +652,8 @@ int run(const Json& bundle) {
         std::cout << "{\"expression_id\":" << expression_id << ",\"kind\":" << quote(kind);
         if (kind == "integer_literal") {
             std::cout << ",\"type\":\"c_int\",\"value\":" << quote(text(field(field(expression, "payload"), "value_text"), "0"));
+        } else if (kind == "string_literal") {
+            std::cout << ",\"type\":\"c_string\",\"value\":" << quote(text(field(field(expression, "payload"), "value_text")));
         } else if (kind == "bool_literal") {
             std::cout << ",\"type\":\"bool\",\"value\":" << quote(text(field(field(expression, "payload"), "value_text"), "false"));
         } else if (kind == "identifier") {

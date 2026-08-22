@@ -94,6 +94,7 @@ test "$abs_rc" -eq 42
 strlen_source="$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass/abi_strlen_main.flow"
 "$flowmini" --dump-frontend-bundle "$strlen_source" > "$tmpdir/strlen.bundle.json"
 "$analyst" < "$tmpdir/strlen.bundle.json" > "$tmpdir/strlen.semantic.json"
+jq -e '.lowering_profile == "none"' "$tmpdir/strlen.semantic.json" >/dev/null
 "$bind" --policy "$policy" < "$tmpdir/strlen.semantic.json" > "$tmpdir/strlen.binding.json"
 "$parallel" < "$tmpdir/strlen.semantic.json" > "$tmpdir/strlen.parallel.json"
 "$optimizer" < "$tmpdir/strlen.parallel.json" > "$tmpdir/strlen.optimized.json"

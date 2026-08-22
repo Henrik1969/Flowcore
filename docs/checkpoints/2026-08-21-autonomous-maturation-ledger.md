@@ -112,6 +112,9 @@
 - Added generic unary integer operand propagation and migrated the libc `abs`
   example off its source-name profile. Its `-42` initializer, result placement,
   and explicit return now drive the emitted LLVM and native exit status 42.
+- Added generic ASCII string-literal storage, `c_string` argument flow, and
+  `c_size_t` result-to-return lowering. The libc `strlen` example now returns 8
+  from explicit Flow source with no source-name selection or handwritten LLVM.
 
 ## Evidence
 
@@ -144,6 +147,8 @@
   `flowanalyst_pipeline`, `flowbind_provider`, both pass-corpus gates, and
   `profile_free_generic_lowering` passed. The complete suite again passed
   **54/54** tests.
+- Focused string/size migration checkpoint: the same six focused gates passed,
+  followed by the complete canonical suite at **54/54**.
 
 ## Remaining work
 
@@ -168,7 +173,7 @@
 
 ## Exact next action
 
-Next action: add generic string literal/value and `c_size_t` result flow, then
-migrate the libc `strlen` example off its handwritten profile. The generated
-getlogin/puts migration remains queued behind source-level nullable-string
-selection so its current fallback is not silently lost.
+Next action: generalize ordered capability sequences to carry `c_string`
+results into later `c_string` arguments, and introduce source-level
+nullable-string selection before removing the generated getlogin/puts fallback
+profile.
