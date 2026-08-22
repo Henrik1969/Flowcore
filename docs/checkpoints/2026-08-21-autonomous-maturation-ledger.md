@@ -101,6 +101,9 @@
   `c_int` arguments, exact binding authorization, positive-result validation,
   and structured refusal outside the supported carrier shape. The generated
   `sysconf` fixture now uses that path and has no source-name profile branches.
+- Added profile-free `c_ulong` argument/result lowering with carrier-derived
+  64-bit local initialization and unsigned result validation. The generated
+  `getauxval` fixture now compiles and executes without source-name dispatch.
 
 ## Evidence
 
@@ -121,6 +124,8 @@
 - Focused `c_long` checkpoint: `native_binding_generation` and
   `flowlower_pipeline` passed, including compilation and execution of the
   generated `sysconf` ELF.
+- Focused `c_ulong` checkpoint: `native_binding_generation`,
+  `profile_free_generic_lowering`, and `flowlower_pipeline` passed.
 - Focused ncurses checkpoint: `ncurses_flow_pipeline`, `flow_less_pager`, and
   `flow_less_ncurses_pager` passed.
 
@@ -147,5 +152,5 @@
 
 ## Exact next action
 
-Next action: generalize integer-width operand and result carriers to `c_ulong`
-and migrate the generated `getauxval(c_ulong)` fixture.
+Next action: replace the remaining generated multi-call system-information
+profile with generic ordered capability-sequence lowering.

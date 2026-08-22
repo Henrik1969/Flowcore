@@ -395,7 +395,6 @@ int run(const Json& bundle) {
         }
         if (login && output) lowering_profile = "generated_getlogin_main";
     }
-    if (text(field(*source_unit, "name")) == "generated_getauxval_main") for (const auto& requirement : binding_requirements) if (requirement.symbol == "getauxval" && requirement.parameter_types == "c_ulong" && requirement.return_type == "c_ulong") lowering_profile = "generated_getauxval_main";
     if (text(field(*source_unit, "name")) == "generated_system_info_main") {
         bool pagesize = false, nprocs = false, nprocs_conf = false, phys = false, avphys = false;
         for (const auto& requirement : binding_requirements) {

@@ -2,6 +2,7 @@
 #include <fstream>
 #include <iostream>
 #include <map>
+#include <set>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -238,7 +239,6 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
     const bool abi_ncurses_profile = has(report, "\"lowering_profile\": \"abi_ncurses_main\"") || has(report, "\"lowering_profile\":\"abi_ncurses_main\"");
     const bool sel_profile = has(report, "\"lowering_profile\": \"sel_main\"") || has(report, "\"lowering_profile\":\"sel_main\"");
     const bool generated_getlogin_profile = has(report, "\"lowering_profile\": \"generated_getlogin_main\"") || has(report, "\"lowering_profile\":\"generated_getlogin_main\"");
-    const bool generated_getauxval_profile = has(report, "\"lowering_profile\": \"generated_getauxval_main\"") || has(report, "\"lowering_profile\":\"generated_getauxval_main\"");
     const bool generated_system_info_profile = has(report, "\"lowering_profile\": \"generated_system_info_main\"") || has(report, "\"lowering_profile\":\"generated_system_info_main\"");
     const bool abi_kernel_clock_profile = has(report, "\"lowering_profile\": \"abi_kernel_clock_main\"") || has(report, "\"lowering_profile\":\"abi_kernel_clock_main\"");
     const bool abi_kernel_random_profile = has(report, "\"lowering_profile\": \"abi_kernel_random_main\"") || has(report, "\"lowering_profile\":\"abi_kernel_random_main\"");
@@ -278,13 +278,22 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
     std::ostringstream generic_expression_instructions;
     int generic_expression_temporary = 0;
     std::map<int, std::string> generic_values;
+    std::set<int> wide_value_symbols;
+    for (const auto& operation : operation_objects) {
+        if (quoted_field(operation, "kind") != "external_call") continue;
+        for (const auto& operand : array_objects(array_field(operation, "operands"))) {
+            const auto symbol = numeric_field(operand, "symbol_id");
+            if (!symbol.empty() && (quoted_field(operand, "type") == "c_long" || quoted_field(operand, "type") == "c_ulong" || quoted_field(operand, "type") == "c_size_t")) wide_value_symbols.insert(std::stoi(symbol));
+        }
+    }
     for (const auto& operation : operation_objects) {
         if (quoted_field(operation, "kind") != "value_definition") continue;
         const auto value_operand = first_array_object(array_field(operation, "operands"));
         const auto value_symbol = numeric_field(operation, "result_symbol_id");
         if (!value_symbol.empty() && quoted_field(value_operand, "kind") == "integer_literal" && valid_integer_literal(quoted_field(value_operand, "value"))) {
             const auto value_name = "%flow_value_" + value_symbol;
-            value_initialization_instructions << "  " << value_name << " = add i32 0, " << quoted_field(value_operand, "value") << "\n";
+            const auto llvm_type = wide_value_symbols.count(std::stoi(value_symbol)) ? "i64" : "i32";
+            value_initialization_instructions << "  " << value_name << " = add " << llvm_type << " 0, " << quoted_field(value_operand, "value") << "\n";
             generic_values[std::stoi(value_symbol)] = value_name;
         }
     }
@@ -298,6 +307,7 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
     const bool external_zero_arg = external_parameters.empty() && has(external_operation, "\"arguments\":[]");
     std::vector<std::string> external_arguments;
     bool external_int_arguments = true;
+    bool external_ulong_arguments = true;
     for (const auto& external_operand : external_operand_objects) {
         std::string argument;
         if (quoted_field(external_operand, "kind") == "integer_literal" && valid_integer_literal(quoted_field(external_operand, "value"))) {
@@ -307,6 +317,7 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
             if (!symbol.empty() && generic_values.count(std::stoi(symbol))) argument = generic_values.at(std::stoi(symbol));
         }
         if (quoted_field(external_operand, "type") != "c_int" || argument.empty()) external_int_arguments = false;
+        if (quoted_field(external_operand, "type") != "c_ulong" || argument.empty()) external_ulong_arguments = false;
         external_arguments.push_back(argument);
     }
     std::string expected_external_parameters;
@@ -320,6 +331,7 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
     }
     const bool external_int_call = !external_arguments.empty() && external_int_arguments &&
         external_parameters == expected_external_parameters;
+    const bool external_ulong_call = external_arguments.size() == 1 && external_ulong_arguments && external_parameters == "c_ulong";
     const bool supported_external_result = valid_c_symbol(external_symbol) && external_return == "c_int" &&
         (external_zero_arg || external_int_call) && !external_result_symbol.empty();
     std::ostringstream external_instructions;
@@ -357,6 +369,8 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
         generic_return == "c_int" && (generic_zero_arg || generic_one_int_arg);
     const bool generic_external_long = profile_free_plan && generic_kind == "external_call" && valid_c_symbol(external_symbol) &&
         external_return == "c_long" && (external_zero_arg || external_int_call);
+    const bool generic_external_ulong = profile_free_plan && generic_kind == "external_call" && valid_c_symbol(external_symbol) &&
+        external_return == "c_ulong" && external_ulong_call;
     const bool generic_return_value = profile_free_plan && generic_kind == "return_value" && operand_type == "c_int" &&
         !generic_return_expression.empty();
     const bool generic_external_result_return = generic_return_value && supported_external_result;
@@ -367,7 +381,6 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
     if (abi_ncurses_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"abi_ncurses_main\"") || !has(binding_report, "\"initscr\"") || !has(binding_report, "\"endwin\"") || !has(binding_report, "\"waddnstr\"") || !has(binding_report, "\"wrefresh\""))) throw std::runtime_error("ABI binding report does not authorize the abi_ncurses_main lowering profile");
     if (sel_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"sel_main\"") || !has(binding_report, "\"initscr\"") || !has(binding_report, "\"endwin\"") || !has(binding_report, "\"wgetch\"") || !has(binding_report, "\"keypad\"") || !has(binding_report, "\"puts\"") || !has(binding_report, "\"read\""))) throw std::runtime_error("ABI binding report does not authorize the sel_main lowering profile");
     if (generated_getlogin_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"generated_getlogin_main\"") || !has(binding_report, "\"getlogin\"") || !has(binding_report, "\"puts\""))) throw std::runtime_error("ABI binding report does not authorize the generated_getlogin_main lowering profile");
-    if (generated_getauxval_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"generated_getauxval_main\"") || !has(binding_report, "\"getauxval\""))) throw std::runtime_error("ABI binding report does not authorize the generated_getauxval_main lowering profile");
     if (generated_system_info_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"generated_system_info_main\"") || !has(binding_report, "\"getpagesize\"") || !has(binding_report, "\"get_nprocs\"") || !has(binding_report, "\"get_nprocs_conf\"") || !has(binding_report, "\"get_phys_pages\"") || !has(binding_report, "\"get_avphys_pages\""))) throw std::runtime_error("ABI binding report does not authorize the generated_system_info_main lowering profile");
     if (abi_kernel_clock_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"abi_kernel_clock_main\"") || !has(binding_report, "\"kind\": \"external_call\"") || !has(binding_report, "\"clock_gettime\""))) throw std::runtime_error("ABI binding report does not authorize the abi_kernel_clock_main lowering profile");
     if (abi_kernel_random_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"abi_kernel_random_main\"") || !has(binding_report, "\"kind\": \"external_call\"") || !has(binding_report, "\"getrandom\""))) throw std::runtime_error("ABI binding report does not authorize the abi_kernel_random_main lowering profile");
@@ -380,10 +393,10 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
     if (remaining_kernel_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"kind\": \"external_call\""))) throw std::runtime_error("ABI binding report does not authorize the remaining kernel lowering profile");
     if (flowcat_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"flowcat_argv_main\"") || !has(binding_report, "\"kind\": \"external_call\"") || !has(binding_report, "\"puts\""))) throw std::runtime_error("ABI binding report does not authorize the flowcat_argv_main lowering profile");
     if (flowcat_file_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"flowcat_file_main\"") || !has(binding_report, "\"kind\": \"capability_sequence\"") || !has(binding_report, "\"open\"") || !has(binding_report, "\"read\"") || !has(binding_report, "\"write\"") || !has(binding_report, "\"close\""))) throw std::runtime_error("ABI binding report does not authorize the flowcat_file_main lowering profile");
-    if (!llvm_path.empty() && (generic_external_scalar || generic_external_long || generic_external_result_return || generic_external_result_branch) &&
+    if (!llvm_path.empty() && (generic_external_scalar || generic_external_long || generic_external_ulong || generic_external_result_return || generic_external_result_branch) &&
         (binding_report.empty() || (!has(binding_report, "\"status\": \"ready\"") && !has(binding_report, "\"status\":\"ready\"")) ||
          (!has(binding_report, "\"symbol\":" + quote(external_symbol)) && !has(binding_report, "\"symbol\": " + quote(external_symbol))))) throw std::runtime_error("generic lowering operation is not authorized");
-    if (!llvm_path.empty() && !generic_external_scalar && !generic_external_long && !generic_return_value && !generic_branch && !trial_profile && !abi_abs_profile && !abi_strlen_profile && !test_licbinds_profile && !abi_ncurses_profile && !sel_profile && !generated_getlogin_profile && !generated_getauxval_profile && !generated_system_info_profile && !abi_kernel_clock_profile && !abi_kernel_random_profile && !abi_kernel_uname_profile && !abi_kernel_openat_profile && !abi_kernel_read_profile && !abi_kernel_write_profile && !abi_kernel_lseek_profile && !abi_kernel_unlinkat_profile && !remaining_kernel_profile && !flowcat_profile && !flowcat_file_profile) throw std::runtime_error("LLVM emission requires an accepted lowering profile or supported generic lowering plan");
+    if (!llvm_path.empty() && !generic_external_scalar && !generic_external_long && !generic_external_ulong && !generic_return_value && !generic_branch && !trial_profile && !abi_abs_profile && !abi_strlen_profile && !test_licbinds_profile && !abi_ncurses_profile && !sel_profile && !generated_getlogin_profile && !generated_system_info_profile && !abi_kernel_clock_profile && !abi_kernel_random_profile && !abi_kernel_uname_profile && !abi_kernel_openat_profile && !abi_kernel_read_profile && !abi_kernel_write_profile && !abi_kernel_lseek_profile && !abi_kernel_unlinkat_profile && !remaining_kernel_profile && !flowcat_profile && !flowcat_file_profile) throw std::runtime_error("LLVM emission requires an accepted lowering profile or supported generic lowering plan");
     if (!llvm_path.empty()) {
         std::ofstream llvm(llvm_path); if (!llvm) throw std::runtime_error("cannot open LLVM output");
         llvm << "; Flowcore target artifact: " << selected_target << "\n";
@@ -415,6 +428,21 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
                  << external_instructions.str()
                  << generic_expression_instructions.str()
                  << "  ret i32 " << generic_return_expression << "\n"
+                    "}\n";
+        } else if (generic_external_ulong) {
+            llvm << "; Flowcore generic lowering plan: c_ulong external call\n"
+                    "target triple = \"x86_64-pc-linux-gnu\"\n"
+                 << "declare i64 @" << external_symbol << "(i64)\n"
+                    "define i32 @main() {\n"
+                    "entry:\n"
+                 << value_initialization_instructions.str()
+                 << "  %result = call i64 @" << external_symbol << "(i64 " << external_arguments.front() << ")\n"
+                    "  %valid = icmp ugt i64 %result, 0\n"
+                    "  br i1 %valid, label %ok, label %error\n"
+                    "ok:\n"
+                    "  ret i32 0\n"
+                    "error:\n"
+                    "  ret i32 1\n"
                     "}\n";
         } else if (generic_external_long) {
             llvm << "; Flowcore generic lowering plan: c_long external call\n"
@@ -565,20 +593,6 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
                     "  %selected = select i1 %missing, ptr %fallback, ptr %login\n"
                     "  call i32 @puts(ptr %selected)\n"
                     "  ret i32 0\n"
-                    "}\n";
-        } else if (generated_getauxval_profile) {
-            llvm << "; Flowcore generated ABI lowering: getauxval\n"
-                    "target triple = \"x86_64-pc-linux-gnu\"\n"
-                    "declare i64 @getauxval(i64)\n"
-                    "define i32 @main() {\n"
-                    "entry:\n"
-                    "  %pagesize = call i64 @getauxval(i64 6)\n"
-                    "  %valid = icmp sgt i64 %pagesize, 0\n"
-                    "  br i1 %valid, label %ok, label %error\n"
-                    "ok:\n"
-                    "  ret i32 0\n"
-                    "error:\n"
-                    "  ret i32 1\n"
                     "}\n";
         } else if (generated_system_info_profile) {
             llvm << "; Flowcore generated ABI lowering: system information\n"

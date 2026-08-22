@@ -234,12 +234,12 @@ printf '%s\n' \
   '}' > "$tmpdir/getauxval.consumer.flow"
 "$flowmini" --dump-frontend-bundle "$tmpdir/getauxval.consumer.flow" |
     "$analyst" > "$tmpdir/getauxval.semantic.json"
-jq -e '.status == "ok" and .lowering_profile == "generated_getauxval_main"' "$tmpdir/getauxval.semantic.json" >/dev/null
+jq -e '.status == "ok" and .lowering_profile == "none"' "$tmpdir/getauxval.semantic.json" >/dev/null
 "$bind" --policy "$tmpdir/getauxval.policy" < "$tmpdir/getauxval.semantic.json" > "$tmpdir/getauxval.binding.json"
 "$parallel" < "$tmpdir/getauxval.semantic.json" | "$optimizer" > "$tmpdir/getauxval.optimized.json"
 "$lowerer" --emit-llvm "$tmpdir/getauxval.ll" --binding-report "$tmpdir/getauxval.binding.json" < "$tmpdir/getauxval.optimized.json" > "$tmpdir/getauxval.lowering.json"
 grep -q '"status": "emitted"' "$tmpdir/getauxval.lowering.json"
-grep -Fq 'call i64 @getauxval(i64 6)' "$tmpdir/getauxval.ll"
+grep -Fq 'call i64 @getauxval(i64 %flow_value_' "$tmpdir/getauxval.ll"
 clang "$tmpdir/getauxval.ll" -o "$tmpdir/getauxval"
 "$tmpdir/getauxval"
 
