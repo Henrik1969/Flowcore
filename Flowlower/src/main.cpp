@@ -253,7 +253,7 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
     const bool abi_kernel_write_profile = has(report, "\"lowering_profile\": \"abi_kernel_write_main\"") || has(report, "\"lowering_profile\":\"abi_kernel_write_main\"");
     const bool abi_kernel_lseek_profile = has(report, "\"lowering_profile\": \"abi_kernel_lseek_main\"") || has(report, "\"lowering_profile\":\"abi_kernel_lseek_main\"");
     const bool abi_kernel_unlinkat_profile = has(report, "\"lowering_profile\": \"abi_kernel_unlinkat_main\"") || has(report, "\"lowering_profile\":\"abi_kernel_unlinkat_main\"");
-    const bool remaining_kernel_profile = abi_kernel_unlinkat_profile || has(report, "abi_kernel_pipe2_main") || has(report, "abi_kernel_fork_main") || has(report, "abi_kernel_waitpid_main") || has(report, "abi_kernel_socketpair_main") || has(report, "abi_kernel_socket_main") || has(report, "abi_kernel_bind_main") || has(report, "abi_kernel_listen_main") || has(report, "abi_kernel_poll_main") || has(report, "abi_kernel_accept4_main") || has(report, "abi_kernel_connect_main") || has(report, "abi_kernel_unshare_main") || has(report, "abi_kernel_sethostname_main") || has(report, "abi_kernel_gethostname_main");
+    const bool remaining_kernel_profile = abi_kernel_unlinkat_profile || has(report, "abi_kernel_pipe2_main") || has(report, "abi_kernel_waitpid_main") || has(report, "abi_kernel_socketpair_main") || has(report, "abi_kernel_bind_main") || has(report, "abi_kernel_poll_main") || has(report, "abi_kernel_accept4_main") || has(report, "abi_kernel_connect_main") || has(report, "abi_kernel_sethostname_main") || has(report, "abi_kernel_gethostname_main");
     const bool flowcat_profile = has(report, "\"lowering_profile\": \"flowcat_argv_main\"") || has(report, "\"lowering_profile\":\"flowcat_argv_main\"");
     const bool flowcat_file_profile = has(report, "\"lowering_profile\": \"flowcat_file_main\"") || has(report, "\"lowering_profile\":\"flowcat_file_main\"");
     const bool profile_free_plan = has(report, "\"lowering_profile\": \"none\"") || has(report, "\"lowering_profile\":\"none\"");
@@ -809,16 +809,12 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
         } else if (remaining_kernel_profile) {
             llvm << "target triple = \"x86_64-pc-linux-gnu\"\n";
             if (has(report, "abi_kernel_pipe2_main")) llvm << "declare i32 @pipe2(ptr, i32)\ndefine i32 @main() {\nentry:\n  %result = call i32 @pipe2(ptr null, i32 0)\n  ret i32 0\n}\n";
-            else if (has(report, "abi_kernel_fork_main")) llvm << "declare i32 @fork()\ndefine i32 @main() {\nentry:\n  %result = call i32 @fork()\n  ret i32 0\n}\n";
             else if (has(report, "abi_kernel_waitpid_main")) llvm << "declare i32 @waitpid(i32, ptr, i32)\ndefine i32 @main() {\nentry:\n  %result = call i32 @waitpid(i32 -1, ptr null, i32 1)\n  ret i32 0\n}\n";
             else if (has(report, "abi_kernel_socketpair_main")) llvm << "declare i32 @socketpair(i32, i32, i32, ptr)\ndefine i32 @main() {\nentry:\n  %result = call i32 @socketpair(i32 1, i32 1, i32 0, ptr null)\n  ret i32 0\n}\n";
-            else if (has(report, "abi_kernel_socket_main")) llvm << "declare i32 @socket(i32, i32, i32)\ndefine i32 @main() {\nentry:\n  %result = call i32 @socket(i32 -1, i32 1, i32 0)\n  ret i32 0\n}\n";
             else if (has(report, "abi_kernel_bind_main")) llvm << "declare i32 @bind(i32, ptr, i64)\ndefine i32 @main() {\nentry:\n  %result = call i32 @bind(i32 -1, ptr null, i64 0)\n  ret i32 0\n}\n";
-            else if (has(report, "abi_kernel_listen_main")) llvm << "declare i32 @listen(i32, i32)\ndefine i32 @main() {\nentry:\n  %result = call i32 @listen(i32 -1, i32 0)\n  ret i32 0\n}\n";
             else if (has(report, "abi_kernel_poll_main")) llvm << "declare i32 @poll(ptr, i64, i32)\ndefine i32 @main() {\nentry:\n  %result = call i32 @poll(ptr null, i64 0, i32 0)\n  ret i32 0\n}\n";
             else if (has(report, "abi_kernel_accept4_main")) llvm << "declare i32 @accept4(i32, ptr, ptr, i32)\ndefine i32 @main() {\nentry:\n  %result = call i32 @accept4(i32 -1, ptr null, ptr null, i32 0)\n  ret i32 0\n}\n";
             else if (has(report, "abi_kernel_connect_main")) llvm << "declare i32 @connect(i32, ptr, i64)\ndefine i32 @main() {\nentry:\n  %result = call i32 @connect(i32 -1, ptr null, i64 0)\n  ret i32 0\n}\n";
-            else if (has(report, "abi_kernel_unshare_main")) llvm << "declare i32 @unshare(i32)\ndefine i32 @main() {\nentry:\n  %result = call i32 @unshare(i32 0)\n  ret i32 0\n}\n";
             else if (has(report, "abi_kernel_sethostname_main")) llvm << "declare i32 @sethostname(ptr, i64)\ndefine i32 @main() {\nentry:\n  %result = call i32 @sethostname(ptr null, i64 0)\n  ret i32 0\n}\n";
             else llvm << "declare i32 @gethostname(ptr, i64)\ndefine i32 @main() {\nentry:\n  %result = call i32 @gethostname(ptr null, i64 0)\n  ret i32 0\n}\n";
         } else if (flowcat_file_profile) {

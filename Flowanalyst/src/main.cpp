@@ -390,10 +390,10 @@ int run(const Json& bundle) {
     if (text(field(*source_unit, "name")) == "abi_kernel_lseek_main") for (const auto& requirement : binding_requirements) if (requirement.symbol == "lseek" && requirement.parameter_types == "c_int,c_long,c_int" && requirement.return_type == "c_long") lowering_profile = "abi_kernel_lseek_main";
     if (text(field(*source_unit, "name")) == "abi_kernel_unlinkat_main") for (const auto& requirement : binding_requirements) if (requirement.symbol == "unlinkat" && requirement.parameter_types == "c_int,c_string,c_int" && requirement.return_type == "c_int") lowering_profile = "abi_kernel_unlinkat_main";
     const std::map<std::string, std::pair<std::string, std::string>> kernel_profiles = {
-        {"abi_kernel_pipe2_main", {"pipe2", "c_pointer,c_int"}}, {"abi_kernel_fork_main", {"fork", ""}},
-        {"abi_kernel_waitpid_main", {"waitpid", "c_int,c_pointer,c_int"}}, {"abi_kernel_socketpair_main", {"socketpair", "c_int,c_int,c_int,c_pointer"}}, {"abi_kernel_socket_main", {"socket", "c_int,c_int,c_int"}},
-        {"abi_kernel_bind_main", {"bind", "c_int,c_pointer,c_size_t"}}, {"abi_kernel_listen_main", {"listen", "c_int,c_int"}}, {"abi_kernel_poll_main", {"poll", "c_pointer,c_size_t,c_int"}},
-        {"abi_kernel_accept4_main", {"accept4", "c_int,c_pointer,c_pointer,c_int"}}, {"abi_kernel_connect_main", {"connect", "c_int,c_pointer,c_size_t"}}, {"abi_kernel_unshare_main", {"unshare", "c_int"}},
+        {"abi_kernel_pipe2_main", {"pipe2", "c_pointer,c_int"}},
+        {"abi_kernel_waitpid_main", {"waitpid", "c_int,c_pointer,c_int"}}, {"abi_kernel_socketpair_main", {"socketpair", "c_int,c_int,c_int,c_pointer"}},
+        {"abi_kernel_bind_main", {"bind", "c_int,c_pointer,c_size_t"}}, {"abi_kernel_poll_main", {"poll", "c_pointer,c_size_t,c_int"}},
+        {"abi_kernel_accept4_main", {"accept4", "c_int,c_pointer,c_pointer,c_int"}}, {"abi_kernel_connect_main", {"connect", "c_int,c_pointer,c_size_t"}},
         {"abi_kernel_sethostname_main", {"sethostname", "c_string,c_size_t"}}, {"abi_kernel_gethostname_main", {"gethostname", "c_pointer,c_size_t"}}
     };
     for (const auto& [profile, signature] : kernel_profiles) if (text(field(*source_unit, "name")) == profile) for (const auto& requirement : binding_requirements) if (requirement.symbol == signature.first && requirement.parameter_types == signature.second) lowering_profile = profile;

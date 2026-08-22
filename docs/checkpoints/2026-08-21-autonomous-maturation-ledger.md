@@ -126,6 +126,10 @@
 - Admitted single mixed-carrier calls on the same generic path and migrated
   `rmdir(c_string)`. Its emitted call now uses the Flow source literal instead
   of the legacy handwritten emitter's null pointer.
+- Migrated the remaining scalar-only kernel fixtures (`fork`, `socket`,
+  `listen`, and `unshare`) to generic single-operation lowering. Their exact
+  `c_int` operands now come from Flow initializers and their source-name profile
+  branches are removed.
 
 ## Evidence
 
@@ -175,6 +179,10 @@
   gates passed. The native ELF executed, the LLVM call referenced the
   source-derived string global, and an adversarial assertion rejected the old
   null-pointer shape. The canonical build and suite passed **54/54**.
+- Focused scalar-kernel checkpoint: `flowlower_pipeline`,
+  `flowanalyst_pipeline`, `flowbind_provider`, `profile_free_generic_lowering`,
+  and both pass-corpus gates passed, including all four native ELFs. The
+  canonical build and suite passed **54/54**.
 
 ## Remaining work
 
@@ -199,7 +207,6 @@
 
 ## Exact next action
 
-Next action: migrate the remaining scalar-only kernel fixtures (`fork`,
-`socket`, `listen`, and `unshare`) onto the single-operation generic path, with
-their argument values taken from Flow source and their profile branches removed
-only after native execution remains green.
+Next action: migrate `sethostname(c_string,c_size_t)` to generic mixed-carrier
+lowering, then introduce explicit generic storage for `c_pointer` operands
+before migrating the remaining pointer-backed kernel fixtures.
