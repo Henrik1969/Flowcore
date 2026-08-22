@@ -215,6 +215,22 @@
   Requirements are now derived only from actual calls, binding reports describe
   the versioned plan as generic, and Flowlower public wording no longer calls
   accepted plans profiles.
+- Removed the transitional terminal capability-set recognizer and fixed LLVM
+  emitter. Flowlower now parses the optimization plan and binding report as
+  typed JSON, authorizes every external operation by its exact provider and ABI
+  tuple, and emits values, calls, nested branches, conversions, cleanup, and
+  returns in source statement/block order.
+- Made `sel` read behavior source-derived. Flow source explicitly initializes
+  its compatibility buffer through authorized `memset`, branches on negative,
+  zero, and positive read results, performs `endwin` cleanup before returning 2
+  on failure, writes only a positive byte count, and returns the selected or
+  cancelled status from its key branch.
+- Added adversarial terminal proofs for different behavior under the same
+  capability set, changed source operation order, an unused policy grant, and
+  renamed source/program identity. No compiler path is selected by those facts.
+- Documented the temporary `c_pointer(N)` writable-allocation interpretation
+  and the explicit public-language choice among bounded buffer, storage
+  declaration, and allocation-operation designs.
 
 ## Evidence
 
@@ -337,6 +353,14 @@
   --test-dir /tmp/flowcore-reusable-chain-sanitize --output-on-failure`.
   **54/54** tests passed, including malformed-input fuzzing, native linking,
   profile-free execution, terminal/resource, graph, and kernel gates.
+- Focused generic-terminal checkpoint: `sel_tui_pipeline`,
+  `flowlower_pipeline`, `native_binding_generation`, and
+  `profile_free_generic_lowering` passed. The native pseudo-terminal gate
+  covered argument input, positive stdin input, EOF, and closed-stdin failure;
+  adversarial variants proved literal and operation-order sensitivity and
+  unused-capability independence.
+- Canonical post-terminal checkpoint: the complete build succeeded and
+  **54/54** CTest tests passed in 19.35 seconds.
 
 ## Remaining work
 
@@ -345,10 +369,6 @@
 - Replace the transitional structured file-copy emitter with reusable loop,
   mutation, dynamic-index, and failure-control-flow LLVM emission. No current
   native example selects a compiler path by application identity.
-- `sel` input safety is repaired and its backend selection now requires
-  structured Flow branches for argv/input and key/output selection, but LLVM
-  emission still lives in a transitional terminal-plan emitter rather than the
-  reusable branch and external-call machinery.
 - Expand effects into external effect, argument-memory effect, determinism,
   resource, ownership, nullability, and lifetime facts.
 - Model typed ncurses session/window resources.
@@ -365,7 +385,7 @@
 
 ## Exact next action
 
-Next action: extend reusable loop/mutation lowering to nested loops, external
-results, dynamic argv indexing, branches, cleanup, and early returns, then
-retire the transitional file-copy emitter without losing partial-write or error
-behavior.
+Next action: extend the typed structured emitter with loop and assignment
+operations, dynamic argv indexing, and reusable loop-carried values, then retire
+the transitional file-copy emitter without losing partial-write, cleanup, or
+error behavior.

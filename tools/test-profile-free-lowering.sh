@@ -202,7 +202,7 @@ jq -e '.status == "ok" and .lowering_profile == "none" and any(.lowering_plan.op
 "$bind" --policy "$tmpdir/result.policy" < "$tmpdir/external-branch.semantic.json" > "$tmpdir/external-branch.binding.json"
 "$lower" --emit-llvm "$tmpdir/external-branch.ll" --binding-report "$tmpdir/external-branch.binding.json" < "$tmpdir/external-branch.optimized.json" > "$tmpdir/external-branch.lowering.json"
 grep -Fq 'call i32 @getppid()' "$tmpdir/external-branch.ll"
-grep -Fq 'icmp sgt i32 %flow_call_' "$tmpdir/external-branch.ll"
+grep -Fq 'icmp sgt i32 %flow_load_' "$tmpdir/external-branch.ll"
 clang "$tmpdir/external-branch.ll" -o "$tmpdir/external-branch"
 set +e
 "$tmpdir/external-branch"

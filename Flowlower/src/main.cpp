@@ -10,6 +10,8 @@
 #include <string_view>
 #include <vector>
 
+#include "structured_plan.hpp"
+
 namespace {
 
 constexpr std::string_view VERSION = "0.1.0";
@@ -275,42 +277,9 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
     }
     file_copy_plan = file_copy_plan && file_copy_loops >= 2 && file_copy_dynamic_argument &&
         file_copy_storage && file_copy_index_assignment;
-    const std::set<std::string> terminal_selection_symbols = {
-        "initscr", "endwin", "noecho", "cbreak", "keypad", "waddnstr",
-        "wrefresh", "wgetch", "puts", "read"
-    };
-    bool interactive_terminal_plan = profile_free_plan;
-    for (const auto& symbol : terminal_selection_symbols)
-        if (!plan_external_symbols.count(symbol)) interactive_terminal_plan = false;
-    bool terminal_has_entry_length = false;
-    bool terminal_has_checked_argument = false;
-    bool terminal_has_argument_branch = false;
-    bool terminal_has_key_branch = false;
-    std::set<std::string> terminal_entry_length_symbols;
-    for (const auto& operation : operation_objects) {
-        for (const auto& operand : array_objects(array_field(operation, "operands"))) {
-            if (quoted_field(operand, "intrinsic") == "list_length") {
-                terminal_has_entry_length = true;
-                const auto result_symbol = numeric_field(operation, "result_symbol_id");
-                if (!result_symbol.empty()) terminal_entry_length_symbols.insert(result_symbol);
-            }
-            if (quoted_field(operand, "intrinsic") == "list_index") terminal_has_checked_argument = true;
-        }
-        if (quoted_field(operation, "kind") != "branch") continue;
-        const auto condition = first_array_object(array_field(operation, "operands"));
-        const auto left = object_field(condition, "left");
-        const auto right = object_field(condition, "right");
-        if ((quoted_field(left, "kind") == "identifier" && terminal_entry_length_symbols.count(numeric_field(left, "symbol_id"))) ||
-            (quoted_field(right, "kind") == "identifier" && terminal_entry_length_symbols.count(numeric_field(right, "symbol_id"))))
-            terminal_has_argument_branch = true;
-        if (quoted_field(condition, "operator") == "==" &&
-            ((quoted_field(left, "kind") == "identifier" && quoted_field(right, "value") == "113") ||
-            (quoted_field(right, "kind") == "identifier" && quoted_field(left, "value") == "113"))
-        )
-            terminal_has_key_branch = true;
-    }
-    interactive_terminal_plan = interactive_terminal_plan && terminal_has_entry_length &&
-        terminal_has_checked_argument && terminal_has_argument_branch && terminal_has_key_branch;
+    const auto structured_llvm = binding_report.empty()
+        ? std::optional<std::string>{}
+        : flowlower::structured::emit(report, binding_report);
     const bool generic_empty_plan = profile_free_plan && operation_objects.empty() &&
         quoted_field(lowering_plan, "format") == "flowcore.lowering_plan" && numeric_field(lowering_plan, "version") == "1";
     const auto first_operation = operation_objects.empty() ? std::string("{}") : operation_objects.front();
@@ -661,13 +630,6 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
         !nullable_consumer_symbol.empty() && !nullable_then_argument.empty() && !nullable_else_argument.empty() &&
         ((nullable_then_argument == nullable_result_symbol && generic_values.count(std::stoi(nullable_else_argument))) ||
          (nullable_else_argument == nullable_result_symbol && generic_values.count(std::stoi(nullable_then_argument))));
-    if (interactive_terminal_plan) {
-        if (binding_report.empty() || (!has(binding_report, "\"status\": \"ready\"") && !has(binding_report, "\"status\":\"ready\"")))
-            throw std::runtime_error("interactive terminal plan is not authorized");
-        for (const auto& symbol : terminal_selection_symbols)
-            if (!has(binding_report, "\"symbol\":" + quote(symbol)) && !has(binding_report, "\"symbol\": " + quote(symbol)))
-                throw std::runtime_error("interactive terminal operation is not authorized: " + symbol);
-    }
     if (file_copy_plan) {
         if (binding_report.empty() || (!has(binding_report, "\"status\": \"ready\"") && !has(binding_report, "\"status\":\"ready\"")))
             throw std::runtime_error("file-copy plan is not authorized");
@@ -686,11 +648,13 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
         if (binding_report.empty() || (!has(binding_report, "\"status\": \"ready\"") && !has(binding_report, "\"status\":\"ready\""))) throw std::runtime_error("generic nullable string lowering is not authorized");
         for (const auto& symbol : nullable_authorized_symbols) if (!has(binding_report, "\"symbol\":" + quote(symbol)) && !has(binding_report, "\"symbol\": " + quote(symbol))) throw std::runtime_error("generic nullable string operation is not authorized: " + symbol);
     }
-    if (!llvm_path.empty() && !generic_external_scalar && !generic_external_long && !generic_external_ulong && !generic_external_size_return && !generic_scalar_sequence && !generic_return_value && !generic_branch && !generic_integer_loop && !nullable_string_branch && !generic_empty_plan && !interactive_terminal_plan && !file_copy_plan) throw std::runtime_error("LLVM emission requires an accepted lowering profile or supported generic lowering plan");
+    if (!llvm_path.empty() && !structured_llvm && !generic_external_scalar && !generic_external_long && !generic_external_ulong && !generic_external_size_return && !generic_scalar_sequence && !generic_return_value && !generic_branch && !generic_integer_loop && !nullable_string_branch && !generic_empty_plan && !file_copy_plan) throw std::runtime_error("LLVM emission requires a supported generic lowering plan");
     if (!llvm_path.empty()) {
         std::ofstream llvm(llvm_path); if (!llvm) throw std::runtime_error("cannot open LLVM output");
         llvm << "; Flowcore target artifact: " << selected_target << "\n";
-        if (nullable_string_branch) {
+        if (structured_llvm) {
+            llvm << *structured_llvm;
+        } else if (nullable_string_branch) {
             const auto then_argument = nullable_then_argument == nullable_result_symbol ? "%flow_nullable" : generic_values.at(std::stoi(nullable_then_argument));
             const auto else_argument = nullable_else_argument == nullable_result_symbol ? "%flow_nullable" : generic_values.at(std::stoi(nullable_else_argument));
             llvm << "; Flowcore generic lowering plan: source-derived nullable string branch\n"
@@ -830,69 +794,6 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
                     "ok:\n"
                     "  ret i32 0\n"
                     "error:\n"
-                    "  ret i32 1\n"
-                    "}\n";
-        } else if (interactive_terminal_plan) {
-            llvm << "; Flowcore structured terminal selection plan: ncurses input and selected output\n"
-                    "target triple = \"x86_64-pc-linux-gnu\"\n"
-                    "@flowcore_sel_message = private unnamed_addr constant [26 x i8] c\"Flowcore sel\\0A\\0ACandidate: \\00\"\n"
-                    "@flowcore_sel_default = private unnamed_addr constant [6 x i8] c\"alpha\\00\"\n"
-                    "@flowcore_sel_cancel = private unnamed_addr constant [16 x i8] c\"selection: none\\00\"\n"
-                    "declare ptr @initscr()\n"
-                    "declare i32 @noecho()\n"
-                    "declare i32 @cbreak()\n"
-                    "declare i32 @keypad(ptr, i32)\n"
-                    "declare i32 @waddnstr(ptr, ptr, i32)\n"
-                    "declare i32 @wrefresh(ptr)\n"
-                    "declare i32 @wgetch(ptr)\n"
-                    "declare i32 @endwin()\n"
-                    "declare i32 @puts(ptr)\n"
-                    "declare i64 @read(i32, ptr, i64)\n"
-                    "define i32 @main(i32 %argc, ptr %argv) {\n"
-                    "entry:\n"
-                    "  %window = call ptr @initscr()\n"
-                    "  %echo = call i32 @noecho()\n"
-                    "  %break = call i32 @cbreak()\n"
-                    "  %keys = call i32 @keypad(ptr %window, i32 1)\n"
-                    "  %write = call i32 @waddnstr(ptr %window, ptr @flowcore_sel_message, i32 25)\n"
-                    "  %has_arg = icmp sgt i32 %argc, 1\n"
-                    "  br i1 %has_arg, label %argument, label %stdin\n"
-                    "argument:\n"
-                    "  %arg_ptr = getelementptr ptr, ptr %argv, i64 1\n"
-                    "  %argument_value = load ptr, ptr %arg_ptr\n"
-                    "  br label %candidate\n"
-                    "stdin:\n"
-                    "  %input = alloca [4096 x i8], align 1\n"
-                    "  %input_ptr = getelementptr [4096 x i8], ptr %input, i64 0, i64 0\n"
-                    "  %input_count = call i64 @read(i32 0, ptr %input_ptr, i64 4095)\n"
-                    "  %input_positive = icmp sgt i64 %input_count, 0\n"
-                    "  br i1 %input_positive, label %input_ready, label %input_nonpositive\n"
-                    "input_nonpositive:\n"
-                    "  %input_eof = icmp eq i64 %input_count, 0\n"
-                    "  br i1 %input_eof, label %input_empty, label %input_error\n"
-                    "input_ready:\n"
-                    "  %terminator = getelementptr i8, ptr %input_ptr, i64 %input_count\n"
-                    "  store i8 0, ptr %terminator\n"
-                    "  br label %candidate\n"
-                    "input_empty:\n"
-                    "  store i8 0, ptr %input_ptr\n"
-                    "  br label %candidate\n"
-                    "input_error:\n"
-                    "  %read_error_end = call i32 @endwin()\n"
-                    "  ret i32 2\n"
-                    "candidate:\n"
-                    "  %selected = phi ptr [%argument_value, %argument], [%input_ptr, %input_ready], [%input_ptr, %input_empty]\n"
-                    "  %candidate_write = call i32 @waddnstr(ptr %window, ptr %selected, i32 -1)\n"
-                    "  %refresh = call i32 @wrefresh(ptr %window)\n"
-                    "  %key = call i32 @wgetch(ptr %window)\n"
-                    "  %end = call i32 @endwin()\n"
-                    "  %quit = icmp eq i32 %key, 113\n"
-                    "  br i1 %quit, label %cancel, label %selected_output\n"
-                    "selected_output:\n"
-                    "  %selected_printed = call i32 @puts(ptr %selected)\n"
-                    "  ret i32 0\n"
-                    "cancel:\n"
-                    "  %cancel_printed = call i32 @puts(ptr @flowcore_sel_cancel)\n"
                     "  ret i32 1\n"
                     "}\n";
         } else if (file_copy_plan) {

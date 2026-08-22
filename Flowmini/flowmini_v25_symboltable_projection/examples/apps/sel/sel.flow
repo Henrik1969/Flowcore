@@ -1,6 +1,7 @@
 import "../../../std/abi/ncurses.flow" as curses
 import "../../../std/abi/libc.flow" as libc
 import "../../../std/abi/kernel.flow" as linux
+import "../../../std/abi/memory.flow" as memory
 
 program sel
 
@@ -14,9 +15,11 @@ main(args : list<string>) {
     selected : c_string("selected: alpha")
     cancelled : c_string("selection: none")
     input : c_pointer(4096)
+    input_capacity : c_size_t(4096)
     input_count : c_size_t(4095)
     input_result : c_long(0)
     stdin_fd : c_int(0)
+    stdout_fd : c_int(1)
     argument_count : c_int(length(args))
 
     curses.initscr() -> window
@@ -28,14 +31,26 @@ main(args : list<string>) {
         argument : c_string(args[1])
         curses.waddnstr(window, argument, count) -> status
     } else {
+        memory.memset(input, stdin_fd, input_capacity) -> input
         linux.read(stdin_fd, input, input_count) -> input_result
+        if input_result < 0 {
+            curses.endwin() -> status
+            return 2
+        } else {
+            if input_result > 0 {
+                display_count : c_size_t(input_result)
+                linux.write(stdout_fd, input, display_count) -> input_result
+            }
+        }
     }
     curses.wrefresh(window) -> status
     curses.wgetch(window) -> key
     curses.endwin() -> status
     if key == 113 {
         libc.puts(cancelled) -> status
+        return 1
     } else {
         libc.puts(selected) -> status
+        return 0
     }
 }
