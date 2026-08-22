@@ -493,5 +493,6 @@
 
 ## Exact next action
 
-Next action: commit and push this final reconciliation, set `.codex-run-state`
-to `DONE`, and verify the pushed branch and worktree are clean.
+Mission complete: the final reconciliation is pushed, `.codex-run-state` is
+`DONE`, and the final state checkpoint must remain clean and synchronized with
+`origin/v25-symboltable-projection`.
