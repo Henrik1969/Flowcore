@@ -12,5 +12,5 @@ enable_testing()
 add_test(NAME flowanalyst_pipeline
     COMMAND ${CMAKE_COMMAND} -E env
         FLOWANALYST_BIN=$<TARGET_FILE:flowanalyst>
+        FLOWMINI_BIN=$<TARGET_FILE:flowmini>
         ${CMAKE_CURRENT_SOURCE_DIR}/tests/run-flowanalyst-tests.sh)
-

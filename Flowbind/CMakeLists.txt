@@ -13,6 +13,8 @@ enable_testing()
 add_test(NAME flowbind_provider
     COMMAND ${CMAKE_COMMAND} -E env
         FLOWBIND_BIN=$<TARGET_FILE:flowbind>
+        FLOWANALYST_BIN=$<TARGET_FILE:flowanalyst>
+        FLOWMINI_BIN=$<TARGET_FILE:flowmini>
         ${CMAKE_CURRENT_SOURCE_DIR}/tests/run-flowbind-tests.sh)
 add_test(NAME flowbind_fuzz
     COMMAND ${CMAKE_COMMAND} -E env

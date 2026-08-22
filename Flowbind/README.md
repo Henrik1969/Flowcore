@@ -15,9 +15,8 @@ available. It also verifies the v0.1 supported C signature family
 (`c_int`, `c_long`, `c_ulong`, `c_size_t`, `c_string`, and `c_pointer`) and reports host
 layout facts.
 It never calls a foreign function. A ready report is the authorization input
-for a later lowering profile; the `flowcat_argv_main` example demonstrates this
-The `flowcat_file_main` example uses exact `libc.so.6` grants for `open`,
-`read`, `write`, and `close`.
+for downstream generic lowering. The profile-free `flowcat` example uses exact
+`libc.so.6` grants for `open`, `read`, `write`, and `close`.
 
 Ready reports also contain a `capabilities` array. Each entry preserves the
 declared contract, provider library, symbol, calling convention, effect, ABI

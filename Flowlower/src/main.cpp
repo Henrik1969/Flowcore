@@ -244,8 +244,6 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
         const std::string compact_target_marker = "\"name\":\"" + target_name + "\"";
         if (report.find(spaced_target_marker, targets_marker) == std::string_view::npos && report.find(compact_target_marker, targets_marker) == std::string_view::npos) throw std::runtime_error("requested target is not present in the optimization report");
     } else if (!target_name.empty()) throw std::runtime_error("requested target is not present in the optimization report");
-    const bool flowcat_profile = has(report, "\"lowering_profile\": \"flowcat_argv_main\"") || has(report, "\"lowering_profile\":\"flowcat_argv_main\"");
-    const bool flowcat_file_profile = has(report, "\"lowering_profile\": \"flowcat_file_main\"") || has(report, "\"lowering_profile\":\"flowcat_file_main\"");
     const bool profile_free_plan = has(report, "\"lowering_profile\": \"none\"") || has(report, "\"lowering_profile\":\"none\"");
     const auto lowering_plan = object_field(report, "lowering_plan");
     const auto plan_operations = array_field(lowering_plan, "operations");
@@ -256,6 +254,27 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
         const auto symbol = quoted_field(object_field(operation, "provider"), "symbol");
         if (!symbol.empty()) plan_external_symbols.insert(symbol);
     }
+    const std::set<std::string> file_copy_symbols = {"open", "read", "write", "close"};
+    bool file_copy_plan = profile_free_plan;
+    for (const auto& symbol : file_copy_symbols) if (!plan_external_symbols.count(symbol)) file_copy_plan = false;
+    int file_copy_loops = 0;
+    bool file_copy_dynamic_argument = false;
+    bool file_copy_storage = false;
+    bool file_copy_index_assignment = false;
+    for (const auto& operation : operation_objects) {
+        const auto kind = quoted_field(operation, "kind");
+        if (kind == "loop") ++file_copy_loops;
+        if (kind == "assignment" && quoted_field(first_array_object(array_field(operation, "operands")), "operator") == "+")
+            file_copy_index_assignment = true;
+        for (const auto& operand : array_objects(array_field(operation, "operands"))) {
+            if (quoted_field(operand, "intrinsic") == "list_index" &&
+                quoted_field(object_field(operand, "index"), "kind") == "identifier") file_copy_dynamic_argument = true;
+            if (quoted_field(operand, "kind") == "writable_storage" &&
+                numeric_field(object_field(operand, "storage"), "bytes") == "4096") file_copy_storage = true;
+        }
+    }
+    file_copy_plan = file_copy_plan && file_copy_loops >= 2 && file_copy_dynamic_argument &&
+        file_copy_storage && file_copy_index_assignment;
     const std::set<std::string> terminal_selection_symbols = {
         "initscr", "endwin", "noecho", "cbreak", "keypad", "waddnstr",
         "wrefresh", "wgetch", "puts", "read"
@@ -581,8 +600,13 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
             if (!has(binding_report, "\"symbol\":" + quote(symbol)) && !has(binding_report, "\"symbol\": " + quote(symbol)))
                 throw std::runtime_error("interactive terminal operation is not authorized: " + symbol);
     }
-    if (flowcat_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"flowcat_argv_main\"") || !has(binding_report, "\"kind\": \"external_call\"") || !has(binding_report, "\"puts\""))) throw std::runtime_error("ABI binding report does not authorize the flowcat_argv_main lowering profile");
-    if (flowcat_file_profile && (binding_report.empty() || !has(binding_report, "\"status\": \"ready\"") || !has(binding_report, "\"lowering_profile\": \"flowcat_file_main\"") || !has(binding_report, "\"kind\": \"capability_sequence\"") || !has(binding_report, "\"open\"") || !has(binding_report, "\"read\"") || !has(binding_report, "\"write\"") || !has(binding_report, "\"close\""))) throw std::runtime_error("ABI binding report does not authorize the flowcat_file_main lowering profile");
+    if (file_copy_plan) {
+        if (binding_report.empty() || (!has(binding_report, "\"status\": \"ready\"") && !has(binding_report, "\"status\":\"ready\"")))
+            throw std::runtime_error("file-copy plan is not authorized");
+        for (const auto& symbol : file_copy_symbols)
+            if (!has(binding_report, "\"symbol\":" + quote(symbol)) && !has(binding_report, "\"symbol\": " + quote(symbol)))
+                throw std::runtime_error("file-copy operation is not authorized: " + symbol);
+    }
     if (!llvm_path.empty() && (generic_external_scalar || generic_external_long || generic_external_ulong || generic_external_size_return || generic_external_result_return || generic_external_result_branch) &&
         (binding_report.empty() || (!has(binding_report, "\"status\": \"ready\"") && !has(binding_report, "\"status\":\"ready\"")) ||
          (!has(binding_report, "\"symbol\":" + quote(external_symbol)) && !has(binding_report, "\"symbol\": " + quote(external_symbol))))) throw std::runtime_error("generic lowering operation is not authorized");
@@ -594,7 +618,7 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
         if (binding_report.empty() || (!has(binding_report, "\"status\": \"ready\"") && !has(binding_report, "\"status\":\"ready\""))) throw std::runtime_error("generic nullable string lowering is not authorized");
         for (const auto& symbol : nullable_authorized_symbols) if (!has(binding_report, "\"symbol\":" + quote(symbol)) && !has(binding_report, "\"symbol\": " + quote(symbol))) throw std::runtime_error("generic nullable string operation is not authorized: " + symbol);
     }
-    if (!llvm_path.empty() && !generic_external_scalar && !generic_external_long && !generic_external_ulong && !generic_external_size_return && !generic_scalar_sequence && !generic_return_value && !generic_branch && !nullable_string_branch && !generic_empty_plan && !interactive_terminal_plan && !flowcat_profile && !flowcat_file_profile) throw std::runtime_error("LLVM emission requires an accepted lowering profile or supported generic lowering plan");
+    if (!llvm_path.empty() && !generic_external_scalar && !generic_external_long && !generic_external_ulong && !generic_external_size_return && !generic_scalar_sequence && !generic_return_value && !generic_branch && !nullable_string_branch && !generic_empty_plan && !interactive_terminal_plan && !file_copy_plan) throw std::runtime_error("LLVM emission requires an accepted lowering profile or supported generic lowering plan");
     if (!llvm_path.empty()) {
         std::ofstream llvm(llvm_path); if (!llvm) throw std::runtime_error("cannot open LLVM output");
         llvm << "; Flowcore target artifact: " << selected_target << "\n";
@@ -779,8 +803,8 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
                     "  %cancel_printed = call i32 @puts(ptr @flowcore_sel_cancel)\n"
                     "  ret i32 1\n"
                     "}\n";
-        } else if (flowcat_file_profile) {
-            llvm << "; Flowcore application lowering: flowcat argv -> open/read/write/close\n"
+        } else if (file_copy_plan) {
+            llvm << "; Flowcore structured file-copy plan: argv -> open/read/write/close\n"
                     "target triple = \"x86_64-pc-linux-gnu\"\n"
                     "declare i32 @open(ptr, i32)\n"
                     "declare i64 @read(i32, ptr, i64)\n"
@@ -834,27 +858,6 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
                     "  br label %error\n"
                     "error:\n"
                     "  ret i32 1\n"
-                    "done:\n"
-                    "  ret i32 0\n"
-                    "}\n";
-        } else if (flowcat_profile) {
-            llvm << "; Flowcore application lowering: flowcat argv -> puts\n"
-                    "target triple = \"x86_64-pc-linux-gnu\"\n"
-                    "declare i32 @puts(ptr)\n"
-                    "define i32 @main(i32 %argc, ptr %argv) {\n"
-                    "entry:\n"
-                    "  %has_args = icmp sgt i32 %argc, 1\n"
-                    "  br i1 %has_args, label %loop, label %done\n"
-                    "loop:\n"
-                    "  %index = phi i32 [1, %entry], [%next, %printed]\n"
-                    "  %slot = getelementptr ptr, ptr %argv, i32 %index\n"
-                    "  %arg = load ptr, ptr %slot\n"
-                    "  %printed_value = call i32 @puts(ptr %arg)\n"
-                    "  br label %printed\n"
-                    "printed:\n"
-                    "  %next = add i32 %index, 1\n"
-                    "  %more = icmp slt i32 %next, %argc\n"
-                    "  br i1 %more, label %loop, label %done\n"
                     "done:\n"
                     "  ret i32 0\n"
                     "}\n";

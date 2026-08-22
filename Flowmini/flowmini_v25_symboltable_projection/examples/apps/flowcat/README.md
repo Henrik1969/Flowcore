@@ -17,12 +17,16 @@ The source declares the canonical typed entry point:
 
 ```flow
 main(args : list<string>) {
-    print args
+    while index < length(args) {
+        open/read/write/close the source-selected path
+    }
 }
 ```
 
-For this vertical slice, `flowcat` treats each process argument after the
-executable name as a path. The explicit `file_io` ABI contract authorizes
+The real source spells out argv traversal, bounded storage, external calls,
+error branches, and return values; the abbreviated snippet above only shows
+the shape. Each process argument after the executable name is a path. The
+explicit `file_io` ABI contract authorizes
 `open`, `read`, `write`, and `close` through the adjacent `policy.conf`;
 Flowbind verifies the exact C symbols before LLVM is emitted. The generated
 program reads each file in bounded chunks and writes the bytes to stdout.

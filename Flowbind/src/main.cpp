@@ -350,7 +350,6 @@ int verify(const std::string& report, const std::string& policy_path, const std:
     const Requirement* lowering_requirement = nullptr;
     if (profile == "sel_main") for (const auto& item : needed) if (item.symbol == "initscr" || item.symbol == "endwin" || item.symbol == "wgetch" || item.symbol == "keypad") lowering_requirement = &item;
     if (profile == "abi_kernel_getpid_main") for (const auto& item : needed) if (item.symbol == "getpid") lowering_requirement = &item;
-    if (profile == "flowcat_argv_main") for (const auto& item : needed) if (item.symbol == "puts") lowering_requirement = &item;
     const auto grants = read_policy(policy_path);
     const std::vector<std::string> supported_types = {"c_int", "c_long", "c_ulong", "c_size_t", "c_string", "c_pointer"};
     auto supported_type = [&](const std::string& type) { for (const auto& candidate : supported_types) if (candidate == type) return true; return false; };
@@ -387,7 +386,6 @@ int verify(const std::string& report, const std::string& policy_path, const std:
     }
     std::cout << "{\n  \"format\": \"flowbind.binding_report\",\n  \"version\": 1,\n  \"status\": \"ready\",\n  \"lowering_profile\": " << (profile.empty() ? "\"none\"" : "\"" + profile + "\"") << ",\n  \"provider\": {\"name\": \"dlopen+dlsym\", \"requirements\": " << needed.size() << "},\n  \"symbols\": [";
     for (std::size_t i = 0; i < needed.size(); ++i) { if (i) std::cout << ','; std::cout << '"' << needed[i].symbol << '"'; }
-    const bool file_profile = profile == "flowcat_file_main";
     std::cout << "],\n  \"capabilities\": [";
     for (std::size_t i = 0; i < needed.size(); ++i) {
         if (i) std::cout << ',';
@@ -410,7 +408,7 @@ int verify(const std::string& report, const std::string& policy_path, const std:
     } catch (const std::exception&) {
         generic_operation_count = 0;
     }
-    std::cout << "],\n  \"lowering_plan\": {\"kind\": " << (file_profile ? "\"capability_sequence\"" : (lowering_requirement ? "\"external_call\"" : "\"none\""))
+    std::cout << "],\n  \"lowering_plan\": {\"kind\": " << (lowering_requirement ? "\"external_call\"" : "\"none\"")
               << ",\"contract\":\"flowcore.lowering_plan\",\"operation_count\":" << generic_operation_count;
     if (lowering_requirement) std::cout << ",\"symbol\":" << json_string(lowering_requirement->symbol) << ",\"parameter_types\":" << json_string(lowering_requirement->parameter_types) << ",\"return_type\":" << json_string(lowering_requirement->return_type);
     std::cout << "},\n  \"policy\": {\"status\": \"authorized\", \"grants\": " << grants.size() << "},\n  \"abi\": {\"convention\": \"c\", \"carrier_types_supported\": true, \"provider_signature_evidence\": \"not-provided\", \"sizeof_int\": " << sizeof(int) << ", \"sizeof_long\": " << sizeof(long) << ", \"sizeof_size_t\": " << sizeof(std::size_t) << ", \"sizeof_pointer\": " << sizeof(void*) << "},\n  \"execution\": \"not-performed\"\n}\n";

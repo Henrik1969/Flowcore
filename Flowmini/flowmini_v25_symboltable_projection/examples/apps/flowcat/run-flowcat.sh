@@ -52,7 +52,7 @@ fi
 "$FLOWMINI_BIN" --dump-frontend-bundle "$EXAMPLE_DIR/flowcat.flow" > "$tmpdir/frontend-bundle.json"
 "$FLOWANALYST_BIN" < "$tmpdir/frontend-bundle.json" > "$tmpdir/semantic-report.json"
 grep -q '"status": "ok"' "$tmpdir/semantic-report.json"
-grep -q '"lowering_profile": "flowcat_file_main"' "$tmpdir/semantic-report.json"
+jq -e '.lowering_profile == "none" and ([.lowering_plan.operations[] | select(.kind == "loop")] | length) == 2 and any(.lowering_plan.operations[]; .kind == "assignment")' "$tmpdir/semantic-report.json" >/dev/null
 
 "$FLOWPARALLEL_BIN" < "$tmpdir/semantic-report.json" > "$tmpdir/parallel-plan.json"
 grep -q '"status": "ready"' "$tmpdir/parallel-plan.json"

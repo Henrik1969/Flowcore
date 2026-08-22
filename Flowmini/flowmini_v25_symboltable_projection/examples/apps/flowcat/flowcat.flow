@@ -2,7 +2,44 @@ import "../../../std/abi/file_io.flow"
 
 program flowcat
 
-// First executable application specimen with an explicit file-I/O boundary.
 main(args : list<string>) {
-    print args
+    index : c_int(1)
+    argument_count : c_int(length(args))
+    one : c_int(1)
+    zero : c_int(0)
+    flags : c_int(0)
+    stdout_fd : c_int(1)
+    fd : c_int(-1)
+    buffer : c_pointer(4096)
+    capacity : c_size_t(4096)
+    count : c_long(0)
+    written : c_long(0)
+    closed : c_int(0)
+
+    while index < argument_count {
+        path : c_string(args[index])
+        open(path, flags) -> fd
+        if fd < zero {
+            one -> return
+        }
+        read(fd, buffer, capacity) -> count
+        while count > zero {
+            write(stdout_fd, buffer, count) -> written
+            if written < zero {
+                close(fd) -> closed
+                one -> return
+            }
+            read(fd, buffer, capacity) -> count
+        }
+        if count < zero {
+            close(fd) -> closed
+            one -> return
+        }
+        close(fd) -> closed
+        if closed < zero {
+            one -> return
+        }
+        index + one -> index
+    }
+    zero -> return
 }

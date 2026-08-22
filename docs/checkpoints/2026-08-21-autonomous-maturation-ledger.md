@@ -195,6 +195,12 @@
   length definition, checked argv indexing, a branch consuming the length
   symbol, and an equality branch for the quit key; the capability set alone is
   no longer sufficient to select the terminal emitter.
+- Removed the final flowcat application/source-name profiles. Flow source now
+  declares argv traversal, bounded writable storage, open/read/write/close
+  calls, error branches, index mutation, and returns. Flowanalyst publishes
+  generic `loop` and `assignment` operations and resolves placement results
+  through parent scopes; Flowlower selects the transitional file-copy emitter
+  from those structured facts and exact authorized capabilities.
 
 ## Evidence
 
@@ -296,14 +302,20 @@
   branch-removal refusal, hostile-binding refusal, native positive input, EOF,
   and closed-stdin error behavior. The canonical build and suite then passed
   **54/54** tests.
+- Focused profile-free file-copy checkpoint: `flowanalyst_pipeline`,
+  `flowbind_provider`, `flowcore_stdlib_boundary`, `flowcat_flowcore_pipeline`,
+  and `flowlower_pipeline` passed. An arbitrarily renamed source emitted the
+  same native path, removing loop operations was rejected, two files produced
+  the expected output, and a missing file returned 1. The canonical build and
+  suite passed **54/54** tests.
 
 ## Remaining work
 
 - The unqualified single-provider import alias remains explicitly transitional;
   selective-opening syntax is not yet part of the language.
-- Replace the remaining flowcat profile/source-name lowering dispatch with a
-  reusable lowering plan. Kernel ABI examples and `sel` no longer select a
-  compiler path by application identity.
+- Replace the transitional structured file-copy emitter with reusable loop,
+  mutation, dynamic-index, and failure-control-flow LLVM emission. No current
+  native example selects a compiler path by application identity.
 - `sel` input safety is repaired and its backend selection now requires
   structured Flow branches for argv/input and key/output selection, but LLVM
   emission still lives in a transitional terminal-plan emitter rather than the
@@ -321,9 +333,14 @@
   rejection, unconnected-output diagnostics, and wire/signal provenance are
   now covered.
 - Reconcile documentation and test counts after the implementation stabilizes.
+- Represent the `c_long` read result to `c_size_t` write-count conversion
+  explicitly in the plan. Both carriers are currently lowered to the verified
+  64-bit platform ABI, but their distinct source-level identities must not be
+  silently conflated by the final reusable argument validator.
 
 ## Exact next action
 
-Next action: replace the remaining flowcat source/profile dispatch with generic
-checked argv, writable storage, and ordered external-call lowering, retaining
-its positive multi-file output and missing-file failure behavior.
+Next action: generalize loop and assignment lowering from the new plan
+operations, including explicit compatible-carrier conversion, then retire the
+transitional file-copy emitter without losing partial-write, cleanup, or error
+behavior.

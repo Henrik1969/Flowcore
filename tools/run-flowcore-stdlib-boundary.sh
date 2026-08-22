@@ -102,8 +102,7 @@ flowcat_fixture="$root/Flowmini/flowmini_v25_symboltable_projection/examples/app
     "$flowbind" --policy "$policy" > "$tmpdir/flowcat.binding.json"
 jq -e '
     .status == "ready" and
-    .lowering_profile == "flowcat_file_main" and
-    .lowering_plan.kind == "capability_sequence" and
+    .lowering_profile == "none" and
     ([.capabilities[].symbol] | sort) == ["close", "open", "read", "write"]
 ' "$tmpdir/flowcat.binding.json" >/dev/null
 

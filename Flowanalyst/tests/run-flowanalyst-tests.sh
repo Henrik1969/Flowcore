@@ -120,7 +120,11 @@ done
 
 flowcat_fixture="$root/Flowmini/flowmini_v25_symboltable_projection/examples/apps/flowcat/flowcat.flow"
 flowcat_report=$("$flowmini" --dump-frontend-bundle "$flowcat_fixture" | "$bin")
-printf '%s\n' "$flowcat_report" | grep -q '"lowering_profile": "flowcat_file_main"'
+printf '%s\n' "$flowcat_report" | jq -e '
+  .lowering_profile == "none" and
+  ([.lowering_plan.operations[] | select(.kind == "loop")] | length) == 2 and
+  any(.lowering_plan.operations[]; .kind == "assignment")
+' >/dev/null
 printf '%s\n' "$flowcat_report" | grep -q '"name":"args"'
 printf '%s\n' "$flowcat_report" | grep -q '"symbol":"open"'
 printf '%s\n' "$flowcat_report" | grep -q '"symbol":"read"'

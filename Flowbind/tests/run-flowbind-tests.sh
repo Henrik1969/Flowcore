@@ -41,7 +41,7 @@ file_report=$(
   "$flowanalyst" |
   "$bin" --policy "$policy"
 )
-printf '%s\n' "$file_report" | jq -e '.status == "ready" and .lowering_profile == "flowcat_file_main" and .lowering_plan.kind == "capability_sequence" and (.symbols | index("open")) != null and (.symbols | index("read")) != null and (.symbols | index("write")) != null and (.symbols | index("close")) != null' >/dev/null
+printf '%s\n' "$file_report" | jq -e '.status == "ready" and .lowering_profile == "none" and (.symbols | index("open")) != null and (.symbols | index("read")) != null and (.symbols | index("write")) != null and (.symbols | index("close")) != null' >/dev/null
 
 set +e
 bad=$(printf '%s' '{"format":"flowanalyst.semantic_report","version":1,"status":"ok","binding_requirements":[{"contract":"bad","library":"libc.so.6","convention":"c","symbol":"flowcore_symbol_that_does_not_exist","effect":"pure","parameter_types":"","return_type":"c_int"}]}' | "$bin" --policy "$policy")

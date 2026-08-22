@@ -69,7 +69,7 @@ struct AggregateLayout { std::string contract, name; std::vector<std::pair<std::
 struct Region { std::string id, kind, status; std::vector<std::string> prerequisites; };
 struct EffectFact { int declaration = -1, symbol = -1; std::string name, effect, certainty, reason; };
 struct CallSite { int expression = -1, statement = -1, scope = -1, callee_symbol = -1, write_symbol = -1; std::string callee; bool pure = false; std::set<int> reads; std::string writes; std::vector<int> arguments; std::vector<int> independent_with; };
-struct LoweringOperation { int expression = -1, statement = -1, scope = -1, block = -1, then_block = -1, else_block = -1, callee_symbol = -1, result_symbol = -1; std::string callee, kind, contract, library, convention, symbol, effect, parameter_types, return_type; std::vector<int> arguments; };
+struct LoweringOperation { int expression = -1, statement = -1, scope = -1, block = -1, then_block = -1, else_block = -1, body_block = -1, callee_symbol = -1, result_symbol = -1; std::string callee, kind, contract, library, convention, symbol, effect, parameter_types, return_type; std::vector<int> arguments; };
 struct Resolution { int expression = -1, statement = -1, scope = -1, symbol = -1; std::string name; };
 
 std::string trim_copy(std::string value) {
@@ -368,30 +368,7 @@ int run(const Json& bundle) {
         int scope_id = integer(field(*symbol, "introduced_scope_id")); int mains = 0; if (scopes.count(scope_id)) for (const auto& child : list(field(*scopes[scope_id], "symbol_ids"))) { int child_id = integer(&child); if (symbols.count(child_id) && text(field(*symbols[child_id], "name")) == "main" && text(field(*symbols[child_id], "kind")) == "Procedure") ++mains; }
         targets.push_back({id, mains, text(field(*symbol, "name"))}); if (mains != 1) add_diagnostic("FLOWANALYST_TARGET_ENTRYPOINT", "target '" + targets.back().name + "' must contain exactly one main procedure", id, "target:" + targets.back().name);
     }
-    std::string lowering_profile = "none";
-    bool flowcat_entrypoint = false;
-    if (text(field(*source_unit, "name")) == "flowcat") {
-        for (const auto& [declaration_id, declaration] : declarations) {
-            if (text(field(*declaration, "kind")) != "main_block") continue;
-            for (const auto& parameter : list(field(*declaration, "parameters"))) {
-                if (text(field(parameter, "name")) == "args" &&
-                    text(field(parameter, "type")) == "list<string>") {
-                    flowcat_entrypoint = true;
-                }
-            }
-        }
-    }
-    bool flowcat_prints_args = false;
-    for (const auto& resolution : resolutions) if (resolution.symbol >= 0 && resolution.name == "args") flowcat_prints_args = true;
-    if (flowcat_entrypoint && flowcat_prints_args) {
-        std::set<std::string> file_symbols;
-        for (const auto& requirement : binding_requirements) file_symbols.insert(requirement.symbol);
-        if (file_symbols.count("open") && file_symbols.count("read") && file_symbols.count("write") && file_symbols.count("close")) lowering_profile = "flowcat_file_main";
-        else {
-            lowering_profile = "flowcat_argv_main";
-            binding_requirements.push_back({"flowcore.argv_output", "libc.so.6", "c", "puts", "io", "c_string", "c_int"});
-        }
-    }
+    const std::string lowering_profile = "none";
     std::function<bool(int)> expression_is_pure = [&](int expression_id) {
         if (!expressions.count(expression_id)) return false;
         const auto* expression = expressions[expression_id];
@@ -430,6 +407,17 @@ int run(const Json& bundle) {
         if (text(field(*expression, "kind")) == "identifier" && resolved_expression_symbols.count(expression_id)) reads.insert(resolved_expression_symbols[expression_id]);
         for (const auto& child : list(field(*expression, "child_expressions"))) collect_reads(integer(&child), reads);
     };
+    auto visible_symbol = [&](int scope_id, const std::string& name) {
+        int current = scope_id;
+        while (current >= 0 && scopes.count(current)) {
+            for (const auto& symbol_id : list(field(*scopes.at(current), "symbol_ids"))) {
+                const int candidate = integer(&symbol_id);
+                if (symbols.count(candidate) && text(field(*symbols.at(candidate), "name")) == name) return candidate;
+            }
+            current = integer(field(*scopes.at(current), "parent_id"));
+        }
+        return -1;
+    };
     std::vector<CallSite> call_sites;
     for (const auto& [expression_id, expression] : expressions) {
         if (text(field(*expression, "kind")) != "call") continue;
@@ -451,10 +439,7 @@ int run(const Json& bundle) {
             const auto* statement_payload = field(*statement, "payload");
             site.writes = text(field(*statement, "name"));
             if (site.writes.empty()) site.writes = text(field(field(statement_payload, "target"), "name"));
-            if (!site.writes.empty() && scopes.count(site.scope)) for (const auto& symbol_id : list(field(*scopes[site.scope], "symbol_ids"))) {
-                const int candidate = integer(&symbol_id);
-                if (symbols.count(candidate) && text(field(*symbols[candidate], "name")) == site.writes) { site.write_symbol = candidate; break; }
-            }
+            if (!site.writes.empty()) site.write_symbol = visible_symbol(site.scope, site.writes);
         }
         call_sites.push_back(std::move(site));
     }
@@ -550,6 +535,35 @@ int run(const Json& bundle) {
         operation.then_block = integer(field(payload, "then_block"));
         operation.else_block = integer(field(field(payload, "else_arm"), "block"));
         operation.kind = "branch";
+        if (operation.expression >= 0) operation.arguments.push_back(operation.expression);
+        lowering_operations.push_back(std::move(operation));
+    }
+    for (const auto& [statement_id, statement] : statements) {
+        if (text(field(*statement, "kind")) != "placement") continue;
+        const auto* payload = field(*statement, "payload");
+        const int value_expression = integer(field(payload, "value_expression"));
+        if (value_expression < 0 || (expressions.count(value_expression) && text(field(*expressions.at(value_expression), "kind")) == "call")) continue;
+        const int scope_id = statement_scopes.count(statement_id) ? statement_scopes.at(statement_id) : -1;
+        LoweringOperation operation;
+        operation.expression = value_expression;
+        operation.statement = statement_id;
+        operation.scope = scope_id;
+        operation.block = containing_block(statement_id);
+        operation.result_symbol = visible_symbol(scope_id, text(field(field(payload, "target"), "name")));
+        operation.kind = "assignment";
+        operation.arguments.push_back(value_expression);
+        lowering_operations.push_back(std::move(operation));
+    }
+    for (const auto& [statement_id, statement] : statements) {
+        if (text(field(*statement, "kind")) != "while") continue;
+        const auto* payload = field(*statement, "payload");
+        LoweringOperation operation;
+        operation.expression = integer(field(payload, "condition_expression"));
+        operation.statement = statement_id;
+        operation.scope = statement_scopes.count(statement_id) ? statement_scopes.at(statement_id) : -1;
+        operation.block = containing_block(statement_id);
+        operation.body_block = integer(field(payload, "body_block"));
+        operation.kind = "loop";
         if (operation.expression >= 0) operation.arguments.push_back(operation.expression);
         lowering_operations.push_back(std::move(operation));
     }
@@ -696,6 +710,7 @@ int run(const Json& bundle) {
         std::cout << "]";
         if (operation.result_symbol >= 0) std::cout << ",\"result_symbol_id\":" << operation.result_symbol;
         if (operation.kind == "branch") std::cout << ",\"then_block_id\":" << operation.then_block << ",\"else_block_id\":" << operation.else_block;
+        if (operation.kind == "loop") std::cout << ",\"body_block_id\":" << operation.body_block;
         if (operation.kind == "external_call") {
             std::cout << ",\"provider\":{\"contract\":" << quote(operation.contract)
                       << ",\"library\":" << quote(operation.library)

@@ -6,15 +6,14 @@ Flowlower is the target-lowering sibling after Flowoptimize:
 source -> Flowmini -> Flowanalyst -> Flowparallel -> Flowoptimize -> Flowlower
 ```
 
-The first target provider is `llvm`. The implementation supports narrow
-source-derived profiles, including the executable `flowcat_file_main`,
-`abi_kernel_clock_main`, and
-`abi_kernel_random_main` profiles, and emits valid
-LLVM modules for them. General source lowering remains a later expansion; every
-emitted profile must be explicit, policy-authorized where it uses external
-capabilities, and executable-tested. Profile-free lowering currently covers
-`c_int` calls with zero or one integer argument, typed result placement,
-integer values and expressions, returns, and boolean/comparison branches.
+The first target provider is `llvm`. Profile-free lowering covers scalar and
+pointer ABI calls, typed result placement, integer and string values,
+expressions, returns, comparisons, checked entry arguments, and selected
+structured control-flow plans. The file-copy and terminal examples are chosen
+from source-derived plan operations and exact authorized capabilities rather
+than application names. Their complex LLVM control-flow emitters remain
+transitional until the reusable loop/branch emitter covers the same native
+error and cleanup laws.
 
 The lowering report preserves the source path carried by the upstream semantic
 and optimization reports. This keeps emitted IR attributable to its source
