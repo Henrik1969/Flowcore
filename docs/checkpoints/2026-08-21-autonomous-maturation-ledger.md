@@ -190,6 +190,11 @@
   guards argc before loading argv. An arbitrary profile-free program prints its
   source-selected argument, while the missing-argument path exits 64 without
   dereferencing argv out of bounds.
+- Made the transitional profile-free `sel` backend contingent on source-derived
+  entry-argument and key-selection branches. The plan must contain an argv
+  length definition, checked argv indexing, a branch consuming the length
+  symbol, and an equality branch for the quit key; the capability set alone is
+  no longer sufficient to select the terminal emitter.
 
 ## Evidence
 
@@ -286,6 +291,11 @@
   outcomes.
 - Focused checked-argv checkpoint: `profile_free_generic_lowering` passed with
   native selected-argument output and missing-argument refusal.
+- Focused structured-terminal checkpoint: `sel_tui_pipeline` passed with an
+  arbitrarily renamed source, explicit argument and quit-key branches,
+  branch-removal refusal, hostile-binding refusal, native positive input, EOF,
+  and closed-stdin error behavior. The canonical build and suite then passed
+  **54/54** tests.
 
 ## Remaining work
 
@@ -294,10 +304,10 @@
 - Replace the remaining flowcat profile/source-name lowering dispatch with a
   reusable lowering plan. Kernel ABI examples and `sel` no longer select a
   compiler path by application identity.
-- `sel` input safety is repaired and its backend selection is profile-free, but
-  its TUI control flow and argv selection still live in a transitional
-  capability-plan emitter rather than structured Flow branches. Capability-set
-  recognition is not yet the final generic control-flow contract.
+- `sel` input safety is repaired and its backend selection now requires
+  structured Flow branches for argv/input and key/output selection, but LLVM
+  emission still lives in a transitional terminal-plan emitter rather than the
+  reusable branch and external-call machinery.
 - Expand effects into external effect, argument-memory effect, determinism,
   resource, ownership, nullability, and lifetime facts.
 - Model typed ncurses session/window resources.
@@ -314,7 +324,6 @@
 
 ## Exact next action
 
-Next action: use the checked entry-argument operations to express `sel`
-argument/input choice, key handling, and output branches in structured Flow
-operations, then replace the transitional capability-set emitter without losing
-cleanup and read-result laws.
+Next action: replace the remaining flowcat source/profile dispatch with generic
+checked argv, writable storage, and ordered external-call lowering, retaining
+its positive multi-file output and missing-file failure behavior.

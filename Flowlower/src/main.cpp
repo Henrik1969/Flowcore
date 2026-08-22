@@ -263,6 +263,35 @@ int lower(std::string_view report, const std::string& llvm_path = {}, std::strin
     bool interactive_terminal_plan = profile_free_plan;
     for (const auto& symbol : terminal_selection_symbols)
         if (!plan_external_symbols.count(symbol)) interactive_terminal_plan = false;
+    bool terminal_has_entry_length = false;
+    bool terminal_has_checked_argument = false;
+    bool terminal_has_argument_branch = false;
+    bool terminal_has_key_branch = false;
+    std::set<std::string> terminal_entry_length_symbols;
+    for (const auto& operation : operation_objects) {
+        for (const auto& operand : array_objects(array_field(operation, "operands"))) {
+            if (quoted_field(operand, "intrinsic") == "list_length") {
+                terminal_has_entry_length = true;
+                const auto result_symbol = numeric_field(operation, "result_symbol_id");
+                if (!result_symbol.empty()) terminal_entry_length_symbols.insert(result_symbol);
+            }
+            if (quoted_field(operand, "intrinsic") == "list_index") terminal_has_checked_argument = true;
+        }
+        if (quoted_field(operation, "kind") != "branch") continue;
+        const auto condition = first_array_object(array_field(operation, "operands"));
+        const auto left = object_field(condition, "left");
+        const auto right = object_field(condition, "right");
+        if ((quoted_field(left, "kind") == "identifier" && terminal_entry_length_symbols.count(numeric_field(left, "symbol_id"))) ||
+            (quoted_field(right, "kind") == "identifier" && terminal_entry_length_symbols.count(numeric_field(right, "symbol_id"))))
+            terminal_has_argument_branch = true;
+        if (quoted_field(condition, "operator") == "==" &&
+            ((quoted_field(left, "kind") == "identifier" && quoted_field(right, "value") == "113") ||
+            (quoted_field(right, "kind") == "identifier" && quoted_field(left, "value") == "113"))
+        )
+            terminal_has_key_branch = true;
+    }
+    interactive_terminal_plan = interactive_terminal_plan && terminal_has_entry_length &&
+        terminal_has_checked_argument && terminal_has_argument_branch && terminal_has_key_branch;
     const bool generic_empty_plan = profile_free_plan && operation_objects.empty() &&
         quoted_field(lowering_plan, "format") == "flowcore.lowering_plan" && numeric_field(lowering_plan, "version") == "1";
     const auto first_operation = operation_objects.empty() ? std::string("{}") : operation_objects.front();

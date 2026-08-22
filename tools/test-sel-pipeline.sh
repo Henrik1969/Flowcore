@@ -30,6 +30,11 @@ jq -e '[.ast.declaration_pool[] | select(.kind == "import") | .alias] == ["curse
 grep -q '"lowering_profile": "none"' "$tmpdir/semantic.json"
  jq -e '(.external_operations | map(.callee) | index("curses.initscr")) != null and (.external_operations | map(.callee) | index("libc.puts")) != null and (.external_operations | map(.callee) | index("linux.read")) != null' "$tmpdir/semantic.json" >/dev/null
 jq -e '.lowering_plan.operations | any(.provider.contract == "curses" and .provider.symbol == "initscr" and .result_resource.cleanup_capability == "endwin")' "$tmpdir/semantic.json" >/dev/null
+jq -e '
+    ([.lowering_plan.operations[].operands[]? | select(.intrinsic == "list_length")] | length) >= 1 and
+    ([.lowering_plan.operations[].operands[]? | select(.intrinsic == "list_index")] | length) >= 1 and
+    ([.lowering_plan.operations[] | select(.kind == "branch")] | length) == 2
+' "$tmpdir/semantic.json" >/dev/null
 "$parallel" < "$tmpdir/semantic.json" > "$tmpdir/parallel.json"
 "$optimizer" < "$tmpdir/parallel.json" > "$tmpdir/optimized.json"
 "$bind" --policy "$tmpdir/policy" < "$tmpdir/semantic.json" > "$tmpdir/binding.json"
@@ -49,6 +54,15 @@ jq -e '.lowering_profile == "none" and (.lowering_plan.operations | any(.provide
 "$bind" --policy "$tmpdir/policy" < "$tmpdir/renamed.semantic.json" > "$tmpdir/renamed.binding.json"
 "$lower" --emit-llvm "$tmpdir/renamed.ll" --binding-report "$tmpdir/renamed.binding.json" < "$tmpdir/renamed.optimized.json" >/dev/null
 grep -q 'structured terminal selection plan' "$tmpdir/renamed.ll"
+
+# A matching capability set without the source-derived selection branches is
+# not sufficient authority for the transitional terminal emitter.
+jq '.lowering_plan.operations |= map(select(.kind != "branch"))' \
+    "$tmpdir/optimized.json" > "$tmpdir/branchless.optimized.json"
+if "$lower" --emit-llvm "$tmpdir/branchless.ll" --binding-report "$tmpdir/binding.json" < "$tmpdir/branchless.optimized.json" >/dev/null 2>&1; then
+    echo 'terminal lowering accepted a capability set without source branches' >&2
+    exit 1
+fi
 
 # Exact operation authorization remains mandatory on the profile-free path.
 sed 's/"wgetch"/"invented_wgetch"/g' "$tmpdir/binding.json" > "$tmpdir/hostile.binding.json"

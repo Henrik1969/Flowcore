@@ -12,19 +12,30 @@ main(args : list<string>) {
     count : c_int(58)
     message : c_string("Flowcore sel\n\n> alpha\n  beta\n  gamma\n\nUp/Down: move  Enter: select  q: quit")
     selected : c_string("selected: alpha")
+    cancelled : c_string("selection: none")
     input : c_pointer(4096)
     input_count : c_size_t(4095)
     input_result : c_long(0)
     stdin_fd : c_int(0)
+    argument_count : c_int(length(args))
 
     curses.initscr() -> window
     curses.noecho() -> status
     curses.cbreak() -> status
     curses.keypad(window, enabled) -> status
     curses.waddnstr(window, message, count) -> status
+    if argument_count > 1 {
+        argument : c_string(args[1])
+        curses.waddnstr(window, argument, count) -> status
+    } else {
+        linux.read(stdin_fd, input, input_count) -> input_result
+    }
     curses.wrefresh(window) -> status
     curses.wgetch(window) -> key
     curses.endwin() -> status
-    libc.puts(selected) -> status
-    linux.read(stdin_fd, input, input_count) -> input_result
+    if key == 113 {
+        libc.puts(cancelled) -> status
+    } else {
+        libc.puts(selected) -> status
+    }
 }
