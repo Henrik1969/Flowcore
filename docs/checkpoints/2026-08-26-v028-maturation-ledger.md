@@ -23,13 +23,29 @@
   revisioned identity storage, and permanent writable-storage semantics remain
   future work.
 
+## Gate 1 inventory
+
+- Added `docs/architecture/v028-artifact-contract-inventory.md` with the
+  producer/consumer/version/authority/parser/test map for every required
+  pipeline artifact and directly consumed provider/runtime evidence.
+- Classified raw searches in required stage entry points and adjacent
+  Flowparallel provider tools.
+- Confirmed Flowparallel and Flowoptimize are the largest unsafe authority
+  surfaces; both copy malformed or absent authority as empty JSON values.
+- Confirmed Flowbind and Flowlower already reject duplicate JSON keys in their
+  local parsers, while Flowbind still checks its top-level envelope by raw text.
+- Confirmed Flowanalyst parses structurally but silently ignores duplicate JSON
+  keys and represents integer identities as `double`.
+- Selected the first vertical slice: public strict JSON and common envelope,
+  followed by the complete semantic-report subset consumed by Flowparallel.
+
 ## Current phase
 
-Gate 1: inventory every public artifact contract and every text-based authority
-decision.
+Gate 2: establish the public strict JSON/diagnostic/serialization foundation and
+the first complete typed semantic-report consumption slice.
 
 ## Exact next action
 
-Produce a checked-in producer/consumer/schema/authority/parser/test inventory,
-classify all raw searches in required stages, and identify the smallest first
-typed vertical slice.
+Create `Flowcontracts`, wire it into the root build, add strict parser and
+deterministic serialization tests, then migrate Flowparallel's semantic-report
+consumer without changing its emitted semantics.
