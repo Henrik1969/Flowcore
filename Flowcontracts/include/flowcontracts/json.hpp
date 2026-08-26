@@ -238,6 +238,13 @@ inline Integer integer(const Value& value, std::string_view path) {
         if (const auto* result = std::get_if<Integer>(number)) return *result;
     throw Error(std::string(path), "expected signed 64-bit integer");
 }
+inline double number(const Value& value, std::string_view path) {
+    if (const auto* item = std::get_if<Number>(&value)) {
+        if (const auto* integer_value = std::get_if<Integer>(item)) return static_cast<double>(*integer_value);
+        return std::get<double>(*item);
+    }
+    throw Error(std::string(path), "expected number");
+}
 inline bool boolean(const Value& value, std::string_view path) {
     if (const auto* result = std::get_if<bool>(&value)) return *result;
     throw Error(std::string(path), "expected boolean");

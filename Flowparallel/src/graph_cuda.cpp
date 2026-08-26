@@ -1,4 +1,5 @@
 #include <dlfcn.h>
+#include <flowcontracts/artifacts.hpp>
 
 #include <cstddef>
 #include <chrono>
@@ -35,46 +36,17 @@ std::string read_input(int argc, char** argv) {
     return input.str();
 }
 
-bool has_field(std::string_view input, std::string_view field, std::string_view value) {
-    const std::string spaced = "\"" + std::string(field) + "\": \"" + std::string(value) + "\"";
-    const std::string compact = "\"" + std::string(field) + "\":\"" + std::string(value) + "\"";
-    return input.find(spaced) != std::string_view::npos || input.find(compact) != std::string_view::npos;
-}
-
-std::size_t number_after(std::string_view input, std::string_view marker, std::size_t start = 0) {
-    const auto found = input.find(marker, start); if (found == std::string_view::npos) return 0;
-    auto position = found + marker.size(); while (position < input.size() && (input[position] == ' ' || input[position] == '\t')) ++position;
-    std::size_t value = 0; while (position < input.size() && input[position] >= '0' && input[position] <= '9') { value = value * 10 + static_cast<std::size_t>(input[position] - '0'); ++position; }
-    return value;
-}
-
 std::string quote(std::string_view value) { std::string result = "\""; for (char character : value) { if (character == '\\' || character == '"') result.push_back('\\'); result.push_back(character); } result.push_back('"'); return result; }
 
-std::string source_path(std::string_view input) {
-    const auto source = input.find("\"source\":"); if (source == std::string_view::npos) return {};
-    const auto path = input.find("\"path\":", source); if (path == std::string_view::npos) return {};
-    auto first = input.find('"', path + 7); if (first == std::string_view::npos) return {}; ++first; std::string result;
-    for (auto position = first; position < input.size(); ++position) { if (input[position] == '"' && input[position - 1] != '\\') return result; result.push_back(input[position]); }
-    return {};
-}
-
 int run(std::string_view report) {
-    if (!has_field(report, "format", "flowanalyst.semantic_report")) throw std::runtime_error("input is not a Flowanalyst semantic report");
-    if (!has_field(report, "status", "ok")) { std::cout << "{\"format\":\"flowparallel.graph_cuda\",\"version\":1,\"status\":\"blocked\"}\n"; return 2; }
-    auto matrix = report.find("\"name\":\"region_dependency\""); if (matrix == std::string_view::npos) matrix = report.find("\"name\": \"region_dependency\"");
-    if (matrix == std::string_view::npos) throw std::runtime_error("region_dependency matrix view is missing");
-    const auto rows = number_after(report, "\"rows\":", matrix); const auto columns = number_after(report, "\"columns\":", matrix);
+    const auto semantic = flowcontracts::semantic_report(flowcontracts::json::parse(report));
+    if (semantic.artifact.status != "ok") { std::cout << "{\"format\":\"flowparallel.graph_cuda\",\"version\":1,\"status\":\"blocked\"}\n"; return 2; }
+    const auto rows = static_cast<std::size_t>(semantic.dependency_matrix.rows);
+    const auto columns = static_cast<std::size_t>(semantic.dependency_matrix.columns);
     if (rows == 0 || rows != columns || rows > 1024) throw std::runtime_error("unsupported graph matrix dimensions");
-    const auto entries = report.find("\"entries\":[", matrix); const auto end = report.find(']', entries);
-    if (entries == std::string_view::npos || end == std::string_view::npos) throw std::runtime_error("matrix entries are missing or unterminated");
     const std::size_t elements = rows * columns; std::vector<float> adjacency(elements, 0.0F);
-    for (auto position = entries; position < end;) {
-        const auto row_marker = report.find("\"row\":", position); if (row_marker == std::string_view::npos || row_marker >= end) break;
-        const auto column_marker = report.find("\"column\":", row_marker); if (column_marker == std::string_view::npos || column_marker >= end) throw std::runtime_error("matrix entry has no column");
-        const auto row = number_after(report, "\"row\":", row_marker); const auto column = number_after(report, "\"column\":", column_marker);
-        if (row >= rows || column >= columns) throw std::runtime_error("matrix entry is out of bounds");
-        adjacency[column * rows + row] = 1.0F; position = column_marker + 9;
-    }
+    for (const auto& entry : semantic.dependency_matrix.entries)
+        adjacency[static_cast<std::size_t>(entry.column) * rows + static_cast<std::size_t>(entry.row)] = entry.value ? 1.0F : 0.0F;
     const auto cpu_start = std::chrono::steady_clock::now();
     std::vector<unsigned char> cpu_reach(elements, 0);
     for (std::size_t i = 0; i < elements; ++i) cpu_reach[i] = adjacency[i] > 0.5F;
@@ -105,7 +77,7 @@ int run(std::string_view report) {
     const double cuda_ms = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - cuda_start).count();
     std::size_t reachable_pairs = 0; for (float value : reach) reachable_pairs += value > 0.5F;
     std::size_t cpu_reachable_pairs = 0; for (unsigned char value : cpu_reach) cpu_reachable_pairs += value != 0;
-    std::cout << "{\n  \"format\": \"flowparallel.graph_cuda\",\n  \"version\": 1,\n  \"status\": \"verified\",\n  \"source\": {\"path\": " << quote(source_path(report)) << "},\n  \"operation\": \"reachability\",\n  \"semiring\": \"boolean\",\n  \"reachable_pairs\": " << reachable_pairs << ",\n  \"cpu_reachable_pairs\": " << cpu_reachable_pairs << ",\n  \"cpu_reference_ms\": " << cpu_ms << ",\n  \"cuda_end_to_end_ms\": " << cuda_ms << ",\n  \"end_to_end_speedup\": " << cpu_ms / cuda_ms << ",\n  \"provider\": \"cuda.cublas.boolean_threshold\",\n  \"device_count\": " << devices << "\n}\n";
+    std::cout << "{\n  \"format\": \"flowparallel.graph_cuda\",\n  \"version\": 1,\n  \"status\": \"verified\",\n  \"source\": {\"path\": " << quote(semantic.source_path) << "},\n  \"operation\": \"reachability\",\n  \"semiring\": \"boolean\",\n  \"reachable_pairs\": " << reachable_pairs << ",\n  \"cpu_reachable_pairs\": " << cpu_reachable_pairs << ",\n  \"cpu_reference_ms\": " << cpu_ms << ",\n  \"cuda_end_to_end_ms\": " << cuda_ms << ",\n  \"end_to_end_speedup\": " << cpu_ms / cuda_ms << ",\n  \"provider\": \"cuda.cublas.boolean_threshold\",\n  \"device_count\": " << devices << "\n}\n";
     return 0;
 }
 }

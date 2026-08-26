@@ -16,7 +16,7 @@ target_compile_options(flowparallel_cpu PRIVATE -Wall -Wextra -Wpedantic)
 
 add_executable(flowparallel_cuda src/cuda_provider.cpp)
 target_compile_options(flowparallel_cuda PRIVATE -Wall -Wextra -Wpedantic)
-target_link_libraries(flowparallel_cuda PRIVATE ${CMAKE_DL_LIBS})
+target_link_libraries(flowparallel_cuda PRIVATE flowcontracts ${CMAKE_DL_LIBS})
 
 add_executable(flowparallel_cuda_execute src/cuda_execute.cpp)
 target_compile_options(flowparallel_cuda_execute PRIVATE -Wall -Wextra -Wpedantic)
@@ -28,16 +28,18 @@ target_link_libraries(flowparallel_matrix_benchmark PRIVATE ${CMAKE_DL_LIBS})
 
 add_executable(flowparallel_runtime_planner src/runtime_planner.cpp)
 target_compile_options(flowparallel_runtime_planner PRIVATE -Wall -Wextra -Wpedantic)
+target_link_libraries(flowparallel_runtime_planner PRIVATE flowcontracts)
 
 add_executable(flowparallel_graph_reference src/graph_reference.cpp)
 target_compile_options(flowparallel_graph_reference PRIVATE -Wall -Wextra -Wpedantic)
 
 add_executable(flowparallel_graph_cuda src/graph_cuda.cpp)
 target_compile_options(flowparallel_graph_cuda PRIVATE -Wall -Wextra -Wpedantic)
-target_link_libraries(flowparallel_graph_cuda PRIVATE ${CMAKE_DL_LIBS})
+target_link_libraries(flowparallel_graph_cuda PRIVATE flowcontracts ${CMAKE_DL_LIBS})
 
 add_executable(flowparallel_graph_planner src/graph_planner.cpp)
 target_compile_options(flowparallel_graph_planner PRIVATE -Wall -Wextra -Wpedantic)
+target_link_libraries(flowparallel_graph_planner PRIVATE flowcontracts)
 enable_testing()
 find_package(Threads REQUIRED)
 

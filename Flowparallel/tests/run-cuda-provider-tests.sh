@@ -23,4 +23,8 @@ printf '%s\n' "$report" | jq -e '
   .execution == "not-performed" and
   .fallback.required == true
 ' >/dev/null
+if printf '%s' '{"format":"flowparallel.execution_plan","format":"flowparallel.execution_plan","version":1,"status":"ready"}' | "$cuda" >/dev/null 2>&1; then
+  echo 'CUDA provider accepted duplicate execution-plan authority' >&2
+  exit 1
+fi
 echo 'Flowparallel CUDA provider boundary: PASS'

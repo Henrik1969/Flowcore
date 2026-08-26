@@ -126,6 +126,25 @@ Gates 2–4 first vertical checkpoint:
 
 ## Exact next action
 
-Migrate adjacent Flowparallel runtime, CUDA, graph calibration, and provider
-planner authority decisions onto Flowcontracts, then execute the end-to-end
-identity mutation gate.
+### Typed provider and planner authority
+
+- Migrated CUDA selection, CUDA graph execution, runtime planning, and graph
+  provider planning from substring/numeric scanning to Flowcontracts.
+- Runtime capability variants and calibration artifacts now require structural
+  format/version/type validation; device availability and measured speedup are
+  read only from their authoritative object paths.
+- Graph tools consume the validated semantic dependency matrix, including
+  dimensions, unique bounded coordinates, Boolean values, and source path.
+- Execution-plan COO duplicates remain valid input to Flowoptimize's explicit
+  attributable deduplication transform; the full gate caught and preserved this
+  deliberate difference from semantic-report matrix authority.
+- Preserved CPU fallback and existing provider-selection policies.
+- Updated planner fixtures from permissive fragments to complete versioned
+  execution/semantic artifacts and added duplicate-authority attacks.
+- Focused CUDA/runtime/graph planner gate passed (3/3 in 0.07 seconds).
+- Canonical gate: build passed and 56/56 CTest tests passed in 27.35 seconds.
+
+## Exact next action
+
+Execute Gate 7 end-to-end identity preservation and independent category
+mutation refusal, then reconcile active repository documentation.

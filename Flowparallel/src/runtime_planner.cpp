@@ -1,3 +1,4 @@
+#include <flowcontracts/artifacts.hpp>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
@@ -23,23 +24,6 @@ std::string read_file(const std::string& path, const char* label) {
     std::ostringstream input;
     input << file.rdbuf();
     return input.str();
-}
-
-bool has_field(std::string_view input, std::string_view field, std::string_view value) {
-    const std::string spaced = "\"" + std::string(field) + "\": \"" + std::string(value) + "\"";
-    const std::string compact = "\"" + std::string(field) + "\":\"" + std::string(value) + "\"";
-    return input.find(spaced) != std::string_view::npos || input.find(compact) != std::string_view::npos;
-}
-
-bool has_text(std::string_view input, std::string_view text) { return input.find(text) != std::string_view::npos; }
-
-double number_after(std::string_view input, std::string_view marker) {
-    const auto start = input.find(marker);
-    if (start == std::string_view::npos) return 0.0;
-    auto position = start + marker.size();
-    while (position < input.size() && (input[position] == ' ' || input[position] == '\t')) ++position;
-    try { return std::stod(std::string(input.substr(position))); }
-    catch (...) { return 0.0; }
 }
 
 std::string quote(std::string_view value) {
@@ -89,18 +73,30 @@ int run(const Options& options) {
     const auto plan = read_file(options.plan_path, "execution plan");
     const auto capabilities = read_file(options.capabilities_path, "runtime capabilities");
     const auto calibration = options.calibration_path.empty() ? std::string{} : read_file(options.calibration_path, "calibration report");
-    if (!has_field(plan, "format", "flowparallel.execution_plan")) throw std::runtime_error("input is not a Flowparallel execution plan");
-    if (!has_field(plan, "status", "ready")) {
+    const auto execution = flowcontracts::execution_plan(flowcontracts::json::parse(plan));
+    if (execution.artifact.status != "ready") {
         std::cout << "{\n  \"format\": \"flowparallel.provider_decision\",\n  \"version\": 1,\n  \"status\": \"blocked\",\n  \"reason\": \"execution plan is not ready\"\n}\n";
         return 2;
     }
-    if (!has_field(capabilities, "format", "frankencore.runtime_capabilities") ||
-        (!has_text(capabilities, "\"version\": 1") && !has_text(capabilities, "\"version\":1")))
-        throw std::runtime_error("unsupported runtime capability snapshot");
-
-    const bool cuda_available = has_field(capabilities, "status", "available") && has_text(capabilities, "\"device_count\":") && number_after(capabilities, "\"device_count\":") >= 1.0;
-    const bool calibration_verified = has_field(calibration, "status", "verified") && has_text(calibration, "\"end_to_end_speedup\":");
-    const double measured_speedup = calibration_verified ? number_after(calibration, "\"end_to_end_speedup\":") : 0.0;
+    const auto capability_value = flowcontracts::json::parse(capabilities);
+    const auto& capability_root = flowcontracts::json::object(capability_value);
+    if (flowcontracts::json::string(flowcontracts::json::required(capability_root, "format"), "$.format") != "frankencore.runtime_capabilities") throw flowcontracts::json::Error("$.format", "unsupported runtime capability format");
+    if (flowcontracts::json::integer(flowcontracts::json::required(capability_root, "version"), "$.version") != 1) throw flowcontracts::json::Error("$.version", "unsupported runtime capability version");
+    const auto& cuda = flowcontracts::required_object(capability_root, "cuda");
+    const auto devices = flowcontracts::json::integer(flowcontracts::json::required(cuda, "device_count", "$.cuda"), "$.cuda.device_count");
+    const bool cuda_available = flowcontracts::json::string(flowcontracts::json::required(cuda, "status", "$.cuda"), "$.cuda.status") == "available" && devices >= 1;
+    bool calibration_verified = false; double measured_speedup = 0.0;
+    if (!calibration.empty()) {
+        const auto calibration_value = flowcontracts::json::parse(calibration);
+        const auto& calibration_root = flowcontracts::json::object(calibration_value);
+        const auto format = flowcontracts::json::string(flowcontracts::json::required(calibration_root, "format"), "$.format");
+        if (format != "flowparallel.matrix_benchmark" && format != "flowparallel.graph_cuda") throw flowcontracts::json::Error("$.format", "unsupported calibration format");
+        const auto calibration_header = flowcontracts::require_header(calibration_value, format, 1);
+        if (const auto* speedup = flowcontracts::json::optional(calibration_root, "end_to_end_speedup")) {
+            measured_speedup = flowcontracts::json::number(*speedup, "$.end_to_end_speedup");
+            calibration_verified = calibration_header.status == "verified";
+        }
+    }
     const bool cost_beneficial = calibration_verified && measured_speedup >= options.minimum_speedup;
     const bool cuda_selected = cuda_available && cost_beneficial;
     std::string reason;

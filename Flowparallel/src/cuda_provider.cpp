@@ -1,4 +1,5 @@
 #include <dlfcn.h>
+#include <flowcontracts/artifacts.hpp>
 
 #include <cstdint>
 #include <cstdlib>
@@ -21,14 +22,6 @@ std::string input(const Options& options) {
     else stream << std::cin.rdbuf();
     return stream.str();
 }
-
-bool top_format(std::string_view text, std::string_view value) {
-    const auto first = text.find("\"format\"");
-    if (first == std::string_view::npos) return false;
-    return text.find("\"format\": \"" + std::string(value) + "\"", first) == first || text.find("\"format\":\"" + std::string(value) + "\"", first) == first;
-}
-
-bool ready(std::string_view text) { return text.find("\"status\": \"ready\"") != std::string_view::npos || text.find("\"status\":\"ready\"") != std::string_view::npos; }
 
 struct CudaProbe { std::string status = "unknown"; std::string diagnostic; unsigned devices = 0; };
 
@@ -66,8 +59,8 @@ Options parse(int argc, char** argv) {
 }
 
 int run(const std::string& plan, const Options& options) {
-    if (!top_format(plan, "flowparallel.execution_plan")) throw std::runtime_error("input is not a Flowparallel execution plan");
-    if (!ready(plan)) { std::cout << "{\n  \"format\": \"flowparallel.cuda_selection\",\n  \"version\": 1,\n  \"status\": \"blocked\",\n  \"reason\": \"execution plan is not ready\"\n}\n"; return 2; }
+    const auto artifact = flowcontracts::execution_plan(flowcontracts::json::parse(plan));
+    if (artifact.artifact.status != "ready") { std::cout << "{\n  \"format\": \"flowparallel.cuda_selection\",\n  \"version\": 1,\n  \"status\": \"blocked\",\n  \"reason\": \"execution plan is not ready\"\n}\n"; return 2; }
     const auto cuda = probe();
     const std::uint64_t matrix_bytes = static_cast<std::uint64_t>(options.matrix_size) * options.matrix_size * sizeof(float);
     std::cout << "{\n  \"format\": \"flowparallel.cuda_selection\",\n"
