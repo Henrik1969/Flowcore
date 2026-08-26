@@ -1,5 +1,7 @@
 #pragma once
 
+#include <flowcontracts/json.hpp>
+
 #include <algorithm>
 #include <cctype>
 #include <map>
@@ -14,81 +16,28 @@
 
 namespace flowlower::structured {
 
-struct Json;
-using Array = std::vector<Json>;
-using Object = std::map<std::string, Json>;
-struct Json : std::variant<std::nullptr_t, bool, double, std::string, Array, Object> {
-    using variant::variant;
-};
-
+using Json = flowcontracts::json::Value;
+using Array = flowcontracts::json::Array;
+using Object = flowcontracts::json::Object;
 class Parser {
 public:
     explicit Parser(std::string text) : text_(std::move(text)) {}
-    Json parse() { skip(); auto result = value(); skip(); if (at() != '\0') fail("trailing input"); return result; }
+    Json parse() const { return flowcontracts::json::parse(text_); }
 private:
     std::string text_;
-    std::size_t position_ = 0;
-    char at() const { return position_ < text_.size() ? text_[position_] : '\0'; }
-    void skip() { while (std::isspace(static_cast<unsigned char>(at()))) ++position_; }
-    [[noreturn]] void fail(const std::string& message) const { throw std::runtime_error("JSON: " + message); }
-    void expect(char expected) { if (at() != expected) fail(std::string("expected '") + expected + "'"); ++position_; }
-    void literal(std::string_view expected) { if (text_.compare(position_, expected.size(), expected) != 0) fail("invalid literal"); position_ += expected.size(); }
-    Json value() {
-        skip();
-        switch (at()) {
-            case '{': return object(); case '[': return array(); case '"': return string();
-            case 't': literal("true"); return true; case 'f': literal("false"); return false;
-            case 'n': literal("null"); return nullptr; default: return number();
-        }
-    }
-    Json object() {
-        Object result; expect('{'); skip(); if (at() == '}') { ++position_; return result; }
-        for (;;) {
-            skip(); if (at() != '"') fail("object key must be a string");
-            auto key = std::get<std::string>(string()); skip(); expect(':');
-            if (!result.emplace(std::move(key), value()).second) fail("duplicate object key");
-            skip(); if (at() == '}') { ++position_; return result; } expect(',');
-        }
-    }
-    Json array() {
-        Array result; expect('['); skip(); if (at() == ']') { ++position_; return result; }
-        for (;;) { result.push_back(value()); skip(); if (at() == ']') { ++position_; return result; } expect(','); }
-    }
-    Json string() {
-        expect('"'); std::string result;
-        while (at() != '"') {
-            if (at() == '\0') fail("unterminated string");
-            if (at() == '\\') {
-                ++position_;
-                switch (at()) {
-                    case '"': case '\\': case '/': result += at(); ++position_; break;
-                    case 'b': result += '\b'; ++position_; break; case 'f': result += '\f'; ++position_; break;
-                    case 'n': result += '\n'; ++position_; break; case 'r': result += '\r'; ++position_; break;
-                    case 't': result += '\t'; ++position_; break; default: fail("unsupported string escape");
-                }
-            } else { result += at(); ++position_; }
-        }
-        ++position_; return result;
-    }
-    Json number() {
-        const auto begin = position_; if (at() == '-') ++position_;
-        while (std::isdigit(static_cast<unsigned char>(at()))) ++position_;
-        if (at() == '.') { ++position_; while (std::isdigit(static_cast<unsigned char>(at()))) ++position_; }
-        if (at() == 'e' || at() == 'E') { ++position_; if (at() == '+' || at() == '-') ++position_; while (std::isdigit(static_cast<unsigned char>(at()))) ++position_; }
-        if (begin == position_) fail("expected value");
-        return std::stod(text_.substr(begin, position_ - begin));
-    }
 };
-
 inline const Json* field(const Json& value, std::string_view name) {
-    const auto* object = std::get_if<Object>(&value); if (!object) return nullptr;
-    const auto found = object->find(std::string{name}); return found == object->end() ? nullptr : &found->second;
+    const auto* object = std::get_if<Object>(&value);
+    return object ? flowcontracts::json::optional(*object, name) : nullptr;
 }
-inline std::string text(const Json* value) { return value && std::holds_alternative<std::string>(*value) ? std::get<std::string>(*value) : std::string{}; }
+inline std::string text(const Json* value) {
+    return value && std::holds_alternative<std::string>(*value) ? std::get<std::string>(*value) : std::string{};
+}
 inline int integer(const Json* value, const char* name, int fallback = -1) {
     if (!value) return fallback;
-    if (!std::holds_alternative<double>(*value)) throw std::runtime_error(std::string("JSON field '") + name + "' must be numeric");
-    return static_cast<int>(std::get<double>(*value));
+    const auto parsed = flowcontracts::json::integer(*value, name);
+    if (parsed < std::numeric_limits<int>::min() || parsed > std::numeric_limits<int>::max()) throw std::runtime_error(std::string("JSON field '") + name + "' is outside int range");
+    return static_cast<int>(parsed);
 }
 inline const Array& array(const Json* value, const char* name) {
     if (!value || !std::holds_alternative<Array>(*value)) throw std::runtime_error(std::string("JSON field '") + name + "' must be an array");

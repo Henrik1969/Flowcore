@@ -1,4 +1,5 @@
 #include <dlfcn.h>
+#include <flowcontracts/artifacts.hpp>
 #include <algorithm>
 #include <cstddef>
 #include <fstream>
@@ -24,75 +25,16 @@ struct Grant { std::string library, symbol, convention, effect, parameter_types,
 
 struct Options { std::string report_path, policy_path, abi_manifest_path; };
 
-struct Json;
-using JsonArray = std::vector<Json>;
-using JsonObject = std::map<std::string, Json>;
-struct Json : std::variant<std::nullptr_t, bool, double, std::string, JsonArray, JsonObject> {
-    using variant::variant;
-};
+using Json = flowcontracts::json::Value;
+using JsonArray = flowcontracts::json::Array;
+using JsonObject = flowcontracts::json::Object;
 
 class JsonParser {
 public:
     explicit JsonParser(std::string text) : text_(std::move(text)) {}
-    Json parse() { skip(); Json result = value(); skip(); if (at() != '\0') fail("trailing input"); return result; }
+    Json parse() const { return flowcontracts::json::parse(text_); }
 private:
     std::string text_;
-    std::size_t position_ = 0;
-    char at() const { return position_ < text_.size() ? text_[position_] : '\0'; }
-    void skip() { while (std::isspace(static_cast<unsigned char>(at()))) ++position_; }
-    [[noreturn]] void fail(const std::string& message) const { throw std::runtime_error("JSON: " + message); }
-    void expect(char expected) { if (at() != expected) fail(std::string("expected '") + expected + "'"); ++position_; }
-    void literal(std::string_view expected) { if (text_.compare(position_, expected.size(), expected) != 0) fail("invalid literal"); position_ += expected.size(); }
-    Json value() {
-        skip();
-        switch (at()) {
-            case '{': return object();
-            case '[': return array();
-            case '"': return string();
-            case 't': literal("true"); return true;
-            case 'f': literal("false"); return false;
-            case 'n': literal("null"); return nullptr;
-            default: return number();
-        }
-    }
-    Json object() {
-        JsonObject result; expect('{'); skip(); if (at() == '}') { ++position_; return result; }
-        for (;;) {
-            skip(); if (at() != '"') fail("object key must be a string");
-            auto key = std::get<std::string>(string()); skip(); expect(':');
-            if (!result.emplace(std::move(key), value()).second) fail("duplicate object key");
-            skip(); if (at() == '}') { ++position_; return result; } expect(',');
-        }
-    }
-    Json array() {
-        JsonArray result; expect('['); skip(); if (at() == ']') { ++position_; return result; }
-        for (;;) { result.push_back(value()); skip(); if (at() == ']') { ++position_; return result; } expect(','); }
-    }
-    Json string() {
-        expect('"'); std::string result;
-        while (at() != '"') {
-            if (at() == '\0') fail("unterminated string");
-            if (at() == '\\') {
-                ++position_;
-                switch (at()) {
-                    case '"': case '\\': case '/': result += at(); ++position_; break;
-                    case 'n': result += '\n'; ++position_; break;
-                    case 'r': result += '\r'; ++position_; break;
-                    case 't': result += '\t'; ++position_; break;
-                    default: fail("unsupported string escape");
-                }
-            } else { result += at(); ++position_; }
-        }
-        ++position_; return result;
-    }
-    Json number() {
-        const auto begin = position_; if (at() == '-') ++position_;
-        while (std::isdigit(static_cast<unsigned char>(at()))) ++position_;
-        if (at() == '.') { ++position_; while (std::isdigit(static_cast<unsigned char>(at()))) ++position_; }
-        if (at() == 'e' || at() == 'E') { ++position_; if (at() == '+' || at() == '-') ++position_; while (std::isdigit(static_cast<unsigned char>(at()))) ++position_; }
-        if (begin == position_) fail("expected value");
-        return std::stod(text_.substr(begin, position_ - begin));
-    }
 };
 
 const Json* json_field(const Json& value, std::string_view name) {
@@ -107,8 +49,8 @@ std::string json_text(const Json* value) {
 }
 
 long long json_integer(const Json* value, const char* field_name) {
-    if (!value || !std::holds_alternative<double>(*value)) throw std::runtime_error(std::string("JSON field '") + field_name + "' must be numeric");
-    return static_cast<long long>(std::get<double>(*value));
+    if (!value) throw std::runtime_error(std::string("JSON field '") + field_name + "' must be an integer");
+    return flowcontracts::json::integer(*value, std::string("$.") + field_name);
 }
 
 const JsonArray& json_array(const Json* value, const char* field_name) {
@@ -444,9 +386,8 @@ bool manifest_verifies_aggregates(const std::string& report, const std::string& 
 }
 
 int verify(const std::string& report, const std::string& policy_path, const std::string& abi_manifest_path) {
-    if (report.find("\"format\": \"flowanalyst.semantic_report\"") == std::string::npos && report.find("\"format\":\"flowanalyst.semantic_report\"") == std::string::npos) throw std::runtime_error("input is not a Flowanalyst semantic report");
-    if (report.find("\"version\": 1") == std::string::npos && report.find("\"version\":1") == std::string::npos) throw std::runtime_error("unsupported Flowanalyst report version");
-    if (report.find("\"status\": \"ok\"") == std::string::npos && report.find("\"status\":\"ok\"") == std::string::npos) {
+    const auto public_header = flowcontracts::require_header(flowcontracts::json::parse(report), "flowanalyst.semantic_report", 1);
+    if (public_header.status != "ok") {
         std::cout << "{\n  \"format\": \"flowbind.binding_report\",\n  \"version\": 1,\n  \"status\": \"blocked\",\n  \"reason\": \"semantic report is not ready\"\n}\n";
         return 2;
     }

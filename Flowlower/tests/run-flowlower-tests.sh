@@ -24,6 +24,17 @@ if printf '%s' '{"format":"flowoptimize.optimization_report","version":1,"status
     exit 1
 fi
 
+for hostile in \
+  '{"format":"flowoptimize.optimization_report","format":"flowoptimize.optimization_report","version":1,"status":"ready"}' \
+  '{"decoy":{"format":"flowoptimize.optimization_report","version":1,"status":"ready"}}' \
+  '{"format":"flowoptimize.optimization_report","version":9223372036854775808,"status":"ready"}'
+do
+  if printf '%s' "$hostile" | "$lowerer" >/dev/null 2>&1; then
+    echo 'Flowlower accepted malformed or non-authoritative envelope' >&2
+    exit 1
+  fi
+done
+
 tmpdir=$(mktemp -d)
 trap 'rm -rf "$tmpdir"' EXIT
 trial="$root/Flowlower/tests/empty_program_main.flow"

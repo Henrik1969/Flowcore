@@ -71,15 +71,25 @@ Gates 2–4 first vertical checkpoint:
 - Deterministic coverage proves semantically identical reordered/whitespace
   input emits byte-identical Flowparallel output.
 
-## Current phase
+## Gate 5 shared binding and lowering contracts
 
-Gate 5: reconcile Flowbind and Flowlower onto the public parser and contract
-semantics without changing authorization, cleanup, reachability, or lowering
-behavior. Adjacent Flowparallel provider/planner artifacts remain for later
-typed slices.
+- Replaced Flowbind's competing private JSON value and parser with the public
+  Flowcontracts parser while preserving its ABI, effect, resource, policy, and
+  provider checks.
+- Replaced Flowbind's raw top-level envelope authority search with the shared
+  typed artifact header contract.
+- Moved Flowlower's structured-plan JSON value and parser onto Flowcontracts
+  while preserving its existing structured lowering API and behavior.
+- Both consumers now share complete-input parsing, duplicate-key refusal,
+  Unicode escape handling, exact signed 64-bit integers, and JSON-path errors.
+- Added adversarial coverage for duplicate authority, nested fake authority,
+  escaped authoritative keys, and integer overflow.
+- Focused gate: Flowbind provider/fuzz, Flowlower, reusable profile-free,
+  ncurses, and `sel` pipelines passed (6/6 in 8.66 seconds).
+- Canonical gate: build passed and 55/55 CTest tests passed in 26.63 seconds.
 
 ## Exact next action
 
-Replace Flowbind's raw top-level semantic envelope checks with the shared typed
-header/semantic contract, then extract Flowlower's private JSON value/parser
-onto Flowcontracts while preserving its structured emitter tests.
+Complete the public typed slices for the remaining captured artifacts and
+adjacent Flowparallel provider/planner evidence, then build the independent
+`flowvalidate` executable over those public contracts.

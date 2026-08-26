@@ -23,6 +23,20 @@ printf '%s\n' \
   'allow libc.so.6 close c io' \
   'allow libc.so.6 flowcore_symbol_that_does_not_exist c pure' > "$policy"
 
+for hostile in \
+  '{"format":"flowanalyst.semantic_report","format":"flowanalyst.semantic_report","version":1,"status":"ok","binding_requirements":[]}' \
+  '{"decoy":{"format":"flowanalyst.semantic_report","version":1,"status":"ok"},"binding_requirements":[]}' \
+  '{"format":"flowanalyst.semantic_report","version":9223372036854775808,"status":"ok","binding_requirements":[]}'
+do
+  if printf '%s' "$hostile" | "$bin" --policy "$policy" >/dev/null 2>&1; then
+    echo 'Flowbind accepted malformed or non-authoritative envelope' >&2
+    exit 1
+  fi
+done
+
+escaped_authority='{"f\u006frmat":"flowanalyst.semantic_report","version":1,"status":"ok","binding_requirements":[]}'
+printf '%s' "$escaped_authority" | "$bin" --policy "$policy" | jq -e '.status == "ready"' >/dev/null
+
 report=$("$flowmini" --dump-frontend-bundle "$fixture" | "$flowanalyst" | "$bin" --policy "$policy")
 printf '%s\n' "$report" | grep -q '"status": "ready"'
 printf '%s\n' "$report" | grep -q '"execution": "not-performed"'

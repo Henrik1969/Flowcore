@@ -7,6 +7,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 add_executable(flowlower src/main.cpp)
 target_compile_options(flowlower PRIVATE -Wall -Wextra -Wpedantic)
+target_link_libraries(flowlower PRIVATE flowcontracts)
 
 enable_testing()
 add_test(NAME flowlower_pipeline

@@ -7,7 +7,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 add_executable(flowbind src/main.cpp)
 target_compile_options(flowbind PRIVATE -Wall -Wextra -Wpedantic)
-target_link_libraries(flowbind PRIVATE ${CMAKE_DL_LIBS})
+target_link_libraries(flowbind PRIVATE flowcontracts ${CMAKE_DL_LIBS})
 
 enable_testing()
 add_test(NAME flowbind_provider
