@@ -1,5 +1,8 @@
 # TinyVM, cross-target and bootstrap autonomous mission
 
+**Status:** completed 2026-08-26 at `tinyvm-cross-target-bootstrap-complete`
+**Result:** see `docs/checkpoints/2026-08-26-tinyvm-cross-target-bootstrap-result.md`
+
 ## Authority
 
 Continue autonomously on the checked-out development branch. Normal commits,

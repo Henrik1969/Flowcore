@@ -356,3 +356,10 @@ the already captured recovered-ISA boundary.
 - The complete GCC superbuild and all 75 canonical tests passed. Focused Clang
   18 ASan/UBSan seed/inventory contracts, adversarial mutations and public
   validator tests passed with the documented LeakSanitizer exclusion.
+
+### Mission closure — `tinyvm-cross-target-bootstrap-complete`
+
+- The mission definition of done is satisfied and summarized in
+  `2026-08-26-tinyvm-cross-target-bootstrap-result.md`.
+- Closure preserves explicit non-claims: complete self-hosting, Stage 1 and
+  FlowOpenOffice remain future gates described by the validated gap inventory.
