@@ -90,6 +90,22 @@ Gates 2–4 first vertical checkpoint:
 
 ## Exact next action
 
-Complete the public typed slices for the remaining captured artifacts and
-adjacent Flowparallel provider/planner evidence, then build the independent
-`flowvalidate` executable over those public contracts.
+### Frontend bundle authority checkpoint
+
+- Replaced Flowanalyst's permissive private JSON parser with Flowcontracts,
+  giving the frontend boundary complete-input parsing, duplicate-key refusal,
+  Unicode handling, exact signed 64-bit integers, and shared diagnostics.
+- Preserved explicit JSON `null` compatibility for optional source-map
+  coordinates while rejecting non-integral and out-of-range identities.
+- Added fail-closed uniqueness checks for symbols, scopes, symbol origins, and
+  AST expression, statement, block, and declaration identities.
+- Added adversarial duplicate-key, nested-authority, integer-overflow, and real
+  duplicate-symbol-identity coverage.
+- Focused Flowanalyst pipeline passed (1/1 in 0.87 seconds).
+- Canonical gate: build passed and 55/55 CTest tests passed in 22.68 seconds.
+
+## Exact next action
+
+Complete public typed slices for the remaining binding, optimization,
+lowering, ABI, runtime, and adjacent Flowparallel provider/planner artifacts,
+then build `flowvalidate` over those public contracts.

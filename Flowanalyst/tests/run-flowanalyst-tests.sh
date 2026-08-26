@@ -134,4 +134,18 @@ if printf '%s' '{"format":"wrong","version":2}' | "$bin" >/dev/null 2>&1; then
     echo 'invalid bundle unexpectedly accepted' >&2
     exit 1
 fi
+for hostile in \
+  '{"format":"flowmini.frontend_bundle","format":"flowmini.frontend_bundle","version":2}' \
+  '{"decoy":{"format":"flowmini.frontend_bundle","version":2}}' \
+  '{"format":"flowmini.frontend_bundle","version":9223372036854775808}'
+do
+  if printf '%s' "$hostile" | "$bin" >/dev/null 2>&1; then
+    echo 'Flowanalyst accepted malformed or non-authoritative frontend envelope' >&2
+    exit 1
+  fi
+done
+if "$flowmini" --dump-frontend-bundle "$fixture" | jq '.symbol_table.symbols[1].id = .symbol_table.symbols[0].id' | "$bin" >/dev/null 2>&1; then
+  echo 'Flowanalyst accepted duplicate symbol identity' >&2
+  exit 1
+fi
 echo 'Flowanalyst tests: PASS'

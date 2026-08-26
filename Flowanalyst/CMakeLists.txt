@@ -6,6 +6,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 add_executable(flowanalyst src/main.cpp)
+target_link_libraries(flowanalyst PRIVATE flowcontracts)
 target_compile_options(flowanalyst PRIVATE -Wall -Wextra -Wpedantic)
 
 enable_testing()

@@ -1,7 +1,9 @@
+#include <flowcontracts/json.hpp>
 #include <cctype>
 #include <fstream>
 #include <functional>
 #include <iostream>
+#include <limits>
 #include <map>
 #include <sstream>
 #include <set>
@@ -16,49 +18,27 @@ namespace {
 
 constexpr std::string_view FLOWANALYST_VERSION = "0.1.0";
 
-struct Json;
-using Object = std::map<std::string, Json>;
-using Array = std::vector<Json>;
-struct Json : std::variant<std::nullptr_t, bool, double, std::string, Array, Object> {
-    using variant::variant;
-};
+using Json = flowcontracts::json::Value;
+using Object = flowcontracts::json::Object;
+using Array = flowcontracts::json::Array;
 
 class Parser {
 public:
     explicit Parser(std::string text) : text_(std::move(text)) {}
-    Json parse() { skip(); Json value = value_json(); skip(); if (at() != '\0') fail("trailing input"); return value; }
+    Json parse() const { return flowcontracts::json::parse(text_); }
 private:
-    std::string text_; std::size_t pos_ = 0;
-    char at() const { return pos_ < text_.size() ? text_[pos_] : '\0'; }
-    void skip() { while (std::isspace(static_cast<unsigned char>(at()))) ++pos_; }
-    [[noreturn]] void fail(const std::string& message) const { throw std::runtime_error("JSON: " + message); }
-    void expect(char c) { if (at() != c) fail(std::string("expected '") + c + "'"); ++pos_; }
-    Json value_json() {
-        skip();
-        switch (at()) { case '{': return object(); case '[': return array(); case '"': return string();
-        case 't': literal("true"); return true; case 'f': literal("false"); return false;
-        case 'n': literal("null"); return nullptr; default: return number(); }
-    }
-    void literal(std::string_view value) { if (text_.compare(pos_, value.size(), value) != 0) fail("invalid literal"); pos_ += value.size(); }
-    Json object() { Object result; expect('{'); skip(); if (at() == '}') { ++pos_; return result; }
-        for (;;) { skip(); if (at() != '"') fail("object key must be a string"); auto key = std::get<std::string>(string()); skip(); expect(':'); result.emplace(std::move(key), value_json()); skip(); if (at() == '}') { ++pos_; return result; } expect(','); }
-    }
-    Json array() { Array result; expect('['); skip(); if (at() == ']') { ++pos_; return result; }
-        for (;;) { result.push_back(value_json()); skip(); if (at() == ']') { ++pos_; return result; } expect(','); }
-    }
-    Json string() { expect('"'); std::string result; while (at() != '"') { if (at() == '\0') fail("unterminated string");
-            if (at() == '\\') { ++pos_; char c = at(); switch (c) { case '"': case '\\': case '/': result += c; ++pos_; break; case 'n': result += '\n'; ++pos_; break; case 'r': result += '\r'; ++pos_; break; case 't': result += '\t'; ++pos_; break; default: fail("unsupported escape"); } }
-            else { result += at(); ++pos_; } } ++pos_; return result; }
-    Json number() { auto begin = pos_; if (at() == '-') ++pos_; while (std::isdigit(static_cast<unsigned char>(at()))) ++pos_; if (at() == '.') { ++pos_; while (std::isdigit(static_cast<unsigned char>(at()))) ++pos_; }
-        if (at() == 'e' || at() == 'E') { ++pos_; if (at() == '+' || at() == '-') ++pos_; while (std::isdigit(static_cast<unsigned char>(at()))) ++pos_; }
-        if (begin == pos_) fail("expected value");
-        return std::stod(text_.substr(begin, pos_ - begin)); }
+    std::string text_;
 };
 
 const Json* field(const Json& value, std::string_view name) { if (auto object = std::get_if<Object>(&value)) { auto it = object->find(std::string(name)); return it == object->end() ? nullptr : &it->second; } return nullptr; }
 const Json* field(const Json* value, std::string_view name) { return value ? field(*value, name) : nullptr; }
 std::string text(const Json* value, std::string fallback = {}) { if (value) if (auto v = std::get_if<std::string>(value)) return *v; return fallback; }
-int integer(const Json* value, int fallback = -1) { if (value) if (auto v = std::get_if<double>(value)) return static_cast<int>(*v); return fallback; }
+int integer(const Json* value, int fallback = -1) {
+    if (!value || std::holds_alternative<std::nullptr_t>(*value)) return fallback;
+    const auto parsed = flowcontracts::json::integer(*value, "$ integer field");
+    if (parsed < std::numeric_limits<int>::min() || parsed > std::numeric_limits<int>::max()) throw std::runtime_error("JSON integer is outside int range");
+    return static_cast<int>(parsed);
+}
 const Array& list(const Json* value) { static const Array empty; return value && std::holds_alternative<Array>(*value) ? std::get<Array>(*value) : empty; }
 std::string quote(std::string_view value) { std::ostringstream out; out << '"'; for (char c : value) { if (c == '"' || c == '\\') out << '\\'; if (c == '\n') out << "\\n"; else if (c == '\r') out << "\\r"; else if (c != '\n') out << c; } return out.str() + '"'; }
 struct Diagnostic { std::string code, severity, message, ast_path, region, source; int symbol = -1, line = -1, column = -1; };
@@ -95,16 +75,20 @@ int run(const Json& bundle) {
     if (text(field(bundle, "format")) != "flowmini.frontend_bundle" || integer(field(bundle, "version")) != 2) throw std::runtime_error("unsupported FlowMini frontend bundle");
     const auto* snapshot = field(bundle, "symbol_table"); if (!snapshot) throw std::runtime_error("bundle has no symbol_table");
     std::map<int, const Json*> symbols, scopes, origins;
-    for (const auto& entry : list(field(snapshot, "symbols"))) symbols[integer(field(entry, "id"))] = &entry;
-    for (const auto& entry : list(field(snapshot, "scopes"))) scopes[integer(field(entry, "id"))] = &entry;
-    for (const auto& entry : list(field(bundle, "symbol_origins"))) origins[integer(field(entry, "symbol_id"))] = &entry;
+    auto insert_identity = [](auto& index, int identity, const Json& entry, std::string_view kind) {
+        if (identity < 0) throw std::runtime_error(std::string(kind) + " identity must be non-negative");
+        if (!index.emplace(identity, &entry).second) throw std::runtime_error("duplicate " + std::string(kind) + " identity " + std::to_string(identity));
+    };
+    for (const auto& entry : list(field(snapshot, "symbols"))) insert_identity(symbols, integer(field(entry, "id")), entry, "symbol");
+    for (const auto& entry : list(field(snapshot, "scopes"))) insert_identity(scopes, integer(field(entry, "id")), entry, "scope");
+    for (const auto& entry : list(field(bundle, "symbol_origins"))) insert_identity(origins, integer(field(entry, "symbol_id")), entry, "symbol origin");
     const auto* ast = field(bundle, "ast");
     std::map<int, const Json*> expressions, statements, blocks, declarations;
     if (ast) {
-        for (const auto& entry : list(field(ast, "expression_pool"))) expressions[integer(field(entry, "id"))] = &entry;
-        for (const auto& entry : list(field(ast, "statement_pool"))) statements[integer(field(entry, "id"))] = &entry;
-        for (const auto& entry : list(field(ast, "block_pool"))) blocks[integer(field(entry, "id"))] = &entry;
-        for (const auto& entry : list(field(ast, "declaration_pool"))) declarations[integer(field(entry, "id"))] = &entry;
+        for (const auto& entry : list(field(ast, "expression_pool"))) insert_identity(expressions, integer(field(entry, "id")), entry, "expression");
+        for (const auto& entry : list(field(ast, "statement_pool"))) insert_identity(statements, integer(field(entry, "id")), entry, "statement");
+        for (const auto& entry : list(field(ast, "block_pool"))) insert_identity(blocks, integer(field(entry, "id")), entry, "block");
+        for (const auto& entry : list(field(ast, "declaration_pool"))) insert_identity(declarations, integer(field(entry, "id")), entry, "declaration");
     }
     std::vector<Diagnostic> diagnostics;
     auto add_diagnostic = [&](std::string code, std::string message, int symbol, std::string region = {}) {
