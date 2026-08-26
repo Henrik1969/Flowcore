@@ -123,7 +123,8 @@ private:
         return {};
     }
     void load() {
-        if (text(field(root_, "format")) != "flowoptimize.optimization_report" || integer(field(root_, "version"), "version") != 1) return;
+        const auto format = text(field(root_, "format"));
+        if ((format != "flowoptimize.optimization_report" && format != "flowcore.backend_lowering_artifact") || integer(field(root_, "version"), "version") != 1) return;
         if (const auto* contracts = field(root_, "abi_type_contracts"))
             for (const auto& item : array(contracts, "abi_type_contracts")) {
                 const auto name = text(field(item, "name"));
@@ -178,8 +179,11 @@ private:
             }
         }
         for(const auto& [block,ops]:blocks_) if(!ops.empty()&&!reachable.count(block)) invalid_control_=true;
-        if (text(field(binding_,"format"))=="flowbind.binding_report" && text(field(binding_,"status"))=="ready")
-            for (const auto& item:array(field(binding_,"capabilities"),"binding.capabilities")) if (text(field(item,"status"))=="authorized") authorized_.insert(provider(item));
+        const Json* authorization = nullptr;
+        if (text(field(binding_,"format"))=="flowbind.binding_report" && text(field(binding_,"status"))=="ready") authorization = &binding_;
+        else if (format == "flowcore.backend_lowering_artifact") authorization = field(root_, "authorization");
+        if (authorization)
+            for (const auto& item:array(field(*authorization,"capabilities"),"authorization.capabilities")) if (text(field(item,"status"))=="authorized") authorized_.insert(provider(item));
         for (const auto& [symbol, definition]:definitions_) {
             const auto kind=text(field(*definition,"kind")); const auto intrinsic=text(field(*definition,"intrinsic"));
             if (intrinsic=="list_length" || intrinsic=="list_index") uses_args_=true;

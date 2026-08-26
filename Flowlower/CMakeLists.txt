@@ -8,8 +8,17 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 add_executable(flowlower src/main.cpp)
 target_compile_options(flowlower PRIVATE -Wall -Wextra -Wpedantic)
 target_link_libraries(flowlower PRIVATE flowcontracts)
+add_executable(flowprepare src/prepare.cpp)
+target_compile_options(flowprepare PRIVATE -Wall -Wextra -Wpedantic)
+target_link_libraries(flowprepare PRIVATE flowcontracts)
 
 enable_testing()
+add_test(NAME flowlower_backend_artifact
+    COMMAND ${CMAKE_COMMAND} -E env
+        FLOWPREPARE_BIN=$<TARGET_FILE:flowprepare>
+        FLOWVALIDATE_BIN=$<TARGET_FILE:flowvalidate>
+        FLOWLOWER_BIN=$<TARGET_FILE:flowlower>
+        ${CMAKE_CURRENT_SOURCE_DIR}/tests/run-backend-artifact-tests.sh)
 add_test(NAME flowlower_pipeline
     COMMAND ${CMAKE_COMMAND} -E env
         FLOWLOWER_BIN=$<TARGET_FILE:flowlower>

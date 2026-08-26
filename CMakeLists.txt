@@ -7,6 +7,7 @@ include(GNUInstallDirs)
 # This is an additive superbuild. Each sibling keeps its own CMake project,
 # tests, and artifact contract; the root only supplies one clean build graph.
 add_subdirectory(Flowcontracts ${CMAKE_CURRENT_BINARY_DIR}/flowcontracts)
+add_subdirectory(subprojects/TinyVM ${CMAKE_CURRENT_BINARY_DIR}/tinyvm)
 add_subdirectory(Flowmini/flowmini_v25_symboltable_projection
     ${CMAKE_CURRENT_BINARY_DIR}/flowmini)
 add_subdirectory(Flowanalyst ${CMAKE_CURRENT_BINARY_DIR}/flowanalyst)
@@ -163,6 +164,7 @@ install(TARGETS
     flowanalyst
     flowbind
     flowoptimize
+    flowprepare
     flowlower
     flowkernel
     flowparallel

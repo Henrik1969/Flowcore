@@ -93,6 +93,74 @@ inline void validate_optimization_report(const json::Value& value) {
     }
 }
 
+inline void validate_backend_lowering_artifact(const json::Value& value) {
+    const auto artifact = require_header(value, "flowcore.backend_lowering_artifact", 1);
+    if (artifact.status != "ready") return;
+    const auto& root = json::object(value);
+    const auto& source = required_object(root, "source");
+    (void)json::string(json::required(source, "path", "$.source"), "$.source.path");
+    validate_targets(root);
+    validate_abi_contracts(root);
+    validate_lowering_authority(json::required(root, "lowering_plan"));
+    (void)required_array(root, "external_operations");
+    const auto& target = required_object(root, "target");
+    const auto target_name = json::string(json::required(target, "name", "$.target"), "$.target.name");
+    if (target_name.empty()) throw json::Error("$.target.name", "selected target name is empty");
+    const auto& targets = required_array(root, "targets");
+    if (!targets.empty()) {
+        bool selected = false;
+        for (const auto& item : targets) {
+            const auto& candidate = json::object(item, "$.targets[]");
+            if (json::string(json::required(candidate, "name", "$.targets[]"), "$.targets[].name") == target_name) {
+                selected = true;
+                if (json::integer(json::required(candidate, "symbol_id", "$.targets[]"), "$.targets[].symbol_id") !=
+                    json::integer(json::required(target, "symbol_id", "$.target"), "$.target.symbol_id"))
+                    throw json::Error("$.target.symbol_id", "selected target identity does not match target catalog");
+            }
+        }
+        if (!selected) throw json::Error("$.target", "selected target is not present in target catalog");
+    }
+    const auto& authorization = required_object(root, "authorization");
+    const auto authorization_status = json::string(json::required(authorization, "status", "$.authorization"), "$.authorization.status");
+    if (authorization_status != "authorized" && authorization_status != "not-required")
+        throw json::Error("$.authorization.status", "unsupported authorization state");
+    const auto& capabilities = required_array(authorization, "capabilities", "$.authorization");
+    std::set<std::string> authorized;
+    for (std::size_t index = 0; index < capabilities.size(); ++index) {
+        const auto path = "$.authorization.capabilities[" + std::to_string(index) + "]";
+        const auto& capability = json::object(capabilities[index], path);
+        std::string identity;
+        for (const auto field : {"contract", "library", "symbol", "convention", "effect", "parameter_types", "return_type", "status"}) {
+            const auto value = json::string(json::required(capability, field, path), path + "." + field);
+            if (field != std::string_view{"status"}) identity += value + "\x1f";
+            else if (value != "authorized") throw json::Error(path + ".status", "capability is not authorized");
+        }
+        if (!authorized.insert(identity).second) throw json::Error(path, "duplicate authorized capability identity");
+    }
+    std::set<std::string> required_capabilities;
+    const auto& plan = json::object(json::required(root, "lowering_plan"), "$.lowering_plan");
+    const auto& operations = required_array(plan, "operations", "$.lowering_plan");
+    for (std::size_t index = 0; index < operations.size(); ++index) {
+        const auto path = "$.lowering_plan.operations[" + std::to_string(index) + "]";
+        const auto& operation = json::object(operations[index], path);
+        if (json::string(json::required(operation, "kind", path), path + ".kind") != "external_call") continue;
+        const auto& provider = required_object(operation, "provider", path);
+        std::string identity;
+        for (const auto field : {"contract", "library", "symbol", "convention", "effect", "parameter_types", "return_type"})
+            identity += json::string(json::required(provider, field, path + ".provider"), path + ".provider." + field) + "\x1f";
+        required_capabilities.insert(identity);
+    }
+    if (required_capabilities != authorized)
+        throw json::Error("$.authorization.capabilities", "authorized capability identities do not exactly match external operations");
+    if ((required_capabilities.empty() && authorization_status != "not-required") ||
+        (!required_capabilities.empty() && authorization_status != "authorized"))
+        throw json::Error("$.authorization.status", "authorization state does not match external operations");
+    const auto& provenance = required_object(root, "provenance");
+    (void)required_object(provenance, "optimization", "$.provenance");
+    (void)required_object(provenance, "binding", "$.provenance");
+    (void)required_array(provenance, "transforms", "$.provenance");
+}
+
 inline void validate_lowering_report(const json::Value& value) {
     const auto artifact = require_header(value, "flowlower.lowering_report", 1);
     if (artifact.status == "blocked") return;
@@ -162,6 +230,7 @@ inline ValidationResult validate(const json::Value& value) {
         else if (result.format == "flowparallel.execution_plan") (void)execution_plan(value);
         else if (result.format == "flowparallel.graph_provider_decision") (void)provider_decision(value);
         else if (result.format == "flowoptimize.optimization_report") validate_optimization_report(value);
+        else if (result.format == "flowcore.backend_lowering_artifact") validate_backend_lowering_artifact(value);
         else if (result.format == "flowlower.lowering_report") validate_lowering_report(value);
         else if (result.format == "flowcore.abi_manifest") validate_abi_manifest(value);
         else if (result.format == "frankencore.runtime_capabilities" || result.format == "flowcore.runtime_capabilities") validate_runtime_capabilities(value, result.format);

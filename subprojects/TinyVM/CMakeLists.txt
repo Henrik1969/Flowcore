@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.22)
-project(tinyvm_recovered LANGUAGES C)
+project(tinyvm_recovered LANGUAGES C CXX)
 
 include(CTest)
 find_package(OpenSSL REQUIRED COMPONENTS Crypto)
@@ -45,6 +45,12 @@ add_executable(tinyvm_isa_v1_conformance tests/isa_v1_conformance.c)
 target_link_libraries(tinyvm_isa_v1_conformance PRIVATE tinyvm_recovered)
 add_executable(flowtinyv1-pack-demo tools/v1_pack_demo.c)
 target_link_libraries(flowtinyv1-pack-demo PRIVATE tinyvm_recovered)
+if(TARGET flowcontracts)
+    add_executable(flowtinylower tools/lower.cpp)
+    target_compile_features(flowtinylower PRIVATE cxx_std_20)
+    target_compile_options(flowtinylower PRIVATE -Wall -Wextra -Wpedantic)
+    target_link_libraries(flowtinylower PRIVATE tinyvm_recovered flowcontracts)
+endif()
 
 if(BUILD_TESTING)
     add_executable(tinyvm_isa_conformance tests/isa_conformance.c)
@@ -88,4 +94,13 @@ if(BUILD_TESTING)
                 $<TARGET_FILE:flowtinyvalidate>
                 $<TARGET_FILE:flowtinyrun>
                 ${CMAKE_CURRENT_BINARY_DIR})
+    if(TARGET flowtinylower)
+        add_test(NAME tinyvm_backend_lowering_boundary
+            COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/tests/backend-lowering-boundary.sh
+                    $<TARGET_FILE:flowtinylower>
+                    $<TARGET_FILE:flowtinyvalidate>
+                    $<TARGET_FILE:flowtinyrun>
+                    ${CMAKE_SOURCE_DIR}/Flowlower/tests/captured-empty-lowering.json
+                    ${CMAKE_CURRENT_BINARY_DIR})
+    endif()
 endif()

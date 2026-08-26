@@ -16,7 +16,9 @@ Current surfaces:
 - typed `flowanalyst.semantic_report` v1 consumption for Flowparallel;
 - typed `flowparallel.execution_plan` and
   `flowparallel.graph_provider_decision` v1 consumption for Flowoptimize;
-- lowering-plan identity and matrix dimension/coordinate validation.
+- lowering-plan identity and matrix dimension/coordinate validation;
+- canonical `flowcore.backend_lowering_artifact` validation, including selected
+  target identity and exact external-operation/authorization-set equality;
 - independently invocable `flowvalidate` support for every main-chain artifact,
   stable valid/invalid/blocked/unsupported exits, machine or human diagnostics,
   source attribution, and canonical JSON round-tripping.

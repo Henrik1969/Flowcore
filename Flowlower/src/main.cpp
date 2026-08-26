@@ -5,6 +5,8 @@
 #include <string>
 #include <string_view>
 
+#include <flowcontracts/validate.hpp>
+
 #include "structured_plan.hpp"
 
 namespace {
@@ -47,10 +49,15 @@ std::string quote(std::string_view value) {
 int lower(std::string_view report, const Options& options, std::string_view binding_report) {
     using namespace flowlower::structured;
     const auto root = Parser{std::string(report)}.parse();
-    if (text(field(root, "format")) != "flowoptimize.optimization_report")
-        throw std::runtime_error("input is not a Flowoptimize optimization report");
+    const auto input_format = text(field(root, "format"));
+    if (input_format != "flowoptimize.optimization_report" && input_format != "flowcore.backend_lowering_artifact")
+        throw std::runtime_error("input is not a backend lowering artifact");
     if (integer(field(root, "version"), "version") != 1)
         throw std::runtime_error("unsupported Flowoptimize report version");
+    if (input_format == "flowcore.backend_lowering_artifact") {
+        flowcontracts::validate_backend_lowering_artifact(root);
+        if (!binding_report.empty()) throw std::runtime_error("backend lowering artifacts already contain authorization evidence");
+    }
     if (text(field(root, "status")) != "ready") {
         std::cout << "{\n  \"format\": \"flowlower.lowering_report\",\n  \"version\": 1,\n  \"status\": \"blocked\",\n  \"backend\": \"llvm\",\n  \"reason\": \"optimization stage is not ready\"\n}\n";
         return 2;
@@ -59,7 +66,12 @@ int lower(std::string_view report, const Options& options, std::string_view bind
     const auto* targets_value = field(root, "targets");
     Array targets;
     if (targets_value) targets = array(targets_value, "targets");
-    const std::string selected_target = options.target_name.empty() ? "main" : options.target_name;
+    std::string selected_target = options.target_name.empty() ? "main" : options.target_name;
+    if (input_format == "flowcore.backend_lowering_artifact") {
+        if (!options.target_name.empty()) throw std::runtime_error("target is already fixed by the backend lowering artifact");
+        if (const auto* target = field(root, "target")) selected_target = text(field(*target, "name"));
+        targets.clear();
+    }
     if (!targets.empty()) {
         if (options.target_name.empty()) {
             std::cout << "{\n  \"format\": \"flowlower.lowering_report\",\n  \"version\": 1,\n  \"status\": \"blocked\",\n  \"backend\": \"llvm\",\n  \"reason\": \"multiple targets require explicit --target selection\"\n}\n";

@@ -96,3 +96,24 @@ the already captured recovered-ISA boundary.
   documented LeakSanitizer exclusion.
 - Runtime provider resolution for `CALL_IMPORT` remains Gate 5; both engines
   explicitly trap and the command-line runner refuses unresolved imports.
+
+### Backend-neutral lowering artifact — `backend-neutral-lowering-v1`
+
+- Added independently invocable `flowprepare`, which consumes captured
+  optimization and optional binding files and emits canonical
+  `flowcore.backend_lowering_artifact` version 1 JSON.
+- The artifact preserves source, complete target catalog and selected target,
+  ABI contracts, external operations, operation/block/symbol identities, exact
+  authorization capabilities and optimization-transform provenance.
+- Public validation rejects target drift, duplicate authorization identities
+  and any difference between authorized tuples and external-call tuples.
+- LLVM `flowlower` and TinyVM `flowtinylower` consume the same captured file;
+  replay tests invoke the producer neither in-process nor as a binary.
+- TinyVM deterministically lowers the first provider-free empty program to ISA
+  v1 returning typed `i32(0)`. It reports structured `unsupported` for valid
+  non-empty plans pending Gate 4 rather than falsely admitting them.
+- Direct optimization-report input to LLVM remains a documented temporary
+  corpus compatibility path, not the public backend boundary.
+- The complete GCC superbuild and all 68 canonical tests passed. Focused Clang
+  18 ASan/UBSan builds and both backend-boundary tests passed with leak
+  detection disabled for the managed traced-host limitation.

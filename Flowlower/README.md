@@ -1,9 +1,10 @@
 # Flowlower
 
-Flowlower is the target-lowering sibling after Flowoptimize:
+Flowlower is the target-lowering sibling after Flowoptimize. `flowprepare`
+publishes the backend-neutral boundary first:
 
 ```text
-source -> Flowmini -> Flowanalyst -> Flowparallel -> Flowoptimize -> Flowlower
+source -> Flowmini -> Flowanalyst -> Flowparallel -> Flowoptimize -> flowprepare -> backend lowerer
 ```
 
 The first target provider is `llvm`. Profile-free lowering covers scalar and
@@ -18,6 +19,22 @@ error and cleanup laws.
 The lowering report preserves the source path carried by the upstream semantic
 and optimization reports. This keeps emitted IR attributable to its source
 artifact without making the lowerer depend on Flowmini internals.
+
+`flowcore.backend_lowering_artifact` version 1 is canonical JSON containing the
+complete selected target, lowering plan, ABI contracts, external operations,
+exact authorization capabilities and optimization provenance. Both
+`flowlower` (LLVM) and `flowtinylower` (TinyVM) consume a captured instance from
+disk. TinyVM currently admits the empty provider-free plan and returns a
+structured unsupported result for non-empty plans while Gate 4 is in progress.
+Direct optimization-report input to `flowlower` remains a temporary corpus
+compatibility path and is not the public backend boundary.
+
+```sh
+flowprepare --binding-report binding.json --target cli optimization.json > lowering.json
+flowvalidate --canonical lowering.json
+flowlower --emit-llvm output.ll lowering.json
+flowtinylower lowering.json output.tvm
+```
 
 Multiplexed reports are preserved through Flowparallel and Flowoptimize. When
 multiple named targets exist, Flowlower requires explicit selection:
