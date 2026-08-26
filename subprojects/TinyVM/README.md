@@ -73,3 +73,4 @@ it is not semantic authority.
 
 The staged integration and LLVM-parity plan is documented in
 [`docs/architecture/tinyvm-flowcore-backend-plan.md`](../../docs/architecture/tinyvm-flowcore-backend-plan.md).
+The first binary boundary is specified in [`ARTIFACT-V1.md`](ARTIFACT-V1.md).
