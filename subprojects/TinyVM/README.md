@@ -63,3 +63,6 @@ The first recovered-baseline observations are recorded in
 Future Flowmini work should lower a validated canonical artifact into a
 versioned TinyVM executable artifact. GNU dispatch is an execution mechanism;
 it is not semantic authority.
+
+The staged integration and LLVM-parity plan is documented in
+[`docs/architecture/tinyvm-flowcore-backend-plan.md`](../../docs/architecture/tinyvm-flowcore-backend-plan.md).
