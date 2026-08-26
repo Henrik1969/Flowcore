@@ -42,13 +42,14 @@ The important architectural boundaries are documented before their full
 implementations exist so the current default path does not accidentally become
 the permanent definition of Flowcore.
 
-Current active implementation is a verified v0.27 namespaced provider
+Current active implementation is a verified v0.28 typed artifact-contract
 language-chain slice. It
 inherits the closed v0.24 raw frontend/export border, establishes semantic
 analysis and policy-binding consumers, preserves an optimization boundary, and
-lowers selected profiles to executable LLVM/ELF artifacts. Graph IR, real
-optimizer transforms, generalized target selection, parallelism policies, CUDA
-providers, and self-hosting remain future expansion work.
+lowers the current supported contract surface to executable LLVM/ELF artifacts.
+Its public stage artifacts are independently validated and identity-tested.
+Canonical Graph IR, generalized optimizer transforms, executable safety
+profiles, certification, and self-hosting remain future expansion work.
 
 Planned and active architecture topics:
 
@@ -71,6 +72,7 @@ Foundational notes:
 - [Frankencore Constitutional Baseline v0.1](FRANKENCORE-CONSTITUTION.md)
 - [Frankencore contract inventory](frankencore-contract-inventory.json)
 - [Current Frankencore conformance](frankencore-current-conformance.md)
+- [Current v0.28 typed artifact-contract status](../checkpoints/2026-08-26-v0.28-typed-artifact-contracts.md)
 - [Mutation-provenance contract](FRANKENCORE-MUTATION-PROVENANCE.md)
 - [Repository audit](FRANKENCORE-AUDIT-2026-08-20.md)
 - [ADR-0001: Mutation event envelope](decisions/0001-mutation-event-envelope.md)

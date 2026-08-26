@@ -5,7 +5,7 @@ Flowcore is experimental language and system-architecture work.
 The current active implementation is:
 
 ```text
-Flowcore v0.27 namespaced provider language-chain slice
+Flowcore v0.28 typed artifact-contract language-chain slice
 ```
 
 Active implementation path:
@@ -22,8 +22,8 @@ This repository is not a finished language or runtime. It is a design and implem
 status: experimental
 production-ready: no
 active branch: v25-symboltable-projection
-active prototype: Flowmini v0.27 namespaced provider language-chain slice
-current milestone: verified frontend-to-ELF chain with explicit lowering profiles
+active prototype: Flowcore v0.28 typed artifact-contract language-chain slice
+current milestone: independently validated, identity-preserving frontend-to-ELF chain
 ```
 
 Current known green gates:
@@ -34,6 +34,8 @@ AST golden tests:              PASS (28/28)
 Symbol projection tests:       PASS (14/14)
 frontend bundle:               PASS (8 golden, 1 isolated, 19 negative)
 downstream sibling CTest:      PASS
+independent flowvalidate:       PASS
+typed identity mutation gate:  PASS
 flowcat native ELF:            PASS
 ```
 
@@ -126,7 +128,7 @@ cmake --build /tmp/flowcore-build
 ctest --test-dir /tmp/flowcore-build --output-on-failure
 ```
 
-The clean root build currently registers 54 tests, including the larger
+The clean root build currently registers 57 tests, including the larger
 integration corpus, pipeline matrix, pass corpus, sibling CTest suites, CUDA
 provider contracts, and Frankencore conformance probes.
 
@@ -169,7 +171,7 @@ CTest:                         PASS (2/2)
 For the complete root build, the current result is:
 
 ```text
-root CTest:                    PASS (54/54)
+root CTest:                    PASS (57/57)
 integration corpus:            PASS (3/3)
 pipeline matrix:               PASS (9 accepted, 1 blocked)
 pass corpus:                   PASS (43 programs)
@@ -180,6 +182,7 @@ stdlib boundary:               PASS (6 ABI modules; libc/file I/O/memory/kernel 
 
 ```text
 Flowmini/README.md
+docs/checkpoints/2026-08-26-v0.28-typed-artifact-contracts.md
 Flowmini/CURRENT.md
 Flowmini/flowmini_v25_symboltable_projection/docs/v0.25-symboltable-projection-status.md
 docs/flowmini/v0.25-origin-maturity-audit.md

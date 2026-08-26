@@ -168,5 +168,20 @@ Gates 2–4 first vertical checkpoint:
 
 ## Exact next action
 
-Reconcile active documentation with executable v0.28 evidence, then run the
-complete sanitizer and hardening matrix and close repository hygiene.
+### Gate 8 repository truth
+
+- Added the current v0.28 status checkpoint and linked it from the root README,
+  documentation index, architecture index, and typed-contract progression.
+- Updated only present-tense root suite claims to 57/57; historical checkpoint
+  counts and subsystem-specific counts remain intact as scoped evidence.
+- Distinguished the active Flowcore v0.28 boundary from the inherited Flowmini
+  v0.27 language slice.
+- Recorded implemented typed/validator/identity behavior separately from future
+  Canonical Graph IR, safety admission, certification, self-hosting, permanent
+  writable-storage semantics, and generalized ABI/CUDA work.
+- Retained the explicit experimental/non-production/non-certified boundary.
+
+## Exact next action
+
+Run the complete sanitizer and hardening matrix, reconcile any environmental
+exclusions precisely, then close run state and final repository hygiene.

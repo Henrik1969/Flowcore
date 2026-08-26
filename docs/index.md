@@ -24,7 +24,8 @@ This is the soul of Flowcore.
 
 - [Flowcore core promise](architecture/flowcore-core-promise.md)
 - [Transformation and revision architecture](architecture/compiler-transformation-revision-model.md)
-- [Current v0.27 namespaced provider language-chain status](checkpoints/2026-08-21-v0.27-namespaced-provider-chain.md)
+- [Current v0.28 typed artifact-contract status](checkpoints/2026-08-26-v0.28-typed-artifact-contracts.md)
+- [Historical v0.27 namespaced provider language-chain status](checkpoints/2026-08-21-v0.27-namespaced-provider-chain.md)
 - [FrankenCore conformance declaration](architecture/frankencore-conformance.md)
 - [Prerequisites](architecture/prerequisites.md)
 - [Frankencore Constitution v0.1](architecture/FRANKENCORE-CONSTITUTION.md)
@@ -49,9 +50,10 @@ See:
 Current checkpoint:
 
 ```text
-Flowcore v0.27 executable namespaced provider language-chain slice
+Flowcore v0.28 typed artifact-contract language-chain slice
 AST golden tests: 28
 Symbol projection tests: 14
 Flowanalyst / Flowbind / Flowoptimize / Flowlower: CTest green
+flowvalidate / identity mutation gates: CTest green
 flowcat: native ELF example PASS
 ```
