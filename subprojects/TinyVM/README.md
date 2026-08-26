@@ -95,6 +95,12 @@ loads the named library only after that check, and dispatches through typed
 thunks. A missing or non-matching policy fails closed. Argument and artifact
 string handles are resolved inside the thunk and never serialized as pointers.
 
+The readonly slice additionally provides exact zero-argument typed thunks for
+`getpid`, `getuid`, `getgid`, `geteuid`, `getegid`, `getppid`, and `getpgrp`
+under their declared `kernel`/`linux` contracts. Legacy four-field Flowbind
+policy grants are accepted only for zero-argument imports; the artifact still
+carries and the thunk still checks the result carrier and complete authority.
+
 ```sh
 flowtinyrun --policy active.policy program.tvm
 ```

@@ -202,7 +202,7 @@ private:
         set_provenance(operation);
         const auto kind = string(required(operation, "kind", "$.operation"), "$.operation.kind");
         const auto& operands = required_array(operation, "operands", "$.operation");
-        if (operands.empty()) throw Unsupported("scalar operation has no operand");
+        if (operands.empty() && kind != "external_call") throw Unsupported("scalar operation has no operand");
         if (kind == "branch") {
             const auto value = expression(operands.front());
             const auto branch_index = code.size(); emit(TV1_BRANCH, value, 0, 0);
@@ -243,12 +243,15 @@ private:
             const auto parameters = string(required(provider, "parameter_types", "$.operation.provider"), "$.operation.provider.parameter_types");
             const auto result_type = string(required(provider, "return_type", "$.operation.provider"), "$.operation.provider.return_type");
             const bool admitted = (symbol == "abs" && parameters == "c_int" && result_type == "c_int") ||
-                                  (symbol == "strlen" && parameters == "c_string" && result_type == "c_size_t");
-            if (!admitted || string(required(provider, "contract", "$.operation.provider"), "$.operation.provider.contract") != "libc" ||
+                                  (symbol == "strlen" && parameters == "c_string" && result_type == "c_size_t") ||
+                                  ((symbol == "getpid" || symbol == "getuid" || symbol == "getgid" || symbol == "geteuid" || symbol == "getegid" || symbol == "getppid" || symbol == "getpgrp") && parameters.empty() && result_type == "c_int");
+            const auto contract = string(required(provider, "contract", "$.operation.provider"), "$.operation.provider.contract");
+            const auto effect = string(required(provider, "effect", "$.operation.provider"), "$.operation.provider.effect");
+            const bool authority = (effect == "pure" && contract == "libc") || (effect == "readonly" && (contract == "kernel" || contract == "linux"));
+            if (!admitted || !authority ||
                 string(required(provider, "library", "$.operation.provider"), "$.operation.provider.library") != "libc.so.6" ||
-                string(required(provider, "convention", "$.operation.provider"), "$.operation.provider.convention") != "c" ||
-                string(required(provider, "effect", "$.operation.provider"), "$.operation.provider.effect") != "pure")
-                throw Unsupported("external provider tuple is not admitted by the pure-call slice");
+                string(required(provider, "convention", "$.operation.provider"), "$.operation.provider.convention") != "c")
+                throw Unsupported("external provider tuple is not admitted by the typed-call slice");
             std::vector<std::size_t> values; for (const auto& operand : operands) values.push_back(expression(operand));
             const auto argument_start = slot();
             for (std::size_t index = 1; index < values.size(); ++index) (void)slot();
@@ -256,6 +259,7 @@ private:
             TinyvmImport imported{}; imported.id = imports.size() + 1;
             auto field = [&](char output[64], std::string_view name) { copy(output, string(required(provider, name, "$.operation.provider"), "$.operation.provider." + std::string(name))); };
             field(imported.contract,"contract"); field(imported.library,"library"); field(imported.convention,"convention"); field(imported.symbol,"symbol"); field(imported.effect,"effect"); field(imported.parameters,"parameter_types"); field(imported.result,"return_type");
+            if (!imported.parameters[0]) copy(imported.parameters, "none");
             copy(imported.evidence, identity("authorization-", serialize(provider))); imports.push_back(imported);
             const auto destination = symbol_slot(integer(required(operation, "result_symbol_id", "$.operation"), "$.operation.result_symbol_id"));
             emit(TV1_CALL_IMPORT, destination, imported.id, argument_start); return;

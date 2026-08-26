@@ -11,7 +11,7 @@ static const TinyvmConstant *constant(const TinyvmArtifactV2 *a,uint64_t id){for
 static const TinyvmString *string_value(const TinyvmArtifactV2 *a,uint64_t id){for(size_t i=0;i<a->string_count;++i)if(a->strings[i].id==id)return &a->strings[i];return NULL;}
 static const TinyvmStorage *storage_value(const TinyvmArtifactV2 *a,uint64_t id){for(size_t i=0;i<a->storage_count;++i)if(a->storage[i].id==id)return &a->storage[i];return NULL;}
 static const TinyvmImport *import_value(const TinyvmArtifactV2 *a,uint64_t id){for(size_t i=0;i<a->import_count;++i)if(a->imports[i].id==id)return &a->imports[i];return NULL;}
-static size_t import_parameter_count(const TinyvmImport *value){if(strcmp(value->parameters,"none")==0)return 0;size_t count=1;for(const char *p=value->parameters;*p;++p)if(*p==',')++count;return count;}
+static size_t import_parameter_count(const TinyvmImport *value){if(!value->parameters[0]||strcmp(value->parameters,"none")==0)return 0;size_t count=1;for(const char *p=value->parameters;*p;++p)if(*p==',')++count;return count;}
 static bool zero2(const InstrWord *w){return w->b==0&&w->pad==0;}
 static bool zero3(const InstrWord *w){return w->a==0&&w->b==0&&w->pad==0;}
 

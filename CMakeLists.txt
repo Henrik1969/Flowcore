@@ -172,7 +172,7 @@ add_test(NAME tinyvm_scalar_backend_parity
 set_tests_properties(tinyvm_scalar_backend_parity PROPERTIES
     DEPENDS "flowlower_backend_artifact;tinyvm_backend_lowering_boundary")
 
-add_test(NAME tinyvm_pure_provider_parity
+add_test(NAME tinyvm_governed_provider_parity
     COMMAND ${CMAKE_COMMAND} -E env
         FLOWCORE_ROOT=${CMAKE_CURRENT_SOURCE_DIR}
         FLOWMINI_BIN=$<TARGET_FILE:flowmini>
@@ -186,7 +186,7 @@ add_test(NAME tinyvm_pure_provider_parity
         FLOWTINYVALIDATE_BIN=$<TARGET_FILE:flowtinyvalidate>
         FLOWTINYRUN_BIN=$<TARGET_FILE:flowtinyrun>
         ${CMAKE_CURRENT_SOURCE_DIR}/tools/test-tinyvm-pure-provider-parity.sh)
-set_tests_properties(tinyvm_pure_provider_parity PROPERTIES
+set_tests_properties(tinyvm_governed_provider_parity PROPERTIES
     DEPENDS "tinyvm_scalar_backend_parity")
 
 # Canonical installed shape. Debian packaging consumes this staged install and

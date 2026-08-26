@@ -7,12 +7,22 @@ trap 'rm -rf "$tmpdir"' EXIT
 policy="$tmpdir/policy"
 printf '%s\n' \
   'allow libc.so.6 abs c pure c_int c_int' \
-  'allow libc.so.6 strlen c pure c_string c_size_t' > "$policy"
+  'allow libc.so.6 strlen c pure c_string c_size_t' \
+  'allow libc.so.6 getpid c readonly' \
+  'allow libc.so.6 getuid c readonly' \
+  'allow libc.so.6 getgid c readonly' \
+  'allow libc.so.6 geteuid c readonly' \
+  'allow libc.so.6 getegid c readonly' \
+  'allow libc.so.6 getppid c readonly' \
+  'allow libc.so.6 getpgrp c readonly' > "$policy"
 printf '%s\n' 'allow libc.so.6 abs c readonly c_int c_int' > "$tmpdir/wrong-policy"
 
-for name in abi_abs_main abi_strlen_main
+for name in \
+  abi_abs_main abi_strlen_main abi_kernel_getpid_main abi_kernel_getuid_main \
+  abi_kernel_getgid_main abi_kernel_geteuid_main abi_kernel_getegid_main \
+  abi_kernel_getppid_main abi_kernel_getpgrp_main
 do
-  echo "pure-provider parity fixture: $name"
+  echo "governed-provider parity fixture: $name"
   source="$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass/$name.flow"
   "$FLOWMINI_BIN" --dump-frontend-bundle "$source" > "$tmpdir/$name.frontend.json"
   "$FLOWANALYST_BIN" < "$tmpdir/$name.frontend.json" > "$tmpdir/$name.semantic.json"
@@ -29,8 +39,9 @@ do
   "$tmpdir/$name.llvm"
   llvm_status=$?
   set -e
-  tiny_result=$("$FLOWTINYRUN_BIN" --policy "$policy" "$tmpdir/$name.tvm" | jq -r '.result')
-  test "$tiny_result" -eq "$llvm_status"
+  "$FLOWTINYRUN_BIN" --policy "$policy" "$tmpdir/$name.tvm" > "$tmpdir/$name.execution.json"
+  tiny_result=$(jq -r '.result' "$tmpdir/$name.execution.json")
+  test $((tiny_result % 256)) -eq "$llvm_status"
 
   if "$FLOWTINYRUN_BIN" "$tmpdir/$name.tvm" >/dev/null 2>&1; then
     echo 'TinyVM ran an import artifact without active policy' >&2
@@ -42,4 +53,4 @@ do
   fi
 done
 
-echo 'pure governed LLVM/TinyVM provider parity: PASS'
+echo 'governed LLVM/TinyVM provider parity: PASS'

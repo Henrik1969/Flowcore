@@ -181,3 +181,21 @@ the already captured recovered-ISA boundary.
 - The complete GCC superbuild and all 70 canonical tests passed. Focused Clang
   18 ASan/UBSan conformance and both parity suites passed with the documented
   LeakSanitizer exclusion.
+
+### Governed readonly identity calls — `tinyvm-governed-readonly-calls`
+
+- Added exact typed zero-argument thunks for `getpid`, `getuid`, `getgid`,
+  `geteuid`, `getegid`, `getppid` and `getpgrp` under their declared
+  `kernel`/`linux`, `libc.so.6`, C, `readonly`, `()->c_int` authorities.
+- Empty parameter lists serialize canonically as `none`; the ISA validator and
+  runtime agree that they consume zero argument slots.
+- Existing four-field Flowbind policy grants remain accepted only for
+  zero-argument imports. Typed result and contract admission are still checked
+  by the artifact and named thunk, so this compatibility does not become a
+  generic symbol grant.
+- Differential executions compare normalized process exit results. Parent-ID
+  execution is invoked without a command-substitution intermediary so LLVM and
+  TinyVM observe the same parent process.
+- The complete GCC superbuild and all 70 canonical tests passed. Focused Clang
+  18 ASan/UBSan provider, scalar and ISA conformance suites passed with the
+  documented LeakSanitizer exclusion.
