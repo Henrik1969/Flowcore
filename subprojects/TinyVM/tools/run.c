@@ -7,11 +7,47 @@
 #include <stdio.h>
 #include <string.h>
 
-static unsigned version(const char *path){unsigned char h[12];FILE *f=fopen(path,"rb");if(!f)return 0;size_t n=fread(h,1,sizeof h,f);fclose(f);if(n!=sizeof h)return 0;return (unsigned)h[8]|(unsigned)h[9]<<8|(unsigned)h[10]<<16|(unsigned)h[11]<<24;}
-int main(int argc,char **argv){
-    const char *policy=NULL;int first=1;if(argc>2&&!strcmp(argv[1],"--policy")){policy=argv[2];first=3;}
+static unsigned version(const char *path) {
+    unsigned char header[12]; FILE *file=fopen(path,"rb"); if(!file)return 0;
+    const size_t count=fread(header,1,sizeof header,file); fclose(file); if(count!=sizeof header)return 0;
+    return (unsigned)header[8]|(unsigned)header[9]<<8|(unsigned)header[10]<<16|(unsigned)header[11]<<24;
+}
+
+static int run_v2(const char *path,const char *policy,int argument_count,char **arguments) {
+    TinyvmArtifactV2 artifact; char diagnostic[160];
+    if(!tinyvm_artifact_v2_read(path,&artifact,diagnostic,sizeof diagnostic)){fprintf(stderr,"flowtinyrun: %s\n",diagnostic);return 1;}
+    if(artifact.isa_version==0) {
+        vm_context context; vm_init(&context); context.pc=(size_t)artifact.entrypoint; context.regs[0]=19; context.regs[1]=23;
+        const bool ok=vm_run_switch(&context,artifact.code,artifact.code_count);
+        printf("{\"format\":\"flowtiny.execution_record\",\"version\":1,\"status\":\"%s\",\"artifact_format\":2,\"artifact_id\":\"%s\",\"target_policy_id\":\"%s\",\"result\":%" PRId64 ",\"pc\":%zu}\n",ok?"completed":"faulted",artifact.artifact_id,artifact.target_policy_id,context.regs[0],context.pc);
+        tinyvm_artifact_v2_destroy(&artifact); return ok?0:1;
+    }
+    if(artifact.isa_version!=1&&artifact.isa_version!=2){tinyvm_artifact_v2_destroy(&artifact);return 2;}
+    TinyvmRuntimeProvider provider={policy,(size_t)argument_count,(const char *const *)arguments};
+    const char *fault=NULL;
+    if(artifact.import_count&&!tinyvm_runtime_provider_preflight(&provider,&artifact,&fault)){fprintf(stderr,"flowtinyrun: %s\n",fault);tinyvm_artifact_v2_destroy(&artifact);return 2;}
+    TinyvmIsaV1Context context;
+    if(!tinyvm_isa_v1_context_init(&context,(size_t)artifact.data_words,UINT64_C(10000000))){tinyvm_artifact_v2_destroy(&artifact);return 1;}
+    context.argument_count=provider.argument_count; context.arguments=provider.arguments;
+    if(artifact.import_count){context.import_resolver=tinyvm_runtime_provider_resolve;context.import_user=&provider;}
+    const bool ok=tinyvm_isa_v1_run_switch(&artifact,&context);
+    if(!ok&&context.fault)fprintf(stderr,"flowtinyrun: %s\n",context.fault);
+    printf("{\"format\":\"flowtiny.execution_record\",\"version\":1,\"status\":\"%s\",\"artifact_format\":2,\"artifact_id\":\"%s\",\"target_policy_id\":\"%s\",\"carrier\":%u,\"result\":%" PRIu64 ",\"pc\":%" PRIu64 ",\"trap\":%u}\n",ok?"completed":"faulted",artifact.artifact_id,artifact.target_policy_id,context.result.carrier,context.result.bits,context.pc,context.trap);
+    tinyvm_isa_v1_context_destroy(&context); tinyvm_artifact_v2_destroy(&artifact); return ok?0:1;
+}
+
+static int run_v1(const char *path) {
+    TinyvmArtifact artifact; char diagnostic[160];
+    if(!tinyvm_artifact_read(path,&artifact,diagnostic,sizeof diagnostic)){fprintf(stderr,"flowtinyrun: %s\n",diagnostic);return 1;}
+    vm_context context; vm_init(&context); context.pc=(size_t)artifact.entrypoint; context.regs[0]=19; context.regs[1]=23;
+    const bool ok=vm_run_switch(&context,artifact.code,artifact.code_count);
+    printf("{\"format\":\"flowtiny.execution_record\",\"version\":1,\"status\":\"%s\",\"artifact_id\":\"%s\",\"result\":%" PRId64 ",\"pc\":%zu}\n",ok?"completed":"faulted",artifact.artifact_id,context.regs[0],context.pc);
+    tinyvm_artifact_destroy(&artifact); return ok?0:1;
+}
+
+int main(int argc,char **argv) {
+    const char *policy=NULL; int first=1;
+    if(argc>2&&!strcmp(argv[1],"--policy")){policy=argv[2];first=3;}
     if(argc<=first){fprintf(stderr,"usage: %s [--policy FILE] ARTIFACT [PROGRAM-ARGUMENT ...]\n",argv[0]);return 2;}
-    const char *path=argv[first];
-    if(version(path)==2){TinyvmArtifactV2 a;char d[160];if(!tinyvm_artifact_v2_read(path,&a,d,sizeof d)){fprintf(stderr,"flowtinyrun: %s\n",d);return 1;}if(a.import_count&&!policy){fprintf(stderr,"flowtinyrun: artifact imports require an explicit active policy\n");tinyvm_artifact_v2_destroy(&a);return 2;}if(a.isa_version==1||a.isa_version==2){TinyvmIsaV1Context ctx;if(!tinyvm_isa_v1_context_init(&ctx,(size_t)a.data_words,UINT64_C(10000000))){tinyvm_artifact_v2_destroy(&a);return 1;}TinyvmRuntimeProvider provider={policy,(size_t)(argc-first),(const char *const *)&argv[first]};ctx.argument_count=provider.argument_count;ctx.arguments=provider.arguments;if(a.import_count){ctx.import_resolver=tinyvm_runtime_provider_resolve;ctx.import_user=&provider;}const bool ok=tinyvm_isa_v1_run_switch(&a,&ctx);printf("{\"format\":\"flowtiny.execution_record\",\"version\":1,\"status\":\"%s\",\"artifact_format\":2,\"artifact_id\":\"%s\",\"target_policy_id\":\"%s\",\"carrier\":%u,\"result\":%" PRIu64 ",\"pc\":%" PRIu64 ",\"trap\":%u}\n",ok?"completed":"faulted",a.artifact_id,a.target_policy_id,ctx.result.carrier,ctx.result.bits,ctx.pc,ctx.trap);tinyvm_isa_v1_context_destroy(&ctx);tinyvm_artifact_v2_destroy(&a);return ok?0:1;}vm_context ctx;vm_init(&ctx);ctx.pc=(size_t)a.entrypoint;ctx.regs[0]=19;ctx.regs[1]=23;const bool ok=vm_run_switch(&ctx,a.code,a.code_count);printf("{\"format\":\"flowtiny.execution_record\",\"version\":1,\"status\":\"%s\",\"artifact_format\":2,\"artifact_id\":\"%s\",\"target_policy_id\":\"%s\",\"result\":%" PRId64 ",\"pc\":%zu}\n",ok?"completed":"faulted",a.artifact_id,a.target_policy_id,ctx.regs[0],ctx.pc);tinyvm_artifact_v2_destroy(&a);return ok?0:1;}
-    TinyvmArtifact a;char d[160];if(!tinyvm_artifact_read(path,&a,d,sizeof d)){fprintf(stderr,"flowtinyrun: %s\n",d);return 1;}vm_context ctx;vm_init(&ctx);ctx.pc=(size_t)a.entrypoint;ctx.regs[0]=19;ctx.regs[1]=23;const bool ok=vm_run_switch(&ctx,a.code,a.code_count);printf("{\"format\":\"flowtiny.execution_record\",\"version\":1,\"status\":\"%s\",\"artifact_id\":\"%s\",\"result\":%" PRId64 ",\"pc\":%zu}\n",ok?"completed":"faulted",a.artifact_id,ctx.regs[0],ctx.pc);tinyvm_artifact_destroy(&a);return ok?0:1;
+    return version(argv[first])==2?run_v2(argv[first],policy,argc-first,&argv[first]):run_v1(argv[first]);
 }

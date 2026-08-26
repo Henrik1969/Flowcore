@@ -214,3 +214,21 @@ the already captured recovered-ISA boundary.
 - The complete GCC superbuild and all 70 canonical tests passed. Focused Clang
   18 ASan/UBSan governed-provider and ISA conformance tests passed with the
   documented LeakSanitizer exclusion.
+
+### Current governed-provider inventory — `tinyvm-governed-provider-inventory`
+
+- Added exact differential parity for `labs`, `getpgid`, `getsid`,
+  `getpriority` and checked indexed argument access through `puts`.
+- Runtime policy is preflighted for every import before the first instruction,
+  so an unreachable call cannot bypass authorization.
+- Published `tinyvm-current-llvm-parity-inventory.md`, separating every
+  executed tuple from readonly-output, filesystem, IPC, loopback, namespace,
+  memory, ncurses and aggregate tuples that still lack safe runtime laws.
+- A validated authorized `fork` plan proves structured unsupported exit 2 and
+  proves that no partial executable is created.
+- Legacy ISA 0 payloads inside the v2 artifact envelope remain executable;
+  governed import preflight applies to ISA 1/2 artifacts with imports and does
+  not silently change the frozen recovered format's behavior.
+- The complete GCC superbuild and all 70 canonical tests passed. Focused Clang
+  18 ASan/UBSan governed-provider, scalar, artifact-boundary and ISA
+  conformance tests passed with the documented LeakSanitizer exclusion.

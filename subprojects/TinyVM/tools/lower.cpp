@@ -50,7 +50,7 @@ public:
     void compile() {
         const auto& operations = required_array(required_object(root_, "lowering_plan"), "operations", "$.lowering_plan");
         scan_arguments(required(root_, "lowering_plan"));
-        if (uses_arguments_) next_slot_ = required_argument_count_ + 1;
+        if (uses_arguments_) { next_slot_ = required_argument_count_ + 1; slot_types_[0] = TINYVM_CARRIER_I32; for (std::size_t index = 1; index < next_slot_; ++index) slot_types_[index] = TINYVM_CARRIER_OPAQUE_HANDLE; }
         for (const auto& value : operations) {
             const auto& operation = object(value, "$.lowering_plan.operations[]");
             const auto kind = string(required(operation, "kind", "$.lowering_plan.operations[]"), "$.lowering_plan.operations[].kind");
@@ -96,6 +96,7 @@ private:
     const Object& root_;
     std::string source_, derivation_;
     std::map<Integer, std::size_t> symbols_;
+    std::map<std::size_t, std::uint32_t> slot_types_;
     std::map<Integer, std::vector<const Object*>> blocks_;
     std::set<Integer> active_blocks_;
     std::deque<std::string> string_data_;
@@ -109,6 +110,7 @@ private:
         if (type == "bool") return TINYVM_CARRIER_I1;
         if (type == "c_int") return TINYVM_CARRIER_I32;
         if (type == "c_long" || type == "c_ulong" || type == "c_size_t") return TINYVM_CARRIER_I64;
+        if (type == "c_string" || type == "c_pointer") return TINYVM_CARRIER_OPAQUE_HANDLE;
         throw Unsupported("type carrier '" + std::string(type) + "' is not admitted by the scalar slice");
     }
     std::size_t slot() { return next_slot_++; }
@@ -129,7 +131,7 @@ private:
         const auto id = constants.size() + 1; constants.push_back({id, type, bits}); return id;
     }
     std::size_t literal(std::uint32_t type, std::uint64_t bits) {
-        const auto result = slot(); emit(TV1_CONST, result, constant(type, bits), 0); return result;
+        const auto result = slot(); slot_types_[result] = type; emit(TV1_CONST, result, constant(type, bits), 0); return result;
     }
     std::size_t expression(const Value& value) {
         const auto& node = object(value, "$.expression");
@@ -152,14 +154,14 @@ private:
             string_data_.push_back(string(required(node, "value", "$.expression"), "$.expression.value"));
             const auto id = string_data_.size();
             strings.push_back({id, reinterpret_cast<std::uint8_t*>(string_data_.back().data()), string_data_.back().size()});
-            const auto result = slot(); emit(TV1_STRING_HANDLE, result, id, 0); return result;
+            const auto result = slot(); slot_types_[result] = TINYVM_CARRIER_OPAQUE_HANDLE; emit(TV1_STRING_HANDLE, result, id, 0); return result;
         }
         if (kind == "writable_storage") {
             const auto& declaration = object(required(node, "storage", "$.expression"), "$.expression.storage");
             const auto bytes = integer(required(declaration, "bytes", "$.expression.storage"), "$.expression.storage.bytes");
             if (bytes <= 0) throw Unsupported("writable storage size is not positive");
             const auto id = storage.size() + 1; storage.push_back({id, static_cast<std::uint64_t>(bytes), 1, 1});
-            const auto result = slot(); emit(TV1_STORAGE_HANDLE, result, id, 0); return result;
+            const auto result = slot(); slot_types_[result] = TINYVM_CARRIER_OPAQUE_HANDLE; emit(TV1_STORAGE_HANDLE, result, id, 0); return result;
         }
         if (kind == "identifier") return symbol_slot(integer(required(node, "symbol_id", "$.expression"), "$.expression.symbol_id"));
         if (kind == "call" && optional(node, "intrinsic") && string(*optional(node, "intrinsic"), "$.expression.intrinsic") == "list_length") return 0;
@@ -171,8 +173,8 @@ private:
             return value + 1;
         }
         if (kind == "conversion") {
-            const auto source = expression(required(node, "operand", "$.expression")); const auto result = slot();
-            emit(TV1_CONVERT, result, source, carrier(string(required(node, "type", "$.expression"), "$.expression.type"))); return result;
+            const auto source = expression(required(node, "operand", "$.expression")); const auto result = slot(); const auto type = carrier(string(required(node, "type", "$.expression"), "$.expression.type"));
+            slot_types_[result] = type; emit(TV1_CONVERT, result, source, type); return result;
         }
         if (kind == "unary") {
             const auto operation = string(required(node, "operator", "$.expression"), "$.expression.operator");
@@ -180,7 +182,7 @@ private:
             if (operation == "+") return operand;
             if (operation != "-") throw Unsupported("unary operator '" + operation + "' is not admitted");
             const auto zero = literal(carrier(string(required(node, "type", "$.expression"), "$.expression.type")), 0), result = slot();
-            emit(TV1_SUB, result, zero, operand); return result;
+            slot_types_[result] = slot_types_.at(operand); emit(TV1_SUB, result, zero, operand); return result;
         }
         if (kind == "binary") {
             const auto left = expression(required(node, "left", "$.expression"));
@@ -188,7 +190,7 @@ private:
             const auto operation = string(required(node, "operator", "$.expression"), "$.expression.operator");
             const std::map<std::string, std::int64_t> opcodes{{"+",TV1_ADD},{"-",TV1_SUB},{"*",TV1_MUL},{"/",TV1_SDIV},{"==",TV1_CMP_EQ},{"!=",TV1_CMP_NE},{"<",TV1_CMP_LT},{"<=",TV1_CMP_LE},{">",TV1_CMP_GT},{">=",TV1_CMP_GE}};
             const auto found = opcodes.find(operation); if (found == opcodes.end()) throw Unsupported("binary operator '" + operation + "' is not admitted");
-            const auto result = slot(); emit(found->second, result, left, right); return result;
+            const auto result = slot(); slot_types_[result] = found->second >= TV1_CMP_EQ ? static_cast<std::uint32_t>(TINYVM_CARRIER_I1) : slot_types_.at(left); emit(found->second, result, left, right); return result;
         }
         throw Unsupported("expression kind '" + kind + "' is not admitted by the scalar slice");
     }
@@ -243,8 +245,11 @@ private:
             const auto parameters = string(required(provider, "parameter_types", "$.operation.provider"), "$.operation.provider.parameter_types");
             const auto result_type = string(required(provider, "return_type", "$.operation.provider"), "$.operation.provider.return_type");
             const bool admitted = (symbol == "abs" && parameters == "c_int" && result_type == "c_int") ||
+                                  (symbol == "labs" && parameters == "c_long" && result_type == "c_long") ||
                                   (symbol == "strlen" && parameters == "c_string" && result_type == "c_size_t") ||
                                   (symbol == "puts" && parameters == "c_string" && result_type == "c_int") ||
+                                  ((symbol == "getpgid" || symbol == "getsid") && parameters == "c_int" && result_type == "c_int") ||
+                                  (symbol == "getpriority" && parameters == "c_int,c_int" && result_type == "c_int") ||
                                   ((symbol == "getpid" || symbol == "getuid" || symbol == "getgid" || symbol == "geteuid" || symbol == "getegid" || symbol == "getppid" || symbol == "getpgrp") && parameters.empty() && result_type == "c_int");
             const auto contract = string(required(provider, "contract", "$.operation.provider"), "$.operation.provider.contract");
             const auto effect = string(required(provider, "effect", "$.operation.provider"), "$.operation.provider.effect");
@@ -253,7 +258,8 @@ private:
                 string(required(provider, "library", "$.operation.provider"), "$.operation.provider.library") != "libc.so.6" ||
                 string(required(provider, "convention", "$.operation.provider"), "$.operation.provider.convention") != "c")
                 throw Unsupported("external provider tuple is not admitted by the typed-call slice");
-            std::vector<std::size_t> values; for (const auto& operand : operands) values.push_back(expression(operand));
+            std::vector<std::uint32_t> expected; for (std::size_t start = 0; start < parameters.size();) { const auto end = parameters.find(',', start); expected.push_back(carrier(parameters.substr(start, end == std::string::npos ? parameters.size() - start : end - start))); if (end == std::string::npos) break; start = end + 1; }
+            std::vector<std::size_t> values; for (std::size_t index = 0; index < operands.size(); ++index) { auto value = expression(operands[index]); if (index >= expected.size()) throw Unsupported("provider argument count mismatch"); if (slot_types_.at(value) != expected[index]) { const auto converted = slot(); slot_types_[converted] = expected[index]; emit(TV1_CONVERT, converted, value, expected[index]); value = converted; } values.push_back(value); }
             const auto argument_start = slot();
             for (std::size_t index = 1; index < values.size(); ++index) (void)slot();
             for (std::size_t index = 0; index < values.size(); ++index) emit(TV1_MOVE, argument_start + index, values[index], 0);
@@ -263,12 +269,14 @@ private:
             if (!imported.parameters[0]) copy(imported.parameters, "none");
             copy(imported.evidence, identity("authorization-", serialize(provider))); imports.push_back(imported);
             const auto destination = symbol_slot(integer(required(operation, "result_symbol_id", "$.operation"), "$.operation.result_symbol_id"));
+            slot_types_[destination] = carrier(result_type);
             emit(TV1_CALL_IMPORT, destination, imported.id, argument_start); return;
         }
         const auto value = expression(operands.front());
         if (kind == "return_value") { emit(TV1_RETURN, value, 0, 0); return; }
         const auto identity = integer(required(operation, "result_symbol_id", "$.operation"), "$.operation.result_symbol_id");
         const auto destination = symbol_slot(identity);
+        slot_types_[destination] = slot_types_.at(value);
         if (destination != value) emit(TV1_MOVE, destination, value, 0);
     }
     bool compile_block(Integer block) {

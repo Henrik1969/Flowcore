@@ -8,6 +8,10 @@ typedef struct {
     const char *const *arguments;
 } TinyvmRuntimeProvider;
 
+bool tinyvm_runtime_provider_preflight(const TinyvmRuntimeProvider *provider,
+                                       const TinyvmArtifactV2 *artifact,
+                                       const char **fault);
+
 bool tinyvm_runtime_provider_resolve(void *user,
                                      const TinyvmArtifactV2 *artifact,
                                      const TinyvmImport *import,

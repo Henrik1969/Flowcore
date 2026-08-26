@@ -27,6 +27,20 @@ test "$status" -eq 2
 grep -q '"status":"unsupported"' "$build/unsupported.json"
 test ! -e "$build/nonempty.tvm"
 
+jq '
+  .authorization = {"status":"authorized","capabilities":[{"contract":"kernel","library":"libc.so.6","symbol":"fork","convention":"c","effect":"process_ipc","parameter_types":"","return_type":"c_int","status":"authorized"}]} |
+  .lowering_plan.operations = [{"id":0,"kind":"external_call","block_id":0,"statement_id":0,"result_symbol_id":1,"operands":[],"provider":{"contract":"kernel","library":"libc.so.6","symbol":"fork","convention":"c","effect":"process_ipc","parameter_types":"","return_type":"c_int"},"effect_contract":{"external":"process_ipc","determinism":"nondeterministic","certainty":"declared"},"argument_resources":[]}]
+' "$fixture" > "$build/unsupported-provider.json"
+rm -f "$build/unsupported-provider.tvm"
+set +e
+"$lower" "$build/unsupported-provider.json" "$build/unsupported-provider.tvm" > "$build/unsupported-provider-result.json"
+status=$?
+set -e
+test "$status" -eq 2
+grep -q '"status":"unsupported"' "$build/unsupported-provider-result.json"
+grep -q 'typed-call slice' "$build/unsupported-provider-result.json"
+test ! -e "$build/unsupported-provider.tvm"
+
 for value in \
   '{"kind":"string_literal","type":"c_string","value":"captured"}' \
   '{"kind":"writable_storage","type":"c_pointer","storage":{"bytes":16,"access":"read_write","lifetime":"call"}}'
