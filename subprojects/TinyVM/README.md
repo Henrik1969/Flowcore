@@ -25,6 +25,13 @@ until their original storage and rollback semantics can be recovered or newly
 specified. The `pad` field is reserved; the historical plan was to divide part
 of it into instrumentation flags, an expansion index, and source/debug identity.
 
+`tinyvm_isa_conformance` covers all 27 recovered opcode identities and the
+defined fault boundaries. Each case runs through computed goto, `switch`, and
+function-pointer dispatch and compares registers, memory, stack, program
+counter, flags, running state, result and fault text. The five `CTX_*` opcodes
+currently conform by producing the same explicit unsupported fault; passing
+their tests is not a claim that their historical semantics were recovered.
+
 ## Build the isolated prototype
 
 ```sh
