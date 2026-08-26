@@ -198,6 +198,7 @@ install(TARGETS
     flowbind
     flowoptimize
     flowprepare
+    flowtarget
     flowlower
     flowkernel
     flowparallel

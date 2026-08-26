@@ -11,6 +11,9 @@ target_link_libraries(flowlower PRIVATE flowcontracts)
 add_executable(flowprepare src/prepare.cpp)
 target_compile_options(flowprepare PRIVATE -Wall -Wextra -Wpedantic)
 target_link_libraries(flowprepare PRIVATE flowcontracts)
+add_executable(flowtarget src/target.cpp)
+target_compile_options(flowtarget PRIVATE -Wall -Wextra -Wpedantic)
+target_link_libraries(flowtarget PRIVATE flowcontracts)
 
 enable_testing()
 add_test(NAME flowlower_backend_artifact
@@ -19,6 +22,11 @@ add_test(NAME flowlower_backend_artifact
         FLOWVALIDATE_BIN=$<TARGET_FILE:flowvalidate>
         FLOWLOWER_BIN=$<TARGET_FILE:flowlower>
         ${CMAKE_CURRENT_SOURCE_DIR}/tests/run-backend-artifact-tests.sh)
+add_test(NAME flowtarget_policy_boundary
+    COMMAND ${CMAKE_COMMAND} -E env
+        FLOWTARGET_BIN=$<TARGET_FILE:flowtarget>
+        FLOWVALIDATE_BIN=$<TARGET_FILE:flowvalidate>
+        ${CMAKE_CURRENT_SOURCE_DIR}/tests/run-target-policy-tests.sh)
 add_test(NAME flowlower_pipeline
     COMMAND ${CMAKE_COMMAND} -E env
         FLOWLOWER_BIN=$<TARGET_FILE:flowlower>

@@ -93,6 +93,46 @@ inline void validate_optimization_report(const json::Value& value) {
     }
 }
 
+inline void validate_target_policy(const json::Value& value) {
+    const auto artifact = require_header(value, "flowcore.target_policy", 1);
+    if (artifact.status != "ready") return;
+    const auto& root = json::object(value);
+    const auto name = json::string(json::required(root, "name"), "$.name");
+    if (name.empty()) throw json::Error("$.name", "target policy name is empty");
+    const auto& backend = required_object(root, "backend");
+    const auto backend_name = json::string(json::required(backend, "name", "$.backend"), "$.backend.name");
+    if (backend_name != "llvm" && backend_name != "tinyvm") throw json::Error("$.backend.name", "unsupported backend");
+    (void)json::integer(json::required(backend, "artifact_version", "$.backend"), "$.backend.artifact_version");
+    const auto& architecture = required_object(root, "architecture");
+    (void)json::string(json::required(architecture, "name", "$.architecture"), "$.architecture.name");
+    const auto bits = json::integer(json::required(architecture, "word_bits", "$.architecture"), "$.architecture.word_bits");
+    if (bits <= 0) throw json::Error("$.architecture.word_bits", "word size must be positive");
+    const auto endian = json::string(json::required(architecture, "endianness", "$.architecture"), "$.architecture.endianness");
+    if (endian != "little" && endian != "big" && endian != "virtual") throw json::Error("$.architecture.endianness", "unsupported endianness");
+    const auto& abi = required_object(root, "abi");
+    (void)json::string(json::required(abi, "name", "$.abi"), "$.abi.name");
+    (void)json::integer(json::required(abi, "version", "$.abi"), "$.abi.version");
+    const auto& capabilities = required_object(root, "capabilities");
+    (void)required_array(capabilities, "required", "$.capabilities");
+    (void)required_array(capabilities, "admitted", "$.capabilities");
+    const auto& resources = required_object(root, "resources");
+    const auto slots = json::integer(json::required(resources, "maximum_slots", "$.resources"), "$.resources.maximum_slots");
+    const auto steps = json::integer(json::required(resources, "maximum_steps", "$.resources"), "$.resources.maximum_steps");
+    if (slots <= 0 || steps <= 0) throw json::Error("$.resources", "resource limits must be positive");
+    const auto& lifecycle = required_object(root, "lifecycle");
+    (void)json::string(json::required(lifecycle, "startup", "$.lifecycle"), "$.lifecycle.startup");
+    (void)json::string(json::required(lifecycle, "cleanup", "$.lifecycle"), "$.lifecycle.cleanup");
+    const auto& evidence = required_object(root, "evidence");
+    (void)json::string(json::required(evidence, "contract", "$.evidence"), "$.evidence.contract");
+    (void)json::string(json::required(evidence, "revision", "$.evidence"), "$.evidence.revision");
+    const auto& fallback = required_object(root, "fallback");
+    const auto mode = json::string(json::required(fallback, "mode", "$.fallback"), "$.fallback.mode");
+    if (mode != "none" && mode != "explicit") throw json::Error("$.fallback.mode", "unsupported fallback mode");
+    const auto target = json::string(json::required(fallback, "target", "$.fallback"), "$.fallback.target");
+    if ((mode == "none" && !target.empty()) || (mode == "explicit" && target.empty()))
+        throw json::Error("$.fallback", "fallback target does not match fallback mode");
+}
+
 inline void validate_backend_lowering_artifact(const json::Value& value) {
     const auto artifact = require_header(value, "flowcore.backend_lowering_artifact", 1);
     if (artifact.status != "ready") return;
@@ -230,6 +270,7 @@ inline ValidationResult validate(const json::Value& value) {
         else if (result.format == "flowparallel.execution_plan") (void)execution_plan(value);
         else if (result.format == "flowparallel.graph_provider_decision") (void)provider_decision(value);
         else if (result.format == "flowoptimize.optimization_report") validate_optimization_report(value);
+        else if (result.format == "flowcore.target_policy") validate_target_policy(value);
         else if (result.format == "flowcore.backend_lowering_artifact") validate_backend_lowering_artifact(value);
         else if (result.format == "flowlower.lowering_report") validate_lowering_report(value);
         else if (result.format == "flowcore.abi_manifest") validate_abi_manifest(value);

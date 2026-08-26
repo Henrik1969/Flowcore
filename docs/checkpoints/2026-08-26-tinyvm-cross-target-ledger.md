@@ -232,3 +232,19 @@ the already captured recovered-ISA boundary.
 - The complete GCC superbuild and all 70 canonical tests passed. Focused Clang
   18 ASan/UBSan governed-provider, scalar, artifact-boundary and ISA
   conformance tests passed with the documented LeakSanitizer exclusion.
+
+### Target-policy artifact contract — `target-policy-artifact-v1`
+
+- Added the independently validated `flowcore.target_policy` version 1 file
+  boundary covering backend, architecture, ABI, capabilities, resources,
+  lifecycle, evidence and fallback.
+- Added canonical named policies for `llvm-host` and `tinyvm-portable`; both
+  explicitly prohibit fallback.
+- Added `flowtarget`, which resolves only an exact safe target name beneath an
+  explicit fixed policy root, validates the file, checks internal/requested
+  identity equality and emits canonical JSON.
+- Boundary tests prove canonical round trips and refusal of missing, path-like
+  and identity-mismatched policy requests without invoking either backend.
+- The complete GCC superbuild and all 71 canonical tests passed. Focused Clang
+  18 ASan/UBSan contract, validator and target-policy boundary tests passed
+  with the documented LeakSanitizer exclusion.

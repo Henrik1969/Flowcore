@@ -17,6 +17,8 @@ Current surfaces:
 - typed `flowparallel.execution_plan` and
   `flowparallel.graph_provider_decision` v1 consumption for Flowoptimize;
 - lowering-plan identity and matrix dimension/coordinate validation;
+- canonical `flowcore.target_policy` v1 validation for backend, architecture,
+  ABI, capability, resource, lifecycle, evidence, and fallback authority;
 - canonical `flowcore.backend_lowering_artifact` validation, including selected
   target identity and exact external-operation/authorization-set equality;
 - independently invocable `flowvalidate` support for every main-chain artifact,
