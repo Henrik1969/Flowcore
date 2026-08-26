@@ -172,6 +172,23 @@ add_test(NAME tinyvm_scalar_backend_parity
 set_tests_properties(tinyvm_scalar_backend_parity PROPERTIES
     DEPENDS "flowlower_backend_artifact;tinyvm_backend_lowering_boundary")
 
+add_test(NAME tinyvm_pure_provider_parity
+    COMMAND ${CMAKE_COMMAND} -E env
+        FLOWCORE_ROOT=${CMAKE_CURRENT_SOURCE_DIR}
+        FLOWMINI_BIN=$<TARGET_FILE:flowmini>
+        FLOWANALYST_BIN=$<TARGET_FILE:flowanalyst>
+        FLOWBIND_BIN=$<TARGET_FILE:flowbind>
+        FLOWPARALLEL_BIN=$<TARGET_FILE:flowparallel>
+        FLOWOPTIMIZE_BIN=$<TARGET_FILE:flowoptimize>
+        FLOWPREPARE_BIN=$<TARGET_FILE:flowprepare>
+        FLOWLOWER_BIN=$<TARGET_FILE:flowlower>
+        FLOWTINYLOWER_BIN=$<TARGET_FILE:flowtinylower>
+        FLOWTINYVALIDATE_BIN=$<TARGET_FILE:flowtinyvalidate>
+        FLOWTINYRUN_BIN=$<TARGET_FILE:flowtinyrun>
+        ${CMAKE_CURRENT_SOURCE_DIR}/tools/test-tinyvm-pure-provider-parity.sh)
+set_tests_properties(tinyvm_pure_provider_parity PROPERTIES
+    DEPENDS "tinyvm_scalar_backend_parity")
+
 # Canonical installed shape. Debian packaging consumes this staged install and
 # splits runtime, development, and documentation payloads without depending on
 # the source-tree layout.

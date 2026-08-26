@@ -45,6 +45,14 @@ typedef struct {
     bool initialized;
 } TinyvmValue;
 
+typedef bool (*TinyvmImportResolver)(void *user,
+                                    const TinyvmArtifactV2 *artifact,
+                                    const TinyvmImport *import,
+                                    const TinyvmValue *arguments,
+                                    size_t argument_count,
+                                    TinyvmValue *result,
+                                    const char **fault);
+
 typedef struct {
     TinyvmValue *slots;
     size_t slot_count;
@@ -59,6 +67,8 @@ typedef struct {
     const char *fault;
     size_t argument_count;
     const char *const *arguments;
+    TinyvmImportResolver import_resolver;
+    void *import_user;
 } TinyvmIsaV1Context;
 
 bool tinyvm_isa_v1_validate(const TinyvmArtifactV2 *artifact,

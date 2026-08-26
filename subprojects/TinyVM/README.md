@@ -86,3 +86,15 @@ admitted slices cover empty programs plus provider-free typed literals,
 conversions, unary/binary arithmetic, comparisons, local definitions,
 assignments, structured branches, loops and returns. Other valid plans receive
 a structured unsupported result until their lowering rules land.
+
+The first governed runtime-provider slice admits only the exact pure tuples
+`libc.so.6:abs(c_int)->c_int` and
+`libc.so.6:strlen(c_string)->c_size_t`. `flowtinyrun` requires an explicit
+active policy file for import-bearing artifacts, matches the complete tuple,
+loads the named library only after that check, and dispatches through typed
+thunks. A missing or non-matching policy fails closed. Argument and artifact
+string handles are resolved inside the thunk and never serialized as pointers.
+
+```sh
+flowtinyrun --policy active.policy program.tvm
+```

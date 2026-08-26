@@ -55,7 +55,7 @@ public:
             const auto& operation = object(value, "$.lowering_plan.operations[]");
             const auto kind = string(required(operation, "kind", "$.lowering_plan.operations[]"), "$.lowering_plan.operations[].kind");
             if (kind == "call") continue;
-            if (kind != "value_definition" && kind != "assignment" && kind != "return_value" && kind != "branch" && kind != "loop")
+            if (kind != "value_definition" && kind != "assignment" && kind != "return_value" && kind != "branch" && kind != "loop" && kind != "external_call")
                 throw Unsupported("operation kind '" + kind + "' is not admitted by the scalar slice");
             const auto block = optional(operation, "block_id") ? integer(*optional(operation, "block_id"), "$.operation.block_id") : 0;
             blocks_[block].push_back(&operation);
@@ -87,6 +87,7 @@ public:
     std::vector<TinyvmConstant> constants;
     std::vector<TinyvmString> strings;
     std::vector<TinyvmStorage> storage;
+    std::vector<TinyvmImport> imports;
     std::vector<TinyvmProvenance> provenance;
     std::size_t slot_count() const { return next_slot_; }
     std::uint32_t isa_version() const { return uses_arguments_ ? 2 : 1; }
@@ -236,6 +237,29 @@ private:
             code[branch_index].pad = static_cast<std::int64_t>(code.size());
             return;
         }
+        if (kind == "external_call") {
+            const auto& provider = object(required(operation, "provider", "$.operation"), "$.operation.provider");
+            const auto symbol = string(required(provider, "symbol", "$.operation.provider"), "$.operation.provider.symbol");
+            const auto parameters = string(required(provider, "parameter_types", "$.operation.provider"), "$.operation.provider.parameter_types");
+            const auto result_type = string(required(provider, "return_type", "$.operation.provider"), "$.operation.provider.return_type");
+            const bool admitted = (symbol == "abs" && parameters == "c_int" && result_type == "c_int") ||
+                                  (symbol == "strlen" && parameters == "c_string" && result_type == "c_size_t");
+            if (!admitted || string(required(provider, "contract", "$.operation.provider"), "$.operation.provider.contract") != "libc" ||
+                string(required(provider, "library", "$.operation.provider"), "$.operation.provider.library") != "libc.so.6" ||
+                string(required(provider, "convention", "$.operation.provider"), "$.operation.provider.convention") != "c" ||
+                string(required(provider, "effect", "$.operation.provider"), "$.operation.provider.effect") != "pure")
+                throw Unsupported("external provider tuple is not admitted by the pure-call slice");
+            std::vector<std::size_t> values; for (const auto& operand : operands) values.push_back(expression(operand));
+            const auto argument_start = slot();
+            for (std::size_t index = 1; index < values.size(); ++index) (void)slot();
+            for (std::size_t index = 0; index < values.size(); ++index) emit(TV1_MOVE, argument_start + index, values[index], 0);
+            TinyvmImport imported{}; imported.id = imports.size() + 1;
+            auto field = [&](char output[64], std::string_view name) { copy(output, string(required(provider, name, "$.operation.provider"), "$.operation.provider." + std::string(name))); };
+            field(imported.contract,"contract"); field(imported.library,"library"); field(imported.convention,"convention"); field(imported.symbol,"symbol"); field(imported.effect,"effect"); field(imported.parameters,"parameter_types"); field(imported.result,"return_type");
+            copy(imported.evidence, identity("authorization-", serialize(provider))); imports.push_back(imported);
+            const auto destination = symbol_slot(integer(required(operation, "result_symbol_id", "$.operation"), "$.operation.result_symbol_id"));
+            emit(TV1_CALL_IMPORT, destination, imported.id, argument_start); return;
+        }
         const auto value = expression(operands.front());
         if (kind == "return_value") { emit(TV1_RETURN, value, 0, 0); return; }
         const auto identity = integer(required(operation, "result_symbol_id", "$.operation"), "$.operation.result_symbol_id");
@@ -322,6 +346,7 @@ int lower(const char* input_path, const char* output_path) {
     artifact.constants = compiler.constants.data(); artifact.constant_count = compiler.constants.size();
     artifact.strings = compiler.strings.data(); artifact.string_count = compiler.strings.size();
     artifact.storage = compiler.storage.data(); artifact.storage_count = compiler.storage.size();
+    artifact.imports = compiler.imports.data(); artifact.import_count = compiler.imports.size();
     artifact.provenance = compiler.provenance.data(); artifact.provenance_count = compiler.provenance.size();
     char diagnostic[256];
     if (!tinyvm_artifact_v2_write(output_path, &artifact, diagnostic, sizeof diagnostic))

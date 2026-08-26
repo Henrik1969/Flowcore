@@ -13,12 +13,13 @@ add_library(tinyvm_recovered STATIC
     src/artifact_v2.c
     src/instructions.c
     src/isa_v1.c
+    src/runtime_provider.c
     src/vm.c
     src/vm_function.c
     src/vm_switch.c
 )
 target_include_directories(tinyvm_recovered PUBLIC include)
-target_link_libraries(tinyvm_recovered PUBLIC OpenSSL::Crypto)
+target_link_libraries(tinyvm_recovered PUBLIC OpenSSL::Crypto ${CMAKE_DL_LIBS})
 target_compile_options(tinyvm_recovered PRIVATE -Wall -Wextra -Wpedantic)
 # vm.c deliberately uses GNU labels-as-values. Keep strict diagnostics for the
 # portable handlers while acknowledging that one isolated extension boundary.

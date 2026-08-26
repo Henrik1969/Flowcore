@@ -64,6 +64,7 @@ static bool binary_arithmetic(TinyvmIsaV1Context *ctx,int64_t opcode,uint64_t ds
 static bool comparison(TinyvmIsaV1Context *ctx,int64_t opcode,uint64_t dst,uint64_t left,uint64_t right,uint64_t instruction){
     TinyvmValue *x=read_slot(ctx,left,instruction),*y=read_slot(ctx,right,instruction);if(!x||!y)return false;if(x->carrier!=y->carrier||(!integer_carrier(x->carrier)&&x->carrier!=TINYVM_CARRIER_I1))return trap(ctx,TV1_TRAP_TYPE_MISMATCH,"comparison carrier mismatch",instruction);int64_t a=x->carrier==TINYVM_CARRIER_I32?(int32_t)x->bits:signed_bits(x->bits),b=y->carrier==TINYVM_CARRIER_I32?(int32_t)y->bits:signed_bits(y->bits);bool r=opcode==TV1_CMP_EQ?a==b:opcode==TV1_CMP_NE?a!=b:opcode==TV1_CMP_LT?a<b:opcode==TV1_CMP_LE?a<=b:opcode==TV1_CMP_GT?a>b:a>=b;ctx->slots[dst]=(TinyvmValue){TINYVM_CARRIER_I1,r?1:0,true};return true;
 }
+static bool call_import(const TinyvmArtifactV2 *a,TinyvmIsaV1Context *ctx,const InstrWord *w,uint64_t instruction){const TinyvmImport *x=import_value(a,(uint64_t)w->b);const size_t count=import_parameter_count(x);for(size_t i=0;i<count;++i)if(!read_slot(ctx,(uint64_t)w->pad+i,instruction))return false;if(!ctx->import_resolver)return trap(ctx,TV1_TRAP_UNRESOLVED_IMPORT,"authorized import has no runtime resolver",instruction);TinyvmValue result={0};const char *fault="runtime provider rejected import";if(!ctx->import_resolver(ctx->import_user,a,x,&ctx->slots[w->pad],count,&result,&fault))return trap(ctx,TV1_TRAP_UNRESOLVED_IMPORT,fault?fault:"runtime provider rejected import",instruction);if(!result.initialized)return trap(ctx,TV1_TRAP_UNRESOLVED_IMPORT,"runtime provider returned an uninitialized value",instruction);ctx->slots[w->a]=result;return true;}
 
 static void execution_inputs(const TinyvmArtifactV2 *a,TinyvmIsaV1Context *ctx){if(a->isa_version!=2||!ctx->slot_count)return;ctx->slots[0]=(TinyvmValue){TINYVM_CARRIER_I32,canonical_i32((int32_t)ctx->argument_count),true};for(size_t i=0;i<ctx->argument_count&&i+1<ctx->slot_count;++i)ctx->slots[i+1]=(TinyvmValue){TINYVM_CARRIER_OPAQUE_HANDLE,UINT64_C(0x0300000000000000)|i,true};}
 
@@ -86,7 +87,7 @@ bool tinyvm_isa_v1_run_switch(const TinyvmArtifactV2 *a,TinyvmIsaV1Context *ctx)
         case TV1_HALT:ctx->result=(TinyvmValue){TINYVM_CARRIER_I32,0,true};ctx->returned=true;ctx->running=false;break;
         case TV1_STRING_HANDLE:ctx->slots[w->a]=(TinyvmValue){TINYVM_CARRIER_OPAQUE_HANDLE,UINT64_C(0x0100000000000000)|(uint64_t)w->b,true};break;
         case TV1_STORAGE_HANDLE:ctx->slots[w->a]=(TinyvmValue){TINYVM_CARRIER_OPAQUE_HANDLE,UINT64_C(0x0200000000000000)|(uint64_t)w->b,true};break;
-        case TV1_CALL_IMPORT:trap(ctx,TV1_TRAP_UNRESOLVED_IMPORT,"authorized import has no runtime resolver",at);break;
+        case TV1_CALL_IMPORT:call_import(a,ctx,w,at);break;
         default:return trap(ctx,TV1_TRAP_EXPLICIT,"invalid validated opcode",at);
         }
     }
@@ -123,7 +124,7 @@ do_trap:trap(ctx,(uint32_t)w->a,"explicit artifact trap",at);goto next;
 do_halt:ctx->result=(TinyvmValue){TINYVM_CARRIER_I32,0,true};ctx->returned=true;ctx->running=false;goto next;
 do_string:ctx->slots[w->a]=(TinyvmValue){TINYVM_CARRIER_OPAQUE_HANDLE,UINT64_C(0x0100000000000000)|(uint64_t)w->b,true};goto next;
 do_storage:ctx->slots[w->a]=(TinyvmValue){TINYVM_CARRIER_OPAQUE_HANDLE,UINT64_C(0x0200000000000000)|(uint64_t)w->b,true};goto next;
-do_import:trap(ctx,TV1_TRAP_UNRESOLVED_IMPORT,"authorized import has no runtime resolver",at);goto next;
+do_import:call_import(a,ctx,w,at);goto next;
 done:
     return ctx->returned&&ctx->trap==0;
 }

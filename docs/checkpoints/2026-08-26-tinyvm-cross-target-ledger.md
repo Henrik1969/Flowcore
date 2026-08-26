@@ -158,3 +158,26 @@ the already captured recovered-ISA boundary.
 - The complete GCC superbuild and all 69 canonical tests passed. Focused Clang
   18 ASan/UBSan conformance, boundary and parity tests passed with the
   documented LeakSanitizer exclusion.
+
+### Governed pure calls — `tinyvm-governed-pure-calls`
+
+- TinyVM lowering admits only two exact initial import tuples:
+  `libc.so.6:abs(c_int)->c_int` and
+  `libc.so.6:strlen(c_string)->c_size_t`, both under contract `libc`, C calling
+  convention and `pure` effect.
+- The executable import section preserves contract, library, symbol,
+  convention, effect, parameter/result carriers and stable authorization
+  evidence identity.
+- `flowtinyrun` refuses import-bearing artifacts without an explicit active
+  policy and rechecks the complete policy tuple before library loading.
+- Runtime dispatch uses named typed thunks, not a generic FFI. Host symbol
+  addresses exist only after policy admission and are never serialized.
+- Artifact string and process-argument handles resolve inside the typed string
+  thunk. Temporary NUL termination is provider-local and bounded.
+- LLVM/TinyVM differential tests prove `abs(-42) == 42` and
+  `strlen("Flowcore") == 8`; missing and effect-mismatched policies fail closed.
+- Switch and computed-goto engines differentially execute the same resolved
+  import callback and complete slot/result state.
+- The complete GCC superbuild and all 70 canonical tests passed. Focused Clang
+  18 ASan/UBSan conformance and both parity suites passed with the documented
+  LeakSanitizer exclusion.
