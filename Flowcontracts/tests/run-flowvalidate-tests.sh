@@ -49,4 +49,14 @@ jq -e '.classification == "unsupported"' "$tmpdir/unsupported.json" >/dev/null
 jq -e '.classification == "blocked"' "$tmpdir/blocked.json" >/dev/null
 jq -e '.classification == "invalid" and (.reason | contains("duplicate"))' "$tmpdir/duplicate.json" >/dev/null
 
+for evidence in \
+  '{"format":"flowcore.abi_manifest","version":1,"provider":"test","types":[]}' \
+  '{"format":"frankencore.runtime_capabilities","version":1,"cuda":{"status":"unavailable","device_count":0}}' \
+  '{"format":"flowcore.runtime_capabilities","version":1,"status":"available","device_count":1}' \
+  '{"format":"flowparallel.matrix_benchmark","version":1,"status":"verified","end_to_end_speedup":1.5}' \
+  '{"format":"flowparallel.graph_cuda","version":1,"status":"verified","end_to_end_speedup":1.5}'
+do
+  printf '%s' "$evidence" | "$validator" | jq -e '.classification == "valid"' >/dev/null
+done
+
 echo 'flowvalidate tests: PASS'

@@ -183,5 +183,33 @@ Gates 2–4 first vertical checkpoint:
 
 ## Exact next action
 
-Run the complete sanitizer and hardening matrix, reconcile any environmental
-exclusions precisely, then close run state and final repository hygiene.
+### Gate 9 final hardening
+
+- Extended independent validation to current ABI manifests, both runtime
+  capability variants, and matrix/graph calibration evidence.
+- Final normal root build passed; 57/57 CTest tests passed in 22.56 seconds.
+- A separate GNU 13.3 ASan/UBSan Debug tree at
+  `/tmp/flowcore-v028-sanitize` built cleanly; 57/57 tests passed in 55.30
+  seconds with `halt_on_error=1`.
+- Leak detection was disabled with `ASAN_OPTIONS=detect_leaks=0` because the
+  managed traced host cannot run LeakSanitizer; AddressSanitizer and
+  UndefinedBehaviorSanitizer remained enabled without suppressions.
+- The root suite exercised strict/malformed/duplicate-key attacks,
+  deterministic canonical round-trips, identity mutations, native LLVM linking
+  and execution, `sel`, `flowcat`, `flow_less`, ncurses, graph routing,
+  generated bindings, CPU fallback, and provider planner contracts.
+- Required stage and adjacent planner entry points contain no remaining raw
+  JSON authority searches. Remaining `find`/`substr` sites in Flowanalyst and
+  Flowbind parse ordinary type names, AST-origin paths, or typed carrier lists.
+- `git diff --check` passed. The tracked worktree was clean before closure;
+  ignored build/IDE outputs were left untouched. `git fsck` reported only
+  historical unreachable objects and no repository corruption.
+- Branch and all progressive `v0.28-*` tags were synchronized before this final
+  closure checkpoint.
+
+## Completion
+
+All v0.28 definition-of-done gates are complete. Canonical Graph IR,
+revisioned persistent identity storage, executable safety admission,
+certification, self-hosting, permanent writable-storage syntax, and generalized
+ABI/CUDA lowering remain explicitly future work rather than hidden blockers.

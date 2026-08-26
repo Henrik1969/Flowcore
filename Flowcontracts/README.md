@@ -20,6 +20,8 @@ Current surfaces:
 - independently invocable `flowvalidate` support for every main-chain artifact,
   stable valid/invalid/blocked/unsupported exits, machine or human diagnostics,
   source attribution, and canonical JSON round-tripping.
+- structural validation for current ABI manifests, both runtime-capability
+  variants, and matrix/graph calibration evidence consumed by provider planners.
 
 ## Version-1 unknown-field policy
 

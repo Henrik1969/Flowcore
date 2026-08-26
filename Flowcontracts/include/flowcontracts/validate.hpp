@@ -106,6 +106,45 @@ inline void validate_lowering_report(const json::Value& value) {
     (void)json::string(json::required(ir, "format", "$.ir"), "$.ir.format");
 }
 
+inline void validate_abi_manifest(const json::Value& value) {
+    const auto& root = json::object(value);
+    if (json::integer(json::required(root, "version"), "$.version") != 1) throw json::Error("$.version", "unsupported ABI manifest version");
+    (void)json::string(json::required(root, "provider"), "$.provider");
+    const auto& types = required_array(root, "types");
+    std::set<std::string> names;
+    for (std::size_t index = 0; index < types.size(); ++index) {
+        const auto path = "$.types[" + std::to_string(index) + "]";
+        const auto& type = json::object(types[index], path);
+        const auto name = json::string(json::required(type, "name", path), path + ".name");
+        (void)json::integer(json::required(type, "size", path), path + ".size");
+        (void)json::integer(json::required(type, "alignment", path), path + ".alignment");
+        (void)required_array(type, "fields", path);
+        if (!names.insert(name).second) throw json::Error(path + ".name", "duplicate ABI type identity");
+    }
+}
+
+inline void validate_runtime_capabilities(const json::Value& value, std::string_view format) {
+    const auto& root = json::object(value);
+    if (json::integer(json::required(root, "version"), "$.version") != 1) throw json::Error("$.version", "unsupported runtime capability version");
+    if (format == "frankencore.runtime_capabilities") {
+        const auto& cuda = required_object(root, "cuda");
+        (void)json::string(json::required(cuda, "status", "$.cuda"), "$.cuda.status");
+        (void)json::integer(json::required(cuda, "device_count", "$.cuda"), "$.cuda.device_count");
+    } else {
+        (void)json::string(json::required(root, "status"), "$.status");
+        (void)json::integer(json::required(root, "device_count"), "$.device_count");
+    }
+}
+
+inline void validate_calibration(const json::Value& value, std::string_view format) {
+    const auto artifact = require_header(value, format, 1);
+    if (artifact.status == "verified") {
+        const auto& root = json::object(value);
+        const auto speedup = json::number(json::required(root, "end_to_end_speedup"), "$.end_to_end_speedup");
+        if (speedup < 0.0) throw json::Error("$.end_to_end_speedup", "speedup must be non-negative");
+    }
+}
+
 inline ValidationResult validate(const json::Value& value) {
     ValidationResult result;
     try {
@@ -124,6 +163,9 @@ inline ValidationResult validate(const json::Value& value) {
         else if (result.format == "flowparallel.graph_provider_decision") (void)provider_decision(value);
         else if (result.format == "flowoptimize.optimization_report") validate_optimization_report(value);
         else if (result.format == "flowlower.lowering_report") validate_lowering_report(value);
+        else if (result.format == "flowcore.abi_manifest") validate_abi_manifest(value);
+        else if (result.format == "frankencore.runtime_capabilities" || result.format == "flowcore.runtime_capabilities") validate_runtime_capabilities(value, result.format);
+        else if (result.format == "flowparallel.matrix_benchmark" || result.format == "flowparallel.graph_cuda") validate_calibration(value, result.format);
         else return {ValidationClass::unsupported, result.format, result.version, result.source, "$.format", "artifact format is not supported"};
         if (const auto* status = json::optional(root, "status")) {
             const auto state = json::string(*status, "$.status");
