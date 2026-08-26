@@ -101,6 +101,11 @@ under their declared `kernel`/`linux` contracts. Legacy four-field Flowbind
 policy grants are accepted only for zero-argument imports; the artifact still
 carries and the thunk still checks the result carrier and complete authority.
 
+The first observable I/O thunk is the exact
+`libc.so.6:puts(c_string)->c_int` tuple under `libc`, C, `io`. Program stdout is
+kept distinct from the final structured execution-record line and is compared
+byte-for-byte with LLVM in the parity suite.
+
 ```sh
 flowtinyrun --policy active.policy program.tvm
 ```

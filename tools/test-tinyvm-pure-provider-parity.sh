@@ -8,6 +8,7 @@ policy="$tmpdir/policy"
 printf '%s\n' \
   'allow libc.so.6 abs c pure c_int c_int' \
   'allow libc.so.6 strlen c pure c_string c_size_t' \
+  'allow libc.so.6 puts c io c_string c_int' \
   'allow libc.so.6 getpid c readonly' \
   'allow libc.so.6 getuid c readonly' \
   'allow libc.so.6 getgid c readonly' \
@@ -18,7 +19,7 @@ printf '%s\n' \
 printf '%s\n' 'allow libc.so.6 abs c readonly c_int c_int' > "$tmpdir/wrong-policy"
 
 for name in \
-  abi_abs_main abi_strlen_main abi_kernel_getpid_main abi_kernel_getuid_main \
+  abi_abs_main abi_strlen_main test_licbinds abi_kernel_getpid_main abi_kernel_getuid_main \
   abi_kernel_getgid_main abi_kernel_geteuid_main abi_kernel_getegid_main \
   abi_kernel_getppid_main abi_kernel_getpgrp_main
 do
@@ -36,12 +37,14 @@ do
   "$FLOWTINYVALIDATE_BIN" "$tmpdir/$name.tvm" | grep -q '"status":"valid"'
 
   set +e
-  "$tmpdir/$name.llvm"
+  "$tmpdir/$name.llvm" > "$tmpdir/$name.llvm.stdout"
   llvm_status=$?
   set -e
   "$FLOWTINYRUN_BIN" --policy "$policy" "$tmpdir/$name.tvm" > "$tmpdir/$name.execution.json"
-  tiny_result=$(jq -r '.result' "$tmpdir/$name.execution.json")
+  tiny_result=$(tail -n 1 "$tmpdir/$name.execution.json" | jq -r '.result')
   test $((tiny_result % 256)) -eq "$llvm_status"
+  sed '$d' "$tmpdir/$name.execution.json" > "$tmpdir/$name.tiny.stdout"
+  cmp -s "$tmpdir/$name.llvm.stdout" "$tmpdir/$name.tiny.stdout"
 
   if "$FLOWTINYRUN_BIN" "$tmpdir/$name.tvm" >/dev/null 2>&1; then
     echo 'TinyVM ran an import artifact without active policy' >&2

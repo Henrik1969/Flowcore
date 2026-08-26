@@ -244,10 +244,11 @@ private:
             const auto result_type = string(required(provider, "return_type", "$.operation.provider"), "$.operation.provider.return_type");
             const bool admitted = (symbol == "abs" && parameters == "c_int" && result_type == "c_int") ||
                                   (symbol == "strlen" && parameters == "c_string" && result_type == "c_size_t") ||
+                                  (symbol == "puts" && parameters == "c_string" && result_type == "c_int") ||
                                   ((symbol == "getpid" || symbol == "getuid" || symbol == "getgid" || symbol == "geteuid" || symbol == "getegid" || symbol == "getppid" || symbol == "getpgrp") && parameters.empty() && result_type == "c_int");
             const auto contract = string(required(provider, "contract", "$.operation.provider"), "$.operation.provider.contract");
             const auto effect = string(required(provider, "effect", "$.operation.provider"), "$.operation.provider.effect");
-            const bool authority = (effect == "pure" && contract == "libc") || (effect == "readonly" && (contract == "kernel" || contract == "linux"));
+            const bool authority = ((effect == "pure" || effect == "io") && contract == "libc") || (effect == "readonly" && (contract == "kernel" || contract == "linux"));
             if (!admitted || !authority ||
                 string(required(provider, "library", "$.operation.provider"), "$.operation.provider.library") != "libc.so.6" ||
                 string(required(provider, "convention", "$.operation.provider"), "$.operation.provider.convention") != "c")

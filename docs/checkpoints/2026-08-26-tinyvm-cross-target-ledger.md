@@ -199,3 +199,18 @@ the already captured recovered-ISA boundary.
 - The complete GCC superbuild and all 70 canonical tests passed. Focused Clang
   18 ASan/UBSan provider, scalar and ISA conformance suites passed with the
   documented LeakSanitizer exclusion.
+
+### Governed output call — `tinyvm-governed-output-call`
+
+- Added the exact typed `libc.so.6:puts(c_string)->c_int` thunk under contract
+  `libc`, C calling convention and `io` effect.
+- The same artifact-string handle used by `strlen` resolves through the
+  provider-local bounded NUL-terminated view; no pointer enters the artifact.
+- Parity now runs a plan containing `strlen`, `abs` and `puts` together and
+  compares program stdout byte-for-byte separately from the structured TinyVM
+  execution record.
+- Missing and mismatched active policy checks remain applied to the I/O fixture
+  as well as pure and readonly fixtures.
+- The complete GCC superbuild and all 70 canonical tests passed. Focused Clang
+  18 ASan/UBSan governed-provider and ISA conformance tests passed with the
+  documented LeakSanitizer exclusion.
