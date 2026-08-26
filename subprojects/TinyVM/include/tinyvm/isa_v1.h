@@ -57,6 +57,8 @@ typedef struct {
     uint32_t trap;
     uint64_t trap_instruction;
     const char *fault;
+    size_t argument_count;
+    const char *const *arguments;
 } TinyvmIsaV1Context;
 
 bool tinyvm_isa_v1_validate(const TinyvmArtifactV2 *artifact,

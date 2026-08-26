@@ -17,7 +17,7 @@ trap 'rm -rf "$tmpdir"' EXIT
 
 for name in \
     profile_free_return profile_free_expression profile_free_local_value \
-    profile_free_branch_compare profile_free_integer_loop
+    profile_free_branch_compare profile_free_integer_loop profile_free_args_length
 do
     echo "parity fixture: $name"
     source="$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass/$name.flow"
@@ -38,6 +38,14 @@ do
     set -e
     tiny_result=$("$tiny_run" "$tmpdir/$name.tvm" | jq -r '.result')
     test "$tiny_result" -eq "$llvm_status"
+    if test "$name" = profile_free_args_length; then
+        set +e
+        "$tmpdir/$name.llvm" selected
+        llvm_selected_status=$?
+        set -e
+        tiny_selected_result=$("$tiny_run" "$tmpdir/$name.tvm" selected | jq -r '.result')
+        test "$tiny_selected_result" -eq "$llvm_selected_status"
+    fi
 done
 
 echo 'provider-free scalar LLVM/TinyVM parity: PASS'

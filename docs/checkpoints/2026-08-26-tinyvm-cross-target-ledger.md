@@ -137,3 +137,24 @@ the already captured recovered-ISA boundary.
 - The complete GCC superbuild and all 69 canonical tests passed. Focused Clang
   18 ASan/UBSan builds and the boundary/parity tests passed with the documented
   LeakSanitizer exclusion.
+
+### Provider-free execution inputs and opaque values — `tinyvm-provider-free-parity`
+
+- Added typed ISA 2 as a versioned execution-input extension; ISA 1 bytecode
+  meaning remains frozen.
+- ISA 2 slot 0 receives process-style argument count and subsequent reserved
+  slots receive tagged opaque argument identities, never host pointers or
+  serialized argument bytes.
+- Lowering selects ISA 2 only for argument intrinsics, calculates the required
+  static index span and emits a checked count guard returning `i32(64)` before
+  access. Dynamic indexing remains explicitly unsupported.
+- No-argument and one-argument executions of the current LLVM argument-count
+  fixture are differentially equal through TinyVM.
+- Switch and computed-goto engines compare complete ISA 2 execution state,
+  including input metadata and opaque argument slots.
+- String constants and writable-storage compatibility declarations now lower
+  into validated artifact sections and tagged opaque handles. Host resolution
+  remains governed provider work in Gate 5.
+- The complete GCC superbuild and all 69 canonical tests passed. Focused Clang
+  18 ASan/UBSan conformance, boundary and parity tests passed with the
+  documented LeakSanitizer exclusion.

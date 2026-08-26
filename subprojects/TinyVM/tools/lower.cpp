@@ -8,6 +8,7 @@ extern "C" {
 #include <algorithm>
 #include <cstdio>
 #include <cstring>
+#include <deque>
 #include <fstream>
 #include <iostream>
 #include <map>
@@ -48,9 +49,12 @@ public:
 
     void compile() {
         const auto& operations = required_array(required_object(root_, "lowering_plan"), "operations", "$.lowering_plan");
+        scan_arguments(required(root_, "lowering_plan"));
+        if (uses_arguments_) next_slot_ = required_argument_count_ + 1;
         for (const auto& value : operations) {
             const auto& operation = object(value, "$.lowering_plan.operations[]");
             const auto kind = string(required(operation, "kind", "$.lowering_plan.operations[]"), "$.lowering_plan.operations[].kind");
+            if (kind == "call") continue;
             if (kind != "value_definition" && kind != "assignment" && kind != "return_value" && kind != "branch" && kind != "loop")
                 throw Unsupported("operation kind '" + kind + "' is not admitted by the scalar slice");
             const auto block = optional(operation, "block_id") ? integer(*optional(operation, "block_id"), "$.operation.block_id") : 0;
@@ -74,15 +78,18 @@ public:
             const auto a = order(left), b = order(right);
             return a == b ? integer(required(*left, "id", "$.operation"), "$.operation.id") < integer(required(*right, "id", "$.operation"), "$.operation.id") : a < b;
         });
-        if (operations.empty()) emit_return_zero();
-        else compile_block(0);
+        if (required_argument_count_) emit_argument_guard();
+        if (blocks_.empty()) emit_return_zero(); else compile_block(0);
         if (code.empty() || (code.back().opcode != TV1_RETURN && code.back().opcode != TV1_TRAP && code.back().opcode != TV1_HALT)) emit_return_zero();
     }
 
     std::vector<InstrWord> code;
     std::vector<TinyvmConstant> constants;
+    std::vector<TinyvmString> strings;
+    std::vector<TinyvmStorage> storage;
     std::vector<TinyvmProvenance> provenance;
     std::size_t slot_count() const { return next_slot_; }
+    std::uint32_t isa_version() const { return uses_arguments_ ? 2 : 1; }
 
 private:
     const Object& root_;
@@ -90,7 +97,10 @@ private:
     std::map<Integer, std::size_t> symbols_;
     std::map<Integer, std::vector<const Object*>> blocks_;
     std::set<Integer> active_blocks_;
+    std::deque<std::string> string_data_;
     std::size_t next_slot_ = 0;
+    std::size_t required_argument_count_ = 0;
+    bool uses_arguments_ = false;
     std::uint64_t operation_ = UINT64_MAX, block_ = 1, symbol_ = UINT64_MAX;
     std::uint32_t line_ = 1;
 
@@ -137,7 +147,28 @@ private:
             if (text != "true" && text != "false") throw Unsupported("non-canonical boolean literal");
             return literal(TINYVM_CARRIER_I1, text == "true");
         }
+        if (kind == "string_literal") {
+            string_data_.push_back(string(required(node, "value", "$.expression"), "$.expression.value"));
+            const auto id = string_data_.size();
+            strings.push_back({id, reinterpret_cast<std::uint8_t*>(string_data_.back().data()), string_data_.back().size()});
+            const auto result = slot(); emit(TV1_STRING_HANDLE, result, id, 0); return result;
+        }
+        if (kind == "writable_storage") {
+            const auto& declaration = object(required(node, "storage", "$.expression"), "$.expression.storage");
+            const auto bytes = integer(required(declaration, "bytes", "$.expression.storage"), "$.expression.storage.bytes");
+            if (bytes <= 0) throw Unsupported("writable storage size is not positive");
+            const auto id = storage.size() + 1; storage.push_back({id, static_cast<std::uint64_t>(bytes), 1, 1});
+            const auto result = slot(); emit(TV1_STORAGE_HANDLE, result, id, 0); return result;
+        }
         if (kind == "identifier") return symbol_slot(integer(required(node, "symbol_id", "$.expression"), "$.expression.symbol_id"));
+        if (kind == "call" && optional(node, "intrinsic") && string(*optional(node, "intrinsic"), "$.expression.intrinsic") == "list_length") return 0;
+        if (kind == "index" && optional(node, "intrinsic") && string(*optional(node, "intrinsic"), "$.expression.intrinsic") == "list_index") {
+            const auto& index = object(required(node, "index", "$.expression"), "$.expression.index");
+            const auto text = string(required(index, "value", "$.expression.index"), "$.expression.index.value");
+            std::size_t consumed = 0; const auto value = std::stoull(text, &consumed, 10);
+            if (consumed != text.size() || value + 1 > required_argument_count_) throw Unsupported("dynamic argument index is not admitted");
+            return value + 1;
+        }
         if (kind == "conversion") {
             const auto source = expression(required(node, "operand", "$.expression")); const auto result = slot();
             emit(TV1_CONVERT, result, source, carrier(string(required(node, "type", "$.expression"), "$.expression.type"))); return result;
@@ -228,6 +259,33 @@ private:
         operation_ = UINT64_MAX; block_ = 1; symbol_ = UINT64_MAX; line_ = 1;
         const auto zero = literal(TINYVM_CARRIER_I32, 0); emit(TV1_RETURN, zero, 0, 0);
     }
+    void scan_arguments(const Value& value) {
+        if (const auto* node = std::get_if<Object>(&value)) {
+            const auto* intrinsic = optional(*node, "intrinsic");
+            if (intrinsic) {
+                const auto name = string(*intrinsic, "$.intrinsic");
+                if (name == "list_length") uses_arguments_ = true;
+                if (name == "list_index") {
+                    uses_arguments_ = true;
+                    const auto& index = object(required(*node, "index"), "$.index");
+                    const auto text = string(required(index, "value", "$.index"), "$.index.value");
+                    std::size_t consumed = 0; const auto position = std::stoull(text, &consumed, 10);
+                    if (consumed != text.size()) throw Unsupported("dynamic argument index is not admitted");
+                    required_argument_count_ = std::max(required_argument_count_, static_cast<std::size_t>(position + 1));
+                }
+            }
+            for (const auto& [key, child] : *node) { (void)key; scan_arguments(child); }
+        } else if (const auto* items = std::get_if<Array>(&value)) for (const auto& child : *items) scan_arguments(child);
+    }
+    void emit_argument_guard() {
+        operation_ = UINT64_MAX; block_ = 1; symbol_ = UINT64_MAX; line_ = 1;
+        const auto required = literal(TINYVM_CARRIER_I32, required_argument_count_);
+        const auto ready = slot(); emit(TV1_CMP_GE, ready, 0, required);
+        const auto branch = code.size(); emit(TV1_BRANCH, ready, 0, 0);
+        const auto failure = literal(TINYVM_CARRIER_I32, 64); emit(TV1_RETURN, failure, 0, 0);
+        code[branch].b = static_cast<std::int64_t>(code.size());
+        code[branch].pad = static_cast<std::int64_t>(branch + 1);
+    }
 };
 
 int lower(const char* input_path, const char* output_path) {
@@ -252,7 +310,7 @@ int lower(const char* input_path, const char* output_path) {
 
     TinyvmArtifactV2 artifact;
     tinyvm_artifact_v2_init(&artifact);
-    artifact.isa_version = 1;
+    artifact.isa_version = compiler.isa_version();
     artifact.data_words = compiler.slot_count();
     artifact.stack_words = 16;
     copy(artifact.artifact_id, identity("tinyvm-", canonical));
@@ -262,12 +320,14 @@ int lower(const char* input_path, const char* output_path) {
     copy(artifact.optimization_id, identity("opt-", optimization));
     artifact.code = compiler.code.data(); artifact.code_count = compiler.code.size();
     artifact.constants = compiler.constants.data(); artifact.constant_count = compiler.constants.size();
+    artifact.strings = compiler.strings.data(); artifact.string_count = compiler.strings.size();
+    artifact.storage = compiler.storage.data(); artifact.storage_count = compiler.storage.size();
     artifact.provenance = compiler.provenance.data(); artifact.provenance_count = compiler.provenance.size();
     char diagnostic[256];
     if (!tinyvm_artifact_v2_write(output_path, &artifact, diagnostic, sizeof diagnostic))
         throw std::runtime_error(std::string("cannot emit TinyVM artifact: ") + diagnostic);
     std::cout << serialize(Object{{"artifact_id", std::string(artifact.artifact_id)}, {"backend", "tinyvm"},
-                                 {"format", "flowtiny.lowering_result"}, {"isa_version", Integer{1}},
+                                 {"format", "flowtiny.lowering_result"}, {"isa_version", Integer{compiler.isa_version()}},
                                  {"status", "emitted"}, {"version", Integer{1}}}) << '\n';
     return 0;
 }

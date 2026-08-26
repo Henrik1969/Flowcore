@@ -77,6 +77,8 @@ The first binary boundary is specified in [`ARTIFACT-V1.md`](ARTIFACT-V1.md).
 The sectioned Flow-capable successor contract is specified in
 [`ARTIFACT-V2.md`](ARTIFACT-V2.md).
 The first typed execution semantics are specified in [`ISA-V1.md`](ISA-V1.md).
+The process-argument execution-input extension is specified in
+[`ISA-V2.md`](ISA-V2.md).
 
 When built in the Flowcore superbuild, `flowtinylower` consumes the public
 backend-neutral lowering artifact and deterministically emits ISA v1. Its first

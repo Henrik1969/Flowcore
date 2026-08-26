@@ -88,6 +88,8 @@ if(BUILD_TESTING)
                 $<TARGET_FILE:flowtinyvalidate>
                 ${CMAKE_CURRENT_BINARY_DIR})
     add_test(NAME tinyvm_isa_v1_conformance COMMAND tinyvm_isa_v1_conformance)
+    set_tests_properties(tinyvm_isa_v1_conformance PROPERTIES
+        PASS_REGULAR_EXPRESSION "TinyVM typed ISA conformance passed")
     add_test(NAME tinyvm_isa_v1_file_boundary
         COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/tests/isa-v1-file-boundary.sh
                 $<TARGET_FILE:flowtinyv1-pack-demo>

@@ -16,9 +16,10 @@ static bool zero2(const InstrWord *w){return w->b==0&&w->pad==0;}
 static bool zero3(const InstrWord *w){return w->a==0&&w->b==0&&w->pad==0;}
 
 bool tinyvm_isa_v1_validate(const TinyvmArtifactV2 *a,char *d,size_t capacity){
-    if(!a||a->isa_version!=1){diagnose(d,capacity,"ISA v1 validator received a different ISA");return false;}
+    if(!a||(a->isa_version!=1&&a->isa_version!=2)){diagnose(d,capacity,"typed ISA validator received a different ISA");return false;}
     if(!a->code||!a->code_count){diagnose(d,capacity,"ISA v1 code is empty");return false;}
     if(a->entrypoint>=a->code_count){diagnose(d,capacity,"ISA v1 entrypoint is outside code");return false;}
+    if(a->isa_version==2&&!a->data_words){diagnose(d,capacity,"ISA v2 execution-input slot is absent");return false;}
     if(a->data_words>UINT32_MAX){diagnose(d,capacity,"ISA v1 virtual slot capacity is unsupported");return false;}
     for(size_t pc=0;pc<a->code_count;++pc){const InstrWord *w=&a->code[pc];
         if(w->opcode<0||w->opcode>=TV1_OPCODE_COUNT){diagnose(d,capacity,"ISA v1 opcode is unsupported");return false;}
@@ -64,8 +65,11 @@ static bool comparison(TinyvmIsaV1Context *ctx,int64_t opcode,uint64_t dst,uint6
     TinyvmValue *x=read_slot(ctx,left,instruction),*y=read_slot(ctx,right,instruction);if(!x||!y)return false;if(x->carrier!=y->carrier||(!integer_carrier(x->carrier)&&x->carrier!=TINYVM_CARRIER_I1))return trap(ctx,TV1_TRAP_TYPE_MISMATCH,"comparison carrier mismatch",instruction);int64_t a=x->carrier==TINYVM_CARRIER_I32?(int32_t)x->bits:signed_bits(x->bits),b=y->carrier==TINYVM_CARRIER_I32?(int32_t)y->bits:signed_bits(y->bits);bool r=opcode==TV1_CMP_EQ?a==b:opcode==TV1_CMP_NE?a!=b:opcode==TV1_CMP_LT?a<b:opcode==TV1_CMP_LE?a<=b:opcode==TV1_CMP_GT?a>b:a>=b;ctx->slots[dst]=(TinyvmValue){TINYVM_CARRIER_I1,r?1:0,true};return true;
 }
 
+static void execution_inputs(const TinyvmArtifactV2 *a,TinyvmIsaV1Context *ctx){if(a->isa_version!=2||!ctx->slot_count)return;ctx->slots[0]=(TinyvmValue){TINYVM_CARRIER_I32,canonical_i32((int32_t)ctx->argument_count),true};for(size_t i=0;i<ctx->argument_count&&i+1<ctx->slot_count;++i)ctx->slots[i+1]=(TinyvmValue){TINYVM_CARRIER_OPAQUE_HANDLE,UINT64_C(0x0300000000000000)|i,true};}
+
 bool tinyvm_isa_v1_run_switch(const TinyvmArtifactV2 *a,TinyvmIsaV1Context *ctx){
-    if(!a||!ctx||a->isa_version!=1||ctx->slot_count<a->data_words)return false;
+    if(!a||!ctx||(a->isa_version!=1&&a->isa_version!=2)||ctx->slot_count<a->data_words)return false;
+    execution_inputs(a,ctx);
     ctx->pc=a->entrypoint;
     while(ctx->running){if(ctx->steps++>=ctx->step_limit)return trap(ctx,TV1_TRAP_STEP_LIMIT,"instruction step limit exceeded",ctx->pc);uint64_t at=ctx->pc++;const InstrWord *w=&a->code[at];
         switch(w->opcode){
@@ -99,7 +103,8 @@ bool tinyvm_isa_v1_run_computed(const TinyvmArtifactV2 *a,TinyvmIsaV1Context *ct
         [TV1_BRANCH]=&&do_branch,[TV1_RETURN]=&&do_return,[TV1_TRAP]=&&do_trap,
         [TV1_HALT]=&&do_halt,[TV1_STRING_HANDLE]=&&do_string,
         [TV1_STORAGE_HANDLE]=&&do_storage,[TV1_CALL_IMPORT]=&&do_import};
-    if(!a||!ctx||a->isa_version!=1||ctx->slot_count<a->data_words)return false;
+    if(!a||!ctx||(a->isa_version!=1&&a->isa_version!=2)||ctx->slot_count<a->data_words)return false;
+    execution_inputs(a,ctx);
     ctx->pc=a->entrypoint;uint64_t at=0;const InstrWord *w=NULL;
 next:
     if(!ctx->running)goto done;
