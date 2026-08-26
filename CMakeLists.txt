@@ -91,6 +91,12 @@ add_test(NAME callable_lowering_boundary
         FLOWTINYRUN_BIN=$<TARGET_FILE:flowtinyrun>
         ${CMAKE_CURRENT_SOURCE_DIR}/tools/test-callable-lowering-boundary.sh)
 
+add_test(NAME bootstrap_gap_inventory
+    COMMAND ${CMAKE_COMMAND} -E env
+        FLOWCORE_ROOT=${CMAKE_CURRENT_SOURCE_DIR}
+        FLOWVALIDATE_BIN=$<TARGET_FILE:flowvalidate>
+        ${CMAKE_CURRENT_SOURCE_DIR}/tools/test-bootstrap-gap-inventory.sh)
+
 add_test(NAME native_binding_selection
     COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/tools/test-native-binding-selection.sh)
 

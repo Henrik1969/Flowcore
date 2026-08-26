@@ -197,6 +197,38 @@ inline void validate_bootstrap_seed(const json::Value& value) {
     }
 }
 
+inline void validate_bootstrap_gap_inventory(const json::Value& value) {
+    const auto artifact = require_header(value, "flowcore.bootstrap_gap_inventory", 1);
+    if (artifact.status != "incomplete" && artifact.status != "complete") throw json::Error("$.status", "unsupported bootstrap inventory status");
+    const auto& root = json::object(value);
+    (void)json::string(json::required(root, "baseline", "$"), "$.baseline");
+    std::set<std::string> completed;
+    for (const auto& item : required_array(root, "completed")) {
+        const auto name = json::string(item, "$.completed[]");
+        if (name.empty() || !completed.insert(name).second) throw json::Error("$.completed", "empty or duplicate completed identity");
+    }
+    std::set<std::string> gaps;
+    const auto& entries = required_array(root, "gaps");
+    for (std::size_t index=0; index<entries.size(); ++index) {
+        const auto path="$.gaps["+std::to_string(index)+"]"; const auto& gap=json::object(entries[index],path);
+        const auto id=json::string(json::required(gap,"id",path),path+".id");
+        if(id.empty()||completed.count(id)||!gaps.insert(id).second)throw json::Error(path+".id","empty, completed, or duplicate gap identity");
+        for(const auto field:{"owner","gate","acceptance"})(void)json::string(json::required(gap,field,path),path+"."+field);
+        (void)required_array(gap,"requires",path);
+    }
+    for (std::size_t index=0; index<entries.size(); ++index) {
+        const auto path="$.gaps["+std::to_string(index)+"]"; const auto& gap=json::object(entries[index],path);
+        for(const auto& dependency:required_array(gap,"requires",path)) {
+            const auto id=json::string(dependency,path+".requires[]");
+            if(!completed.count(id)&&!gaps.count(id))throw json::Error(path+".requires","unknown bootstrap dependency identity");
+        }
+    }
+    const auto& stages=required_array(root,"stages");
+    if(stages.size()!=3)throw json::Error("$.stages","bootstrap inventory must describe Stage 1, 2 and 3");
+    for(std::size_t index=0;index<stages.size();++index){const auto path="$.stages["+std::to_string(index)+"]";const auto& stage=json::object(stages[index],path);if(json::integer(json::required(stage,"stage",path),path+".stage")!=static_cast<json::Integer>(index+1))throw json::Error(path+".stage","bootstrap stages must be ordered 1, 2, 3");for(const auto field:{"producer","status","required_evidence"})(void)json::string(json::required(stage,field,path),path+"."+field);}
+    if ((artifact.status == "complete") != entries.empty()) throw json::Error("$.status", "inventory completeness does not match remaining gaps");
+}
+
 inline void validate_backend_lowering_artifact(const json::Value& value) {
     const auto& header_root = json::object(value);
     if (json::string(json::required(header_root, "format"), "$.format") != "flowcore.backend_lowering_artifact")
@@ -342,6 +374,7 @@ inline ValidationResult validate(const json::Value& value) {
         else if (result.format == "flowparallel.graph_provider_decision") (void)provider_decision(value);
         else if (result.format == "flowoptimize.optimization_report") validate_optimization_report(value);
         else if (result.format == "flowcore.bootstrap_seed") validate_bootstrap_seed(value);
+        else if (result.format == "flowcore.bootstrap_gap_inventory") validate_bootstrap_gap_inventory(value);
         else if (result.format == "flowcore.target_policy") validate_target_policy(value);
         else if (result.format == "flowcore.backend_lowering_artifact") validate_backend_lowering_artifact(value);
         else if (result.format == "flowlower.lowering_report") validate_lowering_report(value);

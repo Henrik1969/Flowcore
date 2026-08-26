@@ -341,3 +341,18 @@ the already captured recovered-ISA boundary.
 - The complete GCC superbuild and all 74 canonical tests passed. The full
   cross-backend callable slice and switch/computed ISA conformance passed under
   Clang 18 ASan/UBSan with the documented LeakSanitizer exclusion.
+
+### Precise remaining bootstrap inventory — `bootstrap-gap-inventory-v1`
+
+- Added a canonical, publicly validated bootstrap gap graph separating proven
+  foundations from language, library, compiler-kit, package, resource and
+  staged-bootstrap work.
+- Every remaining gap has a stable identity, owner, gate, dependency set and
+  executable acceptance statement; dependencies must resolve to another gap or
+  a completed foundation.
+- Stage 1, 2 and 3 name their actual producer, current state and missing
+  evidence. None is reported started or complete merely because the shared
+  scalar compiler/document slice now executes.
+- The complete GCC superbuild and all 75 canonical tests passed. Focused Clang
+  18 ASan/UBSan seed/inventory contracts, adversarial mutations and public
+  validator tests passed with the documented LeakSanitizer exclusion.
