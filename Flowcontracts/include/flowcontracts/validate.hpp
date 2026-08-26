@@ -141,6 +141,28 @@ inline void validate_target_policy(const json::Value& value) {
         throw json::Error("$.fallback", "fallback target does not match fallback mode");
 }
 
+inline void validate_bootstrap_seed(const json::Value& value) {
+    const auto artifact = require_header(value, "flowcore.bootstrap_seed", 1);
+    if (artifact.status != "captured") throw json::Error("$.status", "bootstrap seed is not captured");
+    const auto& root = json::object(value);
+    const auto& source = required_object(root, "source");
+    (void)json::string(json::required(source, "revision", "$.source"), "$.source.revision");
+    const auto digest = json::string(json::required(source, "tracked_sha256", "$.source"), "$.source.tracked_sha256");
+    if (digest.size() != 64 || digest.find_first_not_of("0123456789abcdef") != std::string::npos)
+        throw json::Error("$.source.tracked_sha256", "tracked source digest is not lowercase SHA-256");
+    const auto& tools = required_object(root, "tools");
+    for (const auto field : {"cmake", "c_compiler", "cxx_compiler", "clang", "jq"})
+        (void)json::string(json::required(tools, field, "$.tools"), "$.tools." + std::string(field));
+    const auto& standards = required_object(root, "standards");
+    (void)json::string(json::required(standards, "c", "$.standards"), "$.standards.c");
+    (void)json::string(json::required(standards, "cxx", "$.standards"), "$.standards.cxx");
+    for (const auto field : {"providers", "deterministic_fields", "environment_fields"}) {
+        const auto& entries = required_array(root, field);
+        for (std::size_t index = 0; index < entries.size(); ++index)
+            (void)json::string(entries[index], "$." + std::string(field) + "[" + std::to_string(index) + "]");
+    }
+}
+
 inline void validate_backend_lowering_artifact(const json::Value& value) {
     const auto& header_root = json::object(value);
     if (json::string(json::required(header_root, "format"), "$.format") != "flowcore.backend_lowering_artifact")
@@ -285,6 +307,7 @@ inline ValidationResult validate(const json::Value& value) {
         else if (result.format == "flowparallel.execution_plan") (void)execution_plan(value);
         else if (result.format == "flowparallel.graph_provider_decision") (void)provider_decision(value);
         else if (result.format == "flowoptimize.optimization_report") validate_optimization_report(value);
+        else if (result.format == "flowcore.bootstrap_seed") validate_bootstrap_seed(value);
         else if (result.format == "flowcore.target_policy") validate_target_policy(value);
         else if (result.format == "flowcore.backend_lowering_artifact") validate_backend_lowering_artifact(value);
         else if (result.format == "flowlower.lowering_report") validate_lowering_report(value);

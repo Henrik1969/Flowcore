@@ -70,6 +70,12 @@ set_tests_properties(flowcore_stdlib_boundary PROPERTIES
 add_test(NAME native_binding_inventory
     COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/tools/test-native-binding-inventory.sh)
 
+add_test(NAME stage0_seed_capture
+    COMMAND ${CMAKE_COMMAND} -E env
+        FLOWCORE_ROOT=${CMAKE_CURRENT_SOURCE_DIR}
+        FLOWVALIDATE_BIN=$<TARGET_FILE:flowvalidate>
+        ${CMAKE_CURRENT_SOURCE_DIR}/tools/test-stage0-seed-capture.sh)
+
 add_test(NAME native_binding_selection
     COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/tools/test-native-binding-selection.sh)
 

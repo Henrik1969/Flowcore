@@ -266,3 +266,19 @@ the already captured recovered-ISA boundary.
 - The complete GCC superbuild and all 72 canonical tests passed. Focused Clang
   18 ASan/UBSan resolver, preparation, LLVM/TinyVM admission and captured-file
   boundary tests passed with the documented LeakSanitizer exclusion.
+
+### Stage 0 host and language closure inventory — `stage0-language-closure-inventory`
+
+- Declared the exact current host-language, standard-library, provider and tool
+  privileges for every compiler-chain component and assigned each gap to
+  language, library, provider, tooling or application ownership.
+- Added deterministic `flowcore.bootstrap_seed` capture containing the tracked
+  seed digest, revision, compiler/build tool evidence, language standards and
+  provider surface, with deterministic and environmental fields separated.
+- Identified the first shared compiler/document slice as an ordinary pure
+  scalar classifier and preserved the actual opening gap: public lowering does
+  not yet describe complete callable functions, and TinyVM cannot execute the
+  existing `fn_demo.flow` plan.
+- The complete GCC superbuild and all 73 canonical tests passed. Focused Clang
+  18 ASan/UBSan bootstrap-contract, validator and deterministic-capture tests
+  passed with the documented LeakSanitizer exclusion.
