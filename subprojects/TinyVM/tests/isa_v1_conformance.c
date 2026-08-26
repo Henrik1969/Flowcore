@@ -1,0 +1,49 @@
+#include <tinyvm/isa_v1.h>
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+static void fail(const char *message){fprintf(stderr,"ISA v1 conformance failed: %s\n",message);exit(1);}
+static void id(char out[64],const char *value){snprintf(out,64,"%s",value);}
+static void provenance(TinyvmProvenance *items,size_t count){for(size_t i=0;i<count;++i){items[i].instruction=i;items[i].operation=i+1;items[i].block=1;items[i].line=(uint32_t)(i+1);items[i].column=1;id(items[i].source,"isa-v1-source");id(items[i].derivation,"isa-v1-lowering");}}
+static TinyvmArtifactV2 artifact(InstrWord *code,size_t code_count,TinyvmConstant *constants,size_t constant_count,TinyvmProvenance *prov,size_t slots){TinyvmArtifactV2 a;tinyvm_artifact_v2_init(&a);a.isa_version=1;a.data_words=slots;a.stack_words=16;id(a.artifact_id,"isa-v1-artifact");id(a.source_id,"isa-v1-source");id(a.target_policy_id,"tinyvm-portable");id(a.lowering_plan_id,"isa-v1-plan");id(a.optimization_id,"isa-v1-optimization");a.code=code;a.code_count=code_count;a.constants=constants;a.constant_count=constant_count;a.provenance=prov;a.provenance_count=code_count;return a;}
+static bool same_value(const TinyvmValue *a,const TinyvmValue *b){return a->carrier==b->carrier&&a->bits==b->bits&&a->initialized==b->initialized;}
+static bool same_fault(const char *a,const char *b){return (!a||!b)?a==b:strcmp(a,b)==0;}
+static bool same_context(const TinyvmIsaV1Context *a,const TinyvmIsaV1Context *b){if(a->slot_count!=b->slot_count||a->pc!=b->pc||a->steps!=b->steps||a->running!=b->running||a->returned!=b->returned||a->trap!=b->trap||a->trap_instruction!=b->trap_instruction||!same_value(&a->result,&b->result)||!same_fault(a->fault,b->fault))return false;for(size_t i=0;i<a->slot_count;++i)if(!same_value(&a->slots[i],&b->slots[i]))return false;return true;}
+static TinyvmIsaV1Context execute(const TinyvmArtifactV2 *a,uint64_t limit,bool expected){char diagnostic[160];if(!tinyvm_artifact_v2_validate(a,diagnostic,sizeof diagnostic))fail(diagnostic);TinyvmIsaV1Context ctx,computed;if(!tinyvm_isa_v1_context_init(&ctx,(size_t)a->data_words,limit)||!tinyvm_isa_v1_context_init(&computed,(size_t)a->data_words,limit))fail("context allocation");bool result=tinyvm_isa_v1_run_switch(a,&ctx),computed_result=tinyvm_isa_v1_run_computed(a,&computed);if(result!=expected||computed_result!=expected)fail("unexpected execution result");if(!same_context(&ctx,&computed))fail("switch/computed engine divergence");tinyvm_isa_v1_context_destroy(&computed);return ctx;}
+
+static void arithmetic_and_control(void){
+    TinyvmConstant c[]={{1,TINYVM_CARRIER_I32,20},{2,TINYVM_CARRIER_I32,22},{3,TINYVM_CARRIER_I32,42}};
+    InstrWord code[]={{TV1_CONST,0,1,0},{TV1_CONST,1,2,0},{TV1_ADD,2,0,1},{TV1_CONST,3,3,0},{TV1_CMP_EQ,4,2,3},{TV1_BRANCH,4,7,6},{TV1_TRAP,99,0,0},{TV1_CONVERT,5,2,TINYVM_CARRIER_I64},{TV1_MOVE,6,5,0},{TV1_RETURN,6,0,0}};
+    TinyvmProvenance p[10]={0};provenance(p,10);TinyvmArtifactV2 a=artifact(code,10,c,3,p,7);TinyvmIsaV1Context ctx=execute(&a,100,true);if(!ctx.returned||ctx.result.carrier!=TINYVM_CARRIER_I64||ctx.result.bits!=42)fail("arithmetic/control result");tinyvm_isa_v1_context_destroy(&ctx);
+}
+static void more_arithmetic(void){
+    TinyvmConstant c[]={{1,TINYVM_CARRIER_I64,100},{2,TINYVM_CARRIER_I64,4}};
+    InstrWord code[]={{TV1_CONST,0,1,0},{TV1_CONST,1,2,0},{TV1_SUB,2,0,1},{TV1_MUL,3,2,1},{TV1_SDIV,4,3,1},{TV1_CMP_GE,5,4,2},{TV1_RETURN,4,0,0}};
+    TinyvmProvenance p[7]={0};provenance(p,7);TinyvmArtifactV2 a=artifact(code,7,c,2,p,6);TinyvmIsaV1Context ctx=execute(&a,100,true);if(ctx.result.carrier!=TINYVM_CARRIER_I64||ctx.result.bits!=96)fail("sub/mul/div result");tinyvm_isa_v1_context_destroy(&ctx);
+}
+static void comparisons_and_terminals(void){
+    TinyvmConstant c[]={{1,TINYVM_CARRIER_I64,4},{2,TINYVM_CARRIER_I64,5},{3,TINYVM_CARRIER_I1,0}};
+    InstrWord compare[]={{TV1_CONST,0,1,0},{TV1_CONST,1,2,0},{TV1_CMP_NE,2,0,1},{TV1_CMP_LT,3,0,1},{TV1_CMP_LE,4,0,1},{TV1_CMP_GT,5,1,0},{TV1_CMP_GE,6,1,0},{TV1_RETURN,6,0,0}};TinyvmProvenance pc[8]={0};provenance(pc,8);TinyvmArtifactV2 a=artifact(compare,8,c,3,pc,7);TinyvmIsaV1Context ctx=execute(&a,30,true);if(ctx.result.carrier!=TINYVM_CARRIER_I1||ctx.result.bits!=1)fail("comparison family");tinyvm_isa_v1_context_destroy(&ctx);
+    InstrWord branch_false[]={{TV1_CONST,0,3,0},{TV1_BRANCH,0,2,3},{TV1_TRAP,77,0,0},{TV1_HALT,0,0,0}};TinyvmProvenance pb[4]={0};provenance(pb,4);a=artifact(branch_false,4,c,3,pb,1);ctx=execute(&a,20,true);if(ctx.result.carrier!=TINYVM_CARRIER_I32||ctx.result.bits!=0)fail("false branch/halt");tinyvm_isa_v1_context_destroy(&ctx);
+    InstrWord nop_halt[]={{TV1_NOP,0,0,0},{TV1_HALT,0,0,0}};TinyvmProvenance pn[2]={0};provenance(pn,2);a=artifact(nop_halt,2,NULL,0,pn,0);ctx=execute(&a,10,true);tinyvm_isa_v1_context_destroy(&ctx);
+    InstrWord explicit_trap[]={{TV1_TRAP,55,0,0}};TinyvmProvenance pt[1]={0};provenance(pt,1);a=artifact(explicit_trap,1,NULL,0,pt,0);ctx=execute(&a,10,false);if(ctx.trap!=55)fail("explicit trap code");tinyvm_isa_v1_context_destroy(&ctx);
+}
+static void handles(void){
+    InstrWord code[]={{TV1_STRING_HANDLE,0,1,0},{TV1_STORAGE_HANDLE,1,1,0},{TV1_RETURN,0,0,0}};TinyvmProvenance p[3]={0};provenance(p,3);TinyvmString strings[1]={{1,(uint8_t*)"hello",5}};TinyvmStorage storage[1]={{1,64,8,2}};TinyvmArtifactV2 a=artifact(code,3,NULL,0,p,2);a.strings=strings;a.string_count=1;a.storage=storage;a.storage_count=1;TinyvmIsaV1Context ctx=execute(&a,20,true);if(ctx.result.carrier!=TINYVM_CARRIER_OPAQUE_HANDLE||ctx.result.bits!=UINT64_C(0x0100000000000001))fail("opaque string handle");tinyvm_isa_v1_context_destroy(&ctx);
+}
+static void expected_traps(void){
+    TinyvmConstant c[]={{1,TINYVM_CARRIER_I32,1},{2,TINYVM_CARRIER_I32,0}};
+    InstrWord divide[]={{TV1_CONST,0,1,0},{TV1_CONST,1,2,0},{TV1_SDIV,2,0,1},{TV1_RETURN,2,0,0}};TinyvmProvenance pd[4]={0};provenance(pd,4);TinyvmArtifactV2 a=artifact(divide,4,c,2,pd,3);TinyvmIsaV1Context ctx=execute(&a,20,false);if(ctx.trap!=TV1_TRAP_DIVISION_BY_ZERO||ctx.trap_instruction!=2)fail("division trap");tinyvm_isa_v1_context_destroy(&ctx);
+    InstrWord uninitialized[]={{TV1_RETURN,0,0,0}};TinyvmProvenance pu[1]={0};provenance(pu,1);a=artifact(uninitialized,1,NULL,0,pu,1);ctx=execute(&a,20,false);if(ctx.trap!=TV1_TRAP_UNINITIALIZED_SLOT)fail("uninitialized trap");tinyvm_isa_v1_context_destroy(&ctx);
+    InstrWord loop[]={{TV1_JMP,0,0,0},{TV1_HALT,0,0,0}};TinyvmProvenance pl[2]={0};provenance(pl,2);a=artifact(loop,2,NULL,0,pl,0);ctx=execute(&a,5,false);if(ctx.trap!=TV1_TRAP_STEP_LIMIT)fail("step-limit trap");tinyvm_isa_v1_context_destroy(&ctx);
+    TinyvmConstant overflow_constants[]={{1,TINYVM_CARRIER_I32,INT32_MAX},{2,TINYVM_CARRIER_I32,1}};InstrWord overflow[]={{TV1_CONST,0,1,0},{TV1_CONST,1,2,0},{TV1_ADD,2,0,1},{TV1_RETURN,2,0,0}};TinyvmProvenance po[4]={0};provenance(po,4);a=artifact(overflow,4,overflow_constants,2,po,3);ctx=execute(&a,20,true);if(ctx.result.bits!=(uint64_t)(int64_t)INT32_MIN)fail("modular arithmetic result");tinyvm_isa_v1_context_destroy(&ctx);
+}
+static void unresolved_import(void){
+    TinyvmConstant c[]={{1,TINYVM_CARRIER_I32,7}};InstrWord code[]={{TV1_CONST,0,1,0},{TV1_CALL_IMPORT,1,1,0},{TV1_RETURN,1,0,0}};TinyvmProvenance p[3]={0};provenance(p,3);TinyvmImport x[1]={0};x[0].id=1;id(x[0].contract,"libc-abs-v1");id(x[0].library,"libc.so.6");id(x[0].convention,"c");id(x[0].symbol,"abs");id(x[0].effect,"pure");id(x[0].parameters,"c_int");id(x[0].result,"c_int");id(x[0].evidence,"binding-evidence-1");TinyvmArtifactV2 a=artifact(code,3,c,1,p,2);a.imports=x;a.import_count=1;TinyvmIsaV1Context ctx=execute(&a,20,false);if(ctx.trap!=TV1_TRAP_UNRESOLVED_IMPORT)fail("unresolved import trap");tinyvm_isa_v1_context_destroy(&ctx);
+}
+static void invalid_artifacts(void){
+    char d[160];TinyvmConstant c[]={{1,TINYVM_CARRIER_I32,1}};InstrWord code[]={{TV1_CONST,0,2,0},{TV1_RETURN,0,0,0}};TinyvmProvenance p[2]={0};provenance(p,2);TinyvmArtifactV2 a=artifact(code,2,c,1,p,1);if(tinyvm_artifact_v2_validate(&a,d,sizeof d))fail("accepted missing constant");code[0]=(InstrWord){TV1_JMP,9,0,0};if(tinyvm_artifact_v2_validate(&a,d,sizeof d))fail("accepted invalid jump");code[0]=(InstrWord){TV1_CONST,0,1,0};code[1]=(InstrWord){TV1_NOP,0,0,0};if(tinyvm_artifact_v2_validate(&a,d,sizeof d))fail("accepted missing terminal");code[1]=(InstrWord){TV1_RETURN,0,0,0};id(p[1].source,"wrong-source");if(tinyvm_artifact_v2_validate(&a,d,sizeof d))fail("accepted provenance conflict");
+}
+int main(void){arithmetic_and_control();more_arithmetic();comparisons_and_terminals();handles();expected_traps();unresolved_import();invalid_artifacts();puts("TinyVM ISA v1 conformance passed");return 0;}

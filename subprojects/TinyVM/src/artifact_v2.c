@@ -1,4 +1,5 @@
 #include <tinyvm/artifact_v2.h>
+#include <tinyvm/isa_v1.h>
 
 #include <openssl/sha.h>
 
@@ -41,7 +42,7 @@ bool tinyvm_artifact_v2_validate(const TinyvmArtifactV2 *a,char *d,size_t cap){
     if(a->isa_version>1){diag(d,cap,"unsupported ISA version");return false;}
     if(!text64(a->artifact_id)||!text64(a->source_id)||!text64(a->target_policy_id)||!text64(a->lowering_plan_id)||!text64(a->optimization_id)){diag(d,cap,"invalid required identity");return false;}
     if(a->isa_version==0&&!tinyvm_validate_recovered_code(a->code,a->code_count,a->entrypoint,a->data_words,a->stack_words,d,cap))return false;
-    if(a->isa_version==1){diag(d,cap,"Flow-capable ISA version 1 is not implemented");return false;}
+    if(a->isa_version==1&&!tinyvm_isa_v1_validate(a,d,cap))return false;
     if(a->provenance_count!=a->code_count||(!a->provenance&&a->code_count)){diag(d,cap,"provenance count does not match code");return false;}
     if(a->constant_count&&(!a->constants||!ids_sorted_u64(&a->constants[0].id,a->constant_count,sizeof(*a->constants)))){diag(d,cap,"constant identities are not unique and sorted");return false;}
     for(size_t i=0;i<a->constant_count;++i){const TinyvmConstant *c=&a->constants[i];if(c->carrier<1||c->carrier>4||(c->carrier==1&&c->bits>1)||(c->carrier==2&&(int64_t)(int32_t)c->bits!=(int64_t)c->bits)||(c->carrier==4&&c->bits)){diag(d,cap,"invalid canonical constant");return false;}}

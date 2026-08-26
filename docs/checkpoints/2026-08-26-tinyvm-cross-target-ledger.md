@@ -52,7 +52,7 @@ Gate 1 is active: extend the executable artifact authority for typed constants,
 strings, storage, imports and instruction/source provenance without weakening
 the already captured recovered-ISA boundary.
 
-### Sectioned artifact authority — pending checkpoint
+### Sectioned artifact authority — `tinyvm-artifact-sections-v2`
 
 - Specified format 2 without reinterpreting format 1 reserved bytes.
 - Added ordered code, typed-constant, string, storage, authorized-import and
@@ -70,3 +70,29 @@ the already captured recovered-ISA boundary.
   traced-host limitation.
 - Format 2 currently admits recovered ISA 0. ISA 1 is explicitly rejected until
   its typed execution semantics and cross-section references are implemented.
+
+### Flow-capable ISA v1 — `tinyvm-flow-isa-v1`
+
+- Defined a separate ISA version rather than changing recovered ISA 0.
+- Added typed virtual slots for `i1`, `i32`, `i64` and opaque handles.
+- Added constant definition, move, conversion, modular arithmetic, signed
+  division, six comparisons, absolute jump, conditional branch, return, trap,
+  halt, string/storage handle and authorized-import call opcodes.
+- Opaque handles encode stable tagged identities and never host addresses.
+- `ADD`, `SUB` and `MUL` use modulo-width semantics to match the current LLVM
+  lowerer's plain operations. Division faults are explicit rather than relying
+  on C undefined behavior. Checked arithmetic remains a future distinct
+  semantic operation.
+- Added step-limit, uninitialized-slot, type, division and unresolved-import
+  traps.
+- Added portable switch and GNU computed-goto engines. Conformance compares
+  complete slot state, carriers, bits, PC, step count, result and traps.
+- Added independent file emission, validation and execution proving typed
+  `i64(42)` with the producer absent.
+- Format 2 now validates ISA 1 constant/string/storage/import references,
+  virtual-slot ranges, import argument spans, control targets and terminal
+  behavior.
+- GCC 13 and Clang 18 passed 9/9 tests. GCC ASan/UBSan passed 9/9 with the
+  documented LeakSanitizer exclusion.
+- Runtime provider resolution for `CALL_IMPORT` remains Gate 5; both engines
+  explicitly trap and the command-line runner refuses unresolved imports.

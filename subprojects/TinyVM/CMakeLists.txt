@@ -12,6 +12,7 @@ add_library(tinyvm_recovered STATIC
     src/artifact.c
     src/artifact_v2.c
     src/instructions.c
+    src/isa_v1.c
     src/vm.c
     src/vm_function.c
     src/vm_switch.c
@@ -21,7 +22,7 @@ target_link_libraries(tinyvm_recovered PUBLIC OpenSSL::Crypto)
 target_compile_options(tinyvm_recovered PRIVATE -Wall -Wextra -Wpedantic)
 # vm.c deliberately uses GNU labels-as-values. Keep strict diagnostics for the
 # portable handlers while acknowledging that one isolated extension boundary.
-set_source_files_properties(src/vm.c PROPERTIES COMPILE_OPTIONS -Wno-pedantic)
+set_source_files_properties(src/vm.c src/isa_v1.c PROPERTIES COMPILE_OPTIONS -Wno-pedantic)
 
 add_executable(tinyvm_recovered_demo src/main.c)
 target_link_libraries(tinyvm_recovered_demo PRIVATE tinyvm_recovered)
@@ -40,6 +41,10 @@ add_executable(flowtinyv2-roundtrip tools/v2_roundtrip.c)
 target_link_libraries(flowtinyv2-roundtrip PRIVATE tinyvm_recovered)
 add_executable(flowtinyv2-mutate tests/artifact_v2_mutate.c)
 target_link_libraries(flowtinyv2-mutate PRIVATE OpenSSL::Crypto)
+add_executable(tinyvm_isa_v1_conformance tests/isa_v1_conformance.c)
+target_link_libraries(tinyvm_isa_v1_conformance PRIVATE tinyvm_recovered)
+add_executable(flowtinyv1-pack-demo tools/v1_pack_demo.c)
+target_link_libraries(flowtinyv1-pack-demo PRIVATE tinyvm_recovered)
 
 if(BUILD_TESTING)
     add_executable(tinyvm_isa_conformance tests/isa_conformance.c)
@@ -75,5 +80,12 @@ if(BUILD_TESTING)
                 $<TARGET_FILE:flowtinyv2-roundtrip>
                 $<TARGET_FILE:flowtinyv2-mutate>
                 $<TARGET_FILE:flowtinyvalidate>
+                ${CMAKE_CURRENT_BINARY_DIR})
+    add_test(NAME tinyvm_isa_v1_conformance COMMAND tinyvm_isa_v1_conformance)
+    add_test(NAME tinyvm_isa_v1_file_boundary
+        COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/tests/isa-v1-file-boundary.sh
+                $<TARGET_FILE:flowtinyv1-pack-demo>
+                $<TARGET_FILE:flowtinyvalidate>
+                $<TARGET_FILE:flowtinyrun>
                 ${CMAKE_CURRENT_BINARY_DIR})
 endif()
