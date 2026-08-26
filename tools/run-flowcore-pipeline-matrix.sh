@@ -33,7 +33,7 @@ run_accepted() {
     optimizer_rc=$?
     set -e
     test "$optimizer_rc" -eq 0
-    grep -q '"status": "ready"' "$optimized"
+    jq -e '.status == "ready"' "$optimized" >/dev/null
     set +e
     if [ "$name" = "target_projection_probe" ] && jq -e '.targets | length > 0' "$optimized" >/dev/null; then
         "$lowerer" --target cli < "$optimized" > "$lowered"
@@ -66,7 +66,7 @@ run_blocked() {
     optimizer_rc=$?
     set -e
     test "$optimizer_rc" -eq 2
-    grep -q '"status": "blocked"' "$optimized"
+    jq -e '.status == "blocked"' "$optimized" >/dev/null
     blocked_count=$((blocked_count + 1))
     echo "PASS blocked $name"
 }
@@ -82,7 +82,7 @@ run_semantic_accepted() {
     grep -q '"status": "ok"' "$semantic"
     "$parallel" < "$semantic" > "$tmpdir/$name.parallel.json"
     "$optimizer" < "$tmpdir/$name.parallel.json" > "$optimized"
-    grep -q '"status": "ready"' "$optimized"
+    jq -e '.status == "ready"' "$optimized" >/dev/null
     "$lowerer" < "$optimized" > "$lowered"
     grep -q '"status": "ready"' "$lowered"
     grep -q '"status": "not-emitted"' "$lowered"

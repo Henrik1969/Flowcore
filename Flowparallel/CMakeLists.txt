@@ -5,6 +5,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 add_executable(flowparallel src/main.cpp)
 target_compile_options(flowparallel PRIVATE -Wall -Wextra -Wpedantic)
+target_link_libraries(flowparallel PRIVATE flowcontracts)
 
 add_executable(flowparallel_smoketest tests/parallel_smoketest.cpp)
 target_compile_options(flowparallel_smoketest PRIVATE -Wall -Wextra -Wpedantic)
@@ -53,6 +54,8 @@ target_link_libraries(flowparallel_execution_smoketest PRIVATE flowparallel_cpu_
 add_test(NAME flowparallel_pipeline
     COMMAND ${CMAKE_COMMAND} -E env
         FLOWPARALLEL_BIN=$<TARGET_FILE:flowparallel>
+        FLOWMINI_BIN=$<TARGET_FILE:flowmini>
+        FLOWANALYST_BIN=$<TARGET_FILE:flowanalyst>
         ${CMAKE_CURRENT_SOURCE_DIR}/tests/run-flowparallel-tests.sh)
 add_test(NAME flowparallel_smoketest
     COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/tests/run-parallel-smoketest.sh)
@@ -60,16 +63,22 @@ add_test(NAME flowparallel_cpu_provider
     COMMAND ${CMAKE_COMMAND} -E env
         FLOWPARALLEL_CPU_BIN=$<TARGET_FILE:flowparallel_cpu>
         FLOWPARALLEL_BIN=$<TARGET_FILE:flowparallel>
+        FLOWMINI_BIN=$<TARGET_FILE:flowmini>
+        FLOWANALYST_BIN=$<TARGET_FILE:flowanalyst>
         ${CMAKE_CURRENT_SOURCE_DIR}/tests/run-cpu-provider-tests.sh)
 add_test(NAME flowparallel_cpu_execution
     COMMAND ${CMAKE_COMMAND} -E env
         FLOWPARALLEL_EXECUTION_SMOKETEST_BIN=$<TARGET_FILE:flowparallel_execution_smoketest>
         FLOWPARALLEL_BIN=$<TARGET_FILE:flowparallel>
+        FLOWMINI_BIN=$<TARGET_FILE:flowmini>
+        FLOWANALYST_BIN=$<TARGET_FILE:flowanalyst>
         ${CMAKE_CURRENT_SOURCE_DIR}/tests/run-cpu-execution-tests.sh)
 add_test(NAME flowparallel_cuda_provider
     COMMAND ${CMAKE_COMMAND} -E env
         FLOWPARALLEL_CUDA_BIN=$<TARGET_FILE:flowparallel_cuda>
         FLOWPARALLEL_BIN=$<TARGET_FILE:flowparallel>
+        FLOWMINI_BIN=$<TARGET_FILE:flowmini>
+        FLOWANALYST_BIN=$<TARGET_FILE:flowanalyst>
         ${CMAKE_CURRENT_SOURCE_DIR}/tests/run-cuda-provider-tests.sh)
 add_test(NAME flowparallel_runtime_planner
     COMMAND ${CMAKE_COMMAND} -E env

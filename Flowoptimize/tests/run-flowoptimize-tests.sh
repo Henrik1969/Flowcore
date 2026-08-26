@@ -11,9 +11,11 @@ test -x "$flowmini"
 test -x "$parallel"
 test -x "$optimizer"
 
-report=$("$flowmini" --dump-frontend-bundle "$fixture" | "$analyst" | "$parallel" | "$optimizer")
-printf '%s\n' "$report" | grep -q '"format": "flowoptimize.optimization_report"'
-printf '%s\n' "$report" | grep -q '"status": "ready"'
+tmpdir=$(mktemp -d)
+trap 'rm -rf "$tmpdir"' EXIT
+"$flowmini" --dump-frontend-bundle "$fixture" | "$analyst" | "$parallel" > "$tmpdir/plan.json"
+report=$("$optimizer" "$tmpdir/plan.json")
+printf '%s\n' "$report" | jq -e '.format == "flowoptimize.optimization_report" and .status == "ready"' >/dev/null
 printf '%s\n' "$report" | jq -e '.transforms[0].kind == "coo_deduplicate" and .transforms[0].status == "not-needed" and .state.transformation == "identity"' >/dev/null
 printf '%s\n' "$report" | jq -e --arg source "$fixture" '
   .source.path == $source and
@@ -24,13 +26,13 @@ printf '%s\n' "$report" | jq -e --arg source "$fixture" '
   .provider_policy.cuda.fallback == "cpu"
 ' >/dev/null
 
-decision=$(mktemp)
-trap 'rm -f "$decision"' EXIT
+decision="$tmpdir/decision.json"
 printf '%s\n' '{"format":"flowparallel.graph_provider_decision","version":1,"status":"verified","provider":"cpu.reference","representation":"sparse","reason":"test fallback","fallback":"cpu.reference"}' > "$decision"
 decision_report=$($flowmini --dump-frontend-bundle "$fixture" | "$analyst" | "$parallel" | "$optimizer" --provider-decision "$decision")
 printf '%s\n' "$decision_report" | jq -e '.status == "ready" and .provider_policy.decision.status == "verified" and .provider_policy.decision.provider == "cpu.reference" and .state.canonical_graph == "unchanged" and .state.transformation == "identity"' >/dev/null
 
-duplicate_report=$(printf '%s\n' '{"format": "flowparallel.execution_plan","version":1,"status":"ready","graph_projection":{"name":"region_dependency","rows":2,"columns":2,"entries":[{"row":0,"column":1},{"row":0,"column":1},{"row":1,"column":0}]}}' | "$optimizer")
+jq '.graph_projection.rows = 2 | .graph_projection.columns = 2 | .graph_projection.entries = [{"row":0,"column":1,"value":true},{"row":0,"column":1,"value":true},{"row":1,"column":0,"value":true}]' "$tmpdir/plan.json" > "$tmpdir/duplicate-plan.json"
+duplicate_report=$("$optimizer" "$tmpdir/duplicate-plan.json")
 printf '%s\n' "$duplicate_report" | jq -e '.transforms[0].status == "applied" and .transforms[0].input_entries == 3 and .transforms[0].output_entries == 2 and .transforms[0].semantics_preserved == true' >/dev/null
 
 printf '%s\n' '{"format":"flowparallel.graph_provider_decision","version":1,"status":"verified","provider":"unknown.provider","representation":"dense"}' > "$decision"
@@ -43,4 +45,12 @@ if printf '%s' '{"format":"flowparallel.execution_plan","version":1,"status":"bl
     echo 'rejected semantic report unexpectedly accepted' >&2
     exit 1
 fi
+
+# Typed authority attacks fail before optimization.
+printf '%s' '{"format":"wrong","version":1,"status":"ready","nested":{"format":"flowparallel.execution_plan"}}' > "$tmpdir/nested-fake.json"
+if "$optimizer" "$tmpdir/nested-fake.json" >/dev/null 2>&1; then echo 'nested fake authority unexpectedly accepted' >&2; exit 1; fi
+printf '%s' '{"format":"flowparallel.execution_plan","format":"wrong","version":1,"status":"ready"}' > "$tmpdir/duplicate-key.json"
+if "$optimizer" "$tmpdir/duplicate-key.json" >/dev/null 2>&1; then echo 'duplicate authority unexpectedly accepted' >&2; exit 1; fi
+jq '(.graph_projection.entries[0].row) = .graph_projection.rows' "$tmpdir/plan.json" > "$tmpdir/out-of-range.json"
+if "$optimizer" "$tmpdir/out-of-range.json" >/dev/null 2>&1; then echo 'out-of-range matrix unexpectedly accepted' >&2; exit 1; fi
 echo 'Flowoptimize tests: PASS'

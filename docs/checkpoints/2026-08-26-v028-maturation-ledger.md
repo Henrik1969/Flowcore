@@ -41,11 +41,45 @@
 
 ## Current phase
 
-Gate 2: establish the public strict JSON/diagnostic/serialization foundation and
-the first complete typed semantic-report consumption slice.
+Gates 2–4 first vertical checkpoint:
+
+- Added the public header-only `Flowcontracts` component with a strict
+  complete-input parser, duplicate-key rejection, signed 64-bit integers,
+  finite floating-point handling, Unicode escapes, JSON-path diagnostics, and
+  deterministic lexicographically ordered serialization.
+- Documented the additive version-1 unknown-field policy: unknown data cannot
+  satisfy or select authority, while required authority is validated.
+- Added typed artifact headers, semantic report, lowering-plan identity,
+  execution plan, analysis/execution matrix, and provider-decision surfaces.
+- Migrated Flowparallel's primary semantic-report consumer completely off raw
+  JSON searches and substring copying.
+- Migrated Flowoptimize's primary semantic/execution-plan and provider-decision
+  consumers completely off raw JSON searches and substring copying.
+- Flowparallel now validates operation identity uniqueness and semantic matrix
+  coordinate uniqueness/ranges before emitting a deterministic execution plan.
+- Flowoptimize validates execution matrix coordinates before typed
+  deduplication and emits deterministic attributable transform evidence.
+- Replaced formatting-sensitive integration assertions with structural `jq`
+  assertions where canonical serialization intentionally changed whitespace.
+- Focused gate: `flowcontracts_json`, `flowparallel_pipeline`,
+  `flowoptimize_pipeline`, CPU provider/execution, and CUDA provider tests all
+  passed (6/6 in 0.59 seconds).
+- Canonical gate: build passed and 55/55 CTest tests passed in 24.23 seconds.
+- Adversarial coverage rejects nested and escaped fake authority, duplicate
+  keys, duplicate operation IDs, truncated input, missing lowering plans,
+  unsupported provider/representation pairs, and out-of-range matrix entries.
+- Deterministic coverage proves semantically identical reordered/whitespace
+  input emits byte-identical Flowparallel output.
+
+## Current phase
+
+Gate 5: reconcile Flowbind and Flowlower onto the public parser and contract
+semantics without changing authorization, cleanup, reachability, or lowering
+behavior. Adjacent Flowparallel provider/planner artifacts remain for later
+typed slices.
 
 ## Exact next action
 
-Create `Flowcontracts`, wire it into the root build, add strict parser and
-deterministic serialization tests, then migrate Flowparallel's semantic-report
-consumer without changing its emitted semantics.
+Replace Flowbind's raw top-level semantic envelope checks with the shared typed
+header/semantic contract, then extract Flowlower's private JSON value/parser
+onto Flowcontracts while preserving its structured emitter tests.
