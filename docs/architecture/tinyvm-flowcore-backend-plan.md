@@ -13,13 +13,14 @@ TinyVM becomes a governed Flowcore lowering and runtime provider:
 
 ```text
 Flow source
-  -> frontend bundle
-  -> semantic report
-  -> binding authorization
-  -> execution and optimization plans
-  -> backend-neutral validated lowering model
-       |-> LLVM IR -> native executable
-       `-> TinyVM artifact -> validated TinyVM runtime
+  -> [frontend bundle file]
+  -> [semantic report file]
+  -> [binding authorization file]
+  -> [execution plan file]
+  -> [optimization report file]
+  -> [backend-neutral lowering artifact file]
+       |-> flowlower-llvm  -> [LLVM IR file]  -> native executable
+       `-> flowlower-tinyvm -> [TinyVM file] -> flowtinyvalidate -> flowtinyrun
 ```
 
 Canonical Flow/Graph meaning remains above both backends. TinyVM bytecode is a
@@ -57,6 +58,50 @@ debugger or object-file surface.
    remain differentially equivalent.
 8. LLVM remains the conservative fallback until a parity gate explicitly
    admits TinyVM for the requested artifact and target.
+9. Every arrow is a durable, versioned artifact boundary. A downstream tool
+   must operate from the upstream file without the upstream executable,
+   process, private headers or in-memory objects being present.
+10. Every stage is independently invocable and replayable. Files may be passed
+    through stdin/stdout for convenience, but their complete serialized form is
+    the contract and must be persistable, inspectable and independently
+    validated.
+11. Shared libraries may implement public contract parsing and value types;
+    they must not collapse producer and consumer into one authority boundary or
+    expose private producer state as required input.
+
+## Separate-tool checkpoint discipline
+
+TinyVM integration preserves the existing Flowcore chain architecture. The
+minimum eventual tool boundary is:
+
+```text
+flowlower-tinyvm
+  input:  validated optimization/lowering and binding artifacts
+  output: flowcore.tinyvm_artifact file
+
+flowtinyvalidate
+  input:  flowcore.tinyvm_artifact file
+  output: structured validation report and optional canonical artifact
+
+flowtinyrun
+  input:  independently validated or internally revalidated TinyVM artifact
+  output: structured execution record plus declared program outputs
+```
+
+`flowtinyrun` must still validate untrusted input itself; a prior validator
+report is evidence, not permission to skip validation. The emitter must not be
+linked into the runner, and the runner must not need Flowmini, Flowanalyst,
+Flowbind, Flowparallel, Flowoptimize or Flowlower installed. A captured artifact
+and its declared runtime providers are sufficient to reproduce execution.
+
+Tests must exercise every consumer in two modes:
+
+1. piped directly from the previous stage; and
+2. started independently against a previously captured file after the producer
+   process has exited.
+
+The file boundary is a deliberate checkpoint and audit surface, not temporary
+serialization between components that secretly depend on one another.
 
 ## Gate 0 — freeze and test the recovered baseline
 
@@ -118,18 +163,23 @@ and control-flow form currently emitted by the generic LLVM lowerer.
 
 ## Gate 3 — extract one backend-neutral lowering model
 
-- Move Flowlower's structured-plan parsing, validation, typed expressions,
-  blocks, operations, carriers, provider tuples and authorization checks into a
-  reusable public component.
+- Publish Flowlower's validated structured-plan semantics as a deterministic,
+  versioned backend-neutral lowering artifact. Parsing, typed expressions,
+  blocks, operations, carriers, provider tuples and authorization facts must
+  cross this file boundary rather than an in-memory producer object.
 - Keep artifact-contract parsing in `Flowcontracts`; do not duplicate JSON
   interpretation in TinyVM.
-- Give LLVM and TinyVM visitors over the same validated model.
+- Give independently invocable LLVM and TinyVM tools consumers for the same
+  public artifact contract. They may share its public parser/value library but
+  neither may depend on the process or private implementation that emitted it.
 - Preserve operation, block, symbol, provider, source and derivation identity
   in both emission reports.
 - Reject an operation before backend selection if its semantics are unresolved.
 
-**Exit:** LLVM output remains green and a skeleton TinyVM emitter can consume
-the identical in-memory model without reparsing source or JSON.
+**Exit:** LLVM output remains green and a skeleton TinyVM emitter can consume a
+captured lowering artifact in a fresh process without any earlier compiler
+stage present. The file round-trips deterministically and is independently
+validated before either backend uses it.
 
 ## Gate 4 — internal computation parity
 
@@ -265,6 +315,9 @@ At every checkpoint run focused tests, `git diff --check`, the complete
 canonical Flowcore suite when shared contracts change, sanitizer tests, and
 the relevant LLVM/TinyVM differential corpus. Commit and annotate the exact
 tested boundary; do not tag a partially failing state.
+
+Every checkpoint must also retain captured positive and adversarial boundary
+artifacts sufficient to test the next consumer without running its producer.
 
 ## Deliberately deferred decisions
 
