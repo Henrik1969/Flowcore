@@ -51,3 +51,22 @@
 Gate 1 is active: extend the executable artifact authority for typed constants,
 strings, storage, imports and instruction/source provenance without weakening
 the already captured recovered-ISA boundary.
+
+### Sectioned artifact authority — pending checkpoint
+
+- Specified format 2 without reinterpreting format 1 reserved bytes.
+- Added ordered code, typed-constant, string, storage, authorized-import and
+  per-instruction provenance sections.
+- Added canonical alignment/padding, exact coverage, unique/sorted identities,
+  carrier/storage/import/provenance validation and deterministic byte round-trip.
+- `flowtinyvalidate` now independently identifies and validates formats 1 and 2.
+- `flowtinyrun` revalidates format 2 and refuses declared imports until an
+  authorized runtime resolver exists.
+- Hostile tests recompute a valid SHA-256 after mutating identity padding,
+  section uniqueness, boolean constants, import reserved bytes, provenance and
+  alignment padding; every mutation is rejected structurally.
+- GCC 13 and Clang 18 Debug suites passed 7/7 tests.
+- GCC 13 ASan/UBSan passed 7/7 with leak detection disabled for the managed
+  traced-host limitation.
+- Format 2 currently admits recovered ISA 0. ISA 1 is explicitly rejected until
+  its typed execution semantics and cross-section references are implemented.

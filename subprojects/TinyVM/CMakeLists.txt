@@ -10,6 +10,7 @@ set(CMAKE_C_EXTENSIONS ON)
 
 add_library(tinyvm_recovered STATIC
     src/artifact.c
+    src/artifact_v2.c
     src/instructions.c
     src/vm.c
     src/vm_function.c
@@ -35,6 +36,10 @@ add_executable(flowtinyvalidate tools/validate.c)
 target_link_libraries(flowtinyvalidate PRIVATE tinyvm_recovered)
 add_executable(flowtinyrun tools/run.c)
 target_link_libraries(flowtinyrun PRIVATE tinyvm_recovered)
+add_executable(flowtinyv2-roundtrip tools/v2_roundtrip.c)
+target_link_libraries(flowtinyv2-roundtrip PRIVATE tinyvm_recovered)
+add_executable(flowtinyv2-mutate tests/artifact_v2_mutate.c)
+target_link_libraries(flowtinyv2-mutate PRIVATE OpenSSL::Crypto)
 
 if(BUILD_TESTING)
     add_executable(tinyvm_isa_conformance tests/isa_conformance.c)
@@ -56,5 +61,19 @@ if(BUILD_TESTING)
                 $<TARGET_FILE:flowtinypack-demo>
                 $<TARGET_FILE:flowtinyvalidate>
                 $<TARGET_FILE:flowtinyrun>
+                ${CMAKE_CURRENT_BINARY_DIR})
+    add_test(NAME tinyvm_artifact_v2_roundtrip
+        COMMAND flowtinyv2-roundtrip ${CMAKE_CURRENT_BINARY_DIR}/tinyvm-v2-test.tvm)
+    add_test(NAME tinyvm_artifact_v2_boundary
+        COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/tests/artifact-v2-boundary.sh
+                $<TARGET_FILE:flowtinyv2-roundtrip>
+                $<TARGET_FILE:flowtinyvalidate>
+                $<TARGET_FILE:flowtinyrun>
+                ${CMAKE_CURRENT_BINARY_DIR})
+    add_test(NAME tinyvm_artifact_v2_hostile
+        COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/tests/artifact-v2-hostile.sh
+                $<TARGET_FILE:flowtinyv2-roundtrip>
+                $<TARGET_FILE:flowtinyv2-mutate>
+                $<TARGET_FILE:flowtinyvalidate>
                 ${CMAKE_CURRENT_BINARY_DIR})
 endif()

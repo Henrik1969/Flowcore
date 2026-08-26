@@ -106,13 +106,23 @@ bool tinyvm_artifact_validate(const TinyvmArtifact *artifact,
         diagnose(diagnostic, capacity, "required identity is empty, unterminated, or non-printable"); return false;
     }
     if (strcmp(artifact->target, "tinyvm-portable") != 0) { diagnose(diagnostic, capacity, "artifact target is not tinyvm-portable"); return false; }
-    if (artifact->code == NULL || artifact->code_count == 0) { diagnose(diagnostic, capacity, "artifact code is empty"); return false; }
-    if (artifact->entrypoint >= artifact->code_count) { diagnose(diagnostic, capacity, "entrypoint is outside code"); return false; }
-    if (artifact->data_words > 256 || artifact->stack_words > 256) { diagnose(diagnostic, capacity, "declared recovered-VM resources exceed capacity"); return false; }
-    for (size_t i = 0; i < artifact->code_count; ++i)
-        if (!validate_instruction(&artifact->code[i], i, artifact->code_count, diagnostic, capacity)) return false;
-    if (artifact->code[artifact->code_count - 1].opcode != OP_HALT) { diagnose(diagnostic, capacity, "artifact does not end in HALT"); return false; }
+    if (!tinyvm_validate_recovered_code(artifact->code, artifact->code_count,
+                                        artifact->entrypoint, artifact->data_words,
+                                        artifact->stack_words, diagnostic, capacity)) return false;
     diagnose(diagnostic, capacity, "valid"); return true;
+}
+
+bool tinyvm_validate_recovered_code(const InstrWord *code, size_t code_count,
+                                    uint64_t entrypoint, uint64_t data_words,
+                                    uint64_t stack_words,
+                                    char *diagnostic, size_t capacity) {
+    if (code == NULL || code_count == 0) { diagnose(diagnostic, capacity, "artifact code is empty"); return false; }
+    if (entrypoint >= code_count) { diagnose(diagnostic, capacity, "entrypoint is outside code"); return false; }
+    if (data_words > 256 || stack_words > 256) { diagnose(diagnostic, capacity, "declared recovered-VM resources exceed capacity"); return false; }
+    for (size_t i = 0; i < code_count; ++i)
+        if (!validate_instruction(&code[i], i, code_count, diagnostic, capacity)) return false;
+    if (code[code_count - 1].opcode != OP_HALT) { diagnose(diagnostic, capacity, "artifact does not end in HALT"); return false; }
+    return true;
 }
 
 static void encode(const TinyvmArtifact *artifact, uint8_t *bytes, size_t size) {

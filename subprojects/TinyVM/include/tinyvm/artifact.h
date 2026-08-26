@@ -34,3 +34,7 @@ bool tinyvm_artifact_write(const char *path, TinyvmArtifact *artifact,
                            char *diagnostic, size_t capacity);
 bool tinyvm_artifact_read(const char *path, TinyvmArtifact *artifact,
                           char *diagnostic, size_t capacity);
+bool tinyvm_validate_recovered_code(const InstrWord *code, size_t code_count,
+                                    uint64_t entrypoint, uint64_t data_words,
+                                    uint64_t stack_words,
+                                    char *diagnostic, size_t capacity);
