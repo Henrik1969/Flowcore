@@ -48,14 +48,28 @@ public:
         : root_(root), source_(std::move(source)), derivation_(std::move(derivation)) {}
 
     void compile() {
-        const auto& operations = required_array(required_object(root_, "lowering_plan"), "operations", "$.lowering_plan");
+        const auto& plan = required_object(root_, "lowering_plan");
+        const auto plan_version = integer(required(plan, "version", "$.lowering_plan"), "$.lowering_plan.version");
+        if (plan_version == 2) for (const auto& value : required_array(plan, "functions", "$.lowering_plan")) {
+            const auto& function = object(value, "$.lowering_plan.functions[]");
+            Callable callable; callable.body = integer(required(function, "body_block_id", "$.function"), "$.function.body_block_id");
+            callable.entry = boolean(required(function, "entry", "$.function"), "$.function.entry");
+            callable.available = string(required(function, "availability", "$.function"), "$.function.availability") == "definition";
+            for (const auto& parameter : required_array(function, "parameters", "$.function")) {
+                const auto& item = object(parameter, "$.function.parameters[]");
+                callable.parameters.emplace_back(integer(required(item, "symbol_id", "$.parameter"), "$.parameter.symbol_id"),
+                                                 string(required(item, "type", "$.parameter"), "$.parameter.type"));
+            }
+            callables_[integer(required(function, "symbol_id", "$.function"), "$.function.symbol_id")] = std::move(callable);
+        }
+        const auto& operations = required_array(plan, "operations", "$.lowering_plan");
         scan_arguments(required(root_, "lowering_plan"));
         if (uses_arguments_) { next_slot_ = required_argument_count_ + 1; slot_types_[0] = TINYVM_CARRIER_I32; for (std::size_t index = 1; index < next_slot_; ++index) slot_types_[index] = TINYVM_CARRIER_OPAQUE_HANDLE; }
         for (const auto& value : operations) {
             const auto& operation = object(value, "$.lowering_plan.operations[]");
             const auto kind = string(required(operation, "kind", "$.lowering_plan.operations[]"), "$.lowering_plan.operations[].kind");
-            if (kind == "call") continue;
-            if (kind != "value_definition" && kind != "assignment" && kind != "return_value" && kind != "branch" && kind != "loop" && kind != "external_call")
+            if (kind == "call" && plan_version != 2) continue;
+            if (kind != "call" && kind != "value_definition" && kind != "assignment" && kind != "return_value" && kind != "branch" && kind != "loop" && kind != "external_call")
                 throw Unsupported("operation kind '" + kind + "' is not admitted by the scalar slice");
             const auto block = optional(operation, "block_id") ? integer(*optional(operation, "block_id"), "$.operation.block_id") : 0;
             blocks_[block].push_back(&operation);
@@ -79,7 +93,12 @@ public:
             return a == b ? integer(required(*left, "id", "$.operation"), "$.operation.id") < integer(required(*right, "id", "$.operation"), "$.operation.id") : a < b;
         });
         if (required_argument_count_) emit_argument_guard();
-        if (blocks_.empty()) emit_return_zero(); else compile_block(0);
+        if (blocks_.empty()) emit_return_zero();
+        else if (plan_version == 2) {
+            std::vector<Integer> entries; for (const auto& [identity,function] : callables_) if (function.entry && function.available) entries.push_back(identity);
+            if (entries.size() != 1) throw Unsupported("callable plan requires exactly one selected entry definition");
+            compile_block(callables_.at(entries.front()).body);
+        } else compile_block(0);
         if (code.empty() || (code.back().opcode != TV1_RETURN && code.back().opcode != TV1_TRAP && code.back().opcode != TV1_HALT)) emit_return_zero();
     }
 
@@ -93,11 +112,16 @@ public:
     std::uint32_t isa_version() const { return uses_arguments_ ? 2 : 1; }
 
 private:
+    struct Callable { Integer body=-1; bool entry=false, available=false; std::vector<std::pair<Integer,std::string>> parameters; };
     const Object& root_;
     std::string source_, derivation_;
     std::map<Integer, std::size_t> symbols_;
     std::map<std::size_t, std::uint32_t> slot_types_;
     std::map<Integer, std::vector<const Object*>> blocks_;
+    std::map<Integer,Callable> callables_;
+    std::map<Integer,std::size_t> call_results_;
+    std::size_t* function_result_ = nullptr;
+    std::vector<std::size_t>* function_return_jumps_ = nullptr;
     std::set<Integer> active_blocks_;
     std::deque<std::string> string_data_;
     std::size_t next_slot_ = 0;
@@ -107,8 +131,8 @@ private:
     std::uint32_t line_ = 1;
 
     static std::uint32_t carrier(std::string_view type) {
-        if (type == "bool") return TINYVM_CARRIER_I1;
-        if (type == "c_int") return TINYVM_CARRIER_I32;
+        if (type == "bool" || type == "Bool") return TINYVM_CARRIER_I1;
+        if (type == "int" || type == "c_int") return TINYVM_CARRIER_I32;
         if (type == "c_long" || type == "c_ulong" || type == "c_size_t") return TINYVM_CARRIER_I64;
         if (type == "c_string" || type == "c_pointer") return TINYVM_CARRIER_OPAQUE_HANDLE;
         throw Unsupported("type carrier '" + std::string(type) + "' is not admitted by the scalar slice");
@@ -164,6 +188,11 @@ private:
             const auto result = slot(); slot_types_[result] = TINYVM_CARRIER_OPAQUE_HANDLE; emit(TV1_STORAGE_HANDLE, result, id, 0); return result;
         }
         if (kind == "identifier") return symbol_slot(integer(required(node, "symbol_id", "$.expression"), "$.expression.symbol_id"));
+        if (kind == "call_result") {
+            const auto identity = integer(required(node, "expression_id", "$.expression"), "$.expression.expression_id");
+            if (!call_results_.contains(identity)) throw Unsupported("call result expression is not available");
+            return call_results_.at(identity);
+        }
         if (kind == "call" && optional(node, "intrinsic") && string(*optional(node, "intrinsic"), "$.expression.intrinsic") == "list_length") return 0;
         if (kind == "index" && optional(node, "intrinsic") && string(*optional(node, "intrinsic"), "$.expression.intrinsic") == "list_index") {
             const auto& index = object(required(node, "index", "$.expression"), "$.expression.index");
@@ -204,7 +233,7 @@ private:
         set_provenance(operation);
         const auto kind = string(required(operation, "kind", "$.operation"), "$.operation.kind");
         const auto& operands = required_array(operation, "operands", "$.operation");
-        if (operands.empty() && kind != "external_call") throw Unsupported("scalar operation has no operand");
+        if (operands.empty() && kind != "external_call" && kind != "call") throw Unsupported("scalar operation has no operand");
         if (kind == "branch") {
             const auto value = expression(operands.front());
             const auto branch_index = code.size(); emit(TV1_BRANCH, value, 0, 0);
@@ -213,9 +242,11 @@ private:
             const bool then_terminal = compile_block(then_block);
             std::size_t then_jump = SIZE_MAX;
             if (!then_terminal) { set_provenance(operation); then_jump = code.size(); emit(TV1_JMP, 0, 0, 0); }
-            if (const auto* otherwise = optional(operation, "else_block_id")) {
+            const auto* otherwise = optional(operation, "else_block_id");
+            const auto otherwise_block = otherwise ? integer(*otherwise, "$.operation.else_block_id") : -1;
+            if (otherwise_block >= 0) {
                 code[branch_index].pad = static_cast<std::int64_t>(code.size());
-                const bool else_terminal = compile_block(integer(*otherwise, "$.operation.else_block_id"));
+                const bool else_terminal = compile_block(otherwise_block);
                 std::size_t else_jump = SIZE_MAX;
                 if (!else_terminal) { set_provenance(operation); else_jump = code.size(); emit(TV1_JMP, 0, 0, 0); }
                 const auto join = static_cast<std::int64_t>(code.size());
@@ -272,8 +303,35 @@ private:
             slot_types_[destination] = carrier(result_type);
             emit(TV1_CALL_IMPORT, destination, imported.id, argument_start); return;
         }
+        if (kind == "call") {
+            const auto callee = integer(required(operation, "callee_symbol_id", "$.operation"), "$.operation.callee_symbol_id");
+            if (!callables_.contains(callee) || !callables_.at(callee).available) throw Unsupported("ordinary call definition is unavailable");
+            const auto& callable = callables_.at(callee);
+            if (operands.size() != callable.parameters.size()) throw Unsupported("ordinary call operand count mismatch");
+            std::vector<std::size_t> values; for (const auto& operand : operands) values.push_back(expression(operand));
+            for (std::size_t index=0; index<values.size(); ++index) {
+                const auto destination=symbol_slot(callable.parameters[index].first); slot_types_[destination]=carrier(callable.parameters[index].second);
+                if(slot_types_.at(values[index])!=slot_types_.at(destination))throw Unsupported("ordinary call argument carrier mismatch");
+                emit(TV1_MOVE,destination,values[index],0);
+            }
+            auto result=slot(); slot_types_[result]=TINYVM_CARRIER_I32;
+            std::vector<std::size_t> return_jumps; auto* previous_result=function_result_; auto* previous_jumps=function_return_jumps_;
+            function_result_=&result; function_return_jumps_=&return_jumps; compile_block(callable.body);
+            const auto continuation=static_cast<std::int64_t>(code.size()); for(const auto jump:return_jumps)code[jump].a=continuation;
+            function_result_=previous_result; function_return_jumps_=previous_jumps;
+            const auto expression_id=integer(required(operation,"expression_id","$.operation"),"$.operation.expression_id"); call_results_[expression_id]=result;
+            if(const auto* result_identity=optional(operation,"result_symbol_id")) {
+                const auto destination=symbol_slot(integer(*result_identity,"$.operation.result_symbol_id")); slot_types_[destination]=TINYVM_CARRIER_I32;
+                emit(TV1_MOVE,destination,result,0);
+            }
+            return;
+        }
         const auto value = expression(operands.front());
-        if (kind == "return_value") { emit(TV1_RETURN, value, 0, 0); return; }
+        if (kind == "return_value") {
+            if(function_result_) { emit(TV1_MOVE,*function_result_,value,0); const auto jump=code.size(); emit(TV1_JMP,0,0,0); function_return_jumps_->push_back(jump); }
+            else emit(TV1_RETURN, value, 0, 0);
+            return;
+        }
         const auto identity = integer(required(operation, "result_symbol_id", "$.operation"), "$.operation.result_symbol_id");
         const auto destination = symbol_slot(identity);
         slot_types_[destination] = slot_types_.at(value);

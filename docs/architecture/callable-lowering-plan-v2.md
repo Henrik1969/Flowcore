@@ -27,6 +27,12 @@ call results to the captured expression identity. The shared scalar classifier
 is called independently by tokenizer-shaped and headless-document-shaped probes
 and returns the same class through an `llvm-host` target-policy build.
 
+The first TinyVM consumer deterministically specializes the same non-recursive
+call graph while lowering: arguments move into typed parameter-identity slots,
+each function return writes a dedicated result slot and jumps to the call
+continuation, and the surrounding expression consumes that result by captured
+expression identity. No host stack address or source lookup is serialized.
+
 During the staged consumer migration, Flowanalyst emits version 1 by default
 and emits the complete callable boundary with
 `--lowering-plan-version 2`. This is an explicit artifact-version request, not

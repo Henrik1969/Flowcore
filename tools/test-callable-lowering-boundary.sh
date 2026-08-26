@@ -9,6 +9,9 @@ optimize=${FLOWOPTIMIZE_BIN:?}
 prepare=${FLOWPREPARE_BIN:?}
 validate=${FLOWVALIDATE_BIN:?}
 lower=${FLOWLOWER_BIN:?}
+tiny_lower=${FLOWTINYLOWER_BIN:?}
+tiny_validate=${FLOWTINYVALIDATE_BIN:?}
+tiny_run=${FLOWTINYRUN_BIN:?}
 source="$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass/fn_demo.flow"
 tmpdir=$(mktemp -d)
 trap 'rm -rf "$tmpdir"' EXIT
@@ -52,5 +55,16 @@ classifier_status=$?
 set -e
 test "$classifier_status" -eq 1
 jq -e '.status == "ready" and .backend.name == "llvm"' "$tmpdir/classifier.report.json" >/dev/null
+
+"$prepare" --target-policy "$root/Flowlower/target-policies/tinyvm-portable.json" "$tmpdir/classifier.optimization.json" > "$tmpdir/classifier.tiny.lowering.json"
+"$tiny_lower" "$tmpdir/classifier.tiny.lowering.json" "$tmpdir/classifier.tvm" > "$tmpdir/classifier.tiny.report.json"
+"$tiny_lower" "$tmpdir/classifier.tiny.lowering.json" "$tmpdir/classifier-again.tvm" >/dev/null
+cmp -s "$tmpdir/classifier.tvm" "$tmpdir/classifier-again.tvm"
+"$tiny_validate" "$tmpdir/classifier.tvm" | grep -q '"status":"valid"'
+tiny_result=$("$tiny_run" "$tmpdir/classifier.tvm" | jq -r .result)
+test "$tiny_result" -eq "$classifier_status"
+tiny_computed_result=$("$tiny_run" --engine computed "$tmpdir/classifier.tvm" | jq -r .result)
+test "$tiny_computed_result" -eq "$tiny_result"
+jq -e '.status == "emitted" and .backend == "tinyvm"' "$tmpdir/classifier.tiny.report.json" >/dev/null
 
 echo 'callable lowering boundary: PASS'

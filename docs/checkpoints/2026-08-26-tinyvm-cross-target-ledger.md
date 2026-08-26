@@ -326,3 +326,18 @@ the already captured recovered-ISA boundary.
 - The complete GCC superbuild and all 74 canonical tests passed. The full
   callable v2 capture/validation/LLVM execution slice passed under Clang 18
   ASan/UBSan with the documented LeakSanitizer exclusion.
+
+### TinyVM callable consumer — `tinyvm-callable-lowering-v2`
+
+- TinyVM lowering consumes the same callable v2 catalog through deterministic
+  non-recursive call specialization, typed parameter slots, expression-keyed
+  results and explicit return-to-continuation jumps.
+- Callable artifacts remain host-address-free and byte-deterministic across two
+  lowerings from the same captured input.
+- The shared tokenizer/document classifier executes with result 1 under both
+  `llvm-host` and `tinyvm-portable`, selected only by target-policy file.
+- `flowtinyrun --engine switch|computed` exposes both governed engines for file
+  artifacts; the callable probe produces identical complete result under each.
+- The complete GCC superbuild and all 74 canonical tests passed. The full
+  cross-backend callable slice and switch/computed ISA conformance passed under
+  Clang 18 ASan/UBSan with the documented LeakSanitizer exclusion.

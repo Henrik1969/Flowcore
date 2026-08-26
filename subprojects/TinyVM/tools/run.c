@@ -13,7 +13,7 @@ static unsigned version(const char *path) {
     return (unsigned)header[8]|(unsigned)header[9]<<8|(unsigned)header[10]<<16|(unsigned)header[11]<<24;
 }
 
-static int run_v2(const char *path,const char *policy,int argument_count,char **arguments) {
+static int run_v2(const char *path,const char *policy,const char *engine,int argument_count,char **arguments) {
     TinyvmArtifactV2 artifact; char diagnostic[160];
     if(!tinyvm_artifact_v2_read(path,&artifact,diagnostic,sizeof diagnostic)){fprintf(stderr,"flowtinyrun: %s\n",diagnostic);return 1;}
     if(artifact.isa_version==0) {
@@ -30,7 +30,7 @@ static int run_v2(const char *path,const char *policy,int argument_count,char **
     if(!tinyvm_isa_v1_context_init(&context,(size_t)artifact.data_words,UINT64_C(10000000))){tinyvm_artifact_v2_destroy(&artifact);return 1;}
     context.argument_count=provider.argument_count; context.arguments=provider.arguments;
     if(artifact.import_count){context.import_resolver=tinyvm_runtime_provider_resolve;context.import_user=&provider;}
-    const bool ok=tinyvm_isa_v1_run_switch(&artifact,&context);
+    const bool ok=!strcmp(engine,"computed")?tinyvm_isa_v1_run_computed(&artifact,&context):tinyvm_isa_v1_run_switch(&artifact,&context);
     if(!ok&&context.fault)fprintf(stderr,"flowtinyrun: %s\n",context.fault);
     printf("{\"format\":\"flowtiny.execution_record\",\"version\":1,\"status\":\"%s\",\"artifact_format\":2,\"artifact_id\":\"%s\",\"target_policy_id\":\"%s\",\"carrier\":%u,\"result\":%" PRIu64 ",\"pc\":%" PRIu64 ",\"trap\":%u}\n",ok?"completed":"faulted",artifact.artifact_id,artifact.target_policy_id,context.result.carrier,context.result.bits,context.pc,context.trap);
     tinyvm_isa_v1_context_destroy(&context); tinyvm_artifact_v2_destroy(&artifact); return ok?0:1;
@@ -46,8 +46,13 @@ static int run_v1(const char *path) {
 }
 
 int main(int argc,char **argv) {
-    const char *policy=NULL; int first=1;
-    if(argc>2&&!strcmp(argv[1],"--policy")){policy=argv[2];first=3;}
-    if(argc<=first){fprintf(stderr,"usage: %s [--policy FILE] ARTIFACT [PROGRAM-ARGUMENT ...]\n",argv[0]);return 2;}
-    return version(argv[first])==2?run_v2(argv[first],policy,argc-first,&argv[first]):run_v1(argv[first]);
+    const char *policy=NULL,*engine="switch"; int first=1;
+    while(first<argc&&!strncmp(argv[first],"--",2)) {
+        if(!strcmp(argv[first],"--policy")&&first+1<argc){policy=argv[first+1];first+=2;}
+        else if(!strcmp(argv[first],"--engine")&&first+1<argc){engine=argv[first+1];first+=2;}
+        else {fprintf(stderr,"flowtinyrun: unknown or incomplete option\n");return 2;}
+    }
+    if(strcmp(engine,"switch")&&strcmp(engine,"computed")){fprintf(stderr,"flowtinyrun: engine must be switch or computed\n");return 2;}
+    if(argc<=first){fprintf(stderr,"usage: %s [--policy FILE] [--engine switch|computed] ARTIFACT [PROGRAM-ARGUMENT ...]\n",argv[0]);return 2;}
+    return version(argv[first])==2?run_v2(argv[first],policy,engine,argc-first,&argv[first]):run_v1(argv[first]);
 }
