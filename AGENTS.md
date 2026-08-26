@@ -3,7 +3,7 @@
 ## Autonomous reusable-chain work
 
 The active autonomous mission is defined by
-`docs/tasks/reusable-flow-chain-autonomous.md`. Read it completely before making
+`docs/tasks/typed-artifact-contract-v028.md`. Read it completely before making
 task changes. Treat it as the authoritative objective and definition of done.
 
 ### Continuation contract
@@ -12,8 +12,8 @@ task changes. Treat it as the authoritative objective and definition of done.
 - An intermediate green build, successful commit, plan update, context
   compaction, or completed implementation slice is not completion.
 - Recover after a fresh session by reading, in order: this file, the task file,
-  `docs/architecture/reusable-flow-chain-plan.md`, the current maturation ledger,
-  `.codex-run-state`, recent Git history, and the worktree.
+  `docs/architecture/typed-artifact-contract-plan.md`, the current maturation
+  ledger, `.codex-run-state`, recent Git history, and the worktree.
 - Keep `.codex-run-state` as exactly one of `CONTINUE`, `BLOCKED`, or `DONE`.
 - Leave it as `CONTINUE` while any task gate remains unfinished.
 - Set it to `BLOCKED` only when all safe progress is prevented by a genuine
