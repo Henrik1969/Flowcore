@@ -119,6 +119,9 @@ library.
 
 ## Gate F — self-hosting and build stack
 
+The detailed product-scale and staged bootstrap requirements live in
+[`product-scale-and-self-hosting-plan.md`](product-scale-and-self-hosting-plan.md).
+
 - establish a canonical CMake/Ninja superbuild;
 - remove sibling build-path coupling;
 - make Flowtools/CLion consume imported stage targets;
