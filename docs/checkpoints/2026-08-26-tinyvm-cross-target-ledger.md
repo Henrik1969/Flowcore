@@ -282,3 +282,15 @@ the already captured recovered-ISA boundary.
 - The complete GCC superbuild and all 73 canonical tests passed. Focused Clang
   18 ASan/UBSan bootstrap-contract, validator and deterministic-capture tests
   passed with the documented LeakSanitizer exclusion.
+
+### Non-empty target-policy replay correction — `target-policy-nonempty-replay`
+
+- Corrected the LLVM structured-plan loader to populate backend-lowering
+  artifact version 2 rather than treating it as an empty non-applicable plan.
+- Strengthened name-only cross-target proof with a nonzero return plan: LLVM
+  and TinyVM both execute result 37 from their independently admitted v2 files.
+- The test now prevents an empty source fixture from masking loss of lowering
+  operations at the target-policy boundary.
+- The complete GCC superbuild and all 73 canonical tests passed. The strengthened
+  cross-target execution test passed under Clang 18 ASan/UBSan with the
+  documented LeakSanitizer exclusion.

@@ -33,6 +33,7 @@ add_test(NAME flowtarget_cross_compile
         FLOWPREPARE_BIN=$<TARGET_FILE:flowprepare>
         FLOWLOWER_BIN=$<TARGET_FILE:flowlower>
         FLOWTINYLOWER_BIN=$<TARGET_FILE:flowtinylower>
+        FLOWTINYRUN_BIN=$<TARGET_FILE:flowtinyrun>
         ${CMAKE_CURRENT_SOURCE_DIR}/tests/run-target-cross-compile-tests.sh)
 add_test(NAME flowlower_pipeline
     COMMAND ${CMAKE_COMMAND} -E env

@@ -5,6 +5,7 @@ target=${FLOWTARGET_BIN:?}
 prepare=${FLOWPREPARE_BIN:?}
 llvm=${FLOWLOWER_BIN:?}
 tiny=${FLOWTINYLOWER_BIN:?}
+tiny_run=${FLOWTINYRUN_BIN:?}
 fixture_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 policy_root="$fixture_dir/../target-policies"
 tmpdir=$(mktemp -d)
@@ -59,5 +60,24 @@ else
 fi
 test ! -e "$tmpdir/wrong-abi.tvm"
 jq -e '.status == "unsupported" and (.reason | contains("incompatible with the TinyVM backend"))' "$tmpdir/wrong-abi.report.json" >/dev/null
+
+# A non-empty plan proves v2 policy capture cannot be mistaken for an empty
+# legacy plan by either consumer.
+jq '.lowering_plan.operations = [{"id":0,"kind":"return_value","expression_id":0,"statement_id":0,"scope_id":0,"block_id":0,"callee":"","callee_symbol_id":-1,"arguments":[0],"operands":[{"expression_id":0,"kind":"integer_literal","type":"c_int","value":"37"}]}]' \
+    "$fixture_dir/captured-empty-optimization.json" > "$tmpdir/nonempty.optimization.json"
+for name in llvm-host tinyvm-portable; do
+    "$target" --policy-root "$policy_root" "$name" > "$tmpdir/$name.policy.json"
+    "$prepare" --target-policy "$tmpdir/$name.policy.json" "$tmpdir/nonempty.optimization.json" > "$tmpdir/$name.nonempty.json"
+done
+"$llvm" --emit-llvm "$tmpdir/nonempty.ll" "$tmpdir/llvm-host.nonempty.json" >/dev/null
+clang "$tmpdir/nonempty.ll" -o "$tmpdir/nonempty.llvm"
+set +e
+"$tmpdir/nonempty.llvm"
+llvm_status=$?
+set -e
+test "$llvm_status" -eq 37
+"$tiny" "$tmpdir/tinyvm-portable.nonempty.json" "$tmpdir/nonempty.tvm" >/dev/null
+tiny_result=$("$tiny_run" "$tmpdir/nonempty.tvm" | jq -r .result)
+test "$tiny_result" -eq 37
 
 echo 'target-policy cross compilation: PASS'

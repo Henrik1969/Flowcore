@@ -124,7 +124,10 @@ private:
     }
     void load() {
         const auto format = text(field(root_, "format"));
-        if ((format != "flowoptimize.optimization_report" && format != "flowcore.backend_lowering_artifact") || integer(field(root_, "version"), "version") != 1) return;
+        const auto version = integer(field(root_, "version"), "version");
+        if ((format == "flowoptimize.optimization_report" && version != 1) ||
+            (format == "flowcore.backend_lowering_artifact" && version != 1 && version != 2) ||
+            (format != "flowoptimize.optimization_report" && format != "flowcore.backend_lowering_artifact")) return;
         if (const auto* contracts = field(root_, "abi_type_contracts"))
             for (const auto& item : array(contracts, "abi_type_contracts")) {
                 const auto name = text(field(item, "name"));
