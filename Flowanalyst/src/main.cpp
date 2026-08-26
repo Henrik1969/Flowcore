@@ -49,7 +49,8 @@ struct AggregateLayout { std::string contract, name; std::vector<std::pair<std::
 struct Region { std::string id, kind, status; std::vector<std::string> prerequisites; };
 struct EffectFact { int declaration = -1, symbol = -1; std::string name, effect, certainty, reason; };
 struct CallSite { int expression = -1, statement = -1, scope = -1, callee_symbol = -1, write_symbol = -1; std::string callee; bool pure = false; std::set<int> reads; std::string writes; std::vector<int> arguments; std::vector<int> independent_with; };
-struct LoweringOperation { int expression = -1, statement = -1, scope = -1, block = -1, then_block = -1, else_block = -1, body_block = -1, callee_symbol = -1, result_symbol = -1; std::string callee, kind, contract, library, convention, symbol, effect, parameter_types, return_type; std::vector<int> arguments; };
+struct LoweringOperation { int expression = -1, statement = -1, scope = -1, block = -1, function_symbol = -1, then_block = -1, else_block = -1, body_block = -1, callee_symbol = -1, result_symbol = -1; std::string callee, kind, contract, library, convention, symbol, effect, parameter_types, return_type; std::vector<int> arguments; };
+struct Callable { int symbol = -1, scope = -1, body_block = -1; bool entry = false; std::string name, return_type, availability; std::vector<std::pair<int, std::string>> parameters; };
 struct Resolution { int expression = -1, statement = -1, scope = -1, symbol = -1; std::string name; };
 
 std::string trim_copy(std::string value) {
@@ -71,7 +72,7 @@ bool numeric_extents(const std::string& value) {
     return true;
 }
 
-int run(const Json& bundle) {
+int run(const Json& bundle, int lowering_plan_version) {
     if (text(field(bundle, "format")) != "flowmini.frontend_bundle" || integer(field(bundle, "version")) != 2) throw std::runtime_error("unsupported FlowMini frontend bundle");
     const auto* snapshot = field(bundle, "symbol_table"); if (!snapshot) throw std::runtime_error("bundle has no symbol_table");
     std::map<int, const Json*> symbols, scopes, origins;
@@ -204,9 +205,49 @@ int run(const Json& bundle) {
     std::function<void(int, int)> assign_statements = [&](int block_id, int owner_scope) {
         if (!blocks.count(block_id)) return;
         int scope_id = block_scopes.count(block_id) ? block_scopes[block_id] : owner_scope;
-        for (const auto& statement : list(field(*blocks[block_id], "statements"))) { int statement_id = integer(&statement); statement_scopes[statement_id] = scope_id; for (int child : nested_block(*statements[statement_id])) assign_statements(child, owner_scope); }
+        for (const auto& statement : list(field(*blocks[block_id], "statements"))) {
+            int statement_id = integer(&statement); statement_scopes[statement_id] = scope_id;
+            for (int child : nested_block(*statements[statement_id])) assign_statements(child, owner_scope);
+            const int else_if = integer(field(field(field(*statements[statement_id], "payload"), "else_arm"), "if_statement"));
+            if (else_if >= 0 && statements.count(else_if)) {
+                statement_scopes[else_if] = scope_id;
+                for (int child : nested_block(*statements[else_if])) assign_statements(child, owner_scope);
+            }
+        }
     };
     for (const auto& [declaration_id, declaration] : declarations) { int scope_id = declaration_scopes.count(declaration_id) ? declaration_scopes[declaration_id] : -1; int body = integer(field(*declaration, "body_block")); if (scope_id >= 0 && body >= 0) assign_statements(body, scope_id); }
+    std::vector<Callable> callables;
+    for (const auto& [declaration_id, declaration] : declarations) {
+        const auto kind = text(field(*declaration, "kind"));
+        if (kind != "function" && kind != "main_block") continue;
+        const int scope_id = declaration_scopes.count(declaration_id) ? declaration_scopes[declaration_id] : -1;
+        if (!scopes.count(scope_id)) continue;
+        const int symbol_id = integer(field(*scopes.at(scope_id), "owner_symbol_id"));
+        if (!symbols.count(symbol_id)) continue;
+        Callable callable{symbol_id, scope_id, integer(field(*declaration, "body_block")), kind == "main_block",
+                          kind == "main_block" ? "main" : text(field(*declaration, "name")),
+                          kind == "main_block" ? "c_int" : fact_value(*symbols.at(symbol_id), "return_type_spelling"), "definition", {}};
+        for (const auto& child : list(field(*scopes.at(scope_id), "symbol_ids"))) {
+            const int parameter = integer(&child);
+            if (symbols.count(parameter) && text(field(*symbols.at(parameter), "kind")) == "Parameter")
+                callable.parameters.emplace_back(parameter, fact_value(*symbols.at(parameter), "declared_type_spelling"));
+        }
+        callables.push_back(std::move(callable));
+    }
+    std::set<int> catalogued_callables;
+    for (const auto& callable : callables) catalogued_callables.insert(callable.symbol);
+    for (const auto& [symbol_id, symbol] : symbols) {
+        if (text(field(*symbol, "kind")) != "Function" || catalogued_callables.count(symbol_id)) continue;
+        const int scope_id = integer(field(*symbol, "introduced_scope_id"));
+        Callable callable{symbol_id, scope_id, -1, false, text(field(*symbol, "name")),
+                          fact_value(*symbol, "return_type_spelling"), "declaration", {}};
+        if (scopes.count(scope_id)) for (const auto& child : list(field(*scopes.at(scope_id), "symbol_ids"))) {
+            const int parameter = integer(&child);
+            if (symbols.count(parameter) && text(field(*symbols.at(parameter), "kind")) == "Parameter")
+                callable.parameters.emplace_back(parameter, fact_value(*symbols.at(parameter), "declared_type_spelling"));
+        }
+        callables.push_back(std::move(callable));
+    }
     std::vector<Resolution> resolutions;
     std::map<int, std::pair<int, int>> expression_context;
     std::set<std::pair<int, int>> visited_expressions;
@@ -436,6 +477,18 @@ int run(const Json& bundle) {
         }
     }
     std::vector<LoweringOperation> lowering_operations;
+    auto containing_function = [&](int scope_id) {
+        int current = scope_id;
+        while (current >= 0 && scopes.count(current)) {
+            const int owner = integer(field(*scopes.at(current), "owner_symbol_id"));
+            if (symbols.count(owner)) {
+                const auto kind = text(field(*symbols.at(owner), "kind"));
+                if (kind == "Function" || kind == "Procedure") return owner;
+            }
+            current = integer(field(*scopes.at(current), "parent_id"));
+        }
+        return -1;
+    };
     auto containing_block = [&](int statement_id) {
         for (const auto& [block_id, block] : blocks) for (const auto& member : list(field(*block, "statements"))) if (integer(&member) == statement_id) return block_id;
         return -1;
@@ -446,6 +499,7 @@ int run(const Json& bundle) {
         operation.statement = site.statement;
         operation.scope = site.scope;
         operation.block = containing_block(site.statement);
+        operation.function_symbol = containing_function(site.scope);
         operation.callee_symbol = site.callee_symbol;
         operation.result_symbol = site.write_symbol;
         operation.callee = site.callee;
@@ -485,6 +539,7 @@ int run(const Json& bundle) {
         operation.statement = statement_id;
         operation.scope = scope_id;
         operation.block = containing_block(statement_id);
+        operation.function_symbol = containing_function(scope_id);
         operation.result_symbol = result_symbol;
         operation.kind = "value_definition";
         operation.arguments.push_back(initializer);
@@ -500,6 +555,7 @@ int run(const Json& bundle) {
         operation.statement = statement_id;
         operation.scope = statement_scopes.count(statement_id) ? statement_scopes.at(statement_id) : -1;
         operation.block = containing_block(statement_id);
+        operation.function_symbol = containing_function(operation.scope);
         operation.kind = "return_value";
         operation.arguments.push_back(value_expression);
         lowering_operations.push_back(std::move(operation));
@@ -512,6 +568,7 @@ int run(const Json& bundle) {
         operation.statement = statement_id;
         operation.scope = statement_scopes.count(statement_id) ? statement_scopes.at(statement_id) : -1;
         operation.block = containing_block(statement_id);
+        operation.function_symbol = containing_function(operation.scope);
         operation.then_block = integer(field(payload, "then_block"));
         operation.else_block = integer(field(field(payload, "else_arm"), "block"));
         operation.kind = "branch";
@@ -529,6 +586,7 @@ int run(const Json& bundle) {
         operation.statement = statement_id;
         operation.scope = scope_id;
         operation.block = containing_block(statement_id);
+        operation.function_symbol = containing_function(scope_id);
         operation.result_symbol = visible_symbol(scope_id, text(field(field(payload, "target"), "name")));
         operation.kind = "assignment";
         operation.arguments.push_back(value_expression);
@@ -542,6 +600,7 @@ int run(const Json& bundle) {
         operation.statement = statement_id;
         operation.scope = statement_scopes.count(statement_id) ? statement_scopes.at(statement_id) : -1;
         operation.block = containing_block(statement_id);
+        operation.function_symbol = containing_function(operation.scope);
         operation.body_block = integer(field(payload, "body_block"));
         operation.kind = "loop";
         if (operation.expression >= 0) operation.arguments.push_back(operation.expression);
@@ -600,8 +659,28 @@ int run(const Json& bundle) {
                   << ",\"opaque\":" << quote(type.opaque)
                   << ",\"cleanup\":" << quote(type.cleanup) << "}";
     }
-    std::cout << "],\n  \"lowering_plan\": {\"format\":\"flowcore.lowering_plan\",\"version\":1,\"status\":\""
-              << (diagnostics.empty() ? "ready" : "blocked") << "\",\"operations\":[";
+    std::cout << "],\n  \"lowering_plan\": {\"format\":\"flowcore.lowering_plan\",\"version\":" << lowering_plan_version << ",\"status\":\""
+              << (diagnostics.empty() ? "ready" : "blocked") << "\"";
+    if (lowering_plan_version == 2) {
+        std::cout << ",\"functions\":[";
+        for (std::size_t index = 0; index < callables.size(); ++index) {
+            if (index) std::cout << ',';
+            const auto& callable = callables[index];
+            std::cout << "{\"symbol_id\":" << callable.symbol << ",\"name\":" << quote(callable.name)
+                      << ",\"scope_id\":" << callable.scope << ",\"body_block_id\":" << callable.body_block
+                      << ",\"return_type\":" << quote(callable.return_type) << ",\"entry\":" << (callable.entry ? "true" : "false")
+                      << ",\"availability\":" << quote(callable.availability)
+                      << ",\"parameters\":[";
+            for (std::size_t parameter = 0; parameter < callable.parameters.size(); ++parameter) {
+                if (parameter) std::cout << ',';
+                std::cout << "{\"symbol_id\":" << callable.parameters[parameter].first
+                          << ",\"type\":" << quote(callable.parameters[parameter].second) << "}";
+            }
+            std::cout << "]}";
+        }
+        std::cout << "]";
+    }
+    std::cout << ",\"operations\":[";
     std::function<void(int, const std::string&)> emit_operand = [&](int expression_id, const std::string& declared_type) {
         const auto* expression = expressions.count(expression_id) ? expressions.at(expression_id) : nullptr;
         const auto kind = text(field(expression, "kind"));
@@ -653,7 +732,18 @@ int run(const Json& bundle) {
                 if (type == "list<string>")
                     std::cout << ",\"intrinsic\":\"list_length\",\"type\":\"c_int\",\"symbol_id\":" << symbol;
                 else std::cout << ",\"type\":\"unsupported\"";
-            } else std::cout << ",\"type\":\"unsupported\"";
+            } else {
+                const int callee_symbol = resolved_expression_symbols.count(base) ? resolved_expression_symbols.at(base) : -1;
+                if (lowering_plan_version == 2 && symbols.count(callee_symbol) && text(field(*symbols.at(callee_symbol), "kind")) == "Function") {
+                    std::cout << ",\"type\":" << quote(fact_value(*symbols.at(callee_symbol), "return_type_spelling"))
+                              << ",\"callee_symbol_id\":" << callee_symbol << ",\"arguments\":[";
+                    for (std::size_t index = 0; index < arguments.size(); ++index) {
+                        if (index) std::cout << ',';
+                        emit_operand(integer(&arguments[index]), {});
+                    }
+                    std::cout << "]";
+                } else std::cout << ",\"type\":\"unsupported\"";
+            }
         } else if (kind == "unary") {
             const auto* payload = field(expression, "payload");
             std::cout << ",\"type\":\"c_int\",\"operator\":" << quote(text(field(payload, "operator"))) << ",\"operand\":";
@@ -678,7 +768,9 @@ int run(const Json& bundle) {
                   << ",\"kind\":" << quote(operation.kind)
                   << ",\"expression_id\":" << operation.expression
                   << ",\"statement_id\":" << operation.statement
-                  << ",\"scope_id\":" << operation.scope
+                  << ",\"scope_id\":" << operation.scope;
+        if (lowering_plan_version == 2) std::cout << ",\"function_symbol_id\":" << operation.function_symbol;
+        std::cout
                   << (operation.block >= 0 ? ",\"block_id\":" + std::to_string(operation.block) : std::string{})
                   << ",\"callee\":" << quote(operation.callee)
                   << ",\"callee_symbol_id\":" << operation.callee_symbol
@@ -813,7 +905,21 @@ int main(int argc, char** argv) {
             }
             if (option == "-v" || option == "--version") { std::cout << FLOWANALYST_VERSION << '\n'; return 0; }
         }
-        std::ostringstream input; if (argc > 2) { std::cerr << "usage: flowanalyst [bundle.json]\n"; return 1; } if (argc == 2) { std::ifstream file(argv[1]); if (!file) throw std::runtime_error("cannot open bundle"); input << file.rdbuf(); } else input << std::cin.rdbuf(); return run(Parser(input.str()).parse());
+        int lowering_plan_version = 1; std::string input_path;
+        for (int index = 1; index < argc; ++index) {
+            const std::string argument = argv[index];
+            if (argument == "--lowering-plan-version") {
+                if (++index >= argc) throw std::runtime_error("--lowering-plan-version requires 1 or 2");
+                lowering_plan_version = std::stoi(argv[index]);
+                if (lowering_plan_version != 1 && lowering_plan_version != 2) throw std::runtime_error("unsupported lowering plan version");
+            } else if (!argument.empty() && argument.front() == '-') throw std::runtime_error("unknown option: " + argument);
+            else if (input_path.empty()) input_path = argument;
+            else throw std::runtime_error("too many input paths");
+        }
+        std::ostringstream input;
+        if (!input_path.empty()) { std::ifstream file(input_path); if (!file) throw std::runtime_error("cannot open bundle"); input << file.rdbuf(); }
+        else input << std::cin.rdbuf();
+        return run(Parser(input.str()).parse(), lowering_plan_version);
     }
     catch (const std::exception& error) { std::cerr << "flowanalyst error: " << error.what() << '\n'; return 1; }
 }

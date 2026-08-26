@@ -36,9 +36,43 @@ inline void validate_lowering_plan(const json::Value& value, std::string_view pa
     const auto& plan = json::object(value, path);
     if (json::string(json::required(plan, "format", path), std::string(path) + ".format") != "flowcore.lowering_plan")
         throw json::Error(std::string(path) + ".format", "unsupported lowering plan format");
-    if (json::integer(json::required(plan, "version", path), std::string(path) + ".version") != 1)
+    const auto version = json::integer(json::required(plan, "version", path), std::string(path) + ".version");
+    if (version != 1 && version != 2)
         throw json::Error(std::string(path) + ".version", "unsupported lowering plan version");
     validate_identity_array(plan, "operations", "id", path);
+    if (version == 2) {
+        const auto& functions = required_array(plan, "functions", path);
+        std::set<json::Integer> identities;
+        std::size_t entries = 0;
+        for (std::size_t index = 0; index < functions.size(); ++index) {
+            const auto item_path = std::string(path) + ".functions[" + std::to_string(index) + "]";
+            const auto& function = json::object(functions[index], item_path);
+            const auto identity = json::integer(json::required(function, "symbol_id", item_path), item_path + ".symbol_id");
+            if (identity < 0 || !identities.insert(identity).second) throw json::Error(item_path + ".symbol_id", "invalid or duplicate function identity");
+            (void)json::string(json::required(function, "name", item_path), item_path + ".name");
+            (void)json::integer(json::required(function, "scope_id", item_path), item_path + ".scope_id");
+            (void)json::integer(json::required(function, "body_block_id", item_path), item_path + ".body_block_id");
+            (void)json::string(json::required(function, "return_type", item_path), item_path + ".return_type");
+            (void)json::string(json::required(function, "availability", item_path), item_path + ".availability");
+            if (json::boolean(json::required(function, "entry", item_path), item_path + ".entry")) ++entries;
+            const auto& parameters = required_array(function, "parameters", item_path);
+            std::set<json::Integer> parameter_ids;
+            for (std::size_t parameter = 0; parameter < parameters.size(); ++parameter) {
+                const auto parameter_path = item_path + ".parameters[" + std::to_string(parameter) + "]";
+                const auto& item = json::object(parameters[parameter], parameter_path);
+                const auto parameter_id = json::integer(json::required(item, "symbol_id", parameter_path), parameter_path + ".symbol_id");
+                if (parameter_id < 0 || !parameter_ids.insert(parameter_id).second) throw json::Error(parameter_path + ".symbol_id", "invalid or duplicate parameter identity");
+                (void)json::string(json::required(item, "type", parameter_path), parameter_path + ".type");
+            }
+        }
+        (void)entries;
+        const auto& operations = required_array(plan, "operations", path);
+        for (std::size_t index = 0; index < operations.size(); ++index) {
+            const auto operation_path = std::string(path) + ".operations[" + std::to_string(index) + "]";
+            const auto owner = json::integer(json::required(json::object(operations[index], operation_path), "function_symbol_id", operation_path), operation_path + ".function_symbol_id");
+            if (!identities.count(owner)) throw json::Error(operation_path + ".function_symbol_id", "operation owner is not in function catalog");
+        }
+    }
 }
 
 inline void validate_frontend_bundle(const json::Value& value) {

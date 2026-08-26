@@ -76,6 +76,17 @@ add_test(NAME stage0_seed_capture
         FLOWVALIDATE_BIN=$<TARGET_FILE:flowvalidate>
         ${CMAKE_CURRENT_SOURCE_DIR}/tools/test-stage0-seed-capture.sh)
 
+add_test(NAME callable_lowering_boundary
+    COMMAND ${CMAKE_COMMAND} -E env
+        FLOWCORE_ROOT=${CMAKE_CURRENT_SOURCE_DIR}
+        FLOWMINI_BIN=$<TARGET_FILE:flowmini>
+        FLOWANALYST_BIN=$<TARGET_FILE:flowanalyst>
+        FLOWPARALLEL_BIN=$<TARGET_FILE:flowparallel>
+        FLOWOPTIMIZE_BIN=$<TARGET_FILE:flowoptimize>
+        FLOWPREPARE_BIN=$<TARGET_FILE:flowprepare>
+        FLOWVALIDATE_BIN=$<TARGET_FILE:flowvalidate>
+        ${CMAKE_CURRENT_SOURCE_DIR}/tools/test-callable-lowering-boundary.sh)
+
 add_test(NAME native_binding_selection
     COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/tools/test-native-binding-selection.sh)
 

@@ -69,8 +69,37 @@ inline void validate_abi_contracts(const json::Object& root) {
 inline void validate_lowering_authority(const json::Value& value, std::string_view base = "$.lowering_plan") {
     const auto& plan = json::object(value, base);
     if (json::string(json::required(plan, "format", base), std::string(base) + ".format") != "flowcore.lowering_plan") throw json::Error(std::string(base) + ".format", "unsupported lowering plan format");
-    if (json::integer(json::required(plan, "version", base), std::string(base) + ".version") != 1) throw json::Error(std::string(base) + ".version", "unsupported lowering plan version");
+    const auto version = json::integer(json::required(plan, "version", base), std::string(base) + ".version");
+    if (version != 1 && version != 2) throw json::Error(std::string(base) + ".version", "unsupported lowering plan version");
     const auto& operations = required_array(plan, "operations", base);
+    std::set<json::Integer> function_ids;
+    if (version == 2) {
+        const auto& functions = required_array(plan, "functions", base);
+        std::size_t entries = 0;
+        for (std::size_t index = 0; index < functions.size(); ++index) {
+            const auto path = std::string(base) + ".functions[" + std::to_string(index) + "]";
+            const auto& function = json::object(functions[index], path);
+            const auto id = json::integer(json::required(function, "symbol_id", path), path + ".symbol_id");
+            if (id < 0 || !function_ids.insert(id).second) throw json::Error(path + ".symbol_id", "invalid or duplicate function identity");
+            (void)json::string(json::required(function, "name", path), path + ".name");
+            (void)json::integer(json::required(function, "scope_id", path), path + ".scope_id");
+            (void)json::integer(json::required(function, "body_block_id", path), path + ".body_block_id");
+            (void)json::string(json::required(function, "return_type", path), path + ".return_type");
+            const auto availability = json::string(json::required(function, "availability", path), path + ".availability");
+            if (availability != "definition" && availability != "declaration") throw json::Error(path + ".availability", "unsupported callable availability");
+            if (json::boolean(json::required(function, "entry", path), path + ".entry")) ++entries;
+            const auto& parameters = required_array(function, "parameters", path);
+            std::set<json::Integer> parameter_ids;
+            for (std::size_t parameter = 0; parameter < parameters.size(); ++parameter) {
+                const auto parameter_path = path + ".parameters[" + std::to_string(parameter) + "]";
+                const auto& item = json::object(parameters[parameter], parameter_path);
+                const auto parameter_id = json::integer(json::required(item, "symbol_id", parameter_path), parameter_path + ".symbol_id");
+                if (parameter_id < 0 || !parameter_ids.insert(parameter_id).second) throw json::Error(parameter_path + ".symbol_id", "invalid or duplicate parameter identity");
+                (void)json::string(json::required(item, "type", parameter_path), parameter_path + ".type");
+            }
+        }
+        (void)entries;
+    }
     std::set<json::Integer> ids;
     for (std::size_t index = 0; index < operations.size(); ++index) {
         const auto path = std::string(base) + ".operations[" + std::to_string(index) + "]";
@@ -78,6 +107,14 @@ inline void validate_lowering_authority(const json::Value& value, std::string_vi
         const auto id = json::integer(json::required(operation, "id", path), path + ".id");
         if (id < 0 || !ids.insert(id).second) throw json::Error(path + ".id", id < 0 ? "operation identity must be non-negative" : "duplicate operation identity");
         (void)json::string(json::required(operation, "kind", path), path + ".kind");
+        if (version == 2) {
+            const auto owner = json::integer(json::required(operation, "function_symbol_id", path), path + ".function_symbol_id");
+            if (!function_ids.count(owner)) throw json::Error(path + ".function_symbol_id", "operation owner is not in function catalog");
+            if (json::string(json::required(operation, "kind", path), path + ".kind") == "call") {
+                const auto callee = json::integer(json::required(operation, "callee_symbol_id", path), path + ".callee_symbol_id");
+                if (callee >= 0 && !function_ids.count(callee)) throw json::Error(path + ".callee_symbol_id", "callee is not in function catalog");
+            }
+        }
         if (const auto* block = json::optional(operation, "block_id")) if (json::integer(*block, path + ".block_id") < 0) throw json::Error(path + ".block_id", "operation block identity must be non-negative");
         (void)required_array(operation, "operands", path);
         if (json::string(json::required(operation, "kind", path), path + ".kind") == "external_call") {
@@ -160,7 +197,8 @@ inline SemanticReport semantic_report(const json::Value& value) {
     validate_lowering_authority(result.lowering_plan);
     const auto& plan = json::object(result.lowering_plan, "$.lowering_plan");
     if (json::string(json::required(plan, "format", "$.lowering_plan"), "$.lowering_plan.format") != "flowcore.lowering_plan") throw json::Error("$.lowering_plan.format", "unsupported lowering plan format");
-    if (json::integer(json::required(plan, "version", "$.lowering_plan"), "$.lowering_plan.version") != 1) throw json::Error("$.lowering_plan.version", "unsupported lowering plan version");
+    const auto plan_version = json::integer(json::required(plan, "version", "$.lowering_plan"), "$.lowering_plan.version");
+    if (plan_version != 1 && plan_version != 2) throw json::Error("$.lowering_plan.version", "unsupported lowering plan version");
     for (const auto& item : required_array(root, "effect_facts")) {
         const auto& fact = json::object(item, "$.effect_facts[]");
         if (const auto* certainty = json::optional(fact, "certainty")) if (json::string(*certainty, "$.effect_facts[].certainty") == "proven") ++result.proven_pure_count;
@@ -222,7 +260,8 @@ inline ExecutionPlan execution_plan(const json::Value& value) {
     validate_lowering_authority(result.lowering_plan);
     const auto& plan = json::object(result.lowering_plan, "$.lowering_plan");
     if (json::string(json::required(plan, "format", "$.lowering_plan"), "$.lowering_plan.format") != "flowcore.lowering_plan") throw json::Error("$.lowering_plan.format", "unsupported lowering plan format");
-    if (json::integer(json::required(plan, "version", "$.lowering_plan"), "$.lowering_plan.version") != 1) throw json::Error("$.lowering_plan.version", "unsupported lowering plan version");
+    const auto plan_version = json::integer(json::required(plan, "version", "$.lowering_plan"), "$.lowering_plan.version");
+    if (plan_version != 1 && plan_version != 2) throw json::Error("$.lowering_plan.version", "unsupported lowering plan version");
     result.dependency_matrix = execution_matrix(root);
     return result;
 }

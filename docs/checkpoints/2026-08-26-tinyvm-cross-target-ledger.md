@@ -294,3 +294,21 @@ the already captured recovered-ISA boundary.
 - The complete GCC superbuild and all 73 canonical tests passed. The strengthened
   cross-target execution test passed under Clang 18 ASan/UBSan with the
   documented LeakSanitizer exclusion.
+
+### Callable lowering plan v2 — `callable-lowering-plan-v2`
+
+- Added a complete function catalog with stable identities, parameter types,
+  body roots, return types and exactly one entry to the backend-neutral plan.
+- Every lowering operation now names its owning function; ordinary calls and
+  nested call expressions preserve exact callee and typed argument authority.
+- Flowparallel and Flowoptimize pass the complete file forward without needing
+  Flowanalyst or frontend internals, and `flowprepare` captures it unchanged.
+- Public validation and mutation tests reject duplicate function identity,
+  unknown operation ownership and unknown callees before either backend is
+  invoked; named-target entry candidates remain explicit until selection.
+- Flowanalyst exposes v2 through explicit `--lowering-plan-version 2` during
+  staged consumer migration; v1 remains the default until both backends pass
+  callable parity, avoiding a flag-day break of historical captured pipelines.
+- The complete GCC superbuild and all 74 canonical tests passed. Focused Clang
+  18 ASan/UBSan frontend, analyst, callable boundary and public-validator tests
+  passed with the documented LeakSanitizer exclusion.

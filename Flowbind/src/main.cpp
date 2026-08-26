@@ -154,8 +154,9 @@ void validate_lowering_plan(const std::string& report, const std::vector<Require
     const Json root = JsonParser{report}.parse();
     const Json* plan = json_field(root, "lowering_plan");
     if (plan == nullptr) return;
+    const auto plan_version = json_integer(json_field(*plan, "version"), "lowering_plan.version");
     if (json_text(json_field(*plan, "format")) != "flowcore.lowering_plan" ||
-        json_integer(json_field(*plan, "version"), "lowering_plan.version") != 1) {
+        (plan_version != 1 && plan_version != 2)) {
         throw std::runtime_error("unsupported lowering plan contract");
     }
     const auto& operations = json_array(json_field(*plan, "operations"), "lowering_plan.operations");
