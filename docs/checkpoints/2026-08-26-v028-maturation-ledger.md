@@ -106,6 +106,26 @@ Gates 2–4 first vertical checkpoint:
 
 ## Exact next action
 
-Complete public typed slices for the remaining binding, optimization,
-lowering, ABI, runtime, and adjacent Flowparallel provider/planner artifacts,
-then build `flowvalidate` over those public contracts.
+### Gate 6 independent validator
+
+- Added `flowvalidate`, an independently invocable executable built only on
+  public Flowcontracts definitions.
+- It identifies and validates frontend bundles, semantic reports, lowering
+  plans, binding reports, execution plans, optimization reports, lowering
+  reports, and graph-provider decisions.
+- Stable exits are 0 valid, 1 invalid, 2 blocked, and 3 unsupported; diagnostics
+  provide classification, format, version, source provenance where available,
+  JSON path, and reason in machine JSON or human form.
+- `--canonical` produces deterministic JSON and is idempotent across a second
+  independent validation/serialization pass.
+- Real producer-captured frontend, semantic, binding, execution, optimization,
+  and lowering artifacts validate and round-trip. Duplicate operation identity,
+  duplicate keys, blocked status, and unsupported format tests fail into their
+  exact classes.
+- Focused Flowcontracts and validator gate passed (2/2 in 0.29 seconds).
+
+## Exact next action
+
+Migrate adjacent Flowparallel runtime, CUDA, graph calibration, and provider
+planner authority decisions onto Flowcontracts, then execute the end-to-end
+identity mutation gate.

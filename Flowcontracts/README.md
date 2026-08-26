@@ -17,6 +17,9 @@ Current surfaces:
 - typed `flowparallel.execution_plan` and
   `flowparallel.graph_provider_decision` v1 consumption for Flowoptimize;
 - lowering-plan identity and matrix dimension/coordinate validation.
+- independently invocable `flowvalidate` support for every main-chain artifact,
+  stable valid/invalid/blocked/unsupported exits, machine or human diagnostics,
+  source attribution, and canonical JSON round-tripping.
 
 ## Version-1 unknown-field policy
 
