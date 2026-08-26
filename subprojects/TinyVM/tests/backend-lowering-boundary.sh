@@ -17,7 +17,8 @@ grep -q '"status":"emitted"' "$report"
 "$validate" "$artifact" | grep -q '"status":"valid"'
 "$run" "$artifact" | grep -q '"carrier":2,"result":0'
 
-jq '.lowering_plan.operations = [{"id":0,"kind":"value_definition","block_id":0,"statement_id":0,"result_symbol_id":1,"operands":[{"kind":"integer_literal","type":"c_int","value":"1"}]}]' "$fixture" > "$build/nonempty.json"
+jq '.lowering_plan.operations = [{"id":0,"kind":"call","block_id":0,"statement_id":0,"operands":[]}]' "$fixture" > "$build/nonempty.json"
+rm -f "$build/nonempty.tvm"
 set +e
 "$lower" "$build/nonempty.json" "$build/nonempty.tvm" > "$build/unsupported.json"
 status=$?

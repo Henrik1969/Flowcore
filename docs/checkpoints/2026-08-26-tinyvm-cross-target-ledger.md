@@ -117,3 +117,23 @@ the already captured recovered-ISA boundary.
 - The complete GCC superbuild and all 68 canonical tests passed. Focused Clang
   18 ASan/UBSan builds and both backend-boundary tests passed with leak
   detection disabled for the managed traced-host limitation.
+
+### Provider-free scalar parity — `tinyvm-provider-free-scalar-parity`
+
+- TinyVM lowering now admits typed integer and Boolean literals, identifiers,
+  i32/i64 conversions, unary negation, modular arithmetic, signed division,
+  comparisons, local definitions, assignment, structured branches, loops and
+  typed returns.
+- Symbol storage and expression temporaries lower to distinct virtual slots;
+  control references resolve to artifact-local instruction indexes.
+- Every emitted instruction retains source, lowering-plan, operation, block and
+  symbol derivation. Compiler-generated control/return operations use explicit
+  reserved provenance identities rather than pretending to be source nodes.
+- Differential tests run the same public backend-neutral files through LLVM
+  and TinyVM for empty, literal-return, expression, local-symbol, comparison
+  branch and integer-loop programs and compare observable return values.
+- Unsupported operation and expression kinds still produce structured
+  `unsupported` results without creating a partial executable artifact.
+- The complete GCC superbuild and all 69 canonical tests passed. Focused Clang
+  18 ASan/UBSan builds and the boundary/parity tests passed with the documented
+  LeakSanitizer exclusion.

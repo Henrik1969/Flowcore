@@ -24,8 +24,9 @@ artifact without making the lowerer depend on Flowmini internals.
 complete selected target, lowering plan, ABI contracts, external operations,
 exact authorization capabilities and optimization provenance. Both
 `flowlower` (LLVM) and `flowtinylower` (TinyVM) consume a captured instance from
-disk. TinyVM currently admits the empty provider-free plan and returns a
-structured unsupported result for non-empty plans while Gate 4 is in progress.
+disk. TinyVM currently admits empty and scalar provider-free plans, including
+structured branches and loops, and returns a structured unsupported result for
+the remaining surface while Gate 4 is in progress.
 Direct optimization-report input to `flowlower` remains a temporary corpus
 compatibility path and is not the public backend boundary.
 

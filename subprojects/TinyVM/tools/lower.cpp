@@ -5,13 +5,17 @@ extern "C" {
 
 #include <openssl/sha.h>
 
+#include <algorithm>
 #include <cstdio>
 #include <cstring>
 #include <fstream>
 #include <iostream>
+#include <map>
+#include <set>
 #include <sstream>
 #include <stdexcept>
 #include <string>
+#include <vector>
 
 namespace {
 using namespace flowcontracts;
@@ -35,22 +39,201 @@ std::string identity(std::string_view prefix, std::string_view meaning) {
 
 void copy(char output[64], const std::string& value) { std::snprintf(output, 64, "%s", value.c_str()); }
 
+struct Unsupported : std::runtime_error { using std::runtime_error::runtime_error; };
+
+class Compiler {
+public:
+    Compiler(const Object& root, std::string source, std::string derivation)
+        : root_(root), source_(std::move(source)), derivation_(std::move(derivation)) {}
+
+    void compile() {
+        const auto& operations = required_array(required_object(root_, "lowering_plan"), "operations", "$.lowering_plan");
+        for (const auto& value : operations) {
+            const auto& operation = object(value, "$.lowering_plan.operations[]");
+            const auto kind = string(required(operation, "kind", "$.lowering_plan.operations[]"), "$.lowering_plan.operations[].kind");
+            if (kind != "value_definition" && kind != "assignment" && kind != "return_value" && kind != "branch" && kind != "loop")
+                throw Unsupported("operation kind '" + kind + "' is not admitted by the scalar slice");
+            const auto block = optional(operation, "block_id") ? integer(*optional(operation, "block_id"), "$.operation.block_id") : 0;
+            blocks_[block].push_back(&operation);
+        }
+        std::map<Integer, Integer> block_start;
+        for (const auto& [block, items] : blocks_) for (const auto* operation : items) {
+            const auto kind = string(required(*operation, "kind", "$.operation"), "$.operation.kind");
+            if (kind == "loop") continue;
+            const auto statement = integer(required(*operation, "statement_id", "$.operation"), "$.operation.statement_id");
+            if (!block_start.contains(block) || statement < block_start[block]) block_start[block] = statement;
+        }
+        for (auto& [block, items] : blocks_) std::stable_sort(items.begin(), items.end(), [&](const auto* left, const auto* right) {
+            auto order = [&](const Object* operation) {
+                if (string(required(*operation, "kind", "$.operation"), "$.operation.kind") == "loop") {
+                    const auto body = integer(required(*operation, "body_block_id", "$.operation"), "$.operation.body_block_id");
+                    if (block_start.contains(body)) return block_start[body];
+                }
+                return integer(required(*operation, "statement_id", "$.operation"), "$.operation.statement_id");
+            };
+            const auto a = order(left), b = order(right);
+            return a == b ? integer(required(*left, "id", "$.operation"), "$.operation.id") < integer(required(*right, "id", "$.operation"), "$.operation.id") : a < b;
+        });
+        if (operations.empty()) emit_return_zero();
+        else compile_block(0);
+        if (code.empty() || (code.back().opcode != TV1_RETURN && code.back().opcode != TV1_TRAP && code.back().opcode != TV1_HALT)) emit_return_zero();
+    }
+
+    std::vector<InstrWord> code;
+    std::vector<TinyvmConstant> constants;
+    std::vector<TinyvmProvenance> provenance;
+    std::size_t slot_count() const { return next_slot_; }
+
+private:
+    const Object& root_;
+    std::string source_, derivation_;
+    std::map<Integer, std::size_t> symbols_;
+    std::map<Integer, std::vector<const Object*>> blocks_;
+    std::set<Integer> active_blocks_;
+    std::size_t next_slot_ = 0;
+    std::uint64_t operation_ = UINT64_MAX, block_ = 1, symbol_ = UINT64_MAX;
+    std::uint32_t line_ = 1;
+
+    static std::uint32_t carrier(std::string_view type) {
+        if (type == "bool") return TINYVM_CARRIER_I1;
+        if (type == "c_int") return TINYVM_CARRIER_I32;
+        if (type == "c_long" || type == "c_ulong" || type == "c_size_t") return TINYVM_CARRIER_I64;
+        throw Unsupported("type carrier '" + std::string(type) + "' is not admitted by the scalar slice");
+    }
+    std::size_t slot() { return next_slot_++; }
+    std::size_t symbol_slot(Integer identity) {
+        const auto found = symbols_.find(identity);
+        if (found != symbols_.end()) return found->second;
+        return symbols_.emplace(identity, slot()).first->second;
+    }
+    void emit(std::int64_t opcode, std::int64_t a, std::int64_t b, std::int64_t pad) {
+        code.push_back({opcode, a, b, pad});
+        TinyvmProvenance item{};
+        item.instruction = provenance.size(); item.operation = operation_; item.block = block_; item.symbol = symbol_;
+        item.line = line_; item.column = 1; copy(item.source, source_); copy(item.derivation, derivation_);
+        provenance.push_back(item);
+    }
+    std::size_t constant(std::uint32_t type, std::uint64_t bits) {
+        for (const auto& item : constants) if (item.carrier == type && item.bits == bits) return item.id;
+        const auto id = constants.size() + 1; constants.push_back({id, type, bits}); return id;
+    }
+    std::size_t literal(std::uint32_t type, std::uint64_t bits) {
+        const auto result = slot(); emit(TV1_CONST, result, constant(type, bits), 0); return result;
+    }
+    std::size_t expression(const Value& value) {
+        const auto& node = object(value, "$.expression");
+        const auto kind = string(required(node, "kind", "$.expression"), "$.expression.kind");
+        if (kind == "integer_literal") {
+            const auto type = carrier(string(required(node, "type", "$.expression"), "$.expression.type"));
+            const auto text = string(required(node, "value", "$.expression"), "$.expression.value");
+            std::size_t consumed = 0; const auto signed_value = std::stoll(text, &consumed, 10);
+            if (consumed != text.size()) throw Unsupported("non-canonical integer literal");
+            if (type == TINYVM_CARRIER_I32 && (signed_value < INT32_MIN || signed_value > INT32_MAX)) throw Unsupported("i32 literal is out of range");
+            const auto bits = type == TINYVM_CARRIER_I32 ? static_cast<std::uint64_t>(static_cast<std::int64_t>(static_cast<std::int32_t>(signed_value))) : static_cast<std::uint64_t>(signed_value);
+            return literal(type, bits);
+        }
+        if (kind == "bool_literal") {
+            const auto text = string(required(node, "value", "$.expression"), "$.expression.value");
+            if (text != "true" && text != "false") throw Unsupported("non-canonical boolean literal");
+            return literal(TINYVM_CARRIER_I1, text == "true");
+        }
+        if (kind == "identifier") return symbol_slot(integer(required(node, "symbol_id", "$.expression"), "$.expression.symbol_id"));
+        if (kind == "conversion") {
+            const auto source = expression(required(node, "operand", "$.expression")); const auto result = slot();
+            emit(TV1_CONVERT, result, source, carrier(string(required(node, "type", "$.expression"), "$.expression.type"))); return result;
+        }
+        if (kind == "unary") {
+            const auto operation = string(required(node, "operator", "$.expression"), "$.expression.operator");
+            const auto operand = expression(required(node, "operand", "$.expression"));
+            if (operation == "+") return operand;
+            if (operation != "-") throw Unsupported("unary operator '" + operation + "' is not admitted");
+            const auto zero = literal(carrier(string(required(node, "type", "$.expression"), "$.expression.type")), 0), result = slot();
+            emit(TV1_SUB, result, zero, operand); return result;
+        }
+        if (kind == "binary") {
+            const auto left = expression(required(node, "left", "$.expression"));
+            const auto right = expression(required(node, "right", "$.expression"));
+            const auto operation = string(required(node, "operator", "$.expression"), "$.expression.operator");
+            const std::map<std::string, std::int64_t> opcodes{{"+",TV1_ADD},{"-",TV1_SUB},{"*",TV1_MUL},{"/",TV1_SDIV},{"==",TV1_CMP_EQ},{"!=",TV1_CMP_NE},{"<",TV1_CMP_LT},{"<=",TV1_CMP_LE},{">",TV1_CMP_GT},{">=",TV1_CMP_GE}};
+            const auto found = opcodes.find(operation); if (found == opcodes.end()) throw Unsupported("binary operator '" + operation + "' is not admitted");
+            const auto result = slot(); emit(found->second, result, left, right); return result;
+        }
+        throw Unsupported("expression kind '" + kind + "' is not admitted by the scalar slice");
+    }
+    void set_provenance(const Object& operation) {
+        operation_ = static_cast<std::uint64_t>(integer(required(operation, "id", "$.operation"), "$.operation.id")) + 1;
+        block_ = optional(operation, "block_id") ? static_cast<std::uint64_t>(integer(*optional(operation, "block_id"), "$.operation.block_id")) + 1 : 1;
+        symbol_ = optional(operation, "result_symbol_id") ? static_cast<std::uint64_t>(integer(*optional(operation, "result_symbol_id"), "$.operation.result_symbol_id")) + 1 : UINT64_MAX;
+        line_ = optional(operation, "statement_id") ? static_cast<std::uint32_t>(integer(*optional(operation, "statement_id"), "$.operation.statement_id") + 1) : 1;
+    }
+    void compile_operation(const Object& operation) {
+        set_provenance(operation);
+        const auto kind = string(required(operation, "kind", "$.operation"), "$.operation.kind");
+        const auto& operands = required_array(operation, "operands", "$.operation");
+        if (operands.empty()) throw Unsupported("scalar operation has no operand");
+        if (kind == "branch") {
+            const auto value = expression(operands.front());
+            const auto branch_index = code.size(); emit(TV1_BRANCH, value, 0, 0);
+            const auto then_block = integer(required(operation, "then_block_id", "$.operation"), "$.operation.then_block_id");
+            code[branch_index].b = static_cast<std::int64_t>(code.size());
+            const bool then_terminal = compile_block(then_block);
+            std::size_t then_jump = SIZE_MAX;
+            if (!then_terminal) { set_provenance(operation); then_jump = code.size(); emit(TV1_JMP, 0, 0, 0); }
+            if (const auto* otherwise = optional(operation, "else_block_id")) {
+                code[branch_index].pad = static_cast<std::int64_t>(code.size());
+                const bool else_terminal = compile_block(integer(*otherwise, "$.operation.else_block_id"));
+                std::size_t else_jump = SIZE_MAX;
+                if (!else_terminal) { set_provenance(operation); else_jump = code.size(); emit(TV1_JMP, 0, 0, 0); }
+                const auto join = static_cast<std::int64_t>(code.size());
+                if (then_jump != SIZE_MAX) code[then_jump].a = join;
+                if (else_jump != SIZE_MAX) code[else_jump].a = join;
+            } else {
+                const auto join = static_cast<std::int64_t>(code.size());
+                code[branch_index].pad = join;
+                if (then_jump != SIZE_MAX) code[then_jump].a = join;
+            }
+            return;
+        }
+        if (kind == "loop") {
+            const auto condition = code.size();
+            const auto value = expression(operands.front());
+            const auto branch_index = code.size(); emit(TV1_BRANCH, value, 0, 0);
+            code[branch_index].b = static_cast<std::int64_t>(code.size());
+            const auto body = integer(required(operation, "body_block_id", "$.operation"), "$.operation.body_block_id");
+            const bool body_terminal = compile_block(body);
+            if (!body_terminal) { set_provenance(operation); emit(TV1_JMP, condition, 0, 0); }
+            code[branch_index].pad = static_cast<std::int64_t>(code.size());
+            return;
+        }
+        const auto value = expression(operands.front());
+        if (kind == "return_value") { emit(TV1_RETURN, value, 0, 0); return; }
+        const auto identity = integer(required(operation, "result_symbol_id", "$.operation"), "$.operation.result_symbol_id");
+        const auto destination = symbol_slot(identity);
+        if (destination != value) emit(TV1_MOVE, destination, value, 0);
+    }
+    bool compile_block(Integer block) {
+        if (!active_blocks_.insert(block).second) throw Unsupported("cyclic structured block ownership");
+        const auto found = blocks_.find(block);
+        if (found == blocks_.end()) throw Unsupported("referenced structured block is absent");
+        bool terminal = false;
+        for (const auto* operation : found->second) {
+            if (terminal) break;
+            compile_operation(*operation);
+            terminal = string(required(*operation, "kind", "$.operation"), "$.operation.kind") == "return_value";
+        }
+        active_blocks_.erase(block);
+        return terminal;
+    }
+    void emit_return_zero() {
+        operation_ = UINT64_MAX; block_ = 1; symbol_ = UINT64_MAX; line_ = 1;
+        const auto zero = literal(TINYVM_CARRIER_I32, 0); emit(TV1_RETURN, zero, 0, 0);
+    }
+};
+
 int lower(const char* input_path, const char* output_path) {
     const auto input = parse(read(input_path));
     validate_backend_lowering_artifact(input);
     const auto& root = object(input);
-    const auto& plan = required_object(root, "lowering_plan");
-    const auto& operations = required_array(plan, "operations", "$.lowering_plan");
-    if (!operations.empty()) {
-        std::cout << serialize(Object{{"backend", "tinyvm"}, {"format", "flowtiny.lowering_result"},
-                                     {"reason", "provider-free non-empty lowering is not admitted yet"},
-                                     {"status", "unsupported"}, {"version", Integer{1}}}) << '\n';
-        return 2;
-    }
-
-    TinyvmConstant constants[] = {{1, TINYVM_CARRIER_I32, 0}};
-    InstrWord code[] = {{TV1_CONST, 0, 1, 0}, {TV1_RETURN, 0, 0, 0}};
-    TinyvmProvenance provenance[2] = {};
     const auto canonical = serialize(input);
     const auto source = serialize(required(root, "source"));
     const auto plan_text = serialize(required(root, "lowering_plan"));
@@ -58,30 +241,28 @@ int lower(const char* input_path, const char* output_path) {
     const auto target = serialize(required(root, "target"));
     const auto source_id = identity("source-", source);
     const auto plan_id = identity("plan-", plan_text);
-    for (std::size_t index = 0; index < 2; ++index) {
-        provenance[index].instruction = index;
-        provenance[index].operation = UINT64_MAX;
-        provenance[index].block = 1;
-        provenance[index].symbol = UINT64_MAX;
-        provenance[index].line = 1;
-        provenance[index].column = 1;
-        copy(provenance[index].source, source_id);
-        copy(provenance[index].derivation, plan_id);
+    Compiler compiler(root, source_id, plan_id);
+    try { compiler.compile(); }
+    catch (const Unsupported& unsupported) {
+        std::cout << serialize(Object{{"backend", "tinyvm"}, {"format", "flowtiny.lowering_result"},
+                                     {"reason", std::string(unsupported.what())}, {"status", "unsupported"},
+                                     {"version", Integer{1}}}) << '\n';
+        return 2;
     }
 
     TinyvmArtifactV2 artifact;
     tinyvm_artifact_v2_init(&artifact);
     artifact.isa_version = 1;
-    artifact.data_words = 1;
+    artifact.data_words = compiler.slot_count();
     artifact.stack_words = 16;
     copy(artifact.artifact_id, identity("tinyvm-", canonical));
     copy(artifact.source_id, source_id);
     copy(artifact.target_policy_id, identity("target-", target));
     copy(artifact.lowering_plan_id, plan_id);
     copy(artifact.optimization_id, identity("opt-", optimization));
-    artifact.code = code; artifact.code_count = 2;
-    artifact.constants = constants; artifact.constant_count = 1;
-    artifact.provenance = provenance; artifact.provenance_count = 2;
+    artifact.code = compiler.code.data(); artifact.code_count = compiler.code.size();
+    artifact.constants = compiler.constants.data(); artifact.constant_count = compiler.constants.size();
+    artifact.provenance = compiler.provenance.data(); artifact.provenance_count = compiler.provenance.size();
     char diagnostic[256];
     if (!tinyvm_artifact_v2_write(output_path, &artifact, diagnostic, sizeof diagnostic))
         throw std::runtime_error(std::string("cannot emit TinyVM artifact: ") + diagnostic);

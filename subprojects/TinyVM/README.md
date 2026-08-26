@@ -80,5 +80,7 @@ The first typed execution semantics are specified in [`ISA-V1.md`](ISA-V1.md).
 
 When built in the Flowcore superbuild, `flowtinylower` consumes the public
 backend-neutral lowering artifact and deterministically emits ISA v1. Its first
-admitted slice is the empty provider-free program; other valid plans receive a
-structured unsupported result until their Gate 4 lowering rules land.
+admitted slices cover empty programs plus provider-free typed literals,
+conversions, unary/binary arithmetic, comparisons, local definitions,
+assignments, structured branches, loops and returns. Other valid plans receive
+a structured unsupported result until their lowering rules land.

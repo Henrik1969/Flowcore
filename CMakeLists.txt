@@ -156,6 +156,22 @@ add_test(NAME namespace_ambiguity
 set_tests_properties(namespace_ambiguity PROPERTIES
     DEPENDS "flowanalyst_pipeline")
 
+add_test(NAME tinyvm_scalar_backend_parity
+    COMMAND ${CMAKE_COMMAND} -E env
+        FLOWCORE_ROOT=${CMAKE_CURRENT_SOURCE_DIR}
+        FLOWMINI_BIN=$<TARGET_FILE:flowmini>
+        FLOWANALYST_BIN=$<TARGET_FILE:flowanalyst>
+        FLOWPARALLEL_BIN=$<TARGET_FILE:flowparallel>
+        FLOWOPTIMIZE_BIN=$<TARGET_FILE:flowoptimize>
+        FLOWPREPARE_BIN=$<TARGET_FILE:flowprepare>
+        FLOWLOWER_BIN=$<TARGET_FILE:flowlower>
+        FLOWTINYLOWER_BIN=$<TARGET_FILE:flowtinylower>
+        FLOWTINYVALIDATE_BIN=$<TARGET_FILE:flowtinyvalidate>
+        FLOWTINYRUN_BIN=$<TARGET_FILE:flowtinyrun>
+        ${CMAKE_CURRENT_SOURCE_DIR}/tools/test-tinyvm-scalar-parity.sh)
+set_tests_properties(tinyvm_scalar_backend_parity PROPERTIES
+    DEPENDS "flowlower_backend_artifact;tinyvm_backend_lowering_boundary")
+
 # Canonical installed shape. Debian packaging consumes this staged install and
 # splits runtime, development, and documentation payloads without depending on
 # the source-tree layout.
