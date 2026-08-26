@@ -61,6 +61,8 @@ typedef struct {
 
 void vm_init(vm_context *ctx);
 bool vm_run(vm_context *ctx, const InstrWord *program, size_t length);
+bool vm_run_switch(vm_context *ctx, const InstrWord *program, size_t length);
+bool vm_run_function(vm_context *ctx, const InstrWord *program, size_t length);
 
 void op_add(vm_context *, const InstrWord *);
 void op_sub(vm_context *, const InstrWord *);

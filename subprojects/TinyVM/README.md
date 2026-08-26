@@ -33,6 +33,24 @@ cmake --build build/tinyvm-recovered
 ctest --test-dir build/tinyvm-recovered --output-on-failure
 ```
 
+## Dispatch benchmark
+
+`tinyvm_dispatch_benchmark` executes identical instruction arrays through the
+recovered computed-goto loop, an ordinary `switch`, and a function-pointer
+table. It reports a NOP-heavy dispatch workload plus periodic and deterministically
+shuffled mixed-handler workloads. Results are measurements of one
+host/compiler/configuration, not a portable performance promise.
+
+```sh
+cmake -S subprojects/TinyVM -B build/tinyvm-bench \
+  -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=gcc
+cmake --build build/tinyvm-bench --target tinyvm_dispatch_benchmark
+build/tinyvm-bench/tinyvm_dispatch_benchmark
+```
+
+The first recovered-baseline observations are recorded in
+[`benchmarks/RESULTS-2026-08-26.md`](benchmarks/RESULTS-2026-08-26.md).
+
 ## Provenance
 
 - `/home/henrik/Dokumenter/tinyWM_backtraced.md`
