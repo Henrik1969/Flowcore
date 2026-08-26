@@ -21,6 +21,12 @@ Version 2 is the required authority for implementing functions in LLVM and
 TinyVM; backends may specialize non-recursive calls, but may not rediscover
 function ownership from source names or lexical accidents.
 
+The first LLVM consumer emits each v2 definition as a separate LLVM function,
+binds parameters through their stable symbol identities and connects ordinary
+call results to the captured expression identity. The shared scalar classifier
+is called independently by tokenizer-shaped and headless-document-shaped probes
+and returns the same class through an `llvm-host` target-policy build.
+
 During the staged consumer migration, Flowanalyst emits version 1 by default
 and emits the complete callable boundary with
 `--lowering-plan-version 2`. This is an explicit artifact-version request, not

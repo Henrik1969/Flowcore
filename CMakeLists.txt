@@ -85,6 +85,7 @@ add_test(NAME callable_lowering_boundary
         FLOWOPTIMIZE_BIN=$<TARGET_FILE:flowoptimize>
         FLOWPREPARE_BIN=$<TARGET_FILE:flowprepare>
         FLOWVALIDATE_BIN=$<TARGET_FILE:flowvalidate>
+        FLOWLOWER_BIN=$<TARGET_FILE:flowlower>
         ${CMAKE_CURRENT_SOURCE_DIR}/tools/test-callable-lowering-boundary.sh)
 
 add_test(NAME native_binding_selection

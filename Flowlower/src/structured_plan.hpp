@@ -50,13 +50,16 @@ struct Provider {
     bool operator<(const Provider& other) const { return tie() < other.tie(); }
 };
 struct Operation {
-    int id = -1, statement = -1, block = -1, result_symbol = -1, then_block = -1, else_block = -1, body_block = -1;
+    int id = -1, expression = -1, statement = -1, block = -1, function_symbol = -1, callee_symbol = -1, result_symbol = -1, then_block = -1, else_block = -1, body_block = -1;
     std::string kind;
     const Json* operand = nullptr;
     std::optional<Provider> provider;
 };
+struct Callable { int symbol=-1, body_block=-1; bool entry=false; std::string name, result; std::vector<std::pair<int,std::string>> parameters; };
 
 inline std::string llvm_type(std::string_view carrier) {
+    if (carrier == "int") return "i32";
+    if (carrier == "bool" || carrier == "Bool") return "i1";
     if (carrier == "c_int") return "i32";
     if (carrier == "c_long" || carrier == "c_ulong" || carrier == "c_size_t") return "i64";
     if (carrier == "c_string" || carrier == "c_pointer") return "ptr";
@@ -88,6 +91,11 @@ public:
         out << "; Flowcore generic structured lowering plan: ordered blocks, calls, branches and returns\n"
                "target triple = \"x86_64-pc-linux-gnu\"\n";
         emit_globals(out); emit_declarations(out);
+        if(plan_version_==2) {
+            for(const auto& [identity,function]:callables_)if(!function.entry&&function.body_block>=0)emit_function(function,out);
+            for(const auto& [identity,function]:callables_)if(function.entry){emit_function(function,out);return out.str();}
+            throw std::runtime_error("callable lowering plan has no selected entry definition");
+        }
         out << (uses_args_ ? "define i32 @main(i32 %argc, ptr %argv) {\n" : "define i32 @main() {\n") << "entry:\n";
         emit_allocations(out);
         if (required_argc_ > 0) {
@@ -102,6 +110,7 @@ public:
 private:
     const Json& root_; const Json& binding_;
     std::vector<Operation> operations_;
+    std::map<int,Callable> callables_;
     std::map<int, std::vector<const Operation*>> blocks_;
     std::map<int, std::string> symbol_types_;
     std::map<int, const Json*> definitions_;
@@ -109,6 +118,8 @@ private:
     std::set<Provider> providers_, authorized_;
     bool has_branch_ = false, has_declared_carrier_ = false, has_nonroot_block_ = false, invalid_control_ = false, unsupported_ = false, uses_args_ = false;
     int temporary_ = 0, label_ = 0, required_argc_ = 0;
+    int plan_version_ = 1;
+    std::map<int,std::pair<std::string,std::string>> call_results_;
     bool has_list_length_ = false;
 
     static Provider provider(const Json& value) {
@@ -135,10 +146,22 @@ private:
                 if (!name.empty() && !representation.empty()) carrier_representations_[name] = representation;
             }
         const auto* plan = field(root_, "lowering_plan");
-        if (!plan || text(field(*plan,"format")) != "flowcore.lowering_plan" || integer(field(*plan,"version"),"lowering_plan.version") != 1) return;
+        if (!plan || text(field(*plan,"format")) != "flowcore.lowering_plan") return;
+        plan_version_=integer(field(*plan,"version"),"lowering_plan.version");
+        if(plan_version_!=1&&plan_version_!=2)return;
+        if(plan_version_==2) for(const auto& item:array(field(*plan,"functions"),"lowering_plan.functions")) {
+            Callable function; function.symbol=integer(field(item,"symbol_id"),"function.symbol_id");
+            function.body_block=integer(field(item,"body_block_id"),"function.body_block_id"); function.entry=std::get<bool>(*field(item,"entry"));
+            function.name=text(field(item,"name")); function.result=text(field(item,"return_type"));
+            for(const auto& parameter:array(field(item,"parameters"),"function.parameters"))
+                function.parameters.emplace_back(integer(field(parameter,"symbol_id"),"parameter.symbol_id"),text(field(parameter,"type")));
+            for(const auto& [symbol,type]:function.parameters)symbol_types_[symbol]=type;
+            callables_[function.symbol]=std::move(function);
+        }
         for (const auto& item : array(field(*plan,"operations"), "lowering_plan.operations")) {
-            Operation op; op.id=integer(field(item,"id"),"id"); op.statement=integer(field(item,"statement_id"),"statement_id");
+            Operation op; op.id=integer(field(item,"id"),"id"); op.expression=integer(field(item,"expression_id"),"expression_id"); op.statement=integer(field(item,"statement_id"),"statement_id");
             op.block=integer(field(item,"block_id"),"block_id"); op.kind=text(field(item,"kind"));
+            op.function_symbol=integer(field(item,"function_symbol_id"),"function_symbol_id"); op.callee_symbol=integer(field(item,"callee_symbol_id"),"callee_symbol_id");
             op.result_symbol=integer(field(item,"result_symbol_id"),"result_symbol_id");
             op.then_block=integer(field(item,"then_block_id"),"then_block_id"); op.else_block=integer(field(item,"else_block_id"),"else_block_id");
             op.body_block=integer(field(item,"body_block_id"),"body_block_id");
@@ -151,6 +174,9 @@ private:
                 if (op.result_symbol>=0) symbol_types_[op.result_symbol]=op.provider->result;
             }
             if (op.kind=="value_definition" && op.result_symbol>=0 && op.operand) { definitions_[op.result_symbol]=op.operand; symbol_types_[op.result_symbol]=text(field(*op.operand,"type")); }
+            if(op.kind=="call"&&plan_version_==2&&callables_.count(op.callee_symbol)) {
+                if(op.result_symbol>=0)symbol_types_[op.result_symbol]=callables_.at(op.callee_symbol).result;
+            }
             if (op.kind=="branch") {
                 has_branch_=true;
             }
@@ -158,7 +184,7 @@ private:
             if (op.kind!="call" && op.kind!="external_call" && op.kind!="value_definition" && op.kind!="branch" && op.kind!="return_value" && op.kind!="loop" && op.kind!="assignment") unsupported_=true;
             operations_.push_back(std::move(op));
         }
-        for (auto& op:operations_) if (op.kind!="call") blocks_[op.block].push_back(&op);
+        for (auto& op:operations_) if (op.kind!="call" || plan_version_==2) blocks_[op.block].push_back(&op);
         for (const auto& op : operations_) {
             if (op.kind=="branch" && (op.then_block<0 || !blocks_.count(op.then_block) || (op.else_block>=0 && !blocks_.count(op.else_block)))) invalid_control_=true;
             if (op.kind=="loop" && (op.body_block<0 || !blocks_.count(op.body_block))) invalid_control_=true;
@@ -171,7 +197,10 @@ private:
             const int b_statement=b->kind=="loop"&&block_start.count(b->body_block)?block_start[b->body_block]:b->statement;
             return a_statement < b_statement || (a_statement==b_statement && a->id<b->id);
         });
-        std::set<int> reachable{0};
+        std::set<int> reachable;
+        if(plan_version_==2) {
+            for(const auto& [identity,function]:callables_)if(function.body_block>=0)reachable.insert(function.body_block);
+        } else reachable.insert(0);
         bool changed=true;
         while(changed) {
             changed=false;
@@ -233,6 +262,18 @@ private:
                <<"  %flow_storage_ptr_"<<symbol<<" = getelementptr ["<<bytes<<" x i8], ptr %flow_storage_"<<symbol<<", i64 0, i64 0\n";
         }
     }
+    void emit_function(const Callable& function,std::ostringstream& out) {
+        temporary_=0; label_=0; call_results_.clear();
+        const auto name=function.entry?"main":function.name;
+        if(!c_symbol(name)||llvm_type(function.result)!="i32")throw std::runtime_error("unsupported callable function signature");
+        out<<"define i32 @"<<name<<"(";
+        for(std::size_t index=0;index<function.parameters.size();++index){if(index)out<<", ";const auto type=llvm_type(function.parameters[index].second);if(type.empty())throw std::runtime_error("unsupported callable parameter type");out<<type<<" %flow_arg_"<<function.parameters[index].first;}
+        out<<") {\nentry:\n"; emit_allocations(out);
+        for(const auto& [symbol,type]:function.parameters)out<<"  store "<<llvm_type(type)<<" %flow_arg_"<<symbol<<", ptr "<<slot(symbol)<<"\n";
+        out<<"  br label %flow_block_"<<function.body_block<<"\n";
+        emit_block(function.body_block,out,"flow_function_exit");
+        out<<"flow_function_exit:\n  ret i32 0\n}\n";
+    }
     std::string load_symbol(int symbol,std::ostringstream& out) {
         const auto found=symbol_types_.find(symbol); if(found==symbol_types_.end()) return {};
         const auto name="%flow_load_"+std::to_string(temporary_++); out<<"  "<<name<<" = load "<<llvm_type(found->second)<<", ptr "<<slot(symbol)<<"\n"; return name;
@@ -258,6 +299,10 @@ private:
             if(native_type=="i32"&&wanted=="i64") out<<"  "<<converted<<" = sext i32 "<<loaded<<" to i64\n";
             else if(native_type=="i64"&&wanted=="i32") out<<"  "<<converted<<" = trunc i64 "<<loaded<<" to i32\n"; else return {};
             return {wanted,converted};
+        }
+        if(kind=="call_result") {
+            const int expression_id=integer(field(value,"expression_id"),"expression_id");
+            const auto found=call_results_.find(expression_id); return found==call_results_.end()?std::pair<std::string,std::string>{}:found->second;
         }
         if(kind=="call" && text(field(value,"intrinsic"))=="list_length") return {"i32","%argc"};
         if(kind=="index" && text(field(value,"intrinsic"))=="list_index") {
@@ -302,6 +347,17 @@ private:
                 if(kind=="writable_storage") out<<"  store ptr %flow_storage_ptr_"<<op->result_symbol<<", ptr "<<slot(op->result_symbol)<<"\n";
                 else if(kind=="string_literal") out<<"  store ptr @flow_string_"<<op->result_symbol<<", ptr "<<slot(op->result_symbol)<<"\n";
                 else { auto [type,value]=expression(*op->operand,out); if(value.empty()) throw std::runtime_error("unsupported structured value definition"); out<<"  store "<<type<<" "<<value<<", ptr "<<slot(op->result_symbol)<<"\n"; }
+            } else if(op->kind=="call") {
+                if(!callables_.count(op->callee_symbol))throw std::runtime_error("ordinary call target is unavailable");
+                const auto& function=callables_.at(op->callee_symbol); if(function.body_block<0)throw std::runtime_error("ordinary call definition is unavailable");
+                const auto& operands=array(field(find_json_operation(op->id),"operands"),"operation.operands");
+                if(operands.size()!=function.parameters.size())throw std::runtime_error("ordinary call operand count mismatch");
+                std::vector<std::pair<std::string,std::string>> args;
+                for(std::size_t index=0;index<operands.size();++index)args.push_back(expression(operands[index],out,function.parameters[index].second));
+                const auto result="%flow_call_"+std::to_string(op->id); out<<"  "<<result<<" = call i32 @"<<function.name<<"(";
+                for(std::size_t index=0;index<args.size();++index){if(index)out<<", ";out<<args[index].first<<" "<<args[index].second;}out<<")\n";
+                call_results_[op->expression]={"i32",result};
+                if(op->result_symbol>=0)out<<"  store i32 "<<result<<", ptr "<<slot(op->result_symbol)<<"\n";
             } else if(op->kind=="external_call") {
                 const auto& p=*op->provider; const auto params=carriers(p.parameters); const auto& operands=array(field(find_json_operation(op->id),"operands"),"operation.operands");
                 if(params.size()!=operands.size()) throw std::runtime_error("structured call operand count mismatch");

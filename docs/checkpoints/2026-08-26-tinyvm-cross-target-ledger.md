@@ -312,3 +312,17 @@ the already captured recovered-ISA boundary.
 - The complete GCC superbuild and all 74 canonical tests passed. Focused Clang
   18 ASan/UBSan frontend, analyst, callable boundary and public-validator tests
   passed with the documented LeakSanitizer exclusion.
+
+### LLVM callable consumer — `llvm-callable-lowering-v2`
+
+- LLVM lowering now consumes callable plan v2 as distinct function definitions
+  with stable parameter-slot binding, exact ordinary callee identities and
+  expression-keyed call results; v1 lowering remains unchanged.
+- Added the first shared compiler/document probe: an ordinary pure scalar
+  classifier called through tokenizer-shaped and headless-document-shaped
+  functions without compiler intrinsics or source-name dispatch.
+- The captured v2 plan is prepared under `llvm-host`, emitted, compiled and
+  executed with observable result 1.
+- The complete GCC superbuild and all 74 canonical tests passed. The full
+  callable v2 capture/validation/LLVM execution slice passed under Clang 18
+  ASan/UBSan with the documented LeakSanitizer exclusion.

@@ -692,7 +692,14 @@ int run(const Json& bundle, int lowering_plan_version) {
             !identifier_type.empty() && identifier_type != declared_type;
         const bool writable_storage = kind == "integer_literal" && declared_type == "c_pointer" &&
             !literal.empty() && literal != "0" && literal.front() != '-';
-        std::cout << "{\"expression_id\":" << expression_id << ",\"kind\":" << quote(carrier_conversion ? "conversion" : (writable_storage ? "writable_storage" : kind));
+        bool ordinary_call = false;
+        if (lowering_plan_version == 2 && kind == "call") {
+            const int base = integer(field(field(expression, "payload"), "base"));
+            const auto callee = expressions.count(base) && text(field(*expressions.at(base), "kind")) == "identifier"
+                ? text(field(field(*expressions.at(base), "payload"), "name")) : std::string{};
+            ordinary_call = callee != "length";
+        }
+        std::cout << "{\"expression_id\":" << expression_id << ",\"kind\":" << quote(carrier_conversion ? "conversion" : (writable_storage ? "writable_storage" : (ordinary_call ? "call_result" : kind)));
         if (carrier_conversion) {
             std::cout << ",\"type\":" << quote(declared_type) << ",\"from_type\":" << quote(identifier_type)
                       << ",\"conversion\":\"explicit_typed_initializer\",\"operand\":";
