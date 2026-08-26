@@ -26,3 +26,13 @@ add_test(NAME flowvalidate_artifacts
         FLOWLOWER_BIN=$<TARGET_FILE:flowlower>
         FLOWVALIDATE_FIXTURE=${CMAKE_SOURCE_DIR}/Flowmini/flowmini_v25_symboltable_projection/examples/ast/call_expression_probe.flow
         ${CMAKE_CURRENT_SOURCE_DIR}/tests/run-flowvalidate-tests.sh)
+add_test(NAME flowcontracts_identity_preservation
+    COMMAND ${CMAKE_COMMAND} -E env
+        FLOWMINI_BIN=$<TARGET_FILE:flowmini>
+        FLOWANALYST_BIN=$<TARGET_FILE:flowanalyst>
+        FLOWBIND_BIN=$<TARGET_FILE:flowbind>
+        FLOWPARALLEL_BIN=$<TARGET_FILE:flowparallel>
+        FLOWOPTIMIZE_BIN=$<TARGET_FILE:flowoptimize>
+        FLOWLOWER_BIN=$<TARGET_FILE:flowlower>
+        FLOW_IDENTITY_FIXTURE=${CMAKE_SOURCE_DIR}/Flowmini/flowmini_v25_symboltable_projection/examples/apps/flowcat/flowcat.flow
+        ${CMAKE_CURRENT_SOURCE_DIR}/tests/run-identity-preservation-tests.sh)

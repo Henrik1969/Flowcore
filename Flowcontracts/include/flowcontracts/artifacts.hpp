@@ -38,6 +38,75 @@ inline const json::Array& required_array(const json::Object& parent, std::string
     return json::array(json::required(parent, key, path), std::string(path) + "." + std::string(key));
 }
 
+inline void validate_targets(const json::Object& root) {
+    const auto& targets = required_array(root, "targets");
+    std::set<json::Integer> symbols; std::set<std::string> names;
+    for (std::size_t index = 0; index < targets.size(); ++index) {
+        const auto path = "$.targets[" + std::to_string(index) + "]";
+        const auto& target = json::object(targets[index], path);
+        const auto symbol = json::integer(json::required(target, "symbol_id", path), path + ".symbol_id");
+        const auto name = json::string(json::required(target, "name", path), path + ".name");
+        const auto mains = json::integer(json::required(target, "main_count", path), path + ".main_count");
+        if (symbol < 0 || name.empty() || mains < 0) throw json::Error(path, "invalid target identity");
+        if (!symbols.insert(symbol).second || !names.insert(name).second) throw json::Error(path, "duplicate target identity");
+    }
+}
+
+inline void validate_abi_contracts(const json::Object& root) {
+    const auto& contracts = required_array(root, "abi_type_contracts");
+    std::set<std::pair<std::string, std::string>> identities;
+    for (std::size_t index = 0; index < contracts.size(); ++index) {
+        const auto path = "$.abi_type_contracts[" + std::to_string(index) + "]";
+        const auto& contract = json::object(contracts[index], path);
+        const auto owner = json::string(json::required(contract, "contract", path), path + ".contract");
+        const auto name = json::string(json::required(contract, "name", path), path + ".name");
+        for (const auto field : {"repr", "ownership", "access", "lifetime", "nullable", "opaque", "cleanup"})
+            (void)json::string(json::required(contract, field, path), path + "." + field);
+        if (!identities.emplace(owner, name).second) throw json::Error(path, "duplicate ABI contract identity");
+    }
+}
+
+inline void validate_lowering_authority(const json::Value& value, std::string_view base = "$.lowering_plan") {
+    const auto& plan = json::object(value, base);
+    if (json::string(json::required(plan, "format", base), std::string(base) + ".format") != "flowcore.lowering_plan") throw json::Error(std::string(base) + ".format", "unsupported lowering plan format");
+    if (json::integer(json::required(plan, "version", base), std::string(base) + ".version") != 1) throw json::Error(std::string(base) + ".version", "unsupported lowering plan version");
+    const auto& operations = required_array(plan, "operations", base);
+    std::set<json::Integer> ids;
+    for (std::size_t index = 0; index < operations.size(); ++index) {
+        const auto path = std::string(base) + ".operations[" + std::to_string(index) + "]";
+        const auto& operation = json::object(operations[index], path);
+        const auto id = json::integer(json::required(operation, "id", path), path + ".id");
+        if (id < 0 || !ids.insert(id).second) throw json::Error(path + ".id", id < 0 ? "operation identity must be non-negative" : "duplicate operation identity");
+        (void)json::string(json::required(operation, "kind", path), path + ".kind");
+        if (const auto* block = json::optional(operation, "block_id")) if (json::integer(*block, path + ".block_id") < 0) throw json::Error(path + ".block_id", "operation block identity must be non-negative");
+        (void)required_array(operation, "operands", path);
+        if (json::string(json::required(operation, "kind", path), path + ".kind") == "external_call") {
+            const auto& provider = required_object(operation, "provider", path);
+            for (const auto field : {"contract", "library", "convention", "symbol", "effect", "parameter_types", "return_type"})
+                (void)json::string(json::required(provider, field, path + ".provider"), path + ".provider." + field);
+            const auto& effect = required_object(operation, "effect_contract", path);
+            for (const auto field : {"external", "determinism", "certainty"})
+                (void)json::string(json::required(effect, field, path + ".effect_contract"), path + ".effect_contract." + field);
+            const auto& resources = required_array(operation, "argument_resources", path);
+            for (std::size_t resource_index = 0; resource_index < resources.size(); ++resource_index) {
+                const auto resource_path = path + ".argument_resources[" + std::to_string(resource_index) + "]";
+                const auto& resource = json::object(resources[resource_index], resource_path);
+                if (json::integer(json::required(resource, "index", resource_path), resource_path + ".index") != static_cast<json::Integer>(resource_index)) throw json::Error(resource_path + ".index", "resource index does not match position");
+                for (const auto field : {"type", "memory_effect", "ownership", "access", "lifetime", "nullable", "opaque"})
+                    (void)json::string(json::required(resource, field, resource_path), resource_path + "." + field);
+            }
+        }
+    }
+    for (std::size_t index = 0; index < operations.size(); ++index) {
+        const auto path = std::string(base) + ".operations[" + std::to_string(index) + "]";
+        const auto& operation = json::object(operations[index], path);
+        for (const auto field : {"then_block_id", "else_block_id", "body_block_id"}) if (const auto* reference = json::optional(operation, field)) {
+            const auto block = json::integer(*reference, path + "." + field);
+            if (block < -1) throw json::Error(path + "." + field, "control reference must be -1 or non-negative");
+        }
+    }
+}
+
 inline MatrixView parse_matrix(const json::Object& root) {
     const auto& graph = required_object(root, "analysis_graph");
     if (json::string(json::required(graph, "format", "$.analysis_graph"), "$.analysis_graph.format") != "flowanalyst.analysis_graph") throw json::Error("$.analysis_graph.format", "unsupported analysis graph format");
@@ -84,22 +153,14 @@ inline SemanticReport semantic_report(const json::Value& value) {
     const auto& root = json::object(value);
     const auto& source = required_object(root, "source");
     result.source_path = json::string(json::required(source, "path", "$.source"), "$.source.path");
-    result.targets = required_array(root, "targets");
+    validate_targets(root); result.targets = required_array(root, "targets");
     result.external_operations = required_array(root, "external_operations");
-    result.abi_type_contracts = required_array(root, "abi_type_contracts");
+    validate_abi_contracts(root); result.abi_type_contracts = required_array(root, "abi_type_contracts");
     result.lowering_plan = json::required(root, "lowering_plan");
+    validate_lowering_authority(result.lowering_plan);
     const auto& plan = json::object(result.lowering_plan, "$.lowering_plan");
     if (json::string(json::required(plan, "format", "$.lowering_plan"), "$.lowering_plan.format") != "flowcore.lowering_plan") throw json::Error("$.lowering_plan.format", "unsupported lowering plan format");
     if (json::integer(json::required(plan, "version", "$.lowering_plan"), "$.lowering_plan.version") != 1) throw json::Error("$.lowering_plan.version", "unsupported lowering plan version");
-    const auto& operations = required_array(plan, "operations", "$.lowering_plan");
-    std::set<json::Integer> operation_ids;
-    for (std::size_t index = 0; index < operations.size(); ++index) {
-        const auto path = "$.lowering_plan.operations[" + std::to_string(index) + "]";
-        const auto& operation = json::object(operations[index], path);
-        const auto id = json::integer(json::required(operation, "id", path), path + ".id");
-        if (id < 0) throw json::Error(path + ".id", "operation identity must be non-negative");
-        if (!operation_ids.insert(id).second) throw json::Error(path + ".id", "duplicate operation identity");
-    }
     for (const auto& item : required_array(root, "effect_facts")) {
         const auto& fact = json::object(item, "$.effect_facts[]");
         if (const auto* certainty = json::optional(fact, "certainty")) if (json::string(*certainty, "$.effect_facts[].certainty") == "proven") ++result.proven_pure_count;
@@ -154,10 +215,11 @@ inline ExecutionPlan execution_plan(const json::Value& value) {
     const auto& root = json::object(value);
     const auto& source = required_object(root, "source");
     result.source_path = json::string(json::required(source, "path", "$.source"), "$.source.path");
-    result.targets = required_array(root, "targets");
+    validate_targets(root); result.targets = required_array(root, "targets");
     result.external_operations = required_array(root, "external_operations");
-    result.abi_type_contracts = required_array(root, "abi_type_contracts");
+    validate_abi_contracts(root); result.abi_type_contracts = required_array(root, "abi_type_contracts");
     result.lowering_plan = json::required(root, "lowering_plan");
+    validate_lowering_authority(result.lowering_plan);
     const auto& plan = json::object(result.lowering_plan, "$.lowering_plan");
     if (json::string(json::required(plan, "format", "$.lowering_plan"), "$.lowering_plan.format") != "flowcore.lowering_plan") throw json::Error("$.lowering_plan.format", "unsupported lowering plan format");
     if (json::integer(json::required(plan, "version", "$.lowering_plan"), "$.lowering_plan.version") != 1) throw json::Error("$.lowering_plan.version", "unsupported lowering plan version");

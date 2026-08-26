@@ -146,5 +146,27 @@ Gates 2–4 first vertical checkpoint:
 
 ## Exact next action
 
-Execute Gate 7 end-to-end identity preservation and independent category
-mutation refusal, then reconcile active repository documentation.
+### Gate 7 end-to-end identity preservation
+
+- Added public validation for target identities, ABI contract identities,
+  lowering operation/block/control identities, provider tuples, effect facts,
+  argument-resource facts, and control-reference ranges.
+- Added a complete `flowcat` acceptance chain containing values, external
+  results, branches, nested loops, admitted resource-bearing operations,
+  cleanup calls, explicit returns, source provenance, and the selected `main`
+  target.
+- The test proves byte-equivalent canonical source, target, ABI, and lowering
+  authority across semantic, execution, and optimization stages, then performs
+  LLVM lowering under an exact authorized binding report.
+- Independent source/provenance, target, operation, block, control, provider,
+  ABI, effect, resource, and authorization-evidence mutations are refused by
+  the next relevant consumer.
+- Preserved the intentional rule that binding authority is consumed at actual
+  LLVM emission, not by a report-only lowerer invocation.
+- Focused identity gate passed (1/1 in 0.37 seconds).
+- Canonical gate: build passed and 57/57 CTest tests passed in 26.84 seconds.
+
+## Exact next action
+
+Reconcile active documentation with executable v0.28 evidence, then run the
+complete sanitizer and hardening matrix and close repository hygiene.
