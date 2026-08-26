@@ -27,6 +27,13 @@ add_test(NAME flowtarget_policy_boundary
         FLOWTARGET_BIN=$<TARGET_FILE:flowtarget>
         FLOWVALIDATE_BIN=$<TARGET_FILE:flowvalidate>
         ${CMAKE_CURRENT_SOURCE_DIR}/tests/run-target-policy-tests.sh)
+add_test(NAME flowtarget_cross_compile
+    COMMAND ${CMAKE_COMMAND} -E env
+        FLOWTARGET_BIN=$<TARGET_FILE:flowtarget>
+        FLOWPREPARE_BIN=$<TARGET_FILE:flowprepare>
+        FLOWLOWER_BIN=$<TARGET_FILE:flowlower>
+        FLOWTINYLOWER_BIN=$<TARGET_FILE:flowtinylower>
+        ${CMAKE_CURRENT_SOURCE_DIR}/tests/run-target-cross-compile-tests.sh)
 add_test(NAME flowlower_pipeline
     COMMAND ${CMAKE_COMMAND} -E env
         FLOWLOWER_BIN=$<TARGET_FILE:flowlower>

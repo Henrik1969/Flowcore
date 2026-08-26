@@ -52,11 +52,31 @@ int lower(std::string_view report, const Options& options, std::string_view bind
     const auto input_format = text(field(root, "format"));
     if (input_format != "flowoptimize.optimization_report" && input_format != "flowcore.backend_lowering_artifact")
         throw std::runtime_error("input is not a backend lowering artifact");
-    if (integer(field(root, "version"), "version") != 1)
+    const auto input_version = integer(field(root, "version"), "version");
+    if (input_version != 1 && !(input_format == "flowcore.backend_lowering_artifact" && input_version == 2))
         throw std::runtime_error("unsupported Flowoptimize report version");
     if (input_format == "flowcore.backend_lowering_artifact") {
         flowcontracts::validate_backend_lowering_artifact(root);
         if (!binding_report.empty()) throw std::runtime_error("backend lowering artifacts already contain authorization evidence");
+        if (input_version == 2) {
+            const auto* policy = field(root, "target_policy");
+            const auto* backend = field(*policy, "backend");
+            const auto* architecture = field(*policy, "architecture");
+            const auto* abi = field(*policy, "abi");
+            if (text(field(*backend, "name")) != "llvm" || integer(field(*backend, "artifact_version"), "artifact_version") != 1 ||
+                text(field(*architecture, "name")) != "host" || integer(field(*architecture, "word_bits"), "word_bits") != 64 ||
+                text(field(*abi, "name")) != "flowcore-host-c" || integer(field(*abi, "version"), "abi.version") != 1) {
+                std::cout << "{\"backend\":\"llvm\",\"format\":\"flowlower.lowering_report\",\"reason\":\"target policy is incompatible with the LLVM backend\",\"status\":\"unsupported\",\"version\":1}\n";
+                return 2;
+            }
+            const auto* capabilities = field(*policy, "capabilities");
+            for (const auto& required : array(field(*capabilities, "required"), "target_policy.capabilities.required")) {
+                if (text(&required) != "llvm-host-toolchain") {
+                    std::cout << "{\"backend\":\"llvm\",\"format\":\"flowlower.lowering_report\",\"reason\":\"target policy requires an unavailable provider capability\",\"status\":\"unsupported\",\"version\":1}\n";
+                    return 2;
+                }
+            }
+        }
     }
     if (text(field(root, "status")) != "ready") {
         std::cout << "{\n  \"format\": \"flowlower.lowering_report\",\n  \"version\": 1,\n  \"status\": \"blocked\",\n  \"backend\": \"llvm\",\n  \"reason\": \"optimization stage is not ready\"\n}\n";

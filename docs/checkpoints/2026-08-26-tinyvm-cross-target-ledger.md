@@ -248,3 +248,21 @@ the already captured recovered-ISA boundary.
 - The complete GCC superbuild and all 71 canonical tests passed. Focused Clang
   18 ASan/UBSan contract, validator and target-policy boundary tests passed
   with the documented LeakSanitizer exclusion.
+
+### Target-policy lowering admission — `target-policy-cross-compile-v1`
+
+- Added backend-lowering artifact version 2, which captures the complete
+  independently resolved target policy. Historical version 1 artifacts remain
+  valid and replayable.
+- `flowprepare` keeps source named-target projection separate from backend
+  target policy and never resolves or substitutes a backend itself.
+- LLVM and TinyVM consumers independently admit exact backend, artifact format,
+  architecture, ABI and required provider capabilities before emission.
+- A single cross-compilation test keeps source, optimization artifact, resolver,
+  policy root and preparation/lowering commands fixed while changing only
+  `llvm-host` to `tinyvm-portable`.
+- Wrong-backend, wrong-ABI and unavailable-provider cases return structured
+  `unsupported` exit 2 and prove that no partial output artifact exists.
+- The complete GCC superbuild and all 72 canonical tests passed. Focused Clang
+  18 ASan/UBSan resolver, preparation, LLVM/TinyVM admission and captured-file
+  boundary tests passed with the documented LeakSanitizer exclusion.

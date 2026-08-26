@@ -113,8 +113,16 @@ inline void validate_target_policy(const json::Value& value) {
     (void)json::string(json::required(abi, "name", "$.abi"), "$.abi.name");
     (void)json::integer(json::required(abi, "version", "$.abi"), "$.abi.version");
     const auto& capabilities = required_object(root, "capabilities");
-    (void)required_array(capabilities, "required", "$.capabilities");
-    (void)required_array(capabilities, "admitted", "$.capabilities");
+    for (const auto field : {"required", "admitted"}) {
+        const auto& entries = required_array(capabilities, field, "$.capabilities");
+        std::set<std::string> names;
+        for (std::size_t index = 0; index < entries.size(); ++index) {
+            const auto path = "$.capabilities." + std::string(field) + "[" + std::to_string(index) + "]";
+            const auto name = json::string(entries[index], path);
+            if (name.empty()) throw json::Error(path, "capability name is empty");
+            if (!names.insert(name).second) throw json::Error(path, "duplicate capability name");
+        }
+    }
     const auto& resources = required_object(root, "resources");
     const auto slots = json::integer(json::required(resources, "maximum_slots", "$.resources"), "$.resources.maximum_slots");
     const auto steps = json::integer(json::required(resources, "maximum_steps", "$.resources"), "$.resources.maximum_steps");
@@ -134,9 +142,16 @@ inline void validate_target_policy(const json::Value& value) {
 }
 
 inline void validate_backend_lowering_artifact(const json::Value& value) {
-    const auto artifact = require_header(value, "flowcore.backend_lowering_artifact", 1);
+    const auto& header_root = json::object(value);
+    if (json::string(json::required(header_root, "format"), "$.format") != "flowcore.backend_lowering_artifact")
+        throw json::Error("$.format", "unsupported artifact format");
+    const auto artifact_version = json::integer(json::required(header_root, "version"), "$.version");
+    if (artifact_version != 1 && artifact_version != 2) throw json::Error("$.version", "unsupported artifact version");
+    const Header artifact{"flowcore.backend_lowering_artifact", artifact_version,
+                          json::string(json::required(header_root, "status"), "$.status")};
     if (artifact.status != "ready") return;
     const auto& root = json::object(value);
+    if (artifact.version == 2) validate_target_policy(json::required(root, "target_policy"));
     const auto& source = required_object(root, "source");
     (void)json::string(json::required(source, "path", "$.source"), "$.source.path");
     validate_targets(root);

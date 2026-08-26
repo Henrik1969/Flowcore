@@ -329,11 +329,39 @@ int lower(const char* input_path, const char* output_path) {
     const auto input = parse(read(input_path));
     validate_backend_lowering_artifact(input);
     const auto& root = object(input);
+    const auto artifact_version = integer(required(root, "version"), "$.version");
+    if (artifact_version == 2) {
+        const auto& policy = required_object(root, "target_policy");
+        const auto& backend = required_object(policy, "backend", "$.target_policy");
+        const auto& architecture = required_object(policy, "architecture", "$.target_policy");
+        const auto& abi = required_object(policy, "abi", "$.target_policy");
+        if (string(required(backend, "name", "$.target_policy.backend"), "$.target_policy.backend.name") != "tinyvm" ||
+            integer(required(backend, "artifact_version", "$.target_policy.backend"), "$.target_policy.backend.artifact_version") != 2 ||
+            string(required(architecture, "name", "$.target_policy.architecture"), "$.target_policy.architecture.name") != "tinyvm" ||
+            integer(required(architecture, "word_bits", "$.target_policy.architecture"), "$.target_policy.architecture.word_bits") != 64 ||
+            string(required(abi, "name", "$.target_policy.abi"), "$.target_policy.abi.name") != "flowcore-tinyvm-slot" ||
+            integer(required(abi, "version", "$.target_policy.abi"), "$.target_policy.abi.version") != 2) {
+            std::cout << serialize(Object{{"backend", "tinyvm"}, {"format", "flowtiny.lowering_result"},
+                                         {"reason", "target policy is incompatible with the TinyVM backend"}, {"status", "unsupported"},
+                                         {"version", Integer{1}}}) << '\n';
+            return 2;
+        }
+        const auto& capabilities = required_object(policy, "capabilities", "$.target_policy");
+        for (const auto& required_capability : required_array(capabilities, "required", "$.target_policy.capabilities")) {
+            const auto name = string(required_capability, "$.target_policy.capabilities.required[]");
+            if (name != "tinyvm-isa-2" && name != "exact-import-policy") {
+                std::cout << serialize(Object{{"backend", "tinyvm"}, {"format", "flowtiny.lowering_result"},
+                                             {"reason", "target policy requires an unavailable provider capability"},
+                                             {"status", "unsupported"}, {"version", Integer{1}}}) << '\n';
+                return 2;
+            }
+        }
+    }
     const auto canonical = serialize(input);
     const auto source = serialize(required(root, "source"));
     const auto plan_text = serialize(required(root, "lowering_plan"));
     const auto optimization = serialize(required(required_object(root, "provenance"), "optimization", "$.provenance"));
-    const auto target = serialize(required(root, "target"));
+    const auto target = artifact_version == 2 ? serialize(required(root, "target_policy")) : serialize(required(root, "target"));
     const auto source_id = identity("source-", source);
     const auto plan_id = identity("plan-", plan_text);
     Compiler compiler(root, source_id, plan_id);

@@ -10,7 +10,7 @@ namespace {
 using namespace flowcontracts;
 using namespace flowcontracts::json;
 
-struct Options { std::string optimization_path, binding_path, target_name; };
+struct Options { std::string optimization_path, binding_path, target_name, target_policy_path; };
 
 Options options(int argc, char** argv) {
     Options result;
@@ -22,6 +22,9 @@ Options options(int argc, char** argv) {
         } else if (argument == "--target") {
             if (++index >= argc) throw std::runtime_error("--target requires a name");
             result.target_name = argv[index];
+        } else if (argument == "--target-policy") {
+            if (++index >= argc) throw std::runtime_error("--target-policy requires a path");
+            result.target_policy_path = argv[index];
         } else if (!argument.empty() && argument.front() == '-') throw std::runtime_error("unknown option '" + argument + "'");
         else if (result.optimization_path.empty()) result.optimization_path = argument;
         else throw std::runtime_error("too many input paths");
@@ -73,7 +76,7 @@ int prepare(const Options& option) {
     if (requires_binding && capabilities.empty()) throw Error("$.authorization.capabilities", "external calls require a ready binding report");
 
     const auto optimization_header = header(optimization);
-    Value output = Object{
+    Object output{
         {"abi_type_contracts", required(root, "abi_type_contracts")},
         {"authorization", Object{{"capabilities", capabilities}, {"status", requires_binding ? "authorized" : "not-required"}}},
         {"external_operations", required(root, "external_operations")},
@@ -87,8 +90,14 @@ int prepare(const Options& option) {
         {"status", "ready"},
         {"target", select_target(root, option.target_name)},
         {"targets", required(root, "targets")},
-        {"version", Integer{1}}
+        {"version", Integer{option.target_policy_path.empty() ? 1 : 2}}
     };
+    if (!option.target_policy_path.empty()) {
+        const auto target_policy = parse(read(option.target_policy_path));
+        validate_target_policy(target_policy);
+        if (header(target_policy).status != "ready") throw Error("$.target_policy.status", "target policy is not ready");
+        output.emplace("target_policy", target_policy);
+    }
     validate_backend_lowering_artifact(output);
     std::cout << serialize(output) << '\n';
     return 0;

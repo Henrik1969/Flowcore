@@ -26,6 +26,14 @@ name, validates the named file through Flowcontracts, confirms that its internal
 identity equals the requested name, and writes canonical JSON. Thus a build
 driver can keep every input and tool fixed while changing only the target name.
 
-This checkpoint deliberately does not yet let either backend consume the
-policy. Consumption and compatibility admission are the next file boundary, so
-captured policy resolution remains replayable without either lowerer present.
+`flowprepare --target-policy FILE` now captures a resolved policy into
+`flowcore.backend_lowering_artifact` version 2. Version 1 remains readable for
+historical captured replay; version 2 requires the complete policy. The source
+program's named projection remains in `target`, while machine/backend selection
+is exclusively `target_policy`, avoiding two meanings for the same field.
+
+LLVM and TinyVM independently validate the captured lowering artifact and admit
+only their exact backend, executable format, architecture, ABI and required
+provider capability set. An incompatible policy produces an `unsupported`
+result with exit 2 before an output file is created. Neither consumer invokes
+the resolver or reads the source/optimization producer's files.
