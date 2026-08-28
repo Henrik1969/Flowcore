@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+test "$(id -u)" -eq 0
+LFS=/mnt/lfs
+test "$(findmnt -nro SOURCE "$LFS")" = /dev/vdb1
+test -x "$LFS/usr/bin/bash"
+test -x "$LFS/usr/sbin/chroot"
+
+chown --from lfs -R root:root "$LFS"/{usr,var,etc,tools}
+case $(uname -m) in
+  x86_64) chown --from lfs -R root:root "$LFS/lib64" ;;
+esac
+
+mkdir -pv "$LFS"/{dev,proc,sys,run}
+mountpoint -q "$LFS/dev" || mount -v --bind /dev "$LFS/dev"
+mountpoint -q "$LFS/dev/pts" || mount -vt devpts devpts -o gid=5,mode=0620 "$LFS/dev/pts"
+mountpoint -q "$LFS/proc" || mount -vt proc proc "$LFS/proc"
+mountpoint -q "$LFS/sys" || mount -vt sysfs sysfs "$LFS/sys"
+mountpoint -q "$LFS/run" || mount -vt tmpfs tmpfs "$LFS/run"
+if test -h "$LFS/dev/shm"; then
+  install -v -d -m 1777 "$LFS$(realpath /dev/shm)"
+elif ! mountpoint -q "$LFS/dev/shm"; then
+  mount -vt tmpfs -o nosuid,nodev tmpfs "$LFS/dev/shm"
+fi
+
+install -Dm0755 /mnt/flowlfs-project/scripts/build-chapter07-chroot.sh \
+  "$LFS/root/build-chapter07-chroot.sh"
+
+chroot "$LFS" /usr/bin/env -i \
+  HOME=/root \
+  TERM="${TERM:-dumb}" \
+  PS1='(lfs chroot) \u:\w\$ ' \
+  PATH=/usr/bin:/usr/sbin \
+  MAKEFLAGS="-j$(nproc)" \
+  TESTSUITEFLAGS="-j$(nproc)" \
+  /bin/bash --login /root/build-chapter07-chroot.sh
