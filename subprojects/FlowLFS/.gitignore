@@ -4,4 +4,6 @@
 !/work/.gitkeep
 /artifacts/*
 !/artifacts/.gitkeep
+/execution/sources/*
+!/execution/sources/.gitkeep
 *.log

@@ -1,6 +1,7 @@
 # FlowLFS
 
-Status: environment prepared; construction not started
+Status: control baseline preserved; corrected execution inputs being prepared;
+construction not started
 
 FlowLFS is the first attempt to construct a small, real Flowcore system from
 auditable source. Its baseline is Linux From Scratch 13.0-systemd, followed to
@@ -37,6 +38,7 @@ supporting artifacts.
 book/                 canonical LFS book and book-source archive
 manifests/            canonical download list and checksums
 sources/              upstream release tarballs and LFS patches (untracked)
+execution/            separately pinned, post-advisory execution snapshot
 docs/                 authority, environment, and Flowcore analysis records
 scripts/              bounded retrieval and validation helpers
 work/                 untracked construction state
@@ -59,9 +61,10 @@ artifacts/            untracked ISO/disk images and evidence bundles
 1. Read [authority and method](docs/AUTHORITY-AND-METHOD.md).
 2. Read [development environment](docs/DEVELOPMENT-ENVIRONMENT.md).
 3. Read the [security baseline](docs/SECURITY-BASELINE.md).
-4. Run `scripts/check-host-requirements.sh`.
-5. Review the retrieved book and manifests.
-6. Do not begin Chapter 2 disk operations until an isolated image-backed build
+4. Read the [execution mutation ledger](execution/MUTATION-LEDGER.md).
+5. Run `scripts/check-host-requirements.sh`.
+6. Review the retrieved books and manifests.
+7. Do not begin Chapter 2 disk operations until an isolated image-backed build
    boundary has been reviewed.
 
 ## Non-claims
