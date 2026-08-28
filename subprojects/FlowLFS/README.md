@@ -1,7 +1,7 @@
 # FlowLFS
 
 Status: control and execution inputs pinned; isolated builder gate passed;
-Chapters 2–4 complete; toolchain compilation not started
+Chapter 5 cross-toolchain complete and sealed
 
 FlowLFS is the first attempt to construct a small, real Flowcore system from
 auditable source. Its baseline is Linux From Scratch 13.0-systemd, followed to
