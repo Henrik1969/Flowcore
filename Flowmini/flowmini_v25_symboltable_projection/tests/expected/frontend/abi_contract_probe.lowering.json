@@ -1,0 +1,884 @@
+{
+  "format": "flowmini.lowering_skeleton",
+  "version": 1,
+  "source": {
+    "path": "examples/ast/abi_contract_probe.flow"
+  },
+  "source_files": [
+    {
+      "id": 0,
+      "path": "examples/ast/abi_contract_probe.flow"
+    }
+  ],
+  "expanded_line_count": 51,
+  "source_unit": {
+    "kind": "unit",
+    "name": "abi_contract_probe"
+  },
+  "diagnostic_count": 0,
+  "declarations": [
+    {
+      "id": 0,
+      "kind": "abi",
+      "name": "system",
+      "symbol_ids": [
+        2
+      ]
+    },
+    {
+      "id": 1,
+      "kind": "abi",
+      "name": "implicit_convention",
+      "symbol_ids": [
+        12
+      ]
+    }
+  ],
+  "scopes": [
+    {
+      "id": 1,
+      "kind": "Global",
+      "parent_id": null,
+      "owner_symbol_id": null,
+      "origin": null,
+      "symbol_ids": [
+        1
+      ]
+    },
+    {
+      "id": 2,
+      "kind": "Module",
+      "parent_id": 1,
+      "owner_symbol_id": 1,
+      "origin": {
+        "ast_path": "/source_unit",
+        "entity_kind": "source_unit",
+        "role": "module_scope",
+        "ast_id": null,
+        "source_location": {
+          "line": 1,
+          "column": 1
+        }
+      },
+      "symbol_ids": [
+        2,
+        12
+      ]
+    },
+    {
+      "id": 3,
+      "kind": "Contract",
+      "parent_id": 2,
+      "owner_symbol_id": 2,
+      "origin": {
+        "ast_path": "/declaration_pool/0",
+        "entity_kind": "declaration",
+        "role": "abi_scope",
+        "ast_id": 0,
+        "source_location": {
+          "line": 4,
+          "column": 1
+        }
+      },
+      "symbol_ids": [
+        3,
+        4,
+        5,
+        6,
+        9
+      ]
+    },
+    {
+      "id": 4,
+      "kind": "Struct",
+      "parent_id": 3,
+      "owner_symbol_id": 6,
+      "origin": {
+        "ast_path": "/declaration_pool/0/members/5",
+        "entity_kind": "abi_member",
+        "role": "abi_struct_scope",
+        "ast_id": null,
+        "source_location": {
+          "line": 33,
+          "column": 5
+        }
+      },
+      "symbol_ids": [
+        7,
+        8
+      ]
+    },
+    {
+      "id": 5,
+      "kind": "Function",
+      "parent_id": 3,
+      "owner_symbol_id": 9,
+      "origin": {
+        "ast_path": "/declaration_pool/0/members/6",
+        "entity_kind": "abi_member",
+        "role": "extern_function_scope",
+        "ast_id": null,
+        "source_location": {
+          "line": 38,
+          "column": 5
+        }
+      },
+      "symbol_ids": [
+        10,
+        11
+      ]
+    },
+    {
+      "id": 6,
+      "kind": "Contract",
+      "parent_id": 2,
+      "owner_symbol_id": 12,
+      "origin": {
+        "ast_path": "/declaration_pool/1",
+        "entity_kind": "declaration",
+        "role": "abi_scope",
+        "ast_id": 1,
+        "source_location": {
+          "line": 44,
+          "column": 1
+        }
+      },
+      "symbol_ids": [
+        13
+      ]
+    },
+    {
+      "id": 7,
+      "kind": "Function",
+      "parent_id": 6,
+      "owner_symbol_id": 13,
+      "origin": {
+        "ast_path": "/declaration_pool/1/members/1",
+        "entity_kind": "abi_member",
+        "role": "extern_function_scope",
+        "ast_id": null,
+        "source_location": {
+          "line": 47,
+          "column": 5
+        }
+      },
+      "symbol_ids": [
+        14
+      ]
+    }
+  ],
+  "symbols": [
+    {
+      "id": 1,
+      "name": "abi_contract_probe",
+      "kind": "Module",
+      "owning_scope_id": 1,
+      "introduced_scope_id": 2,
+      "origin": {
+        "ast_path": "/source_unit",
+        "entity_kind": "source_unit",
+        "role": "source_unit",
+        "ast_id": null,
+        "source_location": {
+          "line": 1,
+          "column": 1
+        }
+      },
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/ast/abi_contract_probe.flow",
+        "line": 1,
+        "column": 1
+      },
+      "facts": [
+        {
+          "kind": "Custom",
+          "key": "source_unit_kind",
+          "value": {
+            "type": "string",
+            "value": "unit"
+          }
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "system",
+      "kind": "Contract",
+      "owning_scope_id": 2,
+      "introduced_scope_id": 3,
+      "origin": {
+        "ast_path": "/declaration_pool/0",
+        "entity_kind": "declaration",
+        "role": "abi_declaration",
+        "ast_id": 0,
+        "source_location": {
+          "line": 4,
+          "column": 1
+        }
+      },
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/ast/abi_contract_probe.flow",
+        "line": 3,
+        "column": 1
+      },
+      "facts": [
+        {
+          "kind": "AbiTag",
+          "key": "library_spelling",
+          "value": {
+            "type": "string",
+            "value": "libexample.so"
+          }
+        },
+        {
+          "kind": "AbiTag",
+          "key": "convention_spelling",
+          "value": {
+            "type": "string",
+            "value": "c"
+          }
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "c_string",
+      "kind": "Type",
+      "owning_scope_id": 3,
+      "introduced_scope_id": null,
+      "origin": {
+        "ast_path": "/declaration_pool/0/members/2",
+        "entity_kind": "abi_member",
+        "role": "abi_type",
+        "ast_id": null,
+        "source_location": {
+          "line": 8,
+          "column": 5
+        }
+      },
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/ast/abi_contract_probe.flow",
+        "line": 7,
+        "column": 5
+      },
+      "facts": [
+        {
+          "kind": "AbiTag",
+          "key": "repr_spelling",
+          "value": {
+            "type": "string",
+            "value": "const char*"
+          }
+        },
+        {
+          "kind": "AbiTag",
+          "key": "ownership_spelling",
+          "value": {
+            "type": "string",
+            "value": "borrowed"
+          }
+        },
+        {
+          "kind": "AbiTag",
+          "key": "access_spelling",
+          "value": {
+            "type": "string",
+            "value": "read"
+          }
+        },
+        {
+          "kind": "AbiTag",
+          "key": "lifetime_spelling",
+          "value": {
+            "type": "string",
+            "value": "call"
+          }
+        },
+        {
+          "kind": "AbiTag",
+          "key": "nullable_spelling",
+          "value": {
+            "type": "string",
+            "value": "false"
+          }
+        },
+        {
+          "kind": "AbiTag",
+          "key": "terminator_spelling",
+          "value": {
+            "type": "string",
+            "value": "nul"
+          }
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "c_handle",
+      "kind": "Type",
+      "owning_scope_id": 3,
+      "introduced_scope_id": null,
+      "origin": {
+        "ast_path": "/declaration_pool/0/members/3",
+        "entity_kind": "abi_member",
+        "role": "abi_type",
+        "ast_id": null,
+        "source_location": {
+          "line": 17,
+          "column": 5
+        }
+      },
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/ast/abi_contract_probe.flow",
+        "line": 16,
+        "column": 5
+      },
+      "facts": [
+        {
+          "kind": "AbiTag",
+          "key": "repr_spelling",
+          "value": {
+            "type": "string",
+            "value": "void*"
+          }
+        },
+        {
+          "kind": "AbiTag",
+          "key": "ownership_spelling",
+          "value": {
+            "type": "string",
+            "value": "external"
+          }
+        },
+        {
+          "kind": "AbiTag",
+          "key": "access_spelling",
+          "value": {
+            "type": "string",
+            "value": "opaque"
+          }
+        },
+        {
+          "kind": "AbiTag",
+          "key": "lifetime_spelling",
+          "value": {
+            "type": "string",
+            "value": "external"
+          }
+        },
+        {
+          "kind": "AbiTag",
+          "key": "nullable_spelling",
+          "value": {
+            "type": "string",
+            "value": "true"
+          }
+        },
+        {
+          "kind": "AbiTag",
+          "key": "opaque_spelling",
+          "value": {
+            "type": "string",
+            "value": "true"
+          }
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "name": "c_buffer",
+      "kind": "Type",
+      "owning_scope_id": 3,
+      "introduced_scope_id": null,
+      "origin": {
+        "ast_path": "/declaration_pool/0/members/4",
+        "entity_kind": "abi_member",
+        "role": "abi_type",
+        "ast_id": null,
+        "source_location": {
+          "line": 26,
+          "column": 5
+        }
+      },
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/ast/abi_contract_probe.flow",
+        "line": 25,
+        "column": 5
+      },
+      "facts": [
+        {
+          "kind": "AbiTag",
+          "key": "repr_spelling",
+          "value": {
+            "type": "string",
+            "value": "const void*"
+          }
+        },
+        {
+          "kind": "AbiTag",
+          "key": "ownership_spelling",
+          "value": {
+            "type": "string",
+            "value": "borrowed"
+          }
+        },
+        {
+          "kind": "AbiTag",
+          "key": "access_spelling",
+          "value": {
+            "type": "string",
+            "value": "read"
+          }
+        },
+        {
+          "kind": "AbiTag",
+          "key": "lifetime_spelling",
+          "value": {
+            "type": "string",
+            "value": "call"
+          }
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "name": "Point",
+      "kind": "Struct",
+      "owning_scope_id": 3,
+      "introduced_scope_id": 4,
+      "origin": {
+        "ast_path": "/declaration_pool/0/members/5",
+        "entity_kind": "abi_member",
+        "role": "abi_struct",
+        "ast_id": null,
+        "source_location": {
+          "line": 33,
+          "column": 5
+        }
+      },
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/ast/abi_contract_probe.flow",
+        "line": 32,
+        "column": 5
+      },
+      "facts": []
+    },
+    {
+      "id": 7,
+      "name": "x",
+      "kind": "Field",
+      "owning_scope_id": 4,
+      "introduced_scope_id": null,
+      "origin": {
+        "ast_path": "/declaration_pool/0/members/5/fields/0",
+        "entity_kind": "field",
+        "role": "abi_struct_field",
+        "ast_id": null,
+        "source_location": {
+          "line": 34,
+          "column": 9
+        }
+      },
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/ast/abi_contract_probe.flow",
+        "line": 33,
+        "column": 9
+      },
+      "facts": [
+        {
+          "kind": "TypeReference",
+          "key": "declared_type_spelling",
+          "value": {
+            "type": "string",
+            "value": "c_int"
+          }
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "name": "y",
+      "kind": "Field",
+      "owning_scope_id": 4,
+      "introduced_scope_id": null,
+      "origin": {
+        "ast_path": "/declaration_pool/0/members/5/fields/1",
+        "entity_kind": "field",
+        "role": "abi_struct_field",
+        "ast_id": null,
+        "source_location": {
+          "line": 35,
+          "column": 9
+        }
+      },
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/ast/abi_contract_probe.flow",
+        "line": 34,
+        "column": 9
+      },
+      "facts": [
+        {
+          "kind": "TypeReference",
+          "key": "declared_type_spelling",
+          "value": {
+            "type": "string",
+            "value": "c_long"
+          }
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "name": "inspect",
+      "kind": "Function",
+      "owning_scope_id": 3,
+      "introduced_scope_id": 5,
+      "origin": {
+        "ast_path": "/declaration_pool/0/members/6",
+        "entity_kind": "abi_member",
+        "role": "extern_function",
+        "ast_id": null,
+        "source_location": {
+          "line": 38,
+          "column": 5
+        }
+      },
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/ast/abi_contract_probe.flow",
+        "line": 37,
+        "column": 5
+      },
+      "facts": [
+        {
+          "kind": "TypeReference",
+          "key": "return_type_spelling",
+          "value": {
+            "type": "string",
+            "value": "c_size_t"
+          }
+        },
+        {
+          "kind": "AbiTag",
+          "key": "external_symbol_spelling",
+          "value": {
+            "type": "string",
+            "value": "inspect_point"
+          }
+        },
+        {
+          "kind": "AbiTag",
+          "key": "effect_spelling",
+          "value": {
+            "type": "string",
+            "value": "pure"
+          }
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "name": "text",
+      "kind": "Parameter",
+      "owning_scope_id": 5,
+      "introduced_scope_id": null,
+      "origin": {
+        "ast_path": "/declaration_pool/0/members/6/parameters/0",
+        "entity_kind": "parameter",
+        "role": "extern_parameter",
+        "ast_id": null,
+        "source_location": {
+          "line": 38,
+          "column": 23
+        }
+      },
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/ast/abi_contract_probe.flow",
+        "line": 37,
+        "column": 23
+      },
+      "facts": [
+        {
+          "kind": "TypeReference",
+          "key": "declared_type_spelling",
+          "value": {
+            "type": "string",
+            "value": "c_string"
+          }
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "name": "point",
+      "kind": "Parameter",
+      "owning_scope_id": 5,
+      "introduced_scope_id": null,
+      "origin": {
+        "ast_path": "/declaration_pool/0/members/6/parameters/1",
+        "entity_kind": "parameter",
+        "role": "extern_parameter",
+        "ast_id": null,
+        "source_location": {
+          "line": 38,
+          "column": 40
+        }
+      },
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/ast/abi_contract_probe.flow",
+        "line": 37,
+        "column": 40
+      },
+      "facts": [
+        {
+          "kind": "TypeReference",
+          "key": "declared_type_spelling",
+          "value": {
+            "type": "string",
+            "value": "Point"
+          }
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "name": "implicit_convention",
+      "kind": "Contract",
+      "owning_scope_id": 2,
+      "introduced_scope_id": 6,
+      "origin": {
+        "ast_path": "/declaration_pool/1",
+        "entity_kind": "declaration",
+        "role": "abi_declaration",
+        "ast_id": 1,
+        "source_location": {
+          "line": 44,
+          "column": 1
+        }
+      },
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/ast/abi_contract_probe.flow",
+        "line": 43,
+        "column": 1
+      },
+      "facts": [
+        {
+          "kind": "AbiTag",
+          "key": "library_spelling",
+          "value": {
+            "type": "string",
+            "value": "libimplicit.so"
+          }
+        }
+      ]
+    },
+    {
+      "id": 13,
+      "name": "ping",
+      "kind": "Function",
+      "owning_scope_id": 6,
+      "introduced_scope_id": 7,
+      "origin": {
+        "ast_path": "/declaration_pool/1/members/1",
+        "entity_kind": "abi_member",
+        "role": "extern_function",
+        "ast_id": null,
+        "source_location": {
+          "line": 47,
+          "column": 5
+        }
+      },
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/ast/abi_contract_probe.flow",
+        "line": 46,
+        "column": 5
+      },
+      "facts": [
+        {
+          "kind": "TypeReference",
+          "key": "return_type_spelling",
+          "value": {
+            "type": "string",
+            "value": "c_int"
+          }
+        },
+        {
+          "kind": "AbiTag",
+          "key": "external_symbol_spelling",
+          "value": {
+            "type": "string",
+            "value": "ping"
+          }
+        },
+        {
+          "kind": "AbiTag",
+          "key": "effect_spelling",
+          "value": {
+            "type": "string",
+            "value": "pure"
+          }
+        }
+      ]
+    },
+    {
+      "id": 14,
+      "name": "value",
+      "kind": "Parameter",
+      "owning_scope_id": 7,
+      "introduced_scope_id": null,
+      "origin": {
+        "ast_path": "/declaration_pool/1/members/1/parameters/0",
+        "entity_kind": "parameter",
+        "role": "extern_parameter",
+        "ast_id": null,
+        "source_location": {
+          "line": 47,
+          "column": 20
+        }
+      },
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/ast/abi_contract_probe.flow",
+        "line": 46,
+        "column": 20
+      },
+      "facts": [
+        {
+          "kind": "TypeReference",
+          "key": "declared_type_spelling",
+          "value": {
+            "type": "string",
+            "value": "c_int"
+          }
+        }
+      ]
+    }
+  ],
+  "origin_index": [
+    {
+      "ast_path": "/declaration_pool/0",
+      "symbol_ids": [
+        2
+      ],
+      "scope_ids": [
+        3
+      ]
+    },
+    {
+      "ast_path": "/declaration_pool/0/members/2",
+      "symbol_ids": [
+        3
+      ],
+      "scope_ids": []
+    },
+    {
+      "ast_path": "/declaration_pool/0/members/3",
+      "symbol_ids": [
+        4
+      ],
+      "scope_ids": []
+    },
+    {
+      "ast_path": "/declaration_pool/0/members/4",
+      "symbol_ids": [
+        5
+      ],
+      "scope_ids": []
+    },
+    {
+      "ast_path": "/declaration_pool/0/members/5",
+      "symbol_ids": [
+        6
+      ],
+      "scope_ids": [
+        4
+      ]
+    },
+    {
+      "ast_path": "/declaration_pool/0/members/5/fields/0",
+      "symbol_ids": [
+        7
+      ],
+      "scope_ids": []
+    },
+    {
+      "ast_path": "/declaration_pool/0/members/5/fields/1",
+      "symbol_ids": [
+        8
+      ],
+      "scope_ids": []
+    },
+    {
+      "ast_path": "/declaration_pool/0/members/6",
+      "symbol_ids": [
+        9
+      ],
+      "scope_ids": [
+        5
+      ]
+    },
+    {
+      "ast_path": "/declaration_pool/0/members/6/parameters/0",
+      "symbol_ids": [
+        10
+      ],
+      "scope_ids": []
+    },
+    {
+      "ast_path": "/declaration_pool/0/members/6/parameters/1",
+      "symbol_ids": [
+        11
+      ],
+      "scope_ids": []
+    },
+    {
+      "ast_path": "/declaration_pool/1",
+      "symbol_ids": [
+        12
+      ],
+      "scope_ids": [
+        6
+      ]
+    },
+    {
+      "ast_path": "/declaration_pool/1/members/1",
+      "symbol_ids": [
+        13
+      ],
+      "scope_ids": [
+        7
+      ]
+    },
+    {
+      "ast_path": "/declaration_pool/1/members/1/parameters/0",
+      "symbol_ids": [
+        14
+      ],
+      "scope_ids": []
+    },
+    {
+      "ast_path": "/source_unit",
+      "symbol_ids": [
+        1
+      ],
+      "scope_ids": [
+        2
+      ]
+    }
+  ],
+  "blocks": [],
+  "statements": [],
+  "expression_count": 0
+}

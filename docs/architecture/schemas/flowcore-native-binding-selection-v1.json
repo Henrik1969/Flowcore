@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://flowcore.example/schemas/flowcore-native-binding-selection-v1.json",
+  "title": "Flowcore native binding selection",
+  "type": "object",
+  "required": ["format", "version", "status", "selections", "policy"],
+  "additionalProperties": false,
+  "properties": {
+    "format": { "const": "flowcore.native_binding_selection" },
+    "version": { "const": 1 },
+    "status": { "const": "review-required" },
+    "inventory_format": { "const": "flowcore.native_binding_inventory" },
+    "selections": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "namespace", "capability", "strategy", "contract", "rationale"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "namespace": { "type": "string", "pattern": "^[a-z][a-z0-9_.-]*$" },
+          "capability": { "type": "string", "minLength": 1 },
+          "strategy": {
+            "enum": [
+              "bind-existing",
+              "implement-flowcore",
+              "internal-substrate-adapter",
+              "external-toolchain"
+            ]
+          },
+          "provider": {
+            "type": "object",
+            "required": ["soname", "path", "architecture"],
+            "additionalProperties": false,
+            "properties": {
+              "soname": { "type": "string", "minLength": 1 },
+              "path": { "type": "string", "pattern": "^/" },
+              "architecture": { "type": "string", "minLength": 1 }
+            }
+          },
+          "contract": { "type": "string", "minLength": 1 },
+          "rationale": { "type": "string", "minLength": 1 }
+        },
+        "allOf": [
+          {
+            "if": { "properties": { "strategy": { "enum": ["bind-existing", "external-toolchain"] } } },
+            "then": { "required": ["provider"] }
+          },
+          {
+            "if": { "properties": { "strategy": { "enum": ["implement-flowcore", "internal-substrate-adapter"] } } },
+            "then": { "not": { "required": ["provider"] } }
+          }
+        ]
+      }
+    },
+    "policy": {
+      "type": "object",
+      "required": ["authorization", "execution", "binding_generation"],
+      "additionalProperties": false,
+      "properties": {
+        "authorization": { "const": "not-performed" },
+        "execution": { "const": "not-performed" },
+        "binding_generation": { "const": "not-performed" }
+      }
+    }
+  }
+}

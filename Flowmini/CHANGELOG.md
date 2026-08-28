@@ -1,5 +1,80 @@
 # Flowmini Changelog
 
+## v27_namespaced_provider_chain — active
+
+- Promoted the language-chain slice to the active v0.27 milestone.
+- Added explicit namespace aliases for imports and qualified ABI calls such as
+  `curses.initscr()`, `libc.puts()`, and `linux.read()`.
+- Preserved provider ownership in AST, semantic reports, and binding
+  requirements, with ambiguity diagnostics for unqualified collisions.
+- Added the ncurses-backed `sel` application proof and native-provider
+  inventory/selection maintenance artifacts.
+
+## v26_language_chain — historical
+
+- Established the verified vertical language chain as the v0.26 milestone.
+- Added semantic analysis, capability/ABI verification, optimization boundary,
+  explicit LLVM lowering profiles, and a native ELF application proof.
+- Added named-target semantic entrypoint checks while leaving target selection
+  and separate artifact emission as the next lowering boundary.
+- Packaged the reproducible `flowcat` application example with policy, reports,
+  LLVM, expected output, and preserved inspection builds.
+
+The implementation directory remains `flowmini_v25_symboltable_projection` for
+continuity; the v25 projection milestone is now historical.
+
+## v25_symboltable_projection — historical
+
+- Activated from the tagged `flowmini-v0.24-frontend-border` checkpoint on
+  branch `v25-symboltable-projection`.
+- Preserved v0.24 as a closed implementation line and created
+  `flowmini_v25_symboltable_projection` without build or test artifacts.
+- Established SymbolTable projection maturation, factual cross-links,
+  provenance, projection coverage, and frontend-bundle hardening as the v0.25
+  scope.
+- Kept semantic resolution, contract checking, Graph IR, and runtime lowering
+  outside v0.25.
+- Advanced `flowmini.frontend_bundle` to version 2 with typed symbol/scope
+  origins, canonical arena IDs where available, exact structural roles, and
+  source-location provenance.
+- Hardened the independent consumer with kind, role, ID, ownership, uniqueness,
+  source-map, and reverse-origin validation; expanded the gate to seven goldens,
+  one isolated run, and nineteen required failures.
+- Preserved imports in structural inspection modes so import symbols and
+  multi-file origins are observable without changing execution policy.
+- Expanded SymbolTable projection coverage to 12/12 with `import_demo`.
+
+## v24_explicit_ast — closed frontend-export border
+
+- Added observable typed AST payloads for expressions, type references, and
+  statements.
+- Added recursive precedence-aware expression ownership and validation.
+- Fixed raw-AST unary `not` ownership so its predicate operand is represented
+  instead of silently disappearing; added focused unary/break/continue coverage.
+- Added arena-owned statements and blocks with stable IDs and structural-parent
+  validation.
+- Added arena-owned top-level declarations with stable `DeclarationId` values,
+  complete source-unit ownership, and validated JSON compatibility projections.
+- Completed the C5 typed-statement migration, including explicit conditional,
+  loop, placement, assignable-target, and return source-form ownership.
+- Added structural SymbolTable projection from the AST; current focused golden
+  coverage is 11/11 and the v0.24 factual export boundary is complete.
+- Added canonical refined-type declarations with invariant expressions and
+  ordered ABI blocks containing library/convention clauses, ABI type contracts,
+  ABI structs, and extern functions. Their SymbolTable projection remains
+  factual and unresolved.
+- Established the accepted-language coverage matrix and canonical type policy.
+- Current gates: AST goldens 26/26, SymbolTable projections 11/11, suite 78/78,
+  and CTest 2/2.
+- Added the versioned `flowmini.frontend_bundle` export, generic SymbolTable JSON
+  snapshot, direct structural origin links, and an independent consumer gate
+  with five goldens, an isolated consumer run, and eleven negative attacks,
+  including real multi-file import provenance.
+- Formally closed the v0.24 raw frontend/export border after the complete Tier 3
+  Firetest passed on 2026-08-16.
+- Semantic analysis, remaining accepted-language coverage, and Graph IR remain
+  future work.
+
 ## v22_unit_kinds
 
 - Added explicit source roles:

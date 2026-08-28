@@ -1,0 +1,50 @@
+unit abi_contract_probe
+
+abi system {
+    library "libexample.so"
+    convention c
+
+    type c_string {
+        repr "const char*"
+        ownership borrowed
+        access read
+        lifetime call
+        nullable false
+        terminator nul
+    }
+
+    type c_handle {
+        repr "void*"
+        ownership external
+        access opaque
+        lifetime external
+        nullable true
+        opaque true
+    }
+
+    type c_buffer {
+        repr "const void*"
+        ownership borrowed
+        access read
+        lifetime call
+    }
+
+    struct Point {
+        x : c_int
+        y : c_long
+    }
+
+    extern fn inspect(text : c_string, point : Point): c_size_t {
+        symbol "inspect_point"
+        effect pure
+    }
+}
+
+abi implicit_convention {
+    library "libimplicit.so"
+
+    extern fn ping(value : c_int): c_int {
+        symbol "ping"
+        effect pure
+    }
+}

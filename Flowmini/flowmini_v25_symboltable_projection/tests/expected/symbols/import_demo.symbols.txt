@@ -1,0 +1,108 @@
+SymbolTable dump
+Scopes: 15
+  Scope #1 kind=Global name=global symbols=1 children=1
+  Scope #2 kind=Module name=import_demo symbols=10 children=8
+  Scope #3 kind=Function name=identity symbols=1 children=0
+  Scope #4 kind=Function name=add symbols=2 children=0
+  Scope #5 kind=Function name=square symbols=1 children=0
+  Scope #6 kind=Function name=cube symbols=1 children=0
+  Scope #7 kind=Function name=factorial symbols=3 children=1
+  Scope #8 kind=Block name=while symbols=0 children=0
+  Scope #9 kind=Function name=choose_larger symbols=2 children=2
+  Scope #10 kind=Block name=if symbols=0 children=0
+  Scope #11 kind=Block name=else symbols=0 children=0
+  Scope #12 kind=Function name=collatz_next symbols=6 children=2
+  Scope #13 kind=Block name=if symbols=0 children=0
+  Scope #14 kind=Block name=else symbols=0 children=0
+  Scope #15 kind=Function name=main symbols=4 children=0
+Symbols: 31
+  Symbol #1 scope=#1 name=import_demo kind=Module facts=1
+    declaration_location=<source>:1:1
+    Fact kind=Custom key=source_unit_kind value="program"
+  Symbol #2 scope=#2 name=../../std/math.flow kind=Import facts=0
+    declaration_location=<source>:3:1
+  Symbol #3 scope=#2 name=../../std/collatz.flow kind=Import facts=0
+    declaration_location=<source>:4:1
+  Symbol #4 scope=#2 name=identity kind=Function facts=1
+    declaration_location=<source>:7:1
+    Fact kind=TypeReference key=return_type_spelling value="int"
+  Symbol #5 scope=#3 name=x kind=Parameter facts=1
+    declaration_location=<source>:7:13
+    Fact kind=TypeReference key=declared_type_spelling value="int"
+  Symbol #6 scope=#2 name=add kind=Function facts=1
+    declaration_location=<source>:11:1
+    Fact kind=TypeReference key=return_type_spelling value="int"
+  Symbol #7 scope=#4 name=a kind=Parameter facts=1
+    declaration_location=<source>:11:8
+    Fact kind=TypeReference key=declared_type_spelling value="int"
+  Symbol #8 scope=#4 name=b kind=Parameter facts=1
+    declaration_location=<source>:11:17
+    Fact kind=TypeReference key=declared_type_spelling value="int"
+  Symbol #9 scope=#2 name=square kind=Function facts=1
+    declaration_location=<source>:15:1
+    Fact kind=TypeReference key=return_type_spelling value="int"
+  Symbol #10 scope=#5 name=n kind=Parameter facts=1
+    declaration_location=<source>:15:11
+    Fact kind=TypeReference key=declared_type_spelling value="int"
+  Symbol #11 scope=#2 name=cube kind=Function facts=1
+    declaration_location=<source>:19:1
+    Fact kind=TypeReference key=return_type_spelling value="int"
+  Symbol #12 scope=#6 name=n kind=Parameter facts=1
+    declaration_location=<source>:19:9
+    Fact kind=TypeReference key=declared_type_spelling value="int"
+  Symbol #13 scope=#2 name=factorial kind=Function facts=1
+    declaration_location=<source>:23:1
+    Fact kind=TypeReference key=return_type_spelling value="int"
+  Symbol #14 scope=#7 name=n kind=Parameter facts=1
+    declaration_location=<source>:23:14
+    Fact kind=TypeReference key=declared_type_spelling value="int"
+  Symbol #15 scope=#7 name=one kind=Variable facts=1
+    declaration_location=<source>:24:5
+    Fact kind=TypeReference key=declared_type_spelling value="int"
+  Symbol #16 scope=#7 name=acc kind=Variable facts=1
+    declaration_location=<source>:25:5
+    Fact kind=TypeReference key=declared_type_spelling value="int"
+  Symbol #17 scope=#2 name=choose_larger kind=Function facts=1
+    declaration_location=<source>:35:1
+    Fact kind=TypeReference key=return_type_spelling value="int"
+  Symbol #18 scope=#9 name=a kind=Parameter facts=1
+    declaration_location=<source>:35:18
+    Fact kind=TypeReference key=declared_type_spelling value="int"
+  Symbol #19 scope=#9 name=b kind=Parameter facts=1
+    declaration_location=<source>:35:27
+    Fact kind=TypeReference key=declared_type_spelling value="int"
+  Symbol #20 scope=#2 name=collatz_next kind=Function facts=1
+    declaration_location=<source>:44:1
+    Fact kind=TypeReference key=return_type_spelling value="int"
+  Symbol #21 scope=#12 name=n kind=Parameter facts=1
+    declaration_location=<source>:44:17
+    Fact kind=TypeReference key=declared_type_spelling value="int"
+  Symbol #22 scope=#12 name=zero kind=Variable facts=1
+    declaration_location=<source>:45:5
+    Fact kind=TypeReference key=declared_type_spelling value="int"
+  Symbol #23 scope=#12 name=two kind=Variable facts=1
+    declaration_location=<source>:46:5
+    Fact kind=TypeReference key=declared_type_spelling value="int"
+  Symbol #24 scope=#12 name=three kind=Variable facts=1
+    declaration_location=<source>:47:5
+    Fact kind=TypeReference key=declared_type_spelling value="int"
+  Symbol #25 scope=#12 name=one kind=Variable facts=1
+    declaration_location=<source>:48:5
+    Fact kind=TypeReference key=declared_type_spelling value="int"
+  Symbol #26 scope=#12 name=rem kind=Variable facts=1
+    declaration_location=<source>:49:5
+    Fact kind=TypeReference key=declared_type_spelling value="int"
+  Symbol #27 scope=#2 name=main kind=Procedure facts=0
+    declaration_location=<source>:61:1
+  Symbol #28 scope=#15 name=three kind=Variable facts=1
+    declaration_location=<source>:62:5
+    Fact kind=TypeReference key=declared_type_spelling value="int"
+  Symbol #29 scope=#15 name=four kind=Variable facts=1
+    declaration_location=<source>:63:5
+    Fact kind=TypeReference key=declared_type_spelling value="int"
+  Symbol #30 scope=#15 name=five kind=Variable facts=1
+    declaration_location=<source>:64:5
+    Fact kind=TypeReference key=declared_type_spelling value="int"
+  Symbol #31 scope=#15 name=result kind=Variable facts=1
+    declaration_location=<source>:65:5
+    Fact kind=TypeReference key=declared_type_spelling value="int"

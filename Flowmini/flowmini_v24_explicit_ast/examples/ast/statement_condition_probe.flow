@@ -1,0 +1,26 @@
+program statement_condition_probe
+
+fn adjust(value : int, limit : int) -> int {
+    if value + 1 < limit {
+        value = value + 1
+    }
+
+    while value < limit {
+        if value == 2 {
+            value = value + 1
+        }
+        value = value + 1
+    }
+
+    return value
+}
+
+main {
+    value : int(0)
+
+    if value == 0 {
+        while value < 2 {
+            value = value + 1
+        }
+    }
+}

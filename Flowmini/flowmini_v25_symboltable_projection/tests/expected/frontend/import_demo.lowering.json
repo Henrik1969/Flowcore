@@ -1,0 +1,2109 @@
+{
+  "format": "flowmini.lowering_skeleton",
+  "version": 1,
+  "source": {
+    "path": "examples/pass/import_demo.flow"
+  },
+  "source_files": [
+    {
+      "id": 0,
+      "path": "examples/pass/import_demo.flow"
+    },
+    {
+      "id": 1,
+      "path": "std/math.flow"
+    },
+    {
+      "id": 2,
+      "path": "std/collatz.flow"
+    }
+  ],
+  "expanded_line_count": 75,
+  "source_unit": {
+    "kind": "program",
+    "name": "import_demo"
+  },
+  "diagnostic_count": 0,
+  "declarations": [
+    {
+      "id": 0,
+      "kind": "import",
+      "name": null,
+      "symbol_ids": [
+        2
+      ]
+    },
+    {
+      "id": 1,
+      "kind": "import",
+      "name": null,
+      "symbol_ids": [
+        3
+      ]
+    },
+    {
+      "id": 2,
+      "kind": "function",
+      "name": "identity",
+      "symbol_ids": [
+        4
+      ]
+    },
+    {
+      "id": 3,
+      "kind": "function",
+      "name": "add",
+      "symbol_ids": [
+        6
+      ]
+    },
+    {
+      "id": 4,
+      "kind": "function",
+      "name": "square",
+      "symbol_ids": [
+        9
+      ]
+    },
+    {
+      "id": 5,
+      "kind": "function",
+      "name": "cube",
+      "symbol_ids": [
+        11
+      ]
+    },
+    {
+      "id": 6,
+      "kind": "function",
+      "name": "factorial",
+      "symbol_ids": [
+        13
+      ]
+    },
+    {
+      "id": 7,
+      "kind": "function",
+      "name": "choose_larger",
+      "symbol_ids": [
+        17
+      ]
+    },
+    {
+      "id": 8,
+      "kind": "function",
+      "name": "collatz_next",
+      "symbol_ids": [
+        20
+      ]
+    },
+    {
+      "id": 9,
+      "kind": "main_block",
+      "name": null,
+      "symbol_ids": [
+        27
+      ]
+    }
+  ],
+  "scopes": [
+    {
+      "id": 1,
+      "kind": "Global",
+      "parent_id": null,
+      "owner_symbol_id": null,
+      "origin": null,
+      "symbol_ids": [
+        1
+      ]
+    },
+    {
+      "id": 2,
+      "kind": "Module",
+      "parent_id": 1,
+      "owner_symbol_id": 1,
+      "origin": {
+        "ast_path": "/source_unit",
+        "entity_kind": "source_unit",
+        "role": "module_scope",
+        "ast_id": null,
+        "source_location": {
+          "line": 1,
+          "column": 1
+        }
+      },
+      "symbol_ids": [
+        2,
+        3,
+        4,
+        6,
+        9,
+        11,
+        13,
+        17,
+        20,
+        27
+      ]
+    },
+    {
+      "id": 3,
+      "kind": "Function",
+      "parent_id": 2,
+      "owner_symbol_id": 4,
+      "origin": {
+        "ast_path": "/declaration_pool/2",
+        "entity_kind": "declaration",
+        "role": "function_scope",
+        "ast_id": 2,
+        "source_location": {
+          "line": 7,
+          "column": 1
+        }
+      },
+      "symbol_ids": [
+        5
+      ]
+    },
+    {
+      "id": 4,
+      "kind": "Function",
+      "parent_id": 2,
+      "owner_symbol_id": 6,
+      "origin": {
+        "ast_path": "/declaration_pool/3",
+        "entity_kind": "declaration",
+        "role": "function_scope",
+        "ast_id": 3,
+        "source_location": {
+          "line": 11,
+          "column": 1
+        }
+      },
+      "symbol_ids": [
+        7,
+        8
+      ]
+    },
+    {
+      "id": 5,
+      "kind": "Function",
+      "parent_id": 2,
+      "owner_symbol_id": 9,
+      "origin": {
+        "ast_path": "/declaration_pool/4",
+        "entity_kind": "declaration",
+        "role": "function_scope",
+        "ast_id": 4,
+        "source_location": {
+          "line": 15,
+          "column": 1
+        }
+      },
+      "symbol_ids": [
+        10
+      ]
+    },
+    {
+      "id": 6,
+      "kind": "Function",
+      "parent_id": 2,
+      "owner_symbol_id": 11,
+      "origin": {
+        "ast_path": "/declaration_pool/5",
+        "entity_kind": "declaration",
+        "role": "function_scope",
+        "ast_id": 5,
+        "source_location": {
+          "line": 19,
+          "column": 1
+        }
+      },
+      "symbol_ids": [
+        12
+      ]
+    },
+    {
+      "id": 7,
+      "kind": "Function",
+      "parent_id": 2,
+      "owner_symbol_id": 13,
+      "origin": {
+        "ast_path": "/declaration_pool/6",
+        "entity_kind": "declaration",
+        "role": "function_scope",
+        "ast_id": 6,
+        "source_location": {
+          "line": 23,
+          "column": 1
+        }
+      },
+      "symbol_ids": [
+        14,
+        15,
+        16
+      ]
+    },
+    {
+      "id": 8,
+      "kind": "Block",
+      "parent_id": 7,
+      "owner_symbol_id": null,
+      "origin": {
+        "ast_path": "/block_pool/5",
+        "entity_kind": "block",
+        "role": "while_body_scope",
+        "ast_id": 5,
+        "source_location": {
+          "line": 27,
+          "column": 5
+        }
+      },
+      "symbol_ids": []
+    },
+    {
+      "id": 9,
+      "kind": "Function",
+      "parent_id": 2,
+      "owner_symbol_id": 17,
+      "origin": {
+        "ast_path": "/declaration_pool/7",
+        "entity_kind": "declaration",
+        "role": "function_scope",
+        "ast_id": 7,
+        "source_location": {
+          "line": 35,
+          "column": 1
+        }
+      },
+      "symbol_ids": [
+        18,
+        19
+      ]
+    },
+    {
+      "id": 10,
+      "kind": "Block",
+      "parent_id": 9,
+      "owner_symbol_id": null,
+      "origin": {
+        "ast_path": "/block_pool/7",
+        "entity_kind": "block",
+        "role": "if_then_scope",
+        "ast_id": 7,
+        "source_location": {
+          "line": 36,
+          "column": 5
+        }
+      },
+      "symbol_ids": []
+    },
+    {
+      "id": 11,
+      "kind": "Block",
+      "parent_id": 9,
+      "owner_symbol_id": null,
+      "origin": {
+        "ast_path": "/block_pool/8",
+        "entity_kind": "block",
+        "role": "else_block_scope",
+        "ast_id": 8,
+        "source_location": {
+          "line": 36,
+          "column": 5
+        }
+      },
+      "symbol_ids": []
+    },
+    {
+      "id": 12,
+      "kind": "Function",
+      "parent_id": 2,
+      "owner_symbol_id": 20,
+      "origin": {
+        "ast_path": "/declaration_pool/8",
+        "entity_kind": "declaration",
+        "role": "function_scope",
+        "ast_id": 8,
+        "source_location": {
+          "line": 44,
+          "column": 1
+        }
+      },
+      "symbol_ids": [
+        21,
+        22,
+        23,
+        24,
+        25,
+        26
+      ]
+    },
+    {
+      "id": 13,
+      "kind": "Block",
+      "parent_id": 12,
+      "owner_symbol_id": null,
+      "origin": {
+        "ast_path": "/block_pool/10",
+        "entity_kind": "block",
+        "role": "if_then_scope",
+        "ast_id": 10,
+        "source_location": {
+          "line": 53,
+          "column": 5
+        }
+      },
+      "symbol_ids": []
+    },
+    {
+      "id": 14,
+      "kind": "Block",
+      "parent_id": 12,
+      "owner_symbol_id": null,
+      "origin": {
+        "ast_path": "/block_pool/11",
+        "entity_kind": "block",
+        "role": "else_block_scope",
+        "ast_id": 11,
+        "source_location": {
+          "line": 53,
+          "column": 5
+        }
+      },
+      "symbol_ids": []
+    },
+    {
+      "id": 15,
+      "kind": "Function",
+      "parent_id": 2,
+      "owner_symbol_id": 27,
+      "origin": {
+        "ast_path": "/declaration_pool/9",
+        "entity_kind": "declaration",
+        "role": "main_scope",
+        "ast_id": 9,
+        "source_location": {
+          "line": 61,
+          "column": 1
+        }
+      },
+      "symbol_ids": [
+        28,
+        29,
+        30,
+        31
+      ]
+    }
+  ],
+  "symbols": [
+    {
+      "id": 1,
+      "name": "import_demo",
+      "kind": "Module",
+      "owning_scope_id": 1,
+      "introduced_scope_id": 2,
+      "origin": {
+        "ast_path": "/source_unit",
+        "entity_kind": "source_unit",
+        "role": "source_unit",
+        "ast_id": null,
+        "source_location": {
+          "line": 1,
+          "column": 1
+        }
+      },
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/pass/import_demo.flow",
+        "line": 4,
+        "column": 1
+      },
+      "facts": [
+        {
+          "kind": "Custom",
+          "key": "source_unit_kind",
+          "value": {
+            "type": "string",
+            "value": "program"
+          }
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "../../std/math.flow",
+      "kind": "Import",
+      "owning_scope_id": 2,
+      "introduced_scope_id": null,
+      "origin": {
+        "ast_path": "/declaration_pool/0",
+        "entity_kind": "declaration",
+        "role": "import_declaration",
+        "ast_id": 0,
+        "source_location": {
+          "line": 3,
+          "column": 1
+        }
+      },
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/pass/import_demo.flow",
+        "line": 1,
+        "column": 1
+      },
+      "facts": []
+    },
+    {
+      "id": 3,
+      "name": "../../std/collatz.flow",
+      "kind": "Import",
+      "owning_scope_id": 2,
+      "introduced_scope_id": null,
+      "origin": {
+        "ast_path": "/declaration_pool/1",
+        "entity_kind": "declaration",
+        "role": "import_declaration",
+        "ast_id": 1,
+        "source_location": {
+          "line": 4,
+          "column": 1
+        }
+      },
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/pass/import_demo.flow",
+        "line": 2,
+        "column": 1
+      },
+      "facts": []
+    },
+    {
+      "id": 4,
+      "name": "identity",
+      "kind": "Function",
+      "owning_scope_id": 2,
+      "introduced_scope_id": 3,
+      "origin": {
+        "ast_path": "/declaration_pool/2",
+        "entity_kind": "declaration",
+        "role": "function_declaration",
+        "ast_id": 2,
+        "source_location": {
+          "line": 7,
+          "column": 1
+        }
+      },
+      "source_location": {
+        "source_id": 1,
+        "path": "std/math.flow",
+        "line": 3,
+        "column": 1
+      },
+      "facts": [
+        {
+          "kind": "TypeReference",
+          "key": "return_type_spelling",
+          "value": {
+            "type": "string",
+            "value": "int"
+          }
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "name": "x",
+      "kind": "Parameter",
+      "owning_scope_id": 3,
+      "introduced_scope_id": null,
+      "origin": {
+        "ast_path": "/declaration_pool/2/parameters/0",
+        "entity_kind": "parameter",
+        "role": "function_parameter",
+        "ast_id": null,
+        "source_location": {
+          "line": 7,
+          "column": 13
+        }
+      },
+      "source_location": {
+        "source_id": 1,
+        "path": "std/math.flow",
+        "line": 3,
+        "column": 13
+      },
+      "facts": [
+        {
+          "kind": "TypeReference",
+          "key": "declared_type_spelling",
+          "value": {
+            "type": "string",
+            "value": "int"
+          }
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "name": "add",
+      "kind": "Function",
+      "owning_scope_id": 2,
+      "introduced_scope_id": 4,
+      "origin": {
+        "ast_path": "/declaration_pool/3",
+        "entity_kind": "declaration",
+        "role": "function_declaration",
+        "ast_id": 3,
+        "source_location": {
+          "line": 11,
+          "column": 1
+        }
+      },
+      "source_location": {
+        "source_id": 1,
+        "path": "std/math.flow",
+        "line": 7,
+        "column": 1
+      },
+      "facts": [
+        {
+          "kind": "TypeReference",
+          "key": "return_type_spelling",
+          "value": {
+            "type": "string",
+            "value": "int"
+          }
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "name": "a",
+      "kind": "Parameter",
+      "owning_scope_id": 4,
+      "introduced_scope_id": null,
+      "origin": {
+        "ast_path": "/declaration_pool/3/parameters/0",
+        "entity_kind": "parameter",
+        "role": "function_parameter",
+        "ast_id": null,
+        "source_location": {
+          "line": 11,
+          "column": 8
+        }
+      },
+      "source_location": {
+        "source_id": 1,
+        "path": "std/math.flow",
+        "line": 7,
+        "column": 8
+      },
+      "facts": [
+        {
+          "kind": "TypeReference",
+          "key": "declared_type_spelling",
+          "value": {
+            "type": "string",
+            "value": "int"
+          }
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "name": "b",
+      "kind": "Parameter",
+      "owning_scope_id": 4,
+      "introduced_scope_id": null,
+      "origin": {
+        "ast_path": "/declaration_pool/3/parameters/1",
+        "entity_kind": "parameter",
+        "role": "function_parameter",
+        "ast_id": null,
+        "source_location": {
+          "line": 11,
+          "column": 17
+        }
+      },
+      "source_location": {
+        "source_id": 1,
+        "path": "std/math.flow",
+        "line": 7,
+        "column": 17
+      },
+      "facts": [
+        {
+          "kind": "TypeReference",
+          "key": "declared_type_spelling",
+          "value": {
+            "type": "string",
+            "value": "int"
+          }
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "name": "square",
+      "kind": "Function",
+      "owning_scope_id": 2,
+      "introduced_scope_id": 5,
+      "origin": {
+        "ast_path": "/declaration_pool/4",
+        "entity_kind": "declaration",
+        "role": "function_declaration",
+        "ast_id": 4,
+        "source_location": {
+          "line": 15,
+          "column": 1
+        }
+      },
+      "source_location": {
+        "source_id": 1,
+        "path": "std/math.flow",
+        "line": 11,
+        "column": 1
+      },
+      "facts": [
+        {
+          "kind": "TypeReference",
+          "key": "return_type_spelling",
+          "value": {
+            "type": "string",
+            "value": "int"
+          }
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "name": "n",
+      "kind": "Parameter",
+      "owning_scope_id": 5,
+      "introduced_scope_id": null,
+      "origin": {
+        "ast_path": "/declaration_pool/4/parameters/0",
+        "entity_kind": "parameter",
+        "role": "function_parameter",
+        "ast_id": null,
+        "source_location": {
+          "line": 15,
+          "column": 11
+        }
+      },
+      "source_location": {
+        "source_id": 1,
+        "path": "std/math.flow",
+        "line": 11,
+        "column": 11
+      },
+      "facts": [
+        {
+          "kind": "TypeReference",
+          "key": "declared_type_spelling",
+          "value": {
+            "type": "string",
+            "value": "int"
+          }
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "name": "cube",
+      "kind": "Function",
+      "owning_scope_id": 2,
+      "introduced_scope_id": 6,
+      "origin": {
+        "ast_path": "/declaration_pool/5",
+        "entity_kind": "declaration",
+        "role": "function_declaration",
+        "ast_id": 5,
+        "source_location": {
+          "line": 19,
+          "column": 1
+        }
+      },
+      "source_location": {
+        "source_id": 1,
+        "path": "std/math.flow",
+        "line": 15,
+        "column": 1
+      },
+      "facts": [
+        {
+          "kind": "TypeReference",
+          "key": "return_type_spelling",
+          "value": {
+            "type": "string",
+            "value": "int"
+          }
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "name": "n",
+      "kind": "Parameter",
+      "owning_scope_id": 6,
+      "introduced_scope_id": null,
+      "origin": {
+        "ast_path": "/declaration_pool/5/parameters/0",
+        "entity_kind": "parameter",
+        "role": "function_parameter",
+        "ast_id": null,
+        "source_location": {
+          "line": 19,
+          "column": 9
+        }
+      },
+      "source_location": {
+        "source_id": 1,
+        "path": "std/math.flow",
+        "line": 15,
+        "column": 9
+      },
+      "facts": [
+        {
+          "kind": "TypeReference",
+          "key": "declared_type_spelling",
+          "value": {
+            "type": "string",
+            "value": "int"
+          }
+        }
+      ]
+    },
+    {
+      "id": 13,
+      "name": "factorial",
+      "kind": "Function",
+      "owning_scope_id": 2,
+      "introduced_scope_id": 7,
+      "origin": {
+        "ast_path": "/declaration_pool/6",
+        "entity_kind": "declaration",
+        "role": "function_declaration",
+        "ast_id": 6,
+        "source_location": {
+          "line": 23,
+          "column": 1
+        }
+      },
+      "source_location": {
+        "source_id": 1,
+        "path": "std/math.flow",
+        "line": 19,
+        "column": 1
+      },
+      "facts": [
+        {
+          "kind": "TypeReference",
+          "key": "return_type_spelling",
+          "value": {
+            "type": "string",
+            "value": "int"
+          }
+        }
+      ]
+    },
+    {
+      "id": 14,
+      "name": "n",
+      "kind": "Parameter",
+      "owning_scope_id": 7,
+      "introduced_scope_id": null,
+      "origin": {
+        "ast_path": "/declaration_pool/6/parameters/0",
+        "entity_kind": "parameter",
+        "role": "function_parameter",
+        "ast_id": null,
+        "source_location": {
+          "line": 23,
+          "column": 14
+        }
+      },
+      "source_location": {
+        "source_id": 1,
+        "path": "std/math.flow",
+        "line": 19,
+        "column": 14
+      },
+      "facts": [
+        {
+          "kind": "TypeReference",
+          "key": "declared_type_spelling",
+          "value": {
+            "type": "string",
+            "value": "int"
+          }
+        }
+      ]
+    },
+    {
+      "id": 15,
+      "name": "one",
+      "kind": "Variable",
+      "owning_scope_id": 7,
+      "introduced_scope_id": null,
+      "origin": {
+        "ast_path": "/statement_pool/4",
+        "entity_kind": "statement",
+        "role": "local_binding",
+        "ast_id": 4,
+        "source_location": {
+          "line": 24,
+          "column": 5
+        }
+      },
+      "source_location": {
+        "source_id": 1,
+        "path": "std/math.flow",
+        "line": 20,
+        "column": 5
+      },
+      "facts": [
+        {
+          "kind": "TypeReference",
+          "key": "declared_type_spelling",
+          "value": {
+            "type": "string",
+            "value": "int"
+          }
+        }
+      ]
+    },
+    {
+      "id": 16,
+      "name": "acc",
+      "kind": "Variable",
+      "owning_scope_id": 7,
+      "introduced_scope_id": null,
+      "origin": {
+        "ast_path": "/statement_pool/5",
+        "entity_kind": "statement",
+        "role": "local_binding",
+        "ast_id": 5,
+        "source_location": {
+          "line": 25,
+          "column": 5
+        }
+      },
+      "source_location": {
+        "source_id": 1,
+        "path": "std/math.flow",
+        "line": 21,
+        "column": 5
+      },
+      "facts": [
+        {
+          "kind": "TypeReference",
+          "key": "declared_type_spelling",
+          "value": {
+            "type": "string",
+            "value": "int"
+          }
+        }
+      ]
+    },
+    {
+      "id": 17,
+      "name": "choose_larger",
+      "kind": "Function",
+      "owning_scope_id": 2,
+      "introduced_scope_id": 9,
+      "origin": {
+        "ast_path": "/declaration_pool/7",
+        "entity_kind": "declaration",
+        "role": "function_declaration",
+        "ast_id": 7,
+        "source_location": {
+          "line": 35,
+          "column": 1
+        }
+      },
+      "source_location": {
+        "source_id": 1,
+        "path": "std/math.flow",
+        "line": 31,
+        "column": 1
+      },
+      "facts": [
+        {
+          "kind": "TypeReference",
+          "key": "return_type_spelling",
+          "value": {
+            "type": "string",
+            "value": "int"
+          }
+        }
+      ]
+    },
+    {
+      "id": 18,
+      "name": "a",
+      "kind": "Parameter",
+      "owning_scope_id": 9,
+      "introduced_scope_id": null,
+      "origin": {
+        "ast_path": "/declaration_pool/7/parameters/0",
+        "entity_kind": "parameter",
+        "role": "function_parameter",
+        "ast_id": null,
+        "source_location": {
+          "line": 35,
+          "column": 18
+        }
+      },
+      "source_location": {
+        "source_id": 1,
+        "path": "std/math.flow",
+        "line": 31,
+        "column": 18
+      },
+      "facts": [
+        {
+          "kind": "TypeReference",
+          "key": "declared_type_spelling",
+          "value": {
+            "type": "string",
+            "value": "int"
+          }
+        }
+      ]
+    },
+    {
+      "id": 19,
+      "name": "b",
+      "kind": "Parameter",
+      "owning_scope_id": 9,
+      "introduced_scope_id": null,
+      "origin": {
+        "ast_path": "/declaration_pool/7/parameters/1",
+        "entity_kind": "parameter",
+        "role": "function_parameter",
+        "ast_id": null,
+        "source_location": {
+          "line": 35,
+          "column": 27
+        }
+      },
+      "source_location": {
+        "source_id": 1,
+        "path": "std/math.flow",
+        "line": 31,
+        "column": 27
+      },
+      "facts": [
+        {
+          "kind": "TypeReference",
+          "key": "declared_type_spelling",
+          "value": {
+            "type": "string",
+            "value": "int"
+          }
+        }
+      ]
+    },
+    {
+      "id": 20,
+      "name": "collatz_next",
+      "kind": "Function",
+      "owning_scope_id": 2,
+      "introduced_scope_id": 12,
+      "origin": {
+        "ast_path": "/declaration_pool/8",
+        "entity_kind": "declaration",
+        "role": "function_declaration",
+        "ast_id": 8,
+        "source_location": {
+          "line": 44,
+          "column": 1
+        }
+      },
+      "source_location": {
+        "source_id": 2,
+        "path": "std/collatz.flow",
+        "line": 3,
+        "column": 1
+      },
+      "facts": [
+        {
+          "kind": "TypeReference",
+          "key": "return_type_spelling",
+          "value": {
+            "type": "string",
+            "value": "int"
+          }
+        }
+      ]
+    },
+    {
+      "id": 21,
+      "name": "n",
+      "kind": "Parameter",
+      "owning_scope_id": 12,
+      "introduced_scope_id": null,
+      "origin": {
+        "ast_path": "/declaration_pool/8/parameters/0",
+        "entity_kind": "parameter",
+        "role": "function_parameter",
+        "ast_id": null,
+        "source_location": {
+          "line": 44,
+          "column": 17
+        }
+      },
+      "source_location": {
+        "source_id": 2,
+        "path": "std/collatz.flow",
+        "line": 3,
+        "column": 17
+      },
+      "facts": [
+        {
+          "kind": "TypeReference",
+          "key": "declared_type_spelling",
+          "value": {
+            "type": "string",
+            "value": "int"
+          }
+        }
+      ]
+    },
+    {
+      "id": 22,
+      "name": "zero",
+      "kind": "Variable",
+      "owning_scope_id": 12,
+      "introduced_scope_id": null,
+      "origin": {
+        "ast_path": "/statement_pool/13",
+        "entity_kind": "statement",
+        "role": "local_binding",
+        "ast_id": 13,
+        "source_location": {
+          "line": 45,
+          "column": 5
+        }
+      },
+      "source_location": {
+        "source_id": 2,
+        "path": "std/collatz.flow",
+        "line": 4,
+        "column": 5
+      },
+      "facts": [
+        {
+          "kind": "TypeReference",
+          "key": "declared_type_spelling",
+          "value": {
+            "type": "string",
+            "value": "int"
+          }
+        }
+      ]
+    },
+    {
+      "id": 23,
+      "name": "two",
+      "kind": "Variable",
+      "owning_scope_id": 12,
+      "introduced_scope_id": null,
+      "origin": {
+        "ast_path": "/statement_pool/14",
+        "entity_kind": "statement",
+        "role": "local_binding",
+        "ast_id": 14,
+        "source_location": {
+          "line": 46,
+          "column": 5
+        }
+      },
+      "source_location": {
+        "source_id": 2,
+        "path": "std/collatz.flow",
+        "line": 5,
+        "column": 5
+      },
+      "facts": [
+        {
+          "kind": "TypeReference",
+          "key": "declared_type_spelling",
+          "value": {
+            "type": "string",
+            "value": "int"
+          }
+        }
+      ]
+    },
+    {
+      "id": 24,
+      "name": "three",
+      "kind": "Variable",
+      "owning_scope_id": 12,
+      "introduced_scope_id": null,
+      "origin": {
+        "ast_path": "/statement_pool/15",
+        "entity_kind": "statement",
+        "role": "local_binding",
+        "ast_id": 15,
+        "source_location": {
+          "line": 47,
+          "column": 5
+        }
+      },
+      "source_location": {
+        "source_id": 2,
+        "path": "std/collatz.flow",
+        "line": 6,
+        "column": 5
+      },
+      "facts": [
+        {
+          "kind": "TypeReference",
+          "key": "declared_type_spelling",
+          "value": {
+            "type": "string",
+            "value": "int"
+          }
+        }
+      ]
+    },
+    {
+      "id": 25,
+      "name": "one",
+      "kind": "Variable",
+      "owning_scope_id": 12,
+      "introduced_scope_id": null,
+      "origin": {
+        "ast_path": "/statement_pool/16",
+        "entity_kind": "statement",
+        "role": "local_binding",
+        "ast_id": 16,
+        "source_location": {
+          "line": 48,
+          "column": 5
+        }
+      },
+      "source_location": {
+        "source_id": 2,
+        "path": "std/collatz.flow",
+        "line": 7,
+        "column": 5
+      },
+      "facts": [
+        {
+          "kind": "TypeReference",
+          "key": "declared_type_spelling",
+          "value": {
+            "type": "string",
+            "value": "int"
+          }
+        }
+      ]
+    },
+    {
+      "id": 26,
+      "name": "rem",
+      "kind": "Variable",
+      "owning_scope_id": 12,
+      "introduced_scope_id": null,
+      "origin": {
+        "ast_path": "/statement_pool/17",
+        "entity_kind": "statement",
+        "role": "local_binding",
+        "ast_id": 17,
+        "source_location": {
+          "line": 49,
+          "column": 5
+        }
+      },
+      "source_location": {
+        "source_id": 2,
+        "path": "std/collatz.flow",
+        "line": 8,
+        "column": 5
+      },
+      "facts": [
+        {
+          "kind": "TypeReference",
+          "key": "declared_type_spelling",
+          "value": {
+            "type": "string",
+            "value": "int"
+          }
+        }
+      ]
+    },
+    {
+      "id": 27,
+      "name": "main",
+      "kind": "Procedure",
+      "owning_scope_id": 2,
+      "introduced_scope_id": 15,
+      "origin": {
+        "ast_path": "/declaration_pool/9",
+        "entity_kind": "declaration",
+        "role": "main_declaration",
+        "ast_id": 9,
+        "source_location": {
+          "line": 61,
+          "column": 1
+        }
+      },
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/pass/import_demo.flow",
+        "line": 6,
+        "column": 1
+      },
+      "facts": []
+    },
+    {
+      "id": 28,
+      "name": "three",
+      "kind": "Variable",
+      "owning_scope_id": 15,
+      "introduced_scope_id": null,
+      "origin": {
+        "ast_path": "/statement_pool/22",
+        "entity_kind": "statement",
+        "role": "local_binding",
+        "ast_id": 22,
+        "source_location": {
+          "line": 62,
+          "column": 5
+        }
+      },
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/pass/import_demo.flow",
+        "line": 7,
+        "column": 5
+      },
+      "facts": [
+        {
+          "kind": "TypeReference",
+          "key": "declared_type_spelling",
+          "value": {
+            "type": "string",
+            "value": "int"
+          }
+        }
+      ]
+    },
+    {
+      "id": 29,
+      "name": "four",
+      "kind": "Variable",
+      "owning_scope_id": 15,
+      "introduced_scope_id": null,
+      "origin": {
+        "ast_path": "/statement_pool/23",
+        "entity_kind": "statement",
+        "role": "local_binding",
+        "ast_id": 23,
+        "source_location": {
+          "line": 63,
+          "column": 5
+        }
+      },
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/pass/import_demo.flow",
+        "line": 8,
+        "column": 5
+      },
+      "facts": [
+        {
+          "kind": "TypeReference",
+          "key": "declared_type_spelling",
+          "value": {
+            "type": "string",
+            "value": "int"
+          }
+        }
+      ]
+    },
+    {
+      "id": 30,
+      "name": "five",
+      "kind": "Variable",
+      "owning_scope_id": 15,
+      "introduced_scope_id": null,
+      "origin": {
+        "ast_path": "/statement_pool/24",
+        "entity_kind": "statement",
+        "role": "local_binding",
+        "ast_id": 24,
+        "source_location": {
+          "line": 64,
+          "column": 5
+        }
+      },
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/pass/import_demo.flow",
+        "line": 9,
+        "column": 5
+      },
+      "facts": [
+        {
+          "kind": "TypeReference",
+          "key": "declared_type_spelling",
+          "value": {
+            "type": "string",
+            "value": "int"
+          }
+        }
+      ]
+    },
+    {
+      "id": 31,
+      "name": "result",
+      "kind": "Variable",
+      "owning_scope_id": 15,
+      "introduced_scope_id": null,
+      "origin": {
+        "ast_path": "/statement_pool/25",
+        "entity_kind": "statement",
+        "role": "local_binding",
+        "ast_id": 25,
+        "source_location": {
+          "line": 65,
+          "column": 5
+        }
+      },
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/pass/import_demo.flow",
+        "line": 10,
+        "column": 5
+      },
+      "facts": [
+        {
+          "kind": "TypeReference",
+          "key": "declared_type_spelling",
+          "value": {
+            "type": "string",
+            "value": "int"
+          }
+        }
+      ]
+    }
+  ],
+  "origin_index": [
+    {
+      "ast_path": "/block_pool/10",
+      "symbol_ids": [],
+      "scope_ids": [
+        13
+      ]
+    },
+    {
+      "ast_path": "/block_pool/11",
+      "symbol_ids": [],
+      "scope_ids": [
+        14
+      ]
+    },
+    {
+      "ast_path": "/block_pool/5",
+      "symbol_ids": [],
+      "scope_ids": [
+        8
+      ]
+    },
+    {
+      "ast_path": "/block_pool/7",
+      "symbol_ids": [],
+      "scope_ids": [
+        10
+      ]
+    },
+    {
+      "ast_path": "/block_pool/8",
+      "symbol_ids": [],
+      "scope_ids": [
+        11
+      ]
+    },
+    {
+      "ast_path": "/declaration_pool/0",
+      "symbol_ids": [
+        2
+      ],
+      "scope_ids": []
+    },
+    {
+      "ast_path": "/declaration_pool/1",
+      "symbol_ids": [
+        3
+      ],
+      "scope_ids": []
+    },
+    {
+      "ast_path": "/declaration_pool/2",
+      "symbol_ids": [
+        4
+      ],
+      "scope_ids": [
+        3
+      ]
+    },
+    {
+      "ast_path": "/declaration_pool/2/parameters/0",
+      "symbol_ids": [
+        5
+      ],
+      "scope_ids": []
+    },
+    {
+      "ast_path": "/declaration_pool/3",
+      "symbol_ids": [
+        6
+      ],
+      "scope_ids": [
+        4
+      ]
+    },
+    {
+      "ast_path": "/declaration_pool/3/parameters/0",
+      "symbol_ids": [
+        7
+      ],
+      "scope_ids": []
+    },
+    {
+      "ast_path": "/declaration_pool/3/parameters/1",
+      "symbol_ids": [
+        8
+      ],
+      "scope_ids": []
+    },
+    {
+      "ast_path": "/declaration_pool/4",
+      "symbol_ids": [
+        9
+      ],
+      "scope_ids": [
+        5
+      ]
+    },
+    {
+      "ast_path": "/declaration_pool/4/parameters/0",
+      "symbol_ids": [
+        10
+      ],
+      "scope_ids": []
+    },
+    {
+      "ast_path": "/declaration_pool/5",
+      "symbol_ids": [
+        11
+      ],
+      "scope_ids": [
+        6
+      ]
+    },
+    {
+      "ast_path": "/declaration_pool/5/parameters/0",
+      "symbol_ids": [
+        12
+      ],
+      "scope_ids": []
+    },
+    {
+      "ast_path": "/declaration_pool/6",
+      "symbol_ids": [
+        13
+      ],
+      "scope_ids": [
+        7
+      ]
+    },
+    {
+      "ast_path": "/declaration_pool/6/parameters/0",
+      "symbol_ids": [
+        14
+      ],
+      "scope_ids": []
+    },
+    {
+      "ast_path": "/declaration_pool/7",
+      "symbol_ids": [
+        17
+      ],
+      "scope_ids": [
+        9
+      ]
+    },
+    {
+      "ast_path": "/declaration_pool/7/parameters/0",
+      "symbol_ids": [
+        18
+      ],
+      "scope_ids": []
+    },
+    {
+      "ast_path": "/declaration_pool/7/parameters/1",
+      "symbol_ids": [
+        19
+      ],
+      "scope_ids": []
+    },
+    {
+      "ast_path": "/declaration_pool/8",
+      "symbol_ids": [
+        20
+      ],
+      "scope_ids": [
+        12
+      ]
+    },
+    {
+      "ast_path": "/declaration_pool/8/parameters/0",
+      "symbol_ids": [
+        21
+      ],
+      "scope_ids": []
+    },
+    {
+      "ast_path": "/declaration_pool/9",
+      "symbol_ids": [
+        27
+      ],
+      "scope_ids": [
+        15
+      ]
+    },
+    {
+      "ast_path": "/source_unit",
+      "symbol_ids": [
+        1
+      ],
+      "scope_ids": [
+        2
+      ]
+    },
+    {
+      "ast_path": "/statement_pool/13",
+      "symbol_ids": [
+        22
+      ],
+      "scope_ids": []
+    },
+    {
+      "ast_path": "/statement_pool/14",
+      "symbol_ids": [
+        23
+      ],
+      "scope_ids": []
+    },
+    {
+      "ast_path": "/statement_pool/15",
+      "symbol_ids": [
+        24
+      ],
+      "scope_ids": []
+    },
+    {
+      "ast_path": "/statement_pool/16",
+      "symbol_ids": [
+        25
+      ],
+      "scope_ids": []
+    },
+    {
+      "ast_path": "/statement_pool/17",
+      "symbol_ids": [
+        26
+      ],
+      "scope_ids": []
+    },
+    {
+      "ast_path": "/statement_pool/22",
+      "symbol_ids": [
+        28
+      ],
+      "scope_ids": []
+    },
+    {
+      "ast_path": "/statement_pool/23",
+      "symbol_ids": [
+        29
+      ],
+      "scope_ids": []
+    },
+    {
+      "ast_path": "/statement_pool/24",
+      "symbol_ids": [
+        30
+      ],
+      "scope_ids": []
+    },
+    {
+      "ast_path": "/statement_pool/25",
+      "symbol_ids": [
+        31
+      ],
+      "scope_ids": []
+    },
+    {
+      "ast_path": "/statement_pool/4",
+      "symbol_ids": [
+        15
+      ],
+      "scope_ids": []
+    },
+    {
+      "ast_path": "/statement_pool/5",
+      "symbol_ids": [
+        16
+      ],
+      "scope_ids": []
+    }
+  ],
+  "blocks": [
+    {
+      "id": 0,
+      "statement_ids": []
+    },
+    {
+      "id": 1,
+      "statement_ids": []
+    },
+    {
+      "id": 2,
+      "statement_ids": []
+    },
+    {
+      "id": 3,
+      "statement_ids": []
+    },
+    {
+      "id": 4,
+      "statement_ids": []
+    },
+    {
+      "id": 5,
+      "statement_ids": []
+    },
+    {
+      "id": 6,
+      "statement_ids": []
+    },
+    {
+      "id": 7,
+      "statement_ids": []
+    },
+    {
+      "id": 8,
+      "statement_ids": []
+    },
+    {
+      "id": 9,
+      "statement_ids": []
+    },
+    {
+      "id": 10,
+      "statement_ids": []
+    },
+    {
+      "id": 11,
+      "statement_ids": []
+    },
+    {
+      "id": 12,
+      "statement_ids": []
+    }
+  ],
+  "statements": [
+    {
+      "id": 0,
+      "kind": "return",
+      "source_form": "arrow_placement",
+      "target_kind": null,
+      "source_location": {
+        "source_id": 1,
+        "path": "std/math.flow",
+        "line": 4,
+        "column": 5
+      }
+    },
+    {
+      "id": 1,
+      "kind": "return",
+      "source_form": "arrow_placement",
+      "target_kind": null,
+      "source_location": {
+        "source_id": 1,
+        "path": "std/math.flow",
+        "line": 8,
+        "column": 5
+      }
+    },
+    {
+      "id": 2,
+      "kind": "return",
+      "source_form": "arrow_placement",
+      "target_kind": null,
+      "source_location": {
+        "source_id": 1,
+        "path": "std/math.flow",
+        "line": 12,
+        "column": 5
+      }
+    },
+    {
+      "id": 3,
+      "kind": "return",
+      "source_form": "arrow_placement",
+      "target_kind": null,
+      "source_location": {
+        "source_id": 1,
+        "path": "std/math.flow",
+        "line": 16,
+        "column": 5
+      }
+    },
+    {
+      "id": 4,
+      "kind": "let",
+      "source_form": null,
+      "target_kind": null,
+      "source_location": {
+        "source_id": 1,
+        "path": "std/math.flow",
+        "line": 20,
+        "column": 5
+      }
+    },
+    {
+      "id": 5,
+      "kind": "let",
+      "source_form": null,
+      "target_kind": null,
+      "source_location": {
+        "source_id": 1,
+        "path": "std/math.flow",
+        "line": 21,
+        "column": 5
+      }
+    },
+    {
+      "id": 6,
+      "kind": "placement",
+      "source_form": "arrow_placement",
+      "target_kind": "identifier",
+      "source_location": {
+        "source_id": 1,
+        "path": "std/math.flow",
+        "line": 24,
+        "column": 9
+      }
+    },
+    {
+      "id": 7,
+      "kind": "placement",
+      "source_form": "arrow_placement",
+      "target_kind": "identifier",
+      "source_location": {
+        "source_id": 1,
+        "path": "std/math.flow",
+        "line": 25,
+        "column": 9
+      }
+    },
+    {
+      "id": 8,
+      "kind": "while",
+      "source_form": null,
+      "target_kind": null,
+      "source_location": {
+        "source_id": 1,
+        "path": "std/math.flow",
+        "line": 23,
+        "column": 5
+      }
+    },
+    {
+      "id": 9,
+      "kind": "return",
+      "source_form": "arrow_placement",
+      "target_kind": null,
+      "source_location": {
+        "source_id": 1,
+        "path": "std/math.flow",
+        "line": 28,
+        "column": 5
+      }
+    },
+    {
+      "id": 10,
+      "kind": "return",
+      "source_form": "arrow_placement",
+      "target_kind": null,
+      "source_location": {
+        "source_id": 1,
+        "path": "std/math.flow",
+        "line": 33,
+        "column": 9
+      }
+    },
+    {
+      "id": 11,
+      "kind": "if",
+      "source_form": null,
+      "target_kind": null,
+      "source_location": {
+        "source_id": 1,
+        "path": "std/math.flow",
+        "line": 32,
+        "column": 5
+      }
+    },
+    {
+      "id": 12,
+      "kind": "return",
+      "source_form": "arrow_placement",
+      "target_kind": null,
+      "source_location": {
+        "source_id": 1,
+        "path": "std/math.flow",
+        "line": 35,
+        "column": 9
+      }
+    },
+    {
+      "id": 13,
+      "kind": "let",
+      "source_form": null,
+      "target_kind": null,
+      "source_location": {
+        "source_id": 2,
+        "path": "std/collatz.flow",
+        "line": 4,
+        "column": 5
+      }
+    },
+    {
+      "id": 14,
+      "kind": "let",
+      "source_form": null,
+      "target_kind": null,
+      "source_location": {
+        "source_id": 2,
+        "path": "std/collatz.flow",
+        "line": 5,
+        "column": 5
+      }
+    },
+    {
+      "id": 15,
+      "kind": "let",
+      "source_form": null,
+      "target_kind": null,
+      "source_location": {
+        "source_id": 2,
+        "path": "std/collatz.flow",
+        "line": 6,
+        "column": 5
+      }
+    },
+    {
+      "id": 16,
+      "kind": "let",
+      "source_form": null,
+      "target_kind": null,
+      "source_location": {
+        "source_id": 2,
+        "path": "std/collatz.flow",
+        "line": 7,
+        "column": 5
+      }
+    },
+    {
+      "id": 17,
+      "kind": "let",
+      "source_form": null,
+      "target_kind": null,
+      "source_location": {
+        "source_id": 2,
+        "path": "std/collatz.flow",
+        "line": 8,
+        "column": 5
+      }
+    },
+    {
+      "id": 18,
+      "kind": "placement",
+      "source_form": "arrow_placement",
+      "target_kind": "identifier",
+      "source_location": {
+        "source_id": 2,
+        "path": "std/collatz.flow",
+        "line": 10,
+        "column": 5
+      }
+    },
+    {
+      "id": 19,
+      "kind": "return",
+      "source_form": "arrow_placement",
+      "target_kind": null,
+      "source_location": {
+        "source_id": 2,
+        "path": "std/collatz.flow",
+        "line": 13,
+        "column": 9
+      }
+    },
+    {
+      "id": 20,
+      "kind": "if",
+      "source_form": null,
+      "target_kind": null,
+      "source_location": {
+        "source_id": 2,
+        "path": "std/collatz.flow",
+        "line": 12,
+        "column": 5
+      }
+    },
+    {
+      "id": 21,
+      "kind": "return",
+      "source_form": "arrow_placement",
+      "target_kind": null,
+      "source_location": {
+        "source_id": 2,
+        "path": "std/collatz.flow",
+        "line": 15,
+        "column": 9
+      }
+    },
+    {
+      "id": 22,
+      "kind": "let",
+      "source_form": null,
+      "target_kind": null,
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/pass/import_demo.flow",
+        "line": 7,
+        "column": 5
+      }
+    },
+    {
+      "id": 23,
+      "kind": "let",
+      "source_form": null,
+      "target_kind": null,
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/pass/import_demo.flow",
+        "line": 8,
+        "column": 5
+      }
+    },
+    {
+      "id": 24,
+      "kind": "let",
+      "source_form": null,
+      "target_kind": null,
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/pass/import_demo.flow",
+        "line": 9,
+        "column": 5
+      }
+    },
+    {
+      "id": 25,
+      "kind": "let",
+      "source_form": null,
+      "target_kind": null,
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/pass/import_demo.flow",
+        "line": 10,
+        "column": 5
+      }
+    },
+    {
+      "id": 26,
+      "kind": "placement",
+      "source_form": "arrow_placement",
+      "target_kind": "identifier",
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/pass/import_demo.flow",
+        "line": 12,
+        "column": 5
+      }
+    },
+    {
+      "id": 27,
+      "kind": "expression",
+      "source_form": null,
+      "target_kind": null,
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/pass/import_demo.flow",
+        "line": 13,
+        "column": 5
+      }
+    },
+    {
+      "id": 28,
+      "kind": "placement",
+      "source_form": "arrow_placement",
+      "target_kind": "identifier",
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/pass/import_demo.flow",
+        "line": 15,
+        "column": 5
+      }
+    },
+    {
+      "id": 29,
+      "kind": "expression",
+      "source_form": null,
+      "target_kind": null,
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/pass/import_demo.flow",
+        "line": 16,
+        "column": 5
+      }
+    },
+    {
+      "id": 30,
+      "kind": "placement",
+      "source_form": "arrow_placement",
+      "target_kind": "identifier",
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/pass/import_demo.flow",
+        "line": 18,
+        "column": 5
+      }
+    },
+    {
+      "id": 31,
+      "kind": "expression",
+      "source_form": null,
+      "target_kind": null,
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/pass/import_demo.flow",
+        "line": 19,
+        "column": 5
+      }
+    }
+  ],
+  "expression_count": 67
+}

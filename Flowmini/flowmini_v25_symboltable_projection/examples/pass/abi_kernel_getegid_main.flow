@@ -1,0 +1,9 @@
+import "../../std/abi/kernel.flow" as linux
+
+program abi_kernel_getegid_main
+
+main {
+    effective_group : c_int(0)
+    linux.getegid() -> effective_group
+    return effective_group
+}

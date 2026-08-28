@@ -1,0 +1,220 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+usage() {
+    cat <<'EOF'
+Usage: tools/run-autonomous-codex
+
+Repeatedly runs Codex against the autonomous reusable-chain task until the
+repository state file says DONE or BLOCKED, or a safety limit is reached.
+
+Environment:
+  FLOWCORE_CODEX_MAX_ITERATIONS  Maximum turns; default: 20
+  FLOWCORE_CODEX_MAX_FAILURES    Consecutive failed turns; default: 2
+  FLOWCORE_CODEX_STALL_LIMIT     Consecutive no-progress turns; default: 3
+  FLOWCORE_CODEX_LOG_DIR         Transcript directory; default: /tmp/flowcore-codex-$UID
+  FLOWCORE_CODEX_MODEL           Optional explicit Codex model
+  FLOWCORE_CODEX_PERMISSION_MODE auto-review (default) or isolated-full
+
+The isolated-full mode is intended only for a disposable VM or development
+container containing the working clone and minimum necessary credentials.
+EOF
+}
+
+if [[ ${1:-} == "--help" || ${1:-} == "-h" ]]; then
+    usage
+    exit 0
+fi
+
+if (($# != 0)); then
+    usage >&2
+    exit 64
+fi
+
+command -v git >/dev/null 2>&1 || { echo "git is required" >&2; exit 69; }
+command -v codex >/dev/null 2>&1 || { echo "codex is required" >&2; exit 69; }
+command -v sha256sum >/dev/null 2>&1 || { echo "sha256sum is required" >&2; exit 69; }
+
+repo_root=$(git rev-parse --show-toplevel 2>/dev/null) || {
+    echo "Run this tool from inside the Flowcore Git repository." >&2
+    exit 69
+}
+cd "$repo_root"
+
+task_file="$repo_root/docs/tasks/reusable-flow-chain-autonomous.md"
+state_file="$repo_root/.codex-run-state"
+architecture_file="$repo_root/docs/architecture/reusable-flow-chain-plan.md"
+ledger_file="$repo_root/docs/checkpoints/2026-08-21-autonomous-maturation-ledger.md"
+
+for required_file in "$task_file" "$state_file"; do
+    if [[ ! -f $required_file ]]; then
+        echo "Missing required file: $required_file" >&2
+        exit 66
+    fi
+done
+
+max_iterations=${FLOWCORE_CODEX_MAX_ITERATIONS:-20}
+max_failures=${FLOWCORE_CODEX_MAX_FAILURES:-2}
+stall_limit=${FLOWCORE_CODEX_STALL_LIMIT:-3}
+log_dir=${FLOWCORE_CODEX_LOG_DIR:-/tmp/flowcore-codex-$UID}
+permission_mode=${FLOWCORE_CODEX_PERMISSION_MODE:-auto-review}
+
+for numeric_value in "$max_iterations" "$max_failures" "$stall_limit"; do
+    if [[ ! $numeric_value =~ ^[1-9][0-9]*$ ]]; then
+        echo "Iteration, failure and stall limits must be positive integers." >&2
+        exit 64
+    fi
+done
+
+mkdir -p "$log_dir"
+export GIT_TERMINAL_PROMPT=0
+
+read_state() {
+    local state
+    state=$(tr -d '[:space:]' < "$state_file")
+    case "$state" in
+        CONTINUE|BLOCKED|DONE) printf '%s\n' "$state" ;;
+        *)
+            echo "Invalid state '$state' in $state_file" >&2
+            return 65
+            ;;
+    esac
+}
+
+snapshot() {
+    {
+        git rev-parse HEAD
+        git status --porcelain=v1 --untracked-files=all
+    } | sha256sum | awk '{print $1}'
+}
+
+codex_command=(codex)
+if [[ -n ${FLOWCORE_CODEX_MODEL:-} ]]; then
+    codex_command+=(--model "$FLOWCORE_CODEX_MODEL")
+fi
+
+case "$permission_mode" in
+    auto-review)
+        codex_command+=(
+            --sandbox workspace-write
+            --ask-for-approval on-request
+            -c approvals_reviewer=auto_review
+            -c sandbox_workspace_write.network_access=true
+            exec
+        )
+        ;;
+    isolated-full)
+        codex_command+=(
+            --sandbox danger-full-access
+            --ask-for-approval never
+            exec
+        )
+        ;;
+    *)
+        echo "Unknown FLOWCORE_CODEX_PERMISSION_MODE: $permission_mode" >&2
+        exit 64
+        ;;
+esac
+
+prompt=$(cat <<EOF
+Execute the autonomous Flowcore mission in:
+$task_file
+
+Read the repository AGENTS.md chain first, then read the mission completely.
+Also inspect these files when they exist:
+- $architecture_file
+- $ledger_file
+- $state_file
+
+Recover the actual current state from Git history, the worktree and tests. Begin
+with the first unfinished gate and continue through coherent implementation,
+verification, documentation, commit and push checkpoints. Do not stop merely
+because one slice or checkpoint succeeds. Follow the state protocol exactly:
+leave CONTINUE while ordinary work remains, use BLOCKED only for a genuine total
+blocker recorded with evidence, and use DONE only when every definition-of-done
+gate passes and the final pushed worktree is clean.
+EOF
+)
+
+initial_state=$(read_state)
+if [[ $initial_state == DONE ]]; then
+    echo "Mission already reports DONE."
+    exit 0
+fi
+if [[ $initial_state == BLOCKED ]]; then
+    echo "Mission reports BLOCKED. Review the maturation ledger." >&2
+    exit 2
+fi
+
+consecutive_failures=0
+consecutive_stalls=0
+
+for ((iteration = 1; iteration <= max_iterations; ++iteration)); do
+    state=$(read_state)
+    case "$state" in
+        DONE)
+            echo "Mission reports DONE."
+            exit 0
+            ;;
+        BLOCKED)
+            echo "Mission reports BLOCKED. Review the maturation ledger." >&2
+            exit 2
+            ;;
+    esac
+
+    before=$(snapshot)
+    timestamp=$(date -u +%Y%m%dT%H%M%SZ)
+    log_file="$log_dir/iteration-$(printf '%03d' "$iteration")-$timestamp.log"
+
+    echo "Starting Codex iteration $iteration of $max_iterations"
+    echo "Transcript: $log_file"
+
+    set +e
+    "${codex_command[@]}" "$prompt" 2>&1 | tee "$log_file"
+    codex_status=${PIPESTATUS[0]}
+    set -e
+
+    after=$(snapshot)
+    state=$(read_state)
+
+    if ((codex_status == 0)); then
+        consecutive_failures=0
+    else
+        ((consecutive_failures += 1))
+        echo "Codex exited with status $codex_status." >&2
+    fi
+
+    if [[ $before == "$after" && $state == CONTINUE ]]; then
+        ((consecutive_stalls += 1))
+        echo "No Git/worktree progress detected in this iteration." >&2
+    else
+        consecutive_stalls=0
+    fi
+
+    case "$state" in
+        DONE)
+            echo "Mission reports DONE after iteration $iteration."
+            exit 0
+            ;;
+        BLOCKED)
+            echo "Mission reports BLOCKED after iteration $iteration." >&2
+            exit 2
+            ;;
+    esac
+
+    if ((consecutive_failures >= max_failures)); then
+        echo "Stopping after $consecutive_failures consecutive failed Codex runs." >&2
+        echo "State remains CONTINUE; inspect $log_file and resume after correction." >&2
+        exit 3
+    fi
+
+    if ((consecutive_stalls >= stall_limit)); then
+        echo "Stopping after $consecutive_stalls consecutive no-progress runs." >&2
+        echo "State remains CONTINUE; inspect the transcripts before resuming." >&2
+        exit 4
+    fi
+done
+
+echo "Reached the maximum of $max_iterations iterations with work remaining." >&2
+echo "State remains CONTINUE; raise the limit or resume in a later session." >&2
+exit 5

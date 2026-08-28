@@ -1,0 +1,37 @@
+unit std_math
+
+fn identity(x : int): int {
+    x -> return
+}
+
+fn add(a : int, b : int): int {
+    a + b -> return
+}
+
+fn square(n : int): int {
+    n * n -> return
+}
+
+fn cube(n : int): int {
+    n * n * n -> return
+}
+
+fn factorial(n : int): int {
+    one : int(1)
+    acc : int(1)
+
+    while n > one {
+        acc * n -> acc
+        n - one -> n
+    }
+
+    acc -> return
+}
+
+fn choose_larger(a : int, b : int): int {
+    if a > b {
+        a -> return
+    } else {
+        b -> return
+    }
+}

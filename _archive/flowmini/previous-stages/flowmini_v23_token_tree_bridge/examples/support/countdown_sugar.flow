@@ -1,0 +1,15 @@
+unit countdown_sugar
+
+stdin : stdin.text()
+parse : parse.int.to_record(out="n")
+zero : int(0)
+one : int(1)
+gt : int.gt(lhs="n", rhs="zero", out="cond")
+route : route.bool(path="cond")
+print : stdout.int_line(path="n")
+dec : int.sub(lhs="n", rhs="one", out="n")
+halt : halt.record()
+
+stdin => parse => zero => one => gt => route
+route.true => print => dec => gt
+route.false => halt

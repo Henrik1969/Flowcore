@@ -1,0 +1,8 @@
+import "../../std/abi/kernel.flow"
+program abi_kernel_pipe2_main
+main {
+    channel : c_pointer(0)
+    flags : c_int(0)
+    result : c_int(0)
+    pipe2(channel, flags) -> result
+}

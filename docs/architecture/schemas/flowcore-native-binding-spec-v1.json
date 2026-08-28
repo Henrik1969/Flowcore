@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://flowcore.dev/schemas/flowcore-native-binding-spec-v1.json",
+  "title": "Flowcore Native Binding Specification v1",
+  "type": "object",
+  "required": ["format", "version", "unit", "namespace", "provider", "functions"],
+  "properties": {
+    "format": {"const": "flowcore.native_binding_spec"},
+    "version": {"const": 1},
+    "unit": {"type": "string", "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"},
+    "namespace": {"type": "string", "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"},
+    "provider": {
+      "type": "object",
+      "required": ["soname", "path", "convention"],
+      "properties": {
+        "soname": {"type": "string", "minLength": 1},
+        "path": {"type": "string", "pattern": "^/"},
+        "convention": {"const": "c"}
+      },
+      "additionalProperties": false
+    },
+    "functions": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "required": ["name", "symbol", "effect", "parameters", "return_type"],
+        "properties": {
+          "name": {"type": "string", "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"},
+          "symbol": {"type": "string", "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"},
+          "effect": {"type": "string", "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"},
+          "return_type": {"type": "string", "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"},
+          "parameters": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["name", "type"],
+              "properties": {
+                "name": {"type": "string", "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"},
+                "type": {"type": "string", "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"}
+              },
+              "additionalProperties": false
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,1003 @@
+{
+    "format": "flowmini.ast.v2",
+    "source_unit": {
+        "kind": "program",
+        "name": "structured_value_probe",
+        "declaration_count": 4,
+        "declaration_ids": [
+            0,
+            1,
+            2,
+            3
+        ],
+        "declarations": [
+            {
+                "id": 0,
+                "kind": "refined_type",
+                "name": "Positive",
+                "base_type": "int64",
+                "base_type_ref": {
+                    "kind": "named",
+                    "text": "int64",
+                    "payload": {
+                        "name_segments": [
+                            "int64"
+                        ]
+                    },
+                    "location": {
+                        "line": 4,
+                        "column": 23
+                    }
+                },
+                "invariants": [
+                    {
+                        "condition_expression": 0,
+                        "location": {
+                            "line": 5,
+                            "column": 5
+                        }
+                    }
+                ],
+                "location": {
+                    "line": 4,
+                    "column": 1
+                }
+            },
+            {
+                "id": 1,
+                "kind": "record",
+                "name": "Person",
+                "field_count": 2,
+                "fields": [
+                    {
+                        "name": "age",
+                        "type": "int",
+                        "type_ref": {
+                            "kind": "named",
+                            "text": "int",
+                            "payload": {
+                                "name_segments": [
+                                    "int"
+                                ]
+                            },
+                            "location": {
+                                "line": 9,
+                                "column": 17
+                            }
+                        }
+                    },
+                    {
+                        "name": "active",
+                        "type": "Bool",
+                        "type_ref": {
+                            "kind": "named",
+                            "text": "Bool",
+                            "payload": {
+                                "name_segments": [
+                                    "Bool"
+                                ]
+                            },
+                            "location": {
+                                "line": 10,
+                                "column": 20
+                            }
+                        }
+                    }
+                ]
+            },
+            {
+                "id": 2,
+                "kind": "abi",
+                "name": "local",
+                "members": [
+                    {
+                        "kind": "library",
+                        "spelling": "liblocal.so",
+                        "location": {
+                            "line": 14,
+                            "column": 5
+                        }
+                    },
+                    {
+                        "kind": "struct",
+                        "name": "Point",
+                        "fields": [
+                            {
+                                "name": "x",
+                                "type": "c_int",
+                                "type_ref": {
+                                    "kind": "named",
+                                    "text": "c_int",
+                                    "payload": {
+                                        "name_segments": [
+                                            "c_int"
+                                        ]
+                                    },
+                                    "location": {
+                                        "line": 17,
+                                        "column": 13
+                                    }
+                                },
+                                "location": {
+                                    "line": 17,
+                                    "column": 9
+                                }
+                            },
+                            {
+                                "name": "y",
+                                "type": "c_int",
+                                "type_ref": {
+                                    "kind": "named",
+                                    "text": "c_int",
+                                    "payload": {
+                                        "name_segments": [
+                                            "c_int"
+                                        ]
+                                    },
+                                    "location": {
+                                        "line": 18,
+                                        "column": 13
+                                    }
+                                },
+                                "location": {
+                                    "line": 18,
+                                    "column": 9
+                                }
+                            }
+                        ],
+                        "location": {
+                            "line": 16,
+                            "column": 5
+                        }
+                    }
+                ],
+                "location": {
+                    "line": 13,
+                    "column": 1
+                }
+            },
+            {
+                "id": 3,
+                "kind": "main_block",
+                "has_body": true,
+                "body_block": 0
+            }
+        ]
+    },
+    "declaration_pool_size": 4,
+    "declaration_pool": [
+        {
+            "id": 0,
+            "kind": "refined_type",
+            "name": "Positive",
+            "base_type": "int64",
+            "base_type_ref": {
+                "kind": "named",
+                "text": "int64",
+                "payload": {
+                    "name_segments": [
+                        "int64"
+                    ]
+                },
+                "location": {
+                    "line": 4,
+                    "column": 23
+                }
+            },
+            "invariants": [
+                {
+                    "condition_expression": 0,
+                    "location": {
+                        "line": 5,
+                        "column": 5
+                    }
+                }
+            ],
+            "location": {
+                "line": 4,
+                "column": 1
+            }
+        },
+        {
+            "id": 1,
+            "kind": "record",
+            "name": "Person",
+            "field_count": 2,
+            "fields": [
+                {
+                    "name": "age",
+                    "type": "int",
+                    "type_ref": {
+                        "kind": "named",
+                        "text": "int",
+                        "payload": {
+                            "name_segments": [
+                                "int"
+                            ]
+                        },
+                        "location": {
+                            "line": 9,
+                            "column": 17
+                        }
+                    }
+                },
+                {
+                    "name": "active",
+                    "type": "Bool",
+                    "type_ref": {
+                        "kind": "named",
+                        "text": "Bool",
+                        "payload": {
+                            "name_segments": [
+                                "Bool"
+                            ]
+                        },
+                        "location": {
+                            "line": 10,
+                            "column": 20
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "id": 2,
+            "kind": "abi",
+            "name": "local",
+            "members": [
+                {
+                    "kind": "library",
+                    "spelling": "liblocal.so",
+                    "location": {
+                        "line": 14,
+                        "column": 5
+                    }
+                },
+                {
+                    "kind": "struct",
+                    "name": "Point",
+                    "fields": [
+                        {
+                            "name": "x",
+                            "type": "c_int",
+                            "type_ref": {
+                                "kind": "named",
+                                "text": "c_int",
+                                "payload": {
+                                    "name_segments": [
+                                        "c_int"
+                                    ]
+                                },
+                                "location": {
+                                    "line": 17,
+                                    "column": 13
+                                }
+                            },
+                            "location": {
+                                "line": 17,
+                                "column": 9
+                            }
+                        },
+                        {
+                            "name": "y",
+                            "type": "c_int",
+                            "type_ref": {
+                                "kind": "named",
+                                "text": "c_int",
+                                "payload": {
+                                    "name_segments": [
+                                        "c_int"
+                                    ]
+                                },
+                                "location": {
+                                    "line": 18,
+                                    "column": 13
+                                }
+                            },
+                            "location": {
+                                "line": 18,
+                                "column": 9
+                            }
+                        }
+                    ],
+                    "location": {
+                        "line": 16,
+                        "column": 5
+                    }
+                }
+            ],
+            "location": {
+                "line": 13,
+                "column": 1
+            }
+        },
+        {
+            "id": 3,
+            "kind": "main_block",
+            "has_body": true,
+            "body_block": 0
+        }
+    ],
+    "expression_pool_size": 25,
+    "expression_pool": [
+        {
+            "id": 0,
+            "kind": "binary",
+            "text": ">",
+            "payload": {
+                "operator": ">",
+                "left": 1,
+                "right": 2
+            },
+            "child_expressions": [
+                1,
+                2
+            ]
+        },
+        {
+            "id": 1,
+            "kind": "identifier",
+            "text": "value",
+            "payload": {
+                "name": "value"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 2,
+            "kind": "integer_literal",
+            "text": "0",
+            "payload": {
+                "value_text": "0"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 3,
+            "kind": "integer_literal",
+            "text": "1",
+            "payload": {
+                "value_text": "1"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 4,
+            "kind": "list_literal",
+            "text": "[",
+            "payload": {
+                "elements": [
+                    5,
+                    6,
+                    7
+                ]
+            },
+            "child_expressions": [
+                5,
+                6,
+                7
+            ]
+        },
+        {
+            "id": 5,
+            "kind": "integer_literal",
+            "text": "1",
+            "payload": {
+                "value_text": "1"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 6,
+            "kind": "integer_literal",
+            "text": "2",
+            "payload": {
+                "value_text": "2"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 7,
+            "kind": "integer_literal",
+            "text": "3",
+            "payload": {
+                "value_text": "3"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 8,
+            "kind": "list_literal",
+            "text": "[",
+            "payload": {
+                "elements": [
+                    9,
+                    10,
+                    11,
+                    12
+                ]
+            },
+            "child_expressions": [
+                9,
+                10,
+                11,
+                12
+            ]
+        },
+        {
+            "id": 9,
+            "kind": "integer_literal",
+            "text": "1",
+            "payload": {
+                "value_text": "1"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 10,
+            "kind": "integer_literal",
+            "text": "2",
+            "payload": {
+                "value_text": "2"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 11,
+            "kind": "integer_literal",
+            "text": "3",
+            "payload": {
+                "value_text": "3"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 12,
+            "kind": "integer_literal",
+            "text": "4",
+            "payload": {
+                "value_text": "4"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 13,
+            "kind": "record_literal",
+            "text": "{",
+            "payload": {
+                "fields": [
+                    {
+                        "name": "age",
+                        "value": 14,
+                        "location": {
+                            "line": 26,
+                            "column": 22
+                        }
+                    },
+                    {
+                        "name": "active",
+                        "value": 15,
+                        "location": {
+                            "line": 26,
+                            "column": 31
+                        }
+                    }
+                ]
+            },
+            "child_expressions": [
+                14,
+                15
+            ]
+        },
+        {
+            "id": 14,
+            "kind": "integer_literal",
+            "text": "42",
+            "payload": {
+                "value_text": "42"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 15,
+            "kind": "bool_literal",
+            "text": "true",
+            "payload": {
+                "value_text": "true"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 16,
+            "kind": "record_literal",
+            "text": "{",
+            "payload": {
+                "fields": [
+                    {
+                        "name": "x",
+                        "value": 17,
+                        "location": {
+                            "line": 27,
+                            "column": 20
+                        }
+                    },
+                    {
+                        "name": "y",
+                        "value": 18,
+                        "location": {
+                            "line": 27,
+                            "column": 27
+                        }
+                    }
+                ]
+            },
+            "child_expressions": [
+                17,
+                18
+            ]
+        },
+        {
+            "id": 17,
+            "kind": "integer_literal",
+            "text": "10",
+            "payload": {
+                "value_text": "10"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 18,
+            "kind": "integer_literal",
+            "text": "20",
+            "payload": {
+                "value_text": "20"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 19,
+            "kind": "index",
+            "text": "matrix",
+            "payload": {
+                "base": 20,
+                "indexes": [
+                    21,
+                    22
+                ]
+            },
+            "child_expressions": [
+                20,
+                21,
+                22
+            ]
+        },
+        {
+            "id": 20,
+            "kind": "identifier",
+            "text": "matrix",
+            "payload": {
+                "name": "matrix"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 21,
+            "kind": "integer_literal",
+            "text": "1",
+            "payload": {
+                "value_text": "1"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 22,
+            "kind": "integer_literal",
+            "text": "0",
+            "payload": {
+                "value_text": "0"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 23,
+            "kind": "field_access",
+            "text": "person.age",
+            "payload": {
+                "base": 24,
+                "field": "age"
+            },
+            "child_expressions": [
+                24
+            ]
+        },
+        {
+            "id": 24,
+            "kind": "identifier",
+            "text": "person",
+            "payload": {
+                "name": "person"
+            },
+            "child_expressions": []
+        }
+    ],
+    "statement_pool_size": 7,
+    "statement_pool": [
+        {
+            "id": 0,
+            "kind": "let",
+            "payload": {
+                "name": "positive",
+                "type_ref": {
+                    "kind": "named",
+                    "text": "Positive",
+                    "payload": {
+                        "name_segments": [
+                            "Positive"
+                        ]
+                    },
+                    "location": {
+                        "line": 23,
+                        "column": 16
+                    }
+                },
+                "initializer_expression": 3
+            },
+            "name": "positive",
+            "type": "Positive",
+            "type_ref": {
+                "kind": "named",
+                "text": "Positive",
+                "payload": {
+                    "name_segments": [
+                        "Positive"
+                    ]
+                },
+                "location": {
+                    "line": 23,
+                    "column": 16
+                }
+            },
+            "has_initializer": true,
+            "expression_ids": [
+                3
+            ]
+        },
+        {
+            "id": 1,
+            "kind": "let",
+            "payload": {
+                "name": "values",
+                "type_ref": {
+                    "kind": "generic",
+                    "text": "list<int>",
+                    "payload": {
+                        "constructor_segments": [
+                            "list"
+                        ],
+                        "arguments": [
+                            {
+                                "kind": "named",
+                                "text": "int",
+                                "payload": {
+                                    "name_segments": [
+                                        "int"
+                                    ]
+                                },
+                                "location": {
+                                    "line": 24,
+                                    "column": 19
+                                }
+                            }
+                        ]
+                    },
+                    "location": {
+                        "line": 24,
+                        "column": 14
+                    }
+                },
+                "initializer_expression": 4
+            },
+            "name": "values",
+            "type": "list<int>",
+            "type_ref": {
+                "kind": "generic",
+                "text": "list<int>",
+                "payload": {
+                    "constructor_segments": [
+                        "list"
+                    ],
+                    "arguments": [
+                        {
+                            "kind": "named",
+                            "text": "int",
+                            "payload": {
+                                "name_segments": [
+                                    "int"
+                                ]
+                            },
+                            "location": {
+                                "line": 24,
+                                "column": 19
+                            }
+                        }
+                    ]
+                },
+                "location": {
+                    "line": 24,
+                    "column": 14
+                }
+            },
+            "has_initializer": true,
+            "expression_ids": [
+                4
+            ]
+        },
+        {
+            "id": 2,
+            "kind": "let",
+            "payload": {
+                "name": "matrix",
+                "type_ref": {
+                    "kind": "array",
+                    "text": "array<int>[2,2]",
+                    "payload": {
+                        "element_type": {
+                            "kind": "named",
+                            "text": "int",
+                            "payload": {
+                                "name_segments": [
+                                    "int"
+                                ]
+                            },
+                            "location": {
+                                "line": 25,
+                                "column": 20
+                            }
+                        },
+                        "extents": [
+                            {
+                                "text": "2",
+                                "location": {
+                                    "line": 25,
+                                    "column": 25
+                                }
+                            },
+                            {
+                                "text": "2",
+                                "location": {
+                                    "line": 25,
+                                    "column": 28
+                                }
+                            }
+                        ]
+                    },
+                    "location": {
+                        "line": 25,
+                        "column": 14
+                    }
+                },
+                "initializer_expression": 8
+            },
+            "name": "matrix",
+            "type": "array<int>[2,2]",
+            "type_ref": {
+                "kind": "array",
+                "text": "array<int>[2,2]",
+                "payload": {
+                    "element_type": {
+                        "kind": "named",
+                        "text": "int",
+                        "payload": {
+                            "name_segments": [
+                                "int"
+                            ]
+                        },
+                        "location": {
+                            "line": 25,
+                            "column": 20
+                        }
+                    },
+                    "extents": [
+                        {
+                            "text": "2",
+                            "location": {
+                                "line": 25,
+                                "column": 25
+                            }
+                        },
+                        {
+                            "text": "2",
+                            "location": {
+                                "line": 25,
+                                "column": 28
+                            }
+                        }
+                    ]
+                },
+                "location": {
+                    "line": 25,
+                    "column": 14
+                }
+            },
+            "has_initializer": true,
+            "expression_ids": [
+                8
+            ]
+        },
+        {
+            "id": 3,
+            "kind": "let",
+            "payload": {
+                "name": "person",
+                "type_ref": {
+                    "kind": "named",
+                    "text": "Person",
+                    "payload": {
+                        "name_segments": [
+                            "Person"
+                        ]
+                    },
+                    "location": {
+                        "line": 26,
+                        "column": 14
+                    }
+                },
+                "initializer_expression": 13
+            },
+            "name": "person",
+            "type": "Person",
+            "type_ref": {
+                "kind": "named",
+                "text": "Person",
+                "payload": {
+                    "name_segments": [
+                        "Person"
+                    ]
+                },
+                "location": {
+                    "line": 26,
+                    "column": 14
+                }
+            },
+            "has_initializer": true,
+            "expression_ids": [
+                13
+            ]
+        },
+        {
+            "id": 4,
+            "kind": "let",
+            "payload": {
+                "name": "point",
+                "type_ref": {
+                    "kind": "named",
+                    "text": "Point",
+                    "payload": {
+                        "name_segments": [
+                            "Point"
+                        ]
+                    },
+                    "location": {
+                        "line": 27,
+                        "column": 13
+                    }
+                },
+                "initializer_expression": 16
+            },
+            "name": "point",
+            "type": "Point",
+            "type_ref": {
+                "kind": "named",
+                "text": "Point",
+                "payload": {
+                    "name_segments": [
+                        "Point"
+                    ]
+                },
+                "location": {
+                    "line": 27,
+                    "column": 13
+                }
+            },
+            "has_initializer": true,
+            "expression_ids": [
+                16
+            ]
+        },
+        {
+            "id": 5,
+            "kind": "let",
+            "payload": {
+                "name": "selected",
+                "type_ref": {
+                    "kind": "named",
+                    "text": "int",
+                    "payload": {
+                        "name_segments": [
+                            "int"
+                        ]
+                    },
+                    "location": {
+                        "line": 28,
+                        "column": 16
+                    }
+                },
+                "initializer_expression": 19
+            },
+            "name": "selected",
+            "type": "int",
+            "type_ref": {
+                "kind": "named",
+                "text": "int",
+                "payload": {
+                    "name_segments": [
+                        "int"
+                    ]
+                },
+                "location": {
+                    "line": 28,
+                    "column": 16
+                }
+            },
+            "has_initializer": true,
+            "expression_ids": [
+                19
+            ]
+        },
+        {
+            "id": 6,
+            "kind": "let",
+            "payload": {
+                "name": "age",
+                "type_ref": {
+                    "kind": "named",
+                    "text": "int",
+                    "payload": {
+                        "name_segments": [
+                            "int"
+                        ]
+                    },
+                    "location": {
+                        "line": 29,
+                        "column": 11
+                    }
+                },
+                "initializer_expression": 23
+            },
+            "name": "age",
+            "type": "int",
+            "type_ref": {
+                "kind": "named",
+                "text": "int",
+                "payload": {
+                    "name_segments": [
+                        "int"
+                    ]
+                },
+                "location": {
+                    "line": 29,
+                    "column": 11
+                }
+            },
+            "has_initializer": true,
+            "expression_ids": [
+                23
+            ]
+        }
+    ],
+    "block_pool_size": 1,
+    "block_pool": [
+        {
+            "id": 0,
+            "statements": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6
+            ]
+        }
+    ]
+}

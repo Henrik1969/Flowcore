@@ -1,0 +1,9 @@
+program bad_if_int
+
+main {
+    x : int(1)
+
+    if x {
+        print x
+    }
+}

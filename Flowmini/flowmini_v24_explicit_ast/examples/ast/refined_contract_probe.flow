@@ -1,0 +1,10 @@
+unit refined_contract_probe
+
+type Positive refines int64 {
+    invariant value > 0
+}
+
+type Temperature refines int64 {
+    invariant value >= -40
+    invariant value <= 125
+}

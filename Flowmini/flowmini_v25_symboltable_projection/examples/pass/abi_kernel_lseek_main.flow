@@ -1,0 +1,11 @@
+import "../../std/abi/kernel.flow"
+
+program abi_kernel_lseek_main
+
+main {
+    descriptor : c_int(-1)
+    offset : c_long(0)
+    whence : c_int(0)
+    result : c_long(0)
+    lseek(descriptor, offset, whence) -> result
+}

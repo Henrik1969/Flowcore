@@ -1,0 +1,11 @@
+import "../../std/abi/libc.flow"
+
+program abi_abs_main
+
+main {
+    negative : c_int(-42)
+    result   : c_int(0)
+
+    abs(negative) -> result
+    return result
+}

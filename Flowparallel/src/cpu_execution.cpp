@@ -1,0 +1,63 @@
+#include "flowparallel/cpu_execution.hpp"
+
+#include <algorithm>
+#include <atomic>
+#include <exception>
+#include <mutex>
+#include <stdexcept>
+#include <thread>
+
+namespace flowparallel::cpu {
+
+ExecutionResult execute_independent(const std::vector<Task>& tasks, unsigned workers) {
+    ExecutionResult result;
+    if (workers == 0) { result.status = "error"; result.error = "workers must be greater than zero"; return result; }
+    if (tasks.empty()) return result;
+    const auto actual_workers = std::min<unsigned>(workers, static_cast<unsigned>(tasks.size()));
+    std::atomic<std::size_t> next{0};
+    std::atomic<std::size_t> completed{0};
+    std::atomic<bool> failed{false};
+    std::mutex failure_mutex;
+    std::size_t failed_task = static_cast<std::size_t>(-1);
+    std::string failure;
+
+    auto worker = [&] {
+        while (!failed.load(std::memory_order_acquire)) {
+            const auto index = next.fetch_add(1, std::memory_order_relaxed);
+            if (index >= tasks.size()) return;
+            try {
+                if (!tasks[index].execute) throw std::runtime_error("task has no executable body");
+                tasks[index].execute();
+                completed.fetch_add(1, std::memory_order_relaxed);
+            } catch (const std::exception& error) {
+                if (!failed.exchange(true, std::memory_order_acq_rel)) {
+                    std::lock_guard lock(failure_mutex);
+                    failed_task = index;
+                    failure = error.what();
+                }
+                return;
+            } catch (...) {
+                if (!failed.exchange(true, std::memory_order_acq_rel)) {
+                    std::lock_guard lock(failure_mutex);
+                    failed_task = index;
+                    failure = "task failed with a non-standard exception";
+                }
+                return;
+            }
+        }
+    };
+
+    std::vector<std::thread> threads;
+    threads.reserve(actual_workers);
+    for (unsigned index = 0; index < actual_workers; ++index) threads.emplace_back(worker);
+    for (auto& thread : threads) thread.join();
+    result.completed = completed.load(std::memory_order_relaxed);
+    if (failed.load(std::memory_order_acquire)) {
+        result.status = "error";
+        result.failed_task = failed_task;
+        result.error = failure;
+    }
+    return result;
+}
+
+} // namespace flowparallel::cpu

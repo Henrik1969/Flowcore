@@ -1,0 +1,11 @@
+import "../../std/abi/libc.flow"
+
+program abi_strlen_main
+
+main {
+    message : c_string("Flowcore")
+    length  : c_size_t(0)
+
+    strlen(message) -> length
+    return length
+}

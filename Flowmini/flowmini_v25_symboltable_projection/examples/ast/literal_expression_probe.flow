@@ -1,0 +1,14 @@
+program literal_expression_probe
+
+type Point {
+    field x : int
+    field y : int
+}
+
+main {
+    xs : list<int>([1, 2, 3])
+    p : Point({x: 10, y: 20})
+
+    xs = [4, 5, 6]
+    p = {x: 30, y: 40}
+}

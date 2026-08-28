@@ -1,0 +1,39 @@
+unit std_abi_file_io
+
+abi file_io {
+    library "libc.so.6"
+    convention c
+
+    type c_pointer {
+        repr "void*"
+        ownership borrowed
+        access read_write
+        lifetime call
+        nullable false
+    }
+
+    extern fn open(path : c_string, flags : c_int): c_int {
+        symbol "open"
+        effect io
+    }
+
+    extern fn read(fd : c_int, buffer : c_pointer, count : c_size_t): c_long {
+        symbol "read"
+        effect io
+    }
+
+    extern fn write(fd : c_int, buffer : c_pointer, count : c_size_t): c_long {
+        symbol "write"
+        effect io
+    }
+
+    extern fn sendfile(output_fd : c_int, input_fd : c_int, offset : c_pointer, count : c_size_t): c_long {
+        symbol "sendfile"
+        effect io
+    }
+
+    extern fn close(fd : c_int): c_int {
+        symbol "close"
+        effect io
+    }
+}

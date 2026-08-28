@@ -1,0 +1,48 @@
+import "../../std/abi/kernel.flow"
+
+program abi_kernel_capability_probe
+
+main {
+    integer : c_int(0)
+    long    : c_long(0)
+    count   : c_size_t(0)
+    text    : c_string("flowcore-kernel")
+    pointer : c_pointer(0)
+
+    getpid() -> integer
+    getuid() -> integer
+    getgid() -> integer
+    geteuid() -> integer
+    getegid() -> integer
+    getppid() -> integer
+    getpgrp() -> integer
+    getpgid(integer) -> integer
+    getsid(integer) -> integer
+    getpriority(integer, integer) -> integer
+    clock_gettime(integer, pointer) -> integer
+    uname(pointer) -> integer
+    getrandom(pointer, count, integer) -> long
+
+    openat(integer, text, integer, integer) -> integer
+    read(integer, pointer, count) -> long
+    write(integer, pointer, count) -> long
+    lseek(integer, long, integer) -> long
+    unlinkat(integer, text, integer) -> integer
+    rmdir(text) -> integer
+
+    pipe2(pointer, integer) -> integer
+    fork() -> integer
+    waitpid(integer, pointer, integer) -> integer
+    socketpair(integer, integer, integer, pointer) -> integer
+
+    socket(integer, integer, integer) -> integer
+    bind(integer, pointer, count) -> integer
+    listen(integer, integer) -> integer
+    poll(pointer, count, integer) -> integer
+    accept4(integer, pointer, pointer, integer) -> integer
+    connect(integer, pointer, count) -> integer
+
+    unshare(integer) -> integer
+    sethostname(text, count) -> integer
+    gethostname(pointer, count) -> integer
+}

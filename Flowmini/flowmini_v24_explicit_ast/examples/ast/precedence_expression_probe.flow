@@ -1,0 +1,33 @@
+program precedence_expression_probe
+
+main {
+    a : int(12)
+    b : int(3)
+    c : int(2)
+    d : int(20)
+    result : int(0)
+
+    result = a + b * c
+    result = a * b + c
+    result = a - b - c
+    result = a / b * c
+    result = (a + b) * c
+    result = a * (b + c)
+    result = a - (b - c)
+    result = -a * b
+    result = a * -b
+    result = -(a + b)
+    result = --a
+    result = square(a + b) * c
+    result = values[a + b] + c
+    result = point.x + a * b
+    result = a.b[c](d)
+    result = make(a).b[c]
+    result = (a + b).c
+    result = a(b)(c)
+    result = grid[a + b, c * d]
+
+    if a + b * c < d - 1 {
+        result = result + 1
+    }
+}

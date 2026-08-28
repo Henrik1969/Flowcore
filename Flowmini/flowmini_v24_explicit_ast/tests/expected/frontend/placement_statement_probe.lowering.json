@@ -1,0 +1,638 @@
+{
+  "format": "flowmini.lowering_skeleton",
+  "version": 1,
+  "source": {
+    "path": "examples/ast/placement_statement_probe.flow"
+  },
+  "source_files": [
+    {
+      "id": 0,
+      "path": "examples/ast/placement_statement_probe.flow"
+    }
+  ],
+  "expanded_line_count": 32,
+  "source_unit": {
+    "kind": "program",
+    "name": "placement_statement_probe"
+  },
+  "diagnostic_count": 0,
+  "declarations": [
+    {
+      "id": 0,
+      "kind": "record",
+      "name": "Gear",
+      "symbol_ids": [
+        2
+      ]
+    },
+    {
+      "id": 1,
+      "kind": "record",
+      "name": "GearPair",
+      "symbol_ids": [
+        5
+      ]
+    },
+    {
+      "id": 2,
+      "kind": "function",
+      "name": "keep",
+      "symbol_ids": [
+        8
+      ]
+    },
+    {
+      "id": 3,
+      "kind": "main_block",
+      "name": null,
+      "symbol_ids": [
+        10
+      ]
+    }
+  ],
+  "scopes": [
+    {
+      "id": 1,
+      "kind": "Global",
+      "parent_id": null,
+      "owner_symbol_id": null,
+      "ast_path": null,
+      "symbol_ids": [
+        1
+      ]
+    },
+    {
+      "id": 2,
+      "kind": "Module",
+      "parent_id": 1,
+      "owner_symbol_id": 1,
+      "ast_path": "/source_unit",
+      "symbol_ids": [
+        2,
+        5,
+        8,
+        10
+      ]
+    },
+    {
+      "id": 3,
+      "kind": "Struct",
+      "parent_id": 2,
+      "owner_symbol_id": 2,
+      "ast_path": "/declaration_pool/0",
+      "symbol_ids": [
+        3,
+        4
+      ]
+    },
+    {
+      "id": 4,
+      "kind": "Struct",
+      "parent_id": 2,
+      "owner_symbol_id": 5,
+      "ast_path": "/declaration_pool/1",
+      "symbol_ids": [
+        6,
+        7
+      ]
+    },
+    {
+      "id": 5,
+      "kind": "Function",
+      "parent_id": 2,
+      "owner_symbol_id": 8,
+      "ast_path": "/declaration_pool/2",
+      "symbol_ids": [
+        9
+      ]
+    },
+    {
+      "id": 6,
+      "kind": "Function",
+      "parent_id": 2,
+      "owner_symbol_id": 10,
+      "ast_path": "/declaration_pool/3",
+      "symbol_ids": [
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18
+      ]
+    }
+  ],
+  "symbols": [
+    {
+      "id": 1,
+      "name": "placement_statement_probe",
+      "kind": "Module",
+      "owning_scope_id": 1,
+      "introduced_scope_id": 2,
+      "ast_path": "/source_unit",
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/ast/placement_statement_probe.flow",
+        "line": 1,
+        "column": 1
+      },
+      "facts": [
+        {
+          "kind": "Custom",
+          "key": "source_unit_kind",
+          "value": {
+            "type": "string",
+            "value": "program"
+          }
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Gear",
+      "kind": "Struct",
+      "owning_scope_id": 2,
+      "introduced_scope_id": 3,
+      "ast_path": "/declaration_pool/0",
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/ast/placement_statement_probe.flow",
+        "line": 3,
+        "column": 6
+      },
+      "facts": []
+    },
+    {
+      "id": 3,
+      "name": "teeth",
+      "kind": "Field",
+      "owning_scope_id": 3,
+      "introduced_scope_id": null,
+      "ast_path": "/declaration_pool/0/fields/0",
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/ast/placement_statement_probe.flow",
+        "line": 4,
+        "column": 5
+      },
+      "facts": [
+        {
+          "kind": "TypeReference",
+          "key": "declared_type_spelling",
+          "value": {
+            "type": "string",
+            "value": "int"
+          }
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "rpm",
+      "kind": "Field",
+      "owning_scope_id": 3,
+      "introduced_scope_id": null,
+      "ast_path": "/declaration_pool/0/fields/1",
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/ast/placement_statement_probe.flow",
+        "line": 5,
+        "column": 5
+      },
+      "facts": [
+        {
+          "kind": "TypeReference",
+          "key": "declared_type_spelling",
+          "value": {
+            "type": "string",
+            "value": "int"
+          }
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "name": "GearPair",
+      "kind": "Struct",
+      "owning_scope_id": 2,
+      "introduced_scope_id": 4,
+      "ast_path": "/declaration_pool/1",
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/ast/placement_statement_probe.flow",
+        "line": 8,
+        "column": 6
+      },
+      "facts": []
+    },
+    {
+      "id": 6,
+      "name": "driver",
+      "kind": "Field",
+      "owning_scope_id": 4,
+      "introduced_scope_id": null,
+      "ast_path": "/declaration_pool/1/fields/0",
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/ast/placement_statement_probe.flow",
+        "line": 9,
+        "column": 5
+      },
+      "facts": [
+        {
+          "kind": "TypeReference",
+          "key": "declared_type_spelling",
+          "value": {
+            "type": "string",
+            "value": "Gear"
+          }
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "name": "driven",
+      "kind": "Field",
+      "owning_scope_id": 4,
+      "introduced_scope_id": null,
+      "ast_path": "/declaration_pool/1/fields/1",
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/ast/placement_statement_probe.flow",
+        "line": 10,
+        "column": 5
+      },
+      "facts": [
+        {
+          "kind": "TypeReference",
+          "key": "declared_type_spelling",
+          "value": {
+            "type": "string",
+            "value": "Gear"
+          }
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "name": "keep",
+      "kind": "Function",
+      "owning_scope_id": 2,
+      "introduced_scope_id": 5,
+      "ast_path": "/declaration_pool/2",
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/ast/placement_statement_probe.flow",
+        "line": 13,
+        "column": 1
+      },
+      "facts": [
+        {
+          "kind": "TypeReference",
+          "key": "return_type_spelling",
+          "value": {
+            "type": "string",
+            "value": "int"
+          }
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "name": "value",
+      "kind": "Parameter",
+      "owning_scope_id": 5,
+      "introduced_scope_id": null,
+      "ast_path": "/declaration_pool/2/parameters/0",
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/ast/placement_statement_probe.flow",
+        "line": 13,
+        "column": 9
+      },
+      "facts": [
+        {
+          "kind": "TypeReference",
+          "key": "declared_type_spelling",
+          "value": {
+            "type": "string",
+            "value": "int"
+          }
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "name": "main",
+      "kind": "Procedure",
+      "owning_scope_id": 2,
+      "introduced_scope_id": 6,
+      "ast_path": "/declaration_pool/3",
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/ast/placement_statement_probe.flow",
+        "line": 17,
+        "column": 1
+      },
+      "facts": []
+    },
+    {
+      "id": 11,
+      "name": "scalar",
+      "kind": "Variable",
+      "owning_scope_id": 6,
+      "introduced_scope_id": null,
+      "ast_path": "/statement_pool/1",
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/ast/placement_statement_probe.flow",
+        "line": 18,
+        "column": 5
+      },
+      "facts": [
+        {
+          "kind": "TypeReference",
+          "key": "declared_type_spelling",
+          "value": {
+            "type": "string",
+            "value": "int"
+          }
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "name": "i",
+      "kind": "Variable",
+      "owning_scope_id": 6,
+      "introduced_scope_id": null,
+      "ast_path": "/statement_pool/2",
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/ast/placement_statement_probe.flow",
+        "line": 19,
+        "column": 5
+      },
+      "facts": [
+        {
+          "kind": "TypeReference",
+          "key": "declared_type_spelling",
+          "value": {
+            "type": "string",
+            "value": "int"
+          }
+        }
+      ]
+    },
+    {
+      "id": 13,
+      "name": "j",
+      "kind": "Variable",
+      "owning_scope_id": 6,
+      "introduced_scope_id": null,
+      "ast_path": "/statement_pool/3",
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/ast/placement_statement_probe.flow",
+        "line": 20,
+        "column": 5
+      },
+      "facts": [
+        {
+          "kind": "TypeReference",
+          "key": "declared_type_spelling",
+          "value": {
+            "type": "string",
+            "value": "int"
+          }
+        }
+      ]
+    },
+    {
+      "id": 14,
+      "name": "values",
+      "kind": "Variable",
+      "owning_scope_id": 6,
+      "introduced_scope_id": null,
+      "ast_path": "/statement_pool/4",
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/ast/placement_statement_probe.flow",
+        "line": 21,
+        "column": 5
+      },
+      "facts": [
+        {
+          "kind": "TypeReference",
+          "key": "declared_type_spelling",
+          "value": {
+            "type": "string",
+            "value": "list<int>"
+          }
+        }
+      ]
+    },
+    {
+      "id": 15,
+      "name": "matrix",
+      "kind": "Variable",
+      "owning_scope_id": 6,
+      "introduced_scope_id": null,
+      "ast_path": "/statement_pool/5",
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/ast/placement_statement_probe.flow",
+        "line": 22,
+        "column": 5
+      },
+      "facts": [
+        {
+          "kind": "TypeReference",
+          "key": "declared_type_spelling",
+          "value": {
+            "type": "string",
+            "value": "array<int>[2,2]"
+          }
+        }
+      ]
+    },
+    {
+      "id": 16,
+      "name": "driver",
+      "kind": "Variable",
+      "owning_scope_id": 6,
+      "introduced_scope_id": null,
+      "ast_path": "/statement_pool/6",
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/ast/placement_statement_probe.flow",
+        "line": 23,
+        "column": 5
+      },
+      "facts": [
+        {
+          "kind": "TypeReference",
+          "key": "declared_type_spelling",
+          "value": {
+            "type": "string",
+            "value": "Gear"
+          }
+        }
+      ]
+    },
+    {
+      "id": 17,
+      "name": "driven",
+      "kind": "Variable",
+      "owning_scope_id": 6,
+      "introduced_scope_id": null,
+      "ast_path": "/statement_pool/7",
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/ast/placement_statement_probe.flow",
+        "line": 24,
+        "column": 5
+      },
+      "facts": [
+        {
+          "kind": "TypeReference",
+          "key": "declared_type_spelling",
+          "value": {
+            "type": "string",
+            "value": "Gear"
+          }
+        }
+      ]
+    },
+    {
+      "id": 18,
+      "name": "pair",
+      "kind": "Variable",
+      "owning_scope_id": 6,
+      "introduced_scope_id": null,
+      "ast_path": "/statement_pool/8",
+      "source_location": {
+        "source_id": 0,
+        "path": "examples/ast/placement_statement_probe.flow",
+        "line": 25,
+        "column": 5
+      },
+      "facts": [
+        {
+          "kind": "TypeReference",
+          "key": "declared_type_spelling",
+          "value": {
+            "type": "string",
+            "value": "GearPair"
+          }
+        }
+      ]
+    }
+  ],
+  "blocks": [
+    {
+      "id": 0,
+      "statement_ids": []
+    },
+    {
+      "id": 1,
+      "statement_ids": []
+    }
+  ],
+  "statements": [
+    {
+      "id": 0,
+      "kind": "return",
+      "source_form": "arrow_placement",
+      "target_kind": null,
+      "source_location": null
+    },
+    {
+      "id": 1,
+      "kind": "let",
+      "source_form": null,
+      "target_kind": null,
+      "source_location": null
+    },
+    {
+      "id": 2,
+      "kind": "let",
+      "source_form": null,
+      "target_kind": null,
+      "source_location": null
+    },
+    {
+      "id": 3,
+      "kind": "let",
+      "source_form": null,
+      "target_kind": null,
+      "source_location": null
+    },
+    {
+      "id": 4,
+      "kind": "let",
+      "source_form": null,
+      "target_kind": null,
+      "source_location": null
+    },
+    {
+      "id": 5,
+      "kind": "let",
+      "source_form": null,
+      "target_kind": null,
+      "source_location": null
+    },
+    {
+      "id": 6,
+      "kind": "let",
+      "source_form": null,
+      "target_kind": null,
+      "source_location": null
+    },
+    {
+      "id": 7,
+      "kind": "let",
+      "source_form": null,
+      "target_kind": null,
+      "source_location": null
+    },
+    {
+      "id": 8,
+      "kind": "let",
+      "source_form": null,
+      "target_kind": null,
+      "source_location": null
+    },
+    {
+      "id": 9,
+      "kind": "placement",
+      "source_form": "arrow_placement",
+      "target_kind": "identifier",
+      "source_location": null
+    },
+    {
+      "id": 10,
+      "kind": "placement",
+      "source_form": "arrow_placement",
+      "target_kind": "field_path",
+      "source_location": null
+    },
+    {
+      "id": 11,
+      "kind": "placement",
+      "source_form": "arrow_placement",
+      "target_kind": "indexed",
+      "source_location": null
+    },
+    {
+      "id": 12,
+      "kind": "placement",
+      "source_form": "arrow_placement",
+      "target_kind": "indexed",
+      "source_location": null
+    }
+  ],
+  "expression_count": 30
+}

@@ -1,0 +1,80 @@
+SymbolTable dump
+Scopes: 4
+  Scope #1 kind=Global name=global symbols=1 children=1
+  Scope #2 kind=Module name=canonical_type_spelling_probe symbols=2 children=2
+  Scope #3 kind=Struct name=CanonicalTypeSpellings symbols=22 children=0
+  Scope #4 kind=Function name=main symbols=0 children=0
+Symbols: 25
+  Symbol #1 scope=#1 name=canonical_type_spelling_probe kind=Module facts=1
+    declaration_location=<source>:1:1
+    Fact kind=Custom key=source_unit_kind value="program"
+  Symbol #2 scope=#2 name=CanonicalTypeSpellings kind=Struct facts=0
+    declaration_location=<source>:4:6
+  Symbol #3 scope=#3 name=boolean kind=Field facts=1
+    declaration_location=<source>:5:5
+    Fact kind=TypeReference key=declared_type_spelling value="bool"
+  Symbol #4 scope=#3 name=signed_8 kind=Field facts=1
+    declaration_location=<source>:7:5
+    Fact kind=TypeReference key=declared_type_spelling value="int8"
+  Symbol #5 scope=#3 name=signed_16 kind=Field facts=1
+    declaration_location=<source>:8:5
+    Fact kind=TypeReference key=declared_type_spelling value="int16"
+  Symbol #6 scope=#3 name=signed_32 kind=Field facts=1
+    declaration_location=<source>:9:5
+    Fact kind=TypeReference key=declared_type_spelling value="int32"
+  Symbol #7 scope=#3 name=signed_64 kind=Field facts=1
+    declaration_location=<source>:10:5
+    Fact kind=TypeReference key=declared_type_spelling value="int64"
+  Symbol #8 scope=#3 name=signed_128 kind=Field facts=1
+    declaration_location=<source>:11:5
+    Fact kind=TypeReference key=declared_type_spelling value="int128"
+  Symbol #9 scope=#3 name=unsigned_8 kind=Field facts=1
+    declaration_location=<source>:13:5
+    Fact kind=TypeReference key=declared_type_spelling value="uint8"
+  Symbol #10 scope=#3 name=unsigned_16 kind=Field facts=1
+    declaration_location=<source>:14:5
+    Fact kind=TypeReference key=declared_type_spelling value="uint16"
+  Symbol #11 scope=#3 name=unsigned_32 kind=Field facts=1
+    declaration_location=<source>:15:5
+    Fact kind=TypeReference key=declared_type_spelling value="uint32"
+  Symbol #12 scope=#3 name=unsigned_64 kind=Field facts=1
+    declaration_location=<source>:16:5
+    Fact kind=TypeReference key=declared_type_spelling value="uint64"
+  Symbol #13 scope=#3 name=unsigned_128 kind=Field facts=1
+    declaration_location=<source>:17:5
+    Fact kind=TypeReference key=declared_type_spelling value="uint128"
+  Symbol #14 scope=#3 name=binary_16 kind=Field facts=1
+    declaration_location=<source>:19:5
+    Fact kind=TypeReference key=declared_type_spelling value="float16"
+  Symbol #15 scope=#3 name=binary_32 kind=Field facts=1
+    declaration_location=<source>:20:5
+    Fact kind=TypeReference key=declared_type_spelling value="float32"
+  Symbol #16 scope=#3 name=binary_64 kind=Field facts=1
+    declaration_location=<source>:21:5
+    Fact kind=TypeReference key=declared_type_spelling value="float64"
+  Symbol #17 scope=#3 name=binary_128 kind=Field facts=1
+    declaration_location=<source>:22:5
+    Fact kind=TypeReference key=declared_type_spelling value="float128"
+  Symbol #18 scope=#3 name=character_8 kind=Field facts=1
+    declaration_location=<source>:24:5
+    Fact kind=TypeReference key=declared_type_spelling value="char8"
+  Symbol #19 scope=#3 name=character_16 kind=Field facts=1
+    declaration_location=<source>:25:5
+    Fact kind=TypeReference key=declared_type_spelling value="char16"
+  Symbol #20 scope=#3 name=character_32 kind=Field facts=1
+    declaration_location=<source>:26:5
+    Fact kind=TypeReference key=declared_type_spelling value="char32"
+  Symbol #21 scope=#3 name=integer_alias kind=Field facts=1
+    declaration_location=<source>:28:5
+    Fact kind=TypeReference key=declared_type_spelling value="int"
+  Symbol #22 scope=#3 name=float_alias kind=Field facts=1
+    declaration_location=<source>:29:5
+    Fact kind=TypeReference key=declared_type_spelling value="float"
+  Symbol #23 scope=#3 name=boolean_alias kind=Field facts=1
+    declaration_location=<source>:30:5
+    Fact kind=TypeReference key=declared_type_spelling value="Bool"
+  Symbol #24 scope=#3 name=text_domain kind=Field facts=1
+    declaration_location=<source>:31:5
+    Fact kind=TypeReference key=declared_type_spelling value="string"
+  Symbol #25 scope=#2 name=main kind=Procedure facts=0
+    declaration_location=<source>:34:1

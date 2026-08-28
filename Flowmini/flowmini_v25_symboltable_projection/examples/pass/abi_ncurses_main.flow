@@ -1,0 +1,17 @@
+import "../../std/abi/ncurses.flow"
+
+program abi_ncurses_main
+
+main {
+    window : ncurses_window(0)
+    message : c_string("Flowcore ncurses binding")
+    count : c_int(24)
+    status : c_int(0)
+
+    initscr() -> window
+    noecho() -> status
+    cbreak() -> status
+    waddnstr(window, message, count) -> status
+    wrefresh(window) -> status
+    endwin() -> status
+}

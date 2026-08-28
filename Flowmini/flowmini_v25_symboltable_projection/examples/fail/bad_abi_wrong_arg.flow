@@ -1,0 +1,11 @@
+import "../../std/abi/libc.flow"
+
+program bad_abi_wrong_arg
+
+main {
+    n : c_int(42)
+    out : c_size_t(0)
+
+    strlen(n) -> out
+    print out
+}

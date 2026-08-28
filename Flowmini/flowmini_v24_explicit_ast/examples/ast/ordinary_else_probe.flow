@@ -1,0 +1,10 @@
+program ordinary_else_probe
+
+main {
+    x : int(1)
+    if x == 1 {
+        x = 2
+    } else {
+        x = 3
+    }
+}

@@ -1,0 +1,56 @@
+import "../../std/math.flow"
+
+program numeric_workbench
+
+type Measurement {
+    field value : int
+    field weight : int
+    field accepted : Bool
+}
+
+fn weighted_value(item : Measurement): int {
+    result : int(0)
+    item.value * item.weight -> result
+    result -> return
+}
+
+fn classify(value : int): Bool {
+    threshold : int(10)
+    value > threshold -> return
+}
+
+fn accumulate(values : list<int>): int {
+    index : int(0)
+    total : int(0)
+    limit : int(length(values))
+    one : int(1)
+
+    while index < limit {
+        total + values[index] -> total
+        index + one -> index
+    }
+
+    total -> return
+}
+
+main {
+    samples : list<int>([3, 8, 13, 21, 34, 55])
+    total : int(0)
+    doubled : int(0)
+    first : Measurement({value:3, weight:2, accepted:false})
+    score : int(0)
+    accepted : Bool(false)
+
+    accumulate(samples) -> total
+    square(total) -> doubled
+    weighted_value(first) -> score
+    classify(score) -> accepted
+
+    if accepted {
+        print doubled
+    } else if total > 50 {
+        print total
+    } else {
+        print score
+    }
+}

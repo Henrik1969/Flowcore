@@ -1,0 +1,15 @@
+program statement_initializer_probe
+
+fn seed() -> int {
+    return 3
+}
+
+main {
+    scalar : int(1 + seed())
+    values : list<int>([1, 2, 3])
+    source : stdin.text()
+
+    if true {
+        nested : int(scalar + 1)
+    }
+}

@@ -1,0 +1,82 @@
+#include <dlfcn.h>
+#include <flowcontracts/artifacts.hpp>
+
+#include <cstdint>
+#include <cstdlib>
+#include <fstream>
+#include <iostream>
+#include <sstream>
+#include <stdexcept>
+#include <string>
+#include <string_view>
+
+namespace {
+
+struct Options { std::string plan_path; unsigned matrix_size = 512; };
+
+std::string quote(std::string_view value) { return "\"" + std::string(value) + "\""; }
+
+std::string input(const Options& options) {
+    std::ostringstream stream;
+    if (!options.plan_path.empty()) { std::ifstream file(options.plan_path); if (!file) throw std::runtime_error("cannot open execution plan"); stream << file.rdbuf(); }
+    else stream << std::cin.rdbuf();
+    return stream.str();
+}
+
+struct CudaProbe { std::string status = "unknown"; std::string diagnostic; unsigned devices = 0; };
+
+CudaProbe probe() {
+    CudaProbe result;
+    void* library = dlopen("libcuda.so.1", RTLD_LAZY | RTLD_LOCAL);
+    if (!library) { result.status = "unavailable"; result.diagnostic = "libcuda.so.1 was not available"; return result; }
+    using init_fn = int (*)(unsigned int);
+    using count_fn = int (*)(int*);
+    const auto init = reinterpret_cast<init_fn>(dlsym(library, "cuInit"));
+    const auto count = reinterpret_cast<count_fn>(dlsym(library, "cuDeviceGetCount"));
+    if (!init || !count) { result.diagnostic = "CUDA driver symbols were incomplete"; dlclose(library); return result; }
+    if (init(0) != 0) { result.diagnostic = "CUDA driver initialization failed"; dlclose(library); return result; }
+    int devices = 0;
+    if (count(&devices) != 0) { result.diagnostic = "CUDA device enumeration failed"; dlclose(library); return result; }
+    result.devices = devices > 0 ? static_cast<unsigned>(devices) : 0;
+    result.status = devices > 0 ? "available" : "unavailable";
+    result.diagnostic = devices > 0 ? "CUDA device discovered; kernel execution remains provider-deferred" : "CUDA driver loaded but no devices were reported";
+    dlclose(library);
+    return result;
+}
+
+Options parse(int argc, char** argv) {
+    Options options;
+    for (int index = 1; index < argc; ++index) {
+        const std::string argument = argv[index];
+        if (argument == "--plan") { if (++index >= argc) throw std::runtime_error("--plan requires a value"); options.plan_path = argv[index]; }
+        else if (argument == "--matrix-size") { if (++index >= argc) throw std::runtime_error("--matrix-size requires a value"); options.matrix_size = static_cast<unsigned>(std::stoul(argv[index])); }
+        else if (argument == "-h" || argument == "--help" || argument == "-?") { std::cout << "flowparallel_cuda - optional CUDA provider probe\n\nOptions: --plan plan.json --matrix-size N\n         -h, -?, --help  show help\n         -a, --about    show about information\n         -v, --version  print the raw version number\n"; std::exit(0); }
+        else if (argument == "-a" || argument == "--about") { std::cout << "Flowparallel CUDA probes linear-algebra provider availability and preserves CPU fallback.\n"; std::exit(0); }
+        else if (argument == "-v" || argument == "--version") { std::cout << "0.1.0\n"; std::exit(0); }
+        else throw std::runtime_error("unknown option '" + argument + "'");
+    }
+    return options;
+}
+
+int run(const std::string& plan, const Options& options) {
+    const auto artifact = flowcontracts::execution_plan(flowcontracts::json::parse(plan));
+    if (artifact.artifact.status != "ready") { std::cout << "{\n  \"format\": \"flowparallel.cuda_selection\",\n  \"version\": 1,\n  \"status\": \"blocked\",\n  \"reason\": \"execution plan is not ready\"\n}\n"; return 2; }
+    const auto cuda = probe();
+    const std::uint64_t matrix_bytes = static_cast<std::uint64_t>(options.matrix_size) * options.matrix_size * sizeof(float);
+    std::cout << "{\n  \"format\": \"flowparallel.cuda_selection\",\n"
+                 "  \"version\": 1,\n  \"status\": \"ready\",\n"
+                 "  \"provider\": \"cuda\",\n"
+                 "  \"cuda\": {\"status\": " << quote(cuda.status) << ", \"devices\": " << cuda.devices << ", \"diagnostic\": " << quote(cuda.diagnostic) << "},\n"
+                 "  \"workload\": {\"operation\": \"matrix_multiply\", \"matrix_size\": " << options.matrix_size << ", \"matrix_bytes_per_operand\": " << matrix_bytes << "},\n"
+                 "  \"transfer_cost\": {\"host_to_device\": \"included\", \"device_to_host\": \"included\", \"calibration\": \"runtime\"},\n"
+                 "  \"execution\": \"not-performed\",\n"
+                 "  \"fallback\": {\"required\": true, \"provider\": \"cpu.serial\"}\n}\n";
+    return 0;
+}
+
+} // namespace
+
+int main(int argc, char** argv) {
+    try { const auto options = parse(argc, argv); return run(input(options), options); }
+    catch (const std::exception& error) { std::cerr << "flowparallel_cuda error: " << error.what() << '\n'; return 1; }
+}

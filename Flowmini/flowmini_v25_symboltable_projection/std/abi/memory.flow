@@ -1,0 +1,29 @@
+unit std_abi_memory
+
+abi memory {
+    library "libc.so.6"
+    convention c
+
+    type c_pointer {
+        repr "void*"
+        ownership borrowed
+        access read_write
+        lifetime call
+        nullable false
+    }
+
+    extern fn memcpy(destination : c_pointer, source : c_pointer, count : c_size_t): c_pointer {
+        symbol "memcpy"
+        effect io
+    }
+
+    extern fn memset(destination : c_pointer, value : c_int, count : c_size_t): c_pointer {
+        symbol "memset"
+        effect io
+    }
+
+    extern fn memcmp(left : c_pointer, right : c_pointer, count : c_size_t): c_int {
+        symbol "memcmp"
+        effect pure
+    }
+}

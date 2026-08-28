@@ -1,0 +1,39 @@
+{
+  "format": "frankencore.chain-policy",
+  "version": "1",
+  "name": "desktop-and-android",
+  "language": {
+    "map": "Flowmini",
+    "dialect": "Flowmini.v25",
+    "profile": "project-default"
+  },
+  "prerequisites": [
+    {"capability": "llvm", "version": ">=18 <20"},
+    {"capability": "cmake", "version": ">=3.20"},
+    {"capability": "ninja", "version": ">=1.11"}
+  ],
+  "targets": [
+    {
+      "name": "windows-desktop",
+      "substrate": "windows",
+      "version": ">=11",
+      "optimizer": "safe-default",
+      "lowering": "llvm-windows-x86_64"
+    },
+    {
+      "name": "mac-desktop",
+      "substrate": "macos",
+      "version": ">=14",
+      "optimizer": "safe-default",
+      "lowering": "llvm-macos-arm64"
+    },
+    {
+      "name": "android",
+      "substrate": "android",
+      "version": ">=13",
+      "optimizer": "safe-default",
+      "lowering": "llvm-android-arm64"
+    }
+  ],
+  "failure_policy": "diagnose_and_stop"
+}

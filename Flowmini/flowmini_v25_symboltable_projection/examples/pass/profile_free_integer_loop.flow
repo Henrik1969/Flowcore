@@ -1,0 +1,13 @@
+program arbitrary_counter_loop
+
+main {
+    counter : c_int(0)
+    limit : c_int(4)
+    one : c_int(1)
+
+    while counter < limit {
+        counter + one -> counter
+    }
+
+    counter -> return
+}

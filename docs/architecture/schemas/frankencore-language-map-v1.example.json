@@ -1,0 +1,13 @@
+{
+  "format": "frankencore.language-map",
+  "version": "1",
+  "id": "Danish",
+  "revision": "Danish.v1",
+  "parser": "frankencore.shell.surface.v1",
+  "parent": "canonical",
+  "monikers": {
+    "ask": ["Spørg"],
+    "echo": ["skriv"],
+    "exit": ["afslut"]
+  }
+}

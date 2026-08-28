@@ -20,6 +20,25 @@ This is the soul of Flowcore.
 - [Flowmini docs](flowmini/README.md)
 - [Session notes](sessions/)
 
+## Foundational architecture
+
+- [Flowcore core promise](architecture/flowcore-core-promise.md)
+- [Transformation and revision architecture](architecture/compiler-transformation-revision-model.md)
+- [Current v0.28 typed artifact-contract status](checkpoints/2026-08-26-v0.28-typed-artifact-contracts.md)
+- [Historical v0.27 namespaced provider language-chain status](checkpoints/2026-08-21-v0.27-namespaced-provider-chain.md)
+- [FrankenCore conformance declaration](architecture/frankencore-conformance.md)
+- [Prerequisites](architecture/prerequisites.md)
+- [Frankencore Constitution v0.1](architecture/FRANKENCORE-CONSTITUTION.md)
+- [Frankencore contract inventory](architecture/frankencore-contract-inventory.json)
+- [Current Frankencore conformance](architecture/frankencore-current-conformance.md)
+- [Frankencore repository audit](architecture/FRANKENCORE-AUDIT-2026-08-20.md)
+
+## Development policy
+
+- [Verification gates and Firetest policy](development/verification-gates.md)
+- [Project hygiene](development/project-hygiene.md)
+- [Documentation style](development/documentation-style.md)
+
 ## Current active Flowmini version
 
 See:
@@ -31,6 +50,10 @@ See:
 Current checkpoint:
 
 ```text
-Flowmini v22_unit_kinds
-suite: 75 / 75
+Flowcore v0.28 typed artifact-contract language-chain slice
+AST golden tests: 28
+Symbol projection tests: 14
+Flowanalyst / Flowbind / Flowoptimize / Flowlower: CTest green
+flowvalidate / identity mutation gates: CTest green
+flowcat: native ELF example PASS
 ```

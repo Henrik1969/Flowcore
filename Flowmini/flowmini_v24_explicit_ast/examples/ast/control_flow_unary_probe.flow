@@ -1,0 +1,21 @@
+program control_flow_unary_probe
+
+main {
+    flag : Bool(true)
+    inverted : Bool(false)
+    negative : int(-1)
+    index : int(0)
+
+    not flag -> inverted
+
+    while index < 10 {
+        index + 1 -> index
+        if index == 2 {
+            continue
+        }
+        if not index == 5 {
+            continue
+        }
+        break
+    }
+}

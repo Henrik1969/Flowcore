@@ -1,0 +1,12 @@
+import "../../std/abi/kernel.flow"
+
+program abi_kernel_openat_main
+
+main {
+    directory : c_int(-100)
+    path : c_string("/")
+    flags : c_int(0)
+    mode : c_int(0)
+    result : c_int(0)
+    openat(directory, path, flags, mode) -> result
+}

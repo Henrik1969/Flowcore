@@ -1,0 +1,18 @@
+program flow_less
+
+producer source : pager.input.fake
+node navigate : pager.navigate
+node display : pager.render
+sink halt : halt.record
+
+policy source.lines = "alpha|beta|gamma|delta|epsilon"
+policy source.page_size = 2
+policy source.commands = "pgdown,end"
+
+wire source.out => navigate.in
+wire navigate.out => display.in
+wire display.out => halt.in
+
+main {
+    marker : int(1)
+}

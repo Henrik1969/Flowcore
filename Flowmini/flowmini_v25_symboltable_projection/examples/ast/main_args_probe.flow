@@ -1,0 +1,5 @@
+program main_args_probe
+
+main(args : list<string>) {
+    print 0
+}

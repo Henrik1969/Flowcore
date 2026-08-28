@@ -1,0 +1,9 @@
+import "../../std/abi/kernel.flow" as linux
+
+program abi_kernel_getpgrp_main
+
+main {
+    group : c_int(0)
+    linux.getpgrp() -> group
+    return group
+}

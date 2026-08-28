@@ -1,0 +1,75 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="${FLOWMINI_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
+FLOWMINI_BIN="${FLOWMINI_BIN:-$ROOT/cmake-build-debug/flowmini}"
+
+EXPECTED_DIR="$ROOT/tests/expected/symbols"
+EXAMPLES_DIR="$ROOT/examples/ast"
+
+PROBES=(
+  "main_args_probe"
+  "canonical_type_spelling_probe"
+  "type_reference_probe"
+  "statement_else_probe"
+  "placement_statement_probe"
+  "function_signature_gallery"
+  "statement_initializer_probe"
+  "recursive_expression_probe"
+  "unit_symbol_projection_gallery"
+  "refined_contract_probe"
+  "abi_contract_probe"
+  "structured_value_probe"
+  "target_projection_probe"
+  "import_demo"
+)
+
+if [[ ! -x "$FLOWMINI_BIN" ]]; then
+    echo "error: FLOWMINI_BIN is not executable: $FLOWMINI_BIN" >&2
+    exit 1
+fi
+
+mkdir -p "$EXPECTED_DIR"
+
+updated=0
+checked=0
+
+for probe in "${PROBES[@]}"; do
+    if [[ "$probe" == "import_demo" ]]; then
+        source_file="$ROOT/examples/pass/import_demo.flow"
+    else
+        source_file="$EXAMPLES_DIR/$probe.flow"
+    fi
+    expected_file="$EXPECTED_DIR/$probe.symbols.txt"
+    actual_file="$(mktemp)"
+
+    trap 'rm -f "$actual_file"' EXIT
+
+    echo "== symbol projection: $probe =="
+
+    "$FLOWMINI_BIN" --dump-ast-symbols - "$source_file" > "$actual_file"
+
+    if [[ "${FLOWMINI_UPDATE_SYMBOL_GOLDENS:-0}" == "1" ]]; then
+        cp "$actual_file" "$expected_file"
+        echo "updated: $expected_file"
+        updated=$((updated + 1))
+    else
+        if [[ ! -f "$expected_file" ]]; then
+            echo "error: missing expected symbol projection file: $expected_file" >&2
+            echo "hint: run FLOWMINI_UPDATE_SYMBOL_GOLDENS=1 tools/run-flowmini-symbol-projection-tests.sh" >&2
+            exit 1
+        fi
+
+        diff -u "$expected_file" "$actual_file"
+        checked=$((checked + 1))
+    fi
+
+    rm -f "$actual_file"
+    trap - EXIT
+done
+
+if [[ "${FLOWMINI_UPDATE_SYMBOL_GOLDENS:-0}" == "1" ]]; then
+    echo "Symbol projection golden files updated: $updated"
+else
+    echo "Symbol projection tests: PASS ($checked)"
+fi

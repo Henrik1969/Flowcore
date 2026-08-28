@@ -1,0 +1,19 @@
+program target_projection_probe
+
+fn shared_log(message : string) {
+}
+
+target cli {
+    fn parse_args() {
+    }
+
+    main {
+        shared_log("cli")
+    }
+}
+
+target daemon {
+    main {
+        shared_log("daemon")
+    }
+}

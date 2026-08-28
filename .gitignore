@@ -29,6 +29,7 @@ compile_commands.json
 *.dylib
 *.exe
 *.out
+!Flowmini/flowmini_v24_explicit_ast/tests/expected/stdout/*.out
 *.app
 
 # Generated / temporary files
@@ -44,6 +45,7 @@ core.*
 # Editors
 .vscode/
 .idea/
+.intellijPlatform/
 *.swp
 *.swo
 Session.vim
@@ -68,3 +70,18 @@ test-report/
 # Flowmini generated test reports
 test-report/
 **/test-report/
+
+# Local build/test/IDE artifacts
+build/
+cmake-build-*/
+test-report/
+.idea/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+compile_commands.json
+*.tmp
+tempresult*.txt
+_local_archive/
+__pycache__/
+*.py[cod]

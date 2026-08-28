@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://flowcore.example/schemas/frankencore-facade-invocation-v1.json",
+  "title": "Frankencore facade invocation",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["format", "version", "facade", "backend", "arguments", "policy_outcome"],
+  "properties": {
+    "format": {"const": "frankencore.facade_invocation"},
+    "version": {"const": 1},
+    "facade": {"type": "string", "minLength": 1},
+    "backend": {"type": "string", "minLength": 1},
+    "backend_version": {"type": "string"},
+    "arguments": {"type": "array", "items": {"type": "string"}},
+    "policy": {"type": "string"},
+    "schema": {"type": "string"},
+    "exit_status": {"type": "integer"},
+    "policy_outcome": {"enum": ["allowed", "allowed_with_isolation", "requires_confirmation", "quarantined", "rejected", "unresolved"]},
+    "diagnostics": {"type": "array", "items": {"type": "string"}},
+    "provenance": {"type": "array", "items": {"type": "string"}}
+  }
+}

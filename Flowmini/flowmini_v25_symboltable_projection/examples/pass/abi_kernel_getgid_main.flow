@@ -1,0 +1,9 @@
+import "../../std/abi/kernel.flow" as linux
+
+program abi_kernel_getgid_main
+
+main {
+    group : c_int(0)
+    linux.getgid() -> group
+    return group
+}

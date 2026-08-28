@@ -1,0 +1,24 @@
+unit record_copy_example
+
+producer stdin : stdin.text
+node parse : parse.int.to_record
+node x : const.int
+node copy : record.copy
+node p0 : stdout.int_line
+node p1 : stdout.int_line
+sink halt : halt.record
+
+policy parse.out = "input"
+policy x.out = "x"
+policy x.value = 42
+policy copy.from = "x"
+policy copy.to = "y"
+policy p0.path = "x"
+policy p1.path = "y"
+
+wire stdin.out => parse.in
+wire parse.out => x.in
+wire x.out => copy.in
+wire copy.out => p0.in
+wire p0.out => p1.in
+wire p1.out => halt.in

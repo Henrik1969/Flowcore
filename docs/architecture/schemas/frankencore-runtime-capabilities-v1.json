@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://flowcore.dev/schemas/frankencore-runtime-capabilities-v1.json",
+  "title": "Frankencore runtime capabilities v1",
+  "type": "object",
+  "required": ["format", "version", "cpu", "memory", "cuda"],
+  "properties": {
+    "format": {"const": "frankencore.runtime_capabilities"},
+    "version": {"const": 1},
+    "cpu": {
+      "type": "object",
+      "required": ["logical_processors"],
+      "properties": {"logical_processors": {"type": "integer", "minimum": 0}},
+      "additionalProperties": false
+    },
+    "memory": {
+      "type": "object",
+      "required": ["total_bytes", "available_bytes"],
+      "properties": {
+        "total_bytes": {"type": "integer", "minimum": 0},
+        "available_bytes": {"type": "integer", "minimum": 0}
+      },
+      "additionalProperties": false
+    },
+    "cuda": {
+      "type": "object",
+      "required": ["status", "driver", "device_count", "diagnostic"],
+      "properties": {
+        "status": {"enum": ["available", "unavailable", "unknown"]},
+        "driver": {"type": "string"},
+        "device_count": {"type": "integer", "minimum": 0},
+        "diagnostic": {"type": "string"}
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

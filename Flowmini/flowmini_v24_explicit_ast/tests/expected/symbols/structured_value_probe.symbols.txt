@@ -1,0 +1,58 @@
+SymbolTable dump
+Scopes: 6
+  Scope #1 kind=Global name=global symbols=1 children=1
+  Scope #2 kind=Module name=structured_value_probe symbols=4 children=3
+  Scope #3 kind=Struct name=Person symbols=2 children=0
+  Scope #4 kind=Contract name=local symbols=1 children=1
+  Scope #5 kind=Struct name=Point symbols=2 children=0
+  Scope #6 kind=Function name=main symbols=7 children=0
+Symbols: 17
+  Symbol #1 scope=#1 name=structured_value_probe kind=Module facts=1
+    declaration_location=<source>:1:1
+    Fact kind=Custom key=source_unit_kind value="program"
+  Symbol #2 scope=#2 name=Positive kind=Type facts=2
+    declaration_location=<source>:4:1
+    Fact kind=TypeReference key=base_type_spelling value="int64"
+    Fact kind=Custom key=invariant_spelling value="value>0"
+  Symbol #3 scope=#2 name=Person kind=Struct facts=0
+    declaration_location=<source>:8:6
+  Symbol #4 scope=#3 name=age kind=Field facts=1
+    declaration_location=<source>:9:5
+    Fact kind=TypeReference key=declared_type_spelling value="int"
+  Symbol #5 scope=#3 name=active kind=Field facts=1
+    declaration_location=<source>:10:5
+    Fact kind=TypeReference key=declared_type_spelling value="Bool"
+  Symbol #6 scope=#2 name=local kind=Contract facts=1
+    declaration_location=<source>:13:1
+    Fact kind=AbiTag key=library_spelling value="liblocal.so"
+  Symbol #7 scope=#4 name=Point kind=Struct facts=0
+    declaration_location=<source>:16:5
+  Symbol #8 scope=#5 name=x kind=Field facts=1
+    declaration_location=<source>:17:9
+    Fact kind=TypeReference key=declared_type_spelling value="c_int"
+  Symbol #9 scope=#5 name=y kind=Field facts=1
+    declaration_location=<source>:18:9
+    Fact kind=TypeReference key=declared_type_spelling value="c_int"
+  Symbol #10 scope=#2 name=main kind=Procedure facts=0
+    declaration_location=<source>:22:1
+  Symbol #11 scope=#6 name=positive kind=Variable facts=1
+    declaration_location=<source>:23:5
+    Fact kind=TypeReference key=declared_type_spelling value="Positive"
+  Symbol #12 scope=#6 name=values kind=Variable facts=1
+    declaration_location=<source>:24:5
+    Fact kind=TypeReference key=declared_type_spelling value="list<int>"
+  Symbol #13 scope=#6 name=matrix kind=Variable facts=1
+    declaration_location=<source>:25:5
+    Fact kind=TypeReference key=declared_type_spelling value="array<int>[2,2]"
+  Symbol #14 scope=#6 name=person kind=Variable facts=1
+    declaration_location=<source>:26:5
+    Fact kind=TypeReference key=declared_type_spelling value="Person"
+  Symbol #15 scope=#6 name=point kind=Variable facts=1
+    declaration_location=<source>:27:5
+    Fact kind=TypeReference key=declared_type_spelling value="Point"
+  Symbol #16 scope=#6 name=selected kind=Variable facts=1
+    declaration_location=<source>:28:5
+    Fact kind=TypeReference key=declared_type_spelling value="int"
+  Symbol #17 scope=#6 name=age kind=Variable facts=1
+    declaration_location=<source>:29:5
+    Fact kind=TypeReference key=declared_type_spelling value="int"

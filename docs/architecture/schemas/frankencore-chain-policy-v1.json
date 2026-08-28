@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://flowcore.example/schemas/frankencore-chain-policy-v1.json",
+  "title": "Frankencore language-chain policy",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["format", "version", "name", "language", "prerequisites", "targets", "failure_policy"],
+  "properties": {
+    "format": {"const": "frankencore.chain-policy"},
+    "version": {"const": 1},
+    "name": {"type": "string", "minLength": 1},
+    "language": {"$ref": "#/$defs/language"},
+    "prerequisites": {"type": "array", "items": {"$ref": "#/$defs/requirement"}},
+    "targets": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/target"}},
+    "failure_policy": {"enum": ["diagnose_and_stop", "allow_partial_targets"]}
+  },
+  "$defs": {
+    "language": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["map"],
+      "properties": {
+        "map": {"type": "string", "minLength": 1},
+        "dialect": {"type": "string"},
+        "profile": {"type": "string"}
+      }
+    },
+    "requirement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["capability", "version"],
+      "properties": {
+        "capability": {"type": "string", "minLength": 1},
+        "version": {"type": "string", "minLength": 1}
+      }
+    },
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "substrate", "version", "optimizer", "lowering"],
+      "properties": {
+        "name": {"type": "string", "minLength": 1},
+        "substrate": {"type": "string", "minLength": 1},
+        "version": {"type": "string", "minLength": 1},
+        "optimizer": {"type": "string", "minLength": 1},
+        "lowering": {"type": "string", "minLength": 1}
+      }
+    }
+  }
+}

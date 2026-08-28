@@ -1,0 +1,30 @@
+{
+  "format": "flowcore.native_binding_spec",
+  "version": 1,
+  "unit": "generated_kernel_identity",
+  "namespace": "kernel",
+  "provider": {
+    "soname": "libc.so.6",
+    "path": "/lib/x86_64-linux-gnu/libc.so.6",
+    "convention": "c"
+  },
+  "functions": [
+    {
+      "name": "getpid",
+      "symbol": "getpid",
+      "effect": "readonly",
+      "parameters": [],
+      "return_type": "c_int"
+    },
+    {
+      "name": "getpriority",
+      "symbol": "getpriority",
+      "effect": "readonly",
+      "parameters": [
+        {"name": "which", "type": "c_int"},
+        {"name": "who", "type": "c_int"}
+      ],
+      "return_type": "c_int"
+    }
+  ]
+}

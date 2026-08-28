@@ -1,0 +1,14 @@
+import "../../std/abi/libc.flow"
+
+program test_licbinds
+
+main {
+    message : c_string("Flowcore libc bindings")
+    length : c_size_t(0)
+    magnitude : c_int(-42)
+    absolute : c_int(0)
+    printed : c_int(0)
+    strlen(message) -> length
+    abs(magnitude) -> absolute
+    puts(message) -> printed
+}

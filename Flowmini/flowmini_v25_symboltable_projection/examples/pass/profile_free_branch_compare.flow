@@ -1,0 +1,10 @@
+program profile_free_branch_compare
+
+main {
+    value : c_int(1)
+    if value > 0 {
+        return 42
+    } else {
+        return 7
+    }
+}

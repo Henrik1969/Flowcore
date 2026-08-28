@@ -1,38 +1,72 @@
 # Flowmini Roadmap
 
+Authority: current gates are verified state. Milestone order expresses approved
+direction; version numbers and detailed implementation mechanisms remain
+provisional until each milestone is activated.
+
 ## Current checkpoint
 
 ```text
-v22_unit_kinds
+v26_language_chain (implementation base: v25_symboltable_projection)
 build: OK
-suite: 75 / 75
+AST golden tests: 28 / 28
+Symbol projection tests: 14 / 14
+Frontend bundle tests: 8 golden, 1 isolated, 19 negative
+downstream language-chain CTest: PASS
+flowcat ELF example: PASS
+CTest: 2 / 2
 ```
 
 ## Immediate
 
-1. Commit expected suite outputs and diagnostics.
-2. Clean compiler warnings.
-3. Add programmer's manual draft.
-4. Establish Valgrind baseline.
-5. Establish GDB-on-failure baseline.
+1. Maintain structural SymbolTable coverage and factual metadata.
+2. Maintain the typed-origin and source-provenance contract as the language
+   chain grows.
+3. Expand semantic checks and accepted lowering profiles one explicit contract
+   at a time.
+4. Keep every stage independently consumable and provenance-preserving.
 
 ## Next structural versions
 
-### v23_token_tree_parser_bridge
+### Historical: v23_token_tree_parser_bridge
 
 Move parser input toward TokenTree without changing language behavior.
 
-### v24_explicit_ast
+### Closed: v24_explicit_ast
 
 Introduce explicit AST as parser output.
 
-### v25_symboltable_from_ast
+The historical v0.25 exit rule required every accepted source construct to have a canonical,
+lossless raw-AST representation; accepted syntax does not fall through generic
+unknown placeholders; structurally valid but semantically invalid programs can
+still be represented; ownership, identity, parentage, source provenance, and
+arena references are validated; focused goldens and the complete regression
+suite pass; and current-state documentation describes the boundary truthfully.
 
-Populate SymbolTable from AST declarations before lowering.
+This exit rule passed and was formally declared closed on 2026-08-16.
 
-### v26_semantic_checker_split
+### Historical: v25_symboltable_projection
 
-Separate syntax parsing, symbol collection, semantic checking, and lowering.
+Established the factual AST-to-SymbolTable projection and independent export
+boundary now used by the active v26 language-chain milestone.
+
+### Active: v26_language_chain
+
+Carry selected programs through semantic analysis, capability binding,
+optimization boundary, explicit target lowering, LLVM, and native execution.
+The implementation base remains `flowmini_v25_symboltable_projection` until a
+separate directory migration is justified.
+
+Advance to v0.26 only when the complete AST and lossless structural SymbolTable
+projection form a mature frontend border with stable cross-links, scope
+coverage, source locations, and unresolved declared type/contract facts.
+
+### Provisional later label: v26_semantic_checker_split
+
+Separate and deepen syntax parsing, symbol collection, semantic checking, and
+lowering. The initial resolution, derived facts, contract satisfaction, type
+correctness, and semantic diagnostics already exist in the v25 sibling chain;
+v26 expands their coverage and integrity guarantees.
 
 ## Later runtime work
 

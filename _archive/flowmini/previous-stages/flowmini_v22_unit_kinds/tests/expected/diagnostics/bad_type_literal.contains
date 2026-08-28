@@ -1,0 +1,1 @@
+fatal in lowerer: literal 0 does not satisfy type contract PositiveInteger for 'impossible'

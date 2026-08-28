@@ -1,0 +1,5 @@
+program profile_free_expression
+
+main {
+    return 40 + 2
+}

@@ -1,0 +1,1991 @@
+{
+    "format": "flowmini.ast.v2",
+    "source_unit": {
+        "kind": "program",
+        "name": "precedence_expression_probe",
+        "declaration_count": 1,
+        "declaration_ids": [
+            0
+        ],
+        "declarations": [
+            {
+                "id": 0,
+                "kind": "main_block",
+                "has_body": true,
+                "body_block": 0
+            }
+        ]
+    },
+    "declaration_pool_size": 1,
+    "declaration_pool": [
+        {
+            "id": 0,
+            "kind": "main_block",
+            "has_body": true,
+            "body_block": 0
+        }
+    ],
+    "expression_pool_size": 116,
+    "expression_pool": [
+        {
+            "id": 0,
+            "kind": "integer_literal",
+            "text": "12",
+            "payload": {
+                "value_text": "12"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 1,
+            "kind": "integer_literal",
+            "text": "3",
+            "payload": {
+                "value_text": "3"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 2,
+            "kind": "integer_literal",
+            "text": "2",
+            "payload": {
+                "value_text": "2"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 3,
+            "kind": "integer_literal",
+            "text": "20",
+            "payload": {
+                "value_text": "20"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 4,
+            "kind": "integer_literal",
+            "text": "0",
+            "payload": {
+                "value_text": "0"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 5,
+            "kind": "binary",
+            "text": "+",
+            "payload": {
+                "operator": "+",
+                "left": 6,
+                "right": 7
+            },
+            "child_expressions": [
+                6,
+                7
+            ]
+        },
+        {
+            "id": 6,
+            "kind": "identifier",
+            "text": "a",
+            "payload": {
+                "name": "a"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 7,
+            "kind": "binary",
+            "text": "*",
+            "payload": {
+                "operator": "*",
+                "left": 8,
+                "right": 9
+            },
+            "child_expressions": [
+                8,
+                9
+            ]
+        },
+        {
+            "id": 8,
+            "kind": "identifier",
+            "text": "b",
+            "payload": {
+                "name": "b"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 9,
+            "kind": "identifier",
+            "text": "c",
+            "payload": {
+                "name": "c"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 10,
+            "kind": "binary",
+            "text": "+",
+            "payload": {
+                "operator": "+",
+                "left": 11,
+                "right": 14
+            },
+            "child_expressions": [
+                11,
+                14
+            ]
+        },
+        {
+            "id": 11,
+            "kind": "binary",
+            "text": "*",
+            "payload": {
+                "operator": "*",
+                "left": 12,
+                "right": 13
+            },
+            "child_expressions": [
+                12,
+                13
+            ]
+        },
+        {
+            "id": 12,
+            "kind": "identifier",
+            "text": "a",
+            "payload": {
+                "name": "a"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 13,
+            "kind": "identifier",
+            "text": "b",
+            "payload": {
+                "name": "b"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 14,
+            "kind": "identifier",
+            "text": "c",
+            "payload": {
+                "name": "c"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 15,
+            "kind": "binary",
+            "text": "-",
+            "payload": {
+                "operator": "-",
+                "left": 16,
+                "right": 19
+            },
+            "child_expressions": [
+                16,
+                19
+            ]
+        },
+        {
+            "id": 16,
+            "kind": "binary",
+            "text": "-",
+            "payload": {
+                "operator": "-",
+                "left": 17,
+                "right": 18
+            },
+            "child_expressions": [
+                17,
+                18
+            ]
+        },
+        {
+            "id": 17,
+            "kind": "identifier",
+            "text": "a",
+            "payload": {
+                "name": "a"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 18,
+            "kind": "identifier",
+            "text": "b",
+            "payload": {
+                "name": "b"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 19,
+            "kind": "identifier",
+            "text": "c",
+            "payload": {
+                "name": "c"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 20,
+            "kind": "binary",
+            "text": "*",
+            "payload": {
+                "operator": "*",
+                "left": 21,
+                "right": 24
+            },
+            "child_expressions": [
+                21,
+                24
+            ]
+        },
+        {
+            "id": 21,
+            "kind": "binary",
+            "text": "/",
+            "payload": {
+                "operator": "/",
+                "left": 22,
+                "right": 23
+            },
+            "child_expressions": [
+                22,
+                23
+            ]
+        },
+        {
+            "id": 22,
+            "kind": "identifier",
+            "text": "a",
+            "payload": {
+                "name": "a"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 23,
+            "kind": "identifier",
+            "text": "b",
+            "payload": {
+                "name": "b"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 24,
+            "kind": "identifier",
+            "text": "c",
+            "payload": {
+                "name": "c"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 25,
+            "kind": "binary",
+            "text": "*",
+            "payload": {
+                "operator": "*",
+                "left": 26,
+                "right": 29
+            },
+            "child_expressions": [
+                26,
+                29
+            ]
+        },
+        {
+            "id": 26,
+            "kind": "binary",
+            "text": "+",
+            "payload": {
+                "operator": "+",
+                "left": 27,
+                "right": 28
+            },
+            "child_expressions": [
+                27,
+                28
+            ]
+        },
+        {
+            "id": 27,
+            "kind": "identifier",
+            "text": "a",
+            "payload": {
+                "name": "a"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 28,
+            "kind": "identifier",
+            "text": "b",
+            "payload": {
+                "name": "b"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 29,
+            "kind": "identifier",
+            "text": "c",
+            "payload": {
+                "name": "c"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 30,
+            "kind": "binary",
+            "text": "*",
+            "payload": {
+                "operator": "*",
+                "left": 31,
+                "right": 32
+            },
+            "child_expressions": [
+                31,
+                32
+            ]
+        },
+        {
+            "id": 31,
+            "kind": "identifier",
+            "text": "a",
+            "payload": {
+                "name": "a"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 32,
+            "kind": "binary",
+            "text": "+",
+            "payload": {
+                "operator": "+",
+                "left": 33,
+                "right": 34
+            },
+            "child_expressions": [
+                33,
+                34
+            ]
+        },
+        {
+            "id": 33,
+            "kind": "identifier",
+            "text": "b",
+            "payload": {
+                "name": "b"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 34,
+            "kind": "identifier",
+            "text": "c",
+            "payload": {
+                "name": "c"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 35,
+            "kind": "binary",
+            "text": "-",
+            "payload": {
+                "operator": "-",
+                "left": 36,
+                "right": 37
+            },
+            "child_expressions": [
+                36,
+                37
+            ]
+        },
+        {
+            "id": 36,
+            "kind": "identifier",
+            "text": "a",
+            "payload": {
+                "name": "a"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 37,
+            "kind": "binary",
+            "text": "-",
+            "payload": {
+                "operator": "-",
+                "left": 38,
+                "right": 39
+            },
+            "child_expressions": [
+                38,
+                39
+            ]
+        },
+        {
+            "id": 38,
+            "kind": "identifier",
+            "text": "b",
+            "payload": {
+                "name": "b"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 39,
+            "kind": "identifier",
+            "text": "c",
+            "payload": {
+                "name": "c"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 40,
+            "kind": "binary",
+            "text": "*",
+            "payload": {
+                "operator": "*",
+                "left": 41,
+                "right": 43
+            },
+            "child_expressions": [
+                41,
+                43
+            ]
+        },
+        {
+            "id": 41,
+            "kind": "unary",
+            "text": "-",
+            "payload": {
+                "operator": "-",
+                "operand": 42
+            },
+            "child_expressions": [
+                42
+            ]
+        },
+        {
+            "id": 42,
+            "kind": "identifier",
+            "text": "a",
+            "payload": {
+                "name": "a"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 43,
+            "kind": "identifier",
+            "text": "b",
+            "payload": {
+                "name": "b"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 44,
+            "kind": "binary",
+            "text": "*",
+            "payload": {
+                "operator": "*",
+                "left": 45,
+                "right": 46
+            },
+            "child_expressions": [
+                45,
+                46
+            ]
+        },
+        {
+            "id": 45,
+            "kind": "identifier",
+            "text": "a",
+            "payload": {
+                "name": "a"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 46,
+            "kind": "unary",
+            "text": "-",
+            "payload": {
+                "operator": "-",
+                "operand": 47
+            },
+            "child_expressions": [
+                47
+            ]
+        },
+        {
+            "id": 47,
+            "kind": "identifier",
+            "text": "b",
+            "payload": {
+                "name": "b"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 48,
+            "kind": "unary",
+            "text": "-",
+            "payload": {
+                "operator": "-",
+                "operand": 49
+            },
+            "child_expressions": [
+                49
+            ]
+        },
+        {
+            "id": 49,
+            "kind": "binary",
+            "text": "+",
+            "payload": {
+                "operator": "+",
+                "left": 50,
+                "right": 51
+            },
+            "child_expressions": [
+                50,
+                51
+            ]
+        },
+        {
+            "id": 50,
+            "kind": "identifier",
+            "text": "a",
+            "payload": {
+                "name": "a"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 51,
+            "kind": "identifier",
+            "text": "b",
+            "payload": {
+                "name": "b"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 52,
+            "kind": "unary",
+            "text": "-",
+            "payload": {
+                "operator": "-",
+                "operand": 53
+            },
+            "child_expressions": [
+                53
+            ]
+        },
+        {
+            "id": 53,
+            "kind": "unary",
+            "text": "-",
+            "payload": {
+                "operator": "-",
+                "operand": 54
+            },
+            "child_expressions": [
+                54
+            ]
+        },
+        {
+            "id": 54,
+            "kind": "identifier",
+            "text": "a",
+            "payload": {
+                "name": "a"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 55,
+            "kind": "binary",
+            "text": "*",
+            "payload": {
+                "operator": "*",
+                "left": 56,
+                "right": 61
+            },
+            "child_expressions": [
+                56,
+                61
+            ]
+        },
+        {
+            "id": 56,
+            "kind": "call",
+            "text": "square",
+            "payload": {
+                "base": 57,
+                "arguments": [
+                    58
+                ]
+            },
+            "child_expressions": [
+                57,
+                58
+            ]
+        },
+        {
+            "id": 57,
+            "kind": "identifier",
+            "text": "square",
+            "payload": {
+                "name": "square"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 58,
+            "kind": "binary",
+            "text": "+",
+            "payload": {
+                "operator": "+",
+                "left": 59,
+                "right": 60
+            },
+            "child_expressions": [
+                59,
+                60
+            ]
+        },
+        {
+            "id": 59,
+            "kind": "identifier",
+            "text": "a",
+            "payload": {
+                "name": "a"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 60,
+            "kind": "identifier",
+            "text": "b",
+            "payload": {
+                "name": "b"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 61,
+            "kind": "identifier",
+            "text": "c",
+            "payload": {
+                "name": "c"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 62,
+            "kind": "binary",
+            "text": "+",
+            "payload": {
+                "operator": "+",
+                "left": 63,
+                "right": 68
+            },
+            "child_expressions": [
+                63,
+                68
+            ]
+        },
+        {
+            "id": 63,
+            "kind": "index",
+            "text": "values",
+            "payload": {
+                "base": 64,
+                "indexes": [
+                    65
+                ]
+            },
+            "child_expressions": [
+                64,
+                65
+            ]
+        },
+        {
+            "id": 64,
+            "kind": "identifier",
+            "text": "values",
+            "payload": {
+                "name": "values"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 65,
+            "kind": "binary",
+            "text": "+",
+            "payload": {
+                "operator": "+",
+                "left": 66,
+                "right": 67
+            },
+            "child_expressions": [
+                66,
+                67
+            ]
+        },
+        {
+            "id": 66,
+            "kind": "identifier",
+            "text": "a",
+            "payload": {
+                "name": "a"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 67,
+            "kind": "identifier",
+            "text": "b",
+            "payload": {
+                "name": "b"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 68,
+            "kind": "identifier",
+            "text": "c",
+            "payload": {
+                "name": "c"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 69,
+            "kind": "binary",
+            "text": "+",
+            "payload": {
+                "operator": "+",
+                "left": 70,
+                "right": 72
+            },
+            "child_expressions": [
+                70,
+                72
+            ]
+        },
+        {
+            "id": 70,
+            "kind": "field_access",
+            "text": "point.x",
+            "payload": {
+                "base": 71,
+                "field": "x"
+            },
+            "child_expressions": [
+                71
+            ]
+        },
+        {
+            "id": 71,
+            "kind": "identifier",
+            "text": "point",
+            "payload": {
+                "name": "point"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 72,
+            "kind": "binary",
+            "text": "*",
+            "payload": {
+                "operator": "*",
+                "left": 73,
+                "right": 74
+            },
+            "child_expressions": [
+                73,
+                74
+            ]
+        },
+        {
+            "id": 73,
+            "kind": "identifier",
+            "text": "a",
+            "payload": {
+                "name": "a"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 74,
+            "kind": "identifier",
+            "text": "b",
+            "payload": {
+                "name": "b"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 75,
+            "kind": "call",
+            "text": "a.b[c]",
+            "payload": {
+                "base": 76,
+                "arguments": [
+                    80
+                ]
+            },
+            "child_expressions": [
+                76,
+                80
+            ]
+        },
+        {
+            "id": 76,
+            "kind": "index",
+            "text": "a.b",
+            "payload": {
+                "base": 77,
+                "indexes": [
+                    79
+                ]
+            },
+            "child_expressions": [
+                77,
+                79
+            ]
+        },
+        {
+            "id": 77,
+            "kind": "field_access",
+            "text": "a.b",
+            "payload": {
+                "base": 78,
+                "field": "b"
+            },
+            "child_expressions": [
+                78
+            ]
+        },
+        {
+            "id": 78,
+            "kind": "identifier",
+            "text": "a",
+            "payload": {
+                "name": "a"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 79,
+            "kind": "identifier",
+            "text": "c",
+            "payload": {
+                "name": "c"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 80,
+            "kind": "identifier",
+            "text": "d",
+            "payload": {
+                "name": "d"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 81,
+            "kind": "index",
+            "text": "make(a).b",
+            "payload": {
+                "base": 82,
+                "indexes": [
+                    86
+                ]
+            },
+            "child_expressions": [
+                82,
+                86
+            ]
+        },
+        {
+            "id": 82,
+            "kind": "field_access",
+            "text": "make(a).b",
+            "payload": {
+                "base": 83,
+                "field": "b"
+            },
+            "child_expressions": [
+                83
+            ]
+        },
+        {
+            "id": 83,
+            "kind": "call",
+            "text": "make",
+            "payload": {
+                "base": 84,
+                "arguments": [
+                    85
+                ]
+            },
+            "child_expressions": [
+                84,
+                85
+            ]
+        },
+        {
+            "id": 84,
+            "kind": "identifier",
+            "text": "make",
+            "payload": {
+                "name": "make"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 85,
+            "kind": "identifier",
+            "text": "a",
+            "payload": {
+                "name": "a"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 86,
+            "kind": "identifier",
+            "text": "c",
+            "payload": {
+                "name": "c"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 87,
+            "kind": "field_access",
+            "text": "(a+b).c",
+            "payload": {
+                "base": 88,
+                "field": "c"
+            },
+            "child_expressions": [
+                88
+            ]
+        },
+        {
+            "id": 88,
+            "kind": "binary",
+            "text": "+",
+            "payload": {
+                "operator": "+",
+                "left": 89,
+                "right": 90
+            },
+            "child_expressions": [
+                89,
+                90
+            ]
+        },
+        {
+            "id": 89,
+            "kind": "identifier",
+            "text": "a",
+            "payload": {
+                "name": "a"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 90,
+            "kind": "identifier",
+            "text": "b",
+            "payload": {
+                "name": "b"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 91,
+            "kind": "call",
+            "text": "a(b)",
+            "payload": {
+                "base": 92,
+                "arguments": [
+                    95
+                ]
+            },
+            "child_expressions": [
+                92,
+                95
+            ]
+        },
+        {
+            "id": 92,
+            "kind": "call",
+            "text": "a",
+            "payload": {
+                "base": 93,
+                "arguments": [
+                    94
+                ]
+            },
+            "child_expressions": [
+                93,
+                94
+            ]
+        },
+        {
+            "id": 93,
+            "kind": "identifier",
+            "text": "a",
+            "payload": {
+                "name": "a"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 94,
+            "kind": "identifier",
+            "text": "b",
+            "payload": {
+                "name": "b"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 95,
+            "kind": "identifier",
+            "text": "c",
+            "payload": {
+                "name": "c"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 96,
+            "kind": "index",
+            "text": "grid",
+            "payload": {
+                "base": 97,
+                "indexes": [
+                    98,
+                    101
+                ]
+            },
+            "child_expressions": [
+                97,
+                98,
+                101
+            ]
+        },
+        {
+            "id": 97,
+            "kind": "identifier",
+            "text": "grid",
+            "payload": {
+                "name": "grid"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 98,
+            "kind": "binary",
+            "text": "+",
+            "payload": {
+                "operator": "+",
+                "left": 99,
+                "right": 100
+            },
+            "child_expressions": [
+                99,
+                100
+            ]
+        },
+        {
+            "id": 99,
+            "kind": "identifier",
+            "text": "a",
+            "payload": {
+                "name": "a"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 100,
+            "kind": "identifier",
+            "text": "b",
+            "payload": {
+                "name": "b"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 101,
+            "kind": "binary",
+            "text": "*",
+            "payload": {
+                "operator": "*",
+                "left": 102,
+                "right": 103
+            },
+            "child_expressions": [
+                102,
+                103
+            ]
+        },
+        {
+            "id": 102,
+            "kind": "identifier",
+            "text": "c",
+            "payload": {
+                "name": "c"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 103,
+            "kind": "identifier",
+            "text": "d",
+            "payload": {
+                "name": "d"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 104,
+            "kind": "binary",
+            "text": "<",
+            "payload": {
+                "operator": "<",
+                "left": 105,
+                "right": 110
+            },
+            "child_expressions": [
+                105,
+                110
+            ]
+        },
+        {
+            "id": 105,
+            "kind": "binary",
+            "text": "+",
+            "payload": {
+                "operator": "+",
+                "left": 106,
+                "right": 107
+            },
+            "child_expressions": [
+                106,
+                107
+            ]
+        },
+        {
+            "id": 106,
+            "kind": "identifier",
+            "text": "a",
+            "payload": {
+                "name": "a"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 107,
+            "kind": "binary",
+            "text": "*",
+            "payload": {
+                "operator": "*",
+                "left": 108,
+                "right": 109
+            },
+            "child_expressions": [
+                108,
+                109
+            ]
+        },
+        {
+            "id": 108,
+            "kind": "identifier",
+            "text": "b",
+            "payload": {
+                "name": "b"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 109,
+            "kind": "identifier",
+            "text": "c",
+            "payload": {
+                "name": "c"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 110,
+            "kind": "binary",
+            "text": "-",
+            "payload": {
+                "operator": "-",
+                "left": 111,
+                "right": 112
+            },
+            "child_expressions": [
+                111,
+                112
+            ]
+        },
+        {
+            "id": 111,
+            "kind": "identifier",
+            "text": "d",
+            "payload": {
+                "name": "d"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 112,
+            "kind": "integer_literal",
+            "text": "1",
+            "payload": {
+                "value_text": "1"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 113,
+            "kind": "binary",
+            "text": "+",
+            "payload": {
+                "operator": "+",
+                "left": 114,
+                "right": 115
+            },
+            "child_expressions": [
+                114,
+                115
+            ]
+        },
+        {
+            "id": 114,
+            "kind": "identifier",
+            "text": "result",
+            "payload": {
+                "name": "result"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 115,
+            "kind": "integer_literal",
+            "text": "1",
+            "payload": {
+                "value_text": "1"
+            },
+            "child_expressions": []
+        }
+    ],
+    "statement_pool_size": 26,
+    "statement_pool": [
+        {
+            "id": 0,
+            "kind": "let",
+            "payload": {
+                "name": "a",
+                "type_ref": {
+                    "kind": "named",
+                    "text": "int",
+                    "payload": {
+                        "name_segments": [
+                            "int"
+                        ]
+                    },
+                    "location": {
+                        "line": 5,
+                        "column": 9
+                    }
+                },
+                "initializer_expression": 0
+            },
+            "name": "a",
+            "type": "int",
+            "type_ref": {
+                "kind": "named",
+                "text": "int",
+                "payload": {
+                    "name_segments": [
+                        "int"
+                    ]
+                },
+                "location": {
+                    "line": 5,
+                    "column": 9
+                }
+            },
+            "has_initializer": true,
+            "expression_ids": [
+                0
+            ]
+        },
+        {
+            "id": 1,
+            "kind": "let",
+            "payload": {
+                "name": "b",
+                "type_ref": {
+                    "kind": "named",
+                    "text": "int",
+                    "payload": {
+                        "name_segments": [
+                            "int"
+                        ]
+                    },
+                    "location": {
+                        "line": 6,
+                        "column": 9
+                    }
+                },
+                "initializer_expression": 1
+            },
+            "name": "b",
+            "type": "int",
+            "type_ref": {
+                "kind": "named",
+                "text": "int",
+                "payload": {
+                    "name_segments": [
+                        "int"
+                    ]
+                },
+                "location": {
+                    "line": 6,
+                    "column": 9
+                }
+            },
+            "has_initializer": true,
+            "expression_ids": [
+                1
+            ]
+        },
+        {
+            "id": 2,
+            "kind": "let",
+            "payload": {
+                "name": "c",
+                "type_ref": {
+                    "kind": "named",
+                    "text": "int",
+                    "payload": {
+                        "name_segments": [
+                            "int"
+                        ]
+                    },
+                    "location": {
+                        "line": 7,
+                        "column": 9
+                    }
+                },
+                "initializer_expression": 2
+            },
+            "name": "c",
+            "type": "int",
+            "type_ref": {
+                "kind": "named",
+                "text": "int",
+                "payload": {
+                    "name_segments": [
+                        "int"
+                    ]
+                },
+                "location": {
+                    "line": 7,
+                    "column": 9
+                }
+            },
+            "has_initializer": true,
+            "expression_ids": [
+                2
+            ]
+        },
+        {
+            "id": 3,
+            "kind": "let",
+            "payload": {
+                "name": "d",
+                "type_ref": {
+                    "kind": "named",
+                    "text": "int",
+                    "payload": {
+                        "name_segments": [
+                            "int"
+                        ]
+                    },
+                    "location": {
+                        "line": 8,
+                        "column": 9
+                    }
+                },
+                "initializer_expression": 3
+            },
+            "name": "d",
+            "type": "int",
+            "type_ref": {
+                "kind": "named",
+                "text": "int",
+                "payload": {
+                    "name_segments": [
+                        "int"
+                    ]
+                },
+                "location": {
+                    "line": 8,
+                    "column": 9
+                }
+            },
+            "has_initializer": true,
+            "expression_ids": [
+                3
+            ]
+        },
+        {
+            "id": 4,
+            "kind": "let",
+            "payload": {
+                "name": "result",
+                "type_ref": {
+                    "kind": "named",
+                    "text": "int",
+                    "payload": {
+                        "name_segments": [
+                            "int"
+                        ]
+                    },
+                    "location": {
+                        "line": 9,
+                        "column": 14
+                    }
+                },
+                "initializer_expression": 4
+            },
+            "name": "result",
+            "type": "int",
+            "type_ref": {
+                "kind": "named",
+                "text": "int",
+                "payload": {
+                    "name_segments": [
+                        "int"
+                    ]
+                },
+                "location": {
+                    "line": 9,
+                    "column": 14
+                }
+            },
+            "has_initializer": true,
+            "expression_ids": [
+                4
+            ]
+        },
+        {
+            "id": 5,
+            "kind": "assignment",
+            "payload": {
+                "target": {
+                    "kind": "identifier",
+                    "name": "result",
+                    "location": {
+                        "line": 11,
+                        "column": 5
+                    }
+                },
+                "value_expression": 5,
+                "source_form": "equals_assignment"
+            },
+            "name": "result",
+            "has_value": true,
+            "expression_ids": [
+                5
+            ]
+        },
+        {
+            "id": 6,
+            "kind": "assignment",
+            "payload": {
+                "target": {
+                    "kind": "identifier",
+                    "name": "result",
+                    "location": {
+                        "line": 12,
+                        "column": 5
+                    }
+                },
+                "value_expression": 10,
+                "source_form": "equals_assignment"
+            },
+            "name": "result",
+            "has_value": true,
+            "expression_ids": [
+                10
+            ]
+        },
+        {
+            "id": 7,
+            "kind": "assignment",
+            "payload": {
+                "target": {
+                    "kind": "identifier",
+                    "name": "result",
+                    "location": {
+                        "line": 13,
+                        "column": 5
+                    }
+                },
+                "value_expression": 15,
+                "source_form": "equals_assignment"
+            },
+            "name": "result",
+            "has_value": true,
+            "expression_ids": [
+                15
+            ]
+        },
+        {
+            "id": 8,
+            "kind": "assignment",
+            "payload": {
+                "target": {
+                    "kind": "identifier",
+                    "name": "result",
+                    "location": {
+                        "line": 14,
+                        "column": 5
+                    }
+                },
+                "value_expression": 20,
+                "source_form": "equals_assignment"
+            },
+            "name": "result",
+            "has_value": true,
+            "expression_ids": [
+                20
+            ]
+        },
+        {
+            "id": 9,
+            "kind": "assignment",
+            "payload": {
+                "target": {
+                    "kind": "identifier",
+                    "name": "result",
+                    "location": {
+                        "line": 15,
+                        "column": 5
+                    }
+                },
+                "value_expression": 25,
+                "source_form": "equals_assignment"
+            },
+            "name": "result",
+            "has_value": true,
+            "expression_ids": [
+                25
+            ]
+        },
+        {
+            "id": 10,
+            "kind": "assignment",
+            "payload": {
+                "target": {
+                    "kind": "identifier",
+                    "name": "result",
+                    "location": {
+                        "line": 16,
+                        "column": 5
+                    }
+                },
+                "value_expression": 30,
+                "source_form": "equals_assignment"
+            },
+            "name": "result",
+            "has_value": true,
+            "expression_ids": [
+                30
+            ]
+        },
+        {
+            "id": 11,
+            "kind": "assignment",
+            "payload": {
+                "target": {
+                    "kind": "identifier",
+                    "name": "result",
+                    "location": {
+                        "line": 17,
+                        "column": 5
+                    }
+                },
+                "value_expression": 35,
+                "source_form": "equals_assignment"
+            },
+            "name": "result",
+            "has_value": true,
+            "expression_ids": [
+                35
+            ]
+        },
+        {
+            "id": 12,
+            "kind": "assignment",
+            "payload": {
+                "target": {
+                    "kind": "identifier",
+                    "name": "result",
+                    "location": {
+                        "line": 18,
+                        "column": 5
+                    }
+                },
+                "value_expression": 40,
+                "source_form": "equals_assignment"
+            },
+            "name": "result",
+            "has_value": true,
+            "expression_ids": [
+                40
+            ]
+        },
+        {
+            "id": 13,
+            "kind": "assignment",
+            "payload": {
+                "target": {
+                    "kind": "identifier",
+                    "name": "result",
+                    "location": {
+                        "line": 19,
+                        "column": 5
+                    }
+                },
+                "value_expression": 44,
+                "source_form": "equals_assignment"
+            },
+            "name": "result",
+            "has_value": true,
+            "expression_ids": [
+                44
+            ]
+        },
+        {
+            "id": 14,
+            "kind": "assignment",
+            "payload": {
+                "target": {
+                    "kind": "identifier",
+                    "name": "result",
+                    "location": {
+                        "line": 20,
+                        "column": 5
+                    }
+                },
+                "value_expression": 48,
+                "source_form": "equals_assignment"
+            },
+            "name": "result",
+            "has_value": true,
+            "expression_ids": [
+                48
+            ]
+        },
+        {
+            "id": 15,
+            "kind": "assignment",
+            "payload": {
+                "target": {
+                    "kind": "identifier",
+                    "name": "result",
+                    "location": {
+                        "line": 21,
+                        "column": 5
+                    }
+                },
+                "value_expression": 52,
+                "source_form": "equals_assignment"
+            },
+            "name": "result",
+            "has_value": true,
+            "expression_ids": [
+                52
+            ]
+        },
+        {
+            "id": 16,
+            "kind": "assignment",
+            "payload": {
+                "target": {
+                    "kind": "identifier",
+                    "name": "result",
+                    "location": {
+                        "line": 22,
+                        "column": 5
+                    }
+                },
+                "value_expression": 55,
+                "source_form": "equals_assignment"
+            },
+            "name": "result",
+            "has_value": true,
+            "expression_ids": [
+                55
+            ]
+        },
+        {
+            "id": 17,
+            "kind": "assignment",
+            "payload": {
+                "target": {
+                    "kind": "identifier",
+                    "name": "result",
+                    "location": {
+                        "line": 23,
+                        "column": 5
+                    }
+                },
+                "value_expression": 62,
+                "source_form": "equals_assignment"
+            },
+            "name": "result",
+            "has_value": true,
+            "expression_ids": [
+                62
+            ]
+        },
+        {
+            "id": 18,
+            "kind": "assignment",
+            "payload": {
+                "target": {
+                    "kind": "identifier",
+                    "name": "result",
+                    "location": {
+                        "line": 24,
+                        "column": 5
+                    }
+                },
+                "value_expression": 69,
+                "source_form": "equals_assignment"
+            },
+            "name": "result",
+            "has_value": true,
+            "expression_ids": [
+                69
+            ]
+        },
+        {
+            "id": 19,
+            "kind": "assignment",
+            "payload": {
+                "target": {
+                    "kind": "identifier",
+                    "name": "result",
+                    "location": {
+                        "line": 25,
+                        "column": 5
+                    }
+                },
+                "value_expression": 75,
+                "source_form": "equals_assignment"
+            },
+            "name": "result",
+            "has_value": true,
+            "expression_ids": [
+                75
+            ]
+        },
+        {
+            "id": 20,
+            "kind": "assignment",
+            "payload": {
+                "target": {
+                    "kind": "identifier",
+                    "name": "result",
+                    "location": {
+                        "line": 26,
+                        "column": 5
+                    }
+                },
+                "value_expression": 81,
+                "source_form": "equals_assignment"
+            },
+            "name": "result",
+            "has_value": true,
+            "expression_ids": [
+                81
+            ]
+        },
+        {
+            "id": 21,
+            "kind": "assignment",
+            "payload": {
+                "target": {
+                    "kind": "identifier",
+                    "name": "result",
+                    "location": {
+                        "line": 27,
+                        "column": 5
+                    }
+                },
+                "value_expression": 87,
+                "source_form": "equals_assignment"
+            },
+            "name": "result",
+            "has_value": true,
+            "expression_ids": [
+                87
+            ]
+        },
+        {
+            "id": 22,
+            "kind": "assignment",
+            "payload": {
+                "target": {
+                    "kind": "identifier",
+                    "name": "result",
+                    "location": {
+                        "line": 28,
+                        "column": 5
+                    }
+                },
+                "value_expression": 91,
+                "source_form": "equals_assignment"
+            },
+            "name": "result",
+            "has_value": true,
+            "expression_ids": [
+                91
+            ]
+        },
+        {
+            "id": 23,
+            "kind": "assignment",
+            "payload": {
+                "target": {
+                    "kind": "identifier",
+                    "name": "result",
+                    "location": {
+                        "line": 29,
+                        "column": 5
+                    }
+                },
+                "value_expression": 96,
+                "source_form": "equals_assignment"
+            },
+            "name": "result",
+            "has_value": true,
+            "expression_ids": [
+                96
+            ]
+        },
+        {
+            "id": 24,
+            "kind": "assignment",
+            "payload": {
+                "target": {
+                    "kind": "identifier",
+                    "name": "result",
+                    "location": {
+                        "line": 32,
+                        "column": 9
+                    }
+                },
+                "value_expression": 113,
+                "source_form": "equals_assignment"
+            },
+            "name": "result",
+            "has_value": true,
+            "expression_ids": [
+                113
+            ]
+        },
+        {
+            "id": 25,
+            "kind": "if",
+            "payload": {
+                "condition_expression": 104,
+                "then_block": 1,
+                "else_arm": null
+            },
+            "has_condition": true,
+            "expression_ids": [
+                104
+            ],
+            "condition": 104,
+            "then_block": 1,
+            "else_arm": null
+        }
+    ],
+    "block_pool_size": 2,
+    "block_pool": [
+        {
+            "id": 0,
+            "statements": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
+                11,
+                12,
+                13,
+                14,
+                15,
+                16,
+                17,
+                18,
+                19,
+                20,
+                21,
+                22,
+                23,
+                25
+            ]
+        },
+        {
+            "id": 1,
+            "statements": [
+                24
+            ]
+        }
+    ]
+}

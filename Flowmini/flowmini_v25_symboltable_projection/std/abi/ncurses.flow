@@ -1,0 +1,65 @@
+unit std_abi_ncurses
+
+abi ncurses {
+    library "libncursesw.so.6"
+    convention c
+
+    type ncurses_window {
+        repr "void*"
+        ownership external
+        access opaque
+        lifetime external
+        nullable true
+        opaque true
+        cleanup endwin
+    }
+
+    type c_string {
+        repr "const char*"
+        ownership borrowed
+        access read
+        lifetime call
+        nullable false
+        terminator nul
+    }
+
+    extern fn initscr(): ncurses_window {
+        symbol "initscr"
+        effect terminal
+    }
+
+    extern fn endwin(): c_int {
+        symbol "endwin"
+        effect terminal
+    }
+
+    extern fn noecho(): c_int {
+        symbol "noecho"
+        effect terminal
+    }
+
+    extern fn cbreak(): c_int {
+        symbol "cbreak"
+        effect terminal
+    }
+
+    extern fn waddnstr(window : ncurses_window, text : c_string, count : c_int): c_int {
+        symbol "waddnstr"
+        effect terminal
+    }
+
+    extern fn wrefresh(window : ncurses_window): c_int {
+        symbol "wrefresh"
+        effect terminal
+    }
+
+    extern fn wgetch(window : ncurses_window): c_int {
+        symbol "wgetch"
+        effect terminal
+    }
+
+    extern fn keypad(window : ncurses_window, enabled : c_int): c_int {
+        symbol "keypad"
+        effect terminal
+    }
+}

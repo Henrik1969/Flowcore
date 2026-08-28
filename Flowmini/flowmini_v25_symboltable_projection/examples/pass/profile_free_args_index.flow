@@ -1,0 +1,9 @@
+import "../../std/abi/libc.flow" as libc
+
+program arbitrary_args_index
+
+main(args : list<string>) {
+    selected : c_string(args[1])
+    status : c_int(0)
+    libc.puts(selected) -> status
+}

@@ -1,0 +1,215 @@
+# Flowcore v0.28 maturation ledger
+
+## Baseline
+
+- Branch: `v25-symboltable-projection`
+- Starting commit: `fdbded38bc23cbd2f333df02b1dc0a9192203ac9`
+- Upstream at inspection: `origin/v25-symboltable-projection` at the same commit
+- Starting worktree: clean
+- Previous autonomous mission: complete with `.codex-run-state` equal to `DONE`
+- Toolchain: CMake 3.28.3, GNU Makefiles, GCC/G++ 13.3.0, Ninja 1.11.1,
+  Clang/LLVM 18.1.3
+- Canonical command: `cmake --build build -j4`
+- Canonical test command: `ctest --test-dir build --output-on-failure`
+- Result: build passed; 54/54 tests passed in 21.41 seconds
+
+## Confirmed starting behavior
+
+- The v0.27 reusable profile-free native chain is present.
+- Flowbind and Flowlower already contain stricter structured parsing.
+- Flowparallel and Flowoptimize require a complete authority-search inventory
+  before contract migration.
+- Canonical Graph IR, executable safety profiles, complete boundedness proofs,
+  revisioned identity storage, and permanent writable-storage semantics remain
+  future work.
+
+## Gate 1 inventory
+
+- Added `docs/architecture/v028-artifact-contract-inventory.md` with the
+  producer/consumer/version/authority/parser/test map for every required
+  pipeline artifact and directly consumed provider/runtime evidence.
+- Classified raw searches in required stage entry points and adjacent
+  Flowparallel provider tools.
+- Confirmed Flowparallel and Flowoptimize are the largest unsafe authority
+  surfaces; both copy malformed or absent authority as empty JSON values.
+- Confirmed Flowbind and Flowlower already reject duplicate JSON keys in their
+  local parsers, while Flowbind still checks its top-level envelope by raw text.
+- Confirmed Flowanalyst parses structurally but silently ignores duplicate JSON
+  keys and represents integer identities as `double`.
+- Selected the first vertical slice: public strict JSON and common envelope,
+  followed by the complete semantic-report subset consumed by Flowparallel.
+
+## Current phase
+
+Gates 2–4 first vertical checkpoint:
+
+- Added the public header-only `Flowcontracts` component with a strict
+  complete-input parser, duplicate-key rejection, signed 64-bit integers,
+  finite floating-point handling, Unicode escapes, JSON-path diagnostics, and
+  deterministic lexicographically ordered serialization.
+- Documented the additive version-1 unknown-field policy: unknown data cannot
+  satisfy or select authority, while required authority is validated.
+- Added typed artifact headers, semantic report, lowering-plan identity,
+  execution plan, analysis/execution matrix, and provider-decision surfaces.
+- Migrated Flowparallel's primary semantic-report consumer completely off raw
+  JSON searches and substring copying.
+- Migrated Flowoptimize's primary semantic/execution-plan and provider-decision
+  consumers completely off raw JSON searches and substring copying.
+- Flowparallel now validates operation identity uniqueness and semantic matrix
+  coordinate uniqueness/ranges before emitting a deterministic execution plan.
+- Flowoptimize validates execution matrix coordinates before typed
+  deduplication and emits deterministic attributable transform evidence.
+- Replaced formatting-sensitive integration assertions with structural `jq`
+  assertions where canonical serialization intentionally changed whitespace.
+- Focused gate: `flowcontracts_json`, `flowparallel_pipeline`,
+  `flowoptimize_pipeline`, CPU provider/execution, and CUDA provider tests all
+  passed (6/6 in 0.59 seconds).
+- Canonical gate: build passed and 55/55 CTest tests passed in 24.23 seconds.
+- Adversarial coverage rejects nested and escaped fake authority, duplicate
+  keys, duplicate operation IDs, truncated input, missing lowering plans,
+  unsupported provider/representation pairs, and out-of-range matrix entries.
+- Deterministic coverage proves semantically identical reordered/whitespace
+  input emits byte-identical Flowparallel output.
+
+## Gate 5 shared binding and lowering contracts
+
+- Replaced Flowbind's competing private JSON value and parser with the public
+  Flowcontracts parser while preserving its ABI, effect, resource, policy, and
+  provider checks.
+- Replaced Flowbind's raw top-level envelope authority search with the shared
+  typed artifact header contract.
+- Moved Flowlower's structured-plan JSON value and parser onto Flowcontracts
+  while preserving its existing structured lowering API and behavior.
+- Both consumers now share complete-input parsing, duplicate-key refusal,
+  Unicode escape handling, exact signed 64-bit integers, and JSON-path errors.
+- Added adversarial coverage for duplicate authority, nested fake authority,
+  escaped authoritative keys, and integer overflow.
+- Focused gate: Flowbind provider/fuzz, Flowlower, reusable profile-free,
+  ncurses, and `sel` pipelines passed (6/6 in 8.66 seconds).
+- Canonical gate: build passed and 55/55 CTest tests passed in 26.63 seconds.
+
+## Exact next action
+
+### Frontend bundle authority checkpoint
+
+- Replaced Flowanalyst's permissive private JSON parser with Flowcontracts,
+  giving the frontend boundary complete-input parsing, duplicate-key refusal,
+  Unicode handling, exact signed 64-bit integers, and shared diagnostics.
+- Preserved explicit JSON `null` compatibility for optional source-map
+  coordinates while rejecting non-integral and out-of-range identities.
+- Added fail-closed uniqueness checks for symbols, scopes, symbol origins, and
+  AST expression, statement, block, and declaration identities.
+- Added adversarial duplicate-key, nested-authority, integer-overflow, and real
+  duplicate-symbol-identity coverage.
+- Focused Flowanalyst pipeline passed (1/1 in 0.87 seconds).
+- Canonical gate: build passed and 55/55 CTest tests passed in 22.68 seconds.
+
+## Exact next action
+
+### Gate 6 independent validator
+
+- Added `flowvalidate`, an independently invocable executable built only on
+  public Flowcontracts definitions.
+- It identifies and validates frontend bundles, semantic reports, lowering
+  plans, binding reports, execution plans, optimization reports, lowering
+  reports, and graph-provider decisions.
+- Stable exits are 0 valid, 1 invalid, 2 blocked, and 3 unsupported; diagnostics
+  provide classification, format, version, source provenance where available,
+  JSON path, and reason in machine JSON or human form.
+- `--canonical` produces deterministic JSON and is idempotent across a second
+  independent validation/serialization pass.
+- Real producer-captured frontend, semantic, binding, execution, optimization,
+  and lowering artifacts validate and round-trip. Duplicate operation identity,
+  duplicate keys, blocked status, and unsupported format tests fail into their
+  exact classes.
+- Focused Flowcontracts and validator gate passed (2/2 in 0.29 seconds).
+
+## Exact next action
+
+### Typed provider and planner authority
+
+- Migrated CUDA selection, CUDA graph execution, runtime planning, and graph
+  provider planning from substring/numeric scanning to Flowcontracts.
+- Runtime capability variants and calibration artifacts now require structural
+  format/version/type validation; device availability and measured speedup are
+  read only from their authoritative object paths.
+- Graph tools consume the validated semantic dependency matrix, including
+  dimensions, unique bounded coordinates, Boolean values, and source path.
+- Execution-plan COO duplicates remain valid input to Flowoptimize's explicit
+  attributable deduplication transform; the full gate caught and preserved this
+  deliberate difference from semantic-report matrix authority.
+- Preserved CPU fallback and existing provider-selection policies.
+- Updated planner fixtures from permissive fragments to complete versioned
+  execution/semantic artifacts and added duplicate-authority attacks.
+- Focused CUDA/runtime/graph planner gate passed (3/3 in 0.07 seconds).
+- Canonical gate: build passed and 56/56 CTest tests passed in 27.35 seconds.
+
+## Exact next action
+
+### Gate 7 end-to-end identity preservation
+
+- Added public validation for target identities, ABI contract identities,
+  lowering operation/block/control identities, provider tuples, effect facts,
+  argument-resource facts, and control-reference ranges.
+- Added a complete `flowcat` acceptance chain containing values, external
+  results, branches, nested loops, admitted resource-bearing operations,
+  cleanup calls, explicit returns, source provenance, and the selected `main`
+  target.
+- The test proves byte-equivalent canonical source, target, ABI, and lowering
+  authority across semantic, execution, and optimization stages, then performs
+  LLVM lowering under an exact authorized binding report.
+- Independent source/provenance, target, operation, block, control, provider,
+  ABI, effect, resource, and authorization-evidence mutations are refused by
+  the next relevant consumer.
+- Preserved the intentional rule that binding authority is consumed at actual
+  LLVM emission, not by a report-only lowerer invocation.
+- Focused identity gate passed (1/1 in 0.37 seconds).
+- Canonical gate: build passed and 57/57 CTest tests passed in 26.84 seconds.
+
+## Exact next action
+
+### Gate 8 repository truth
+
+- Added the current v0.28 status checkpoint and linked it from the root README,
+  documentation index, architecture index, and typed-contract progression.
+- Updated only present-tense root suite claims to 57/57; historical checkpoint
+  counts and subsystem-specific counts remain intact as scoped evidence.
+- Distinguished the active Flowcore v0.28 boundary from the inherited Flowmini
+  v0.27 language slice.
+- Recorded implemented typed/validator/identity behavior separately from future
+  Canonical Graph IR, safety admission, certification, self-hosting, permanent
+  writable-storage semantics, and generalized ABI/CUDA work.
+- Retained the explicit experimental/non-production/non-certified boundary.
+
+## Exact next action
+
+### Gate 9 final hardening
+
+- Extended independent validation to current ABI manifests, both runtime
+  capability variants, and matrix/graph calibration evidence.
+- Final normal root build passed; 57/57 CTest tests passed in 22.56 seconds.
+- A separate GNU 13.3 ASan/UBSan Debug tree at
+  `/tmp/flowcore-v028-sanitize` built cleanly; 57/57 tests passed in 55.30
+  seconds with `halt_on_error=1`.
+- Leak detection was disabled with `ASAN_OPTIONS=detect_leaks=0` because the
+  managed traced host cannot run LeakSanitizer; AddressSanitizer and
+  UndefinedBehaviorSanitizer remained enabled without suppressions.
+- The root suite exercised strict/malformed/duplicate-key attacks,
+  deterministic canonical round-trips, identity mutations, native LLVM linking
+  and execution, `sel`, `flowcat`, `flow_less`, ncurses, graph routing,
+  generated bindings, CPU fallback, and provider planner contracts.
+- Required stage and adjacent planner entry points contain no remaining raw
+  JSON authority searches. Remaining `find`/`substr` sites in Flowanalyst and
+  Flowbind parse ordinary type names, AST-origin paths, or typed carrier lists.
+- `git diff --check` passed. The tracked worktree was clean before closure;
+  ignored build/IDE outputs were left untouched. `git fsck` reported only
+  historical unreachable objects and no repository corruption.
+- Branch and all progressive `v0.28-*` tags were synchronized before this final
+  closure checkpoint.
+
+## Completion
+
+All v0.28 definition-of-done gates are complete. Canonical Graph IR,
+revisioned persistent identity storage, executable safety admission,
+certification, self-hosting, permanent writable-storage syntax, and generalized
+ABI/CUDA lowering remain explicitly future work rather than hidden blockers.

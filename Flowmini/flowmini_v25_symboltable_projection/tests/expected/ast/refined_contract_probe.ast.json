@@ -1,0 +1,278 @@
+{
+    "format": "flowmini.ast.v2",
+    "source_unit": {
+        "kind": "unit",
+        "name": "refined_contract_probe",
+        "location": {
+            "line": 1,
+            "column": 1
+        },
+        "declaration_count": 2,
+        "declaration_ids": [
+            0,
+            1
+        ],
+        "declarations": [
+            {
+                "id": 0,
+                "kind": "refined_type",
+                "name": "Positive",
+                "base_type": "int64",
+                "base_type_ref": {
+                    "kind": "named",
+                    "text": "int64",
+                    "payload": {
+                        "name_segments": [
+                            "int64"
+                        ]
+                    },
+                    "location": {
+                        "line": 4,
+                        "column": 23
+                    }
+                },
+                "invariants": [
+                    {
+                        "condition_expression": 0,
+                        "location": {
+                            "line": 5,
+                            "column": 5
+                        }
+                    }
+                ],
+                "location": {
+                    "line": 4,
+                    "column": 1
+                }
+            },
+            {
+                "id": 1,
+                "kind": "refined_type",
+                "name": "Temperature",
+                "base_type": "int64",
+                "base_type_ref": {
+                    "kind": "named",
+                    "text": "int64",
+                    "payload": {
+                        "name_segments": [
+                            "int64"
+                        ]
+                    },
+                    "location": {
+                        "line": 8,
+                        "column": 26
+                    }
+                },
+                "invariants": [
+                    {
+                        "condition_expression": 3,
+                        "location": {
+                            "line": 9,
+                            "column": 5
+                        }
+                    },
+                    {
+                        "condition_expression": 7,
+                        "location": {
+                            "line": 10,
+                            "column": 5
+                        }
+                    }
+                ],
+                "location": {
+                    "line": 8,
+                    "column": 1
+                }
+            }
+        ]
+    },
+    "declaration_pool_size": 2,
+    "declaration_pool": [
+        {
+            "id": 0,
+            "kind": "refined_type",
+            "name": "Positive",
+            "base_type": "int64",
+            "base_type_ref": {
+                "kind": "named",
+                "text": "int64",
+                "payload": {
+                    "name_segments": [
+                        "int64"
+                    ]
+                },
+                "location": {
+                    "line": 4,
+                    "column": 23
+                }
+            },
+            "invariants": [
+                {
+                    "condition_expression": 0,
+                    "location": {
+                        "line": 5,
+                        "column": 5
+                    }
+                }
+            ],
+            "location": {
+                "line": 4,
+                "column": 1
+            }
+        },
+        {
+            "id": 1,
+            "kind": "refined_type",
+            "name": "Temperature",
+            "base_type": "int64",
+            "base_type_ref": {
+                "kind": "named",
+                "text": "int64",
+                "payload": {
+                    "name_segments": [
+                        "int64"
+                    ]
+                },
+                "location": {
+                    "line": 8,
+                    "column": 26
+                }
+            },
+            "invariants": [
+                {
+                    "condition_expression": 3,
+                    "location": {
+                        "line": 9,
+                        "column": 5
+                    }
+                },
+                {
+                    "condition_expression": 7,
+                    "location": {
+                        "line": 10,
+                        "column": 5
+                    }
+                }
+            ],
+            "location": {
+                "line": 8,
+                "column": 1
+            }
+        }
+    ],
+    "expression_pool_size": 10,
+    "expression_pool": [
+        {
+            "id": 0,
+            "kind": "binary",
+            "text": ">",
+            "payload": {
+                "operator": ">",
+                "left": 1,
+                "right": 2
+            },
+            "child_expressions": [
+                1,
+                2
+            ]
+        },
+        {
+            "id": 1,
+            "kind": "identifier",
+            "text": "value",
+            "payload": {
+                "name": "value"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 2,
+            "kind": "integer_literal",
+            "text": "0",
+            "payload": {
+                "value_text": "0"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 3,
+            "kind": "binary",
+            "text": ">=",
+            "payload": {
+                "operator": ">=",
+                "left": 4,
+                "right": 5
+            },
+            "child_expressions": [
+                4,
+                5
+            ]
+        },
+        {
+            "id": 4,
+            "kind": "identifier",
+            "text": "value",
+            "payload": {
+                "name": "value"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 5,
+            "kind": "unary",
+            "text": "-",
+            "payload": {
+                "operator": "-",
+                "operand": 6
+            },
+            "child_expressions": [
+                6
+            ]
+        },
+        {
+            "id": 6,
+            "kind": "integer_literal",
+            "text": "40",
+            "payload": {
+                "value_text": "40"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 7,
+            "kind": "binary",
+            "text": "<=",
+            "payload": {
+                "operator": "<=",
+                "left": 8,
+                "right": 9
+            },
+            "child_expressions": [
+                8,
+                9
+            ]
+        },
+        {
+            "id": 8,
+            "kind": "identifier",
+            "text": "value",
+            "payload": {
+                "name": "value"
+            },
+            "child_expressions": []
+        },
+        {
+            "id": 9,
+            "kind": "integer_literal",
+            "text": "125",
+            "payload": {
+                "value_text": "125"
+            },
+            "child_expressions": []
+        }
+    ],
+    "statement_pool_size": 0,
+    "statement_pool": [],
+    "block_pool_size": 0,
+    "block_pool": []
+}
