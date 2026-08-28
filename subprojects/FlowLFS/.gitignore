@@ -18,4 +18,8 @@
 !/builder/evidence/.gitkeep
 !/builder/evidence/*.md
 !/builder/evidence/*.sha256
+/construction/evidence/*
+!/construction/evidence/.gitkeep
+!/construction/evidence/*.md
+!/construction/evidence/*.sha256
 *.log

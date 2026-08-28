@@ -51,3 +51,8 @@ and `nproc` checks also passed.
 The builder working disk is a disposable QCOW2 overlay backed by the read-only
 sealed base. These large state files remain intentionally untracked; their
 identities and reproduction inputs are permanent evidence.
+
+The pristine target digest records the Phase 2 observation; that blank image
+was then advanced into construction rather than retained as a local checkpoint.
+Its empty state is reproducible with `create-builder-disks.sh`. Durable target
+checkpoints begin at the completed Chapter 4 boundary.
