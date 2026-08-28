@@ -6,4 +6,12 @@
 !/artifacts/.gitkeep
 /execution/sources/*
 !/execution/sources/.gitkeep
+/builder/media/*
+!/builder/media/.gitkeep
+/builder/state/*
+!/builder/state/.gitkeep
+/builder/seed/*
+!/builder/seed/.gitkeep
+/builder/evidence/*
+!/builder/evidence/.gitkeep
 *.log

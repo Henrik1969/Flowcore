@@ -17,11 +17,11 @@ bootloader changes.
 ## Pinned inputs
 
 ```text
-LFS edition:       13.0-systemd
-book publication:  2026-03-05
+LFS control:       13.0-systemd
+LFS execution:     r13.0-201-systemd
 target:            x86_64-lfs-linux-gnu
-source list:       manifests/wget-list
-source checksums:  manifests/md5sums
+source list:       execution/manifests/wget-list
+source checksums:  execution/manifests/md5sums
 ```
 
 The manifests are retrieved from the same stable-systemd release directory as
@@ -56,6 +56,9 @@ Observed on 2026-08-28: the production host is not an admissible builder.
 Texinfo is absent and `/bin/sh` resolves to Dash instead of Bash. These facts
 will be corrected only in the isolated builder, never by rewriting the
 production host for this project.
+
+The reviewed builder contract is in
+[`builder/BUILDER-CONTRACT.md`](../builder/BUILDER-CONTRACT.md).
 
 ## Construction phases
 
