@@ -1,0 +1,133 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+    "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html;charset=iso-8859-1" />
+    <title>LFS Errata</title>
+    <link rel="stylesheet" type="text/css" href="/css/main.css" />
+  </head>
+  <body>
+    <div id="banner">
+      <a href="/index.html">
+<!--
+        <img src="/images/lfs-logo.png" 
+        alt="Linux From Scratch | Your Distro, Your Rules" /> 
+-->
+<!--  High res image, but it needs size/location help.  
+      The old image was 192x75, but the new image has a ratio of 2 (1024x512).
+-->
+     <img src="/images/linux-from-scratch.png" height="96" width="192"
+          alt="Linux From Scratch | Your Distro, Your Rules" />
+      </a>
+    </div>
+    
+    <!-- SiteSearch Google -->
+    <form id ="search" method="get" action="https://www.google.com/custom">
+      <p>
+         <input type="hidden" name="client" value="pub-1920546463376456" />
+         <input type="hidden" name="forid" value="1" />
+         <input type="hidden" name="ie" value="ISO-8859-1" />
+         <input type="hidden" name="oe" value="ISO-8859-1" />
+         <input type="hidden" name="safe" value="active" />
+         <input type="hidden" name="cof"
+          value="GALT:#008000;GL:1;DIV:#336699;VLC:663399;AH:center;BGC:FFFFFF;LBGC:336699;ALC:0000FF;LC:0000FF;T:000000;GFNT:0000FF;GIMP:0000FF;LH:50;LW:128;L:http://www.linuxfromscratch.org/images/lfs-logo.png;S:http://www.linuxfromscratch.org;FORID:1" />
+         <input type="hidden" name="hl" value="en" />
+         <input type="hidden" name="domains" value="linuxfromscratch.org" />
+         <input type="text" name="q" size="31" maxlength="255" id="sbi" />
+      </p>
+      <p>
+         <input type="submit" name="sa" value="Google Search" id="sbb" />
+         <input type="radio" name="sitesearch" value="" id="ss0" />
+         <label for="ss0" title="Search the Web">Web</label>
+         <input type="radio" name="sitesearch" value="linuxfromscratch.org" 
+                checked="checked" id="ss1" />
+         <label for="ss1" title="Search www.linuxfromscratch.org">LFS</label>
+      </p>
+    </form> 
+
+   <!-- Search Mailing Lists -->
+<!--
+   <form id="search" method="get" action="http://search.linuxfromscratch.org/index.cgi">
+     <p>
+      <label title="Enter your search terms">
+        <input type="text" name="query" size="31" maxlength="255" accesskey="s" />
+      </label>
+      <label title="Submit the search terms">
+        <input type="submit" value="Search" />
+      </label>
+     </p>
+   </form>
+-->
+
+    <div class="navbar">
+      <ul id="menu">
+        <li><a id="patches" href="/patches/">Patches</a></li>
+        <li><a id="hints" href="/hints/">Hints</a></li>
+        <li><a id="slfs" href="/slfs/">SLFS</a></li>
+        <li><a id="glfs" href="/glfs/">GLFS</a></li>
+        <li><a id="mlfs" href="/mlfs/">MLFS</a></li>
+        <li><a id="alfs" href="/alfs/">ALFS</a></li>
+        <li><a id="blfs" href="/blfs/">BLFS</a></li>
+        <li><a id="lfsactive" href="/lfs/">LFS</a></li>
+      </ul>
+    </div>
+
+    <div id="leftmenu">
+      <ul id="lfsmenulist">
+        <li><a href="/">Home</a></li>
+        <li><a href="/lfs/index.html">LFS Home</a></li>
+        <li><a href="/lfs/news.html">News</a></li>
+        <li><a href="/lfs/download.html">Download</a></li>
+        <li><a href="/lfs/read.html">Read Online</a></li>
+        <li><a href="/advisories">Advisories</a></li>
+        <li><a href="/lfs/faq.html">LFS FAQ</a></li>
+        <li><a href="https://www.linuxfromscratch.org/cgi-bin/lfscounter.php">Get Counted</a></li>
+        <li><a href="/lfs/support.html">Support</a></li>
+        <li><a href="/mail.html">Mailing Lists</a></li>
+        <li><a href="https://wiki.linuxfromscratch.org/lfs">Wiki</a></li>
+        <li><a href="/lfs/contribute.html">Contribute</a></li>
+        <li><a href="/mirrors.html">Website Mirrors</a></li>
+      </ul>
+    </div>
+
+    <div class="main">
+     <h1>Errata for the 13.0-systemd Version of the LFS Book</h1>
+
+<!-- TEMPLATE
+       <h2>Known Security Vulnerabilities</h2>
+         <ul>
+            <li><p>Item 1</p></li>
+            <li><p>Item 2</p></li>
+         </ul>
+
+       <h2>Miscellaneous Errata</h2>
+         <ul>
+           <li><p>Item 1</p></li>
+           <li><p>Item 2</p></li>
+         </ul>
+
+     END TEMPLATE -->
+
+       <h2>Known Security Vulnerabilities</h2>
+         <ul>
+           <li>Read <a href='../../advisories/13.0.html'>the security advisories page</a>.</li>
+         </ul>
+
+       <h2>Miscellaneous Errata</h2>
+         <ul>
+           <!-- When updating, don't delete the following line.  Just comment it.-->
+           <!--  <li>There are no current items for this version of LFS.</li>-->
+           <li>Inetutils: one test "libls.sh" may fail under certain
+		  conditions.</li>
+         </ul>
+
+       <br />
+      <div id="footer">
+       <p>&copy; 1998-2026 Gerard Beekmans. Website design by Jeremy Huntwork &amp;
+                 Matthew Burgess.</p>
+      </div>
+     </div>
+  </body>
+</html>
+

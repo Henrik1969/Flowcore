@@ -1,0 +1,7 @@
+/sources/*
+!/sources/.gitkeep
+/work/*
+!/work/.gitkeep
+/artifacts/*
+!/artifacts/.gitkeep
+*.log
