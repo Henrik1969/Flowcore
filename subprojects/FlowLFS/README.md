@@ -1,6 +1,6 @@
 # FlowLFS
 
-Status: control baseline preserved; corrected execution inputs being prepared;
+Status: control and execution inputs pinned; isolated builder gate passed;
 construction not started
 
 FlowLFS is the first attempt to construct a small, real Flowcore system from

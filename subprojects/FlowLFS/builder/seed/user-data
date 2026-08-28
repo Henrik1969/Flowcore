@@ -1,0 +1,55 @@
+#cloud-config
+autoinstall:
+  version: 1
+  locale: en_US.UTF-8
+  keyboard:
+    layout: us
+  identity:
+    hostname: flowlfs-builder
+    username: flowbuilder
+    # Temporary builder-only password: ubuntu
+    password: "$6$exDY1mhS4KUYCE/2$zmn9ToZwTKLhCw.b4/b.ZRTIZM30JZ4QrOQ2aOXJ8yk96xpcCof0kxKwuX1kqLG/ygbJ1f8wxED22bTL4F46P0"
+  ssh:
+    install-server: true
+    allow-pw: true
+  storage:
+    layout:
+      name: direct
+  packages:
+    - bash
+    - binutils
+    - bison
+    - build-essential
+    - coreutils
+    - diffutils
+    - findutils
+    - gawk
+    - gcc
+    - g++
+    - grep
+    - gzip
+    - m4
+    - make
+    - patch
+    - perl
+    - python3
+    - sed
+    - tar
+    - texinfo
+    - xz-utils
+    - ca-certificates
+    - curl
+    - wget
+    - rsync
+    - parted
+    - e2fsprogs
+    - dosfstools
+    - grub-pc-bin
+  late-commands:
+    - curtin in-target --target=/target -- ln -sfn bash /bin/sh
+    - curtin in-target --target=/target -- mkdir -p /usr/local/libexec
+    - curtin in-target --target=/target -- curl --fail --output /usr/local/libexec/flowlfs-callback http://10.0.2.2:3003/callback/flowlfs-callback
+    - curtin in-target --target=/target -- chmod 0755 /usr/local/libexec/flowlfs-callback
+    - curtin in-target --target=/target -- curl --fail --output /etc/systemd/system/flowlfs-callback.service http://10.0.2.2:3003/callback/flowlfs-callback.service
+    - curtin in-target --target=/target -- systemctl enable flowlfs-callback.service
+  shutdown: poweroff

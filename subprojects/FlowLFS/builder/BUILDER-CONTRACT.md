@@ -20,6 +20,11 @@ without changing the production workstation.
 - Emulator: QEMU. Use KVM only when `/dev/kvm` is actually usable; otherwise
   use TCG software emulation.
 
+On 2026-08-28 the already loaded KVM device was missing only its dynamic
+`/dev/kvm` node. Re-triggering its existing udev rule restored the expected
+`root:kvm` mode `0660` node, and a no-disk QEMU KVM probe succeeded. No host
+package, group membership, or persistent configuration was changed.
+
 The builder distribution is a provider choice, not an LFS source substitution.
 The LFS target is constructed only from the verified execution source contract.
 
@@ -52,6 +57,15 @@ the documented bootstrap password `ubuntu`. SSH is forwarded only to host
 loopback port 2222. This credential is installation scaffolding, not a secret
 or a production credential, and must not survive into any target artifact.
 
+## Callback and phone number
+
+The host-side phone number is `ssh://127.0.0.1:2222`. QEMU forwards it to the
+builder's SSH service and binds it only on host loopback, so it is not a LAN
+service. The guest's `flowlfs-callback.service` runs after SSH and announces a
+`FLOWLFS_CALLBACK READY` record on the serial console with the phone number,
+guest hostname, and boot ID. The callback is readiness evidence; SSH remains
+the controlled access path.
+
 ## Isolation and lifecycle
 
 1. Verify the signed installation-media manifest and ISO digest.
@@ -59,7 +73,8 @@ or a production credential, and must not survive into any target artifact.
 3. Install Ubuntu Server on the builder disk only.
 4. Attach the project read-only and provision the builder packages.
 5. Pass the execution book's host check inside the guest.
-6. Snapshot or seal the prepared builder before Chapter 2.
+6. Seal the prepared builder with `scripts/seal-builder.sh`; subsequent boots
+   use its disposable QCOW2 overlay.
 7. Disable networking for the LFS construction run after inputs are copied.
 8. Install only to the dedicated target disk.
 9. Seal the target image before boot validation; boot-test an overlay/copy.
@@ -81,9 +96,18 @@ construction phase.
 scripts/fetch-builder-media.sh
 scripts/create-builder-disks.sh
 scripts/launch-builder-installer.sh
+scripts/seal-builder.sh
 scripts/launch-builder.sh
 ```
 
 The disk creator refuses to overwrite existing state. Resetting a builder or
 target disk therefore requires an explicit, separately reviewed removal rather
 than an accidental rerun.
+
+## Completed Phase 2 instance
+
+On 2026-08-28 the builder installed, booted, emitted its callback, and passed
+the complete LFS host gate. The guest saw the builder as `/dev/vda` (32 GiB,
+root filesystem) and the pristine target as `/dev/vdb` (40 GiB, no partition or
+filesystem). The prepared builder was sealed read-only and a disposable working
+overlay was created. See `evidence/BUILDER-GATE-2026-08-28.md`.

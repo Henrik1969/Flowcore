@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+phone=ssh://127.0.0.1:2222
+hostname=$(hostname)
+boot_id=$(cat /proc/sys/kernel/random/boot_id)
+message="FLOWLFS_CALLBACK READY phone=$phone guest=$hostname boot_id=$boot_id"
+
+logger --tag flowlfs-callback -- "$message"
+printf '%s\n' "$message" > /dev/ttyS0

@@ -33,7 +33,7 @@ if test -r /dev/kvm && test -w /dev/kvm; then
 fi
 
 printf 'Launching with QEMU acceleration: %s\n' "$accel"
-python3 -m http.server 3003 --bind 127.0.0.1 --directory "$seed_dir" \
+python3 -m http.server 3003 --bind 127.0.0.1 --directory "$builder_dir" \
   >"$builder_dir/evidence/autoinstall-http.log" 2>&1 &
 seed_server=$!
 trap 'kill "$seed_server" 2>/dev/null || true' EXIT
@@ -46,4 +46,4 @@ qemu-system-x86_64 \
   -drive "file=$iso,media=cdrom,readonly=on" \
   -nic user,model=virtio-net-pci \
   -kernel "$kernel" -initrd "$initrd" \
-  -append 'autoinstall ds=nocloud-net;s=http://10.0.2.2:3003/ console=ttyS0,115200n8'
+  -append 'autoinstall ds=nocloud-net;s=http://10.0.2.2:3003/seed/ console=ttyS0,115200n8'

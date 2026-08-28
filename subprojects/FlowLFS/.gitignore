@@ -12,6 +12,10 @@
 !/builder/state/.gitkeep
 /builder/seed/*
 !/builder/seed/.gitkeep
+!/builder/seed/user-data
+!/builder/seed/meta-data
 /builder/evidence/*
 !/builder/evidence/.gitkeep
+!/builder/evidence/*.md
+!/builder/evidence/*.sha256
 *.log
