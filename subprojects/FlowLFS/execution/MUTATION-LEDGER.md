@@ -79,3 +79,22 @@ No construction may begin until all 94 execution inputs verify against the
 captured checksum list. Construction must occur in an isolated image-backed
 boundary and must produce a VM-runnable disk image and/or ISO, never mutate the
 host into the target system.
+
+## Chapter 8 execution mutations
+
+The generated Chapter 8 runner makes only explicit non-interactive choices:
+
+- `Europe/Copenhagen` replaces the book's timezone placeholder.
+- `A4` replaces Groff's paper-size placeholder.
+- Glibc upgrade-only removal/service commands are omitted on the new root.
+- Bash's interactive `exec` transition is omitted from the resumable runner.
+- GMP's explicitly 32-bit-only placeholder command is omitted on x86_64.
+- Test commands are recognized broadly enough to preserve failure status while
+  allowing the book's documented non-fatal test treatment.
+
+Section 8.84's online stripping recipe is unsafe when the running strip/install
+toolchain demand-pages the same libraries it is replacing. After this behavior
+truncated `libzstd` and `libsframe`, both were recovered from canonical state
+and validated before sealing. The finalizer exempts its exact live executable
+and library dependency set while stripping every other eligible inactive ELF
+object. Full recovery details are in the Chapter 8 evidence report.
