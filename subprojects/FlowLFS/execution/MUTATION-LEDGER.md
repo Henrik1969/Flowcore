@@ -98,3 +98,27 @@ truncated `libzstd` and `libsframe`, both were recovered from canonical state
 and validated before sealing. The finalizer exempts its exact live executable
 and library dependency set while stripping every other eligible inactive ELF
 object. Full recovery details are in the Chapter 8 evidence report.
+
+## Post-book callback boundary
+
+The LFS control is retained unchanged through Chapters 9 and 10. The runnable
+artifact then adds OpenSSH 10.5p1 from the captured official BLFS development
+recipe and upstream archive. This is a declared post-book adaptation, not an
+implicit LFS substitution.
+
+- Root login is public-key only; password and keyboard-interactive methods are
+  disabled.
+- The accepted public key is stored at
+  `/etc/ssh/authorized_keys/root` with strict ownership and permissions.
+- Root receives an unrecoverable random password hash solely so OpenSSH does
+  not classify the account as locked; no password is retained or usable over
+  SSH.
+- Construction requires a canonical shadow database (`pwconv` when absent),
+  dates the password record, and fails if the effective root record remains
+  locked.
+- `flowlfs-callback.service` announces the VM-local callback address on the
+  serial console after `sshd.service` starts.
+
+The callback can be removed by disabling and deleting the two service units,
+removing OpenSSH and its configuration, and returning to the immutable
+pre-callback boot-ready checkpoint.

@@ -1,7 +1,7 @@
 # FlowLFS
 
-Status: control and execution inputs pinned; isolated builder gate passed;
-Chapter 5 cross-toolchain complete and sealed
+Status: LFS r13.0-201-systemd baseline built, sealed, and verified as a
+standalone VM-runnable qcow2 image
 
 FlowLFS is the first attempt to construct a small, real Flowcore system from
 auditable source. Its baseline is Linux From Scratch 13.0-systemd, followed to
@@ -24,13 +24,15 @@ provenance, and rollback path.
 
 ## Current deliverable
 
-This checkpoint prepares the project and development environment only. It does
-not partition a host disk, create privileged users, mount filesystems, enter a
-chroot, compile packages, or claim a bootable system.
+`artifacts/FlowLFS-v0.1-x86_64.qcow2` is the verified executable deliverable.
+It is a standalone 40 GiB qcow2 disk image for legacy-BIOS x86_64 VMs. Run it
+with `scripts/launch-standalone.sh`; the launcher provides the callback at
+`ssh://127.0.0.1:2222` and retains serial evidence locally.
 
-The intended final executable artifacts are a VM-runnable ISO and/or disk
-image. Documentation, source manifests, checksums, build logs, and evidence are
-supporting artifacts.
+The image boots Linux 7.1.8 and systemd 261.2 to multi-user state. Public-key
+SSH access and the serial callback marker were verified against the exact
+promoted artifact. Documentation, source manifests, checksums, build logs, and
+evidence are its supporting artifacts.
 
 ## Layout
 
@@ -69,5 +71,7 @@ artifacts/            untracked ISO/disk images and evidence bundles
 
 ## Non-claims
 
-FlowLFS is not yet a Flowcore runtime, FrankenPOP composition, distribution,
-bootable image, or conforming system. No public capability API is defined here.
+FlowLFS is a bootable LFS control baseline with one explicitly declared
+post-book callback adaptation. It is not yet a Flowcore runtime, FrankenPOP
+composition, general-purpose distribution, or conforming Flowcore system. No
+public capability API is defined here.
