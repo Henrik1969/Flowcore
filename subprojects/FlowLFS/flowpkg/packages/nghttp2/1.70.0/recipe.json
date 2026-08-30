@@ -1,0 +1,1 @@
+{"schema":"flowpkg.recipe.v0","package":"nghttp2","version":"1.70.0","source_sha256":"e05cb1388eaca3830aded4ccf20044b6e1ac1a61411dcca11b0437c4285c8bc2","build_identity":"flowbuilder","dependencies":[],"configure":["--prefix=/usr","--disable-static","--enable-lib-only","--docdir=/usr/share/doc/nghttp2-1.70.0"],"tests":["make check"],"install_root":"staging-only"}

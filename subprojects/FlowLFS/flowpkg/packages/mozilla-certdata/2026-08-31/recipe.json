@@ -1,0 +1,15 @@
+{
+  "schema": "flowpkg.recipe.v0",
+  "package": "mozilla-certdata-policy",
+  "version": "2026-08-31",
+  "source_sha256": "81b7f2576333a2e360e673f912d7b0b7a765d836c731003e348a46cac5d37198",
+  "source_date_epoch": 1788078403,
+  "dependencies": ["p11-kit@0.26.5", "make-ca@1.16.1"],
+  "generation": [
+    "build-private p11-kit module configuration with x-init-reserved paths=<stage>/etc/pki",
+    "make-ca --force --certdata <captured> --destdir <stage>"
+  ],
+  "network_during_generation": false,
+  "local_owner_anchors_included": false,
+  "install_root": "staging-only"
+}

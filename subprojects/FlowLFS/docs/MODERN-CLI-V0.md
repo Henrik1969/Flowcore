@@ -1,6 +1,6 @@
 # Modern CLI profile v0
 
-Status: active construction on the writable Flowcore twin
+Status: first complete realization on the writable Flowcore twin
 
 ## Purpose
 
@@ -57,10 +57,38 @@ Versions remain fixed until an explicit profile revision changes them.
   upstream policy object.
 - Rollback must restore both projected files and derived shared registries.
 
-## First construction gate
+## Resolved v0 core
 
-The first executable gate is libtasn1. It proves that a shared-library package
-can be built unprivileged, admitted immutably, projected reversibly, made
-visible through the dynamic-linker registry, and consumed by the following
-p11-kit build.
+The resolved v0 core contains ten independently admitted objects: libtasn1,
+p11-kit, make-ca, a frozen Mozilla policy input and its derived stores,
+libunistring, libidn2, nghttp2, libpsl, curl, and Git. The realization lock
+names every exact object and activates them in dependency order.
 
+Git is built with upstream's `NO_RUST=1` capability constraint because no Rust
+toolchain has yet been admitted. fzf, zoxide, eza, bat, Neovim, and a
+Rust-enabled Git are optional unresolved extensions. Naming them does not
+pretend they exist; each must pass the same source-forge process before an
+owner can add it to a later realization.
+
+## Realization interface
+
+The guest-side owner interface is `/usr/local/sbin/flowprofile-modern-cli`:
+
+```sh
+flowprofile-modern-cli preflight
+flowprofile-modern-cli activate
+flowprofile-modern-cli verify
+flowprofile-modern-cli status
+flowprofile-modern-cli deactivate
+```
+
+Activation checks the exact ten-object lock, projects in dependency order, and
+performs local verification without network access. Online HTTPS is exercised
+only by the separate profile verification operation. Deactivation rolls back
+in reverse order.
+
+The completed lifecycle acceptance removed the whole profile, demonstrated
+that SSH and the independently admitted shell layer survived, and reconstructed
+the profile from `/flow/store` without rebuilding or downloading anything.
+The permanent evidence capsule and its digest are recorded under
+`flowpkg/evidence/modern-cli-v0`.

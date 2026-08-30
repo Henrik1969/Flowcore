@@ -1,0 +1,9 @@
+{
+  "schema":"flowpkg.adaptation.v0",
+  "package":"curl",
+  "version":"8.21.0",
+  "lineage":"canonical-upstream-unmodified",
+  "source_mutations":[],
+  "build_adaptations":["BLFS OpenSSL backend","BLFS CA directory","security-recommended libpsl enabled","HTTP/2 nghttp2 enabled","transactional immutable projection"],
+  "authority":"flowlfs.modern-cli.v0 owner opt-in; network use does not imply source admission"
+}

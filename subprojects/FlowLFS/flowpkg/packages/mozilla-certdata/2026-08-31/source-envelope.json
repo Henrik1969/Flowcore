@@ -1,0 +1,12 @@
+{
+  "schema": "flowpkg.source-envelope.v0",
+  "package": "mozilla-certdata",
+  "version": "2026-08-31",
+  "canonical_url": "https://hg-edge.mozilla.org/projects/nss/raw-file/tip/lib/ckfw/builtins/certdata.txt",
+  "sha256": "81b7f2576333a2e360e673f912d7b0b7a765d836c731003e348a46cac5d37198",
+  "retrieval_http_date": "2026-08-30T23:10:57Z",
+  "retrieval_etag": "W/\"1788078403\"",
+  "source_identity": "content digest is authoritative because the canonical URL is a mutable tip",
+  "policy_origin": "Mozilla NSS builtin roots",
+  "signature": null
+}

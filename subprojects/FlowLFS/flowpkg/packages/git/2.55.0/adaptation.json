@@ -1,0 +1,6 @@
+{
+  "schema":"flowpkg.adaptation.v0","package":"git","version":"2.55.0","lineage":"canonical-upstream-with-capability-constraint","source_mutations":[],
+  "build_adaptations":["upstream-supported NO_RUST=1 because no admitted Rust toolchain exists","canonical prebuilt man and HTML documentation","transactional immutable projection"],
+  "omitted_capability":"Git subsystems implemented in Rust","migration":"rebuild as a distinct object after an owner selects an admitted Rust toolchain",
+  "authority":"flowlfs.modern-cli.v0 owner opt-in"
+}

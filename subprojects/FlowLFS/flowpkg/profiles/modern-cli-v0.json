@@ -1,20 +1,19 @@
 {
-  "schema": "flowlfs.profile.v0",
-  "profile": "flowlfs.modern-cli.v0",
-  "selection": "owner-opt-in",
-  "control_specification": "BLFS systemd r13.0-1379",
-  "capabilities": [
-    "flowlfs.libasn1",
-    "flowlfs.shared-trust-policy",
-    "flowlfs.https-acquisition",
-    "flowlfs.source-control",
-    "flowlfs.modern-cli-presentation"
+  "schema":"flowlfs.profile-realization.v0","profile":"flowlfs.modern-cli.v0","selection":"owner-opt-in","control_specification":"BLFS systemd r13.0-1379","part_of_recovery_base":false,"automatic_network_refresh":false,
+  "resolved":[
+    {"package":"libtasn1","version":"4.21.0","object":"sha256-7f9517391aa6d7b2ce0459e9a5b6bed7f0d9a8cba9eb462b7afe6cd1470a500c"},
+    {"package":"p11-kit","version":"0.26.5","object":"sha256-127645fdf24a6adc2c6c54cfcca8fd4440ee5714e550f4749ff743b4a7cfa65a"},
+    {"package":"make-ca","version":"1.16.1","object":"sha256-c00f252ba8a7290451a9ef839535492b8bf8e2ee8442710fffa6310bb80baf73"},
+    {"package":"mozilla-certdata","version":"2026-08-31","object":"sha256-618b86afac9f80b39b2c49d4f5b84ad44253dde8dd55baffe591e8d0e432eeee"},
+    {"package":"libunistring","version":"1.4.2","object":"sha256-15f6c9b9134313be6dcdb44220aa88ffab6c6847d7720ea4c02241c66b1abe5d"},
+    {"package":"libidn2","version":"2.3.8","object":"sha256-c5be992984715d83a1e9a00e836de18c2470d0f71af7bd8743d4ff6beca30ff1"},
+    {"package":"nghttp2","version":"1.70.0","object":"sha256-c328bd636352f153bef205eff692172222d05ef86d272ac262d21eec4f27548e"},
+    {"package":"libpsl","version":"0.23.3","object":"sha256-82970094b553455d47b71d68c2cc567bc5b287ae6ed732e5d2322f3083626c63"},
+    {"package":"curl","version":"8.21.0","object":"sha256-08b6f02aab5f00cb530078b3eef5bad6de8d70fee8abb0585dc2ffd4e63188b0"},
+    {"package":"git","version":"2.55.0","object":"sha256-63564714a11cf9ad9a92447d8477ad8719c57636437548c58541cc876e039109"}
   ],
-  "resolved_first_gate": ["libtasn1@4.21.0"],
-  "policy": {
-    "part_of_recovery_base": false,
-    "automatic_network_refresh": false,
-    "trust_policy_separate_from_processor": true,
-    "projection_requires_owner_authority": true
-  }
+  "capabilities":["shared-trust-policy","https-acquisition","http2","public-suffix-security","internationalized-domain-names","source-control"],
+  "constraints":["Git Rust subsystems omitted until an admitted Rust toolchain is selected"],
+  "optional_unresolved_extensions":["fzf","zoxide","eza","bat","neovim","Git Rust subsystems"],
+  "policy":{"trust_policy_separate_from_processor":true,"projection_requires_owner_authority":true,"network_use_does_not_grant_source_admission":true}
 }

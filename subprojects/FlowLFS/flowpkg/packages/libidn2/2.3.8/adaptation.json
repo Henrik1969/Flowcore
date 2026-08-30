@@ -1,0 +1,1 @@
+{"schema":"flowpkg.adaptation.v0","package":"libidn2","version":"2.3.8","lineage":"canonical-upstream-unmodified","source_mutations":[],"build_adaptations":["fixed acquisition epoch","atomic admission","reversible linker-cache projection"],"authority":"flowlfs.modern-cli.v0 dependency resolution"}

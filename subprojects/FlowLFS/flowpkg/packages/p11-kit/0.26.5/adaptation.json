@@ -1,0 +1,17 @@
+{
+  "schema": "flowpkg.adaptation.v0",
+  "package": "p11-kit",
+  "version": "0.26.5",
+  "lineage": "canonical-upstream-with-flowcore-adaptation",
+  "source_mutations": [
+    "BLFS trust-extract compatibility hook adapted to call the separately packaged make-ca processor"
+  ],
+  "build_adaptations": [
+    "fixed SOURCE_DATE_EPOCH",
+    "trust anchor path fixed at /etc/pki/anchors",
+    "update-ca-certificates compatibility name packaged transactionally",
+    "NSS compatibility projection deferred until NSS is selected",
+    "atomic admission and reversible linker-cache projection"
+  ],
+  "authority": "flowlfs.modern-cli.v0 owner opt-in"
+}

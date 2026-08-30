@@ -1,0 +1,8 @@
+{
+  "schema":"flowpkg.source-envelope.v0","package":"git","version":"2.55.0","control_specification":"BLFS systemd r13.0-1379",
+  "canonical_url":"https://www.kernel.org/pub/software/scm/git/git-2.55.0.tar.xz","sha256":"457fdb04dc8728e007d4688695e6912e6f680727920f2a40bf11eacc17505357","blfs_md5":"758c02a1b621cc0868ee0a0d99573e6b",
+  "documentation":[
+    {"file":"git-manpages-2.55.0.tar.xz","sha256":"a32d432f80df46a14a05d1104c72d5a13fe27e9feba9aa0f017e54131db6b982"},
+    {"file":"git-htmldocs-2.55.0.tar.xz","sha256":"d1142c4e28b469d297d6df6519653e92a76c952f55202fde17a72a3b03d49437"}
+  ]
+}

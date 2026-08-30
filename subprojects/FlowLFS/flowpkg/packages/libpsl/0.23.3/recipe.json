@@ -1,0 +1,1 @@
+{"schema":"flowpkg.recipe.v0","package":"libpsl","version":"0.23.3","source_sha256":"93941f85a1e7bd593fa94f299233cb5dfc91cd144fd9a78a6ceb75001c5b03be","build_identity":"flowbuilder","dependencies":["libunistring@1.4.2","libidn2@2.3.8"],"meson":["--prefix=/usr","--buildtype=release"],"tests":["ninja test"],"install_root":"staging-only"}

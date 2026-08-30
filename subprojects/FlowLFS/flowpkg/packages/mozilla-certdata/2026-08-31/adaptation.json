@@ -1,0 +1,18 @@
+{
+  "schema": "flowpkg.adaptation.v0",
+  "package": "mozilla-certdata-policy",
+  "version": "2026-08-31",
+  "lineage": "canonical-policy-input-with-flowcore-projection",
+  "source_mutations": [],
+  "policy_adaptations": [
+    "mutable upstream tip frozen by SHA-256 identity",
+    "certificate stores generated offline",
+    "unprivileged generation starts from the neutral accessible root directory",
+    "builder-owned read-only extractor output is thawed only before candidate replacement",
+    "p11-kit staging provider selected through its supported per-user x-init-reserved paths argument",
+    "automatic refresh disabled",
+    "local owner anchors excluded from immutable policy object",
+    "policy activation is an explicit reversible projection"
+  ],
+  "authority": "flowlfs.modern-cli.v0 owner trust-policy selection"
+}

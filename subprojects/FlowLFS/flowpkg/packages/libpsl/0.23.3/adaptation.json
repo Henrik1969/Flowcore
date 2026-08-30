@@ -1,0 +1,1 @@
+{"schema":"flowpkg.adaptation.v0","package":"libpsl","version":"0.23.3","lineage":"canonical-upstream-unmodified","source_mutations":[],"build_adaptations":["fixed acquisition epoch","atomic admission","reversible linker-cache projection"],"authority":"flowlfs.modern-cli.v0 security dependency resolution"}

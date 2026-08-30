@@ -1,0 +1,12 @@
+{
+  "schema": "flowpkg.recipe.v0",
+  "package": "make-ca",
+  "version": "1.16.1",
+  "source_sha256": "98c7e6fded1938b972d0177b5d5e925d318be87f84ee9e4cad680656a8c29414",
+  "build_identity": "flowbuilder",
+  "dependencies": ["p11-kit@0.26.5"],
+  "tests": ["bash syntax with declared extglob parser capability", "help generation", "staged processor presence"],
+  "install_root": "staging-only",
+  "network_during_build": false,
+  "certificate_policy_included": false
+}

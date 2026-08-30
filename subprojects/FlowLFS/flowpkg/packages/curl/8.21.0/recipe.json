@@ -1,0 +1,11 @@
+{
+  "schema":"flowpkg.recipe.v0",
+  "package":"curl",
+  "version":"8.21.0",
+  "source_sha256":"aa1b66a70eace83dc624508745646c08ae561de512ab403adffb93ac87fc72e6",
+  "build_identity":"flowbuilder",
+  "dependencies":["openssl@4.0.1-base","libpsl@0.23.3","nghttp2@1.70.0","mozilla-certdata-policy@2026-08-31"],
+  "configure":["--prefix=/usr","--disable-static","--with-openssl","--with-ca-path=/etc/ssl/certs"],
+  "tests":["make test","ordinary-user HTTPS fetch"],
+  "install_root":"staging-only"
+}

@@ -1,0 +1,20 @@
+HTTP/2 200
+x-content-type-options: nosniff
+cache-control: public, max-age=3600
+content-type: text/plain; charset="UTF-8"
+accept-ranges: bytes
+content-disposition: inline; filename="certdata.txt"
+content-security-policy: default-src 'none'; connect-src 'self' https://bugzilla.mozilla.org/; img-src 'self'; script-src https://hg.mozilla.org/static/ https://hg-edge.mozilla.org/static/; style-src 'self' 'unsafe-inline'; upgrade-insecure-requests; frame-ancestors https:
+access-control-allow-origin: *
+strict-transport-security: max-age=31536000
+server: Apache
+x-cache-info: cached
+via: 1.1 varnish, 1.1 varnish
+etag: W/"1788078403"
+date: Sun, 30 Aug 2026 23:10:57 GMT
+x-served-by: cache-cph2320059-CPH, cache-cph2320059-CPH, cache-cph2320029-CPH
+x-cache: MISS, MISS
+x-cache-hits: 0, 0
+x-timer: S1788131456.150647,VS0,VE859
+vary: Accept-Encoding
+content-length: 1375098

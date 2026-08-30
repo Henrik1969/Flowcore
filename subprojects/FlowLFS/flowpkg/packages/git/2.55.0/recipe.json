@@ -1,0 +1,6 @@
+{
+  "schema":"flowpkg.recipe.v0","package":"git","version":"2.55.0","source_sha256":"457fdb04dc8728e007d4688695e6912e6f680727920f2a40bf11eacc17505357","build_identity":"flowbuilder",
+  "dependencies":["curl@8.21.0","openssl@4.0.1-base","pcre2@base","expat@base","perl@base","python@base"],
+  "configure":["--prefix=/usr","--with-gitconfig=/etc/gitconfig","--with-python=python3","--with-libpcre2"],
+  "make_features":["NO_RUST=1"],"tests":["GIT_UNZIP=nonexist make NO_RUST=1 test -k"],"install_root":"staging-only"
+}

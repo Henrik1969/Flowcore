@@ -1,0 +1,13 @@
+{
+  "schema": "flowpkg.recipe.v0",
+  "package": "p11-kit",
+  "version": "0.26.5",
+  "source_sha256": "f2cc09111e44bf3fea58f023180b33acea90aa82d042d6fbb623fbc5ba033bb7",
+  "source_date_epoch": 1786012050,
+  "build_identity": "flowbuilder",
+  "dependencies": ["libtasn1@4.21.0"],
+  "meson": ["--prefix=/usr", "--buildtype=release", "-Dtrust_paths=/etc/pki/anchors"],
+  "tests": ["ninja test"],
+  "install_root": "staging-only",
+  "shared_state": ["dynamic-linker-cache"]
+}

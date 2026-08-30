@@ -1,0 +1,16 @@
+{
+  "schema": "flowpkg.adaptation.v0",
+  "package": "make-ca",
+  "version": "1.16.1",
+  "lineage": "canonical-upstream-with-flowcore-adaptation",
+  "source_mutations": [
+    "remove deprecated mktemp -t option as required by captured BLFS"
+  ],
+  "policy_adaptations": [
+    "do not download certdata during build",
+    "do not generate or package a certificate store",
+    "do not enable the upstream network refresh timer",
+    "treat certificate policy and local owner anchors as separate state"
+  ],
+  "authority": "flowlfs.modern-cli.v0 owner opt-in"
+}
