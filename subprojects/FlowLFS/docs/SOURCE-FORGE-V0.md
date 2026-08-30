@@ -42,6 +42,39 @@ and the recovery shell.
 JSON and shell are bootstrap representations of these records, not their
 permanent semantic identity.
 
+## Source mutation law
+
+Canonical upstream source is an immutable lineage root, not a prohibition on
+change. FlowLFS may patch, replace, extend, or deeply restructure any admitted
+source—including shells, Binutils, Coreutils, systemd, libraries, and the
+kernel—when the derived source receives its own explicit identity.
+
+```text
+canonical upstream source
+  + Flowcore adaptation patch set
+  + Flowcore-native additive source
+  -> named Flowcore source revision
+  -> derivation
+  -> immutable object
+```
+
+Every mutation must retain:
+
+- the exact canonical ancestor and content digest;
+- ordered patches, replacements, and additive files;
+- the law, requirement, or owner policy authorizing each change;
+- intended semantic and compatibility effects;
+- affected capability claims and consumers;
+- build, regression, compatibility, and migration evidence;
+- a distinct version/lineage identity and rollback route.
+
+A Flowcore-derived source tree must never be presented as unmodified upstream.
+Conversely, upstream compatibility is not sacred or presumed: it is a
+versioned capability that may be preserved, constrained, or deliberately
+rejected with visible diagnostics. Additive native capabilities are encouraged
+when they remain discoverable and do not acquire hidden authority merely by
+being compiled into a foundational tool.
+
 ## Store and projection rules
 
 - `/flow/store/objects/sha256-<digest>` contains sealed output trees.

@@ -107,24 +107,29 @@ admit() {
   require_root admit
   test -d "$stage_root/usr" || die 'completed staging root is absent'
   test "$(stat -c %U "$stage_root")" = flowbuilder || die 'stage was not produced by flowbuilder'
+  chmod 0755 "$stage_root"
 
   digest=$(tar --sort=name --mtime=@0 --owner=0 --group=0 --numeric-owner \
     -C "$stage_root" -cf - . | sha256sum | awk '{print $1}')
   object=$store_root/objects/sha256-$digest
 
   if test -e "$object"; then
-    test -d "$object/root" || die "invalid existing object $object"
+    test -d "$object/root" -a -f "$object/manifest.tsv" -a -f "$object/derivation.txt" \
+      || die "invalid existing object $object"
   else
-    install -d -m 0755 "$object"
-    mv "$stage_root" "$object/root"
-    chown -R root:root "$object/root"
+    incoming=$store_root/objects/.incoming-zsh-$digest-$$
+    test ! -e "$incoming" || die "stale incoming object $incoming"
+    install -d -m 0755 "$incoming"
+    mv "$stage_root" "$incoming/root"
+    chown -R root:root "$incoming/root"
     (
-      cd "$object/root"
+      cd "$incoming/root"
       find . -mindepth 1 -printf '%y\t%m\t%u\t%g\t%p\t%l\n' | LC_ALL=C sort
-    ) > "$object/manifest.tsv"
-    cp "$evidence_root/environment.txt" "$object/derivation.txt"
-    printf 'source_sha256=%s\noutput_tree_sha256=%s\n' "$source_sha" "$digest" >> "$object/derivation.txt"
-    chmod -R a-w "$object"
+    ) > "$incoming/manifest.tsv"
+    cp "$evidence_root/environment.txt" "$incoming/derivation.txt"
+    printf 'source_sha256=%s\noutput_tree_sha256=%s\n' "$source_sha" "$digest" >> "$incoming/derivation.txt"
+    chmod -R a-w "$incoming"
+    mv "$incoming" "$object"
   fi
 
   ln -sfn "$object" "$object_pointer"
@@ -189,6 +194,8 @@ verify() {
   test -d "$projection" || die 'projection is not active'
   test "$(getent passwd root | cut -d: -f7)" = /bin/bash || die 'root recovery shell changed'
   systemctl is-active --quiet sshd.service || die 'sshd recovery service is not active'
+  su -s /bin/bash flowbuilder -c '/usr/bin/zsh --version >/dev/null' \
+    || die 'projected Zsh is not executable by an unprivileged user'
   test "$(grep -Fxc /bin/zsh /etc/shells)" -eq 1 || die '/etc/shells contribution is not unique'
   /usr/bin/zsh -fc '[[ $ZSH_VERSION == 5.9.2 ]] && zmodload zsh/pcre && print -r -- "$ZSH_VERSION pcre-ok"'
 

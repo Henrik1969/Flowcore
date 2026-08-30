@@ -1,0 +1,26 @@
+{
+  "format": "flowlfs.adaptation",
+  "version": 0,
+  "package": "flow-shell-defaults",
+  "upstream_version": "0.1.0",
+  "adaptations": [
+    {
+      "id": "portable-core-only",
+      "effect": "Retain safe ideas from Henrik's shell setup without personal paths, Court modules, history observers, plugin managers, or unavailable tools.",
+      "authority": "owner policy",
+      "reversible": true
+    },
+    {
+      "id": "global-canonical-policy",
+      "effect": "Own shell semantics under /etc/flow-shell and use minimal /etc/skel adapters for newly created users.",
+      "authority": "flowlfs.shell-environment.v0",
+      "reversible": true
+    },
+    {
+      "id": "no-network-startup",
+      "effect": "Shell startup never downloads, clones, updates, or executes content obtained from the network.",
+      "authority": "source-forge trust boundary",
+      "reversible": true
+    }
+  ]
+}

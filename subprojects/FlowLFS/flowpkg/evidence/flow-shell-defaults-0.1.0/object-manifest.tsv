@@ -1,0 +1,13 @@
+d	755	root	root	./etc	
+d	755	root	root	./etc/flow-shell	
+d	755	root	root	./etc/profile.d	
+d	755	root	root	./etc/skel	
+d	755	root	root	./etc/zsh	
+f	644	root	root	./etc/flow-shell/bashrc	
+f	644	root	root	./etc/flow-shell/environment.sh	
+f	644	root	root	./etc/flow-shell/profile.sh	
+f	644	root	root	./etc/profile.d/flow-shell.sh	
+f	644	root	root	./etc/skel/.bash_profile	
+f	644	root	root	./etc/skel/.bashrc	
+f	644	root	root	./etc/zsh/zshenv	
+f	644	root	root	./etc/zsh/zshrc	

@@ -13,13 +13,25 @@ unprivileged `flowbuilder` user, installed into a staging root, admitted into
 the immutable guest store, projected, rolled back, reprojected without a
 network or rebuild, and verified after a cold boot.
 
-Final reproducible object:
+First reproducible root-only object:
 
 ```text
 /flow/store/objects/sha256-d646930bd47443cf02114513c355c5935bde892b25e73e08fa4a5e131f2f912e
 ```
 
-Final VM twin SHA-256 after clean shutdown:
+The ordinary-user shell experiment later discovered that this object's
+`root/` directory was sealed as mode 0550. Zsh was therefore executable by
+root but not traversable by an ordinary user. The object was not mutated.
+Zsh was rebuilt with a normalized mode-0755 staging root and admitted as:
+
+```text
+/flow/store/objects/sha256-35919dcaea12c0c67ea22ef0598feb20148c6be78d331bd84aa117a8bdcd9b73
+```
+
+This user-accessible object is the current active Zsh projection. Its evidence
+is under `user-access/`.
+
+VM twin SHA-256 at the first Zsh cold-boot checkpoint:
 
 ```text
 e222e27133a13cc8208c4d78550f0fee59bfd8c3ef9b301d7b1346a298325e02
@@ -73,7 +85,9 @@ The store deliberately retains unsuccessful or superseded immutable outputs:
 3. `a95e8ecb...887b4` was the second functional build. Comparison isolated the
    nondeterminism to the `CreationDate` comment in 21 `intro*.html` files.
 4. `d646930b...f912e` controls `SOURCE_DATE_EPOCH=1783881773`; two clean builds
-   converged on this identity. This is the active projection.
+   converged on this identity. It was the first reproducible projection, but
+   was superseded by the user-accessible `35919dca...cd9b73` object described
+   above.
 
 No prior object was rewritten to manufacture success.
 

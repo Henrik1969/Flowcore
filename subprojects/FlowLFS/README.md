@@ -46,6 +46,11 @@ as a reproducible digest-addressed object, and projected reversibly without
 changing the recovery shell. See `docs/SOURCE-FORGE-V0.md` and
 `flowpkg/evidence/zsh-5.9.2/REPORT.md`.
 
+It also carries the composable `flowlfs.shell-environment.v0` profile. Its
+owner-authored package provides dependency-free global Bash/Zsh defaults and
+materialized new-user templates without enabling anonymous login or copying
+personal shell state. See `docs/SHELL-ENVIRONMENT-V0.md`.
+
 ## Layout
 
 ```text

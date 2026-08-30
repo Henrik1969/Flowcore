@@ -1,0 +1,18 @@
+{
+  "format": "flowlfs.package-recipe",
+  "version": 0,
+  "package": "flow-shell-defaults",
+  "upstream_version": "0.1.0",
+  "recipe_authority": "FlowLFS owner-authored source",
+  "target": "all-flowlfs-users",
+  "build_user": "flowbuilder",
+  "required_capabilities": ["bash", "zsh", "coreutils", "grep", "less", "vim"],
+  "test": "syntax, clean-environment startup, non-root home isolation",
+  "install_boundary": "staging only",
+  "activation": {
+    "filesystem_projection": "symlink",
+    "shared_state": "/etc/profile gains a bounded /etc/profile.d loader",
+    "new_user_seed": "/etc/skel uses verified materialized template copies",
+    "anonymous_login": false
+  }
+}

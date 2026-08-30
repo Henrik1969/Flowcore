@@ -1,0 +1,15 @@
+{
+  "format": "flowlfs.source-envelope",
+  "version": 0,
+  "package": "flow-shell-defaults",
+  "upstream_version": "0.1.0",
+  "origin_claim": "FlowLFS owner-authored source",
+  "retrieval_transport": "local-authoring",
+  "created_on": "2026-08-30",
+  "sha256": "76383d4759c348337afa1d87f1393231b6b5b6f2177d9c0ab2a7b7b48ce2c497",
+  "authorship": "repository commit authority",
+  "verification_result": "content-digest-verified",
+  "trust_class": "owner-authored-source",
+  "execution_authority": false,
+  "notes": "Store admission and projection remain separate decisions."
+}

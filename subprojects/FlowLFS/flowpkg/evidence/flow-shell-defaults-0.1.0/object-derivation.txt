@@ -1,0 +1,7 @@
+package=flow-shell-defaults
+version=0.1.0
+source_sha256=76383d4759c348337afa1d87f1393231b6b5b6f2177d9c0ab2a7b7b48ce2c497
+builder=uid=999(flowbuilder) gid=998(flowbuilder) groups=998(flowbuilder)
+GNU bash, version 5.3.0(1)-release (x86_64-pc-linux-gnu)
+zsh 5.9.2 (x86_64-pc-linux-gnu)
+output_tree_sha256=2c940496de50227f5367fc982ed23eb581a12ed8db4ca4b7877e400f1e4d7da3

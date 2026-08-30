@@ -1,0 +1,33 @@
+# FlowLFS global interactive Bash policy.
+case $- in *i*) ;; *) return 0 2>/dev/null || exit 0 ;; esac
+
+HISTCONTROL=ignoreboth:erasedups
+HISTSIZE=5000
+HISTFILESIZE=10000
+shopt -s histappend checkwinsize
+
+alias ll='ls -alF'
+alias la='ls -A'
+alias l='ls -CF'
+alias grep='grep --color=auto'
+alias diff='diff --color=auto'
+
+case ${TERM-} in
+    xterm*|screen*|tmux*|*-256color|linux) _flow_color_prompt=1 ;;
+    *) _flow_color_prompt=0 ;;
+esac
+
+if [ "$(id -u)" -eq 0 ]; then
+    if [ "$_flow_color_prompt" -eq 1 ]; then
+        PS1='\[\e[1;31m\]\u@\h\[\e[0m\]:\[\e[1;34m\]\w\[\e[0m\]# '
+    else
+        PS1='\u@\h:\w# '
+    fi
+else
+    if [ "$_flow_color_prompt" -eq 1 ]; then
+        PS1='\[\e[1;32m\]\u@\h\[\e[0m\]:\[\e[1;34m\]\w\[\e[0m\]\$ '
+    else
+        PS1='\u@\h:\w\$ '
+    fi
+fi
+unset _flow_color_prompt

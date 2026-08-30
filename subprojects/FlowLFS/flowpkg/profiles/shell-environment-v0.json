@@ -1,0 +1,23 @@
+{
+  "format": "flowlfs.profile",
+  "version": 0,
+  "profile_id": "flowlfs.shell-environment.v0",
+  "policy_profile": "experimental",
+  "composable": true,
+  "requires": [
+    "bash",
+    "zsh",
+    "shell-neutral-environment",
+    "interactive-shell-defaults",
+    "new-user-template-materialization"
+  ],
+  "forbids": [
+    "network-fetch-during-shell-startup",
+    "anonymous-remote-login",
+    "personal-history-in-system-package"
+  ],
+  "recovery_invariants": {
+    "root_login_shell": "/bin/bash",
+    "remote_service": "sshd.service"
+  }
+}
