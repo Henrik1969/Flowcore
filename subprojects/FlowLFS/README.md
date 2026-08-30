@@ -34,6 +34,12 @@ SSH access and the serial callback marker were verified against the exact
 promoted artifact. Documentation, source manifests, checksums, build logs, and
 evidence are its supporting artifacts.
 
+The certified artifact and sealed checkpoint are read-only, filesystem-
+immutable controls. All post-baseline work belongs in
+`artifacts/FlowLFS-v0.1-flowcore-twin.qcow2`. Run
+`scripts/verify-baseline-purity.sh` before mutation and use
+`scripts/launch-flowcore-twin.sh` when intentionally booting the writable twin.
+
 ## Layout
 
 ```text
