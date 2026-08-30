@@ -51,6 +51,10 @@ owner-authored package provides dependency-free global Bash/Zsh defaults and
 materialized new-user templates without enabling anonymous login or copying
 personal shell state. See `docs/SHELL-ENVIRONMENT-V0.md`.
 
+The optional acquisition and inspection stack is being constructed under
+`docs/MODERN-CLI-V0.md`. It is explicitly owner-selected and is not part of
+the recovery base.
+
 ## Layout
 
 ```text

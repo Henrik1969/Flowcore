@@ -1,0 +1,12 @@
+{
+  "schema": "flowpkg.recipe.v0",
+  "package": "libtasn1",
+  "version": "4.21.0",
+  "source_sha256": "1d8a444a223cc5464240777346e125de51d8e6abf0b8bac742ac84609167dc87",
+  "source_date_epoch": 1767879696,
+  "build_identity": "flowbuilder",
+  "configure": ["--prefix=/usr", "--disable-static"],
+  "tests": ["make check"],
+  "install_root": "staging-only",
+  "shared_state": ["dynamic-linker-cache"]
+}

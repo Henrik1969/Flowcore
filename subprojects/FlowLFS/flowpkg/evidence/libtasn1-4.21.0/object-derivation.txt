@@ -1,0 +1,10 @@
+package=libtasn1
+version=4.21.0
+source_sha256=1d8a444a223cc5464240777346e125de51d8e6abf0b8bac742ac84609167dc87
+source_date_epoch=1767879696
+builder=uid=999(flowbuilder) gid=998(flowbuilder) groups=998(flowbuilder)
+kernel=Linux 7.1.8 #1 SMP PREEMPT_DYNAMIC Sat Aug 29 20:58:55 UTC 2026 x86_64 GNU/Linux
+gcc (GCC) 16.2.0
+GNU Make 4.4.1
+source_sha256=1d8a444a223cc5464240777346e125de51d8e6abf0b8bac742ac84609167dc87
+output_tree_sha256=7f9517391aa6d7b2ce0459e9a5b6bed7f0d9a8cba9eb462b7afe6cd1470a500c

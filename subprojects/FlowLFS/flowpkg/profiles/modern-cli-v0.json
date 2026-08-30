@@ -1,0 +1,20 @@
+{
+  "schema": "flowlfs.profile.v0",
+  "profile": "flowlfs.modern-cli.v0",
+  "selection": "owner-opt-in",
+  "control_specification": "BLFS systemd r13.0-1379",
+  "capabilities": [
+    "flowlfs.libasn1",
+    "flowlfs.shared-trust-policy",
+    "flowlfs.https-acquisition",
+    "flowlfs.source-control",
+    "flowlfs.modern-cli-presentation"
+  ],
+  "resolved_first_gate": ["libtasn1@4.21.0"],
+  "policy": {
+    "part_of_recovery_base": false,
+    "automatic_network_refresh": false,
+    "trust_policy_separate_from_processor": true,
+    "projection_requires_owner_authority": true
+  }
+}

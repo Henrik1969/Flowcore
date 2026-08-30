@@ -1,0 +1,11 @@
+{
+  "schema": "flowpkg.source-envelope.v0",
+  "package": "make-ca",
+  "version": "1.16.1",
+  "control_specification": "BLFS systemd r13.0-1379",
+  "canonical_url": "https://github.com/lfs-book/make-ca/archive/v1.16.1/make-ca-1.16.1.tar.gz",
+  "sha256": "98c7e6fded1938b972d0177b5d5e925d318be87f84ee9e4cad680656a8c29414",
+  "blfs_md5": "bf9cea2d24fc5344d4951b49f275c595",
+  "detached_signature": null,
+  "identity_assurance": "archive content matches the digest published by the captured BLFS control specification; no detached signature claimed"
+}

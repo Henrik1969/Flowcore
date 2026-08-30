@@ -1,0 +1,13 @@
+{
+  "schema": "flowpkg.source-envelope.v0",
+  "package": "p11-kit",
+  "version": "0.26.5",
+  "control_specification": "BLFS systemd r13.0-1379",
+  "canonical_url": "https://github.com/p11-glue/p11-kit/releases/download/0.26.5/p11-kit-0.26.5.tar.xz",
+  "sha256": "f2cc09111e44bf3fea58f023180b33acea90aa82d042d6fbb623fbc5ba033bb7",
+  "blfs_md5": "308306e889850bff08fae74ae7897a21",
+  "detached_signature": "p11-kit-0.26.5.tar.xz.sig",
+  "valid_signing_key_fingerprint": "5D46CB0F763405A7053556F47A75A648B3F9220C",
+  "upstream_signer": "Zoltan Fridrich",
+  "identity_evidence": "upstream repository states releases are signed by maintainers and identifies Zoltan Fridrich"
+}

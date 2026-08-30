@@ -1,0 +1,13 @@
+{
+  "schema": "flowpkg.source-envelope.v0",
+  "package": "libtasn1",
+  "version": "4.21.0",
+  "control_specification": "BLFS systemd r13.0-1379",
+  "canonical_url": "https://ftpmirror.gnu.org/libtasn1/libtasn1-4.21.0.tar.gz",
+  "sha256": "1d8a444a223cc5464240777346e125de51d8e6abf0b8bac742ac84609167dc87",
+  "blfs_md5": "2ee1d9f3aa66f1e308c46a283aa9a8c2",
+  "detached_signature": "libtasn1-4.21.0.tar.gz.sig",
+  "valid_signing_subkey_fingerprint": "A3CC9C870B9D310ABAD4CF2F51722B08FE4745A2",
+  "captured_primary_key_fingerprint": "B1D2BD1375BECB784CF4F8C4D73CF638C53C06BE",
+  "identity_assurance": "signature valid; captured key identity not elevated to owner trust"
+}

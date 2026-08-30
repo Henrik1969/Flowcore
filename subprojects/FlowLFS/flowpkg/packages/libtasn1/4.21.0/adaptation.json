@@ -1,0 +1,15 @@
+{
+  "schema": "flowpkg.adaptation.v0",
+  "package": "libtasn1",
+  "version": "4.21.0",
+  "lineage": "canonical-upstream-unmodified",
+  "source_mutations": [],
+  "build_adaptations": [
+    "fixed SOURCE_DATE_EPOCH",
+    "exclude generated Info dir registry from object ownership",
+    "atomic immutable-object admission",
+    "transactional symlink projection",
+    "dynamic-linker cache treated as derived shared state"
+  ],
+  "authority": "flowlfs.modern-cli.v0 owner opt-in"
+}
