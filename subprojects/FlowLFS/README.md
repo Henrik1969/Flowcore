@@ -60,13 +60,14 @@ artifacts/            untracked ISO/disk images and evidence bundles
 
 ## Start here
 
-1. Read [authority and method](docs/AUTHORITY-AND-METHOD.md).
-2. Read [development environment](docs/DEVELOPMENT-ENVIRONMENT.md).
-3. Read the [security baseline](docs/SECURITY-BASELINE.md).
-4. Read the [execution mutation ledger](execution/MUTATION-LEDGER.md).
-5. Run `scripts/check-host-requirements.sh`.
-6. Review the retrieved books and manifests.
-7. Do not begin Chapter 2 disk operations until an isolated image-backed build
+1. Read [FlowLFS, Part 1](FlowLFS_part_1.md), the revised build handbook.
+2. Read [authority and method](docs/AUTHORITY-AND-METHOD.md).
+3. Read [development environment](docs/DEVELOPMENT-ENVIRONMENT.md).
+4. Read the [security baseline](docs/SECURITY-BASELINE.md).
+5. Read the [execution mutation ledger](execution/MUTATION-LEDGER.md).
+6. Run `scripts/check-host-requirements.sh`.
+7. Review the retrieved books and manifests.
+8. Do not begin Chapter 2 disk operations until an isolated image-backed build
    boundary has been reviewed.
 
 ## Non-claims
