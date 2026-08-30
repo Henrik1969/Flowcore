@@ -1,0 +1,18 @@
+{
+  "format": "flowlfs.source-envelope",
+  "version": 0,
+  "package": "zsh",
+  "upstream_version": "5.9.2",
+  "origin_claim": "https://www.zsh.org/pub/zsh-5.9.2.tar.xz",
+  "retrieval_transport": "https",
+  "retrieved_on": "2026-08-30",
+  "sha256": "36fa734374b44783582cec09bcd67822e2f992c779ec1624ab5596df078d2f81",
+  "upstream_checksum_list": "https://www.zsh.org/pub/SHA256SUM",
+  "detached_signature": "https://www.zsh.org/pub/zsh-5.9.2.tar.xz.asc",
+  "release_keyring": "https://www.zsh.org/pub/zsh-keyring.asc",
+  "verified_signing_fingerprint": "7CA7ECAAF06216B90F894146ACF8146CAE8CBBC4",
+  "verification_result": "digest-and-signature-verified",
+  "trust_class": "verified-source-candidate",
+  "execution_authority": false,
+  "notes": "Verification proves correspondence to the captured upstream keyring; admission remains a separate local policy decision."
+}

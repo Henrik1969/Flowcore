@@ -1,0 +1,44 @@
+{
+  "format": "flowlfs.adaptation",
+  "version": 0,
+  "package": "zsh",
+  "upstream_version": "5.9.2",
+  "adaptations": [
+    {
+      "id": "consolidate-system-configuration",
+      "effect": "Use /etc/zsh and update documentation references from /etc/z* to /etc/zsh/z*.",
+      "authority": "BLFS development r13.0-1379",
+      "reversible": true
+    },
+    {
+      "id": "staged-store-install",
+      "effect": "Replace direct root installation with DESTDIR staging, immutable admission, and later projection.",
+      "authority": "flowlfs.source-forge.v0",
+      "reversible": true
+    },
+    {
+      "id": "managed-shell-registry",
+      "effect": "Treat /etc/shells as shared resolved state instead of package-owned append-only state.",
+      "authority": "flowlfs.source-forge.v0",
+      "reversible": true
+    },
+    {
+      "id": "managed-info-registry",
+      "effect": "Exclude generated /usr/share/info/dir from package ownership; packages contribute Info documents and a resolver owns the shared registry.",
+      "authority": "flowlfs.source-forge.v0",
+      "reversible": true
+    },
+    {
+      "id": "controlled-build-time",
+      "effect": "Set SOURCE_DATE_EPOCH=1783881773 from the canonical source release so Groff documentation does not embed wall-clock build time.",
+      "authority": "flowlfs.source-forge.v0 reproducibility requirement",
+      "reversible": true
+    },
+    {
+      "id": "preserve-recovery-shell",
+      "effect": "Do not change root's login shell, /bin/sh, or SSH authentication policy.",
+      "authority": "flowlfs.source-forge.v0",
+      "reversible": true
+    }
+  ]
+}

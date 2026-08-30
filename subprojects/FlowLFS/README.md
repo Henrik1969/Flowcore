@@ -40,11 +40,18 @@ immutable controls. All post-baseline work belongs in
 `scripts/verify-baseline-purity.sh` before mutation and use
 `scripts/launch-flowcore-twin.sh` when intentionally booting the writable twin.
 
+The writable twin now carries the first experimental source-forge projection:
+Zsh 5.9.2 built from verified upstream source as an unprivileged user, admitted
+as a reproducible digest-addressed object, and projected reversibly without
+changing the recovery shell. See `docs/SOURCE-FORGE-V0.md` and
+`flowpkg/evidence/zsh-5.9.2/REPORT.md`.
+
 ## Layout
 
 ```text
 book/                 canonical LFS book and book-source archive
 blfs/                 captured stable and execution BLFS systemd books
+flowpkg/              experimental profiles, recipes, sources, and evidence
 manifests/            canonical download list and checksums
 sources/              upstream release tarballs and LFS patches (untracked)
 execution/            separately pinned, post-advisory execution snapshot
@@ -80,7 +87,8 @@ artifacts/            untracked ISO/disk images and evidence bundles
 
 ## Non-claims
 
-FlowLFS is a bootable LFS control baseline with one explicitly declared
-post-book callback adaptation. It is not yet a Flowcore runtime, FrankenPOP
-composition, general-purpose distribution, or conforming Flowcore system. No
-public capability API is defined here.
+FlowLFS has a bootable immutable LFS control and a separate experimental twin
+with callback and source-forge adaptations. It is not yet a Flowcore runtime,
+FrankenPOP composition, general-purpose distribution, or conforming Flowcore
+system. The source-forge schemas are experimental and no public capability API
+is frozen here.

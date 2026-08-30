@@ -1,0 +1,854 @@
+make[1]: Entering directory '/var/lib/flowbuild/zsh-5.9.2/source/Src'
+make[2]: Entering directory '/var/lib/flowbuild/zsh-5.9.2/source/Src'
+make[3]: Entering directory '/var/lib/flowbuild/zsh-5.9.2/source/Src/Builtins'
+make[3]: Leaving directory '/var/lib/flowbuild/zsh-5.9.2/source/Src/Builtins'
+make[3]: Entering directory '/var/lib/flowbuild/zsh-5.9.2/source/Src/Modules'
+make[4]: Entering directory '/var/lib/flowbuild/zsh-5.9.2/source/Src/Zle'
+make[4]: 'complete.mdh' is up to date.
+make[4]: Leaving directory '/var/lib/flowbuild/zsh-5.9.2/source/Src/Zle'
+make[3]: Leaving directory '/var/lib/flowbuild/zsh-5.9.2/source/Src/Modules'
+make[3]: Entering directory '/var/lib/flowbuild/zsh-5.9.2/source/Src/Zle'
+make[3]: Leaving directory '/var/lib/flowbuild/zsh-5.9.2/source/Src/Zle'
+make[2]: Leaving directory '/var/lib/flowbuild/zsh-5.9.2/source/Src'
+rm -f stamp-modobjs.tmp
+make[2]: Entering directory '/var/lib/flowbuild/zsh-5.9.2/source/Src'
+gcc -c -I. -I../Src -I../Src -I../Src/Zle -I.  -DHAVE_CONFIG_H -Wall -Wmissing-prototypes -O2  -o params.o params.c
+make[3]: Entering directory '/var/lib/flowbuild/zsh-5.9.2/source/Src/Builtins'
+make[3]: Leaving directory '/var/lib/flowbuild/zsh-5.9.2/source/Src/Builtins'
+make[3]: Entering directory '/var/lib/flowbuild/zsh-5.9.2/source/Src/Modules'
+make[3]: Leaving directory '/var/lib/flowbuild/zsh-5.9.2/source/Src/Modules'
+make[3]: Entering directory '/var/lib/flowbuild/zsh-5.9.2/source/Src/Zle'
+make[3]: Leaving directory '/var/lib/flowbuild/zsh-5.9.2/source/Src/Zle'
+make[2]: Leaving directory '/var/lib/flowbuild/zsh-5.9.2/source/Src'
+Updated `stamp-modobjs'.
+rm -f zsh
+gcc  -s -rdynamic -o zsh main.o  `cat stamp-modobjs`   -lpcre2-8 -lgdbm -lcap -ldl -lncursesw -lrt -lm  -lc
+/usr/bin/ld: utils.o: in function `gettempname':
+utils.c:(.text+0x18a1): warning: the use of `mktemp' is dangerous, better use `mkstemp' or `mkdtemp'
+/bin/sh ../mkinstalldirs /var/lib/flowbuild/zsh-5.9.2/stage/usr/bin
+mkdir -m 755 -p -- /var/lib/flowbuild/zsh-5.9.2/stage/usr/bin
+/usr/bin/install -c  zsh /var/lib/flowbuild/zsh-5.9.2/stage/usr/bin/zsh-5.9.2
+if test -f /var/lib/flowbuild/zsh-5.9.2/stage/usr/bin/zsh; then \
+    rm -f /var/lib/flowbuild/zsh-5.9.2/stage/usr/bin/zsh.old; \
+    ln /var/lib/flowbuild/zsh-5.9.2/stage/usr/bin/zsh /var/lib/flowbuild/zsh-5.9.2/stage/usr/bin/zsh.old; \
+else :; fi
+rm -f /var/lib/flowbuild/zsh-5.9.2/stage/usr/bin/zsh.new
+ln /var/lib/flowbuild/zsh-5.9.2/stage/usr/bin/zsh-5.9.2 /var/lib/flowbuild/zsh-5.9.2/stage/usr/bin/zsh.new
+mv /var/lib/flowbuild/zsh-5.9.2/stage/usr/bin/zsh.new /var/lib/flowbuild/zsh-5.9.2/stage/usr/bin/zsh
+make[1]: Leaving directory '/var/lib/flowbuild/zsh-5.9.2/source/Src'
+make[1]: Entering directory '/var/lib/flowbuild/zsh-5.9.2/source/Src'
+make[2]: Entering directory '/var/lib/flowbuild/zsh-5.9.2/source/Src'
+make[3]: Entering directory '/var/lib/flowbuild/zsh-5.9.2/source/Src/Builtins'
+/bin/sh ../../mkinstalldirs /var/lib/flowbuild/zsh-5.9.2/stage/usr/lib/zsh/5.9.2/zsh
+mkdir -m 755 -p -- /var/lib/flowbuild/zsh-5.9.2/stage/usr/lib/zsh/5.9.2/zsh
+/usr/bin/install -c  rlimits.so /var/lib/flowbuild/zsh-5.9.2/stage/usr/lib/zsh/5.9.2/zsh/rlimits.so
+/bin/sh ../../mkinstalldirs /var/lib/flowbuild/zsh-5.9.2/stage/usr/lib/zsh/5.9.2/zsh
+/usr/bin/install -c  sched.so /var/lib/flowbuild/zsh-5.9.2/stage/usr/lib/zsh/5.9.2/zsh/sched.so
+make[3]: Leaving directory '/var/lib/flowbuild/zsh-5.9.2/source/Src/Builtins'
+make[3]: Entering directory '/var/lib/flowbuild/zsh-5.9.2/source/Src/Modules'
+/bin/sh ../../mkinstalldirs /var/lib/flowbuild/zsh-5.9.2/stage/usr/lib/zsh/5.9.2/zsh
+/usr/bin/install -c  attr.so /var/lib/flowbuild/zsh-5.9.2/stage/usr/lib/zsh/5.9.2/zsh/attr.so
+/bin/sh ../../mkinstalldirs /var/lib/flowbuild/zsh-5.9.2/stage/usr/lib/zsh/5.9.2/zsh
+/usr/bin/install -c  cap.so /var/lib/flowbuild/zsh-5.9.2/stage/usr/lib/zsh/5.9.2/zsh/cap.so
+/bin/sh ../../mkinstalldirs /var/lib/flowbuild/zsh-5.9.2/stage/usr/lib/zsh/5.9.2/zsh
+/usr/bin/install -c  clone.so /var/lib/flowbuild/zsh-5.9.2/stage/usr/lib/zsh/5.9.2/zsh/clone.so
+/bin/sh ../../mkinstalldirs /var/lib/flowbuild/zsh-5.9.2/stage/usr/lib/zsh/5.9.2/zsh
+/usr/bin/install -c  curses.so /var/lib/flowbuild/zsh-5.9.2/stage/usr/lib/zsh/5.9.2/zsh/curses.so
+/bin/sh ../../mkinstalldirs /var/lib/flowbuild/zsh-5.9.2/stage/usr/lib/zsh/5.9.2/zsh
+/usr/bin/install -c  datetime.so /var/lib/flowbuild/zsh-5.9.2/stage/usr/lib/zsh/5.9.2/zsh/datetime.so
+/bin/sh ../../mkinstalldirs /var/lib/flowbuild/zsh-5.9.2/stage/usr/lib/zsh/5.9.2/zsh/db
+mkdir -m 755 -p -- /var/lib/flowbuild/zsh-5.9.2/stage/usr/lib/zsh/5.9.2/zsh/db
+/usr/bin/install -c  db_gdbm.so /var/lib/flowbuild/zsh-5.9.2/stage/usr/lib/zsh/5.9.2/zsh/db/gdbm.so
+/bin/sh ../../mkinstalldirs /var/lib/flowbuild/zsh-5.9.2/stage/usr/lib/zsh/5.9.2/zsh
+/usr/bin/install -c  example.so /var/lib/flowbuild/zsh-5.9.2/stage/usr/lib/zsh/5.9.2/zsh/example.so
+/bin/sh ../../mkinstalldirs /var/lib/flowbuild/zsh-5.9.2/stage/usr/lib/zsh/5.9.2/zsh
+/usr/bin/install -c  files.so /var/lib/flowbuild/zsh-5.9.2/stage/usr/lib/zsh/5.9.2/zsh/files.so
+/bin/sh ../../mkinstalldirs /var/lib/flowbuild/zsh-5.9.2/stage/usr/lib/zsh/5.9.2/zsh
+/usr/bin/install -c  langinfo.so /var/lib/flowbuild/zsh-5.9.2/stage/usr/lib/zsh/5.9.2/zsh/langinfo.so
+/bin/sh ../../mkinstalldirs /var/lib/flowbuild/zsh-5.9.2/stage/usr/lib/zsh/5.9.2/zsh
+/usr/bin/install -c  mapfile.so /var/lib/flowbuild/zsh-5.9.2/stage/usr/lib/zsh/5.9.2/zsh/mapfile.so
+/bin/sh ../../mkinstalldirs /var/lib/flowbuild/zsh-5.9.2/stage/usr/lib/zsh/5.9.2/zsh
+/usr/bin/install -c  mathfunc.so /var/lib/flowbuild/zsh-5.9.2/stage/usr/lib/zsh/5.9.2/zsh/mathfunc.so
+/bin/sh ../../mkinstalldirs /var/lib/flowbuild/zsh-5.9.2/stage/usr/lib/zsh/5.9.2/zsh
+/usr/bin/install -c  nearcolor.so /var/lib/flowbuild/zsh-5.9.2/stage/usr/lib/zsh/5.9.2/zsh/nearcolor.so
+/bin/sh ../../mkinstalldirs /var/lib/flowbuild/zsh-5.9.2/stage/usr/lib/zsh/5.9.2/zsh
+/usr/bin/install -c  newuser.so /var/lib/flowbuild/zsh-5.9.2/stage/usr/lib/zsh/5.9.2/zsh/newuser.so
+/bin/sh ../../mkinstalldirs /var/lib/flowbuild/zsh-5.9.2/stage/usr/lib/zsh/5.9.2/zsh/param
+mkdir -m 755 -p -- /var/lib/flowbuild/zsh-5.9.2/stage/usr/lib/zsh/5.9.2/zsh/param
+/usr/bin/install -c  param_private.so /var/lib/flowbuild/zsh-5.9.2/stage/usr/lib/zsh/5.9.2/zsh/param/private.so
+/bin/sh ../../mkinstalldirs /var/lib/flowbuild/zsh-5.9.2/stage/usr/lib/zsh/5.9.2/zsh
+/usr/bin/install -c  parameter.so /var/lib/flowbuild/zsh-5.9.2/stage/usr/lib/zsh/5.9.2/zsh/parameter.so
+/bin/sh ../../mkinstalldirs /var/lib/flowbuild/zsh-5.9.2/stage/usr/lib/zsh/5.9.2/zsh
+/usr/bin/install -c  pcre.so /var/lib/flowbuild/zsh-5.9.2/stage/usr/lib/zsh/5.9.2/zsh/pcre.so
+/bin/sh ../../mkinstalldirs /var/lib/flowbuild/zsh-5.9.2/stage/usr/lib/zsh/5.9.2/zsh
+/usr/bin/install -c  regex.so /var/lib/flowbuild/zsh-5.9.2/stage/usr/lib/zsh/5.9.2/zsh/regex.so
+/bin/sh ../../mkinstalldirs /var/lib/flowbuild/zsh-5.9.2/stage/usr/lib/zsh/5.9.2/zsh/net
+mkdir -m 755 -p -- /var/lib/flowbuild/zsh-5.9.2/stage/usr/lib/zsh/5.9.2/zsh/net
+/usr/bin/install -c  socket.so /var/lib/flowbuild/zsh-5.9.2/stage/usr/lib/zsh/5.9.2/zsh/net/socket.so
+/bin/sh ../../mkinstalldirs /var/lib/flowbuild/zsh-5.9.2/stage/usr/lib/zsh/5.9.2/zsh
+/usr/bin/install -c  stat.so /var/lib/flowbuild/zsh-5.9.2/stage/usr/lib/zsh/5.9.2/zsh/stat.so
+/bin/sh ../../mkinstalldirs /var/lib/flowbuild/zsh-5.9.2/stage/usr/lib/zsh/5.9.2/zsh
+/usr/bin/install -c  system.so /var/lib/flowbuild/zsh-5.9.2/stage/usr/lib/zsh/5.9.2/zsh/system.so
+/bin/sh ../../mkinstalldirs /var/lib/flowbuild/zsh-5.9.2/stage/usr/lib/zsh/5.9.2/zsh/net
+/usr/bin/install -c  tcp.so /var/lib/flowbuild/zsh-5.9.2/stage/usr/lib/zsh/5.9.2/zsh/net/tcp.so
+/bin/sh ../../mkinstalldirs /var/lib/flowbuild/zsh-5.9.2/stage/usr/lib/zsh/5.9.2/zsh
+/usr/bin/install -c  termcap.so /var/lib/flowbuild/zsh-5.9.2/stage/usr/lib/zsh/5.9.2/zsh/termcap.so
+/bin/sh ../../mkinstalldirs /var/lib/flowbuild/zsh-5.9.2/stage/usr/lib/zsh/5.9.2/zsh
+/usr/bin/install -c  terminfo.so /var/lib/flowbuild/zsh-5.9.2/stage/usr/lib/zsh/5.9.2/zsh/terminfo.so
+/bin/sh ../../mkinstalldirs /var/lib/flowbuild/zsh-5.9.2/stage/usr/lib/zsh/5.9.2/zsh
+/usr/bin/install -c  watch.so /var/lib/flowbuild/zsh-5.9.2/stage/usr/lib/zsh/5.9.2/zsh/watch.so
+/bin/sh ../../mkinstalldirs /var/lib/flowbuild/zsh-5.9.2/stage/usr/lib/zsh/5.9.2/zsh
+/usr/bin/install -c  zftp.so /var/lib/flowbuild/zsh-5.9.2/stage/usr/lib/zsh/5.9.2/zsh/zftp.so
+/bin/sh ../../mkinstalldirs /var/lib/flowbuild/zsh-5.9.2/stage/usr/lib/zsh/5.9.2/zsh
+/usr/bin/install -c  zprof.so /var/lib/flowbuild/zsh-5.9.2/stage/usr/lib/zsh/5.9.2/zsh/zprof.so
+/bin/sh ../../mkinstalldirs /var/lib/flowbuild/zsh-5.9.2/stage/usr/lib/zsh/5.9.2/zsh
+/usr/bin/install -c  zpty.so /var/lib/flowbuild/zsh-5.9.2/stage/usr/lib/zsh/5.9.2/zsh/zpty.so
+/bin/sh ../../mkinstalldirs /var/lib/flowbuild/zsh-5.9.2/stage/usr/lib/zsh/5.9.2/zsh
+/usr/bin/install -c  zselect.so /var/lib/flowbuild/zsh-5.9.2/stage/usr/lib/zsh/5.9.2/zsh/zselect.so
+make[4]: Entering directory '/var/lib/flowbuild/zsh-5.9.2/source/Src/Zle'
+make[4]: 'complete.mdh' is up to date.
+make[4]: Leaving directory '/var/lib/flowbuild/zsh-5.9.2/source/Src/Zle'
+make[4]: Entering directory '/var/lib/flowbuild/zsh-5.9.2/source/Src/Zle'
+make[4]: 'complete.export' is up to date.
+make[4]: Leaving directory '/var/lib/flowbuild/zsh-5.9.2/source/Src/Zle'
+/bin/sh ../../mkinstalldirs /var/lib/flowbuild/zsh-5.9.2/stage/usr/lib/zsh/5.9.2/zsh
+/usr/bin/install -c  zutil.so /var/lib/flowbuild/zsh-5.9.2/stage/usr/lib/zsh/5.9.2/zsh/zutil.so
+make[3]: Leaving directory '/var/lib/flowbuild/zsh-5.9.2/source/Src/Modules'
+make[3]: Entering directory '/var/lib/flowbuild/zsh-5.9.2/source/Src/Zle'
+/bin/sh ../../mkinstalldirs /var/lib/flowbuild/zsh-5.9.2/stage/usr/lib/zsh/5.9.2/zsh
+/usr/bin/install -c  compctl.so /var/lib/flowbuild/zsh-5.9.2/stage/usr/lib/zsh/5.9.2/zsh/compctl.so
+/bin/sh ../../mkinstalldirs /var/lib/flowbuild/zsh-5.9.2/stage/usr/lib/zsh/5.9.2/zsh
+/usr/bin/install -c  complete.so /var/lib/flowbuild/zsh-5.9.2/stage/usr/lib/zsh/5.9.2/zsh/complete.so
+/bin/sh ../../mkinstalldirs /var/lib/flowbuild/zsh-5.9.2/stage/usr/lib/zsh/5.9.2/zsh
+/usr/bin/install -c  complist.so /var/lib/flowbuild/zsh-5.9.2/stage/usr/lib/zsh/5.9.2/zsh/complist.so
+/bin/sh ../../mkinstalldirs /var/lib/flowbuild/zsh-5.9.2/stage/usr/lib/zsh/5.9.2/zsh
+/usr/bin/install -c  computil.so /var/lib/flowbuild/zsh-5.9.2/stage/usr/lib/zsh/5.9.2/zsh/computil.so
+/bin/sh ../../mkinstalldirs /var/lib/flowbuild/zsh-5.9.2/stage/usr/lib/zsh/5.9.2/zsh
+/usr/bin/install -c  deltochar.so /var/lib/flowbuild/zsh-5.9.2/stage/usr/lib/zsh/5.9.2/zsh/deltochar.so
+/bin/sh ../../mkinstalldirs /var/lib/flowbuild/zsh-5.9.2/stage/usr/lib/zsh/5.9.2/zsh
+/usr/bin/install -c  zle.so /var/lib/flowbuild/zsh-5.9.2/stage/usr/lib/zsh/5.9.2/zsh/zle.so
+/bin/sh ../../mkinstalldirs /var/lib/flowbuild/zsh-5.9.2/stage/usr/lib/zsh/5.9.2/zsh
+/usr/bin/install -c  zleparameter.so /var/lib/flowbuild/zsh-5.9.2/stage/usr/lib/zsh/5.9.2/zsh/zleparameter.so
+make[3]: Leaving directory '/var/lib/flowbuild/zsh-5.9.2/source/Src/Zle'
+make[2]: Leaving directory '/var/lib/flowbuild/zsh-5.9.2/source/Src'
+make[1]: Leaving directory '/var/lib/flowbuild/zsh-5.9.2/source/Src'
+if test x/usr/share/zsh/5.9.2/functions != x && test x/usr/share/zsh/5.9.2/functions != xno; then \
+  test x/usr/share/zsh/site-functions != xno && \
+    /bin/sh ./mkinstalldirs /var/lib/flowbuild/zsh-5.9.2/stage/usr/share/zsh/site-functions; \
+  sdir_top="." fndir="/usr/share/zsh/5.9.2/functions" dir_top="." \
+  scriptdir="/usr/share/zsh/5.9.2/scripts" runhelpdir="/usr/share/zsh/5.9.2/help" \
+  FUNCTIONS_SUBDIRS="no" \
+  INSTALL_DATA="/usr/bin/install -c -m 644" \
+  INSTALL_PROGRAM="/usr/bin/install -c" \
+  DESTDIR="/var/lib/flowbuild/zsh-5.9.2/stage" VERSION="5.9.2" \
+  /bin/sh ./Config/installfns.sh || exit 1; \
+fi; \
+exit 0
+mkdir -m 755 -p -- /var/lib/flowbuild/zsh-5.9.2/stage/usr/share/zsh/site-functions
+mkdir -m 755 -p -- /var/lib/flowbuild/zsh-5.9.2/stage/usr/share/zsh/5.9.2/functions
+mkdir -m 755 -p -- /var/lib/flowbuild/zsh-5.9.2/stage/usr/share/zsh/5.9.2/scripts
+make[1]: Entering directory '/var/lib/flowbuild/zsh-5.9.2/source/Doc'
+/bin/sh ../mkinstalldirs /var/lib/flowbuild/zsh-5.9.2/stage/usr/share/man/man1
+mkdir -m 755 -p -- /var/lib/flowbuild/zsh-5.9.2/stage/usr/share/man/man1
+for file in zsh.1 zshbuiltins.1 zshcalsys.1 zshcompctl.1 zshcompwid.1 zshcompsys.1 zshcontrib.1 zshexpn.1 zshmisc.1 zshmodules.1 zshoptions.1 zshparam.1 zshroadmap.1 zshtcpsys.1 zshzftpsys.1 zshzle.1 zshall.1; do \
+    test -s $file || exit 1; \
+    /usr/bin/install -c -m 644 $file /var/lib/flowbuild/zsh-5.9.2/stage/usr/share/man/man1/`echo $file | sed 's|zsh|zsh|'` || exit 1; \
+done
+make[1]: Leaving directory '/var/lib/flowbuild/zsh-5.9.2/source/Doc'
+make[1]: Entering directory '/var/lib/flowbuild/zsh-5.9.2/source/Doc'
+if test x"/usr/share/zsh/5.9.2/help" != x""; then \
+    /bin/sh ../mkinstalldirs /var/lib/flowbuild/zsh-5.9.2/stage/usr/share/zsh/5.9.2/help; \
+    /usr/bin/install -c -m 644 help/* /var/lib/flowbuild/zsh-5.9.2/stage/usr/share/zsh/5.9.2/help; \
+    while read from to; do \
+        rm -f /var/lib/flowbuild/zsh-5.9.2/stage/usr/share/zsh/5.9.2/help/$to || : ; \
+        ln -s $from /var/lib/flowbuild/zsh-5.9.2/stage/usr/share/zsh/5.9.2/help/$to; \
+    done < help.txt; \
+fi
+mkdir -m 755 -p -- /var/lib/flowbuild/zsh-5.9.2/stage/usr/share/zsh/5.9.2/help
+make[1]: Leaving directory '/var/lib/flowbuild/zsh-5.9.2/source/Doc'
+make[1]: Entering directory '/var/lib/flowbuild/zsh-5.9.2/source/Doc'
+/bin/sh ../mkinstalldirs /var/lib/flowbuild/zsh-5.9.2/stage/usr/share/info
+mkdir -m 755 -p -- /var/lib/flowbuild/zsh-5.9.2/stage/usr/share/info
+rm -rf infodir
+mkdir infodir
+if ( \
+    sed '/^@setfilename/s|zsh|zsh|' \
+	< ./zsh.texi > infodir/tzsh.texi && \
+    (cd infodir && makeinfo tzsh.texi) && \
+    for file in infodir/zsh.info*; do \
+	/usr/bin/install -c -m 644 $file /var/lib/flowbuild/zsh-5.9.2/stage/usr/share/info || exit 1; \
+    done \
+); then \
+    if /bin/sh -c 'install-info --version' >/dev/null 2>&1; then \
+      install-info --info-dir=/var/lib/flowbuild/zsh-5.9.2/stage/usr/share/info \
+        /var/lib/flowbuild/zsh-5.9.2/stage/usr/share/info/zsh.info; \
+    else true; fi; \
+    rm -rf infodir; \
+    exit 0; \
+else \
+    rm -rf infodir; \
+    exit 1; \
+fi
+tzsh.texi:20702: warning: node `Completion Directories' in menu where `Completion System Variables' expected
+tzsh.texi:20703: warning: unexpected node `Completion System Variables' in menu
+tzsh.texi:101: warning: node prev pointer for `Concept Index' is `Top' but prev is `User Contributions' in menu
+tzsh.texi:20702: warning: node next pointer for `Completion Functions' is `Completion System Variables' but next is `Completion Directories' in menu
+tzsh.texi:20702: warning: node prev pointer for `Completion Directories' is `Completion System Variables' but prev is `Completion Functions' in menu
+tzsh.texi:20703: warning: node prev pointer for `Completion System Variables' is `Completion Functions' but prev is `Completion Directories' in menu
+make[1]: Leaving directory '/var/lib/flowbuild/zsh-5.9.2/source/Doc'
+make[1]: Entering directory '/var/lib/flowbuild/zsh-5.9.2/source/Doc'
+d=`echo 'July 12, 2026'`; \
+v="<font size=\"-1\">Zsh version 5.9.2, released on $d.</font>"; \
+case 'texi2any -c TEXI2HTML=1' in \
+  *texi2any*) echo "texinfo_set_from_init_file('PRE_BODY_CLOSE','$v');" ;; \
+  *) echo "\$PRE_BODY_CLOSE = '$v';" ;; \
+esac > texi2html.conf
+texi2any -c TEXI2HTML=1 --output . --ifinfo --split=chapter --node-files \
+             --init-file texi2html.conf ./zsh.texi
+./zsh.texi:20702: warning: node `Completion Directories' in menu where `Completion System Variables' expected
+./zsh.texi:20703: warning: unexpected node `Completion System Variables' in menu
+./zsh.texi:101: warning: node prev pointer for `Concept Index' is `Top' but prev is `User Contributions' in menu
+./zsh.texi:20702: warning: node next pointer for `Completion Functions' is `Completion System Variables' but next is `Completion Directories' in menu
+./zsh.texi:20702: warning: node prev pointer for `Completion Directories' is `Completion System Variables' but prev is `Completion Functions' in menu
+./zsh.texi:20703: warning: node prev pointer for `Completion System Variables' is `Completion Functions' but prev is `Completion Directories' in menu
+if groff -ms -Thtml -P-jintro ./intro.ms > tmp.html; then \
+  mv tmp.html intro.html; \
+else \
+  rm -f tmp.html; false; \
+fi
+troff:././intro.ms:107: warning: font name 'C' is deprecated
+troff:././intro.ms:107: warning: cannot select font 'C'
+troff:././intro.ms:108: warning: cannot select font 'C'
+troff:././intro.ms:111: warning: cannot select font 'C'
+troff:././intro.ms:112: warning: cannot select font 'C'
+troff:././intro.ms:120: warning: cannot select font 'C'
+troff:././intro.ms:138: warning: cannot select font 'C'
+troff:././intro.ms:139: warning: cannot select font 'C'
+troff:././intro.ms:156: warning: cannot select font 'C'
+troff:././intro.ms:156: warning: cannot select font 'C'
+troff:././intro.ms:158: warning: cannot select font 'C'
+troff:././intro.ms:171: warning: cannot select font 'C'
+troff:././intro.ms:173: warning: cannot select font 'C'
+troff:././intro.ms:179: warning: cannot select font 'C'
+troff:././intro.ms:185: warning: cannot select font 'C'
+troff:././intro.ms:187: warning: cannot select font 'C'
+troff:././intro.ms:217: warning: cannot select font 'C'
+troff:././intro.ms:218: warning: cannot select font 'C'
+troff:././intro.ms:218: warning: cannot select font 'C'
+troff:././intro.ms:219: warning: cannot select font 'C'
+troff:././intro.ms:232: warning: cannot select font 'C'
+troff:././intro.ms:232: warning: cannot select font 'C'
+troff:././intro.ms:235: warning: cannot select font 'C'
+troff:././intro.ms:257: warning: cannot select font 'C'
+troff:././intro.ms:257: warning: cannot select font 'C'
+troff:././intro.ms:258: warning: cannot select font 'C'
+troff:././intro.ms:259: warning: cannot select font 'C'
+troff:././intro.ms:260: warning: cannot select font 'C'
+troff:././intro.ms:260: warning: cannot select font 'C'
+troff:././intro.ms:261: warning: cannot select font 'C'
+troff:././intro.ms:261: warning: cannot select font 'C'
+troff:././intro.ms:262: warning: cannot select font 'C'
+troff:././intro.ms:264: warning: cannot select font 'C'
+troff:././intro.ms:277: warning: cannot select font 'C'
+troff:././intro.ms:278: warning: cannot select font 'C'
+troff:././intro.ms:282: warning: cannot select font 'C'
+troff:././intro.ms:283: warning: cannot select font 'C'
+troff:././intro.ms:291: warning: cannot select font 'C'
+troff:././intro.ms:292: warning: cannot select font 'C'
+troff:././intro.ms:305: warning: cannot select font 'C'
+troff:././intro.ms:306: warning: cannot select font 'C'
+troff:././intro.ms:307: warning: cannot select font 'C'
+troff:././intro.ms:312: warning: cannot select font 'C'
+troff:././intro.ms:317: warning: cannot select font 'C'
+troff:././intro.ms:324: warning: cannot select font 'C'
+troff:././intro.ms:335: warning: cannot select font 'C'
+troff:././intro.ms:336: warning: cannot select font 'C'
+troff:././intro.ms:339: warning: cannot select font 'C'
+troff:././intro.ms:342: warning: cannot select font 'C'
+troff:././intro.ms:345: warning: cannot select font 'C'
+troff:././intro.ms:347: warning: cannot select font 'C'
+troff:././intro.ms:348: warning: cannot select font 'C'
+troff:././intro.ms:348: warning: cannot select font 'C'
+troff:././intro.ms:349: warning: cannot select font 'C'
+troff:././intro.ms:350: warning: cannot select font 'C'
+troff:././intro.ms:350: warning: cannot select font 'C'
+troff:././intro.ms:354: warning: cannot select font 'C'
+troff:././intro.ms:358: warning: cannot select font 'C'
+troff:././intro.ms:358: warning: cannot select font 'C'
+troff:././intro.ms:363: warning: cannot select font 'C'
+troff:././intro.ms:371: warning: cannot select font 'C'
+troff:././intro.ms:371: warning: cannot select font 'C'
+troff:././intro.ms:374: warning: cannot select font 'C'
+troff:././intro.ms:385: warning: cannot select font 'C'
+troff:././intro.ms:393: warning: cannot select font 'C'
+troff:././intro.ms:403: warning: cannot select font 'C'
+troff:././intro.ms:415: warning: cannot select font 'C'
+troff:././intro.ms:416: warning: cannot select font 'C'
+troff:././intro.ms:419: warning: cannot select font 'C'
+troff:././intro.ms:431: warning: cannot select font 'C'
+troff:././intro.ms:433: warning: cannot select font 'C'
+troff:././intro.ms:437: warning: cannot select font 'C'
+troff:././intro.ms:452: warning: cannot select font 'C'
+troff:././intro.ms:452: warning: cannot select font 'C'
+troff:././intro.ms:453: warning: cannot select font 'C'
+troff:././intro.ms:454: warning: cannot select font 'C'
+troff:././intro.ms:454: warning: cannot select font 'C'
+troff:././intro.ms:454: warning: cannot select font 'C'
+troff:././intro.ms:457: warning: cannot select font 'C'
+troff:././intro.ms:458: warning: cannot select font 'C'
+troff:././intro.ms:459: warning: cannot select font 'C'
+troff:././intro.ms:461: warning: cannot select font 'C'
+troff:././intro.ms:462: warning: cannot select font 'C'
+troff:././intro.ms:491: warning: cannot select font 'C'
+troff:././intro.ms:502: warning: cannot select font 'C'
+troff:././intro.ms:511: warning: cannot select font 'C'
+troff:././intro.ms:513: warning: cannot select font 'C'
+troff:././intro.ms:516: warning: cannot select font 'C'
+troff:././intro.ms:519: warning: cannot select font 'C'
+troff:././intro.ms:540: warning: cannot select font 'C'
+troff:././intro.ms:544: warning: cannot select font 'C'
+troff:././intro.ms:560: warning: cannot select font 'C'
+troff:././intro.ms:566: warning: cannot select font 'C'
+troff:././intro.ms:572: warning: cannot select font 'C'
+troff:././intro.ms:574: warning: cannot select font 'C'
+troff:././intro.ms:588: warning: cannot select font 'C'
+troff:././intro.ms:590: warning: cannot select font 'C'
+troff:././intro.ms:591: warning: cannot select font 'C'
+troff:././intro.ms:594: warning: cannot select font 'C'
+troff:././intro.ms:599: warning: cannot select font 'C'
+troff:././intro.ms:605: warning: cannot select font 'C'
+troff:././intro.ms:607: warning: cannot select font 'C'
+troff:././intro.ms:608: warning: cannot select font 'C'
+troff:././intro.ms:610: warning: cannot select font 'C'
+troff:././intro.ms:619: warning: cannot select font 'C'
+troff:././intro.ms:623: warning: cannot select font 'C'
+troff:././intro.ms:626: warning: cannot select font 'C'
+troff:././intro.ms:629: warning: cannot select font 'C'
+troff:././intro.ms:629: warning: cannot select font 'C'
+troff:././intro.ms:630: warning: cannot select font 'C'
+troff:././intro.ms:631: warning: cannot select font 'C'
+troff:././intro.ms:631: warning: cannot select font 'C'
+troff:././intro.ms:633: warning: cannot select font 'C'
+troff:././intro.ms:634: warning: cannot select font 'C'
+troff:././intro.ms:637: warning: cannot select font 'C'
+troff:././intro.ms:640: warning: cannot select font 'C'
+troff:././intro.ms:645: warning: cannot select font 'C'
+troff:././intro.ms:652: warning: cannot select font 'C'
+troff:././intro.ms:653: warning: cannot select font 'C'
+troff:././intro.ms:655: warning: cannot select font 'C'
+troff:././intro.ms:674: warning: cannot select font 'C'
+troff:././intro.ms:677: warning: cannot select font 'C'
+troff:././intro.ms:684: warning: cannot select font 'C'
+troff:././intro.ms:694: warning: cannot select font 'C'
+troff:././intro.ms:703: warning: cannot select font 'C'
+troff:././intro.ms:729: warning: cannot select font 'C'
+troff:././intro.ms:730: warning: cannot select font 'C'
+troff:././intro.ms:734: warning: cannot select font 'C'
+troff:././intro.ms:734: warning: cannot select font 'C'
+troff:././intro.ms:735: warning: cannot select font 'C'
+troff:././intro.ms:736: warning: cannot select font 'C'
+troff:././intro.ms:737: warning: cannot select font 'C'
+troff:././intro.ms:739: warning: cannot select font 'C'
+troff:././intro.ms:758: warning: cannot select font 'C'
+troff:././intro.ms:760: warning: cannot select font 'C'
+troff:././intro.ms:773: warning: cannot select font 'C'
+troff:././intro.ms:797: warning: cannot select font 'C'
+troff:././intro.ms:797: warning: cannot select font 'C'
+troff:././intro.ms:800: warning: cannot select font 'C'
+troff:././intro.ms:800: warning: cannot select font 'C'
+troff:././intro.ms:801: warning: cannot select font 'C'
+troff:././intro.ms:826: warning: cannot select font 'C'
+troff:././intro.ms:836: warning: cannot select font 'C'
+troff:././intro.ms:839: warning: cannot select font 'C'
+troff:././intro.ms:850: warning: cannot select font 'C'
+troff:././intro.ms:861: warning: cannot select font 'C'
+troff:././intro.ms:861: warning: cannot select font 'C'
+troff:././intro.ms:864: warning: cannot select font 'C'
+troff:././intro.ms:864: warning: cannot select font 'C'
+troff:././intro.ms:865: warning: cannot select font 'C'
+troff:././intro.ms:866: warning: cannot select font 'C'
+troff:././intro.ms:872: warning: cannot select font 'C'
+troff:././intro.ms:880: warning: cannot select font 'C'
+troff:././intro.ms:895: warning: cannot select font 'C'
+troff:././intro.ms:922: warning: cannot select font 'C'
+troff:././intro.ms:933: warning: cannot select font 'C'
+troff:././intro.ms:933: warning: cannot select font 'C'
+troff:././intro.ms:935: warning: cannot select font 'C'
+troff:././intro.ms:935: warning: cannot select font 'C'
+troff:././intro.ms:937: warning: cannot select font 'C'
+troff:././intro.ms:937: warning: cannot select font 'C'
+troff:././intro.ms:940: warning: cannot select font 'C'
+troff:././intro.ms:940: warning: cannot select font 'C'
+troff:././intro.ms:940: warning: cannot select font 'C'
+troff:././intro.ms:940: warning: cannot select font 'C'
+troff:././intro.ms:942: warning: cannot select font 'C'
+troff:././intro.ms:942: warning: cannot select font 'C'
+troff:././intro.ms:944: warning: cannot select font 'C'
+troff:././intro.ms:946: warning: cannot select font 'C'
+troff:././intro.ms:947: warning: cannot select font 'C'
+troff:././intro.ms:947: warning: cannot select font 'C'
+troff:././intro.ms:949: warning: cannot select font 'C'
+troff:././intro.ms:952: warning: cannot select font 'C'
+troff:././intro.ms:952: warning: cannot select font 'C'
+troff:././intro.ms:952: warning: cannot select font 'C'
+troff:././intro.ms:952: warning: cannot select font 'C'
+troff:././intro.ms:955: warning: cannot select font 'C'
+troff:././intro.ms:963: warning: cannot select font 'C'
+troff:././intro.ms:968: warning: cannot select font 'C'
+troff:././intro.ms:973: warning: cannot select font 'C'
+troff:././intro.ms:979: warning: cannot select font 'C'
+troff:././intro.ms:982: warning: cannot select font 'C'
+troff:././intro.ms:983: warning: cannot select font 'C'
+troff:././intro.ms:988: warning: cannot select font 'C'
+troff:././intro.ms:988: warning: cannot select font 'C'
+troff:././intro.ms:989: warning: cannot select font 'C'
+troff:././intro.ms:997: warning: cannot select font 'C'
+troff:././intro.ms:1006: warning: cannot select font 'C'
+troff:././intro.ms:1031: warning: cannot select font 'C'
+troff:././intro.ms:1038: warning: cannot select font 'C'
+troff:././intro.ms:1060: warning: cannot select font 'C'
+troff:././intro.ms:1061: warning: cannot select font 'C'
+troff:././intro.ms:1068: warning: cannot select font 'C'
+troff:././intro.ms:1084: warning: cannot select font 'C'
+troff:././intro.ms:1086: warning: cannot select font 'C'
+troff:././intro.ms:1086: warning: cannot select font 'C'
+troff:././intro.ms:1087: warning: cannot select font 'C'
+troff:././intro.ms:1092: warning: cannot select font 'C'
+troff:././intro.ms:1096: warning: cannot select font 'C'
+troff:././intro.ms:1097: warning: cannot select font 'C'
+troff:././intro.ms:1102: warning: cannot select font 'C'
+troff:././intro.ms:1103: warning: cannot select font 'C'
+troff:././intro.ms:1110: warning: cannot select font 'C'
+troff:././intro.ms:1116: warning: cannot select font 'C'
+troff:././intro.ms:1116: warning: cannot select font 'C'
+troff:././intro.ms:1123: warning: cannot select font 'C'
+troff:././intro.ms:1127: warning: cannot select font 'C'
+troff:././intro.ms:1128: warning: cannot select font 'C'
+troff:././intro.ms:1130: warning: cannot select font 'C'
+troff:././intro.ms:1131: warning: cannot select font 'C'
+troff:././intro.ms:1131: warning: cannot select font 'C'
+troff:././intro.ms:1132: warning: cannot select font 'C'
+troff:././intro.ms:1134: warning: cannot select font 'C'
+troff:././intro.ms:1138: warning: cannot select font 'C'
+troff:././intro.ms:1142: warning: cannot select font 'C'
+troff:././intro.ms:1144: warning: cannot select font 'C'
+troff:././intro.ms:1155: warning: cannot select font 'C'
+troff:././intro.ms:1171: warning: cannot select font 'C'
+troff:././intro.ms:1173: warning: cannot select font 'C'
+troff:././intro.ms:1176: warning: cannot select font 'C'
+troff:././intro.ms:1179: warning: cannot select font 'C'
+troff:././intro.ms:1183: warning: cannot select font 'C'
+troff:././intro.ms:1184: warning: cannot select font 'C'
+troff:././intro.ms:1188: warning: cannot select font 'C'
+troff:././intro.ms:1194: warning: cannot select font 'C'
+troff:././intro.ms:1195: warning: cannot select font 'C'
+troff:././intro.ms:1196: warning: cannot select font 'C'
+troff:././intro.ms:1199: warning: cannot select font 'C'
+troff:././intro.ms:1200: warning: cannot select font 'C'
+troff:././intro.ms:1211: warning: cannot select font 'C'
+troff:././intro.ms:1213: warning: cannot select font 'C'
+troff:././intro.ms:1221: warning: cannot select font 'C'
+troff:././intro.ms:1222: warning: cannot select font 'C'
+troff:././intro.ms:1227: warning: cannot select font 'C'
+troff:././intro.ms:1229: warning: cannot select font 'C'
+troff:././intro.ms:1239: warning: cannot select font 'C'
+troff:././intro.ms:1244: warning: cannot select font 'C'
+troff:././intro.ms:1246: warning: cannot select font 'C'
+troff:././intro.ms:1256: warning: cannot select font 'C'
+troff:././intro.ms:1257: warning: cannot select font 'C'
+troff:././intro.ms:1258: warning: cannot select font 'C'
+troff:././intro.ms:1259: warning: cannot select font 'C'
+troff:././intro.ms:1281: warning: cannot select font 'C'
+troff:././intro.ms:1281: warning: cannot select font 'C'
+troff:././intro.ms:1283: warning: cannot select font 'C'
+troff:././intro.ms:1300: warning: cannot select font 'C'
+troff:././intro.ms:1303: warning: cannot select font 'C'
+troff:././intro.ms:1309: warning: cannot select font 'C'
+troff:././intro.ms:1316: warning: cannot select font 'C'
+troff:././intro.ms:1317: warning: cannot select font 'C'
+troff:././intro.ms:1320: warning: cannot select font 'C'
+troff:././intro.ms:1321: warning: cannot select font 'C'
+troff:././intro.ms:1324: warning: cannot select font 'C'
+troff:././intro.ms:1326: warning: cannot select font 'C'
+troff:././intro.ms:1336: warning: cannot select font 'C'
+troff:././intro.ms:1343: warning: cannot select font 'C'
+troff:././intro.ms:1350: warning: cannot select font 'C'
+troff:././intro.ms:1365: warning: cannot select font 'C'
+troff:././intro.ms:1366: warning: cannot select font 'C'
+troff:././intro.ms:1367: warning: cannot select font 'C'
+troff:././intro.ms:1371: warning: cannot select font 'C'
+troff:././intro.ms:1372: warning: cannot select font 'C'
+troff:././intro.ms:1384: warning: cannot select font 'C'
+troff:././intro.ms:1386: warning: cannot select font 'C'
+troff:././intro.ms:1392: warning: cannot select font 'C'
+troff:././intro.ms:1393: warning: cannot select font 'C'
+troff:././intro.ms:1398: warning: cannot select font 'C'
+troff:././intro.ms:1403: warning: cannot select font 'C'
+troff:././intro.ms:1405: warning: cannot select font 'C'
+troff:././intro.ms:1406: warning: cannot select font 'C'
+troff:././intro.ms:1411: warning: cannot select font 'C'
+troff:././intro.ms:1413: warning: cannot select font 'C'
+troff:././intro.ms:1414: warning: cannot select font 'C'
+troff:././intro.ms:1420: warning: cannot select font 'C'
+troff:././intro.ms:1422: warning: cannot select font 'C'
+troff:././intro.ms:1423: warning: cannot select font 'C'
+troff:././intro.ms:1429: warning: cannot select font 'C'
+troff:././intro.ms:1434: warning: cannot select font 'C'
+troff:././intro.ms:1440: warning: cannot select font 'C'
+troff:././intro.ms:1447: warning: cannot select font 'C'
+troff:././intro.ms:1449: warning: cannot select font 'C'
+troff:././intro.ms:1450: warning: cannot select font 'C'
+troff:././intro.ms:1450: warning: cannot select font 'C'
+troff:././intro.ms:1457: warning: cannot select font 'C'
+troff:././intro.ms:1465: warning: cannot select font 'C'
+troff:././intro.ms:1469: warning: cannot select font 'C'
+troff:././intro.ms:1473: warning: cannot select font 'C'
+troff:././intro.ms:1476: warning: cannot select font 'C'
+troff:././intro.ms:1477: warning: cannot select font 'C'
+troff:././intro.ms:1481: warning: cannot select font 'C'
+troff:././intro.ms:1484: warning: cannot select font 'C'
+troff:././intro.ms:1490: warning: cannot select font 'C'
+troff:././intro.ms:1497: warning: cannot select font 'C'
+troff:././intro.ms:1498: warning: cannot select font 'C'
+troff:././intro.ms:1502: warning: cannot select font 'C'
+troff:././intro.ms:1503: warning: cannot select font 'C'
+troff:././intro.ms:1515: warning: cannot select font 'C'
+troff:././intro.ms:1516: warning: cannot select font 'C'
+troff:././intro.ms:1519: warning: cannot select font 'C'
+troff:././intro.ms:1522: warning: cannot select font 'C'
+troff:././intro.ms:1525: warning: cannot select font 'C'
+troff:././intro.ms:1532: warning: cannot select font 'C'
+troff:././intro.ms:1534: warning: cannot select font 'C'
+troff:././intro.ms:1537: warning: cannot select font 'C'
+troff:././intro.ms:1541: warning: cannot select font 'C'
+troff:././intro.ms:1542: warning: cannot select font 'C'
+troff:././intro.ms:1544: warning: cannot select font 'C'
+troff:././intro.ms:1549: warning: cannot select font 'C'
+troff:././intro.ms:1551: warning: cannot select font 'C'
+troff:././intro.ms:1557: warning: cannot select font 'C'
+troff:././intro.ms:1560: warning: cannot select font 'C'
+troff:././intro.ms:1562: warning: cannot select font 'C'
+troff:././intro.ms:1563: warning: cannot select font 'C'
+troff:././intro.ms:1573: warning: cannot select font 'C'
+troff:././intro.ms:1574: warning: cannot select font 'C'
+troff:././intro.ms:1576: warning: cannot select font 'C'
+troff:././intro.ms:1577: warning: cannot select font 'C'
+troff:././intro.ms:1578: warning: cannot select font 'C'
+troff:././intro.ms:1594: warning: cannot select font 'C'
+troff:././intro.ms:1596: warning: cannot select font 'C'
+troff:././intro.ms:1599: warning: cannot select font 'C'
+troff:././intro.ms:1610: warning: cannot select font 'C'
+troff:././intro.ms:1611: warning: cannot select font 'C'
+troff:././intro.ms:1617: warning: cannot select font 'C'
+troff:././intro.ms:1617: warning: cannot select font 'C'
+troff:././intro.ms:1618: warning: cannot select font 'C'
+troff:././intro.ms:1621: warning: cannot select font 'C'
+troff:././intro.ms:1622: warning: cannot select font 'C'
+troff:././intro.ms:1626: warning: cannot select font 'C'
+troff:././intro.ms:1627: warning: cannot select font 'C'
+troff:././intro.ms:1629: warning: cannot select font 'C'
+troff:././intro.ms:1639: warning: cannot select font 'C'
+troff:././intro.ms:1640: warning: cannot select font 'C'
+troff:././intro.ms:1644: warning: cannot select font 'C'
+troff:././intro.ms:1645: warning: cannot select font 'C'
+troff:././intro.ms:1648: warning: cannot select font 'C'
+troff:././intro.ms:1650: warning: cannot select font 'C'
+troff:././intro.ms:1651: warning: cannot select font 'C'
+troff:././intro.ms:1653: warning: cannot select font 'C'
+troff:././intro.ms:1657: warning: cannot select font 'C'
+troff:././intro.ms:1657: warning: cannot select font 'C'
+troff:././intro.ms:1659: warning: cannot select font 'C'
+troff:././intro.ms:1661: warning: cannot select font 'C'
+troff:././intro.ms:1664: warning: cannot select font 'C'
+troff:././intro.ms:1667: warning: cannot select font 'C'
+troff:././intro.ms:1667: warning: cannot select font 'C'
+troff:././intro.ms:1668: warning: cannot select font 'C'
+troff:././intro.ms:1669: warning: cannot select font 'C'
+troff:././intro.ms:1674: warning: cannot select font 'C'
+troff:././intro.ms:1675: warning: cannot select font 'C'
+troff:././intro.ms:1677: warning: cannot select font 'C'
+troff:././intro.ms:1680: warning: cannot select font 'C'
+troff:././intro.ms:1684: warning: cannot select font 'C'
+troff:././intro.ms:1688: warning: cannot select font 'C'
+troff:././intro.ms:1690: warning: cannot select font 'C'
+troff:././intro.ms:1691: warning: cannot select font 'C'
+troff:././intro.ms:1696: warning: cannot select font 'C'
+troff:././intro.ms:1698: warning: cannot select font 'C'
+troff:././intro.ms:1704: warning: cannot select font 'C'
+troff:././intro.ms:1709: warning: cannot select font 'C'
+troff:././intro.ms:1711: warning: cannot select font 'C'
+troff:././intro.ms:1715: warning: cannot select font 'C'
+troff:././intro.ms:1718: warning: cannot select font 'C'
+troff:././intro.ms:1719: warning: cannot select font 'C'
+troff:././intro.ms:1719: warning: cannot select font 'C'
+troff:././intro.ms:1721: warning: cannot select font 'C'
+troff:././intro.ms:1721: warning: cannot select font 'C'
+troff:././intro.ms:1724: warning: cannot select font 'C'
+troff:././intro.ms:1728: warning: cannot select font 'C'
+troff:././intro.ms:1733: warning: cannot select font 'C'
+troff:././intro.ms:1734: warning: cannot select font 'C'
+troff:././intro.ms:1736: warning: cannot select font 'C'
+troff:././intro.ms:1738: warning: cannot select font 'C'
+troff:././intro.ms:1745: warning: cannot select font 'C'
+troff:././intro.ms:1747: warning: cannot select font 'C'
+troff:././intro.ms:1759: warning: cannot select font 'C'
+troff:././intro.ms:1760: warning: cannot select font 'C'
+troff:././intro.ms:1761: warning: cannot select font 'C'
+troff:././intro.ms:1766: warning: cannot select font 'C'
+troff:././intro.ms:1768: warning: cannot select font 'C'
+troff:././intro.ms:1770: warning: cannot select font 'C'
+troff:././intro.ms:1772: warning: cannot select font 'C'
+troff:././intro.ms:1775: warning: cannot select font 'C'
+troff:././intro.ms:1779: warning: cannot select font 'C'
+troff:././intro.ms:1782: warning: cannot select font 'C'
+troff:././intro.ms:1783: warning: cannot select font 'C'
+troff:././intro.ms:1788: warning: cannot select font 'C'
+troff:././intro.ms:1800: warning: cannot select font 'C'
+troff:././intro.ms:1801: warning: cannot select font 'C'
+troff:././intro.ms:1801: warning: cannot select font 'C'
+troff:././intro.ms:1809: warning: cannot select font 'C'
+troff:././intro.ms:1810: warning: cannot select font 'C'
+troff:././intro.ms:1812: warning: cannot select font 'C'
+troff:././intro.ms:1812: warning: cannot select font 'C'
+troff:././intro.ms:1815: warning: cannot select font 'C'
+troff:././intro.ms:1815: warning: cannot select font 'C'
+troff:././intro.ms:1815: warning: cannot select font 'C'
+troff:././intro.ms:1820: warning: cannot select font 'C'
+troff:././intro.ms:1829: warning: cannot select font 'C'
+troff:././intro.ms:1830: warning: cannot select font 'C'
+troff:././intro.ms:1831: warning: cannot select font 'C'
+troff:././intro.ms:1832: warning: cannot select font 'C'
+troff:././intro.ms:1833: warning: cannot select font 'C'
+troff:././intro.ms:1835: warning: cannot select font 'C'
+troff:././intro.ms:1835: warning: cannot select font 'C'
+troff:././intro.ms:1838: warning: cannot select font 'C'
+troff:././intro.ms:1843: warning: cannot select font 'C'
+troff:././intro.ms:1844: warning: cannot select font 'C'
+troff:././intro.ms:1844: warning: cannot select font 'C'
+troff:././intro.ms:1844: warning: cannot select font 'C'
+troff:././intro.ms:1844: warning: cannot select font 'C'
+troff:././intro.ms:1848: warning: cannot select font 'C'
+troff:././intro.ms:1851: warning: cannot select font 'C'
+troff:././intro.ms:1852: warning: cannot select font 'C'
+troff:././intro.ms:1852: warning: cannot select font 'C'
+troff:././intro.ms:1852: warning: cannot select font 'C'
+troff:././intro.ms:1853: warning: cannot select font 'C'
+troff:././intro.ms:1853: warning: cannot select font 'C'
+troff:././intro.ms:1853: warning: cannot select font 'C'
+troff:././intro.ms:1855: warning: cannot select font 'C'
+troff:././intro.ms:1858: warning: cannot select font 'C'
+troff:././intro.ms:1862: warning: cannot select font 'C'
+troff:././intro.ms:1863: warning: cannot select font 'C'
+troff:././intro.ms:1868: warning: cannot select font 'C'
+troff:././intro.ms:1868: warning: cannot select font 'C'
+troff:././intro.ms:1870: warning: cannot select font 'C'
+troff:././intro.ms:1870: warning: cannot select font 'C'
+troff:././intro.ms:1870: warning: cannot select font 'C'
+troff:././intro.ms:1873: warning: cannot select font 'C'
+troff:././intro.ms:1877: warning: cannot select font 'C'
+troff:././intro.ms:1877: warning: cannot select font 'C'
+troff:././intro.ms:1878: warning: cannot select font 'C'
+troff:././intro.ms:1882: warning: cannot select font 'C'
+troff:././intro.ms:1883: warning: cannot select font 'C'
+troff:././intro.ms:1884: warning: cannot select font 'C'
+troff:././intro.ms:1885: warning: cannot select font 'C'
+troff:././intro.ms:1886: warning: cannot select font 'C'
+troff:././intro.ms:1886: warning: cannot select font 'C'
+troff:././intro.ms:1887: warning: cannot select font 'C'
+troff:././intro.ms:1887: warning: cannot select font 'C'
+troff:././intro.ms:1889: warning: cannot select font 'C'
+troff:././intro.ms:1891: warning: cannot select font 'C'
+troff:././intro.ms:1892: warning: cannot select font 'C'
+troff:././intro.ms:1897: warning: cannot select font 'C'
+troff:././intro.ms:1898: warning: cannot select font 'C'
+troff:././intro.ms:1898: warning: cannot select font 'C'
+troff:././intro.ms:1899: warning: cannot select font 'C'
+troff:././intro.ms:1902: warning: cannot select font 'C'
+troff:././intro.ms:1902: warning: cannot select font 'C'
+troff:././intro.ms:1902: warning: cannot select font 'C'
+troff:././intro.ms:1903: warning: cannot select font 'C'
+troff:././intro.ms:1903: warning: cannot select font 'C'
+troff:././intro.ms:1903: warning: cannot select font 'C'
+troff:././intro.ms:1906: warning: cannot select font 'C'
+troff:././intro.ms:1907: warning: cannot select font 'C'
+troff:././intro.ms:1909: warning: cannot select font 'C'
+troff:././intro.ms:1910: warning: cannot select font 'C'
+troff:././intro.ms:1914: warning: cannot select font 'C'
+troff:././intro.ms:1921: warning: cannot select font 'C'
+troff:././intro.ms:1922: warning: cannot select font 'C'
+troff:././intro.ms:1927: warning: cannot select font 'C'
+troff:././intro.ms:1930: warning: cannot select font 'C'
+troff:././intro.ms:1930: warning: cannot select font 'C'
+troff:././intro.ms:1935: warning: cannot select font 'C'
+troff:././intro.ms:1936: warning: cannot select font 'C'
+troff:././intro.ms:1937: warning: cannot select font 'C'
+troff:././intro.ms:1938: warning: cannot select font 'C'
+troff:././intro.ms:1939: warning: cannot select font 'C'
+troff:././intro.ms:1940: warning: cannot select font 'C'
+troff:././intro.ms:1943: warning: cannot select font 'C'
+troff:././intro.ms:1944: warning: cannot select font 'C'
+troff:././intro.ms:1947: warning: cannot select font 'C'
+troff:././intro.ms:1949: warning: cannot select font 'C'
+troff:././intro.ms:1952: warning: cannot select font 'C'
+troff:././intro.ms:1953: warning: cannot select font 'C'
+troff:././intro.ms:1957: warning: cannot select font 'C'
+troff:././intro.ms:1964: warning: cannot select font 'C'
+troff:././intro.ms:1966: warning: cannot select font 'C'
+troff:././intro.ms:1971: warning: cannot select font 'C'
+troff:././intro.ms:1973: warning: cannot select font 'C'
+troff:././intro.ms:1975: warning: cannot select font 'C'
+troff:././intro.ms:1975: warning: cannot select font 'C'
+troff:././intro.ms:1976: warning: cannot select font 'C'
+troff:././intro.ms:1979: warning: cannot select font 'C'
+troff:././intro.ms:1979: warning: cannot select font 'C'
+troff:././intro.ms:1982: warning: cannot select font 'C'
+troff:././intro.ms:1988: warning: cannot select font 'C'
+troff:././intro.ms:1988: warning: cannot select font 'C'
+troff:././intro.ms:1989: warning: cannot select font 'C'
+troff:././intro.ms:1991: warning: cannot select font 'C'
+troff:././intro.ms:1991: warning: cannot select font 'C'
+troff:././intro.ms:2001: warning: cannot select font 'C'
+troff:././intro.ms:2006: warning: cannot select font 'C'
+troff:././intro.ms:2007: warning: cannot select font 'C'
+troff:././intro.ms:2011: warning: cannot select font 'C'
+troff:././intro.ms:2012: warning: cannot select font 'C'
+troff:././intro.ms:2020: warning: cannot select font 'C'
+troff:././intro.ms:2022: warning: cannot select font 'C'
+troff:././intro.ms:2022: warning: cannot select font 'C'
+troff:././intro.ms:2023: warning: cannot select font 'C'
+troff:././intro.ms:2033: warning: cannot select font 'C'
+troff:././intro.ms:2042: warning: cannot select font 'C'
+troff:././intro.ms:2043: warning: cannot select font 'C'
+troff:././intro.ms:2044: warning: cannot select font 'C'
+troff:././intro.ms:2046: warning: cannot select font 'C'
+troff:././intro.ms:2047: warning: cannot select font 'C'
+troff:././intro.ms:2058: warning: cannot select font 'C'
+troff:././intro.ms:2079: warning: cannot select font 'C'
+troff:././intro.ms:2081: warning: cannot select font 'C'
+troff:././intro.ms:2100: warning: cannot select font 'C'
+troff:././intro.ms:2100: warning: cannot select font 'C'
+troff:././intro.ms:2103: warning: cannot select font 'C'
+troff:././intro.ms:2103: warning: cannot select font 'C'
+troff:././intro.ms:2105: warning: cannot select font 'C'
+troff:././intro.ms:2105: warning: cannot select font 'C'
+troff:././intro.ms:2106: warning: cannot select font 'C'
+troff:././intro.ms:2106: warning: cannot select font 'C'
+troff:././intro.ms:2106: warning: cannot select font 'C'
+troff:././intro.ms:2106: warning: cannot select font 'C'
+troff:././intro.ms:2108: warning: cannot select font 'C'
+troff:././intro.ms:2109: warning: cannot select font 'C'
+troff:././intro.ms:2122: warning: cannot select font 'C'
+troff:././intro.ms:2130: warning: cannot select font 'C'
+troff:././intro.ms:2141: warning: cannot select font 'C'
+troff:././intro.ms:2142: warning: cannot select font 'C'
+troff:././intro.ms:2142: warning: cannot select font 'C'
+troff:././intro.ms:2144: warning: cannot select font 'C'
+troff:././intro.ms:2145: warning: cannot select font 'C'
+troff:././intro.ms:2154: warning: cannot select font 'C'
+troff:././intro.ms:2162: warning: cannot select font 'C'
+troff:././intro.ms:2172: warning: cannot select font 'C'
+troff:././intro.ms:2179: warning: cannot select font 'C'
+troff:././intro.ms:2186: warning: cannot select font 'C'
+troff:././intro.ms:2187: warning: cannot select font 'C'
+troff:././intro.ms:2194: warning: cannot select font 'C'
+troff:././intro.ms:2201: warning: cannot select font 'C'
+troff:././intro.ms:2216: warning: cannot select font 'C'
+troff:././intro.ms:2231: warning: cannot select font 'C'
+troff:././intro.ms:2231: warning: cannot select font 'C'
+troff:././intro.ms:2232: warning: cannot select font 'C'
+troff:././intro.ms:2244: warning: cannot select font 'C'
+troff:././intro.ms:2244: warning: cannot select font 'C'
+troff:././intro.ms:2244: warning: cannot select font 'C'
+troff:././intro.ms:2244: warning: cannot select font 'C'
+troff:././intro.ms:2245: warning: cannot select font 'C'
+troff:././intro.ms:2264: warning: cannot select font 'C'
+troff:././intro.ms:2264: warning: cannot select font 'C'
+troff:././intro.ms:2265: warning: cannot select font 'C'
+troff:././intro.ms:2267: warning: cannot select font 'C'
+troff:././intro.ms:2295: warning: cannot select font 'C'
+troff:././intro.ms:2304: warning: cannot select font 'C'
+troff:././intro.ms:2313: warning: cannot select font 'C'
+troff:././intro.ms:2314: warning: cannot select font 'C'
+troff:././intro.ms:2314: warning: cannot select font 'C'
+troff:././intro.ms:2319: warning: cannot select font 'C'
+troff:././intro.ms:2323: warning: cannot select font 'C'
+troff:././intro.ms:2331: warning: cannot select font 'C'
+troff:././intro.ms:2362: warning: cannot select font 'C'
+troff:././intro.ms:2365: warning: cannot select font 'C'
+troff:././intro.ms:2366: warning: cannot select font 'C'
+troff:././intro.ms:2374: warning: cannot select font 'C'
+troff:././intro.ms:2380: warning: cannot select font 'C'
+troff:././intro.ms:2381: warning: cannot select font 'C'
+troff:././intro.ms:2387: warning: cannot select font 'C'
+troff:././intro.ms:2389: warning: cannot select font 'C'
+troff:././intro.ms:2396: warning: cannot select font 'C'
+troff:././intro.ms:2396: warning: cannot select font 'C'
+troff:././intro.ms:2396: warning: cannot select font 'C'
+troff:././intro.ms:2397: warning: cannot select font 'C'
+troff:././intro.ms:2398: warning: cannot select font 'C'
+troff:././intro.ms:2398: warning: cannot select font 'C'
+troff:././intro.ms:2402: warning: cannot select font 'C'
+troff:././intro.ms:2406: warning: cannot select font 'C'
+troff:././intro.ms:2407: warning: cannot select font 'C'
+troff:././intro.ms:2407: warning: cannot select font 'C'
+troff:././intro.ms:2407: warning: cannot select font 'C'
+troff:././intro.ms:2411: warning: cannot select font 'C'
+troff:././intro.ms:2421: warning: cannot select font 'C'
+troff:././intro.ms:2422: warning: cannot select font 'C'
+troff:././intro.ms:2436: warning: cannot select font 'C'
+troff:././intro.ms:2438: warning: cannot select font 'C'
+troff:././intro.ms:2449: warning: cannot select font 'C'
+troff:././intro.ms:2460: warning: cannot select font 'C'
+troff:././intro.ms:2460: warning: cannot select font 'C'
+troff:././intro.ms:2461: warning: cannot select font 'C'
+troff:././intro.ms:2469: warning: cannot select font 'C'
+troff:././intro.ms:2479: warning: cannot select font 'C'
+troff:././intro.ms:2482: warning: cannot select font 'C'
+troff:././intro.ms:2484: warning: cannot select font 'C'
+troff:././intro.ms:2488: warning: cannot select font 'C'
+troff:././intro.ms:2490: warning: cannot select font 'C'
+troff:././intro.ms:2492: warning: cannot select font 'C'
+troff:././intro.ms:2494: warning: cannot select font 'C'
+troff:././intro.ms:2497: warning: cannot select font 'C'
+troff:././intro.ms:2500: warning: cannot select font 'C'
+troff:././intro.ms:2507: warning: cannot select font 'C'
+troff:././intro.ms:2509: warning: cannot select font 'C'
+troff:././intro.ms:2516: warning: cannot select font 'C'
+troff:././intro.ms:2562: warning: cannot select font 'C'
+troff:././intro.ms:2565: warning: cannot select font 'C'
+troff:././intro.ms:2570: warning: cannot select font 'C'
+troff:././intro.ms:2578: warning: cannot select font 'C'
+troff:././intro.ms:2588: warning: cannot select font 'C'
+troff:././intro.ms:2591: warning: cannot select font 'C'
+troff:././intro.ms:2600: warning: cannot select font 'C'
+troff:././intro.ms:2612: warning: cannot select font 'C'
+troff:././intro.ms:2614: warning: cannot select font 'C'
+troff:././intro.ms:2615: warning: cannot select font 'C'
+troff:././intro.ms:2615: warning: cannot select font 'C'
+troff:././intro.ms:2620: warning: cannot select font 'C'
+troff:././intro.ms:2631: warning: cannot select font 'C'
+troff:././intro.ms:2636: warning: cannot select font 'C'
+troff:././intro.ms:2639: warning: cannot select font 'C'
+troff:././intro.ms:2654: warning: cannot select font 'C'
+troff:././intro.ms:2674: warning: cannot select font 'C'
+troff:././intro.ms:2681: warning: cannot select font 'C'
+troff:././intro.ms:2681: warning: cannot select font 'C'
+troff:././intro.ms:2683: warning: cannot select font 'C'
+troff:././intro.ms:2689: warning: cannot select font 'C'
+troff:././intro.ms:2690: warning: cannot select font 'C'
+troff:././intro.ms:2699: warning: cannot select font 'C'
+troff:././intro.ms:2705: warning: cannot select font 'C'
+troff:././intro.ms:2706: warning: cannot select font 'C'
+troff:././intro.ms:2707: warning: cannot select font 'C'
+troff:././intro.ms:2708: warning: cannot select font 'C'
+troff:././intro.ms:2718: warning: cannot select font 'C'
+troff:././intro.ms:2729: warning: cannot select font 'C'
+troff:././intro.ms:2730: warning: cannot select font 'C'
+troff:././intro.ms:2732: warning: cannot select font 'C'
+troff:././intro.ms:2733: warning: cannot select font 'C'
+/bin/sh ../mkinstalldirs /var/lib/flowbuild/zsh-5.9.2/stage/usr/share/doc/zsh-5.9.2/html
+mkdir -m 755 -p -- /var/lib/flowbuild/zsh-5.9.2/stage/usr/share/doc/zsh-5.9.2/html
+for file in *.html; do \
+    /usr/bin/install -c -m 644 $file /var/lib/flowbuild/zsh-5.9.2/stage/usr/share/doc/zsh-5.9.2/html || exit 1; \
+done
+make[1]: Leaving directory '/var/lib/flowbuild/zsh-5.9.2/source/Doc'

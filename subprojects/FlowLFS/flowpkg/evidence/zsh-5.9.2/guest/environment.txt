@@ -1,0 +1,7 @@
+package=zsh
+version=5.9.2
+source_sha256=36fa734374b44783582cec09bcd67822e2f992c779ec1624ab5596df078d2f81
+builder=uid=999(flowbuilder) gid=998(flowbuilder) groups=998(flowbuilder)
+kernel=Linux 7.1.8 #1 SMP PREEMPT_DYNAMIC Sat Aug 29 20:58:55 UTC 2026 x86_64 GNU/Linux
+gcc (GCC) 16.2.0
+GNU Make 4.4.1

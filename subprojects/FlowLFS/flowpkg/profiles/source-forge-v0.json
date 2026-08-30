@@ -1,0 +1,21 @@
+{
+  "format": "flowlfs.profile",
+  "version": 0,
+  "profile_id": "flowlfs.source-forge.v0",
+  "policy_profile": "experimental",
+  "composable": true,
+  "requires": [
+    "canonical-source-input",
+    "source-integrity-verification",
+    "unprivileged-native-build",
+    "immutable-package-store",
+    "reversible-filesystem-projection",
+    "package-provenance-query",
+    "build-evidence-export"
+  ],
+  "recovery_invariants": {
+    "root_login_shell": "/bin/bash",
+    "remote_service": "sshd.service",
+    "serial_console": true
+  }
+}
