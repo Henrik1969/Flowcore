@@ -44,6 +44,7 @@ immutable controls. All post-baseline work belongs in
 
 ```text
 book/                 canonical LFS book and book-source archive
+blfs/                 captured stable and execution BLFS systemd books
 manifests/            canonical download list and checksums
 sources/              upstream release tarballs and LFS patches (untracked)
 execution/            separately pinned, post-advisory execution snapshot
@@ -67,13 +68,14 @@ artifacts/            untracked ISO/disk images and evidence bundles
 ## Start here
 
 1. Read [FlowLFS, Part 1](FlowLFS_part_1.md), the revised build handbook.
-2. Read [authority and method](docs/AUTHORITY-AND-METHOD.md).
-3. Read [development environment](docs/DEVELOPMENT-ENVIRONMENT.md).
-4. Read the [security baseline](docs/SECURITY-BASELINE.md).
-5. Read the [execution mutation ledger](execution/MUTATION-LEDGER.md).
-6. Run `scripts/check-host-requirements.sh`.
-7. Review the retrieved books and manifests.
-8. Do not begin Chapter 2 disk operations until an isolated image-backed build
+2. Read the [captured BLFS authority](blfs/README.md).
+3. Read [authority and method](docs/AUTHORITY-AND-METHOD.md).
+4. Read [development environment](docs/DEVELOPMENT-ENVIRONMENT.md).
+5. Read the [security baseline](docs/SECURITY-BASELINE.md).
+6. Read the [execution mutation ledger](execution/MUTATION-LEDGER.md).
+7. Run `scripts/check-host-requirements.sh`.
+8. Review the retrieved books and manifests.
+9. Do not begin Chapter 2 disk operations until an isolated image-backed build
    boundary has been reviewed.
 
 ## Non-claims
