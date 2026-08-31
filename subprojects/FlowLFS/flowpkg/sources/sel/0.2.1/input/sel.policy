@@ -1,0 +1,7 @@
+allow libflowterminal.so.1 flow_terminal_open c terminal
+allow libflowterminal.so.1 flow_terminal_close c terminal
+allow libflowterminal.so.1 flow_terminal_enter c terminal
+allow libflowterminal.so.1 flow_terminal_write c terminal
+allow libflowterminal.so.1 flow_terminal_present c terminal
+allow libflowterminal.so.1 flow_terminal_read_event c terminal
+allow libc.so.6 puts c io

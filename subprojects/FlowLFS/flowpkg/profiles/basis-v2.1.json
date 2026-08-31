@@ -1,0 +1,15 @@
+{
+  "schema": "flowlfs.profile-realization.v0",
+  "profile": "flowlfs.basis.v2.1",
+  "selection": "system-owner",
+  "law": "preserve canonical behavior and terminal insulation while making normalized navigation operational",
+  "resolved": [
+    {"package": "zsh", "version": "5.9.2", "object": "sha256-35919dcaea12c0c67ea22ef0598feb20148c6be78d331bd84aa117a8bdcd9b73"},
+    {"package": "flow-basis", "version": "0.1.0", "object": "sha256-f2cf1b94f4edc7289d92b60a203d659c3a880ddc35ba6081f97bc5d60348a2b9"},
+    {"package": "flow-terminal", "version": "1.0.0", "object": "sha256-ad1b715e2c2d8e390444ea69a9603901b946a5a2dbb80759fd0d5cdc9f6ddec2"},
+    {"package": "sel", "version": "0.2.1", "object": "sha256-4f15abfd0db057e5fc5bcf3d230b7a34ce87476bdfe51f95b686c5d57401c535"}
+  ],
+  "terminal_contract": "normalized up/down/enter events alter functional selection without terminal-brand control sequences",
+  "navigation_acceptance": ["down+enter selects beta", "down+down+up+enter selects beta", "q cancels"],
+  "projections": ["xterm-kitty", "alacritty", "invented-terminal"]
+}

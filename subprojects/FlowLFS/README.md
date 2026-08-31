@@ -70,6 +70,11 @@ The terminal-insulated revision is documented in
 `sel`'s direct ncurses dependency with a provider-neutral terminal ABI and an
 independent terminal-restoration guardian.
 
+Interactive navigation is completed by the immutable basis v2.1 correction,
+`artifacts/FlowLFS-v0.1-basis-v2.1-terminal-navigation.qcow2`, launched with
+`scripts/launch-basis-v2.1-navigation.sh` on default callback port 2232. The
+original sealed v2 image remains unchanged as failure and lineage evidence.
+
 ## Layout
 
 ```text

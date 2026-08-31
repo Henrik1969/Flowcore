@@ -32,5 +32,10 @@ clang "$tmpdir/sel.ll" -L"$FLOWTERMINAL_LIBDIR" -Wl,-rpath,"$FLOWTERMINAL_LIBDIR
 printf 'q' | TERM=invented-terminal "$tmpdir/sel" > "$tmpdir/output" || status=$?
 test "${status:-0}" -eq 1
 grep -q 'selection: none' "$tmpdir/output"
+printf '\033[B\n' | TERM=xterm-kitty "$tmpdir/sel" > "$tmpdir/down-output"
+grep -q 'cursor: beta' "$tmpdir/down-output"
+grep -q 'selected: beta' "$tmpdir/down-output"
+printf '\033[B\033[B\033[A\n' | TERM=alacritty "$tmpdir/sel" > "$tmpdir/multi-output"
+grep -q 'selected: beta' "$tmpdir/multi-output"
 ! grep -q 'ncurses\|terminfo\|xterm-kitty' "$tmpdir/sel.ll"
-echo 'FLOWTERMINAL_SEL_PIPELINE_PASS provider=flowterminal projection=unknown'
+echo 'FLOWTERMINAL_SEL_PIPELINE_PASS provider=flowterminal navigation=up,down,enter projection=unknown'
