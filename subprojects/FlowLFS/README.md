@@ -75,6 +75,11 @@ Interactive navigation is completed by the immutable basis v2.1 correction,
 `scripts/launch-basis-v2.1-navigation.sh` on default callback port 2232. The
 original sealed v2 image remains unchanged as failure and lineage evidence.
 
+The first interchangeable selection capability is described in
+`docs/SELECTION-PROVIDERS-V0.md`. Its runnable image adds source-built Go,
+canonical source-built fzf, and explicit native/fzf provider policy without
+changing the native default.
+
 ## Layout
 
 ```text

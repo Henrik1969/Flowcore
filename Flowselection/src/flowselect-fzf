@@ -1,0 +1,8 @@
+#!/bin/sh
+set -eu
+
+test "$#" -gt 0 || exit 2
+for candidate do printf '%s\n' "$candidate"; done |
+    FZF_DEFAULT_COMMAND= FZF_DEFAULT_OPTS= SHELL=/bin/false \
+    /usr/bin/fzf --no-multi --no-mouse --no-scrollbar --no-separator \
+        --no-preview --no-input --layout=reverse --height=100%

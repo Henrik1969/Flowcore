@@ -1,0 +1,22 @@
+#!/bin/sh
+set -eu
+policy_root=${FLOW_SELECTION_POLICY_ROOT:-/etc/flowcore/selection}
+local_policy=$policy_root/provider.local
+case "${1:-status}" in
+    status)
+        if test -r "$local_policy"; then printf 'owner\t'; cat "$local_policy"; else printf 'default\t'; cat "$policy_root/provider"; fi
+        ;;
+    set)
+        test "$(id -u)" -eq 0 || { echo 'flowselection-provider: set requires root' >&2; exit 2; }
+        case "${2:-}" in native|fzf) provider=$2;; *) echo 'flowselection-provider: provider must be native or fzf' >&2; exit 2;; esac
+        temporary=$policy_root/.provider.local.$$
+        printf '%s\n' "$provider" > "$temporary"
+        chmod 0644 "$temporary"
+        mv "$temporary" "$local_policy"
+        ;;
+    reset)
+        test "$(id -u)" -eq 0 || { echo 'flowselection-provider: reset requires root' >&2; exit 2; }
+        rm -f "$local_policy"
+        ;;
+    *) echo 'usage: flowselection-provider [status|set native|set fzf|reset]' >&2; exit 2;;
+esac
