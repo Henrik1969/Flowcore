@@ -28,3 +28,22 @@ Notable upstream results include p11-kit 67/67, libtasn1 31/31, libidn2 12/12,
 libpsl 8/8, curl 1599/1599 applicable tests, and Git 31695 successful with zero
 failures (391 upstream TODO/broken expectations). Git has the explicit
 `NO_RUST=1` constraint until a Rust toolchain is independently admitted.
+
+## Runnable realization
+
+The profile was sealed as the standalone qcow2 image
+`artifacts/FlowLFS-v0.1-modern-cli-v0.qcow2` after a clean shutdown.
+
+- Virtual size: 40 GiB
+- Stored size at sealing: 5.07 GiB
+- SHA-256: `495e21c2e8246fb2fb2507425478087a97e4735adf707b606ce386b790b8f336`
+- Backing file: none
+- Host mode after sealing: read-only; the launcher uses a disposable snapshot
+- `qemu-img check`: no errors
+
+The separate image was booted on callback port 2226. In that image the profile
+was fully deactivated, absence of its commands and trust policy was verified,
+and the ten-object realization was reconstructed from the carried immutable
+store with offline activation. The subsequent online HTTPS verification and
+ordinary-user Git/curl runtime checks passed. It was then shut down cleanly and
+hashed as recorded above.

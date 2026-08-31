@@ -51,9 +51,11 @@ owner-authored package provides dependency-free global Bash/Zsh defaults and
 materialized new-user templates without enabling anonymous login or copying
 personal shell state. See `docs/SHELL-ENVIRONMENT-V0.md`.
 
-The optional acquisition and inspection stack is being constructed under
+The optional acquisition and inspection stack is realized under
 `docs/MODERN-CLI-V0.md`. It is explicitly owner-selected and is not part of
-the recovery base.
+the recovery base. The independently flattened, boot-tested deliverable is
+`artifacts/FlowLFS-v0.1-modern-cli-v0.qcow2`; launch it with
+`scripts/launch-modern-cli-v0.sh` (default callback port 2226).
 
 ## Layout
 
