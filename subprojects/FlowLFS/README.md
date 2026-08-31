@@ -57,6 +57,12 @@ the recovery base. The independently flattened, boot-tested deliverable is
 `artifacts/FlowLFS-v0.1-modern-cli-v0.qcow2`; launch it with
 `scripts/launch-modern-cli-v0.sh` (default callback port 2226).
 
+The additive system basis is realized under `docs/BASIS-V1.md`. Its sealed
+runnable image is `artifacts/FlowLFS-v0.1-basis-v1.qcow2`; launch it with
+`scripts/launch-basis-v1.sh` (default callback port 2228). It preserves
+canonical `/etc/skel` and account behavior while adding Zsh, system-local PATH,
+per-user history policy, editable monikers, and the native Flowcore `sel` tool.
+
 ## Layout
 
 ```text

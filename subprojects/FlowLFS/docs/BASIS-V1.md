@@ -1,7 +1,6 @@
 # FlowLFS basis v1
 
-Status: first additive basis realization complete on a disposable VM snapshot;
-runnable-image sealing pending
+Status: complete, store-reinstalled, and sealed as a runnable VM image
 
 ## Constitutional law
 
@@ -45,3 +44,15 @@ directive for GNU `as`; both forms and the exact diff are retained.
 - ordinary-user `sel` pseudo-terminal execution;
 - unchanged Bash recovery shell and active SSH;
 - full reverse rollback followed by store-only reprojection.
+
+## Runnable artifact
+
+`artifacts/FlowLFS-v0.1-basis-v1.qcow2` is a standalone 40 GiB qcow2 image
+(5.09 GiB stored when sealed) with no backing file. It passed `qemu-img check`
+after clean shutdown.
+
+SHA-256:
+`1d09a2093a688cdc0b1c21a91f6030057989bf7aff718f226bbd537bc1e7ed60`
+
+Run `scripts/launch-basis-v1.sh`; the default callback is port 2228 and the
+launcher uses a disposable snapshot so experiments do not mutate sealed bytes.

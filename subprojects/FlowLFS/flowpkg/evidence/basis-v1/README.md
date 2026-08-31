@@ -17,3 +17,10 @@ The `sel` evidence includes canonical Flow source and the complete preserved
 frontend, semantic, optimization, binding, lowering, LLVM, and assembly chain.
 The build records the single `.addrsig` compatibility adaptation required by
 GNU `as` and performs final assembly/link inside FlowLFS as `flowbuilder`.
+
+The final standalone image is `artifacts/FlowLFS-v0.1-basis-v1.qcow2`, SHA-256
+`1d09a2093a688cdc0b1c21a91f6030057989bf7aff718f226bbd537bc1e7ed60`.
+It has no backing file, passed `qemu-img check`, and is host-read-only after
+sealing. The final artifact independently passed full basis deactivation,
+canonical fallback verification, offline store-only reactivation, modern CLI
+verification, and clean shutdown.
