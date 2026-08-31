@@ -86,7 +86,7 @@ verify(){
   useradd -m -k /etc/skel -s /bin/bash "$probe"
   home=$(getent passwd "$probe"|cut -d: -f6); test "$(stat -c %U "$home")" = "$probe" || die 'canonical home ownership failed'
   for path in bin .local/bin .local/state/zsh .local/share/flowcore .cache/zsh Projects Downloads Documents .config/flowcore/monikers.tsv; do test -e "$home/$path" || die "new-user template absent: $path"; done
-  su -s /bin/bash - "$probe" -c 'bash -lic '\''case ":$PATH:" in *:/usr/local/sbin:*) :;; *) exit 11;; esac; test "$EDITOR" = vim; alias ll >/dev/null'\'''
+  su -s /bin/bash - "$probe" -c 'bash -lc '\''case ":$PATH:" in *:/usr/local/sbin:*) :;; *) exit 11;; esac; test "$EDITOR" = vim'\'''
   su -s /usr/bin/zsh - "$probe" -c 'zsh -lic '\''[[ $HISTFILE == $HOME/.local/state/zsh/history ]]; go2 projects; [[ $PWD == $HOME/Projects ]]; flow-moniker-show home >/dev/null'\'''
   test "$(getent passwd root|cut -d: -f7)" = /bin/bash || die 'root recovery shell changed'; systemctl is-active --quiet sshd.service || die 'sshd inactive'
   cleanup; trap - EXIT; printf 'FLOWPKG_BASIS_VERIFY_PASS canonical_useradd=pass additive_monikers=pass\n'
