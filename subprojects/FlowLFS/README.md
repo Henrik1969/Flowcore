@@ -87,6 +87,11 @@ contract, explicit provider policy, and unchanged fzf object.
 The durable architectural and package-store findings from this tranche are in
 `docs/SELECTION-CAPABILITY-LESSONS-V1.md`.
 
+The first native realization engine is documented in
+`docs/BULK-PROJECTOR-V0.md`, with its exact transaction boundary in
+`docs/BULK-PROJECTOR-V0-CONTRACT.md`. It retains the existing Go, fzf, and
+Flowselection objects while replacing their shell-per-entry projection loops.
+
 ## Layout
 
 ```text
