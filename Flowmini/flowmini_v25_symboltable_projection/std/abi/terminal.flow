@@ -1,0 +1,60 @@
+unit std_abi_terminal
+
+abi terminal {
+    library "libflowterminal.so.1"
+    convention c
+
+    type terminal_session {
+        repr "void*"
+        ownership external
+        access opaque
+        lifetime external
+        nullable false
+        opaque true
+        cleanup flow_terminal_close
+    }
+
+    type c_string {
+        repr "const char*"
+        ownership borrowed
+        access read
+        lifetime call
+        nullable false
+        terminator nul
+    }
+
+    extern fn open(): terminal_session {
+        symbol "flow_terminal_open"
+        effect terminal
+    }
+
+    extern fn close(): c_int {
+        symbol "flow_terminal_close"
+        effect terminal
+    }
+
+    extern fn enter(): c_int {
+        symbol "flow_terminal_enter"
+        effect terminal
+    }
+
+    extern fn write(text : c_string, count : c_int): c_int {
+        symbol "flow_terminal_write"
+        effect terminal
+    }
+
+    extern fn present(): c_int {
+        symbol "flow_terminal_present"
+        effect terminal
+    }
+
+    extern fn read_event(): c_int {
+        symbol "flow_terminal_read_event"
+        effect terminal
+    }
+
+    extern fn capabilities(): c_int {
+        symbol "flow_terminal_capabilities"
+        effect terminal
+    }
+}

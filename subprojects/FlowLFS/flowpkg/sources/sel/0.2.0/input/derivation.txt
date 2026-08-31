@@ -1,0 +1,3 @@
+status=Flowcore source-derived assembly cache
+provider=libflowterminal.so.1
+terminal_brand_dependency=none

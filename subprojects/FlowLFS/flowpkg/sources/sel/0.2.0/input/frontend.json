@@ -1,0 +1,869 @@
+{
+  "format": "flowmini.frontend_bundle",
+  "version": 2,
+  "source": {"path": "Flowmini/flowmini_v25_symboltable_projection/examples/apps/sel/sel.flow"},
+  "source_map": {
+    "coordinate_space": "expanded_lines",
+    "files": [
+      {"id": 0, "path": "Flowmini/flowmini_v25_symboltable_projection/examples/apps/sel/sel.flow"},
+      {"id": 1, "path": "Flowmini/flowmini_v25_symboltable_projection/std/abi/terminal.flow"},
+      {"id": 2, "path": "Flowmini/flowmini_v25_symboltable_projection/std/abi/libc.flow"}
+    ],
+    "lines": [
+      {"expanded_line": 1, "source_id": 0, "source_line": 4},
+      {"expanded_line": 2, "source_id": null, "source_line": null},
+      {"expanded_line": 3, "source_id": 0, "source_line": 1},
+      {"expanded_line": 4, "source_id": 0, "source_line": 2},
+      {"expanded_line": 5, "source_id": null, "source_line": null},
+      {"expanded_line": 6, "source_id": 1, "source_line": 2},
+      {"expanded_line": 7, "source_id": 1, "source_line": 3},
+      {"expanded_line": 8, "source_id": 1, "source_line": 4},
+      {"expanded_line": 9, "source_id": 1, "source_line": 5},
+      {"expanded_line": 10, "source_id": 1, "source_line": 6},
+      {"expanded_line": 11, "source_id": 1, "source_line": 7},
+      {"expanded_line": 12, "source_id": 1, "source_line": 8},
+      {"expanded_line": 13, "source_id": 1, "source_line": 9},
+      {"expanded_line": 14, "source_id": 1, "source_line": 10},
+      {"expanded_line": 15, "source_id": 1, "source_line": 11},
+      {"expanded_line": 16, "source_id": 1, "source_line": 12},
+      {"expanded_line": 17, "source_id": 1, "source_line": 13},
+      {"expanded_line": 18, "source_id": 1, "source_line": 14},
+      {"expanded_line": 19, "source_id": 1, "source_line": 15},
+      {"expanded_line": 20, "source_id": 1, "source_line": 16},
+      {"expanded_line": 21, "source_id": 1, "source_line": 17},
+      {"expanded_line": 22, "source_id": 1, "source_line": 18},
+      {"expanded_line": 23, "source_id": 1, "source_line": 19},
+      {"expanded_line": 24, "source_id": 1, "source_line": 20},
+      {"expanded_line": 25, "source_id": 1, "source_line": 21},
+      {"expanded_line": 26, "source_id": 1, "source_line": 22},
+      {"expanded_line": 27, "source_id": 1, "source_line": 23},
+      {"expanded_line": 28, "source_id": 1, "source_line": 24},
+      {"expanded_line": 29, "source_id": 1, "source_line": 25},
+      {"expanded_line": 30, "source_id": 1, "source_line": 26},
+      {"expanded_line": 31, "source_id": 1, "source_line": 27},
+      {"expanded_line": 32, "source_id": 1, "source_line": 28},
+      {"expanded_line": 33, "source_id": 1, "source_line": 29},
+      {"expanded_line": 34, "source_id": 1, "source_line": 30},
+      {"expanded_line": 35, "source_id": 1, "source_line": 31},
+      {"expanded_line": 36, "source_id": 1, "source_line": 32},
+      {"expanded_line": 37, "source_id": 1, "source_line": 33},
+      {"expanded_line": 38, "source_id": 1, "source_line": 34},
+      {"expanded_line": 39, "source_id": 1, "source_line": 35},
+      {"expanded_line": 40, "source_id": 1, "source_line": 36},
+      {"expanded_line": 41, "source_id": 1, "source_line": 37},
+      {"expanded_line": 42, "source_id": 1, "source_line": 38},
+      {"expanded_line": 43, "source_id": 1, "source_line": 39},
+      {"expanded_line": 44, "source_id": 1, "source_line": 40},
+      {"expanded_line": 45, "source_id": 1, "source_line": 41},
+      {"expanded_line": 46, "source_id": 1, "source_line": 42},
+      {"expanded_line": 47, "source_id": 1, "source_line": 43},
+      {"expanded_line": 48, "source_id": 1, "source_line": 44},
+      {"expanded_line": 49, "source_id": 1, "source_line": 45},
+      {"expanded_line": 50, "source_id": 1, "source_line": 46},
+      {"expanded_line": 51, "source_id": 1, "source_line": 47},
+      {"expanded_line": 52, "source_id": 1, "source_line": 48},
+      {"expanded_line": 53, "source_id": 1, "source_line": 49},
+      {"expanded_line": 54, "source_id": 1, "source_line": 50},
+      {"expanded_line": 55, "source_id": 1, "source_line": 51},
+      {"expanded_line": 56, "source_id": 1, "source_line": 52},
+      {"expanded_line": 57, "source_id": 1, "source_line": 53},
+      {"expanded_line": 58, "source_id": 1, "source_line": 54},
+      {"expanded_line": 59, "source_id": 1, "source_line": 55},
+      {"expanded_line": 60, "source_id": 1, "source_line": 56},
+      {"expanded_line": 61, "source_id": 1, "source_line": 57},
+      {"expanded_line": 62, "source_id": 1, "source_line": 58},
+      {"expanded_line": 63, "source_id": 1, "source_line": 59},
+      {"expanded_line": 64, "source_id": 1, "source_line": 60},
+      {"expanded_line": 65, "source_id": null, "source_line": null},
+      {"expanded_line": 66, "source_id": 2, "source_line": 2},
+      {"expanded_line": 67, "source_id": 2, "source_line": 3},
+      {"expanded_line": 68, "source_id": 2, "source_line": 4},
+      {"expanded_line": 69, "source_id": 2, "source_line": 5},
+      {"expanded_line": 70, "source_id": 2, "source_line": 6},
+      {"expanded_line": 71, "source_id": 2, "source_line": 7},
+      {"expanded_line": 72, "source_id": 2, "source_line": 8},
+      {"expanded_line": 73, "source_id": 2, "source_line": 9},
+      {"expanded_line": 74, "source_id": 2, "source_line": 10},
+      {"expanded_line": 75, "source_id": 2, "source_line": 11},
+      {"expanded_line": 76, "source_id": 2, "source_line": 12},
+      {"expanded_line": 77, "source_id": 2, "source_line": 13},
+      {"expanded_line": 78, "source_id": 2, "source_line": 14},
+      {"expanded_line": 79, "source_id": 2, "source_line": 15},
+      {"expanded_line": 80, "source_id": 2, "source_line": 16},
+      {"expanded_line": 81, "source_id": 2, "source_line": 17},
+      {"expanded_line": 82, "source_id": 2, "source_line": 18},
+      {"expanded_line": 83, "source_id": 2, "source_line": 19},
+      {"expanded_line": 84, "source_id": 2, "source_line": 20},
+      {"expanded_line": 85, "source_id": 2, "source_line": 21},
+      {"expanded_line": 86, "source_id": 2, "source_line": 22},
+      {"expanded_line": 87, "source_id": 2, "source_line": 23},
+      {"expanded_line": 88, "source_id": 2, "source_line": 24},
+      {"expanded_line": 89, "source_id": 2, "source_line": 25},
+      {"expanded_line": 90, "source_id": 2, "source_line": 26},
+      {"expanded_line": 91, "source_id": 2, "source_line": 27},
+      {"expanded_line": 92, "source_id": 2, "source_line": 28},
+      {"expanded_line": 93, "source_id": 2, "source_line": 29},
+      {"expanded_line": 94, "source_id": 2, "source_line": 30},
+      {"expanded_line": 95, "source_id": 2, "source_line": 31},
+      {"expanded_line": 96, "source_id": 2, "source_line": 32},
+      {"expanded_line": 97, "source_id": 2, "source_line": 33},
+      {"expanded_line": 98, "source_id": 2, "source_line": 34},
+      {"expanded_line": 99, "source_id": 2, "source_line": 35},
+      {"expanded_line": 100, "source_id": null, "source_line": null},
+      {"expanded_line": 101, "source_id": 0, "source_line": 5},
+      {"expanded_line": 102, "source_id": 0, "source_line": 6},
+      {"expanded_line": 103, "source_id": 0, "source_line": 7},
+      {"expanded_line": 104, "source_id": 0, "source_line": 8},
+      {"expanded_line": 105, "source_id": 0, "source_line": 9},
+      {"expanded_line": 106, "source_id": 0, "source_line": 10},
+      {"expanded_line": 107, "source_id": 0, "source_line": 11},
+      {"expanded_line": 108, "source_id": 0, "source_line": 12},
+      {"expanded_line": 109, "source_id": 0, "source_line": 13},
+      {"expanded_line": 110, "source_id": 0, "source_line": 14},
+      {"expanded_line": 111, "source_id": 0, "source_line": 15},
+      {"expanded_line": 112, "source_id": 0, "source_line": 16},
+      {"expanded_line": 113, "source_id": 0, "source_line": 17},
+      {"expanded_line": 114, "source_id": 0, "source_line": 18},
+      {"expanded_line": 115, "source_id": 0, "source_line": 19},
+      {"expanded_line": 116, "source_id": 0, "source_line": 20},
+      {"expanded_line": 117, "source_id": 0, "source_line": 21},
+      {"expanded_line": 118, "source_id": 0, "source_line": 22},
+      {"expanded_line": 119, "source_id": 0, "source_line": 23},
+      {"expanded_line": 120, "source_id": 0, "source_line": 24},
+      {"expanded_line": 121, "source_id": 0, "source_line": 25},
+      {"expanded_line": 122, "source_id": 0, "source_line": 26},
+      {"expanded_line": 123, "source_id": 0, "source_line": 27},
+      {"expanded_line": 124, "source_id": 0, "source_line": 28}
+    ]
+  },
+  "ast": {
+  "format": "flowmini.ast.v2",
+  "source_unit": {
+    "kind": "program",
+    "name": "sel",
+    "location": {"line": 1, "column": 1},
+    "declaration_count": 5,
+    "declaration_ids": [0, 1, 2, 3, 4],
+    "declarations": [
+      {
+        "id": 0,
+        "kind": "import",
+        "module_name": "../../../std/abi/terminal.flow",
+        "alias": "terminal",
+        "location": {"line": 3, "column": 1}
+      },
+      {
+        "id": 1,
+        "kind": "import",
+        "module_name": "../../../std/abi/libc.flow",
+        "alias": "libc",
+        "location": {"line": 4, "column": 1}
+      },
+      {
+        "id": 2,
+        "kind": "abi",
+        "name": "terminal",
+        "members": [
+          {"kind": "library", "spelling": "libflowterminal.so.1", "location": {"line": 8, "column": 5}},
+          {"kind": "convention", "spelling": "c", "location": {"line": 9, "column": 5}},
+          {"kind": "type", "name": "terminal_session", "properties": [{"kind": "repr", "spelling": "void*", "location": {"line": 12, "column": 9}}, {"kind": "ownership", "spelling": "external", "location": {"line": 13, "column": 9}}, {"kind": "access", "spelling": "opaque", "location": {"line": 14, "column": 9}}, {"kind": "lifetime", "spelling": "external", "location": {"line": 15, "column": 9}}, {"kind": "nullable", "spelling": "false", "location": {"line": 16, "column": 9}}, {"kind": "opaque", "spelling": "true", "location": {"line": 17, "column": 9}}, {"kind": "cleanup", "spelling": "flow_terminal_close", "location": {"line": 18, "column": 9}}], "location": {"line": 11, "column": 5}},
+          {"kind": "type", "name": "c_string", "properties": [{"kind": "repr", "spelling": "const char*", "location": {"line": 22, "column": 9}}, {"kind": "ownership", "spelling": "borrowed", "location": {"line": 23, "column": 9}}, {"kind": "access", "spelling": "read", "location": {"line": 24, "column": 9}}, {"kind": "lifetime", "spelling": "call", "location": {"line": 25, "column": 9}}, {"kind": "nullable", "spelling": "false", "location": {"line": 26, "column": 9}}, {"kind": "terminator", "spelling": "nul", "location": {"line": 27, "column": 9}}], "location": {"line": 21, "column": 5}},
+          {"kind": "extern_function", "name": "open", "parameters": [], "return_type": "terminal_session", "return_type_ref": {"kind": "named", "text": "terminal_session", "payload": {"name_segments": ["terminal_session"]}, "location": {"line": 30, "column": 23}}, "clauses": [{"kind": "symbol", "spelling": "flow_terminal_open", "location": {"line": 31, "column": 9}}, {"kind": "effect", "spelling": "terminal", "location": {"line": 32, "column": 9}}], "location": {"line": 30, "column": 5}},
+          {"kind": "extern_function", "name": "close", "parameters": [], "return_type": "c_int", "return_type_ref": {"kind": "named", "text": "c_int", "payload": {"name_segments": ["c_int"]}, "location": {"line": 35, "column": 24}}, "clauses": [{"kind": "symbol", "spelling": "flow_terminal_close", "location": {"line": 36, "column": 9}}, {"kind": "effect", "spelling": "terminal", "location": {"line": 37, "column": 9}}], "location": {"line": 35, "column": 5}},
+          {"kind": "extern_function", "name": "enter", "parameters": [], "return_type": "c_int", "return_type_ref": {"kind": "named", "text": "c_int", "payload": {"name_segments": ["c_int"]}, "location": {"line": 40, "column": 24}}, "clauses": [{"kind": "symbol", "spelling": "flow_terminal_enter", "location": {"line": 41, "column": 9}}, {"kind": "effect", "spelling": "terminal", "location": {"line": 42, "column": 9}}], "location": {"line": 40, "column": 5}},
+          {"kind": "extern_function", "name": "write", "parameters": [
+            {"name": "text", "type": "c_string", "type_ref": {"kind": "named", "text": "c_string", "payload": {"name_segments": ["c_string"]}, "location": {"line": 45, "column": 28}}, "location": {"line": 45, "column": 21}},
+            {"name": "count", "type": "c_int", "type_ref": {"kind": "named", "text": "c_int", "payload": {"name_segments": ["c_int"]}, "location": {"line": 45, "column": 46}}, "location": {"line": 45, "column": 38}}
+          ], "return_type": "c_int", "return_type_ref": {"kind": "named", "text": "c_int", "payload": {"name_segments": ["c_int"]}, "location": {"line": 45, "column": 54}}, "clauses": [{"kind": "symbol", "spelling": "flow_terminal_write", "location": {"line": 46, "column": 9}}, {"kind": "effect", "spelling": "terminal", "location": {"line": 47, "column": 9}}], "location": {"line": 45, "column": 5}},
+          {"kind": "extern_function", "name": "present", "parameters": [], "return_type": "c_int", "return_type_ref": {"kind": "named", "text": "c_int", "payload": {"name_segments": ["c_int"]}, "location": {"line": 50, "column": 26}}, "clauses": [{"kind": "symbol", "spelling": "flow_terminal_present", "location": {"line": 51, "column": 9}}, {"kind": "effect", "spelling": "terminal", "location": {"line": 52, "column": 9}}], "location": {"line": 50, "column": 5}},
+          {"kind": "extern_function", "name": "read_event", "parameters": [], "return_type": "c_int", "return_type_ref": {"kind": "named", "text": "c_int", "payload": {"name_segments": ["c_int"]}, "location": {"line": 55, "column": 29}}, "clauses": [{"kind": "symbol", "spelling": "flow_terminal_read_event", "location": {"line": 56, "column": 9}}, {"kind": "effect", "spelling": "terminal", "location": {"line": 57, "column": 9}}], "location": {"line": 55, "column": 5}},
+          {"kind": "extern_function", "name": "capabilities", "parameters": [], "return_type": "c_int", "return_type_ref": {"kind": "named", "text": "c_int", "payload": {"name_segments": ["c_int"]}, "location": {"line": 60, "column": 31}}, "clauses": [{"kind": "symbol", "spelling": "flow_terminal_capabilities", "location": {"line": 61, "column": 9}}, {"kind": "effect", "spelling": "terminal", "location": {"line": 62, "column": 9}}], "location": {"line": 60, "column": 5}}
+        ],
+        "location": {"line": 7, "column": 1}
+      },
+      {
+        "id": 3,
+        "kind": "abi",
+        "name": "libc",
+        "members": [
+          {"kind": "library", "spelling": "libc.so.6", "location": {"line": 68, "column": 5}},
+          {"kind": "convention", "spelling": "c", "location": {"line": 69, "column": 5}},
+          {"kind": "type", "name": "c_string", "properties": [{"kind": "repr", "spelling": "const char*", "location": {"line": 72, "column": 9}}, {"kind": "ownership", "spelling": "borrowed", "location": {"line": 73, "column": 9}}, {"kind": "access", "spelling": "read", "location": {"line": 74, "column": 9}}, {"kind": "lifetime", "spelling": "call", "location": {"line": 75, "column": 9}}, {"kind": "nullable", "spelling": "false", "location": {"line": 76, "column": 9}}, {"kind": "terminator", "spelling": "nul", "location": {"line": 77, "column": 9}}], "location": {"line": 71, "column": 5}},
+          {"kind": "extern_function", "name": "strlen", "parameters": [
+            {"name": "text", "type": "c_string", "type_ref": {"kind": "named", "text": "c_string", "payload": {"name_segments": ["c_string"]}, "location": {"line": 80, "column": 29}}, "location": {"line": 80, "column": 22}}
+          ], "return_type": "c_size_t", "return_type_ref": {"kind": "named", "text": "c_size_t", "payload": {"name_segments": ["c_size_t"]}, "location": {"line": 80, "column": 40}}, "clauses": [{"kind": "symbol", "spelling": "strlen", "location": {"line": 81, "column": 9}}, {"kind": "effect", "spelling": "pure", "location": {"line": 82, "column": 9}}], "location": {"line": 80, "column": 5}},
+          {"kind": "extern_function", "name": "abs", "parameters": [
+            {"name": "value", "type": "c_int", "type_ref": {"kind": "named", "text": "c_int", "payload": {"name_segments": ["c_int"]}, "location": {"line": 85, "column": 27}}, "location": {"line": 85, "column": 19}}
+          ], "return_type": "c_int", "return_type_ref": {"kind": "named", "text": "c_int", "payload": {"name_segments": ["c_int"]}, "location": {"line": 85, "column": 35}}, "clauses": [{"kind": "symbol", "spelling": "abs", "location": {"line": 86, "column": 9}}, {"kind": "effect", "spelling": "pure", "location": {"line": 87, "column": 9}}], "location": {"line": 85, "column": 5}},
+          {"kind": "extern_function", "name": "labs", "parameters": [
+            {"name": "value", "type": "c_long", "type_ref": {"kind": "named", "text": "c_long", "payload": {"name_segments": ["c_long"]}, "location": {"line": 90, "column": 28}}, "location": {"line": 90, "column": 20}}
+          ], "return_type": "c_long", "return_type_ref": {"kind": "named", "text": "c_long", "payload": {"name_segments": ["c_long"]}, "location": {"line": 90, "column": 37}}, "clauses": [{"kind": "symbol", "spelling": "labs", "location": {"line": 91, "column": 9}}, {"kind": "effect", "spelling": "pure", "location": {"line": 92, "column": 9}}], "location": {"line": 90, "column": 5}},
+          {"kind": "extern_function", "name": "puts", "parameters": [
+            {"name": "text", "type": "c_string", "type_ref": {"kind": "named", "text": "c_string", "payload": {"name_segments": ["c_string"]}, "location": {"line": 95, "column": 27}}, "location": {"line": 95, "column": 20}}
+          ], "return_type": "c_int", "return_type_ref": {"kind": "named", "text": "c_int", "payload": {"name_segments": ["c_int"]}, "location": {"line": 95, "column": 38}}, "clauses": [{"kind": "symbol", "spelling": "puts", "location": {"line": 96, "column": 9}}, {"kind": "effect", "spelling": "io", "location": {"line": 97, "column": 9}}], "location": {"line": 95, "column": 5}}
+        ],
+        "location": {"line": 67, "column": 1}
+      },
+      {
+        "id": 4,
+        "kind": "main_block",
+        "parameters": [
+        {"name": "args", "type": "list<string>", "type_ref": {"kind": "generic", "text": "list<string>", "payload": {"constructor_segments": ["list"], "arguments": [{"kind": "named", "text": "string", "payload": {"name_segments": ["string"]}, "location": {"line": 102, "column": 18}}]}, "location": {"line": 102, "column": 13}}, "location": {"line": 102, "column": 6}}        ],
+        "has_body": true,
+        "body_block": 0,
+        "location": {"line": 102, "column": 1}
+      }
+    ]
+  },
+  "declaration_pool_size": 5,
+  "declaration_pool": [
+    {
+      "id": 0,
+      "kind": "import",
+      "module_name": "../../../std/abi/terminal.flow",
+      "alias": "terminal",
+      "location": {"line": 3, "column": 1}
+    },
+    {
+      "id": 1,
+      "kind": "import",
+      "module_name": "../../../std/abi/libc.flow",
+      "alias": "libc",
+      "location": {"line": 4, "column": 1}
+    },
+    {
+      "id": 2,
+      "kind": "abi",
+      "name": "terminal",
+      "members": [
+        {"kind": "library", "spelling": "libflowterminal.so.1", "location": {"line": 8, "column": 5}},
+        {"kind": "convention", "spelling": "c", "location": {"line": 9, "column": 5}},
+        {"kind": "type", "name": "terminal_session", "properties": [{"kind": "repr", "spelling": "void*", "location": {"line": 12, "column": 9}}, {"kind": "ownership", "spelling": "external", "location": {"line": 13, "column": 9}}, {"kind": "access", "spelling": "opaque", "location": {"line": 14, "column": 9}}, {"kind": "lifetime", "spelling": "external", "location": {"line": 15, "column": 9}}, {"kind": "nullable", "spelling": "false", "location": {"line": 16, "column": 9}}, {"kind": "opaque", "spelling": "true", "location": {"line": 17, "column": 9}}, {"kind": "cleanup", "spelling": "flow_terminal_close", "location": {"line": 18, "column": 9}}], "location": {"line": 11, "column": 5}},
+        {"kind": "type", "name": "c_string", "properties": [{"kind": "repr", "spelling": "const char*", "location": {"line": 22, "column": 9}}, {"kind": "ownership", "spelling": "borrowed", "location": {"line": 23, "column": 9}}, {"kind": "access", "spelling": "read", "location": {"line": 24, "column": 9}}, {"kind": "lifetime", "spelling": "call", "location": {"line": 25, "column": 9}}, {"kind": "nullable", "spelling": "false", "location": {"line": 26, "column": 9}}, {"kind": "terminator", "spelling": "nul", "location": {"line": 27, "column": 9}}], "location": {"line": 21, "column": 5}},
+        {"kind": "extern_function", "name": "open", "parameters": [], "return_type": "terminal_session", "return_type_ref": {"kind": "named", "text": "terminal_session", "payload": {"name_segments": ["terminal_session"]}, "location": {"line": 30, "column": 23}}, "clauses": [{"kind": "symbol", "spelling": "flow_terminal_open", "location": {"line": 31, "column": 9}}, {"kind": "effect", "spelling": "terminal", "location": {"line": 32, "column": 9}}], "location": {"line": 30, "column": 5}},
+        {"kind": "extern_function", "name": "close", "parameters": [], "return_type": "c_int", "return_type_ref": {"kind": "named", "text": "c_int", "payload": {"name_segments": ["c_int"]}, "location": {"line": 35, "column": 24}}, "clauses": [{"kind": "symbol", "spelling": "flow_terminal_close", "location": {"line": 36, "column": 9}}, {"kind": "effect", "spelling": "terminal", "location": {"line": 37, "column": 9}}], "location": {"line": 35, "column": 5}},
+        {"kind": "extern_function", "name": "enter", "parameters": [], "return_type": "c_int", "return_type_ref": {"kind": "named", "text": "c_int", "payload": {"name_segments": ["c_int"]}, "location": {"line": 40, "column": 24}}, "clauses": [{"kind": "symbol", "spelling": "flow_terminal_enter", "location": {"line": 41, "column": 9}}, {"kind": "effect", "spelling": "terminal", "location": {"line": 42, "column": 9}}], "location": {"line": 40, "column": 5}},
+        {"kind": "extern_function", "name": "write", "parameters": [
+          {"name": "text", "type": "c_string", "type_ref": {"kind": "named", "text": "c_string", "payload": {"name_segments": ["c_string"]}, "location": {"line": 45, "column": 28}}, "location": {"line": 45, "column": 21}},
+          {"name": "count", "type": "c_int", "type_ref": {"kind": "named", "text": "c_int", "payload": {"name_segments": ["c_int"]}, "location": {"line": 45, "column": 46}}, "location": {"line": 45, "column": 38}}
+        ], "return_type": "c_int", "return_type_ref": {"kind": "named", "text": "c_int", "payload": {"name_segments": ["c_int"]}, "location": {"line": 45, "column": 54}}, "clauses": [{"kind": "symbol", "spelling": "flow_terminal_write", "location": {"line": 46, "column": 9}}, {"kind": "effect", "spelling": "terminal", "location": {"line": 47, "column": 9}}], "location": {"line": 45, "column": 5}},
+        {"kind": "extern_function", "name": "present", "parameters": [], "return_type": "c_int", "return_type_ref": {"kind": "named", "text": "c_int", "payload": {"name_segments": ["c_int"]}, "location": {"line": 50, "column": 26}}, "clauses": [{"kind": "symbol", "spelling": "flow_terminal_present", "location": {"line": 51, "column": 9}}, {"kind": "effect", "spelling": "terminal", "location": {"line": 52, "column": 9}}], "location": {"line": 50, "column": 5}},
+        {"kind": "extern_function", "name": "read_event", "parameters": [], "return_type": "c_int", "return_type_ref": {"kind": "named", "text": "c_int", "payload": {"name_segments": ["c_int"]}, "location": {"line": 55, "column": 29}}, "clauses": [{"kind": "symbol", "spelling": "flow_terminal_read_event", "location": {"line": 56, "column": 9}}, {"kind": "effect", "spelling": "terminal", "location": {"line": 57, "column": 9}}], "location": {"line": 55, "column": 5}},
+        {"kind": "extern_function", "name": "capabilities", "parameters": [], "return_type": "c_int", "return_type_ref": {"kind": "named", "text": "c_int", "payload": {"name_segments": ["c_int"]}, "location": {"line": 60, "column": 31}}, "clauses": [{"kind": "symbol", "spelling": "flow_terminal_capabilities", "location": {"line": 61, "column": 9}}, {"kind": "effect", "spelling": "terminal", "location": {"line": 62, "column": 9}}], "location": {"line": 60, "column": 5}}
+      ],
+      "location": {"line": 7, "column": 1}
+    },
+    {
+      "id": 3,
+      "kind": "abi",
+      "name": "libc",
+      "members": [
+        {"kind": "library", "spelling": "libc.so.6", "location": {"line": 68, "column": 5}},
+        {"kind": "convention", "spelling": "c", "location": {"line": 69, "column": 5}},
+        {"kind": "type", "name": "c_string", "properties": [{"kind": "repr", "spelling": "const char*", "location": {"line": 72, "column": 9}}, {"kind": "ownership", "spelling": "borrowed", "location": {"line": 73, "column": 9}}, {"kind": "access", "spelling": "read", "location": {"line": 74, "column": 9}}, {"kind": "lifetime", "spelling": "call", "location": {"line": 75, "column": 9}}, {"kind": "nullable", "spelling": "false", "location": {"line": 76, "column": 9}}, {"kind": "terminator", "spelling": "nul", "location": {"line": 77, "column": 9}}], "location": {"line": 71, "column": 5}},
+        {"kind": "extern_function", "name": "strlen", "parameters": [
+          {"name": "text", "type": "c_string", "type_ref": {"kind": "named", "text": "c_string", "payload": {"name_segments": ["c_string"]}, "location": {"line": 80, "column": 29}}, "location": {"line": 80, "column": 22}}
+        ], "return_type": "c_size_t", "return_type_ref": {"kind": "named", "text": "c_size_t", "payload": {"name_segments": ["c_size_t"]}, "location": {"line": 80, "column": 40}}, "clauses": [{"kind": "symbol", "spelling": "strlen", "location": {"line": 81, "column": 9}}, {"kind": "effect", "spelling": "pure", "location": {"line": 82, "column": 9}}], "location": {"line": 80, "column": 5}},
+        {"kind": "extern_function", "name": "abs", "parameters": [
+          {"name": "value", "type": "c_int", "type_ref": {"kind": "named", "text": "c_int", "payload": {"name_segments": ["c_int"]}, "location": {"line": 85, "column": 27}}, "location": {"line": 85, "column": 19}}
+        ], "return_type": "c_int", "return_type_ref": {"kind": "named", "text": "c_int", "payload": {"name_segments": ["c_int"]}, "location": {"line": 85, "column": 35}}, "clauses": [{"kind": "symbol", "spelling": "abs", "location": {"line": 86, "column": 9}}, {"kind": "effect", "spelling": "pure", "location": {"line": 87, "column": 9}}], "location": {"line": 85, "column": 5}},
+        {"kind": "extern_function", "name": "labs", "parameters": [
+          {"name": "value", "type": "c_long", "type_ref": {"kind": "named", "text": "c_long", "payload": {"name_segments": ["c_long"]}, "location": {"line": 90, "column": 28}}, "location": {"line": 90, "column": 20}}
+        ], "return_type": "c_long", "return_type_ref": {"kind": "named", "text": "c_long", "payload": {"name_segments": ["c_long"]}, "location": {"line": 90, "column": 37}}, "clauses": [{"kind": "symbol", "spelling": "labs", "location": {"line": 91, "column": 9}}, {"kind": "effect", "spelling": "pure", "location": {"line": 92, "column": 9}}], "location": {"line": 90, "column": 5}},
+        {"kind": "extern_function", "name": "puts", "parameters": [
+          {"name": "text", "type": "c_string", "type_ref": {"kind": "named", "text": "c_string", "payload": {"name_segments": ["c_string"]}, "location": {"line": 95, "column": 27}}, "location": {"line": 95, "column": 20}}
+        ], "return_type": "c_int", "return_type_ref": {"kind": "named", "text": "c_int", "payload": {"name_segments": ["c_int"]}, "location": {"line": 95, "column": 38}}, "clauses": [{"kind": "symbol", "spelling": "puts", "location": {"line": 96, "column": 9}}, {"kind": "effect", "spelling": "io", "location": {"line": 97, "column": 9}}], "location": {"line": 95, "column": 5}}
+      ],
+      "location": {"line": 67, "column": 1}
+    },
+    {
+      "id": 4,
+      "kind": "main_block",
+      "parameters": [
+      {"name": "args", "type": "list<string>", "type_ref": {"kind": "generic", "text": "list<string>", "payload": {"constructor_segments": ["list"], "arguments": [{"kind": "named", "text": "string", "payload": {"name_segments": ["string"]}, "location": {"line": 102, "column": 18}}]}, "location": {"line": 102, "column": 13}}, "location": {"line": 102, "column": 6}}      ],
+      "has_body": true,
+      "body_block": 0,
+      "location": {"line": 102, "column": 1}
+    }
+  ],
+  "expression_pool_size": 40,
+  "expression_pool": [
+    {
+      "id": 0,
+      "kind": "integer_literal",
+      "text": "0",
+      "payload": {"value_text": "0"},
+      "child_expressions": []
+    },
+    {
+      "id": 1,
+      "kind": "integer_literal",
+      "text": "0",
+      "payload": {"value_text": "0"},
+      "child_expressions": []
+    },
+    {
+      "id": 2,
+      "kind": "integer_literal",
+      "text": "0",
+      "payload": {"value_text": "0"},
+      "child_expressions": []
+    },
+    {
+      "id": 3,
+      "kind": "integer_literal",
+      "text": "76",
+      "payload": {"value_text": "76"},
+      "child_expressions": []
+    },
+    {
+      "id": 4,
+      "kind": "string_literal",
+      "text": "Flowcore sel\n\n> alpha\n  beta\n  gamma\n\nUp/Down: move  Enter: select  q: quit\n",
+      "payload": {"value_text": "Flowcore sel\n\n> alpha\n  beta\n  gamma\n\nUp/Down: move  Enter: select  q: quit\n"},
+      "child_expressions": []
+    },
+    {
+      "id": 5,
+      "kind": "string_literal",
+      "text": "selected: alpha",
+      "payload": {"value_text": "selected: alpha"},
+      "child_expressions": []
+    },
+    {
+      "id": 6,
+      "kind": "string_literal",
+      "text": "selection: none",
+      "payload": {"value_text": "selection: none"},
+      "child_expressions": []
+    },
+    {
+      "id": 7,
+      "kind": "call",
+      "text": "terminal.open",
+      "payload": {"base": 8, "arguments": []},
+      "child_expressions": [8]
+    },
+    {
+      "id": 8,
+      "kind": "field_access",
+      "text": "terminal.open",
+      "payload": {"base": 9, "field": "open"},
+      "child_expressions": [9]
+    },
+    {
+      "id": 9,
+      "kind": "identifier",
+      "text": "terminal",
+      "payload": {"name": "terminal"},
+      "child_expressions": []
+    },
+    {
+      "id": 10,
+      "kind": "call",
+      "text": "terminal.enter",
+      "payload": {"base": 11, "arguments": []},
+      "child_expressions": [11]
+    },
+    {
+      "id": 11,
+      "kind": "field_access",
+      "text": "terminal.enter",
+      "payload": {"base": 12, "field": "enter"},
+      "child_expressions": [12]
+    },
+    {
+      "id": 12,
+      "kind": "identifier",
+      "text": "terminal",
+      "payload": {"name": "terminal"},
+      "child_expressions": []
+    },
+    {
+      "id": 13,
+      "kind": "call",
+      "text": "terminal.write",
+      "payload": {"base": 14, "arguments": [16, 17]},
+      "child_expressions": [14, 16, 17]
+    },
+    {
+      "id": 14,
+      "kind": "field_access",
+      "text": "terminal.write",
+      "payload": {"base": 15, "field": "write"},
+      "child_expressions": [15]
+    },
+    {
+      "id": 15,
+      "kind": "identifier",
+      "text": "terminal",
+      "payload": {"name": "terminal"},
+      "child_expressions": []
+    },
+    {
+      "id": 16,
+      "kind": "identifier",
+      "text": "message",
+      "payload": {"name": "message"},
+      "child_expressions": []
+    },
+    {
+      "id": 17,
+      "kind": "identifier",
+      "text": "count",
+      "payload": {"name": "count"},
+      "child_expressions": []
+    },
+    {
+      "id": 18,
+      "kind": "call",
+      "text": "terminal.present",
+      "payload": {"base": 19, "arguments": []},
+      "child_expressions": [19]
+    },
+    {
+      "id": 19,
+      "kind": "field_access",
+      "text": "terminal.present",
+      "payload": {"base": 20, "field": "present"},
+      "child_expressions": [20]
+    },
+    {
+      "id": 20,
+      "kind": "identifier",
+      "text": "terminal",
+      "payload": {"name": "terminal"},
+      "child_expressions": []
+    },
+    {
+      "id": 21,
+      "kind": "call",
+      "text": "terminal.read_event",
+      "payload": {"base": 22, "arguments": []},
+      "child_expressions": [22]
+    },
+    {
+      "id": 22,
+      "kind": "field_access",
+      "text": "terminal.read_event",
+      "payload": {"base": 23, "field": "read_event"},
+      "child_expressions": [23]
+    },
+    {
+      "id": 23,
+      "kind": "identifier",
+      "text": "terminal",
+      "payload": {"name": "terminal"},
+      "child_expressions": []
+    },
+    {
+      "id": 24,
+      "kind": "call",
+      "text": "terminal.close",
+      "payload": {"base": 25, "arguments": []},
+      "child_expressions": [25]
+    },
+    {
+      "id": 25,
+      "kind": "field_access",
+      "text": "terminal.close",
+      "payload": {"base": 26, "field": "close"},
+      "child_expressions": [26]
+    },
+    {
+      "id": 26,
+      "kind": "identifier",
+      "text": "terminal",
+      "payload": {"name": "terminal"},
+      "child_expressions": []
+    },
+    {
+      "id": 27,
+      "kind": "binary",
+      "text": "==",
+      "payload": {"operator": "==", "left": 28, "right": 29},
+      "child_expressions": [28, 29]
+    },
+    {
+      "id": 28,
+      "kind": "identifier",
+      "text": "key",
+      "payload": {"name": "key"},
+      "child_expressions": []
+    },
+    {
+      "id": 29,
+      "kind": "integer_literal",
+      "text": "113",
+      "payload": {"value_text": "113"},
+      "child_expressions": []
+    },
+    {
+      "id": 30,
+      "kind": "call",
+      "text": "libc.puts",
+      "payload": {"base": 31, "arguments": [33]},
+      "child_expressions": [31, 33]
+    },
+    {
+      "id": 31,
+      "kind": "field_access",
+      "text": "libc.puts",
+      "payload": {"base": 32, "field": "puts"},
+      "child_expressions": [32]
+    },
+    {
+      "id": 32,
+      "kind": "identifier",
+      "text": "libc",
+      "payload": {"name": "libc"},
+      "child_expressions": []
+    },
+    {
+      "id": 33,
+      "kind": "identifier",
+      "text": "cancelled",
+      "payload": {"name": "cancelled"},
+      "child_expressions": []
+    },
+    {
+      "id": 34,
+      "kind": "integer_literal",
+      "text": "1",
+      "payload": {"value_text": "1"},
+      "child_expressions": []
+    },
+    {
+      "id": 35,
+      "kind": "call",
+      "text": "libc.puts",
+      "payload": {"base": 36, "arguments": [38]},
+      "child_expressions": [36, 38]
+    },
+    {
+      "id": 36,
+      "kind": "field_access",
+      "text": "libc.puts",
+      "payload": {"base": 37, "field": "puts"},
+      "child_expressions": [37]
+    },
+    {
+      "id": 37,
+      "kind": "identifier",
+      "text": "libc",
+      "payload": {"name": "libc"},
+      "child_expressions": []
+    },
+    {
+      "id": 38,
+      "kind": "identifier",
+      "text": "selected",
+      "payload": {"name": "selected"},
+      "child_expressions": []
+    },
+    {
+      "id": 39,
+      "kind": "integer_literal",
+      "text": "0",
+      "payload": {"value_text": "0"},
+      "child_expressions": []
+    }
+  ],
+  "statement_pool_size": 18,
+  "statement_pool": [
+    {
+      "id": 0,
+      "kind": "let",
+      "payload": {"name": "session", "type_ref": {"kind": "named", "text": "terminal_session", "payload": {"name_segments": ["terminal_session"]}, "location": {"line": 103, "column": 15}}, "initializer_expression": 0},
+      "name": "session",
+      "type": "terminal_session",
+      "type_ref": {"kind": "named", "text": "terminal_session", "payload": {"name_segments": ["terminal_session"]}, "location": {"line": 103, "column": 15}},
+      "has_initializer": true,
+      "expression_ids": [0],
+      "location": {"line": 103, "column": 5}
+    },
+    {
+      "id": 1,
+      "kind": "let",
+      "payload": {"name": "status", "type_ref": {"kind": "named", "text": "c_int", "payload": {"name_segments": ["c_int"]}, "location": {"line": 104, "column": 14}}, "initializer_expression": 1},
+      "name": "status",
+      "type": "c_int",
+      "type_ref": {"kind": "named", "text": "c_int", "payload": {"name_segments": ["c_int"]}, "location": {"line": 104, "column": 14}},
+      "has_initializer": true,
+      "expression_ids": [1],
+      "location": {"line": 104, "column": 5}
+    },
+    {
+      "id": 2,
+      "kind": "let",
+      "payload": {"name": "key", "type_ref": {"kind": "named", "text": "c_int", "payload": {"name_segments": ["c_int"]}, "location": {"line": 105, "column": 11}}, "initializer_expression": 2},
+      "name": "key",
+      "type": "c_int",
+      "type_ref": {"kind": "named", "text": "c_int", "payload": {"name_segments": ["c_int"]}, "location": {"line": 105, "column": 11}},
+      "has_initializer": true,
+      "expression_ids": [2],
+      "location": {"line": 105, "column": 5}
+    },
+    {
+      "id": 3,
+      "kind": "let",
+      "payload": {"name": "count", "type_ref": {"kind": "named", "text": "c_int", "payload": {"name_segments": ["c_int"]}, "location": {"line": 106, "column": 13}}, "initializer_expression": 3},
+      "name": "count",
+      "type": "c_int",
+      "type_ref": {"kind": "named", "text": "c_int", "payload": {"name_segments": ["c_int"]}, "location": {"line": 106, "column": 13}},
+      "has_initializer": true,
+      "expression_ids": [3],
+      "location": {"line": 106, "column": 5}
+    },
+    {
+      "id": 4,
+      "kind": "let",
+      "payload": {"name": "message", "type_ref": {"kind": "named", "text": "c_string", "payload": {"name_segments": ["c_string"]}, "location": {"line": 107, "column": 15}}, "initializer_expression": 4},
+      "name": "message",
+      "type": "c_string",
+      "type_ref": {"kind": "named", "text": "c_string", "payload": {"name_segments": ["c_string"]}, "location": {"line": 107, "column": 15}},
+      "has_initializer": true,
+      "expression_ids": [4],
+      "location": {"line": 107, "column": 5}
+    },
+    {
+      "id": 5,
+      "kind": "let",
+      "payload": {"name": "selected", "type_ref": {"kind": "named", "text": "c_string", "payload": {"name_segments": ["c_string"]}, "location": {"line": 108, "column": 16}}, "initializer_expression": 5},
+      "name": "selected",
+      "type": "c_string",
+      "type_ref": {"kind": "named", "text": "c_string", "payload": {"name_segments": ["c_string"]}, "location": {"line": 108, "column": 16}},
+      "has_initializer": true,
+      "expression_ids": [5],
+      "location": {"line": 108, "column": 5}
+    },
+    {
+      "id": 6,
+      "kind": "let",
+      "payload": {"name": "cancelled", "type_ref": {"kind": "named", "text": "c_string", "payload": {"name_segments": ["c_string"]}, "location": {"line": 109, "column": 17}}, "initializer_expression": 6},
+      "name": "cancelled",
+      "type": "c_string",
+      "type_ref": {"kind": "named", "text": "c_string", "payload": {"name_segments": ["c_string"]}, "location": {"line": 109, "column": 17}},
+      "has_initializer": true,
+      "expression_ids": [6],
+      "location": {"line": 109, "column": 5}
+    },
+    {
+      "id": 7,
+      "kind": "placement",
+      "payload": {"value_expression": 7, "target": {"kind": "identifier", "name": "session", "location": {"line": 111, "column": 24}}, "source_form": "arrow_placement"},
+      "has_value": true,
+      "expression_ids": [7],
+      "location": {"line": 111, "column": 5}
+    },
+    {
+      "id": 8,
+      "kind": "placement",
+      "payload": {"value_expression": 10, "target": {"kind": "identifier", "name": "status", "location": {"line": 112, "column": 25}}, "source_form": "arrow_placement"},
+      "has_value": true,
+      "expression_ids": [10],
+      "location": {"line": 112, "column": 5}
+    },
+    {
+      "id": 9,
+      "kind": "placement",
+      "payload": {"value_expression": 13, "target": {"kind": "identifier", "name": "status", "location": {"line": 113, "column": 39}}, "source_form": "arrow_placement"},
+      "has_value": true,
+      "expression_ids": [13],
+      "location": {"line": 113, "column": 5}
+    },
+    {
+      "id": 10,
+      "kind": "placement",
+      "payload": {"value_expression": 18, "target": {"kind": "identifier", "name": "status", "location": {"line": 114, "column": 27}}, "source_form": "arrow_placement"},
+      "has_value": true,
+      "expression_ids": [18],
+      "location": {"line": 114, "column": 5}
+    },
+    {
+      "id": 11,
+      "kind": "placement",
+      "payload": {"value_expression": 21, "target": {"kind": "identifier", "name": "key", "location": {"line": 115, "column": 30}}, "source_form": "arrow_placement"},
+      "has_value": true,
+      "expression_ids": [21],
+      "location": {"line": 115, "column": 5}
+    },
+    {
+      "id": 12,
+      "kind": "placement",
+      "payload": {"value_expression": 24, "target": {"kind": "identifier", "name": "status", "location": {"line": 116, "column": 25}}, "source_form": "arrow_placement"},
+      "has_value": true,
+      "expression_ids": [24],
+      "location": {"line": 116, "column": 5}
+    },
+    {
+      "id": 13,
+      "kind": "placement",
+      "payload": {"value_expression": 30, "target": {"kind": "identifier", "name": "status", "location": {"line": 118, "column": 33}}, "source_form": "arrow_placement"},
+      "has_value": true,
+      "expression_ids": [30],
+      "location": {"line": 118, "column": 9}
+    },
+    {
+      "id": 14,
+      "kind": "return",
+      "payload": {"value_expression": 34, "source_form": "keyword_return"},
+      "has_value": true,
+      "expression_ids": [34],
+      "location": {"line": 119, "column": 9}
+    },
+    {
+      "id": 15,
+      "kind": "if",
+      "payload": {"condition_expression": 27, "then_block": 1, "else_arm": {"kind": "else_block", "block": 2}},
+      "has_condition": true,
+      "expression_ids": [27],
+      "condition": 27,
+      "then_block": 1,
+      "else_arm": {"kind": "else_block", "block": 2},
+      "location": {"line": 117, "column": 5}
+    },
+    {
+      "id": 16,
+      "kind": "placement",
+      "payload": {"value_expression": 35, "target": {"kind": "identifier", "name": "status", "location": {"line": 121, "column": 32}}, "source_form": "arrow_placement"},
+      "has_value": true,
+      "expression_ids": [35],
+      "location": {"line": 121, "column": 9}
+    },
+    {
+      "id": 17,
+      "kind": "return",
+      "payload": {"value_expression": 39, "source_form": "keyword_return"},
+      "has_value": true,
+      "expression_ids": [39],
+      "location": {"line": 122, "column": 9}
+    }
+  ],
+  "block_pool_size": 3,
+  "block_pool": [
+    {"id": 0, "statements": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 15]},
+    {"id": 1, "statements": [13, 14]},
+    {"id": 2, "statements": [16, 17]}
+  ]
+}
+,
+  "symbol_table": {
+  "format": "symboltable.snapshot",
+  "version": 1,
+  "global_scope_id": 1,
+  "scopes": [
+    {"id": 1, "parent_id": null, "kind": "Global", "owner_symbol_id": null, "debug_name": "global", "child_scope_ids": [2], "symbol_ids": [1]},
+    {"id": 2, "parent_id": 1, "kind": "Module", "owner_symbol_id": 1, "debug_name": "sel", "child_scope_ids": [3, 11, 16], "symbol_ids": [2, 3, 4, 16, 26]},
+    {"id": 3, "parent_id": 2, "kind": "Contract", "owner_symbol_id": 4, "debug_name": "terminal", "child_scope_ids": [4, 5, 6, 7, 8, 9, 10], "symbol_ids": [5, 6, 7, 8, 9, 10, 13, 14, 15]},
+    {"id": 4, "parent_id": 3, "kind": "Function", "owner_symbol_id": 7, "debug_name": "open", "child_scope_ids": [], "symbol_ids": []},
+    {"id": 5, "parent_id": 3, "kind": "Function", "owner_symbol_id": 8, "debug_name": "close", "child_scope_ids": [], "symbol_ids": []},
+    {"id": 6, "parent_id": 3, "kind": "Function", "owner_symbol_id": 9, "debug_name": "enter", "child_scope_ids": [], "symbol_ids": []},
+    {"id": 7, "parent_id": 3, "kind": "Function", "owner_symbol_id": 10, "debug_name": "write", "child_scope_ids": [], "symbol_ids": [11, 12]},
+    {"id": 8, "parent_id": 3, "kind": "Function", "owner_symbol_id": 13, "debug_name": "present", "child_scope_ids": [], "symbol_ids": []},
+    {"id": 9, "parent_id": 3, "kind": "Function", "owner_symbol_id": 14, "debug_name": "read_event", "child_scope_ids": [], "symbol_ids": []},
+    {"id": 10, "parent_id": 3, "kind": "Function", "owner_symbol_id": 15, "debug_name": "capabilities", "child_scope_ids": [], "symbol_ids": []},
+    {"id": 11, "parent_id": 2, "kind": "Contract", "owner_symbol_id": 16, "debug_name": "libc", "child_scope_ids": [12, 13, 14, 15], "symbol_ids": [17, 18, 20, 22, 24]},
+    {"id": 12, "parent_id": 11, "kind": "Function", "owner_symbol_id": 18, "debug_name": "strlen", "child_scope_ids": [], "symbol_ids": [19]},
+    {"id": 13, "parent_id": 11, "kind": "Function", "owner_symbol_id": 20, "debug_name": "abs", "child_scope_ids": [], "symbol_ids": [21]},
+    {"id": 14, "parent_id": 11, "kind": "Function", "owner_symbol_id": 22, "debug_name": "labs", "child_scope_ids": [], "symbol_ids": [23]},
+    {"id": 15, "parent_id": 11, "kind": "Function", "owner_symbol_id": 24, "debug_name": "puts", "child_scope_ids": [], "symbol_ids": [25]},
+    {"id": 16, "parent_id": 2, "kind": "Function", "owner_symbol_id": 26, "debug_name": "main", "child_scope_ids": [17, 18], "symbol_ids": [27, 28, 29, 30, 31, 32, 33, 34]},
+    {"id": 17, "parent_id": 16, "kind": "Block", "owner_symbol_id": null, "debug_name": "if", "child_scope_ids": [], "symbol_ids": []},
+    {"id": 18, "parent_id": 16, "kind": "Block", "owner_symbol_id": null, "debug_name": "else", "child_scope_ids": [], "symbol_ids": []}
+  ],
+  "symbols": [
+    {"id": 1, "owning_scope_id": 1, "name": "sel", "kind": "Module", "visibility": "Unspecified", "definition_state": "Unknown", "introduced_scope_id": 2, "declaration_location": {"file": "", "line": 1, "column": 1}, "definition_location": null, "facts": [{"kind": "Custom", "key": "source_unit_kind", "value": {"type": "string", "value": "program"}}]},
+    {"id": 2, "owning_scope_id": 2, "name": "<import:terminal>", "kind": "Import", "visibility": "Unspecified", "definition_state": "Unknown", "introduced_scope_id": null, "declaration_location": {"file": "", "line": 3, "column": 1}, "definition_location": null, "facts": []},
+    {"id": 3, "owning_scope_id": 2, "name": "<import:libc>", "kind": "Import", "visibility": "Unspecified", "definition_state": "Unknown", "introduced_scope_id": null, "declaration_location": {"file": "", "line": 4, "column": 1}, "definition_location": null, "facts": []},
+    {"id": 4, "owning_scope_id": 2, "name": "terminal", "kind": "Contract", "visibility": "Unspecified", "definition_state": "Unknown", "introduced_scope_id": 3, "declaration_location": {"file": "", "line": 7, "column": 1}, "definition_location": null, "facts": [{"kind": "AbiTag", "key": "library_spelling", "value": {"type": "string", "value": "libflowterminal.so.1"}}, {"kind": "AbiTag", "key": "convention_spelling", "value": {"type": "string", "value": "c"}}]},
+    {"id": 5, "owning_scope_id": 3, "name": "terminal_session", "kind": "Type", "visibility": "Unspecified", "definition_state": "Unknown", "introduced_scope_id": null, "declaration_location": {"file": "", "line": 11, "column": 5}, "definition_location": null, "facts": [{"kind": "AbiTag", "key": "repr_spelling", "value": {"type": "string", "value": "void*"}}, {"kind": "AbiTag", "key": "ownership_spelling", "value": {"type": "string", "value": "external"}}, {"kind": "AbiTag", "key": "access_spelling", "value": {"type": "string", "value": "opaque"}}, {"kind": "AbiTag", "key": "lifetime_spelling", "value": {"type": "string", "value": "external"}}, {"kind": "AbiTag", "key": "nullable_spelling", "value": {"type": "string", "value": "false"}}, {"kind": "AbiTag", "key": "opaque_spelling", "value": {"type": "string", "value": "true"}}, {"kind": "AbiTag", "key": "cleanup_spelling", "value": {"type": "string", "value": "flow_terminal_close"}}]},
+    {"id": 6, "owning_scope_id": 3, "name": "c_string", "kind": "Type", "visibility": "Unspecified", "definition_state": "Unknown", "introduced_scope_id": null, "declaration_location": {"file": "", "line": 21, "column": 5}, "definition_location": null, "facts": [{"kind": "AbiTag", "key": "repr_spelling", "value": {"type": "string", "value": "const char*"}}, {"kind": "AbiTag", "key": "ownership_spelling", "value": {"type": "string", "value": "borrowed"}}, {"kind": "AbiTag", "key": "access_spelling", "value": {"type": "string", "value": "read"}}, {"kind": "AbiTag", "key": "lifetime_spelling", "value": {"type": "string", "value": "call"}}, {"kind": "AbiTag", "key": "nullable_spelling", "value": {"type": "string", "value": "false"}}, {"kind": "AbiTag", "key": "terminator_spelling", "value": {"type": "string", "value": "nul"}}]},
+    {"id": 7, "owning_scope_id": 3, "name": "open", "kind": "Function", "visibility": "Unspecified", "definition_state": "Unknown", "introduced_scope_id": 4, "declaration_location": {"file": "", "line": 30, "column": 5}, "definition_location": null, "facts": [{"kind": "TypeReference", "key": "return_type_spelling", "value": {"type": "string", "value": "terminal_session"}}, {"kind": "AbiTag", "key": "external_symbol_spelling", "value": {"type": "string", "value": "flow_terminal_open"}}, {"kind": "AbiTag", "key": "effect_spelling", "value": {"type": "string", "value": "terminal"}}]},
+    {"id": 8, "owning_scope_id": 3, "name": "close", "kind": "Function", "visibility": "Unspecified", "definition_state": "Unknown", "introduced_scope_id": 5, "declaration_location": {"file": "", "line": 35, "column": 5}, "definition_location": null, "facts": [{"kind": "TypeReference", "key": "return_type_spelling", "value": {"type": "string", "value": "c_int"}}, {"kind": "AbiTag", "key": "external_symbol_spelling", "value": {"type": "string", "value": "flow_terminal_close"}}, {"kind": "AbiTag", "key": "effect_spelling", "value": {"type": "string", "value": "terminal"}}]},
+    {"id": 9, "owning_scope_id": 3, "name": "enter", "kind": "Function", "visibility": "Unspecified", "definition_state": "Unknown", "introduced_scope_id": 6, "declaration_location": {"file": "", "line": 40, "column": 5}, "definition_location": null, "facts": [{"kind": "TypeReference", "key": "return_type_spelling", "value": {"type": "string", "value": "c_int"}}, {"kind": "AbiTag", "key": "external_symbol_spelling", "value": {"type": "string", "value": "flow_terminal_enter"}}, {"kind": "AbiTag", "key": "effect_spelling", "value": {"type": "string", "value": "terminal"}}]},
+    {"id": 10, "owning_scope_id": 3, "name": "write", "kind": "Function", "visibility": "Unspecified", "definition_state": "Unknown", "introduced_scope_id": 7, "declaration_location": {"file": "", "line": 45, "column": 5}, "definition_location": null, "facts": [{"kind": "TypeReference", "key": "return_type_spelling", "value": {"type": "string", "value": "c_int"}}, {"kind": "AbiTag", "key": "external_symbol_spelling", "value": {"type": "string", "value": "flow_terminal_write"}}, {"kind": "AbiTag", "key": "effect_spelling", "value": {"type": "string", "value": "terminal"}}]},
+    {"id": 11, "owning_scope_id": 7, "name": "text", "kind": "Parameter", "visibility": "Unspecified", "definition_state": "Unknown", "introduced_scope_id": null, "declaration_location": {"file": "", "line": 45, "column": 21}, "definition_location": null, "facts": [{"kind": "TypeReference", "key": "declared_type_spelling", "value": {"type": "string", "value": "c_string"}}]},
+    {"id": 12, "owning_scope_id": 7, "name": "count", "kind": "Parameter", "visibility": "Unspecified", "definition_state": "Unknown", "introduced_scope_id": null, "declaration_location": {"file": "", "line": 45, "column": 38}, "definition_location": null, "facts": [{"kind": "TypeReference", "key": "declared_type_spelling", "value": {"type": "string", "value": "c_int"}}]},
+    {"id": 13, "owning_scope_id": 3, "name": "present", "kind": "Function", "visibility": "Unspecified", "definition_state": "Unknown", "introduced_scope_id": 8, "declaration_location": {"file": "", "line": 50, "column": 5}, "definition_location": null, "facts": [{"kind": "TypeReference", "key": "return_type_spelling", "value": {"type": "string", "value": "c_int"}}, {"kind": "AbiTag", "key": "external_symbol_spelling", "value": {"type": "string", "value": "flow_terminal_present"}}, {"kind": "AbiTag", "key": "effect_spelling", "value": {"type": "string", "value": "terminal"}}]},
+    {"id": 14, "owning_scope_id": 3, "name": "read_event", "kind": "Function", "visibility": "Unspecified", "definition_state": "Unknown", "introduced_scope_id": 9, "declaration_location": {"file": "", "line": 55, "column": 5}, "definition_location": null, "facts": [{"kind": "TypeReference", "key": "return_type_spelling", "value": {"type": "string", "value": "c_int"}}, {"kind": "AbiTag", "key": "external_symbol_spelling", "value": {"type": "string", "value": "flow_terminal_read_event"}}, {"kind": "AbiTag", "key": "effect_spelling", "value": {"type": "string", "value": "terminal"}}]},
+    {"id": 15, "owning_scope_id": 3, "name": "capabilities", "kind": "Function", "visibility": "Unspecified", "definition_state": "Unknown", "introduced_scope_id": 10, "declaration_location": {"file": "", "line": 60, "column": 5}, "definition_location": null, "facts": [{"kind": "TypeReference", "key": "return_type_spelling", "value": {"type": "string", "value": "c_int"}}, {"kind": "AbiTag", "key": "external_symbol_spelling", "value": {"type": "string", "value": "flow_terminal_capabilities"}}, {"kind": "AbiTag", "key": "effect_spelling", "value": {"type": "string", "value": "terminal"}}]},
+    {"id": 16, "owning_scope_id": 2, "name": "libc", "kind": "Contract", "visibility": "Unspecified", "definition_state": "Unknown", "introduced_scope_id": 11, "declaration_location": {"file": "", "line": 67, "column": 1}, "definition_location": null, "facts": [{"kind": "AbiTag", "key": "library_spelling", "value": {"type": "string", "value": "libc.so.6"}}, {"kind": "AbiTag", "key": "convention_spelling", "value": {"type": "string", "value": "c"}}]},
+    {"id": 17, "owning_scope_id": 11, "name": "c_string", "kind": "Type", "visibility": "Unspecified", "definition_state": "Unknown", "introduced_scope_id": null, "declaration_location": {"file": "", "line": 71, "column": 5}, "definition_location": null, "facts": [{"kind": "AbiTag", "key": "repr_spelling", "value": {"type": "string", "value": "const char*"}}, {"kind": "AbiTag", "key": "ownership_spelling", "value": {"type": "string", "value": "borrowed"}}, {"kind": "AbiTag", "key": "access_spelling", "value": {"type": "string", "value": "read"}}, {"kind": "AbiTag", "key": "lifetime_spelling", "value": {"type": "string", "value": "call"}}, {"kind": "AbiTag", "key": "nullable_spelling", "value": {"type": "string", "value": "false"}}, {"kind": "AbiTag", "key": "terminator_spelling", "value": {"type": "string", "value": "nul"}}]},
+    {"id": 18, "owning_scope_id": 11, "name": "strlen", "kind": "Function", "visibility": "Unspecified", "definition_state": "Unknown", "introduced_scope_id": 12, "declaration_location": {"file": "", "line": 80, "column": 5}, "definition_location": null, "facts": [{"kind": "TypeReference", "key": "return_type_spelling", "value": {"type": "string", "value": "c_size_t"}}, {"kind": "AbiTag", "key": "external_symbol_spelling", "value": {"type": "string", "value": "strlen"}}, {"kind": "AbiTag", "key": "effect_spelling", "value": {"type": "string", "value": "pure"}}]},
+    {"id": 19, "owning_scope_id": 12, "name": "text", "kind": "Parameter", "visibility": "Unspecified", "definition_state": "Unknown", "introduced_scope_id": null, "declaration_location": {"file": "", "line": 80, "column": 22}, "definition_location": null, "facts": [{"kind": "TypeReference", "key": "declared_type_spelling", "value": {"type": "string", "value": "c_string"}}]},
+    {"id": 20, "owning_scope_id": 11, "name": "abs", "kind": "Function", "visibility": "Unspecified", "definition_state": "Unknown", "introduced_scope_id": 13, "declaration_location": {"file": "", "line": 85, "column": 5}, "definition_location": null, "facts": [{"kind": "TypeReference", "key": "return_type_spelling", "value": {"type": "string", "value": "c_int"}}, {"kind": "AbiTag", "key": "external_symbol_spelling", "value": {"type": "string", "value": "abs"}}, {"kind": "AbiTag", "key": "effect_spelling", "value": {"type": "string", "value": "pure"}}]},
+    {"id": 21, "owning_scope_id": 13, "name": "value", "kind": "Parameter", "visibility": "Unspecified", "definition_state": "Unknown", "introduced_scope_id": null, "declaration_location": {"file": "", "line": 85, "column": 19}, "definition_location": null, "facts": [{"kind": "TypeReference", "key": "declared_type_spelling", "value": {"type": "string", "value": "c_int"}}]},
+    {"id": 22, "owning_scope_id": 11, "name": "labs", "kind": "Function", "visibility": "Unspecified", "definition_state": "Unknown", "introduced_scope_id": 14, "declaration_location": {"file": "", "line": 90, "column": 5}, "definition_location": null, "facts": [{"kind": "TypeReference", "key": "return_type_spelling", "value": {"type": "string", "value": "c_long"}}, {"kind": "AbiTag", "key": "external_symbol_spelling", "value": {"type": "string", "value": "labs"}}, {"kind": "AbiTag", "key": "effect_spelling", "value": {"type": "string", "value": "pure"}}]},
+    {"id": 23, "owning_scope_id": 14, "name": "value", "kind": "Parameter", "visibility": "Unspecified", "definition_state": "Unknown", "introduced_scope_id": null, "declaration_location": {"file": "", "line": 90, "column": 20}, "definition_location": null, "facts": [{"kind": "TypeReference", "key": "declared_type_spelling", "value": {"type": "string", "value": "c_long"}}]},
+    {"id": 24, "owning_scope_id": 11, "name": "puts", "kind": "Function", "visibility": "Unspecified", "definition_state": "Unknown", "introduced_scope_id": 15, "declaration_location": {"file": "", "line": 95, "column": 5}, "definition_location": null, "facts": [{"kind": "TypeReference", "key": "return_type_spelling", "value": {"type": "string", "value": "c_int"}}, {"kind": "AbiTag", "key": "external_symbol_spelling", "value": {"type": "string", "value": "puts"}}, {"kind": "AbiTag", "key": "effect_spelling", "value": {"type": "string", "value": "io"}}]},
+    {"id": 25, "owning_scope_id": 15, "name": "text", "kind": "Parameter", "visibility": "Unspecified", "definition_state": "Unknown", "introduced_scope_id": null, "declaration_location": {"file": "", "line": 95, "column": 20}, "definition_location": null, "facts": [{"kind": "TypeReference", "key": "declared_type_spelling", "value": {"type": "string", "value": "c_string"}}]},
+    {"id": 26, "owning_scope_id": 2, "name": "main", "kind": "Procedure", "visibility": "Unspecified", "definition_state": "Unknown", "introduced_scope_id": 16, "declaration_location": {"file": "", "line": 102, "column": 1}, "definition_location": null, "facts": []},
+    {"id": 27, "owning_scope_id": 16, "name": "args", "kind": "Parameter", "visibility": "Unspecified", "definition_state": "Unknown", "introduced_scope_id": null, "declaration_location": {"file": "", "line": 102, "column": 6}, "definition_location": null, "facts": [{"kind": "TypeReference", "key": "declared_type_spelling", "value": {"type": "string", "value": "list<string>"}}]},
+    {"id": 28, "owning_scope_id": 16, "name": "session", "kind": "Variable", "visibility": "Unspecified", "definition_state": "Unknown", "introduced_scope_id": null, "declaration_location": {"file": "", "line": 103, "column": 5}, "definition_location": null, "facts": [{"kind": "TypeReference", "key": "declared_type_spelling", "value": {"type": "string", "value": "terminal_session"}}]},
+    {"id": 29, "owning_scope_id": 16, "name": "status", "kind": "Variable", "visibility": "Unspecified", "definition_state": "Unknown", "introduced_scope_id": null, "declaration_location": {"file": "", "line": 104, "column": 5}, "definition_location": null, "facts": [{"kind": "TypeReference", "key": "declared_type_spelling", "value": {"type": "string", "value": "c_int"}}]},
+    {"id": 30, "owning_scope_id": 16, "name": "key", "kind": "Variable", "visibility": "Unspecified", "definition_state": "Unknown", "introduced_scope_id": null, "declaration_location": {"file": "", "line": 105, "column": 5}, "definition_location": null, "facts": [{"kind": "TypeReference", "key": "declared_type_spelling", "value": {"type": "string", "value": "c_int"}}]},
+    {"id": 31, "owning_scope_id": 16, "name": "count", "kind": "Variable", "visibility": "Unspecified", "definition_state": "Unknown", "introduced_scope_id": null, "declaration_location": {"file": "", "line": 106, "column": 5}, "definition_location": null, "facts": [{"kind": "TypeReference", "key": "declared_type_spelling", "value": {"type": "string", "value": "c_int"}}]},
+    {"id": 32, "owning_scope_id": 16, "name": "message", "kind": "Variable", "visibility": "Unspecified", "definition_state": "Unknown", "introduced_scope_id": null, "declaration_location": {"file": "", "line": 107, "column": 5}, "definition_location": null, "facts": [{"kind": "TypeReference", "key": "declared_type_spelling", "value": {"type": "string", "value": "c_string"}}]},
+    {"id": 33, "owning_scope_id": 16, "name": "selected", "kind": "Variable", "visibility": "Unspecified", "definition_state": "Unknown", "introduced_scope_id": null, "declaration_location": {"file": "", "line": 108, "column": 5}, "definition_location": null, "facts": [{"kind": "TypeReference", "key": "declared_type_spelling", "value": {"type": "string", "value": "c_string"}}]},
+    {"id": 34, "owning_scope_id": 16, "name": "cancelled", "kind": "Variable", "visibility": "Unspecified", "definition_state": "Unknown", "introduced_scope_id": null, "declaration_location": {"file": "", "line": 109, "column": 5}, "definition_location": null, "facts": [{"kind": "TypeReference", "key": "declared_type_spelling", "value": {"type": "string", "value": "c_string"}}]}
+  ]
+},
+  "origin_contract": {"format": "flowmini.structural_origins", "version": 1},
+  "symbol_origins": [
+    {"symbol_id": 1, "ast_path": "/source_unit", "entity_kind": "source_unit", "role": "source_unit", "ast_id": null, "source_location": {"line": 1, "column": 1}},
+    {"symbol_id": 2, "ast_path": "/declaration_pool/0", "entity_kind": "declaration", "role": "import_declaration", "ast_id": 0, "source_location": {"line": 3, "column": 1}},
+    {"symbol_id": 3, "ast_path": "/declaration_pool/1", "entity_kind": "declaration", "role": "import_declaration", "ast_id": 1, "source_location": {"line": 4, "column": 1}},
+    {"symbol_id": 4, "ast_path": "/declaration_pool/2", "entity_kind": "declaration", "role": "abi_declaration", "ast_id": 2, "source_location": {"line": 7, "column": 1}},
+    {"symbol_id": 5, "ast_path": "/declaration_pool/2/members/2", "entity_kind": "abi_member", "role": "abi_type", "ast_id": null, "source_location": {"line": 11, "column": 5}},
+    {"symbol_id": 6, "ast_path": "/declaration_pool/2/members/3", "entity_kind": "abi_member", "role": "abi_type", "ast_id": null, "source_location": {"line": 21, "column": 5}},
+    {"symbol_id": 7, "ast_path": "/declaration_pool/2/members/4", "entity_kind": "abi_member", "role": "extern_function", "ast_id": null, "source_location": {"line": 30, "column": 5}},
+    {"symbol_id": 8, "ast_path": "/declaration_pool/2/members/5", "entity_kind": "abi_member", "role": "extern_function", "ast_id": null, "source_location": {"line": 35, "column": 5}},
+    {"symbol_id": 9, "ast_path": "/declaration_pool/2/members/6", "entity_kind": "abi_member", "role": "extern_function", "ast_id": null, "source_location": {"line": 40, "column": 5}},
+    {"symbol_id": 10, "ast_path": "/declaration_pool/2/members/7", "entity_kind": "abi_member", "role": "extern_function", "ast_id": null, "source_location": {"line": 45, "column": 5}},
+    {"symbol_id": 11, "ast_path": "/declaration_pool/2/members/7/parameters/0", "entity_kind": "parameter", "role": "extern_parameter", "ast_id": null, "source_location": {"line": 45, "column": 21}},
+    {"symbol_id": 12, "ast_path": "/declaration_pool/2/members/7/parameters/1", "entity_kind": "parameter", "role": "extern_parameter", "ast_id": null, "source_location": {"line": 45, "column": 38}},
+    {"symbol_id": 13, "ast_path": "/declaration_pool/2/members/8", "entity_kind": "abi_member", "role": "extern_function", "ast_id": null, "source_location": {"line": 50, "column": 5}},
+    {"symbol_id": 14, "ast_path": "/declaration_pool/2/members/9", "entity_kind": "abi_member", "role": "extern_function", "ast_id": null, "source_location": {"line": 55, "column": 5}},
+    {"symbol_id": 15, "ast_path": "/declaration_pool/2/members/10", "entity_kind": "abi_member", "role": "extern_function", "ast_id": null, "source_location": {"line": 60, "column": 5}},
+    {"symbol_id": 16, "ast_path": "/declaration_pool/3", "entity_kind": "declaration", "role": "abi_declaration", "ast_id": 3, "source_location": {"line": 67, "column": 1}},
+    {"symbol_id": 17, "ast_path": "/declaration_pool/3/members/2", "entity_kind": "abi_member", "role": "abi_type", "ast_id": null, "source_location": {"line": 71, "column": 5}},
+    {"symbol_id": 18, "ast_path": "/declaration_pool/3/members/3", "entity_kind": "abi_member", "role": "extern_function", "ast_id": null, "source_location": {"line": 80, "column": 5}},
+    {"symbol_id": 19, "ast_path": "/declaration_pool/3/members/3/parameters/0", "entity_kind": "parameter", "role": "extern_parameter", "ast_id": null, "source_location": {"line": 80, "column": 22}},
+    {"symbol_id": 20, "ast_path": "/declaration_pool/3/members/4", "entity_kind": "abi_member", "role": "extern_function", "ast_id": null, "source_location": {"line": 85, "column": 5}},
+    {"symbol_id": 21, "ast_path": "/declaration_pool/3/members/4/parameters/0", "entity_kind": "parameter", "role": "extern_parameter", "ast_id": null, "source_location": {"line": 85, "column": 19}},
+    {"symbol_id": 22, "ast_path": "/declaration_pool/3/members/5", "entity_kind": "abi_member", "role": "extern_function", "ast_id": null, "source_location": {"line": 90, "column": 5}},
+    {"symbol_id": 23, "ast_path": "/declaration_pool/3/members/5/parameters/0", "entity_kind": "parameter", "role": "extern_parameter", "ast_id": null, "source_location": {"line": 90, "column": 20}},
+    {"symbol_id": 24, "ast_path": "/declaration_pool/3/members/6", "entity_kind": "abi_member", "role": "extern_function", "ast_id": null, "source_location": {"line": 95, "column": 5}},
+    {"symbol_id": 25, "ast_path": "/declaration_pool/3/members/6/parameters/0", "entity_kind": "parameter", "role": "extern_parameter", "ast_id": null, "source_location": {"line": 95, "column": 20}},
+    {"symbol_id": 26, "ast_path": "/declaration_pool/4", "entity_kind": "declaration", "role": "main_declaration", "ast_id": 4, "source_location": {"line": 102, "column": 1}},
+    {"symbol_id": 27, "ast_path": "/declaration_pool/4/parameters/0", "entity_kind": "parameter", "role": "function_parameter", "ast_id": null, "source_location": {"line": 102, "column": 6}},
+    {"symbol_id": 28, "ast_path": "/statement_pool/0", "entity_kind": "statement", "role": "local_binding", "ast_id": 0, "source_location": {"line": 103, "column": 5}},
+    {"symbol_id": 29, "ast_path": "/statement_pool/1", "entity_kind": "statement", "role": "local_binding", "ast_id": 1, "source_location": {"line": 104, "column": 5}},
+    {"symbol_id": 30, "ast_path": "/statement_pool/2", "entity_kind": "statement", "role": "local_binding", "ast_id": 2, "source_location": {"line": 105, "column": 5}},
+    {"symbol_id": 31, "ast_path": "/statement_pool/3", "entity_kind": "statement", "role": "local_binding", "ast_id": 3, "source_location": {"line": 106, "column": 5}},
+    {"symbol_id": 32, "ast_path": "/statement_pool/4", "entity_kind": "statement", "role": "local_binding", "ast_id": 4, "source_location": {"line": 107, "column": 5}},
+    {"symbol_id": 33, "ast_path": "/statement_pool/5", "entity_kind": "statement", "role": "local_binding", "ast_id": 5, "source_location": {"line": 108, "column": 5}},
+    {"symbol_id": 34, "ast_path": "/statement_pool/6", "entity_kind": "statement", "role": "local_binding", "ast_id": 6, "source_location": {"line": 109, "column": 5}}
+  ],
+  "scope_origins": [
+    {"scope_id": 2, "ast_path": "/source_unit", "entity_kind": "source_unit", "role": "module_scope", "ast_id": null, "source_location": {"line": 1, "column": 1}},
+    {"scope_id": 3, "ast_path": "/declaration_pool/2", "entity_kind": "declaration", "role": "abi_scope", "ast_id": 2, "source_location": {"line": 7, "column": 1}},
+    {"scope_id": 4, "ast_path": "/declaration_pool/2/members/4", "entity_kind": "abi_member", "role": "extern_function_scope", "ast_id": null, "source_location": {"line": 30, "column": 5}},
+    {"scope_id": 5, "ast_path": "/declaration_pool/2/members/5", "entity_kind": "abi_member", "role": "extern_function_scope", "ast_id": null, "source_location": {"line": 35, "column": 5}},
+    {"scope_id": 6, "ast_path": "/declaration_pool/2/members/6", "entity_kind": "abi_member", "role": "extern_function_scope", "ast_id": null, "source_location": {"line": 40, "column": 5}},
+    {"scope_id": 7, "ast_path": "/declaration_pool/2/members/7", "entity_kind": "abi_member", "role": "extern_function_scope", "ast_id": null, "source_location": {"line": 45, "column": 5}},
+    {"scope_id": 8, "ast_path": "/declaration_pool/2/members/8", "entity_kind": "abi_member", "role": "extern_function_scope", "ast_id": null, "source_location": {"line": 50, "column": 5}},
+    {"scope_id": 9, "ast_path": "/declaration_pool/2/members/9", "entity_kind": "abi_member", "role": "extern_function_scope", "ast_id": null, "source_location": {"line": 55, "column": 5}},
+    {"scope_id": 10, "ast_path": "/declaration_pool/2/members/10", "entity_kind": "abi_member", "role": "extern_function_scope", "ast_id": null, "source_location": {"line": 60, "column": 5}},
+    {"scope_id": 11, "ast_path": "/declaration_pool/3", "entity_kind": "declaration", "role": "abi_scope", "ast_id": 3, "source_location": {"line": 67, "column": 1}},
+    {"scope_id": 12, "ast_path": "/declaration_pool/3/members/3", "entity_kind": "abi_member", "role": "extern_function_scope", "ast_id": null, "source_location": {"line": 80, "column": 5}},
+    {"scope_id": 13, "ast_path": "/declaration_pool/3/members/4", "entity_kind": "abi_member", "role": "extern_function_scope", "ast_id": null, "source_location": {"line": 85, "column": 5}},
+    {"scope_id": 14, "ast_path": "/declaration_pool/3/members/5", "entity_kind": "abi_member", "role": "extern_function_scope", "ast_id": null, "source_location": {"line": 90, "column": 5}},
+    {"scope_id": 15, "ast_path": "/declaration_pool/3/members/6", "entity_kind": "abi_member", "role": "extern_function_scope", "ast_id": null, "source_location": {"line": 95, "column": 5}},
+    {"scope_id": 16, "ast_path": "/declaration_pool/4", "entity_kind": "declaration", "role": "main_scope", "ast_id": 4, "source_location": {"line": 102, "column": 1}},
+    {"scope_id": 17, "ast_path": "/block_pool/1", "entity_kind": "block", "role": "if_then_scope", "ast_id": 1, "source_location": {"line": 117, "column": 5}},
+    {"scope_id": 18, "ast_path": "/block_pool/2", "entity_kind": "block", "role": "else_block_scope", "ast_id": 2, "source_location": {"line": 117, "column": 5}}
+  ],
+  "diagnostics": []
+}

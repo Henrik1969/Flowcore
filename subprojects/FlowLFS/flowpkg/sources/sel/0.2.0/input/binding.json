@@ -1,0 +1,12 @@
+{
+  "format": "flowbind.binding_report",
+  "version": 1,
+  "status": "ready",
+  "provider": {"name": "dlopen+dlsym", "requirements": 7},
+  "symbols": ["flow_terminal_open","flow_terminal_close","flow_terminal_enter","flow_terminal_write","flow_terminal_present","flow_terminal_read_event","puts"],
+  "capabilities": [{"contract":"terminal","library":"libflowterminal.so.1","symbol":"flow_terminal_open","convention":"c","effect":"terminal","parameter_types":"","return_type":"terminal_session","status":"authorized"},{"contract":"terminal","library":"libflowterminal.so.1","symbol":"flow_terminal_close","convention":"c","effect":"terminal","parameter_types":"","return_type":"c_int","status":"authorized"},{"contract":"terminal","library":"libflowterminal.so.1","symbol":"flow_terminal_enter","convention":"c","effect":"terminal","parameter_types":"","return_type":"c_int","status":"authorized"},{"contract":"terminal","library":"libflowterminal.so.1","symbol":"flow_terminal_write","convention":"c","effect":"terminal","parameter_types":"c_string,c_int","return_type":"c_int","status":"authorized"},{"contract":"terminal","library":"libflowterminal.so.1","symbol":"flow_terminal_present","convention":"c","effect":"terminal","parameter_types":"","return_type":"c_int","status":"authorized"},{"contract":"terminal","library":"libflowterminal.so.1","symbol":"flow_terminal_read_event","convention":"c","effect":"terminal","parameter_types":"","return_type":"c_int","status":"authorized"},{"contract":"libc","library":"libc.so.6","symbol":"puts","convention":"c","effect":"io","parameter_types":"c_string","return_type":"c_int","status":"authorized"}],
+  "lowering_plan": {"kind": "generic","contract":"flowcore.lowering_plan","operation_count":18},
+  "policy": {"status": "authorized", "grants": 7},
+  "abi": {"convention": "c", "carrier_types_supported": true, "provider_signature_evidence": "not-provided", "sizeof_int": 4, "sizeof_long": 8, "sizeof_size_t": 8, "sizeof_pointer": 8},
+  "execution": "not-performed"
+}

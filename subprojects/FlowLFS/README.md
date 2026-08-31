@@ -63,6 +63,13 @@ runnable image is `artifacts/FlowLFS-v0.1-basis-v1.qcow2`; launch it with
 canonical `/etc/skel` and account behavior while adding Zsh, system-local PATH,
 per-user history policy, editable monikers, and the native Flowcore `sel` tool.
 
+The terminal-insulated revision is documented in
+`docs/BASIS-V2-TERMINAL.md`. Its sealed image is
+`artifacts/FlowLFS-v0.1-basis-v2-terminal.qcow2`; launch it with
+`scripts/launch-basis-v2-terminal.sh` (default callback port 2230). It replaces
+`sel`'s direct ncurses dependency with a provider-neutral terminal ABI and an
+independent terminal-restoration guardian.
+
 ## Layout
 
 ```text

@@ -1,0 +1,17 @@
+{
+  "schema": "flowlfs.profile-realization.v0",
+  "profile": "flowlfs.basis.v2",
+  "selection": "system-owner",
+  "law": "preserve canonical Linux behavior; insulate functional tools from terminal projections",
+  "resolved": [
+    {"package": "zsh", "version": "5.9.2", "object": "sha256-35919dcaea12c0c67ea22ef0598feb20148c6be78d331bd84aa117a8bdcd9b73"},
+    {"package": "flow-basis", "version": "0.1.0", "object": "sha256-f2cf1b94f4edc7289d92b60a203d659c3a880ddc35ba6081f97bc5d60348a2b9"},
+    {"package": "flow-terminal", "version": "1.0.0", "object": "sha256-ad1b715e2c2d8e390444ea69a9603901b946a5a2dbb80759fd0d5cdc9f6ddec2"},
+    {"package": "sel", "version": "0.2.0", "object": "sha256-597de8dc8a3f883aade4e219b44bfa141f164acbf1e0a398475542750272120b"}
+  ],
+  "canonical_interfaces": ["/etc/skel", "useradd -m", "Bash recovery shell", "/etc/profile.d", "POSIX terminal byte streams"],
+  "additive_capabilities": ["Zsh", "home templates", "directory monikers", "provider-neutral terminal events", "sel"],
+  "terminal_contract": "functional tools consume libflowterminal semantic operations; provider v1 does not read TERM or terminfo",
+  "lifecycle": "exact termios restoration by explicit close, atexit, and an independent parent-liveness guardian",
+  "user_authority": "terminal brand, emulator, skeleton copies, moniker choices, and history content remain owner choices"
+}

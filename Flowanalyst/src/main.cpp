@@ -43,7 +43,7 @@ const Array& list(const Json* value) { static const Array empty; return value &&
 std::string quote(std::string_view value) { std::ostringstream out; out << '"'; for (char c : value) { if (c == '"' || c == '\\') out << '\\'; if (c == '\n') out << "\\n"; else if (c == '\r') out << "\\r"; else if (c != '\n') out << c; } return out.str() + '"'; }
 struct Diagnostic { std::string code, severity, message, ast_path, region, source; int symbol = -1, line = -1, column = -1; };
 struct Target { int symbol = -1, mains = 0; std::string name; };
-struct BindingRequirement { std::string contract, library, convention, symbol, effect, parameter_types, return_type; };
+struct BindingRequirement { int source_symbol = -1; std::string contract, library, convention, symbol, effect, parameter_types, return_type; };
 struct AbiTypeContract { std::string contract, name, repr, ownership, access, lifetime, nullable, opaque, cleanup; };
 struct AggregateLayout { std::string contract, name; std::vector<std::pair<std::string, std::string>> fields; };
 struct Region { std::string id, kind, status; std::vector<std::string> prerequisites; };
@@ -138,7 +138,7 @@ int run(const Json& bundle, int lowering_plan_version) {
                 if (!parameter_types.empty()) parameter_types += ',';
                 parameter_types += fact_value(*symbols[parameter_id], "declared_type_spelling");
             }
-            binding_requirements.push_back({text(field(*contract, "name")), library, convention, external, fact_value(*symbols[child_id], "effect_spelling"), parameter_types, fact_value(*symbols[child_id], "return_type_spelling")});
+            binding_requirements.push_back({child_id, text(field(*contract, "name")), library, convention, external, fact_value(*symbols[child_id], "effect_spelling"), parameter_types, fact_value(*symbols[child_id], "return_type_spelling")});
         }
         for (const auto& child : list(field(*scopes[contract_scope], "symbol_ids"))) {
             const int child_id = integer(&child);
@@ -509,7 +509,12 @@ int run(const Json& bundle, int lowering_plan_version) {
         const auto separator = leaf.rfind('.');
         if (separator != std::string::npos) leaf = leaf.substr(separator + 1);
         for (const auto& requirement : binding_requirements) {
-            if (requirement.symbol != leaf) continue;
+            /* Qualified ABI calls resolve through declaration identity, so a
+             * semantic name can differ from its provider export. Preserve the
+             * established unqualified-call boundary until those calls carry
+             * an explicit contract qualification of their own. */
+            const bool qualified = site.callee.find('.') != std::string::npos;
+            if (qualified ? requirement.source_symbol != site.callee_symbol : requirement.symbol != leaf) continue;
             operation.kind = "external_call";
             operation.contract = requirement.contract;
             operation.library = requirement.library;

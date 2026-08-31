@@ -7,6 +7,7 @@ include(GNUInstallDirs)
 # This is an additive superbuild. Each sibling keeps its own CMake project,
 # tests, and artifact contract; the root only supplies one clean build graph.
 add_subdirectory(Flowcontracts ${CMAKE_CURRENT_BINARY_DIR}/flowcontracts)
+add_subdirectory(Flowterminal ${CMAKE_CURRENT_BINARY_DIR}/flowterminal)
 add_subdirectory(subprojects/TinyVM ${CMAKE_CURRENT_BINARY_DIR}/tinyvm)
 add_subdirectory(Flowmini/flowmini_v25_symboltable_projection
     ${CMAKE_CURRENT_BINARY_DIR}/flowmini)
@@ -140,6 +141,20 @@ add_test(NAME sel_tui_pipeline
         ${CMAKE_CURRENT_SOURCE_DIR}/tools/test-sel-pipeline.sh)
 set_tests_properties(sel_tui_pipeline PROPERTIES
     DEPENDS "ncurses_flow_pipeline")
+
+add_test(NAME terminal_sel_pipeline
+    COMMAND ${CMAKE_COMMAND} -E env
+        FLOWCORE_ROOT=${CMAKE_CURRENT_SOURCE_DIR}
+        FLOWMINI_BIN=$<TARGET_FILE:flowmini>
+        FLOWANALYST_BIN=$<TARGET_FILE:flowanalyst>
+        FLOWPARALLEL_BIN=$<TARGET_FILE:flowparallel>
+        FLOWOPTIMIZE_BIN=$<TARGET_FILE:flowoptimize>
+        FLOWBIND_BIN=$<TARGET_FILE:flowbind>
+        FLOWLOWER_BIN=$<TARGET_FILE:flowlower>
+        FLOWTERMINAL_LIBDIR=$<TARGET_FILE_DIR:flowterminal>
+        ${CMAKE_CURRENT_SOURCE_DIR}/tools/test-terminal-sel-pipeline.sh)
+set_tests_properties(terminal_sel_pipeline PROPERTIES
+    DEPENDS "flowterminal_provider;flowlower_pipeline")
 
 add_test(NAME flowcore_graph_routing
     COMMAND ${CMAKE_COMMAND} -E env

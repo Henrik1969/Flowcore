@@ -1,0 +1,11 @@
+{
+  "format": "flowlower.lowering_report",
+  "version": 1,
+  "status": "ready",
+  "source": {"path": "Flowmini/flowmini_v25_symboltable_projection/examples/apps/sel/sel.flow"},
+  "target": {"name": "main", "selection": "explicit-or-default"},
+  "artifact": {"backend": "llvm", "target_specific": true, "status": "emitted"},
+  "backend": {"name": "llvm", "provider_status": "available"},
+  "ir": {"format": "llvm-ir", "status": "emitted"},
+  "message": "LLVM lowering boundary reached for the accepted lowering plan"
+}
