@@ -20,3 +20,10 @@ Providers receive candidates as arguments, not shell source. The fzf adapter
 clears ambient fzf command/options variables, supplies candidates on standard
 input, and admits no preview, history, reload, transform, execute, walker, or
 shell-integration authority.
+
+The native provider is the portable plain-text projection. It writes the full
+candidate set and a `> ` selection marker to `/dev/tty` on entry and after each
+state change. It uses no cursor-addressing escapes or terminfo assumptions;
+consequently, successive states are appended instead of redrawn in place.
+Standard output remains reserved for the selected item required by the CLI
+contract.

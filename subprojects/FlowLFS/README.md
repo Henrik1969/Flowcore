@@ -80,6 +80,11 @@ The first interchangeable selection capability is described in
 canonical source-built fzf, and explicit native/fzf provider policy without
 changing the native default.
 
+The immutable v1 correction is described in
+`docs/SELECTION-PROVIDERS-V1.md`. It gives the native provider a complete,
+portable candidate-list projection while retaining the same selection
+contract, explicit provider policy, and unchanged fzf object.
+
 ## Layout
 
 ```text
