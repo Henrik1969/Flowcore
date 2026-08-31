@@ -1,0 +1,11 @@
+{
+  "schema": "flowpkg.recipe.v0",
+  "package": "sel",
+  "version": "0.1.0",
+  "source_sha256": "50180307ec1435036812cf842ee1097d7e18170bdb543fe4f547988fe3c9e6c8",
+  "build_identity": "flowbuilder",
+  "dependencies": ["gcc@16.2.0-base", "ncursesw@6.6-base", "util-linux-script@base"],
+  "build": ["verify Flow source and source-derived assembly identities", "assemble and link inside FlowLFS", "stage only"],
+  "tests": ["source pipeline reports preserved", "pseudo-terminal behavior", "ordinary-user runtime"],
+  "install_root": "staging-only"
+}

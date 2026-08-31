@@ -1,0 +1,10 @@
+{
+  "schema": "flowpkg.adaptation.v0",
+  "package": "flow-basis",
+  "version": "0.1.0",
+  "lineage": "owner-authored-additive-system-policy",
+  "canonical_behaviors_preserved": ["/etc/skel account templates", "useradd -m", "Bash recovery shell", "profile.d login integration", "user ownership after account creation"],
+  "additions": ["canonical local PATH reachability", "private per-user shell history policy", "portable home directory defaults", "editable moniker catalogue", "collision-safe Zsh moniker commands"],
+  "user_state_policy": "templates become mutable user-owned copies; packages never overwrite existing homes",
+  "rollback": "remove unchanged global projections and unchanged /etc/skel templates; never inspect or mutate created homes"
+}

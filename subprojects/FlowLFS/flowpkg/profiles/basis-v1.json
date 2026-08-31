@@ -1,0 +1,15 @@
+{
+  "schema": "flowlfs.profile-realization.v0",
+  "profile": "flowlfs.basis.v1",
+  "selection": "system-owner",
+  "law": "preserve canonically expected Linux behavior; provide Flowcore capabilities additively",
+  "resolved": [
+    {"package": "zsh", "version": "5.9.2", "object": "sha256-35919dcaea12c0c67ea22ef0598feb20148c6be78d331bd84aa117a8bdcd9b73"},
+    {"package": "flow-basis", "version": "0.1.0", "object": "sha256-f2cf1b94f4edc7289d92b60a203d659c3a880ddc35ba6081f97bc5d60348a2b9"},
+    {"package": "sel", "version": "0.1.0", "object": "sha256-fe9a6f9eaedef7679e71948692857e1cafcd285a8f3de9de650f1b22746ded6e"}
+  ],
+  "canonical_interfaces": ["/etc/skel", "useradd -m", "Bash recovery shell", "/etc/profile.d"],
+  "additive_capabilities": ["Zsh", "local administrative PATH", "per-user history policy", "home templates", "directory monikers", "sel"],
+  "user_authority": "skeleton copies, moniker choices and history content are mutable user-owned state",
+  "anonymous_remote_login": false
+}

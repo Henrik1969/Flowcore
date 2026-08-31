@@ -1,0 +1,37 @@
+# FlowLFS additive interactive Zsh policy.
+[[ -o interactive ]] || return 0
+
+setopt append_history share_history hist_ignore_space hist_ignore_all_dups
+setopt hist_save_no_dups hist_find_no_dups hist_expire_dups_first hist_reduce_blanks
+setopt auto_cd interactive_comments
+HISTSIZE=10000
+SAVEHIST=20000
+typeset -g HISTFILE=${XDG_STATE_HOME:-$HOME/.local/state}/zsh/history
+mkdir -p -- ${HISTFILE:h}
+chmod 700 -- ${HISTFILE:h} 2>/dev/null || true
+
+autoload -Uz compinit
+typeset -g _flow_zcompdump=${XDG_CACHE_HOME:-$HOME/.cache}/zsh/zcompdump-$ZSH_VERSION
+mkdir -p -- ${_flow_zcompdump:h}
+chmod 700 -- ${_flow_zcompdump:h} 2>/dev/null || true
+compinit -d $_flow_zcompdump
+unset _flow_zcompdump
+
+bindkey -e
+bindkey '^[[A' history-beginning-search-backward
+bindkey '^[[B' history-beginning-search-forward
+
+alias ll='ls -alF'
+alias la='ls -A'
+alias l='ls -CF'
+alias grep='grep --color=auto'
+alias diff='diff --color=auto'
+
+[[ -r /usr/share/flowcore/zsh/monikers.zsh ]] && source /usr/share/flowcore/zsh/monikers.zsh
+
+if [[ $EUID == 0 ]]; then
+    PROMPT='%F{red}%n@%m%f:%F{blue}%~%f# '
+else
+    PROMPT='%F{green}%n@%m%f:%F{blue}%~%f%# '
+fi
+RPROMPT='%(?..%F{red}exit:%?%f)'

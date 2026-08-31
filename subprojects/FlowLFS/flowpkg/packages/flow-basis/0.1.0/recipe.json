@@ -1,0 +1,10 @@
+{
+  "schema": "flowpkg.recipe.v0",
+  "package": "flow-basis",
+  "version": "0.1.0",
+  "source_sha256": "56daaf8df7783edbe91f524eb943c9d847a662ae608b45f8f7c97395adbd0b47",
+  "build_identity": "flowbuilder",
+  "dependencies": ["bash@base", "zsh@5.9.2", "shadow@base", "coreutils@base"],
+  "tests": ["syntax", "canonical useradd -m skeleton copy", "ordinary-user Bash", "ordinary-user Zsh history", "moniker navigation", "rollback"],
+  "install_root": "staging-only"
+}

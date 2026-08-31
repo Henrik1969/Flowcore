@@ -1,0 +1,2 @@
+# FlowLFS global Zsh environment.
+[[ -r /etc/flow-basis/environment.sh ]] && source /etc/flow-basis/environment.sh

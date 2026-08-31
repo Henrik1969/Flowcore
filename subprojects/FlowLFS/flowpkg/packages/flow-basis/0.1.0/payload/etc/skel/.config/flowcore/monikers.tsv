@@ -1,0 +1,10 @@
+# Flowcore directory monikers. Format: name<TAB>home-relative-or-absolute-path
+home	~
+bin	~/bin
+local-bin	~/.local/bin
+config	~/.config
+state	~/.local/state
+data	~/.local/share
+projects	~/Projects
+downloads	~/Downloads
+documents	~/Documents

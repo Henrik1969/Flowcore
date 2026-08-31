@@ -1,0 +1,11 @@
+{
+  "schema": "flowpkg.adaptation.v0",
+  "package": "sel",
+  "version": "0.1.0",
+  "lineage": "canonical owner-authored Flow source with cross-stage bootstrap",
+  "source_mutations": [],
+  "assembly_adaptations": ["remove Clang metadata-only .addrsig directive after verifying the original assembly; GNU as in the LFS base rejects that directive"],
+  "bootstrap_constraint": "Flow compiler chain is not yet admitted in FlowLFS; preserve every checked pipeline intermediate and assemble/link the source-derived x86_64 cache with native LFS GCC",
+  "migration": "replace the assembly cache with an in-system Flow compiler derivation once that toolchain is independently admitted",
+  "authority": "flowlfs.basis.v1 additive native tool selection"
+}

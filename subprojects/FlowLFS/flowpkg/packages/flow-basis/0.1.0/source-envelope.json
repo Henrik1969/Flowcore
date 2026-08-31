@@ -1,0 +1,10 @@
+{
+  "schema": "flowpkg.source-envelope.v0",
+  "package": "flow-basis",
+  "version": "0.1.0",
+  "origin_claim": "FlowLFS owner-authored additive Linux basis",
+  "canonical_input": "flow-basis-0.1.0.tar.xz",
+  "sha256": "56daaf8df7783edbe91f524eb943c9d847a662ae608b45f8f7c97395adbd0b47",
+  "authorship": "repository commit authority",
+  "execution_authority": false
+}

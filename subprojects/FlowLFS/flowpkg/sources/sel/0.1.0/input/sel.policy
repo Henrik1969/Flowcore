@@ -1,0 +1,12 @@
+allow libncursesw.so.6 initscr c terminal
+allow libncursesw.so.6 endwin c terminal
+allow libncursesw.so.6 noecho c terminal
+allow libncursesw.so.6 cbreak c terminal
+allow libncursesw.so.6 keypad c terminal
+allow libncursesw.so.6 waddnstr c terminal
+allow libncursesw.so.6 wrefresh c terminal
+allow libncursesw.so.6 wgetch c terminal
+allow libc.so.6 puts c io
+allow libc.so.6 read c filesystem
+allow libc.so.6 write c filesystem
+allow libc.so.6 memset c io
