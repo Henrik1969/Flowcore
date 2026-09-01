@@ -19,10 +19,10 @@ trap cleanup EXIT INT TERM
 qemu-system-x86_64 \
   -name flowlfs-wayland-minimal-v0 \
   -machine "q35,accel=$accel" -cpu "$cpu" -smp 1 -m 2G \
-  -display gtk,gl=off,show-tabs=on,show-menubar=on,zoom-to-fit=on -monitor none \
+  -display gtk,gl=off,show-tabs=on,show-menubar=on,zoom-to-fit=on,grab-on-hover=on -monitor none \
   -serial file:"$root/subprojects/FlowLFS/artifacts/FlowLFS-v0.1-wayland-minimal-v0-runtime-serial.log" \
   -snapshot -drive "file=$image,if=virtio,format=qcow2" \
-  -vga virtio -device virtio-keyboard-pci -device virtio-mouse-pci \
+  -vga virtio -device virtio-keyboard-pci -device virtio-tablet-pci \
   -nic user,model=virtio-net-pci,hostfwd=tcp:127.0.0.1:2300-:22 &
 qemu_system_pid=$!
 ssh_vm(){ ssh -n -p 2300 -o BatchMode=yes -o ConnectTimeout=2 -o StrictHostKeyChecking=no -o UserKnownHostsFile="$known" root@127.0.0.1 "$@"; }
