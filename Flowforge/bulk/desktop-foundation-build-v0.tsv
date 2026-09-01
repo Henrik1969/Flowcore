@@ -1,0 +1,8 @@
+# flowfactory.bulk-source-build.v0.1
+# package	version	class	verify-pc	tests	setup-args	verify-version	verify-path	verify-output
+freetype	2.14.1	autotools	freetype2	disabled	--disable-static	26.4.20	-	-
+fontconfig	2.17.1	autotools	fontconfig	disabled	--sysconfdir=/etc --localstatedir=/var --disable-docs --disable-static	2.17.1	-	-
+tllist	1.1.0	meson	tllist	disabled	-	1.1.0	-	-
+fcft	3.3.3	meson	fcft	disabled	-Ddocs=disabled -Dgrapheme-shaping=disabled -Drun-shaping=disabled -Dsvg-backend=none	3.3.3	-	-
+dejavu-fonts	2.37	font-data	-	disabled	-	-	-	-
+foot	1.27.0	meson	-	disabled	-Ddocs=disabled -Dtests=false -Dime=false -Dgrapheme-clustering=disabled -Dterminfo=disabled -Dutmp-backend=none	-	/usr/bin/foot	foot version: 1.27.0 -pgo -ime -graphemes +toplevel-tag +blur -assertions

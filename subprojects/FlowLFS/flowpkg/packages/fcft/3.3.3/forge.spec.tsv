@@ -1,0 +1,13 @@
+format	flowforge.source-package.v0
+package	fcft
+version	3.3.3
+source_archive	fcft-3.3.3-canonical.tar
+source_sha256	b0c0f4a599f43723736c8565b8b84337c4195077f07f1bb8bb3252bb13a2306a
+build_class	meson
+verify_pc	fcft
+verify_version	3.3.3
+verify_path	
+verify_output	
+tests	disabled
+setup_args	-Ddocs=disabled -Dgrapheme-shaping=disabled -Drun-shaping=disabled -Dsvg-backend=none
+authority	libraries, headers, declared tools and canonical data only

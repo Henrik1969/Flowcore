@@ -1,0 +1,13 @@
+format	flowforge.source-package.v0
+package	dejavu-fonts
+version	2.37
+source_archive	dejavu-fonts-2.37-canonical.tar
+source_sha256	fa9ca4d13871dd122f61258a80d01751d603b4d3ee14095d65453b4e846e17d7
+build_class	font-data
+verify_pc	
+verify_version	
+verify_path	
+verify_output	
+tests	disabled
+setup_args	
+authority	libraries, headers, declared tools and canonical data only

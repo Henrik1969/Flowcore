@@ -1,0 +1,30 @@
+{
+  "schema": "flowlfs.profile-realization.v0",
+  "profile": "flowlfs.desktop-foundation.v0",
+  "extends": "flowlfs.wayland-minimal.v0",
+  "orchestrator": "flowfactory.source-package.v0",
+  "source_manifest": "Flowforge/bulk/desktop-foundation-v0.tsv",
+  "build_manifest": "Flowforge/bulk/desktop-foundation-build-v0.tsv",
+  "resolved_count": 6,
+  "packages": [
+    "freetype-2.14.1",
+    "fontconfig-2.17.1",
+    "tllist-1.1.0",
+    "fcft-3.3.3",
+    "dejavu-fonts-2.37",
+    "foot-1.27.0"
+  ],
+  "capabilities": {
+    "font_discovery": "fontconfig-2.17.1",
+    "font_data": "dejavu-fonts-2.37",
+    "graphical_terminal": "foot-1.27.0"
+  },
+  "excluded_until_additive_profiles": ["harfbuzz", "utf8proc", "ime", "audio", "browser", "file-manager"],
+  "proof": {
+    "network_during_build": "forbidden",
+    "manifest_count": 6,
+    "realized_count": 6,
+    "qemu_img_check": "pass",
+    "image_sha256": "167182c8e016a4101211e666bc7ccc2bbd083c352ccdcc501e317c43e335debf"
+  }
+}

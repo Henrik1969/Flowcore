@@ -1,0 +1,13 @@
+format	flowforge.source-package.v0
+package	tllist
+version	1.1.0
+source_archive	tllist-1.1.0-canonical.tar
+source_sha256	0e7b7094a02550dd80b7243bcffc3671550b0f1d8ba625e4dff52517827d5d23
+build_class	meson
+verify_pc	tllist
+verify_version	1.1.0
+verify_path	
+verify_output	
+tests	disabled
+setup_args	
+authority	libraries, headers, declared tools and canonical data only

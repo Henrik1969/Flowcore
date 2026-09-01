@@ -6,8 +6,9 @@ field(){ local key=$1; awk -F '\t' -v k="$key" '$1==k {sub(/^[^\t]*\t/,""); prin
 test "$(field format)" = flowforge.source-package.v0||die format
 package=$(field package); version=$(field version); archive=$(field source_archive)
 source_sha=$(field source_sha256); class=$(field build_class); verify_pc=$(field verify_pc)
-case "$package/$version/$archive/$class/$verify_pc" in *[!A-Za-z0-9._+/-]*) die identity;; esac
-case "$class" in meson|autotools) :;; *) die build-class;; esac
+verify_path=$(field verify_path); verify_output=$(field verify_output)
+case "$package/$version/$archive/$class/$verify_pc$verify_path" in *[!A-Za-z0-9._+/-]*) die identity;; esac
+case "$class" in meson|autotools|font-data) :;; *) die build-class;; esac
 input=/var/tmp/flowpkg-input/$package-$version; build=/var/lib/flowbuild/$package-$version
 stage=$build/stage; evidence=/flow/evidence/$package-$version
 pointer=$store/packages/$package/$version/object; projection=$store/projections/$package-$version
@@ -34,16 +35,28 @@ build_package(){
     ninja -C "$build/source/build-flow" 2>&1|tee "$evidence/build.log"
     if test "$(field tests)" = enabled; then meson test -C "$build/source/build-flow" --print-errorlogs 2>&1|tee "$evidence/test.log"; fi
     DESTDIR="$stage" ninja -C "$build/source/build-flow" install 2>&1|tee "$evidence/install.log"
-  else
+  elif test "$class" = autotools; then
     cd "$build/source"
     ./configure --prefix=/usr "${setup_words[@]}" 2>&1|tee "$evidence/setup.log"
     make -j"$(nproc)" 2>&1|tee "$evidence/build.log"
     if test "$(field tests)" = enabled; then make check 2>&1|tee "$evidence/test.log"; fi
     make DESTDIR="$stage" install 2>&1|tee "$evidence/install.log"
+  else
+    install -d -m0755 "$stage/usr/share/fonts/truetype/$package"
+    find "$build/source" -type f \( -name '*.ttf' -o -name '*.otf' \) -exec install -m0644 -t "$stage/usr/share/fonts/truetype/$package" {} +
+    find "$stage/usr/share/fonts/truetype/$package" -type f -print -quit | grep -q . || die font-data
+    printf 'canonical font data; no executable build\n' | tee "$evidence/build.log" "$evidence/install.log"
   fi
   install -D -m0644 "$spec" "$stage/usr/share/flowforge/specs/$package-$version.tsv"
-  PKG_CONFIG_SYSROOT_DIR="$stage" PKG_CONFIG_PATH="$stage/usr/lib/pkgconfig:$stage/usr/share/pkgconfig" pkg-config --modversion "$verify_pc"|tee "$evidence/version.log"
-  test "$(cat "$evidence/version.log")" = "$(field verify_version)"||die version
+  if test -n "$verify_pc"; then
+    PKG_CONFIG_SYSROOT_DIR="$stage" PKG_CONFIG_PATH="$stage/usr/lib/pkgconfig:$stage/usr/share/pkgconfig" pkg-config --modversion "$verify_pc"|tee "$evidence/version.log"
+    test "$(cat "$evidence/version.log")" = "$(field verify_version)"||die version
+  elif test -n "$verify_path"; then
+    test -x "$stage$verify_path"||die verify-path
+    if test -n "$verify_output"; then "$stage$verify_path" --version 2>&1|head -1|tee "$evidence/version.log"; test "$(cat "$evidence/version.log")" = "$verify_output"||die version; fi
+  else
+    find "$stage/usr/share/fonts" -type f \( -name '*.ttf' -o -name '*.otf' \) -print -quit | grep -q . || die verify-font-data
+  fi
   printf 'FLOWFORGE_SOURCE_V0_BUILD_PASS package=%s version=%s class=%s offline=yes\n' "$package" "$version" "$class"
 }
 admit(){
@@ -59,6 +72,6 @@ admit(){
   ln -sfn "$object" "$pointer"; printf 'FLOWFORGE_SOURCE_V0_ADMIT_PASS object=%s\n' "$object"
 }
 project(){ root; object=$(readlink -f "$pointer"); /usr/local/sbin/flowpkg-projector project "$object" / "$projection"; }
-verify(){ root; object=$(readlink -f "$pointer"); test "$(cat "$projection/object")" = "$object"; test "$(pkg-config --modversion "$verify_pc")" = "$(field verify_version)"; printf 'FLOWFORGE_SOURCE_V0_VERIFY_PASS package=%s version=%s\n' "$package" "$version"; }
+verify(){ root; object=$(readlink -f "$pointer"); test "$(cat "$projection/object")" = "$object"; if test -n "$verify_pc"; then test "$(pkg-config --modversion "$verify_pc")" = "$(field verify_version)"; elif test -n "$verify_path"; then test -x "$verify_path"; if test -n "$verify_output"; then test "$("$verify_path" --version 2>&1|head -1)" = "$verify_output"; fi; else find -L "/usr/share/fonts/truetype/$package" -type f \( -name '*.ttf' -o -name '*.otf' \) -print -quit|grep -q .; fi; printf 'FLOWFORGE_SOURCE_V0_VERIFY_PASS package=%s version=%s\n' "$package" "$version"; }
 rollback(){ root; object=$(readlink -f "$pointer"); /usr/local/sbin/flowpkg-projector rollback "$object" / "$projection" "$projection.rolled-back.$(date +%s)"; }
 case "$action" in prepare)prepare;; build)build_package;; admit)admit;; project)project;; verify)verify;; rollback)rollback;; *)die action;; esac

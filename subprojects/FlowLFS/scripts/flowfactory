@@ -72,8 +72,8 @@ fi
 if test "${1:-}" = realize-source-bulk; then
   manifest=${2:?manifest required}; root=$(CDPATH='' cd -- "$(dirname -- "$0")/../../.." && pwd); cd "$root"
   test -f "$manifest"||die manifest
-  profile=wayland-minimal-v0; port=2299; known=/tmp/flowfactory-wayland-known-hosts
-  base=subprojects/FlowLFS/artifacts/FlowLFS-v0.1-bulk-cargo-small-v0.qcow2
+  profile=${3:-wayland-minimal-v0}; port=2299; known=/tmp/flowfactory-$profile-known-hosts
+  base=${4:-subprojects/FlowLFS/artifacts/FlowLFS-v0.1-bulk-cargo-small-v0.qcow2}
   working=subprojects/FlowLFS/artifacts/FlowLFS-v0.1-$profile-working.qcow2
   final=subprojects/FlowLFS/artifacts/FlowLFS-v0.1-$profile.qcow2
   serial=subprojects/FlowLFS/artifacts/FlowLFS-v0.1-$profile-build-serial.log
@@ -83,12 +83,15 @@ if test "${1:-}" = realize-source-bulk; then
   trap cleanup_source EXIT INT TERM
   test -r "$base"||die baseline; test ! -e "$working" -a ! -e "$final"||die output-exists
   mkdir -p "$evidence_dir"; : >"$tmp/packages.tsv"
-  while IFS=$'\t' read -r package version class verify_pc tests setup_args; do
+  while IFS=$'\t' read -r package version class verify_pc tests setup_args verify_version verify_path verify_output; do
     case "$package" in ''|'#'*) continue;; esac
+    test "$verify_pc" != -||verify_pc=; test "${setup_args:-}" != -||setup_args=
+    verify_version=${verify_version:-$version}; test "$verify_version" != -||verify_version=
+    test "${verify_path:-}" != -||verify_path=; test "${verify_output:-}" != -||verify_output=
     source_dir="subprojects/FlowLFS/flowpkg/sources/$package/$version"; package_dir="subprojects/FlowLFS/flowpkg/packages/$package/$version"
     archive=$(find "$source_dir" -maxdepth 1 -name '*-canonical.tar' -print -quit); test -s "$archive"||die source-envelope
     digest=$(sha256sum "$archive"|awk '{print $1}'); spec="$package_dir/forge.spec.tsv"
-    { printf 'format\tflowforge.source-package.v0\npackage\t%s\nversion\t%s\nsource_archive\t%s\nsource_sha256\t%s\nbuild_class\t%s\nverify_pc\t%s\nverify_version\t%s\ntests\t%s\nsetup_args\t%s\nauthority\tlibraries, headers, declared tools and canonical data only\n' "$package" "$version" "$(basename "$archive")" "$digest" "$class" "$verify_pc" "$version" "$tests" "$setup_args"; } >"$spec"
+    { printf 'format\tflowforge.source-package.v0\npackage\t%s\nversion\t%s\nsource_archive\t%s\nsource_sha256\t%s\nbuild_class\t%s\nverify_pc\t%s\nverify_version\t%s\nverify_path\t%s\nverify_output\t%s\ntests\t%s\nsetup_args\t%s\nauthority\tlibraries, headers, declared tools and canonical data only\n' "$package" "$version" "$(basename "$archive")" "$digest" "$class" "$verify_pc" "$verify_version" "$verify_path" "$verify_output" "$tests" "$setup_args"; } >"$spec"
     printf '%s\t%s\t%s\t%s\n' "$package" "$version" "$archive" "$spec" >>"$tmp/packages.tsv"
   done <"$manifest"
   test -s "$tmp/packages.tsv"||die empty-source-bulk

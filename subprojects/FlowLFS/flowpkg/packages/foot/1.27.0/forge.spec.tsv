@@ -1,0 +1,13 @@
+format	flowforge.source-package.v0
+package	foot
+version	1.27.0
+source_archive	foot-1.27.0-canonical.tar
+source_sha256	f5917cad2d7b723b99873e53d78fd10ea202923d189aed5086591fc53b70b7e3
+build_class	meson
+verify_pc	
+verify_version	
+verify_path	/usr/bin/foot
+verify_output	foot version: 1.27.0 -pgo -ime -graphemes +toplevel-tag +blur -assertions
+tests	disabled
+setup_args	-Ddocs=disabled -Dtests=false -Dime=false -Dgrapheme-clustering=disabled -Dterminfo=disabled -Dutmp-backend=none
+authority	libraries, headers, declared tools and canonical data only

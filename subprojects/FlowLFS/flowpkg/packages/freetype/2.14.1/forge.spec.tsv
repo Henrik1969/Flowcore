@@ -1,0 +1,13 @@
+format	flowforge.source-package.v0
+package	freetype
+version	2.14.1
+source_archive	freetype-2.14.1-canonical.tar
+source_sha256	32427e8c471ac095853212a37aef816c60b42052d4d9e48230bab3bdf2936ccc
+build_class	autotools
+verify_pc	freetype2
+verify_version	26.4.20
+verify_path	
+verify_output	
+tests	disabled
+setup_args	--disable-static
+authority	libraries, headers, declared tools and canonical data only

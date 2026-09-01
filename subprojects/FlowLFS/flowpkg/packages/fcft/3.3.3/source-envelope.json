@@ -1,0 +1,10 @@
+{
+  "schema": "flowlfs.source-envelope.v0",
+  "package": "fcft",
+  "version": "3.3.3",
+  "build_class": "meson",
+  "upstream": "https://codeberg.org/dnkl/fcft/archive/3.3.3.tar.gz",
+  "canonical_archive_sha256": "b0c0f4a599f43723736c8565b8b84337c4195077f07f1bb8bb3252bb13a2306a",
+  "authority": "font loading and rasterization provider for native Wayland clients",
+  "network_during_build": "forbidden"
+}

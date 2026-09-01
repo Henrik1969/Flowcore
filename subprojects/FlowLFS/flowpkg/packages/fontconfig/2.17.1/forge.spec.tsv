@@ -1,0 +1,13 @@
+format	flowforge.source-package.v0
+package	fontconfig
+version	2.17.1
+source_archive	fontconfig-2.17.1-canonical.tar
+source_sha256	9f5cae93f4fffc1fbc05ae99cdfc708cd60dfd6612ffc0512827025c026fa541
+build_class	autotools
+verify_pc	fontconfig
+verify_version	2.17.1
+verify_path	
+verify_output	
+tests	disabled
+setup_args	--sysconfdir=/etc --localstatedir=/var --disable-docs --disable-static
+authority	libraries, headers, declared tools and canonical data only
