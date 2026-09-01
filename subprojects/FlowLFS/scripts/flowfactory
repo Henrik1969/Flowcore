@@ -37,6 +37,83 @@ if test "${1:-}" = capture-source-bulk; then
   capture_source_bulk "${2:?manifest required}"
   exit 0
 fi
+if test "${1:-}" = probe-wayland-baseline; then
+  root=$(CDPATH='' cd -- "$(dirname -- "$0")/../../.." && pwd); cd "$root"
+  base=subprojects/FlowLFS/artifacts/FlowLFS-v0.1-bulk-cargo-small-v0.qcow2
+  port=2246; known=/tmp/flowfactory-wayland-probe-known-hosts
+  tmp=$(mktemp -d /tmp/flowfactory-probe.XXXXXX); qemu_pid=
+  trap 'rc=$?; test -z "${qemu_pid:-}" || { kill "$qemu_pid" 2>/dev/null||:; wait "$qemu_pid" 2>/dev/null||:; }; rm -rf "$tmp"; exit "$rc"' EXIT INT TERM
+  accel=tcg; cpu=max; if test -r /dev/kvm -a -w /dev/kvm; then accel=kvm; cpu=host; fi
+  qemu-system-x86_64 -name flowlfs-wayland-probe -machine "q35,accel=$accel" -cpu "$cpu" -smp 2 -m 2G -display none -monitor none -serial "file:$tmp/serial.log" -snapshot -drive "file=$base,if=virtio,format=qcow2" -nic "user,model=virtio-net-pci,hostfwd=tcp:127.0.0.1:$port-:22" & qemu_pid=$!
+  ssh_probe(){ ssh -n -p "$port" -o BatchMode=yes -o ConnectTimeout=2 -o StrictHostKeyChecking=no -o UserKnownHostsFile="$known" root@127.0.0.1 "$@"; }
+  ready=no; for n in $(seq 1 90); do ssh_probe true >/dev/null 2>&1&&{ ready=yes; break; }; sleep 1; done
+  if test "$ready" != yes; then tail -80 "$tmp/serial.log" >&2; die probe-vm-timeout; fi
+  ssh_probe 'set -e; for x in cc c++ meson ninja pkg-config python3 autoconf automake libtool; do command -v "$x"||true; done; printf "KERNEL\n"; zcat /proc/config.gz 2>/dev/null | grep -E "CONFIG_(DRM|DRM_VIRTIO_GPU|INPUT_EVDEV|VIRTIO_INPUT|VT|DEVTMPFS)=" || true; find /lib/modules -type f \( -name "*virtio*gpu*" -o -name "*drm*" \) -print 2>/dev/null | sort; modinfo virtio_gpu 2>&1 || true; printf "PKGCONFIG\n"; pkg-config --list-all 2>/dev/null | sort; printf "PYTHON\n"; python3 -c "import yaml, mako; print(\"yaml+mako=yes\")" 2>&1 || true; printf "DEVICES\n"; ls -l /dev/dri /dev/input 2>&1 || true'
+  ssh_probe 'systemctl poweroff'; wait "$qemu_pid"; qemu_pid=
+  trap - EXIT INT TERM; rm -rf "$tmp"
+  exit 0
+fi
+if test "${1:-}" = verify-wayland-image; then
+  root=$(CDPATH='' cd -- "$(dirname -- "$0")/../../.." && pwd); cd "$root"
+  image=subprojects/FlowLFS/artifacts/FlowLFS-v0.1-wayland-minimal-v0.qcow2
+  port=2299; known=/tmp/flowfactory-wayland-verify-known-hosts
+  tmp=$(mktemp -d /tmp/flowfactory-wayland-verify.XXXXXX); qemu_pid=
+  cleanup_verify(){ local rc=$?; test -z "${qemu_pid:-}"||{ kill "$qemu_pid" 2>/dev/null||:; wait "$qemu_pid" 2>/dev/null||:; }; rm -rf "$tmp"; return "$rc"; }
+  trap cleanup_verify EXIT INT TERM
+  accel=tcg; cpu=max; if test -r /dev/kvm -a -w /dev/kvm; then accel=kvm; cpu=host; fi
+  qemu-system-x86_64 -name flowlfs-wayland-verify -machine "q35,accel=$accel" -cpu "$cpu" -smp 1 -m 2G -display none -monitor none -serial "file:$tmp/serial.log" -snapshot -drive "file=$image,if=virtio,format=qcow2" -device virtio-gpu-pci -device virtio-keyboard-pci -device virtio-mouse-pci -nic "user,model=virtio-net-pci,hostfwd=tcp:127.0.0.1:$port-:22" & qemu_pid=$!
+  ssh_verify(){ ssh -n -p "$port" -o BatchMode=yes -o ConnectTimeout=2 -o StrictHostKeyChecking=no -o UserKnownHostsFile="$known" root@127.0.0.1 "$@"; }
+  ready=no; for n in $(seq 1 90); do ssh_verify true >/dev/null 2>&1&&{ ready=yes; break; }; sleep 1; done; test "$ready" = yes||die verify-vm-timeout
+  ssh_verify 'set -e; test -c /dev/dri/card0; test -c /dev/input/event0; pkg-config --exact-version=16.0.0 weston; test "$(weston --version)" = "weston 16.0.0"; install -d -m0700 /tmp/flow-weston-runtime; export XDG_RUNTIME_DIR=/tmp/flow-weston-runtime LIBSEAT_BACKEND=noop SEATD_VTBOUND=0; weston -Bheadless --renderer=pixman --idle-time=0 --socket=wayland-flow >/tmp/weston-headless.log 2>&1 & p=$!; for n in $(seq 1 20); do test -S "$XDG_RUNTIME_DIR/wayland-flow"&&kill -0 "$p"&&break; sleep 1; done; test -S "$XDG_RUNTIME_DIR/wayland-flow"; kill -0 "$p"; grep -q "Output.*enabled" /tmp/weston-headless.log; kill "$p"; wait "$p" || true; rm -f "$XDG_RUNTIME_DIR/wayland-flow" "$XDG_RUNTIME_DIR/wayland-flow.lock"; export SEATD_SOCK=/run/seatd.sock; seatd -g video >/tmp/seatd.log 2>&1 & seat=$!; for n in $(seq 1 10); do test -S "$SEATD_SOCK"&&break; sleep 1; done; test -S "$SEATD_SOCK"||{ cat /tmp/seatd.log >&2; exit 1; }; export LIBSEAT_BACKEND=seatd; weston -Bdrm --renderer=pixman --idle-time=0 --socket=wayland-flow-drm >/tmp/weston-drm.log 2>&1 & p=$!; for n in $(seq 1 20); do test -S "$XDG_RUNTIME_DIR/wayland-flow-drm"&&kill -0 "$p"&&break; sleep 1; done; if ! test -S "$XDG_RUNTIME_DIR/wayland-flow-drm" || ! kill -0 "$p"; then cat /tmp/weston-drm.log >&2; cat /tmp/seatd.log >&2; exit 1; fi; grep -q "Output.*enabled" /tmp/weston-drm.log; kill "$p"; wait "$p" || true; kill "$seat"; wait "$seat" || true; printf "FLOW_WAYLAND_DEVICE_PASS drm=%s input=%s compositor=drm-pixman\n" "$(readlink -f /sys/class/drm/card0/device/driver 2>/dev/null || echo present)" "$(find /dev/input -name "event*" | wc -l)"; systemctl poweroff'
+  wait "$qemu_pid"; qemu_pid=; trap - EXIT INT TERM; rm -rf "$tmp"
+  printf 'FLOWFACTORY_WAYLAND_VERIFY_PASS image=%s\n' "$image"
+  exit 0
+fi
+if test "${1:-}" = realize-source-bulk; then
+  manifest=${2:?manifest required}; root=$(CDPATH='' cd -- "$(dirname -- "$0")/../../.." && pwd); cd "$root"
+  test -f "$manifest"||die manifest
+  profile=wayland-minimal-v0; port=2299; known=/tmp/flowfactory-wayland-known-hosts
+  base=subprojects/FlowLFS/artifacts/FlowLFS-v0.1-bulk-cargo-small-v0.qcow2
+  working=subprojects/FlowLFS/artifacts/FlowLFS-v0.1-$profile-working.qcow2
+  final=subprojects/FlowLFS/artifacts/FlowLFS-v0.1-$profile.qcow2
+  serial=subprojects/FlowLFS/artifacts/FlowLFS-v0.1-$profile-build-serial.log
+  evidence_dir=subprojects/FlowLFS/flowpkg/evidence/$profile
+  tmp=$(mktemp -d /tmp/flowfactory-source.XXXXXX); qemu_pid=
+  cleanup_source(){ local rc=$?; test -z "${qemu_pid:-}"||{ kill "$qemu_pid" 2>/dev/null||:; wait "$qemu_pid" 2>/dev/null||:; }; if test "$rc" -ne 0 -a -e "$working"; then chmod u+w "$working" 2>/dev/null||:; rm -f "$working"; fi; rm -rf "$tmp"; return "$rc"; }
+  trap cleanup_source EXIT INT TERM
+  test -r "$base"||die baseline; test ! -e "$working" -a ! -e "$final"||die output-exists
+  mkdir -p "$evidence_dir"; : >"$tmp/packages.tsv"
+  while IFS=$'\t' read -r package version class verify_pc tests setup_args; do
+    case "$package" in ''|'#'*) continue;; esac
+    source_dir="subprojects/FlowLFS/flowpkg/sources/$package/$version"; package_dir="subprojects/FlowLFS/flowpkg/packages/$package/$version"
+    archive=$(find "$source_dir" -maxdepth 1 -name '*-canonical.tar' -print -quit); test -s "$archive"||die source-envelope
+    digest=$(sha256sum "$archive"|awk '{print $1}'); spec="$package_dir/forge.spec.tsv"
+    { printf 'format\tflowforge.source-package.v0\npackage\t%s\nversion\t%s\nsource_archive\t%s\nsource_sha256\t%s\nbuild_class\t%s\nverify_pc\t%s\nverify_version\t%s\ntests\t%s\nsetup_args\t%s\nauthority\tlibraries, headers, declared tools and canonical data only\n' "$package" "$version" "$(basename "$archive")" "$digest" "$class" "$verify_pc" "$version" "$tests" "$setup_args"; } >"$spec"
+    printf '%s\t%s\t%s\t%s\n' "$package" "$version" "$archive" "$spec" >>"$tmp/packages.tsv"
+  done <"$manifest"
+  test -s "$tmp/packages.tsv"||die empty-source-bulk
+  progress vm clone; cp --reflink=auto "$base" "$working"; chmod u+w "$working"
+  accel=tcg; cpu=max; if test -r /dev/kvm -a -w /dev/kvm; then accel=kvm; cpu=host; fi
+  qemu-system-x86_64 -name flowlfs-wayland-build -machine "q35,accel=$accel" -cpu "$cpu" -smp 4 -m 4G -display none -monitor none -chardev "file,id=serial,path=$serial" -serial chardev:serial -drive "file=$working,if=virtio,format=qcow2" -nic "user,model=virtio-net-pci,hostfwd=tcp:127.0.0.1:$port-:22" & qemu_pid=$!
+  ssh_source(){ ssh -n -p "$port" -o BatchMode=yes -o ConnectTimeout=2 -o StrictHostKeyChecking=no -o UserKnownHostsFile="$known" root@127.0.0.1 "$@"; }
+  ready=no; for n in $(seq 1 90); do ssh_source true >/dev/null 2>&1&&{ ready=yes; break; }; sleep 1; done; test "$ready" = yes||die vm-timeout
+  scp -P "$port" -o StrictHostKeyChecking=no -o UserKnownHostsFile="$known" subprojects/FlowLFS/scripts/flowforge-source-package-v0-guest.sh root@127.0.0.1:/root/
+  ssh_source 'install -m0755 /root/flowforge-source-package-v0-guest.sh /usr/local/sbin/flowforge-source-package-v0'
+  : >"$tmp/active.tsv"
+  while IFS=$'\t' read -r package version archive spec; do
+    progress build "$package-$version"; scp -P "$port" -o StrictHostKeyChecking=no -o UserKnownHostsFile="$known" "$archive" "$spec" root@127.0.0.1:/root/
+    remote_spec=/flow/forge/specs/$package-$version.tsv; name=$(basename "$archive")
+    ssh_source "set -e; install -m0644 /root/$(basename "$spec") '$remote_spec'; /usr/local/sbin/flowforge-source-package-v0 '$remote_spec' prepare; install -o flowbuilder -g flowbuilder -m0644 '/root/$name' '/var/tmp/flowpkg-input/$package-$version/$name'; su -s /bin/bash flowbuilder -c 'cd /tmp && /usr/local/sbin/flowforge-source-package-v0 $remote_spec build'; /usr/local/sbin/flowforge-source-package-v0 '$remote_spec' admit; /usr/local/sbin/flowforge-source-package-v0 '$remote_spec' project; /usr/local/sbin/flowforge-source-package-v0 '$remote_spec' verify; ldconfig"
+    object=$(ssh_source "readlink -f /flow/store/packages/$package/$version/object"); printf '%s\t%s\t%s\n' "$package" "$version" "${object##*/}" >>"$tmp/active.tsv"
+  done <"$tmp/packages.tsv"
+  test "$(wc -l <"$tmp/active.tsv")" -eq "$(wc -l <"$tmp/packages.tsv")"||die incomplete-realization
+  scp -P "$port" -o StrictHostKeyChecking=no -o UserKnownHostsFile="$known" "$tmp/active.tsv" root@127.0.0.1:/root/wayland-active.tsv
+  ssh_source "state=/flow/store/profile-realizations/$profile; mkdir -p \"\$state\"; install -m0644 /root/wayland-active.tsv \"\$state/active.tsv\"; tar -C / -cJf /tmp/$profile-evidence.tar.xz flow/evidence flow/store/profile-realizations/$profile flow/forge/specs; sync; systemctl poweroff"
+  wait "$qemu_pid"; qemu_pid=; mv "$working" "$final"; chmod a-w "$final"; qemu-img check "$final"
+  sha=$(sha256sum "$final"|awk '{print $1}'); printf '%s  %s\n' "$sha" "$(basename "$final")" >"$final.sha256"
+  printf 'FLOWFACTORY_SOURCE_BULK_PASS profile=%s packages=%s image_sha256=%s\n' "$profile" "$(wc -l <"$tmp/packages.tsv")" "$sha"
+  exit 0
+fi
 test "${1:-}" = realize-bulk||die 'usage: flowfactory {capture-source-bulk|realize-bulk} MANIFEST'
 manifest=${2:?manifest required}
 root=$(CDPATH='' cd -- "$(dirname -- "$0")/../../.." && pwd)

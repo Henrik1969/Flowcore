@@ -1,0 +1,11 @@
+format	flowforge.source-package.v0
+package	hwdata
+version	0.410
+source_archive	hwdata-0.410-canonical.tar
+source_sha256	2864b061b179b8ad8cb6a7339ca07678240a183d9cedce8677a4950acaf798e0
+build_class	autotools
+verify_pc	hwdata
+verify_version	0.410
+tests	disabled
+setup_args	--disable-blacklist
+authority	libraries, headers, declared tools and canonical data only

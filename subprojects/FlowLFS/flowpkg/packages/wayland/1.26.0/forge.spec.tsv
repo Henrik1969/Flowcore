@@ -1,0 +1,11 @@
+format	flowforge.source-package.v0
+package	wayland
+version	1.26.0
+source_archive	wayland-1.26.0-canonical.tar
+source_sha256	64176eaa46e4969903e286f8e5ef8331affc17fdf03ac9b58381d2b23162b7a3
+build_class	meson
+verify_pc	wayland-server
+verify_version	1.26.0
+tests	enabled
+setup_args	-Ddocumentation=false -Dtests=true
+authority	libraries, headers, declared tools and canonical data only

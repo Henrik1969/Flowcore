@@ -1,0 +1,18 @@
+# flowfactory.bulk-source-build.v0
+# package	version	class	pkg-config-version	tests	meson/configure arguments
+libxml2	2.15.3	autotools	libxml-2.0	enabled	--without-python --disable-static
+wayland	1.26.0	meson	wayland-server	enabled	-Ddocumentation=false -Dtests=true
+wayland-protocols	1.49	meson	wayland-protocols	enabled	-Dtests=true
+libdrm	2.4.134	meson	libdrm	enabled	-Dintel=disabled -Dradeon=disabled -Damdgpu=disabled -Dnouveau=disabled -Dvmwgfx=disabled -Domap=disabled -Dexynos=disabled -Dfreedreno=disabled -Dtegra=disabled -Dvc4=disabled -Detnaviv=disabled -Dcairo-tests=disabled -Dman-pages=disabled -Dvalgrind=disabled -Dinstall-test-programs=false -Dudev=true
+libpng	1.6.58	autotools	libpng	enabled	--disable-static
+pixman	0.46.4	meson	pixman-1	enabled	-Dgtk=disabled -Dlibpng=disabled -Dtests=disabled -Ddemos=disabled
+cairo	1.18.4	meson	cairo	disabled	-Dfontconfig=disabled -Dfreetype=disabled -Dglib=disabled -Dxcb=disabled -Dxlib=disabled -Dxlib-xcb=disabled -Dpng=enabled -Dtests=disabled -Dgtk_doc=false
+xkeyboard-config	2.48	meson	xkeyboard-config	enabled	-Dnls=false
+libxkbcommon	1.13.2	meson	xkbcommon	enabled	-Denable-x11=false -Denable-docs=false -Denable-tools=true -Denable-wayland=true -Denable-xkbregistry=false
+libevdev	1.13.6	meson	libevdev	enabled	-Dtests=disabled -Dtools=enabled -Ddocumentation=disabled
+mtdev	1.1.7	autotools	mtdev	enabled	
+libinput	1.30.1	meson	libinput	disabled	-Dlibwacom=false -Ddebug-gui=false -Dtests=false -Ddocumentation=false -Dlua-plugins=disabled
+libseat	0.9.1	meson	libseat	enabled	-Dlibseat-logind=systemd -Dlibseat-seatd=enabled -Dserver=enabled -Dexamples=disabled -Dman-pages=disabled
+hwdata	0.410	autotools	hwdata	disabled	--disable-blacklist
+libdisplay-info	0.3.0	meson	libdisplay-info	enabled	
+weston	16.0.0	meson	weston	disabled	-Dbackend-drm=true -Dbackend-headless=true -Dbackend-pipewire=false -Dbackend-rdp=false -Dbackend-vnc=false -Dbackend-wayland=false -Dbackend-x11=false -Drenderer-gl=false -Drenderer-vulkan=false -Dxwayland=false -Dsystemd=true -Dcolor-management-lcms=false -Dshell-desktop=true -Dshell-ivi=false -Dshell-kiosk=false -Dshell-lua=false -Dimage-jpeg=false -Dimage-webp=false -Dtools=info -Ddemo-clients=false -Dsimple-clients=damage -Dtests=false -Ddoc=false

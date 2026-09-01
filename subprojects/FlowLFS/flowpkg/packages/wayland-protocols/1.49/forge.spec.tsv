@@ -1,0 +1,11 @@
+format	flowforge.source-package.v0
+package	wayland-protocols
+version	1.49
+source_archive	wayland-protocols-1.49-canonical.tar
+source_sha256	ec4c8f74942d6dff7ace8b4ce4764f0ef9ff618a935d974ea77edee2ad240b14
+build_class	meson
+verify_pc	wayland-protocols
+verify_version	1.49
+tests	enabled
+setup_args	-Dtests=true
+authority	libraries, headers, declared tools and canonical data only

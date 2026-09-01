@@ -1,0 +1,11 @@
+format	flowforge.source-package.v0
+package	mtdev
+version	1.1.7
+source_archive	mtdev-1.1.7-canonical.tar
+source_sha256	a107adad2101fecac54ac7f9f0e0a0dd155d954193da55c2340c97f2ff1d814e
+build_class	autotools
+verify_pc	mtdev
+verify_version	1.1.7
+tests	enabled
+setup_args	
+authority	libraries, headers, declared tools and canonical data only

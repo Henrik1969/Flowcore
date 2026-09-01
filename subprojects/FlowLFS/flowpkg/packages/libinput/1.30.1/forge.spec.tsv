@@ -1,0 +1,11 @@
+format	flowforge.source-package.v0
+package	libinput
+version	1.30.1
+source_archive	libinput-1.30.1-canonical.tar
+source_sha256	c5169568f337c4a3bda927c42afef3a9d4c891e48a405cba39d57cb4631b9fb0
+build_class	meson
+verify_pc	libinput
+verify_version	1.30.1
+tests	disabled
+setup_args	-Dlibwacom=false -Ddebug-gui=false -Dtests=false -Ddocumentation=false -Dlua-plugins=disabled
+authority	libraries, headers, declared tools and canonical data only

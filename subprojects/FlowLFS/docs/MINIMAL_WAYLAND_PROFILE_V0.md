@@ -31,7 +31,13 @@ made private authority of the compositor profile.
 
 ## Production order
 
-`Flowforge/bulk/wayland-minimal-v0.tsv` is the reviewed dependency order. Each
+`Flowforge/bulk/wayland-minimal-v0.tsv` is the reviewed dependency order. Its
+XML parser is an explicit build dependency of the Wayland scanner rather than
+an assumed host facility. Hardware identity data required to interpret display
+metadata is likewise its own package authority. The display-info provider is
+version 0.3.0 because Weston 16 declares the
+compatible range `>=0.2,<0.4`; the newer BLFS 0.4 provider belongs to a later
+Mesa-oriented profile and is not forced across that public boundary. Each
 row must become an immutable source envelope, isolated build, admitted object,
 and reversible projection. The realization is valid only when:
 

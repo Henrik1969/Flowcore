@@ -1,0 +1,10 @@
+{
+  "schema": "flowlfs.source-envelope.v0",
+  "package": "libxml2",
+  "version": "2.15.3",
+  "build_class": "autotools",
+  "upstream": "https://download.gnome.org/sources/libxml2/2.15/libxml2-2.15.3.tar.xz",
+  "canonical_archive_sha256": "78262a6e7ac170d6528ebfe2efccdf220191a5af6a6cd61ea4a9a9a5042c7a07",
+  "authority": "XML parser required by the canonical Wayland scanner build",
+  "network_during_build": "forbidden"
+}

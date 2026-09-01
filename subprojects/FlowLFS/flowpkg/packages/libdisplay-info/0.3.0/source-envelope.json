@@ -1,0 +1,10 @@
+{
+  "schema": "flowlfs.source-envelope.v0",
+  "package": "libdisplay-info",
+  "version": "0.3.0",
+  "build_class": "meson",
+  "upstream": "https://gitlab.freedesktop.org/emersion/libdisplay-info/-/releases/0.3.0/downloads/libdisplay-info-0.3.0.tar.xz",
+  "canonical_archive_sha256": "6ae77cd937f9cf7d1321d35c116062c4911e8447010a6a713ac4286f7a9d5987",
+  "authority": "display metadata decoding within Weston's declared API range",
+  "network_during_build": "forbidden"
+}

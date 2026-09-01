@@ -1,0 +1,29 @@
+{
+  "schema": "flowlfs.profile-realization.v0",
+  "profile": "flowlfs.wayland-minimal.v0",
+  "extends": "flowlfs.bulk-cargo-small.v0",
+  "orchestrator": "flowfactory.source-package.v0",
+  "manifest": "Flowforge/bulk/wayland-minimal-build-v0.tsv",
+  "resolved_count": 16,
+  "realization_state": "/flow/store/profile-realizations/wayland-minimal-v0/active.tsv",
+  "display": {
+    "protocol": "wayland-1.26.0",
+    "compositor": "weston-16.0.0",
+    "backend": "drm",
+    "renderer": "pixman",
+    "seat_provider": "seatd",
+    "vm_device": "virtio-gpu-pci"
+  },
+  "excluded": ["mesa", "llvm", "xorg", "xwayland", "display-manager", "audio", "toolkit", "browser"],
+  "proof": {
+    "network_during_build": "forbidden",
+    "manifest_count": 16,
+    "realized_count": 16,
+    "qemu_img_check": "pass",
+    "cold_boot": "pass",
+    "drm_device": "pass",
+    "input_devices": 5,
+    "drm_pixman_compositor": "pass",
+    "image_sha256": "e308a8f9dcfe19e1d0afaea097ded6aa1fb6c782fc68d5bc04a513f6febc9637"
+  }
+}

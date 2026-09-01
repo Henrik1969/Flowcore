@@ -1,0 +1,10 @@
+{
+  "schema": "flowlfs.source-envelope.v0",
+  "package": "libpng",
+  "version": "1.6.58",
+  "build_class": "autotools",
+  "upstream": "https://downloads.sourceforge.net/libpng/libpng-1.6.58.tar.xz",
+  "canonical_archive_sha256": "28eb403f51f0f7405249132cecfe82ea5c0ef97f1b32c5a65828814ae0d34775",
+  "authority": "PNG image codec required by Cairo",
+  "network_during_build": "forbidden"
+}

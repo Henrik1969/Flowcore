@@ -1,0 +1,11 @@
+format	flowforge.source-package.v0
+package	libpng
+version	1.6.58
+source_archive	libpng-1.6.58-canonical.tar
+source_sha256	28eb403f51f0f7405249132cecfe82ea5c0ef97f1b32c5a65828814ae0d34775
+build_class	autotools
+verify_pc	libpng
+verify_version	1.6.58
+tests	enabled
+setup_args	--disable-static
+authority	libraries, headers, declared tools and canonical data only

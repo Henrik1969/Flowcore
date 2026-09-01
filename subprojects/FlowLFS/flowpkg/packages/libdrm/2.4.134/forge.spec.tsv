@@ -1,0 +1,11 @@
+format	flowforge.source-package.v0
+package	libdrm
+version	2.4.134
+source_archive	libdrm-2.4.134-canonical.tar
+source_sha256	ac5e74d157830eb8bee44c6a6bf3ad49774ef0dd2a72bdad74a8f20308b52a95
+build_class	meson
+verify_pc	libdrm
+verify_version	2.4.134
+tests	enabled
+setup_args	-Dintel=disabled -Dradeon=disabled -Damdgpu=disabled -Dnouveau=disabled -Dvmwgfx=disabled -Domap=disabled -Dexynos=disabled -Dfreedreno=disabled -Dtegra=disabled -Dvc4=disabled -Detnaviv=disabled -Dcairo-tests=disabled -Dman-pages=disabled -Dvalgrind=disabled -Dinstall-test-programs=false -Dudev=true
+authority	libraries, headers, declared tools and canonical data only

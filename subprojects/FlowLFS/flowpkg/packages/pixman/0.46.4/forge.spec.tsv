@@ -1,0 +1,11 @@
+format	flowforge.source-package.v0
+package	pixman
+version	0.46.4
+source_archive	pixman-0.46.4-canonical.tar
+source_sha256	d09c44ebc3bd5bee7021c79f922fe8fb2fb57f7320f55e97ff9914d2346a591c
+build_class	meson
+verify_pc	pixman-1
+verify_version	0.46.4
+tests	enabled
+setup_args	-Dgtk=disabled -Dlibpng=disabled -Dtests=disabled -Ddemos=disabled
+authority	libraries, headers, declared tools and canonical data only

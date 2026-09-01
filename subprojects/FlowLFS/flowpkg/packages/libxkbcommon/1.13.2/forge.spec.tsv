@@ -1,0 +1,11 @@
+format	flowforge.source-package.v0
+package	libxkbcommon
+version	1.13.2
+source_archive	libxkbcommon-1.13.2-canonical.tar
+source_sha256	acc4d5f7c3cbba5f9f8d08d8bdbeede84ecede46792f47929aa9321873385528
+build_class	meson
+verify_pc	xkbcommon
+verify_version	1.13.2
+tests	enabled
+setup_args	-Denable-x11=false -Denable-docs=false -Denable-tools=true -Denable-wayland=true -Denable-xkbregistry=false
+authority	libraries, headers, declared tools and canonical data only

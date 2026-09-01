@@ -1,0 +1,10 @@
+{
+  "schema": "flowlfs.source-envelope.v0",
+  "package": "cairo",
+  "version": "1.18.4",
+  "build_class": "meson",
+  "upstream": "https://www.cairographics.org/releases/cairo-1.18.4.tar.xz",
+  "canonical_archive_sha256": "445ed8208a6e4823de1226a74ca319d3600e83f6369f99b14265006599c32ccb",
+  "authority": "minimal 2D image renderer required by the Weston shell",
+  "network_during_build": "forbidden"
+}

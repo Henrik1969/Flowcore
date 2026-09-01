@@ -1,0 +1,11 @@
+format	flowforge.source-package.v0
+package	libxml2
+version	2.15.3
+source_archive	libxml2-2.15.3-canonical.tar
+source_sha256	78262a6e7ac170d6528ebfe2efccdf220191a5af6a6cd61ea4a9a9a5042c7a07
+build_class	autotools
+verify_pc	libxml-2.0
+verify_version	2.15.3
+tests	enabled
+setup_args	--without-python --disable-static
+authority	libraries, headers, declared tools and canonical data only

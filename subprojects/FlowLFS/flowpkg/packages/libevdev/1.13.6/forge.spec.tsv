@@ -1,0 +1,11 @@
+format	flowforge.source-package.v0
+package	libevdev
+version	1.13.6
+source_archive	libevdev-1.13.6-canonical.tar
+source_sha256	73f215eccbd8233f414737ac06bca2687e67c44b97d2d7576091aa9718551110
+build_class	meson
+verify_pc	libevdev
+verify_version	1.13.6
+tests	enabled
+setup_args	-Dtests=disabled -Dtools=enabled -Ddocumentation=disabled
+authority	libraries, headers, declared tools and canonical data only

@@ -1,0 +1,11 @@
+format	flowforge.source-package.v0
+package	libdisplay-info
+version	0.3.0
+source_archive	libdisplay-info-0.3.0-canonical.tar
+source_sha256	6ae77cd937f9cf7d1321d35c116062c4911e8447010a6a713ac4286f7a9d5987
+build_class	meson
+verify_pc	libdisplay-info
+verify_version	0.3.0
+tests	enabled
+setup_args	
+authority	libraries, headers, declared tools and canonical data only

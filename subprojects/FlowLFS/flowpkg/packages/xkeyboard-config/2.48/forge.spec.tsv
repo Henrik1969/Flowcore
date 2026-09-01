@@ -1,0 +1,11 @@
+format	flowforge.source-package.v0
+package	xkeyboard-config
+version	2.48
+source_archive	xkeyboard-config-2.48-canonical.tar
+source_sha256	b77041324f0109f77161ee43743fe04baa485866af8460d31e476ad3f7648fd5
+build_class	meson
+verify_pc	xkeyboard-config
+verify_version	2.48
+tests	enabled
+setup_args	-Dnls=false
+authority	libraries, headers, declared tools and canonical data only

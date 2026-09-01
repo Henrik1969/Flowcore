@@ -1,0 +1,11 @@
+format	flowforge.source-package.v0
+package	libseat
+version	0.9.1
+source_archive	libseat-0.9.1-canonical.tar
+source_sha256	819979c922a0be258aed133d93920bce6a3d3565a60588d6d372ce9db2712cd3
+build_class	meson
+verify_pc	libseat
+verify_version	0.9.1
+tests	enabled
+setup_args	-Dlibseat-logind=systemd -Dlibseat-seatd=enabled -Dserver=enabled -Dexamples=disabled -Dman-pages=disabled
+authority	libraries, headers, declared tools and canonical data only

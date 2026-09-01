@@ -1,0 +1,11 @@
+format	flowforge.source-package.v0
+package	cairo
+version	1.18.4
+source_archive	cairo-1.18.4-canonical.tar
+source_sha256	445ed8208a6e4823de1226a74ca319d3600e83f6369f99b14265006599c32ccb
+build_class	meson
+verify_pc	cairo
+verify_version	1.18.4
+tests	disabled
+setup_args	-Dfontconfig=disabled -Dfreetype=disabled -Dglib=disabled -Dxcb=disabled -Dxlib=disabled -Dxlib-xcb=disabled -Dpng=enabled -Dtests=disabled -Dgtk_doc=false
+authority	libraries, headers, declared tools and canonical data only
