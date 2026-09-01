@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 root=$(CDPATH='' cd -- "$(dirname -- "$0")/../../.." && pwd)
-image=$root/subprojects/FlowLFS/artifacts/FlowLFS-v0.1-desktop-foundation-v0.qcow2
+image=${FLOWLFS_DESKTOP_IMAGE:-$root/subprojects/FlowLFS/artifacts/FlowLFS-v0.1-desktop-foundation-v0.qcow2}
+vm_name=${FLOWLFS_DESKTOP_NAME:-flowlfs-desktop-foundation-v0}
+port=${FLOWLFS_DESKTOP_PORT:-2302}
 test -r "$image"||{ printf 'missing image: %s\n' "$image" >&2; exit 1; }
 accel=tcg; cpu=max
 if test -r /dev/kvm -a -w /dev/kvm; then accel=kvm; cpu=host; fi
@@ -17,15 +19,15 @@ cleanup(){
 }
 trap cleanup EXIT INT TERM
 qemu-system-x86_64 \
-  -name flowlfs-desktop-foundation-v0 \
+  -name "$vm_name" \
   -machine "q35,accel=$accel" -cpu "$cpu" -smp 2 -m 2G \
   -display gtk,gl=off,show-tabs=on,show-menubar=on,zoom-to-fit=on,grab-on-hover=on -monitor none \
   -serial file:"$root/subprojects/FlowLFS/artifacts/FlowLFS-v0.1-desktop-foundation-v0-runtime-serial.log" \
   -snapshot -drive "file=$image,if=virtio,format=qcow2" \
   -vga virtio -device virtio-keyboard-pci -device virtio-tablet-pci \
-  -nic user,model=virtio-net-pci,hostfwd=tcp:127.0.0.1:2302-:22 &
+  -nic user,model=virtio-net-pci,hostfwd=tcp:127.0.0.1:"$port"-:22 &
 qemu_system_pid=$!
-ssh_vm(){ ssh -n -p 2302 -o BatchMode=yes -o ConnectTimeout=2 -o StrictHostKeyChecking=no -o UserKnownHostsFile="$known" root@127.0.0.1 "$@"; }
+ssh_vm(){ ssh -n -p "$port" -o BatchMode=yes -o ConnectTimeout=2 -o StrictHostKeyChecking=no -o UserKnownHostsFile="$known" root@127.0.0.1 "$@"; }
 ready=no
 for n in $(seq 1 90); do
   ssh_vm true >/dev/null 2>&1&&{ ready=yes; break; }
@@ -38,7 +40,7 @@ if ! ssh_vm 'set -e; install -d -m0700 /run/user/0; fc-cache -f; export XDG_RUNT
   printf 'Desktop foundation failed to become ready\n' >&2
   exit 1
 fi
-printf 'FLOWLFS_DESKTOP_FOUNDATION_READY ssh=root@127.0.0.1:2302 terminal=foot\n'
+printf 'FLOWLFS_DESKTOP_FOUNDATION_READY ssh=root@127.0.0.1:%s terminal=foot\n' "$port"
 wait "$qemu_system_pid"
 qemu_system_pid=
 trap - EXIT INT TERM

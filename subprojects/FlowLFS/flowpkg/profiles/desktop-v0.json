@@ -1,0 +1,23 @@
+{
+  "schema": "flowlfs.profile-realization.v0",
+  "profile": "flowlfs.desktop.v0",
+  "extends": "flowlfs.desktop-foundation.v0",
+  "resolved_additions": [
+    {
+      "package": "flow-desktop-defaults",
+      "version": "0.1.0",
+      "object": "sha256-3f1504bf788130023ac529244ff98a34f6d837da6239ef237afa01d1c873b173"
+    }
+  ],
+  "session_owner": "root-temporary",
+  "menu_provider": "weston-desktop-shell",
+  "terminal_provider": "foot",
+  "application_capabilities": ["launcher", "terminal", "editor", "files", "monitor"],
+  "canonical_interfaces_preserved": ["Weston XDG configuration", "Foot CLI and XDG configuration", "Vim", "Zsh", "procps top"],
+  "proof": {
+    "qemu_img_check": "pass",
+    "package_verify": "pass",
+    "font_match": "DejaVu Sans Mono",
+    "image_sha256": "cecb8dfd33842b0d90c9e2a638f8f6b20272f20040d413f0ccac6a8957213878"
+  }
+}
