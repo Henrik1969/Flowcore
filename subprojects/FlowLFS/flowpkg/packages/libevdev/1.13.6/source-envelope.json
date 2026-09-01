@@ -1,0 +1,10 @@
+{
+  "schema": "flowlfs.source-envelope.v0",
+  "package": "libevdev",
+  "version": "1.13.6",
+  "build_class": "meson",
+  "upstream": "https://www.freedesktop.org/software/libevdev/libevdev-1.13.6.tar.xz",
+  "canonical_archive_sha256": "73f215eccbd8233f414737ac06bca2687e67c44b97d2d7576091aa9718551110",
+  "authority": "evdev normalization",
+  "network_during_build": "forbidden"
+}

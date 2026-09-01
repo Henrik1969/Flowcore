@@ -1,0 +1,10 @@
+{
+  "schema": "flowlfs.source-envelope.v0",
+  "package": "libdisplay-info",
+  "version": "0.4.0",
+  "build_class": "meson",
+  "upstream": "https://gitlab.freedesktop.org/emersion/libdisplay-info/-/releases/0.4.0/downloads/libdisplay-info-0.4.0.tar.xz",
+  "canonical_archive_sha256": "43b180baa143e2035654759d84e2b2f5ee77d5fe817c423838c7fe59c0d68459",
+  "authority": "display metadata decoding",
+  "network_during_build": "forbidden"
+}

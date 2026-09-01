@@ -1,0 +1,10 @@
+{
+  "schema": "flowlfs.source-envelope.v0",
+  "package": "libxkbcommon",
+  "version": "1.13.2",
+  "build_class": "meson",
+  "upstream": "https://github.com/xkbcommon/libxkbcommon/archive/refs/tags/xkbcommon-1.13.2.tar.gz",
+  "canonical_archive_sha256": "acc4d5f7c3cbba5f9f8d08d8bdbeede84ecede46792f47929aa9321873385528",
+  "authority": "keyboard interpretation; Wayland enabled, X11 disabled",
+  "network_during_build": "forbidden"
+}

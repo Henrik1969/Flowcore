@@ -1,0 +1,10 @@
+{
+  "schema": "flowlfs.source-envelope.v0",
+  "package": "libdrm",
+  "version": "2.4.134",
+  "build_class": "meson",
+  "upstream": "https://dri.freedesktop.org/libdrm/libdrm-2.4.134.tar.xz",
+  "canonical_archive_sha256": "ac5e74d157830eb8bee44c6a6bf3ad49774ef0dd2a72bdad74a8f20308b52a95",
+  "authority": "DRM userspace ABI; generic and virtio path only",
+  "network_during_build": "forbidden"
+}

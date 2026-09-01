@@ -1,0 +1,14 @@
+# flowfactory.bulk-source.v0
+# order	package	version	build-class	source-url	authority
+10	wayland	1.26.0	meson	https://gitlab.freedesktop.org/wayland/wayland/-/releases/1.26.0/downloads/wayland-1.26.0.tar.xz	protocol libraries and scanner
+20	wayland-protocols	1.49	meson	https://gitlab.freedesktop.org/wayland/wayland-protocols/-/releases/1.49/downloads/wayland-protocols-1.49.tar.xz	protocol descriptions only
+30	libdrm	2.4.134	meson	https://dri.freedesktop.org/libdrm/libdrm-2.4.134.tar.xz	DRM userspace ABI; generic and virtio path only
+40	pixman	0.46.4	meson	https://www.cairographics.org/releases/pixman-0.46.4.tar.gz	CPU pixel renderer
+50	xkeyboard-config	2.48	meson	https://www.x.org/pub/individual/data/xkeyboard-config/xkeyboard-config-2.48.tar.xz	canonical keyboard data
+60	libxkbcommon	1.13.2	meson	https://github.com/xkbcommon/libxkbcommon/archive/refs/tags/xkbcommon-1.13.2.tar.gz	keyboard interpretation; Wayland enabled, X11 disabled
+70	libevdev	1.13.6	meson	https://www.freedesktop.org/software/libevdev/libevdev-1.13.6.tar.xz	evdev normalization
+80	mtdev	1.1.7	autotools	https://bitmath.org/code/mtdev/mtdev-1.1.7.tar.bz2	multitouch event normalization
+90	libinput	1.30.1	meson	https://gitlab.freedesktop.org/libinput/libinput/-/archive/1.30.1/libinput-1.30.1.tar.bz2	seat input policy; documentation and tests excluded
+100	libseat	0.9.1	meson	https://git.sr.ht/~kennylevinsen/seatd/archive/0.9.1.tar.gz	seat provider boundary
+110	libdisplay-info	0.4.0	meson	https://gitlab.freedesktop.org/emersion/libdisplay-info/-/releases/0.4.0/downloads/libdisplay-info-0.4.0.tar.xz	display metadata decoding
+120	weston	16.0.0	meson	https://gitlab.freedesktop.org/wayland/weston/-/releases/16.0.0/downloads/weston-16.0.0.tar.xz	DRM backend, Pixman renderer and desktop shell only

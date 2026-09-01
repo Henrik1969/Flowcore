@@ -1,0 +1,10 @@
+{
+  "schema": "flowlfs.source-envelope.v0",
+  "package": "weston",
+  "version": "16.0.0",
+  "build_class": "meson",
+  "upstream": "https://gitlab.freedesktop.org/wayland/weston/-/releases/16.0.0/downloads/weston-16.0.0.tar.xz",
+  "canonical_archive_sha256": "dfb32e2bccabda957b94a8d0ec6075acd18c71c87ebc543ee3e618d294ca0f7f",
+  "authority": "DRM backend, Pixman renderer and desktop shell only",
+  "network_during_build": "forbidden"
+}

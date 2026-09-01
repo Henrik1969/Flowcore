@@ -3,7 +3,41 @@ set -euo pipefail
 
 die(){ printf 'FLOWFACTORY_ERROR %s\n' "$*" >&2; exit 1; }
 progress(){ printf 'FLOWFACTORY_PROGRESS phase=%s %s\n' "$1" "${2:-}"; }
-test "${1:-}" = realize-bulk||die 'usage: flowfactory realize-bulk MANIFEST'
+capture_source_bulk(){
+  local manifest=$1 root tmp order package version class url authority archive canonical_sha envelope envelope_sha source_dir package_dir
+  root=$(CDPATH='' cd -- "$(dirname -- "$0")/../../.." && pwd)
+  cd "$root"
+  test -f "$manifest"||die manifest
+  tmp=$(mktemp -d /tmp/flowfactory-capture.XXXXXX)
+  trap 'rm -rf "$tmp"' RETURN
+  while IFS=$'\t' read -r order package version class url authority; do
+    case "$order" in ''|'#'*) continue;; *[!0-9]*) die source-order;; esac
+    case "$package/$version/$class" in *[!A-Za-z0-9._/-]*) die source-identity;; esac
+    case "$url" in https://*) :;; *) die canonical-source-url;; esac
+    progress capture "$package-$version"
+    source_dir="subprojects/FlowLFS/flowpkg/sources/$package/$version"
+    package_dir="subprojects/FlowLFS/flowpkg/packages/$package/$version"
+    archive=${url##*/}; envelope="$source_dir/$package-$version-canonical.tar"
+    if test -s "$envelope" -a -s "$package_dir/source-envelope.json"; then
+      envelope_sha=$(sha256sum "$envelope"|awk '{print $1}')
+      test "$(jq -r .canonical_archive_sha256 "$package_dir/source-envelope.json")" = "$envelope_sha"||die cached-source-lock
+      progress capture-cache-hit "$package-$version"
+      continue
+    fi
+    curl -fsSL --retry 3 -o "$tmp/$archive" "$url" </dev/null
+    canonical_sha=$(sha256sum "$tmp/$archive"|awk '{print $1}')
+    mkdir -p "$source_dir" "$package_dir"
+    install -m0444 "$tmp/$archive" "$envelope"
+    printf '/input/\n' >"$source_dir/.gitignore"
+    jq -n --arg package "$package" --arg version "$version" --arg class "$class" --arg upstream "$url" --arg digest "$canonical_sha" --arg authority "$authority" '{schema:"flowlfs.source-envelope.v0",package:$package,version:$version,build_class:$class,upstream:$upstream,canonical_archive_sha256:$digest,authority:$authority,network_during_build:"forbidden"}' >"$package_dir/source-envelope.json"
+  done <"$manifest"
+  progress capture-complete "manifest=$manifest"
+}
+if test "${1:-}" = capture-source-bulk; then
+  capture_source_bulk "${2:?manifest required}"
+  exit 0
+fi
+test "${1:-}" = realize-bulk||die 'usage: flowfactory {capture-source-bulk|realize-bulk} MANIFEST'
 manifest=${2:?manifest required}
 root=$(CDPATH='' cd -- "$(dirname -- "$0")/../../.." && pwd)
 cd "$root"
