@@ -1,0 +1,12 @@
+{
+  "schema": "flowlfs.source-envelope.v0",
+  "package": "fd",
+  "version": "10.5.0",
+  "upstream": "https://github.com/sharkdp/fd",
+  "tag": "v10.5.0",
+  "tag_commit": "4f81778774463bf414a184cbe6d5219ad2229646",
+  "canonical_tag_archive_sha256": "e6d9e90730bf316101691e49d59cc02565278dc3779d33a77423801569484851",
+  "vendored_locked_envelope_sha256": "3828417e47995f52c65cf49986b0c3f894058ce019c7b6ab417ff11cd2022639",
+  "dependency_policy": "Cargo.lock plus cargo vendor; offline build required",
+  "builder_provider": "flowlfs.rust-bootstrap.1.97.1"
+}

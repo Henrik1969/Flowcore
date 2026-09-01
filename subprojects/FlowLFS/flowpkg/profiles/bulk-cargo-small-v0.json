@@ -1,0 +1,11 @@
+{
+  "schema": "flowlfs.profile-realization.v0",
+  "profile": "flowlfs.bulk-cargo-small.v0",
+  "extends": "flowlfs.factory-proof-ripgrep.v0",
+  "orchestrator": "flowfactory.v0",
+  "resolved": [
+    {"package":"fd","version":"10.5.0","object":"sha256-6b6f51ee73fb75a539759d1a91ab848ba3cbe382714389cd74f449dd31a7a466"},
+    {"package":"bat","version":"0.26.1","object":"sha256-c086f612bcf22e2ebda0f9bc2b208483223e5c62be69999f76a1e8a50f6fd336"}
+  ],
+  "proof": {"network_during_build":"offline","rollback_reforge_identity":"exact-per-package","cold_boot":"pass","manifest_count":2,"realized_count":2}
+}

@@ -1,0 +1,4 @@
+# flowfactory.bulk-cargo.v0
+# package	version	repository	tag	binary	verify-first-line
+fd	10.5.0	https://github.com/sharkdp/fd	v10.5.0	fd	fd 10.5.0
+bat	0.26.1	https://github.com/sharkdp/bat	v0.26.1	bat	bat 0.26.1

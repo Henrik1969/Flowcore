@@ -1,0 +1,94 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+die(){ printf 'FLOWFACTORY_ERROR %s\n' "$*" >&2; exit 1; }
+progress(){ printf 'FLOWFACTORY_PROGRESS phase=%s %s\n' "$1" "${2:-}"; }
+test "${1:-}" = realize-bulk||die 'usage: flowfactory realize-bulk MANIFEST'
+manifest=${2:?manifest required}
+root=$(CDPATH='' cd -- "$(dirname -- "$0")/../../.." && pwd)
+cd "$root"
+test -f "$manifest"||die manifest
+port=2244; known=/tmp/flowfactory-known-hosts; profile=bulk-cargo-small-v0
+base=subprojects/FlowLFS/artifacts/FlowLFS-v0.1-factory-proof-ripgrep-v0.qcow2
+working=subprojects/FlowLFS/artifacts/FlowLFS-v0.1-$profile-working.qcow2
+final=subprojects/FlowLFS/artifacts/FlowLFS-v0.1-$profile.qcow2
+serial=subprojects/FlowLFS/artifacts/FlowLFS-v0.1-$profile-build-serial.log
+evidence_dir=subprojects/FlowLFS/flowpkg/evidence/$profile
+tmp=$(mktemp -d /tmp/flowfactory.XXXXXX); qemu_pid=
+cleanup(){ local rc=$?; if test -n "$qemu_pid" && kill -0 "$qemu_pid" 2>/dev/null; then kill "$qemu_pid" 2>/dev/null||:; wait "$qemu_pid" 2>/dev/null||:; fi; if test "$rc" -ne 0 -a -e "$working"; then chmod u+w "$working" 2>/dev/null||:; rm -f "$working"; fi; rm -rf "$tmp"; return "$rc"; }
+trap cleanup EXIT INT TERM
+ssh_vm(){ ssh -n -p "$port" -o BatchMode=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile="$known" root@127.0.0.1 "$@"; }
+wait_ssh(){ local n; for n in $(seq 1 60); do ssh_vm true >/dev/null 2>&1&&return; sleep 1; done; die vm-timeout; }
+
+test -r "$base"||die baseline
+test ! -e "$working" -a ! -e "$final"||die output-exists
+mkdir -p "$evidence_dir"
+: >"$tmp/packages.tsv"
+while IFS=$'\t' read -r package version repository tag binary verify; do
+  case "$package" in ''|'#'*) continue;; *[!A-Za-z0-9._-]*) die package-identity;; esac
+  case "$version/$tag/$binary" in *[!A-Za-z0-9._/-]*) die release-identity;; esac
+  progress source "$package-$version"
+  source_dir="subprojects/FlowLFS/flowpkg/sources/$package/$version"
+  package_dir="subprojects/FlowLFS/flowpkg/packages/$package/$version"
+  envelope="$source_dir/$package-$version-vendored.tar.xz"; spec="$package_dir/forge.spec.tsv"
+  if test -s "$envelope" -a -s "$spec" -a -s "$package_dir/source-envelope.json"; then
+    envelope_sha=$(sha256sum "$envelope"|awk '{print $1}')
+    test "$(awk -F '\t' '$1=="source_sha256"{print $2}' "$spec")" = "$envelope_sha"||die cached-envelope-lock
+    printf '%s\t%s\t%s\t%s\t%s\t%s\n' "$package" "$version" "$binary" "$verify" "$envelope" "$spec" >>"$tmp/packages.tsv"
+    progress source-cache-hit "$package-$version"
+    continue
+  fi
+  work="$tmp/$package-$version"; mkdir -p "$work/source"
+  url="$repository/archive/refs/tags/$tag.tar.gz"; canonical="$work/canonical.tar.gz"
+  curl -fsSL --retry 3 -o "$canonical" "$url" </dev/null
+  canonical_sha=$(sha256sum "$canonical"|awk '{print $1}')
+  commit=$(git ls-remote "$repository.git" "refs/tags/$tag^{}" </dev/null|awk 'NR==1{print $1}')
+  test -n "$commit"||commit=$(git ls-remote "$repository.git" "refs/tags/$tag" </dev/null|awk 'NR==1{print $1}')
+  test -n "$commit"||die tag-resolution
+  tar -xf "$canonical" -C "$work/source" --strip-components=1
+  test -f "$work/source/Cargo.lock"||die cargo-lock
+  mkdir -p "$work/source/.cargo"
+  (cd "$work/source" && cargo vendor --locked vendor >.cargo/config.toml </dev/null)
+  printf '\n[net]\noffline = true\n' >>"$work/source/.cargo/config.toml"
+  mkdir -p "$source_dir" "$package_dir"
+  tar --sort=name --mtime=@0 --owner=0 --group=0 --numeric-owner --transform="s,^\\./,$package-$version/," -C "$work/source" --exclude='./target' --exclude='./target/*' -cJf "$envelope" .
+  envelope_sha=$(sha256sum "$envelope"|awk '{print $1}')
+  printf '/input/\n' >"$source_dir/.gitignore"
+  { printf 'format\tflowforge.cargo-package.v0.2\n'; printf 'package\t%s\nversion\t%s\n' "$package" "$version"; printf 'source_archive\t%s\nsource_sha256\t%s\n' "$(basename "$envelope")" "$envelope_sha"; printf 'toolchain_prefix\t/opt/flow/rust-bootstrap/1.97.1\n'; printf 'test_args\ttest --locked --offline\n'; printf 'build_args\tbuild --release --locked --offline\n'; printf 'install\ttarget/release/%s\t/usr/bin/%s\t0755\n' "$binary" "$binary"; printf 'verify_path\t/usr/bin/%s\nverify_version\t%s\n' "$binary" "$verify"; printf 'authority\texecutable only; configuration and owner state excluded\n'; } >"$spec"
+  jq -n --arg package "$package" --arg version "$version" --arg upstream "$repository" --arg tag "$tag" --arg commit "$commit" --arg canonical "$canonical_sha" --arg envelope "$envelope_sha" '{schema:"flowlfs.source-envelope.v0",package:$package,version:$version,upstream:$upstream,tag:$tag,tag_commit:$commit,canonical_tag_archive_sha256:$canonical,vendored_locked_envelope_sha256:$envelope,dependency_policy:"Cargo.lock plus cargo vendor; offline build required",builder_provider:"flowlfs.rust-bootstrap.1.97.1"}' >"$package_dir/source-envelope.json"
+  printf '%s\t%s\t%s\t%s\t%s\t%s\n' "$package" "$version" "$binary" "$verify" "$envelope" "$spec" >>"$tmp/packages.tsv"
+done <"$manifest"
+test -s "$tmp/packages.tsv"||die empty-bulk
+
+progress vm clone
+cp --reflink=auto "$base" "$working"; chmod u+w "$working"
+accel=tcg; cpu=max; if test -r /dev/kvm -a -w /dev/kvm; then accel=kvm; cpu=host; fi
+qemu-system-x86_64 -name flowlfs-factory -machine "q35,accel=$accel" -cpu "$cpu" -smp 4 -m 4G -display none -monitor none -chardev "file,id=serial,path=$serial" -serial chardev:serial -drive "file=$working,if=virtio,format=qcow2" -nic "user,model=virtio-net-pci,hostfwd=tcp:127.0.0.1:$port-:22" & qemu_pid=$!
+wait_ssh
+ssh_vm '/usr/local/sbin/flowprofile-factory-proof-ripgrep-v0 verify'
+while IFS=$'\t' read -r package version binary verify envelope spec; do
+  progress build "$package-$version"
+  scp -P "$port" -o StrictHostKeyChecking=no -o UserKnownHostsFile="$known" "$envelope" "$spec" root@127.0.0.1:/root/
+  remote_spec="/flow/forge/specs/$package-$version.tsv"; archive=$(basename "$envelope")
+  ssh_vm "set -e; install -m0644 /root/$(basename "$spec") '$remote_spec'; /usr/local/sbin/flowforge-cargo-package-v0.2 '$remote_spec' prepare; install -o flowbuilder -g flowbuilder -m0644 '/root/$archive' '/var/tmp/flowpkg-input/$package-$version/$archive'; su -s /bin/bash flowbuilder -c 'cd /tmp && /usr/local/sbin/flowforge-cargo-package-v0.2 $remote_spec build'; /usr/local/sbin/flowforge-cargo-package-v0.2 '$remote_spec' admit; /usr/local/sbin/flowforge-cargo-package-v0.2 '$remote_spec' project; /usr/local/sbin/flowforge-cargo-package-v0.2 '$remote_spec' verify"
+  object=$(ssh_vm "readlink -f /flow/store/packages/$package/$version/object")
+  ssh_vm "set -e; /usr/local/sbin/flowforge-cargo-package-v0.2 '$remote_spec' rollback; su -s /bin/bash flowbuilder -c 'cd /tmp && /usr/local/sbin/flowforge-cargo-package-v0.2 $remote_spec build'; /usr/local/sbin/flowforge-cargo-package-v0.2 '$remote_spec' admit; test \"\$(readlink -f /flow/store/packages/$package/$version/object)\" = '$object'; /usr/local/sbin/flowforge-cargo-package-v0.2 '$remote_spec' project; /usr/local/sbin/flowforge-cargo-package-v0.2 '$remote_spec' verify"
+  printf '%s\t%s\t%s\n' "$package" "$version" "${object##*/}" >>"$tmp/active.tsv"
+done <"$tmp/packages.tsv"
+test "$(wc -l <"$tmp/active.tsv")" -eq "$(wc -l <"$tmp/packages.tsv")"||die incomplete-realization
+
+progress profile realize
+scp -P "$port" -o StrictHostKeyChecking=no -o UserKnownHostsFile="$known" "$tmp/active.tsv" root@127.0.0.1:/root/flowfactory-bulk-active.tsv
+ssh_vm "set -e; state=/flow/store/profile-realizations/$profile; mkdir -p \"\$state\"; install -m0644 /root/flowfactory-bulk-active.tsv \"\$state/active.tsv\"; tar -C / -cJf /tmp/$profile-evidence.tar.xz flow/evidence flow/store/profile-realizations/$profile flow/forge/specs"
+scp -P "$port" -o StrictHostKeyChecking=no -o UserKnownHostsFile="$known" "root@127.0.0.1:/tmp/$profile-evidence.tar.xz" "$evidence_dir/"
+ssh_vm 'sync; systemctl poweroff'
+wait "$qemu_pid"; qemu_pid=
+mv "$working" "$final"; chmod a-w "$final"; qemu-img check "$final"
+image_sha=$(sha256sum "$final"|awk '{print $1}'); printf '%s  %s\n' "$image_sha" "$(basename "$final")" >"$final.sha256"
+
+progress cold-boot verify
+qemu-system-x86_64 -name flowlfs-factory -machine "q35,accel=$accel" -cpu "$cpu" -smp 4 -m 4G -display none -monitor none -snapshot -drive "file=$final,if=virtio,format=qcow2" -nic "user,model=virtio-net-pci,hostfwd=tcp:127.0.0.1:$port-:22" & qemu_pid=$!
+wait_ssh
+while IFS=$'\t' read -r package version binary verify envelope spec; do ssh_vm "set -e; test \"\$('$binary' --version|head -1)\" = '$verify'; /usr/local/sbin/flowforge-cargo-package-v0.2 '/flow/forge/specs/$package-$version.tsv' verify"; done <"$tmp/packages.tsv"
+ssh_vm 'systemctl poweroff'; wait "$qemu_pid"; qemu_pid=
+printf 'FLOWFACTORY_BULK_PASS profile=%s packages=%s image_sha256=%s\n' "$profile" "$(wc -l <"$tmp/packages.tsv")" "$image_sha"

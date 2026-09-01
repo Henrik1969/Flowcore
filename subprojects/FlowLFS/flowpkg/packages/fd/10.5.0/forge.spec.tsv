@@ -1,0 +1,12 @@
+format	flowforge.cargo-package.v0.2
+package	fd
+version	10.5.0
+source_archive	fd-10.5.0-vendored.tar.xz
+source_sha256	3828417e47995f52c65cf49986b0c3f894058ce019c7b6ab417ff11cd2022639
+toolchain_prefix	/opt/flow/rust-bootstrap/1.97.1
+test_args	test --locked --offline
+build_args	build --release --locked --offline
+install	target/release/fd	/usr/bin/fd	0755
+verify_path	/usr/bin/fd
+verify_version	fd 10.5.0
+authority	executable only; configuration and owner state excluded

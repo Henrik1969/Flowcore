@@ -1,0 +1,12 @@
+format	flowforge.cargo-package.v0.2
+package	bat
+version	0.26.1
+source_archive	bat-0.26.1-vendored.tar.xz
+source_sha256	b7d1a35c3c4f8b7a4d198190fe5dec83a844c515c18b7651cfd31a18c6144321
+toolchain_prefix	/opt/flow/rust-bootstrap/1.97.1
+test_args	test --locked --offline
+build_args	build --release --locked --offline
+install	target/release/bat	/usr/bin/bat	0755
+verify_path	/usr/bin/bat
+verify_version	bat 0.26.1
+authority	executable only; configuration and owner state excluded

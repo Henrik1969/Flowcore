@@ -19,3 +19,8 @@ Version 0.2 isolates each build behind private `HOME`, `TMPDIR`, and Cargo home
 directories and neutral Git configuration. Closed `generate` rows allow the
 built executable to produce documentation and completions into its staged
 object without granting general shell hooks.
+
+`scripts/flowfactory realize-bulk MANIFEST` is the stable host entry point. It
+performs canonical retrieval, locked vendoring, isolated offline builds,
+immutable admission, exact rollback/reforge comparison, combined realization,
+VM sealing, and cold-boot verification behind one reviewed command boundary.

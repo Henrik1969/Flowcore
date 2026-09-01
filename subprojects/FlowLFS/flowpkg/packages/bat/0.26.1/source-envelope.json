@@ -1,0 +1,12 @@
+{
+  "schema": "flowlfs.source-envelope.v0",
+  "package": "bat",
+  "version": "0.26.1",
+  "upstream": "https://github.com/sharkdp/bat",
+  "tag": "v0.26.1",
+  "tag_commit": "979ba22628bc9d8171f2cffca2bd5c90c9fc0a9e",
+  "canonical_tag_archive_sha256": "4474de87e084953eefc1120cf905a79f72bbbf85091e30cf37c9214eafcaa9c9",
+  "vendored_locked_envelope_sha256": "b7d1a35c3c4f8b7a4d198190fe5dec83a844c515c18b7651cfd31a18c6144321",
+  "dependency_policy": "Cargo.lock plus cargo vendor; offline build required",
+  "builder_provider": "flowlfs.rust-bootstrap.1.97.1"
+}
