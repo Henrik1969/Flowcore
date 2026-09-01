@@ -1,0 +1,20 @@
+format	flowforge.cargo-package.v0
+package	zoxide
+version	0.10.0
+source_archive	zoxide-0.10.0-vendored.tar.xz
+source_sha256	b4104914d1269474993a4d64962b598a5292446c8f7019bddee65fac4a88ec55
+toolchain_prefix	/opt/flow/rust-bootstrap/1.97.1
+test_args	test --locked --offline
+build_args	build --release --locked --offline
+install	target/release/zoxide	/usr/bin/zoxide	0755
+install	contrib/completions/_zoxide	/usr/share/zsh/site-functions/_zoxide	0644
+install	contrib/completions/zoxide.bash	/usr/share/bash-completion/completions/zoxide	0644
+install	man/man1/zoxide.1	/usr/share/man/man1/zoxide.1	0644
+install	man/man1/zoxide-add.1	/usr/share/man/man1/zoxide-add.1	0644
+install	man/man1/zoxide-import.1	/usr/share/man/man1/zoxide-import.1	0644
+install	man/man1/zoxide-init.1	/usr/share/man/man1/zoxide-init.1	0644
+install	man/man1/zoxide-query.1	/usr/share/man/man1/zoxide-query.1	0644
+install	man/man1/zoxide-remove.1	/usr/share/man/man1/zoxide-remove.1	0644
+verify_path	/usr/bin/zoxide
+verify_version	zoxide 0.10.0
+authority	executable only; shell initialization separately owner-selected

@@ -1,0 +1,13 @@
+{
+  "schema": "flowlfs.source-envelope.v0",
+  "package": "zoxide",
+  "version": "0.10.0",
+  "upstream": "https://github.com/ajeetdsouza/zoxide",
+  "tag": "v0.10.0",
+  "tag_commit": "f84f9a3e1d16fabf3e34b199ec7d552993b41f29",
+  "canonical_tag_archive_sha256": "4fcd4272b013a10b637dbcc299c58a9924b94470a9042677ca1a204cc2e9150e",
+  "vendored_locked_envelope_sha256": "b4104914d1269474993a4d64962b598a5292446c8f7019bddee65fac4a88ec55",
+  "dependency_policy": "Cargo.lock plus cargo vendor; offline build required",
+  "minimum_rust": "1.88.0",
+  "builder_provider": "flowlfs.rust-bootstrap.1.97.1"
+}

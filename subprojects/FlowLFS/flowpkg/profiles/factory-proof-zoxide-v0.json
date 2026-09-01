@@ -1,0 +1,13 @@
+{
+  "schema": "flowlfs.profile-realization.v0",
+  "profile": "flowlfs.factory-proof-zoxide.v0",
+  "extends": "flowlfs.fabric-floor.v0",
+  "resolved": [
+    {"package":"rust-bootstrap","version":"1.97.1","object":"sha256-8e327fa0e8c5255a7f41f2212c526ea8f542d265f0fbb6d563caf2abd304609f","class":"official-bootstrap-seed"},
+    {"package":"flowforge-cargo","version":"0.1.0","object":"sha256-bdf8f850b86560602a2bdf36d0c8bfd4682fe6453f3aba53b097dbbfea17621d"},
+    {"package":"zoxide","version":"0.10.0","object":"sha256-ef684892b18d6698c8994909527c95255404ec7d2a0bef8a18be7ffb6dafdd72"},
+    {"package":"flow-zoxide-integration","version":"0.1.0","object":"sha256-6c5ff9f9faf7418d3d4f8b2a48d797689a4078e038397f2b562b62bdc433f75a"}
+  ],
+  "forge_recipe": {"path":"/flow/forge/specs/zoxide-0.10.0.tsv","sha256":"1c4d44438d68fa679258bf8991206e235efaedbaf55fddf2255b7431a59c03fd","lifetime":"independent-of-product-projection"},
+  "proof": {"network":"offline","upstream_tests":16,"rollback_reforge_identity":"exact","shell_integration":"explicit-owner-opt-in"}
+}
