@@ -1,0 +1,16 @@
+format	flowforge.cargo-package.v0.2
+package	ripgrep
+version	15.2.0
+source_archive	ripgrep-15.2.0-vendored.tar.xz
+source_sha256	1b29f9332c5c403a3dcd339e25295a3a78935085bc7a9c01bc418848657a05c7
+toolchain_prefix	/opt/flow/rust-bootstrap/1.97.1
+test_args	test --locked --offline
+build_args	build --release --locked --offline
+generate	target/release/rg	--generate man	/usr/share/man/man1/rg.1	0644
+generate	target/release/rg	--generate complete-bash	/usr/share/bash-completion/completions/rg	0644
+generate	target/release/rg	--generate complete-zsh	/usr/share/zsh/site-functions/_rg	0644
+generate	target/release/rg	--generate complete-fish	/usr/share/fish/vendor_completions.d/rg.fish	0644
+install	target/release/rg	/usr/bin/rg	0755
+verify_path	/usr/bin/rg
+verify_version	ripgrep 15.2.0
+authority	executable, generated manual and completions; no configuration or owner state

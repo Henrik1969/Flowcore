@@ -1,0 +1,11 @@
+{
+  "schema": "flowlfs.profile-realization.v0",
+  "profile": "flowlfs.factory-proof-ripgrep.v0",
+  "extends": "flowlfs.factory-proof-zoxide.v0",
+  "resolved": [
+    {"package":"flowforge-cargo","version":"0.2.0","object":"sha256-1f7d8fcaebaccba9aaefb340ce5680f1d5a7a930f4acedfba1edc257d6a4284e"},
+    {"package":"ripgrep","version":"15.2.0","object":"sha256-b778ffaef4a6f8f31f7a6f37954ef62cd4fe8c1fae5f2e8d522119540a08fd5c"}
+  ],
+  "forge_recipe": {"path":"/flow/forge/specs/ripgrep-15.2.0.tsv","sha256":"cc2dd89cffeda58294f5e21bba4934ce72079ddcada39e2499bffd920dbbd494","lifetime":"independent-of-product-projection"},
+  "proof": {"network":"offline","upstream_tests":446,"rollback_reforge_identity":"exact","build_isolation":["HOME","TMPDIR","CARGO_HOME","Git configuration"],"generated_projections":["man","bash","zsh","fish"]}
+}

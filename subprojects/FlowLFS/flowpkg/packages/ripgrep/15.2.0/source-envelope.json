@@ -1,0 +1,15 @@
+{
+  "schema": "flowlfs.source-envelope.v0",
+  "package": "ripgrep",
+  "version": "15.2.0",
+  "upstream": "https://github.com/BurntSushi/ripgrep",
+  "tag": "15.2.0",
+  "annotated_tag_object": "6ec72defacfb042f203ca0b4bf2513a0a5505a7e",
+  "tag_commit": "e89fff89ac9af12e8d4ce9d5fd07beb408ca730f",
+  "canonical_tag_archive_sha256": "7605249d3eb0d5f170e3414498e3344e26b1e7a147aec518b57090b80036a562",
+  "vendored_locked_envelope_sha256": "1b29f9332c5c403a3dcd339e25295a3a78935085bc7a9c01bc418848657a05c7",
+  "dependency_policy": "Cargo.lock plus cargo vendor; offline build required",
+  "minimum_rust": "1.85",
+  "builder_provider": "flowlfs.rust-bootstrap.1.97.1",
+  "features": "canonical defaults; PCRE2 capability deferred"
+}
