@@ -12,7 +12,7 @@
     "backend": "drm",
     "renderer": "pixman",
     "seat_provider": "seatd",
-    "vm_device": "virtio-gpu-pci"
+    "vm_device": "virtio-vga"
   },
   "excluded": ["mesa", "llvm", "xorg", "xwayland", "display-manager", "audio", "toolkit", "browser"],
   "proof": {

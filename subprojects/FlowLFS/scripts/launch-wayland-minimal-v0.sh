@@ -22,7 +22,7 @@ qemu-system-x86_64 \
   -display gtk,gl=off -monitor none \
   -serial file:"$root/subprojects/FlowLFS/artifacts/FlowLFS-v0.1-wayland-minimal-v0-runtime-serial.log" \
   -snapshot -drive "file=$image,if=virtio,format=qcow2" \
-  -device virtio-gpu-pci -device virtio-keyboard-pci -device virtio-mouse-pci \
+  -device virtio-vga,xres=1280,yres=800 -device virtio-keyboard-pci -device virtio-mouse-pci \
   -nic user,model=virtio-net-pci,hostfwd=tcp:127.0.0.1:2300-:22 &
 qemu_system_pid=$!
 ssh_vm(){ ssh -n -p 2300 -o BatchMode=yes -o ConnectTimeout=2 -o StrictHostKeyChecking=no -o UserKnownHostsFile="$known" root@127.0.0.1 "$@"; }
