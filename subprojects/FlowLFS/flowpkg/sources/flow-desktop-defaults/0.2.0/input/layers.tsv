@@ -1,0 +1,5 @@
+00-kernel-hardware	Linux evdev, DRM/KMS, VirtIO devices	raw devices only; no locale or desktop policy
+10-data	xkeyboard-config, glibc locale data, tzdata	canonical symbols, locale definitions, and zones
+20-functional	libinput, libxkbcommon, Wayland, Flow capability commands	normalized events and provider-neutral operations
+30-projection	Weston desktop shell and Foot	maps functional capabilities to visible desktop surfaces
+40-protection	system defaults plus canonical owner overrides	policy selects providers; owner state remains outside immutable objects

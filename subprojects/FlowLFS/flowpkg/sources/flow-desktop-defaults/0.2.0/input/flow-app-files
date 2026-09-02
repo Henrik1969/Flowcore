@@ -1,0 +1,2 @@
+#!/bin/sh
+exec flow-terminal --title='FlowLFS Files' zsh -lc 'printf "FlowLFS files: %s\n\n" "$PWD"; ls -lah; exec zsh'

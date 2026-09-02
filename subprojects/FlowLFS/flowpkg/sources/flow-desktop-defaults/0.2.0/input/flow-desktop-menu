@@ -1,0 +1,10 @@
+#!/bin/sh
+set -eu
+choice=$(flowselect Terminal Editor Files Monitor) || exit $?
+case "$choice" in
+  Terminal) exec flow-terminal ;;
+  Editor) exec flow-app-editor ;;
+  Files) exec flow-app-files ;;
+  Monitor) exec flow-app-monitor ;;
+  *) exit 64 ;;
+esac

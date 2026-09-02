@@ -1,0 +1,5 @@
+#!/bin/sh
+set -eu
+cat /usr/share/flowcore/desktop/layers.tsv
+printf '\nRegional policy\n'
+cat /etc/flowcore/regional.conf

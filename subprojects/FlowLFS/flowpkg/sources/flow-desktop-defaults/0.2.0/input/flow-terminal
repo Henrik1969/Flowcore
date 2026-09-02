@@ -1,0 +1,9 @@
+#!/bin/sh
+set -eu
+provider_file=${XDG_CONFIG_HOME:-$HOME/.config}/flowcore/desktop/terminal-provider
+test -r "$provider_file" || provider_file=/etc/flowcore/desktop/terminal-provider
+provider=$(sed -n '1p' "$provider_file")
+case "$provider" in
+  foot) exec /usr/bin/foot "$@" ;;
+  *) printf 'flow-terminal: unavailable provider: %s\n' "$provider" >&2; exit 69 ;;
+esac

@@ -1,0 +1,27 @@
+{
+  "schema": "flowlfs.profile-realization.v0",
+  "profile": "flowlfs.desktop.v0.1",
+  "extends": "flowlfs.desktop.v0",
+  "resolved_additions": [
+    {
+      "package": "flow-desktop-defaults",
+      "version": "0.2.0",
+      "object": "sha256-d17d04aaf8a053fb4045ffd603f6c1b163296f515f637807857b04cbfcaad51a",
+      "replaces_projection": "flow-desktop-defaults-0.1.0"
+    }
+  ],
+  "layer_contract": "docs/DESKTOP-LAYER-BOUNDARIES-V0.1.md",
+  "regional_policy": {
+    "locale": "da_DK.UTF-8",
+    "timezone": "Europe/Copenhagen",
+    "keyboard": "pc105/dk/winkeys"
+  },
+  "proof": {
+    "weston_process_locale": "pass",
+    "foot_process_locale": "pass",
+    "foot_locale_fallback_warning": "absent",
+    "keyboard_projection": "pass",
+    "qemu_img_check": "pass",
+    "image_sha256": "7945abec35ab0c44b488a9458c51623f2cb5c15acf9fe9fc66c024896b753b94"
+  }
+}
