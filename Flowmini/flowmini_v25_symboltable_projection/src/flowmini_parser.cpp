@@ -6,6 +6,7 @@
 #include <cctype>
 #include <map>
 #include <memory>
+#include <optional>
 #include <sstream>
 #include <stdexcept>
 #include <set>
@@ -20,6 +21,9 @@ struct Symbol {
     std::string path;
     std::string qualifiedName;
     std::vector<int> shape;
+    bool immutable = false;
+    std::optional<int> constantInt;
+    std::optional<bool> constantBool;
 };
 
 struct Scope {
@@ -470,7 +474,7 @@ private:
         if (const Symbol* visible = lookup(name)) {
             fail(token, "declaration of '" + name + "' conflicts with visible symbol '" + visible->qualifiedName + "'; implicit shadowing is forbidden");
         }
-        currentScope().symbols[name] = Symbol{type, pathFor(name), currentScope().qualifiedName + "::" + name, {}};
+        currentScope().symbols[name] = Symbol{type, pathFor(name), currentScope().qualifiedName + "::" + name, {}, declaringConstant_, {}, {}};
     }
 
 
@@ -478,7 +482,7 @@ private:
         if (const Symbol* visible = lookup(name)) {
             fail(token, "declaration of '" + name + "' conflicts with visible symbol '" + visible->qualifiedName + "'; implicit shadowing is forbidden");
         }
-        currentScope().symbols[name] = Symbol{"array<int>", pathFor(name), currentScope().qualifiedName + "::" + name, std::move(shape)};
+        currentScope().symbols[name] = Symbol{"array<int>", pathFor(name), currentScope().qualifiedName + "::" + name, std::move(shape), declaringConstant_, {}, {}};
     }
 
     [[nodiscard]] bool isArrayIntType(const std::string& type) const { return type == "array<int>"; }
@@ -785,6 +789,24 @@ private:
         if (expr.kind == ExprKind::Identifier) {
             const Symbol* sym = lookup(expr.ident);
             if (sym == nullptr) { throw flow::DiagnosticError{"lowerer", "use of undeclared identifier '" + expr.ident + "'"}; }
+            if (sym->constantInt.has_value()) {
+                const std::string id = generatedId("const_ref");
+                const std::string path = targetHint.empty() ? id : targetHint;
+                addNode("node", id, "const.int");
+                addPolicy(id, "out", path);
+                addPolicy(id, "value", *sym->constantInt);
+                if (step != nullptr) { appendStep(*step, Step{false, false, {id, "in"}, {id, "out"}}); }
+                return path;
+            }
+            if (sym->constantBool.has_value()) {
+                const std::string id = generatedId("const_ref");
+                const std::string path = targetHint.empty() ? id : targetHint;
+                addNode("node", id, "const.bool");
+                addPolicy(id, "out", path);
+                addPolicy(id, "value", *sym->constantBool);
+                if (step != nullptr) { appendStep(*step, Step{false, false, {id, "in"}, {id, "out"}}); }
+                return path;
+            }
             return sym->path;
         }
         if (expr.kind == ExprKind::FieldAccess) {
@@ -990,9 +1012,9 @@ private:
 
         for (std::size_t i = 0; i < fn->args.size(); ++i) {
             const auto& arg = fn->args[i];
-            currentScope().symbols[arg.name] = Symbol{arg.type, pathFor(arg.name), currentScope().qualifiedName + "::" + arg.name, {}};
+            currentScope().symbols[arg.name] = Symbol{arg.type, pathFor(arg.name), currentScope().qualifiedName + "::" + arg.name, {}, false, {}, {}};
         }
-        currentScope().symbols["return"] = Symbol{fn->returnType, pathFor("return"), currentScope().qualifiedName + "::return", {}};
+        currentScope().symbols["return"] = Symbol{fn->returnType, pathFor("return"), currentScope().qualifiedName + "::return", {}, false, {}, {}};
 
         Step bindStep;
         for (std::size_t i = 0; i < fn->args.size(); ++i) {
@@ -1378,6 +1400,15 @@ private:
         return Step{}; // graph declaration only; explicit chains still wire it
     }
 
+    [[nodiscard]] Step parseConstDeclarationAsStep() {
+        expectIdentifier("expected 'const'");
+        const bool previous = declaringConstant_;
+        declaringConstant_ = true;
+        Step result = parseSweetDeclarationAsStep();
+        declaringConstant_ = previous;
+        return result;
+    }
+
     [[nodiscard]] Step parseIntDeclaration(const Token& idToken, const std::string& id) {
         expectIdentifier("expected 'int'");
         if (!match(TokenKind::LeftParen)) { fail(peek(), "declaration of '" + id + "' requires initializer"); }
@@ -1394,6 +1425,10 @@ private:
             return Step{};
         }
         declareSymbol(idToken, id, "int");
+        if (declaringConstant_ && initializer.kind == ExprKind::LiteralInt) {
+            currentScope().symbols[id].constantInt = initializer.literal;
+            return Step{};
+        }
         const std::string path = lookup(id)->path;
         Step step;
         static_cast<void>(lowerExprToPath(initializer, path, &step));
@@ -1407,6 +1442,10 @@ private:
         expect(TokenKind::RightParen, "expected ')' after Bool initializer");
         if (exprType(initializer) != "Bool") { throw flow::DiagnosticError{"lowerer", "initializer for Bool '" + id + "' is not Bool"}; }
         declareSymbol(idToken, id, "Bool");
+        if (declaringConstant_ && initializer.kind == ExprKind::LiteralBool) {
+            currentScope().symbols[id].constantBool = initializer.boolLiteral;
+            return Step{};
+        }
         const std::string path = lookup(id)->path;
         Step step;
         static_cast<void>(lowerExprToPath(initializer, path, &step));
@@ -1431,6 +1470,10 @@ private:
             throw flow::DiagnosticError{"lowerer", "initializer for refined type '" + declaredType + "' must be a satisfying literal or a value already known to satisfy that type"};
         }
         declareSymbol(idToken, id, declaredType);
+        if (declaringConstant_ && initializer.kind == ExprKind::LiteralInt) {
+            currentScope().symbols[id].constantInt = initializer.literal;
+            return Step{};
+        }
         const std::string path = lookup(id)->path;
         Step step;
         static_cast<void>(lowerExprToPath(initializer, path, &step));
@@ -1676,6 +1719,13 @@ private:
     }
 
     [[nodiscard]] Step lowerAssignmentToTarget(const Expr& expr, const Target& target) {
+        const Symbol* targetSymbol = lookup(target.ident);
+        if (targetSymbol == nullptr) {
+            throw flow::DiagnosticError{"lowerer", "cannot assign to undeclared target '" + target.ident + "'"};
+        }
+        if (targetSymbol->immutable) {
+            throw flow::DiagnosticError{"lowerer", "cannot mutate constant '" + target.ident + "'"};
+        }
         const std::string actual = exprType(expr);
         const std::string wanted = targetType(target);
         if (!canAssignType(actual, wanted)) { throw flow::DiagnosticError{"lowerer", "type mismatch assigning " + actual + " to " + wanted + " target '" + target.ident + "'"}; }
@@ -1905,6 +1955,7 @@ private:
         if (check(TokenKind::KeywordBreak)) { Step s = parseBreakStatement(); expectLineEnd("expected newline after break"); return s; }
         if (check(TokenKind::KeywordContinue)) { Step s = parseContinueStatement(); expectLineEnd("expected newline after continue"); return s; }
         if (looksLikePlacement()) { Step s = parsePlacementAsStep(); expectLineEnd("expected newline after placement"); return s; }
+        if (check(TokenKind::Identifier) && peek().text == "const") { Step s = parseConstDeclarationAsStep(); expectLineEnd("expected newline after constant declaration"); return s; }
         if (check(TokenKind::Identifier) && lookahead(1).kind == TokenKind::Colon) { Step s = parseSweetDeclarationAsStep(); expectLineEnd("expected newline after declaration"); return s; }
         fail(peek(), "expected block statement");
     }
@@ -1974,6 +2025,7 @@ private:
     int functionInstanceCounter_ = 0;
     bool currentFunctionSawReturn_ = false;
     bool mainSeen_ = false;
+    bool declaringConstant_ = false;
     std::string callStepResultPath_;
 };
 

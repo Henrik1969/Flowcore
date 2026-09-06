@@ -9,6 +9,7 @@ source="${root}/Flowmini/flowmini_v25_symboltable_projection/examples/bootstrap/
 provider_source="${root}/Flowmini/flowmini_v25_symboltable_projection/examples/bootstrap/utf8_hosted_provider_probe.flow"
 runtime_source="${root}/Flowmini/flowmini_v25_symboltable_projection/examples/bootstrap/utf8_reader_runtime_probe.flow"
 malformed_runtime_source="${root}/Flowmini/flowmini_v25_symboltable_projection/examples/bootstrap/utf8_malformed_runtime_probe.flow"
+constant_failure_source="${root}/Flowmini/flowmini_v25_symboltable_projection/examples/fail/bad_constant_mutation.flow"
 tmpdir="$(mktemp -d)"
 trap 'rm -rf "${tmpdir}"' EXIT
 
@@ -40,3 +41,9 @@ malformed_output="$(printf '\101\300\257\102' | "${flowmini}" "${malformed_runti
 cpp_diagnostics="$(printf '\101\300\257\102' | "${artifact}" | jq -r '.diagnostics | length')"
 test "${malformed_output}" = "${cpp_diagnostics}"
 echo "Flow UTF-8 malformed-input probe: PASS"
+
+if "${flowmini}" "${constant_failure_source}" >/dev/null 2>&1; then
+    echo "constant mutation was accepted" >&2
+    exit 1
+fi
+echo "Flow constant immutability probe: PASS"

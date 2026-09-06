@@ -1,0 +1,6 @@
+program bad_constant_mutation
+
+main {
+    const answer : int(42)
+    7 -> answer
+}

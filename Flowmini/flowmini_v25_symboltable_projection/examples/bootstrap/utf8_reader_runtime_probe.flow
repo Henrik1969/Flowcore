@@ -1,6 +1,9 @@
 program utf8_reader_runtime_probe
 
 main {
+    const lead_bias : int(192)
+    const continuation_bias : int(128)
+    const continuation_width : int(64)
     bytes : list<int>(stdin.bytes())
     lead : int(0)
     continuation : int(0)
@@ -8,6 +11,6 @@ main {
 
     bytes[1] -> lead
     bytes[2] -> continuation
-    (lead - 192) * 64 + continuation - 128 -> scalar
+    (lead - lead_bias) * continuation_width + continuation - continuation_bias -> scalar
     print scalar
 }
