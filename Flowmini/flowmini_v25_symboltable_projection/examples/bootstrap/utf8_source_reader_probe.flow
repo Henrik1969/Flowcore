@@ -1,5 +1,16 @@
 program utf8_source_reader_probe
 
+type Diagnostic {
+    field code : int
+    field offset : int
+}
+
+type Utf8Outcome {
+    field valid : Bool
+    field scalar_count : int
+    field diagnostic_count : int
+}
+
 // This is the first Flow-side consumer of the captured UTF-8 contract. The
 // current language slice can represent byte lists, scalar arithmetic, indexed
 // access, and bounded loops. General byte/file input and diagnostic records
@@ -17,6 +28,8 @@ main {
     malformed : list<int>([65,192,175,66])
     malformed_index : int(0)
     diagnostic_count : int(0)
+    first_diagnostic : Diagnostic({code: 1, offset: 1})
+    second_diagnostic : Diagnostic({code: 2, offset: 2})
 
     while index < length(bytes) {
         if bytes[index] < 128 {
@@ -45,11 +58,21 @@ main {
         }
     }
 
+    valid : Bool(false)
+    if diagnostic_count == 2 {
+        true -> valid
+    }
+    outcome : Utf8Outcome({valid: valid, scalar_count: scalar_count, diagnostic_count: diagnostic_count})
+
     if ascii == 65 {
         if decoded == 230 {
             if scalar_count == 2 {
-                if diagnostic_count == 2 {
-                    1 -> return
+                if outcome.valid {
+                    if first_diagnostic.code == 1 {
+                        if second_diagnostic.offset == 2 {
+                            1 -> return
+                        }
+                    }
                 }
             }
         }
