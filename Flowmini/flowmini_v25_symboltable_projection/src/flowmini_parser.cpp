@@ -898,6 +898,19 @@ private:
                 if (step != nullptr) { appendStep(*step, Step{false, false, {id, "in"}, {id, "out"}}); }
                 return path;
             }
+            if (sym->path.find('.') != std::string::npos) {
+                const auto split = sym->path.rfind('.');
+                const std::string recordPath = sym->path.substr(0, split);
+                const std::string field = sym->path.substr(split + 1);
+                const std::string id = generatedId("payload_get");
+                const std::string out = targetHint.empty() ? generatedId("tmp") : targetHint;
+                addNode("node", id, "record.field.get");
+                addPolicy(id, "record", recordPath);
+                addPolicy(id, "fields", field);
+                addPolicy(id, "out", out);
+                if (step != nullptr) { appendStep(*step, Step{false, false, {id, "in"}, {id, "out"}}); }
+                return out;
+            }
             return sym->path;
         }
         if (expr.kind == ExprKind::FieldAccess) {
@@ -1951,7 +1964,7 @@ private:
             Step step;
             if (expr.kind == ExprKind::Identifier) {
                 const Symbol* sourceSym = lookup(expr.ident);
-                if (sourceSym->constantInt.has_value() || sourceSym->constantBool.has_value()) {
+                if (sourceSym->constantInt.has_value() || sourceSym->constantBool.has_value() || sourceSym->path.find('.') != std::string::npos) {
                     static_cast<void>(lowerExprToPath(expr, targetPath, &step));
                 } else {
                     const std::string id = generatedId("copy");
@@ -2232,6 +2245,18 @@ private:
                 activeVariantArmMember_.clear();
             }
             enterScope("when_arm" + std::to_string(cases.size()));
+            if (!caseVariantMember.empty()) {
+                const TypeDef* variantDef = lookupType(exprType(selector));
+                const auto payload = variantDef->variantMembers.find(caseVariantMember);
+                const Symbol* selectorSymbol = lookup(selector.ident);
+                for (const auto& field : payload->second) {
+                    currentScope().symbols[field.name] = Symbol{
+                        field.type,
+                        selectorSymbol->path + "." + field.name,
+                        currentScope().qualifiedName + "::" + field.name,
+                        {}, false, {}, {}};
+                }
+            }
             Step body = parseBlockStatementsUntilRightBrace();
             leaveScope();
             activeVariantArmType_ = savedVariantType;

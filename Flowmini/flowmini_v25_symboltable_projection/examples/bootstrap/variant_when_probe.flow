@@ -10,7 +10,7 @@ main {
     marker : int(0)
     when outcome {
         case DecodeOutcome.scalar {
-            outcome.value -> marker
+            value -> marker
         }
         default {
             99 -> marker

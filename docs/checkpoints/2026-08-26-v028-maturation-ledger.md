@@ -306,3 +306,17 @@ field reads whose member is not the active case.
 
 Add arm-local payload bindings and prove diagnostic payload routing, then carry
 variant member identity into the semantic report as an explicit fact.
+
+## Arm-local tagged payload bindings checkpoint
+
+- Selected variant payload fields are now introduced as arm-local bindings, so a
+  scalar arm may use `value` directly after `case DecodeOutcome.scalar`.
+- Nested payload reads lower through the existing record field getter and remain
+  target-neutral.
+- Cross-member access remains rejected while positive direct-binding,
+  construction, routing, and Flowanalyst probes pass.
+
+## Exact next action
+
+Add explicit diagnostic payload routing and semantic-report facts for the
+selected variant member, then revisit exhaustive variant matching.
