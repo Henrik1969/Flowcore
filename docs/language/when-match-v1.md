@@ -34,7 +34,7 @@ The UTF-8 decoder is the first evidence target. Its C++ reference states are
 the ASCII byte, valid two-byte lead, continuation byte, and malformed byte.
 The initial Flow state-trace probe now compares scalar output and diagnostics
 against the existing C++ artifact and records the corresponding state codes
-before any broader pattern or enum syntax is admitted.
+using `when` arms, before any broader pattern or enum syntax is admitted.
 
 The first integer `when` grammar is now implemented against this contract and
 covered by case, default, duplicate-case, and missing-default probes. Broader

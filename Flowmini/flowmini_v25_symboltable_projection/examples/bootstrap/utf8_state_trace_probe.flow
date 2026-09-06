@@ -19,30 +19,45 @@ main {
     state3 : int(0)
     state4 : int(0)
 
-    if byte0 < 128 {
-        state_ascii -> state0
-    } else {
-        state_invalid_lead -> state0
+    when byte0 {
+        case 65 {
+            state_ascii -> state0
+        }
+        default {
+            state_invalid_lead -> state0
+        }
     }
-    if not byte1 < 194 {
-        state_lead -> state1
-    } else {
-        state_invalid_lead -> state1
+    when byte1 {
+        case 195 {
+            state_lead -> state1
+        }
+        default {
+            state_invalid_lead -> state1
+        }
     }
-    if not byte2 < 128 {
-        state_continuation -> state2
-    } else {
-        state_invalid_lead -> state2
+    when byte2 {
+        case 166 {
+            state_continuation -> state2
+        }
+        default {
+            state_invalid_lead -> state2
+        }
     }
-    if byte3 < 194 {
-        state_invalid_lead -> state3
-    } else {
-        state_lead -> state3
+    when byte3 {
+        case 192 {
+            state_invalid_lead -> state3
+        }
+        default {
+            state_lead -> state3
+        }
     }
-    if byte4 < 192 {
-        state_unexpected_continuation -> state4
-    } else {
-        state_continuation -> state4
+    when byte4 {
+        case 175 {
+            state_unexpected_continuation -> state4
+        }
+        default {
+            state_continuation -> state4
+        }
     }
 
     print state0
