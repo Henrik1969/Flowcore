@@ -378,3 +378,19 @@ canonical repository gate before continuing semantic-report maturation.
 
 Run the complete 80-test repository gate, then add generic Flowanalyst lowering
 for `when` control blocks before routing the classifier through LLVM/TinyVM.
+
+## Generic `when` IR boundary checkpoint
+
+- Defined the target-neutral `match` lowering operation needed to carry enum
+  and tagged-variant case identity beyond Flowmini runtime execution.
+- The contract preserves selector type, ordered labels, variant tags,
+  arm-local payload bindings, explicit default/join blocks, and exhaustive
+  coverage evidence.
+- Existing Boolean `branch` remains unchanged for `if` and `guard`; migration
+  proceeds through Flowanalyst, Flowparallel, Flowoptimize, Flowlower, and
+  TinyVM without application-specific dispatch.
+
+## Exact next action
+
+Emit the new `match` operation from Flowanalyst for the existing `when` AST and
+add preservation/validation tests before backend emission.
