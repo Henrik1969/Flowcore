@@ -210,7 +210,9 @@ private:
             const auto operand = expression(required(node, "operand", "$.expression"));
             if (operation == "+") return operand;
             if (operation != "-") throw Unsupported("unary operator '" + operation + "' is not admitted");
-            const auto zero = literal(carrier(string(required(node, "type", "$.expression"), "$.expression.type")), 0), result = slot();
+            // Negation preserves the operand carrier, as the LLVM backend does.
+            // The surrounding expression's type may describe its return context.
+            const auto zero = literal(slot_types_.at(operand), 0), result = slot();
             slot_types_[result] = slot_types_.at(operand); emit(TV1_SUB, result, zero, operand); return result;
         }
         if (kind == "binary") {

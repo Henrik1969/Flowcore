@@ -305,7 +305,8 @@ set +e
 "$tmpdir/kernel-getpriority"
 actual_priority=$?
 set -e
-test "$actual_priority" -eq "$expected_priority"
+# Process exit status retains only the low eight bits, including negative nice values.
+test "$actual_priority" -eq "$((expected_priority & 255))"
 
 kernel_clock_source="$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass/abi_kernel_clock_main.flow"
 "$flowmini" --dump-frontend-bundle "$kernel_clock_source" > "$tmpdir/kernel-clock.bundle.json"

@@ -1,5 +1,68 @@
 # Flowcore autonomous maturation ledger
 
+## Resumed recovery and negative-result repair — 2026-09-06
+
+Recovered `71381d7` on `v29-language-maturation`, synchronized with origin.
+The only incoming worktree change was `.codex-run-state = CONTINUE`.
+Re-read the mission, backend/product plans and receiver decision, then verified
+the actual source and builds rather than relying on the prior green report.
+
+The first fresh normal and ASan/UBSan runs each passed 74/76. Both failures
+were exposed by this session's inherited nice value of -3: the native
+`getpriority` executable exits 253, while the tests expected either -3 or
+attempted shell arithmetic on TinyVM's unsigned 18446744073709551613 result.
+The native assertion now masks the expected status to eight bits. Provider
+parity parses the JSON integer exactly with Python before masking; neither
+shell overflow nor JSON floating-point rounding can alter the comparison.
+
+A deterministic generated `labs` program returning the negated c_long result
+then exposed a real backend defect: TinyVM negation constructed an i32 zero
+from the contextual return type and subtracted an i64 operand, causing
+`arithmetic carrier mismatch`. Negation now constructs zero with the operand
+carrier, matching existing LLVM behavior. The retained regression checks
+authorized native/TinyVM execution, exit 214 for -42, matching stdout and
+missing/wrong-policy refusal. No compiler source/profile selector was added.
+
+Focused verification passed 4/4: `flowlower_pipeline`,
+`tinyvm_governed_provider_parity`, `tinyvm_scalar_backend_parity`, and
+`tinyvm_backend_lowering_boundary`. Complete verification uses the same Debug
+and ASan/UBSan build configurations documented below:
+
+```sh
+cmake --build /tmp/flowcore-reusable-current -j4
+ctest --test-dir /tmp/flowcore-reusable-current --output-on-failure
+cmake --build /tmp/flowcore-reusable-current-sanitize -j4
+ASAN_OPTIONS=detect_leaks=0 LSAN_OPTIONS=detect_leaks=0 \
+  ctest --test-dir /tmp/flowcore-reusable-current-sanitize --output-on-failure
+sh /tmp/flowcore-reusable-acceptance/run.sh
+git diff --check
+```
+
+The complete normal suite passed **76/76** in 20.11 seconds; the complete
+ASan/UBSan suite passed **76/76** in 62.21 seconds. Both builds and
+`git diff --check` passed. Native acceptance
+again exited **42**, all six compiler hashes remained unchanged, and the
+Linux x86-64 ELF SHA-256 remains
+`86ac3acba71f522aa13b5d58e733486737c1b4b9ffc19ed5224ab1c75470f400`.
+The acceptance sources/artifacts and test logs remain under `/tmp`.
+
+Gate 6 remains the first unfinished mission gate. Source inspection reconfirms
+that `NodeDecl` contains role/id/kind only, `buildCheckedGraph` requires an
+AtomRegistry factory, and `PagerNavigateNode::run` owns navigation in C++.
+The [receiver decision](../architecture/source-graph-activation-decision.md)
+is still a proposal; this continuation requested the specific decision again.
+The alternatives and public-semantic dependency recorded below still apply.
+No native graph implementation or Flow-owned navigation is claimed.
+
+All identified independent repairs are now verified. The receiver question
+has no answer in this resumed session, so the mission state returns to
+**BLOCKED**, not DONE, under the task's material-public-language-choice rule.
+The smallest required input remains acceptance of the proposed fresh-state,
+one-input/one-function/one-output activation contract, or a replacement
+node/plug contract. This checkpoint preserves the repairs and evidence on the
+authorized development branch; the previously incoming CONTINUE state was
+honored during recovery and safe work. No unrelated changes were present.
+
 ## Recovery audit — 2026-09-06
 
 This section supersedes the historical completion claim below. Recovered HEAD
