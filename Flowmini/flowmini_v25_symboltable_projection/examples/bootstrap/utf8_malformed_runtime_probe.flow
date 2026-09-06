@@ -1,0 +1,22 @@
+program utf8_malformed_runtime_probe
+
+main {
+    bytes : list<int>(stdin.bytes())
+    index : int(0)
+    byte : int(0)
+    diagnostic_count : int(0)
+
+    while index < length(bytes) {
+        bytes[index] -> byte
+        if byte < 128 {
+            index + 1 -> index
+        } else {
+            if byte < 194 {
+                diagnostic_count + 1 -> diagnostic_count
+            }
+            index + 1 -> index
+        }
+    }
+
+    print diagnostic_count
+}

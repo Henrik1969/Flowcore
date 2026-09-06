@@ -8,6 +8,7 @@ artifact="${FLOWMINI_UTF8_ARTIFACT_BIN:-${root}/Flowmini/flowmini_v25_symboltabl
 source="${root}/Flowmini/flowmini_v25_symboltable_projection/examples/bootstrap/utf8_source_reader_probe.flow"
 provider_source="${root}/Flowmini/flowmini_v25_symboltable_projection/examples/bootstrap/utf8_hosted_provider_probe.flow"
 runtime_source="${root}/Flowmini/flowmini_v25_symboltable_projection/examples/bootstrap/utf8_reader_runtime_probe.flow"
+malformed_runtime_source="${root}/Flowmini/flowmini_v25_symboltable_projection/examples/bootstrap/utf8_malformed_runtime_probe.flow"
 tmpdir="$(mktemp -d)"
 trap 'rm -rf "${tmpdir}"' EXIT
 
@@ -34,3 +35,8 @@ runtime_output="$(printf '\101\303\246' | "${flowmini}" "${runtime_source}")"
 cpp_scalar="$(printf '\101\303\246' | "${artifact}" | jq -r '.scalars[1].value')"
 test "${runtime_output}" = "${cpp_scalar}"
 echo "Flow UTF-8 runtime decode probe: PASS"
+
+malformed_output="$(printf '\101\300\257\102' | "${flowmini}" "${malformed_runtime_source}")"
+cpp_diagnostics="$(printf '\101\300\257\102' | "${artifact}" | jq -r '.diagnostics | length')"
+test "${malformed_output}" = "${cpp_diagnostics}"
+echo "Flow UTF-8 malformed-input probe: PASS"
