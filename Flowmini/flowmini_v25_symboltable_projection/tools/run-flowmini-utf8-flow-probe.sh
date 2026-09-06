@@ -18,6 +18,8 @@ when_duplicate_source="${root}/Flowmini/flowmini_v25_symboltable_projection/exam
 when_overlap_source="${root}/Flowmini/flowmini_v25_symboltable_projection/examples/fail/bad_when_overlap.flow"
 when_descending_source="${root}/Flowmini/flowmini_v25_symboltable_projection/examples/fail/bad_when_descending.flow"
 enum_source="${root}/Flowmini/flowmini_v25_symboltable_projection/examples/bootstrap/enum_state_probe.flow"
+enum_exhaustive_source="${root}/Flowmini/flowmini_v25_symboltable_projection/examples/bootstrap/enum_exhaustive_probe.flow"
+enum_nonexhaustive_source="${root}/Flowmini/flowmini_v25_symboltable_projection/examples/fail/bad_enum_nonexhaustive.flow"
 variant_source="${root}/Flowmini/flowmini_v25_symboltable_projection/examples/bootstrap/variant_declaration_probe.flow"
 classifier_source="${root}/Flowmini/flowmini_v25_symboltable_projection/examples/bootstrap/shared_scalar_classifier.flow"
 tmpdir="$(mktemp -d)"
@@ -114,6 +116,21 @@ echo "Flow enum identity probe: PASS"
 jq -e '.status == "ok"' "${tmpdir}/enum-semantic.json" >/dev/null
 jq -e '([.ast.declaration_pool[]? | select(.kind == "enum")] | length == 1) and ([.ast.statement_pool[]? | select(.kind == "when")] | length == 1)' "${tmpdir}/enum-bundle.json" >/dev/null
 echo "Flow enum frontend integration probe: PASS"
+
+enum_exhaustive_output="$(${flowmini} "${enum_exhaustive_source}")"
+test "${enum_exhaustive_output}" = "22"
+if "${flowmini}" --dump-frontend-bundle "${enum_exhaustive_source}" > "${tmpdir}/enum-exhaustive-bundle.json"; then
+    :
+else
+    echo "exhaustive enum when was rejected" >&2
+    exit 1
+fi
+echo "Flow exhaustive enum when probe: PASS"
+if "${flowmini}" "${enum_nonexhaustive_source}" >/dev/null 2>&1; then
+    echo "non-exhaustive enum when was accepted" >&2
+    exit 1
+fi
+echo "Flow enum exhaustiveness validation probe: PASS"
 
 variant_output="$("${flowmini}" "${variant_source}")"
 test "${variant_output}" = "1"

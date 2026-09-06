@@ -237,3 +237,19 @@ ABI/CUDA lowering remain explicitly future work rather than hidden blockers.
 Implement tagged variant construction and payload-aware `when` matching with a
 small runtime probe, then carry the same evidence through frontend projection
 and Flowanalyst while preserving the C++ artifacts unchanged.
+
+## Enum exhaustiveness checkpoint
+
+- Closed enum `when` statements may omit `default` when every declared member is
+  covered exactly once; open integer selectors still require `default`.
+- Missing enum members are rejected with a semantic diagnostic, and the
+  exhaustive route has an unreachable fallback only to satisfy the graph's
+  total wiring contract.
+- Added runtime and frontend probe coverage for exhaustive matching and the
+  non-exhaustive rejection path.
+
+## Exact next action
+
+Implement the first payload-bearing tagged variant constructor and preserve its
+variant identity through a runtime record representation before adding guarded
+payload field access.

@@ -2124,7 +2124,18 @@ private:
             skipNewlines();
         }
         expect(TokenKind::RightBrace, "expected '}' to close when block");
-        if (!hasDefault) { throw flow::DiagnosticError{"lowerer", "when requires a default arm"}; }
+        if (!hasDefault) {
+            const std::string selectorType = exprType(selector);
+            if (!isEnumType(selectorType)) {
+                throw flow::DiagnosticError{"lowerer", "when requires a default arm for open integer selectors"};
+            }
+            const TypeDef* enumDef = lookupType(selectorType);
+            for (const auto& [memberName, memberValue] : enumDef->enumMembers) {
+                if (!seenValues.contains(memberValue)) {
+                    throw flow::DiagnosticError{"lowerer", "exhaustive enum when is missing case " + selectorType + "." + memberName};
+                }
+            }
+        }
 
         const std::string joinId = generatedId("when_join");
         addNode("node", joinId, "record.nop");
@@ -2178,7 +2189,11 @@ private:
             if (!arm.body.terminates) { addWire(arm.body.last, {joinId, "in"}); }
         }
 
-        if (!defaultBody.has_value()) { throw flow::DiagnosticError{"lowerer", "when requires a default arm"}; }
+        if (!defaultBody.has_value()) {
+            const std::string unreachableId = generatedId("when_unreachable");
+            addNode("node", unreachableId, "record.nop");
+            defaultBody = Step{false, false, {unreachableId, "in"}, {unreachableId, "out"}};
+        }
         if (routes.empty()) {
             return Step{false, defaultBody->terminates, defaultBody->first, defaultBody->last};
         }

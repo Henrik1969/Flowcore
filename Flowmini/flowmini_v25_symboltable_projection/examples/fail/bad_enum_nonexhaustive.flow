@@ -1,0 +1,17 @@
+program bad_enum_nonexhaustive
+
+enum DecodeState {
+    ascii
+    malformed
+}
+
+main {
+    state : DecodeState(DecodeState.ascii)
+    marker : int(0)
+    when state {
+        case DecodeState.ascii {
+            11 -> marker
+        }
+    }
+    print marker
+}

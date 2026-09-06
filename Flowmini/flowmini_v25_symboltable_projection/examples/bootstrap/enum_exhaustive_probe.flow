@@ -1,0 +1,20 @@
+program enum_exhaustive_probe
+
+enum DecodeState {
+    ascii
+    malformed
+}
+
+main {
+    state : DecodeState(DecodeState.malformed)
+    marker : int(0)
+    when state {
+        case DecodeState.ascii {
+            11 -> marker
+        }
+        case DecodeState.malformed {
+            22 -> marker
+        }
+    }
+    print marker
+}
