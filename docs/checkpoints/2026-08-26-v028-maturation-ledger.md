@@ -740,3 +740,11 @@ The open work inventory above is retained as backlog context, not as an
 autonomous definition of done. `.codex-run-state` is therefore set to
 `BLOCKED` pending these concrete scope and authority decisions. The unrelated
 pre-existing Flowselection changes remain untouched.
+
+## Active scope clarification
+
+The active development scope is the Flowcore/Flowmini language chain only:
+language semantics, frontend facts, lowering, backend parity, evidence, and
+the bounded self-hosting path. Flowselection and `Flowselection/sel-ui/` are
+explicitly excluded from this workstream and must remain untouched unless a
+later instruction reopens them.
