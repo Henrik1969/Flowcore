@@ -11,6 +11,9 @@ lowerer=${FLOWLOWER_BIN:-$root/build/flowlower/flowlower}
 tmpdir=$(mktemp -d)
 trap 'rm -rf "$tmpdir"' EXIT
 
+# Acceptance must consume the existing compiler tools without replacing them.
+sha256sum "$flowmini" "$analyst" "$bind" "$parallel" "$optimizer" "$lowerer" > "$tmpdir/compiler-tools.sha256"
+
 provider=$(ldconfig -p 2>/dev/null | awk '$1 == "libc.so.6" && $NF ~ /^\// { print $NF; exit }')
 test -n "$provider"
 jq --arg provider "$provider" '.provider.path = $provider' \
@@ -250,4 +253,5 @@ grep -Fq 'call i64 @getauxval(i64 %flow_load_' "$tmpdir/getauxval.ll"
 clang "$tmpdir/getauxval.ll" -o "$tmpdir/getauxval"
 "$tmpdir/getauxval"
 
-printf '%s\n' 'Generated native binding artifacts: PASS'
+sha256sum --check --status "$tmpdir/compiler-tools.sha256"
+printf '%s\n' 'Generated native binding artifacts: PASS (compiler tool hashes unchanged)'

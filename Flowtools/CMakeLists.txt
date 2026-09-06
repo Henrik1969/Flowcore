@@ -42,6 +42,7 @@ add_custom_target(flowcore_conformance
     COMMAND "${CMAKE_COMMAND}" -E env
         CLOCK_BIN=$<TARGET_FILE:frankencore_clock>
         REVISION_BIN=$<TARGET_FILE:frankencore_revision_probe>
+        FLOWBIND_BIN=$<TARGET_FILE:flowbind>
         "${CMAKE_CURRENT_LIST_DIR}/../tools/check-frankencore-conformance.sh"
     DEPENDS frankencore_clock frankencore_revision_probe flowcore_architecture_check
     WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/.."

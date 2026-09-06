@@ -150,9 +150,20 @@ void dump_frontend_bundle_json(std::ostream& out,
         out << '\n';
     }
 
-    out << "  ],\n"
-        << "  \"diagnostics\": []\n"
-        << "}\n";
+    out << "  ],\n  \"diagnostics\": [";
+    for (std::size_t index = 0; index < module.unsupported_graph_locations.size(); ++index) {
+        const auto& location = module.unsupported_graph_locations[index];
+        if (index) out << ',';
+        out << "{\"code\":\"FLOWMINI_GRAPH_LOWERING_UNSUPPORTED\",\"severity\":\"error\","
+               "\"message\":\"graph syntax is interpreter-only; no structured graph lowering contract is implemented\","
+               "\"provenance\":{\"source\":";
+        const auto line_index = static_cast<std::size_t>(location.line - 1);
+        const bool mapped = location.line > 0 && line_index < lineOrigins.size();
+        dump_json_string(out, mapped ? std::string_view(lineOrigins[line_index].source_path) : sourcePath);
+        out << ",\"line\":" << (mapped ? lineOrigins[line_index].source_line : location.line)
+            << ",\"column\":" << location.column << "}}";
+    }
+    out << "]\n}\n";
 }
 
 } // namespace flowmini::ast

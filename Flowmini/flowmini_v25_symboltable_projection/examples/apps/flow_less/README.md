@@ -1,5 +1,11 @@
 # flow_less application example
 
+This is a compatibility-interpreter demonstration. Flow declares the wiring,
+but C++ `PagerNavigateNode` still implements navigation and page extraction.
+It does not yet satisfy the mission's Flow-owned application-behavior gate.
+Frontend bundle export reports `FLOWMINI_GRAPH_LOWERING_UNSUPPORTED`; the native
+compiler chain must not silently compile only the marker in `main`.
+
 `flow_less` is the first pager-shaped Flow application. Its source contains no
 terminal library calls, cursor arithmetic, or provider-specific state. It reads
 an actual text file and connects a pager provider to a plain renderer through

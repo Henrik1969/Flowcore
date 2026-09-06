@@ -21,7 +21,7 @@ This repository is not a finished language or runtime. It is a design and implem
 ```text
 status: experimental
 production-ready: no
-active branch: v25-symboltable-projection
+active branch: v29-language-maturation
 active prototype: Flowcore v0.28 typed artifact-contract language-chain slice
 current milestone: independently validated, identity-preserving frontend-to-ELF chain
 ```
@@ -128,7 +128,7 @@ cmake --build /tmp/flowcore-build
 ctest --test-dir /tmp/flowcore-build --output-on-failure
 ```
 
-The clean root build currently registers 57 tests, including the larger
+The clean root build currently registers 76 tests, including the larger
 integration corpus, pipeline matrix, pass corpus, sibling CTest suites, CUDA
 provider contracts, and Frankencore conformance probes.
 
@@ -157,7 +157,7 @@ cmake --build cmake-build-debug --target flowmini_suite
 ctest --test-dir cmake-build-debug --output-on-failure
 ```
 
-Expected current result:
+Historical standalone checkpoint (the root suite below is authoritative):
 
 ```text
 normal CMake/Ninja build:      PASS
@@ -171,12 +171,18 @@ CTest:                         PASS (2/2)
 For the complete root build, the current result is:
 
 ```text
-root CTest:                    PASS (57/57)
+root CTest:                    PASS (76/76)
 integration corpus:            PASS (3/3)
-pipeline matrix:               PASS (9 accepted, 1 blocked)
-pass corpus:                   PASS (43 programs)
+pipeline matrix:               PASS (7 accepted, 2 semantic-only, 1 blocked)
+pass corpus:                   PASS (91 programs)
 stdlib boundary:               PASS (6 ABI modules; libc/file I/O/memory/kernel ready at binding boundary)
 ```
+
+The reusable native chain is covered by generated-binding and native execution
+tests. The `flow_less` examples still execute C++ pager behavior through Flow
+wiring in the compatibility interpreter. Source-owned navigation and compiled
+graph delivery remain unfinished; see the
+[activation decision](docs/architecture/source-graph-activation-decision.md).
 
 ## Recommended reading
 

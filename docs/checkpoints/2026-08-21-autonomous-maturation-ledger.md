@@ -1,6 +1,85 @@
 # Flowcore autonomous maturation ledger
 
-## Completed in this continuation
+## Recovery audit — 2026-09-06
+
+This section supersedes the historical completion claim below. Recovered HEAD
+was `7182fbf` on `v29-language-maturation`; the worktree already changed AGENTS.md
+to this mission and run state to CONTINUE. Those user changes were preserved.
+No compiler application/profile selectors were found in the five stage source
+directories. The first substantive unfinished objective is Gate 6, with a
+related silent-projection correctness gap in Gate 1.
+
+Confirmed fixes in this checkpoint:
+
+- Clean out-of-tree testing initially passed 70/75. Five tests selected absent
+  sibling-build binaries. CMake now supplies current target paths to generated
+  binding acceptance, conformance, parallel smoke/reference and the flowcat
+  example pipeline. All five focused tests passed after repair.
+- ASan exposed the smoke test's 1 GiB virtual-memory limit preventing its shadow
+  map from being reserved. Address-sanitized builds disable that address-space
+  cap while retaining bounded input and the 30-second timeout. Normal builds
+  retain the cap. No sanitizer error is suppressed.
+- The compiler-chain acceptance test records and checks hashes of all six tools
+  across generated binding and native execution. Source/provider selection does
+  not replace compiler binaries.
+- `flow_less` actually selects C++ `PagerNavigateNode`; page commands, state and
+  extraction are not implemented in Flow. Before the repair, frontend export
+  dropped its graph and Flowanalyst admitted only `marker : int(1)` as a ready
+  native plan. Export now diagnoses graph keywords/connection tokens through
+  lexer facts with original source provenance. Flowanalyst propagates the
+  refusal and Flowparallel cannot schedule the blocked plan. Strings and
+  comments containing graph words do not trigger it. Interpreter graph tests
+  remain green. This is explicit unsupported behavior, not graph lowering.
+- The new `graph_lowering_refusal` gate tests captured bundles independently,
+  renamed source/program identity, downstream refusal and literal/comment
+  independence. README and architecture notes now distinguish native scalar
+  lowering from compatibility-interpreter graphs.
+
+Exact verification commands (logs and build outputs remain outside Git):
+
+```sh
+cmake -S . -B /tmp/flowcore-reusable-current -G Ninja -DCMAKE_BUILD_TYPE=Debug
+cmake --build /tmp/flowcore-reusable-current -j4
+ctest --test-dir /tmp/flowcore-reusable-current --output-on-failure
+cmake -S . -B /tmp/flowcore-reusable-current-sanitize -G Ninja \
+  -DCMAKE_BUILD_TYPE=Debug \
+  '-DCMAKE_C_FLAGS=-fsanitize=address,undefined -fno-omit-frame-pointer' \
+  '-DCMAKE_CXX_FLAGS=-fsanitize=address,undefined -fno-omit-frame-pointer'
+cmake --build /tmp/flowcore-reusable-current-sanitize -j4
+ASAN_OPTIONS=detect_leaks=0 LSAN_OPTIONS=detect_leaks=0 \
+  ctest --test-dir /tmp/flowcore-reusable-current-sanitize --output-on-failure
+git diff --check
+```
+
+Both complete builds succeeded. Normal CTest: **76/76**, 22.32 seconds.
+ASan/UBSan CTest: **76/76**, 61.27 seconds. Leak detection retains the earlier
+external-provider environment exclusion. Coverage includes malformed binding
+input, native execution, namespace collisions, terminal read/error/EOF paths,
+resource cleanup and graph interpretation. The pass corpus now contains 91
+programs; the pipeline matrix has seven accepted, two semantic-only and one
+blocked fixture.
+
+Additional retained native proof: `sh /tmp/flowcore-reusable-acceptance/run.sh`
+generates a new `september_capability` binding for libc `gettid`, compiles
+`september_unregistered_consumer` with already-built tools, and checks its
+positive-result branch exits **42**. All six compiler SHA-256 checks pass. The
+result `/tmp/flowcore-reusable-acceptance/september` is a Linux x86-64 ELF PIE,
+SHA-256 `86ac3acba71f522aa13b5d58e733486737c1b4b9ffc19ed5224ab1c75470f400`.
+Source, generated provider evidence, policy, captured stage artifacts, LLVM,
+binary and reproduction script are retained there, not committed. The permanent
+`native_binding_generation` gate covers the same generated-binding route.
+
+Gate 6 cannot be claimed complete: the current NodeDecl/AtomRegistry boundary
+has no source function identity or payload/parameter/result mapping, and callable
+v2 specifies sequential function calls only. The concrete proposed next step
+and alternatives are in
+[the source receiver decision](../architecture/source-graph-activation-decision.md).
+The user was asked whether to admit one stateless Flow function activation per
+delivered input, or require the broader node/plug design. No answer has yet
+been received. At this checkpoint state remains CONTINUE while the verified
+changes are committed and pushed.
+
+## Historical implementation record
 
 - Baseline audited: current v25 imports already preserve explicit aliases such
   as `curses`, `libc`, and `linux` in AST/SymbolTable projections; the existing
@@ -493,6 +572,6 @@
 
 ## Exact next action
 
-Mission complete: the final reconciliation is pushed, `.codex-run-state` is
-`DONE`, and the final state checkpoint must remain clean and synchronized with
-`origin/v25-symboltable-projection`.
+Gate 6 remains unfinished. Resolve the source receiver activation contract,
+then implement source-defined navigation and durable graph lowering. Historical
+DONE and branch-synchronization claims do not describe this recovered checkout.

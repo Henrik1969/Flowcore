@@ -59,8 +59,17 @@ add_test(NAME flowparallel_pipeline
         FLOWMINI_BIN=$<TARGET_FILE:flowmini>
         FLOWANALYST_BIN=$<TARGET_FILE:flowanalyst>
         ${CMAKE_CURRENT_SOURCE_DIR}/tests/run-flowparallel-tests.sh)
+set(flowparallel_smoke_memory_kb 1048576)
+if(CMAKE_CXX_FLAGS MATCHES "-fsanitize=[^ ]*address")
+    # ASan reserves a large virtual shadow map; the input and timeout still
+    # bound the workload, but a 1 GiB address-space cap prevents startup.
+    set(flowparallel_smoke_memory_kb 0)
+endif()
 add_test(NAME flowparallel_smoketest
-    COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/tests/run-parallel-smoketest.sh)
+    COMMAND ${CMAKE_COMMAND} -E env
+        FLOWPARALLEL_SMOKETEST_BIN=$<TARGET_FILE:flowparallel_smoketest>
+        FLOWPARALLEL_SMOKETEST_MEMORY_KB=${flowparallel_smoke_memory_kb}
+        ${CMAKE_CURRENT_SOURCE_DIR}/tests/run-parallel-smoketest.sh)
 add_test(NAME flowparallel_cpu_provider
     COMMAND ${CMAKE_COMMAND} -E env
         FLOWPARALLEL_CPU_BIN=$<TARGET_FILE:flowparallel_cpu>
@@ -89,8 +98,8 @@ add_test(NAME flowparallel_runtime_planner
 add_test(NAME flowparallel_graph_reference
     COMMAND ${CMAKE_COMMAND} -E env
         FLOWPARALLEL_GRAPH_REFERENCE_BIN=$<TARGET_FILE:flowparallel_graph_reference>
-        FLOWMINI_BIN=${CMAKE_CURRENT_SOURCE_DIR}/../Flowmini/flowmini_v25_symboltable_projection/cmake-build-debug/flowmini
-        FLOWANALYST_BIN=${CMAKE_CURRENT_SOURCE_DIR}/../Flowanalyst/build/flowanalyst
+        FLOWMINI_BIN=$<TARGET_FILE:flowmini>
+        FLOWANALYST_BIN=$<TARGET_FILE:flowanalyst>
         FLOW_GRAPH_FIXTURE=${CMAKE_CURRENT_SOURCE_DIR}/../Flowmini/flowmini_v25_symboltable_projection/examples/ast/parallel_independence_probe.flow
         ${CMAKE_CURRENT_SOURCE_DIR}/tests/run-graph-reference-tests.sh)
 add_test(NAME flowparallel_graph_planner

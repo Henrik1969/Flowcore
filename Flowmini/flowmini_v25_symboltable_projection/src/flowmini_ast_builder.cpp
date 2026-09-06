@@ -2772,6 +2772,19 @@ namespace flowmini::ast {
 
     AstModule build_source_header_ast(const std::vector<flowmini::Token>& tokens) {
         AstModule module = make_empty_ast_module();
+        for (const auto& token : tokens) {
+            switch (token.kind) {
+                case flowmini::TokenKind::KeywordProducer:
+                case flowmini::TokenKind::KeywordNode:
+                case flowmini::TokenKind::KeywordSink:
+                case flowmini::TokenKind::KeywordWire:
+                case flowmini::TokenKind::KeywordPolicy:
+                case flowmini::TokenKind::Arrow:
+                    module.unsupported_graph_locations.push_back(location_from_token(token));
+                    break;
+                default: break;
+            }
+        }
         module.block_pool.reserve(tokens.size());
         module.statement_pool.reserve(tokens.size());
 

@@ -500,6 +500,9 @@ struct AstModule {
     std::vector<Expression> expression_pool;
     std::vector<Statement> statement_pool;
     std::vector<Block> block_pool;
+    // Syntax admitted by the compatibility interpreter but not represented in
+    // the structured AST must never disappear into an executable plan.
+    std::vector<SourceLocation> unsupported_graph_locations;
 };
 
 const char* to_string(SourceUnitKind kind);

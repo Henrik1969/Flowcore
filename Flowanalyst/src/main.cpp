@@ -101,7 +101,14 @@ int run(const Json& bundle, int lowering_plan_version) {
         }
         diagnostics.push_back(std::move(item));
     };
-    for (const auto& entry : list(field(bundle, "diagnostics"))) add_diagnostic("FLOWMINI_FRONTEND_DIAGNOSTIC", text(field(entry, "message"), "FlowMini frontend diagnostic"), -1);
+    for (const auto& entry : list(field(bundle, "diagnostics"))) {
+        add_diagnostic(text(field(entry, "code"), "FLOWMINI_FRONTEND_DIAGNOSTIC"), text(field(entry, "message"), "FlowMini frontend diagnostic"), -1);
+        if (const auto* provenance = field(entry, "provenance")) {
+            diagnostics.back().source = text(field(provenance, "source"), diagnostics.back().source);
+            diagnostics.back().line = integer(field(provenance, "line"));
+            diagnostics.back().column = integer(field(provenance, "column"));
+        }
+    }
     std::vector<Target> targets;
     std::vector<BindingRequirement> binding_requirements;
     std::vector<AbiTypeContract> abi_type_contracts;
@@ -628,7 +635,7 @@ int run(const Json& bundle, int lowering_plan_version) {
     std::map<std::string, int> region_index;
     for (std::size_t index = 0; index < regions.size(); ++index) region_index[regions[index].id] = static_cast<int>(index);
     std::cout << "{\n  \"format\": \"flowanalyst.semantic_report\",\n  \"version\": 1,\n  \"status\": \"" << (diagnostics.empty() ? "ok" : "error") << "\",\n  \"source\": {\"path\": " << quote(text(field(field(bundle, "source"), "path"))) << "},\n  \"frontend_bundle\": {\"format\": \"flowmini.frontend_bundle\", \"version\": 2},\n  \"diagnostics\": [";
-    for (std::size_t i = 0; i < diagnostics.size(); ++i) { const auto& d = diagnostics[i]; if (i) std::cout << ','; std::cout << "{\"code\":" << quote(d.code) << ",\"severity\":" << quote(d.severity) << ",\"message\":" << quote(d.message) << ",\"root_cause\":true"; if (d.symbol >= 0) { std::cout << ",\"subject\":{\"kind\":\"symbol\",\"id\":" << d.symbol << "}"; std::cout << ",\"provenance\":{\"source\":" << quote(d.source) << ",\"ast_path\":" << quote(d.ast_path) << ",\"line\":" << d.line << ",\"column\":" << d.column << "}"; } if (!d.region.empty()) std::cout << ",\"region\":" << quote(d.region); std::cout << '}'; }
+    for (std::size_t i = 0; i < diagnostics.size(); ++i) { const auto& d = diagnostics[i]; if (i) std::cout << ','; std::cout << "{\"code\":" << quote(d.code) << ",\"severity\":" << quote(d.severity) << ",\"message\":" << quote(d.message) << ",\"root_cause\":true"; if (d.symbol >= 0) { std::cout << ",\"subject\":{\"kind\":\"symbol\",\"id\":" << d.symbol << "}"; } if (d.symbol >= 0 || d.line >= 0) { std::cout << ",\"provenance\":{\"source\":" << quote(d.source) << ",\"ast_path\":" << quote(d.ast_path) << ",\"line\":" << d.line << ",\"column\":" << d.column << "}"; } if (!d.region.empty()) std::cout << ",\"region\":" << quote(d.region); std::cout << '}'; }
     std::cout << "],\n  \"binding_requirements\": [";
     for (std::size_t i = 0; i < binding_requirements.size(); ++i) { if (i) std::cout << ','; const auto& requirement = binding_requirements[i]; std::cout << "{\"contract\":" << quote(requirement.contract) << ",\"library\":" << quote(requirement.library) << ",\"convention\":" << quote(requirement.convention) << ",\"symbol\":" << quote(requirement.symbol) << ",\"effect\":" << quote(requirement.effect) << ",\"parameter_types\":" << quote(requirement.parameter_types) << ",\"return_type\":" << quote(requirement.return_type) << "}"; }
     std::cout << "],\n  \"aggregate_abi_layouts\": [";

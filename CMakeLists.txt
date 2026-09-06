@@ -14,6 +14,14 @@ add_subdirectory(Flowanalyst ${CMAKE_CURRENT_BINARY_DIR}/flowanalyst)
 add_subdirectory(Flowbind ${CMAKE_CURRENT_BINARY_DIR}/flowbind)
 add_subdirectory(Flowoptimize ${CMAKE_CURRENT_BINARY_DIR}/flowoptimize)
 
+# The example pipeline must use this build's tools, including forward target
+# references, rather than executables left in sibling source directories.
+set(FLOWCORE_FLOWMINI "$<TARGET_FILE:flowmini>")
+set(FLOWCORE_FLOWANALYST "$<TARGET_FILE:flowanalyst>")
+set(FLOWCORE_FLOWBIND "$<TARGET_FILE:flowbind>")
+set(FLOWCORE_FLOWOPTIMIZE "$<TARGET_FILE:flowoptimize>")
+set(FLOWCORE_FLOWLOWER "$<TARGET_FILE:flowlower>")
+
 # Flowtools owns the Frankencore reference providers and the Flowparallel
 # subproject. Including it here avoids duplicating that target graph.
 add_subdirectory(Flowtools ${CMAKE_CURRENT_BINARY_DIR}/flowtools)
@@ -106,6 +114,9 @@ add_test(NAME native_binding_generation
         FLOWMINI_BIN=$<TARGET_FILE:flowmini>
         FLOWANALYST_BIN=$<TARGET_FILE:flowanalyst>
         FLOWBIND_BIN=$<TARGET_FILE:flowbind>
+        FLOWPARALLEL_BIN=$<TARGET_FILE:flowparallel>
+        FLOWOPTIMIZE_BIN=$<TARGET_FILE:flowoptimize>
+        FLOWLOWER_BIN=$<TARGET_FILE:flowlower>
         ${CMAKE_CURRENT_SOURCE_DIR}/tools/test-generate-flow-bindings.sh)
 
 add_test(NAME native_ncurses_binding
@@ -154,6 +165,13 @@ add_test(NAME flow_less_pager
         ${CMAKE_CURRENT_SOURCE_DIR}/tools/test-flow-less.sh)
 set_tests_properties(flow_less_pager PROPERTIES
     DEPENDS "flowcore_graph_routing")
+
+add_test(NAME graph_lowering_refusal
+    COMMAND ${CMAKE_COMMAND} -E env
+        FLOWMINI_BIN=$<TARGET_FILE:flowmini>
+        FLOWANALYST_BIN=$<TARGET_FILE:flowanalyst>
+        FLOWPARALLEL_BIN=$<TARGET_FILE:flowparallel>
+        sh ${CMAKE_CURRENT_SOURCE_DIR}/tools/test-graph-lowering-refusal.sh)
 
 add_test(NAME flow_less_ncurses_pager
     COMMAND ${CMAKE_COMMAND} -E env

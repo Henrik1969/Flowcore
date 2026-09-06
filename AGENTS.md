@@ -3,7 +3,7 @@
 ## Autonomous reusable-chain work
 
 The active autonomous mission is defined by
-`docs/tasks/tinyvm-cross-target-bootstrap.md`. Read it completely before making
+`docs/tasks/reusable-flow-chain-autonomous.md`. Read it completely before making
 task changes. Treat it as the authoritative objective and definition of done.
 
 ### Continuation contract

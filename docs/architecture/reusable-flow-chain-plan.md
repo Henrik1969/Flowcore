@@ -20,7 +20,13 @@ Flow source
 
 ## Current facts
 
-- Every required compiler stage consumes or preserves the versioned structured
+The native scalar/control-flow migration is implemented. Gate 6 is incomplete:
+`flow_less` wires built-in C++ atoms and does not yet own navigation in Flow.
+Graph syntax is currently executable only through the compatibility interpreter;
+frontend export diagnoses unsupported graph lowering rather than silently
+dropping the graph. See the [activation decision](source-graph-activation-decision.md).
+
+- For the admitted scalar/control-flow surface, every required compiler stage consumes or preserves the versioned structured
   lowering plan without application, source-unit or profile selection.
 - Flowbind authorizes exact provider, convention, carrier, effect, resource and
   generated contract/evidence identities.

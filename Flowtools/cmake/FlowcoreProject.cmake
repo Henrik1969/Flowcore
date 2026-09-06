@@ -13,7 +13,7 @@ set(FLOWCORE_CLANG "clang" CACHE STRING "C compiler used for Flowcore lowered ar
 
 function(flowcore_project_tools)
     foreach(tool IN ITEMS FLOWCORE_FLOWMINI FLOWCORE_FLOWANALYST FLOWCORE_FLOWBIND FLOWCORE_FLOWOPTIMIZE FLOWCORE_FLOWLOWER)
-        if(NOT EXISTS "${${tool}}")
+        if(NOT "${${tool}}" MATCHES "^\\$<TARGET_FILE:" AND NOT EXISTS "${${tool}}")
             message(WARNING "${tool} does not exist yet: ${${tool}}. Build the Flowcore stages or override it in CLion's CMake cache.")
         endif()
     endforeach()
