@@ -595,6 +595,26 @@ public:
     }
 };
 
+class VariantConstructNode final : public ConfiguredNode {
+public:
+    using ConfiguredNode::ConfiguredNode;
+
+    std::vector<Route> run(MiniEnvelope env) override {
+        auto& record = requirePayload<RecordPayload>(env, "variant.construct");
+        const std::string out = getPolicyString(config_, "out", "variant");
+        const auto fields = splitPathList(getPolicyString(config_, "fields", ""));
+        const auto paths = splitPathList(getPolicyString(config_, "field_paths", ""));
+        if (fields.size() != paths.size()) {
+            throw flow::DiagnosticError{"variant.construct", "payload field/path count mismatch"};
+        }
+        Record variant;
+        variant["__tag"] = Value{static_cast<std::int64_t>(getPolicyInt(config_, "tag", 0))};
+        for (std::size_t i = 0; i < fields.size(); ++i) { variant[fields[i]] = getPathValue(record, paths[i], "variant.construct"); }
+        setPathValue(record, out, Value{std::move(variant)}, "variant.construct");
+        return {Route{"out", std::move(env)}};
+    }
+};
+
 class ConstBoolNode final : public ConfiguredNode {
 public:
     using ConfiguredNode::ConfiguredNode;
@@ -1359,6 +1379,8 @@ AtomRegistry makeCoreAtomRegistry() {
 
     registry.registerAtom(AtomContract{"const.int", {{"in", "Record"}}, {{"out", "Record"}}, {}},
         [](NodeConfig config) { return std::make_unique<ConstIntNode>(std::move(config)); });
+    registry.registerAtom(AtomContract{"variant.construct", {{"in", "Record"}}, {{"out", "Record"}}, {}},
+        [](NodeConfig config) { return std::make_unique<VariantConstructNode>(std::move(config)); });
     registry.registerAtom(AtomContract{"const.bool", {{"in", "Record"}}, {{"out", "Record"}}, {}},
         [](NodeConfig config) { return std::make_unique<ConstBoolNode>(std::move(config)); });
     registry.registerAtom(AtomContract{"const.text", {{"in", "Record"}}, {{"out", "Record"}}, {}},

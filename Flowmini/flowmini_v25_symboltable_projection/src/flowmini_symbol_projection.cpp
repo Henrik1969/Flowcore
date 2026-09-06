@@ -1,6 +1,7 @@
 #include "flowmini_symbol_projection.h"
 
 #include <cstdint>
+#include <set>
 #include <string>
 #include <type_traits>
 #include <utility>
@@ -867,6 +868,15 @@ struct ProjectTopLevelDecl {
                                          AstOriginRole::EnumDeclaration,
                                          decl.location,
                                          declarationId));
+        const auto variantScope = table.createScope(symboltable::ScopeKind::Struct, moduleScope, typeSymbol, decl.name);
+        record_scope_origin(scopeOrigins,
+                            variantScope,
+                            astPath + "/payload",
+                            make_origin(AstOriginEntityKind::Declaration,
+                                        AstOriginRole::RecordScope,
+                                        decl.location,
+                                        declarationId));
+        std::set<std::string> seenFields;
         for (const auto& member : decl.members) {
             const auto memberSymbol = table.insertSymbol(moduleScope, member.name, symboltable::SymbolKind::Variable);
             set_declaration_location(table, memberSymbol, member.location);
@@ -877,6 +887,18 @@ struct ProjectTopLevelDecl {
                                              AstOriginRole::EnumDeclaration,
                                              member.location,
                                              declarationId));
+            for (const auto& field : member.fields) {
+                if (!seenFields.insert(field.name).second) { continue; }
+                const auto fieldSymbol = table.insertSymbol(variantScope, field.name, symboltable::SymbolKind::Field);
+                set_declaration_location(table, fieldSymbol, field.location);
+                record_symbol_origin(symbolOrigins,
+                                     fieldSymbol,
+                                     astPath + ".member[" + member.name + "].field[" + field.name + "]",
+                                     make_origin(AstOriginEntityKind::Field,
+                                                 AstOriginRole::RecordField,
+                                                 field.location));
+                add_type_spelling_fact(table, fieldSymbol, "declared_type_spelling", field.type);
+            }
         }
     }
 

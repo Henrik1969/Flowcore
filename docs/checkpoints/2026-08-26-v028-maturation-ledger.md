@@ -253,3 +253,24 @@ and Flowanalyst while preserving the C++ artifacts unchanged.
 Implement the first payload-bearing tagged variant constructor and preserve its
 variant identity through a runtime record representation before adding guarded
 payload field access.
+
+## Tagged variant construction checkpoint
+
+- Added explicit `Variant.member(payload...)` construction for typed variant
+  declarations.
+- The runtime representation is a target-neutral record containing a stable
+  internal tag and the selected payload fields; construction uses the existing
+  record envelope and does not alter the C++ evidence path.
+- Variant payload fields are projected into the frontend symbol table so
+  Flowanalyst validates construction and field reads through the same semantic
+  chain.
+- Added runtime, frontend, and Flowanalyst probe coverage for scalar payload
+  construction and readback.
+- Guarded variant matching remains intentionally unfinished: the current field
+  projection is a conservative union of payload fields and does not yet prove
+  that a field is accessed only in its matching member arm.
+
+## Exact next action
+
+Add payload-aware variant `when` cases and arm-local field bindings, then reject
+cross-member payload access in frontend and Flowanalyst validation.

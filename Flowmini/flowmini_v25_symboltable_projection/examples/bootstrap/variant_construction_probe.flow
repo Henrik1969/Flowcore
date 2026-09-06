@@ -1,0 +1,13 @@
+program variant_construction_probe
+
+variant DecodeOutcome {
+    scalar(value : int)
+    diagnostic(code : int, offset : int)
+}
+
+main {
+    outcome : DecodeOutcome(DecodeOutcome.scalar(42))
+    value : int(0)
+    outcome.value -> value
+    print value
+}

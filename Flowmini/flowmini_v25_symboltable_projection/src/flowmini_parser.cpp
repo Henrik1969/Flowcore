@@ -121,7 +121,7 @@ struct AbiStructDef {
     std::vector<AbiStructFieldDef> fields;
 };
 
-enum class ExprKind { LiteralInt, LiteralBool, LiteralString, Identifier, StdinInt, StdinBytes, ListIndex, ArrayIndex, FieldAccess, ListLength, FunctionCall, UnaryNot, Binary };
+enum class ExprKind { LiteralInt, LiteralBool, LiteralString, Identifier, StdinInt, StdinBytes, ListIndex, ArrayIndex, FieldAccess, ListLength, FunctionCall, VariantConstruct, UnaryNot, Binary };
 struct Expr {
     ExprKind kind = ExprKind::Identifier;
     int literal = 0;
@@ -395,6 +395,11 @@ private:
         return def != nullptr && def->isEnum;
     }
 
+    [[nodiscard]] bool isVariantType(const std::string& type) const {
+        const TypeDef* def = lookupType(type);
+        return def != nullptr && def->isVariant;
+    }
+
     [[nodiscard]] const TypeField* findTypeField(const std::string& type, const std::string& field) const {
         const TypeDef* def = lookupType(type);
         if (def == nullptr) { return nullptr; }
@@ -410,6 +415,17 @@ private:
         std::string curType = sym->type;
         for (const auto& field : fields) {
             const TypeField* f = findTypeField(curType, field);
+            TypeField variantField;
+            if (f == nullptr && isVariantType(curType)) {
+                const TypeDef* variant = lookupType(curType);
+                for (const auto& [member, payload] : variant->variantMembers) {
+                    for (const auto& candidate : payload) {
+                        if (candidate.name == field) { variantField = candidate; break; }
+                    }
+                    if (!variantField.name.empty()) { break; }
+                }
+                if (!variantField.name.empty()) { f = &variantField; }
+            }
             if (f == nullptr) {
                 throw flow::DiagnosticError{"lowerer", "type '" + curType + "' has no field '" + field + "'"};
             }
@@ -579,6 +595,27 @@ private:
                 Expr expr;
                 expr.kind = ExprKind::Identifier;
                 expr.ident = member.text;
+                return expr;
+            }
+
+            if (isVariantType(id) && match(TokenKind::Dot)) {
+                const Token& member = expectIdentifier("expected variant member after '.'");
+                const TypeDef* def = lookupType(id);
+                if (def->variantMembers.find(member.text) == def->variantMembers.end()) {
+                    fail(member, "unknown variant member '" + member.text + "'");
+                }
+                expect(TokenKind::LeftParen, "variant construction requires payload parentheses");
+                Expr expr;
+                expr.kind = ExprKind::VariantConstruct;
+                expr.ident = id;
+                expr.fields.push_back(member.text);
+                if (!check(TokenKind::RightParen)) {
+                    while (true) {
+                        expr.args.push_back(parsePredicateExpr());
+                        if (!match(TokenKind::Comma)) { break; }
+                    }
+                }
+                expect(TokenKind::RightParen, "expected ')' after variant payload");
                 return expr;
             }
 
@@ -765,6 +802,15 @@ private:
             }
             return fn->returnType;
         }
+        if (expr.kind == ExprKind::VariantConstruct) {
+            const TypeDef* def = lookupType(expr.ident);
+            const auto member = def->variantMembers.find(expr.fields.front());
+            if (member->second.size() != expr.args.size()) { throw flow::DiagnosticError{"lowerer", "variant member '" + expr.fields.front() + "' payload count mismatch"}; }
+            for (std::size_t i = 0; i < expr.args.size(); ++i) {
+                if (!canAssignType(exprType(expr.args[i]), member->second[i].type)) { throw flow::DiagnosticError{"lowerer", "variant payload type mismatch for '" + member->second[i].name + "'"}; }
+            }
+            return expr.ident;
+        }
         if (expr.kind == ExprKind::UnaryNot) {
             const std::string inner = exprType(*expr.left);
             if (inner != "Bool") { throw flow::DiagnosticError{"lowerer", "not requires Bool operand, got " + inner}; }
@@ -915,6 +961,36 @@ private:
             Step callStep = lowerFunctionCall(expr, targetHint.empty() ? generatedId("fn_return") : targetHint);
             if (step != nullptr) { appendStep(*step, callStep); }
             return targetHint.empty() ? callStepResultPath_ : targetHint;
+        }
+        if (expr.kind == ExprKind::VariantConstruct) {
+            const TypeDef* def = lookupType(expr.ident);
+            const auto member = def->variantMembers.find(expr.fields.front());
+            int tag = 0;
+            for (const auto& [name, fields] : def->variantMembers) {
+                if (name == expr.fields.front()) { break; }
+                ++tag;
+            }
+            const std::string out = targetHint.empty() ? generatedId("variant") : targetHint;
+            Step combined;
+            std::ostringstream fields;
+            std::ostringstream paths;
+            for (std::size_t i = 0; i < expr.args.size(); ++i) {
+                Step payloadStep;
+                const std::string payloadPath = lowerExprToPath(expr.args[i], generatedId("variant_payload"), &payloadStep);
+                appendStep(combined, payloadStep);
+                if (i > 0) { fields << ','; paths << ','; }
+                fields << member->second[i].name;
+                paths << payloadPath;
+            }
+            const std::string nodeId = generatedId("variant_construct");
+            addNode("node", nodeId, "variant.construct");
+            addPolicy(nodeId, "out", out);
+            addPolicy(nodeId, "tag", tag);
+            addPolicy(nodeId, "fields", fields.str());
+            addPolicy(nodeId, "field_paths", paths.str());
+            appendStep(combined, Step{false, false, {nodeId, "in"}, {nodeId, "out"}});
+            if (step != nullptr) { appendStep(*step, combined); }
+            return out;
         }
         if (expr.kind == ExprKind::LiteralInt) {
             const std::string id = generatedId("lit");
@@ -1471,6 +1547,17 @@ private:
             expect(TokenKind::RightParen, "expected ')' after enum initializer");
             if (exprType(initializer) != enumType) { throw flow::DiagnosticError{"lowerer", "enum initializer for '" + id + "' has wrong enum type"}; }
             declareSymbol(idToken, id, enumType);
+            Step step;
+            static_cast<void>(lowerExprToPath(initializer, lookup(id)->path, &step));
+            return step;
+        }
+        if (check(TokenKind::Identifier) && isVariantType(peek().text)) {
+            const std::string variantType = expectIdentifier("expected variant type").text;
+            expect(TokenKind::LeftParen, "variant declaration requires initializer");
+            Expr initializer = parsePredicateExpr();
+            expect(TokenKind::RightParen, "expected ')' after variant initializer");
+            if (exprType(initializer) != variantType) { throw flow::DiagnosticError{"lowerer", "variant initializer for '" + id + "' has wrong variant type"}; }
+            declareSymbol(idToken, id, variantType);
             Step step;
             static_cast<void>(lowerExprToPath(initializer, lookup(id)->path, &step));
             return step;
