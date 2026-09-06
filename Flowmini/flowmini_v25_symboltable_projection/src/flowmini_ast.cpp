@@ -1042,6 +1042,21 @@ namespace flowmini::ast {
                 out << "], \"location\": ";
                 dump_source_location_json(out, enumDecl->location);
                 out << "\n";
+            } else if (const auto* variantDecl = std::get_if<VariantDecl>(&decl)) {
+                out << ",\n";
+                dump_indent(out, indent + 2);
+                out << "\"name\": ";
+                dump_json_string(out, variantDecl->name);
+                out << ", \"members\": [";
+                for (std::size_t i = 0; i < variantDecl->members.size(); ++i) {
+                    if (i > 0) { out << ", "; }
+                    out << "{\"name\": ";
+                    dump_json_string(out, variantDecl->members[i].name);
+                    out << ", \"field_count\": " << variantDecl->members[i].fields.size() << "}";
+                }
+                out << "], \"location\": ";
+                dump_source_location_json(out, variantDecl->location);
+                out << "\n";
             } else if (const auto* refinedTypeDecl = std::get_if<RefinedTypeDecl>(&decl)) {
                 out << ",\n";
                 dump_indent(out, indent + 2);
@@ -1133,6 +1148,7 @@ namespace flowmini::ast {
             case TopLevelKind::Function:    return "function";
             case TopLevelKind::Record:      return "record";
             case TopLevelKind::Enum:        return "enum";
+            case TopLevelKind::Variant:     return "variant";
             case TopLevelKind::RefinedType: return "refined_type";
             case TopLevelKind::Abi:         return "abi";
             case TopLevelKind::Target:      return "target";
@@ -1354,6 +1370,7 @@ namespace flowmini::ast {
         if (std::holds_alternative<FunctionDecl>(decl))     { return TopLevelKind::Function;}
         if (std::holds_alternative<RecordDecl>(decl))       { return TopLevelKind::Record;}
         if (std::holds_alternative<EnumDecl>(decl))         { return TopLevelKind::Enum;}
+        if (std::holds_alternative<VariantDecl>(decl))      { return TopLevelKind::Variant;}
         if (std::holds_alternative<RefinedTypeDecl>(decl))  { return TopLevelKind::RefinedType;}
         if (std::holds_alternative<AbiDecl>(decl))          { return TopLevelKind::Abi;}
         if (std::holds_alternative<TargetDecl>(decl))       { return TopLevelKind::Target;}

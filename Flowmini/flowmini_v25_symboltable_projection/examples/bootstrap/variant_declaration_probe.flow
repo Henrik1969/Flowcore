@@ -1,0 +1,11 @@
+variant DecodeOutcome {
+    scalar(value : int)
+    diagnostic(code : int, offset : int)
+}
+
+program variant_declaration_probe
+
+main {
+    marker : int(1)
+    print marker
+}

@@ -264,6 +264,10 @@ namespace flowmini::ast {
             return is_identifier_text(token, "enum");
         }
 
+        bool is_variant_token(const flowmini::Token& token) {
+            return is_identifier_text(token, "variant");
+        }
+
         bool is_abi_token(const flowmini::Token& token) {
             return is_identifier_text(token, "abi");
         }
@@ -3007,6 +3011,54 @@ namespace flowmini::ast {
                     if (i < tokens.size() && tokens[i].kind == flowmini::TokenKind::RightBrace) { ++i; }
                 }
                 append_top_level_declaration(module, std::move(enumDecl));
+                i = skip_until_next_top_levelish_token(tokens, i);
+                continue;
+            }
+
+            if (is_variant_token(tokens[i])) {
+                VariantDecl variantDecl;
+                variantDecl.location = location_from_token(tokens[i]);
+                ++i;
+                if (i < tokens.size() && tokens[i].kind == flowmini::TokenKind::Identifier) {
+                    variantDecl.name = tokens[i].text;
+                    ++i;
+                }
+                if (i < tokens.size() && tokens[i].kind == flowmini::TokenKind::LeftBrace) {
+                    ++i;
+                    while (i < tokens.size() && !is_end_token(tokens[i]) &&
+                           tokens[i].kind != flowmini::TokenKind::RightBrace) {
+                        if (tokens[i].kind == flowmini::TokenKind::Newline) { ++i; continue; }
+                        if (tokens[i].kind != flowmini::TokenKind::Identifier) { ++i; continue; }
+                        VariantMember member;
+                        member.name = tokens[i].text;
+                        member.location = location_from_token(tokens[i]);
+                        ++i;
+                        if (i < tokens.size() && tokens[i].kind == flowmini::TokenKind::LeftParen) {
+                            ++i;
+                            while (i < tokens.size() && tokens[i].kind != flowmini::TokenKind::RightParen &&
+                                   !is_end_token(tokens[i])) {
+                                if (tokens[i].kind == flowmini::TokenKind::Identifier) {
+                                    RecordField field;
+                                    field.name = tokens[i].text;
+                                    field.location = location_from_token(tokens[i]);
+                                    ++i;
+                                    if (i < tokens.size() && tokens[i].kind == flowmini::TokenKind::Colon) { ++i; }
+                                    if (i < tokens.size() && tokens[i].kind == flowmini::TokenKind::Identifier) {
+                                        field.type = parse_type_ref(tokens, i);
+                                    }
+                                    member.fields.push_back(std::move(field));
+                                } else {
+                                    ++i;
+                                }
+                                if (i < tokens.size() && tokens[i].kind == flowmini::TokenKind::Comma) { ++i; }
+                            }
+                            if (i < tokens.size() && tokens[i].kind == flowmini::TokenKind::RightParen) { ++i; }
+                        }
+                        variantDecl.members.push_back(std::move(member));
+                    }
+                    if (i < tokens.size() && tokens[i].kind == flowmini::TokenKind::RightBrace) { ++i; }
+                }
+                append_top_level_declaration(module, std::move(variantDecl));
                 i = skip_until_next_top_levelish_token(tokens, i);
                 continue;
             }

@@ -95,6 +95,8 @@ struct TypeDef {
     std::vector<TypeField> fields;
     bool isEnum = false;
     std::map<std::string, int> enumMembers;
+    bool isVariant = false;
+    std::map<std::string, std::vector<TypeField>> variantMembers;
 };
 
 struct AbiTypeDef {
@@ -146,13 +148,13 @@ struct Target {
 class Parser {
 public:
     explicit Parser(const std::vector<Token>& tokens) : tokens_(tokens) {
-        types_.emplace("int", TypeDef{"int", "", {}, {}, false, {}});
-        types_.emplace("Bool", TypeDef{"Bool", "", {}, {}, false, {}});
-        types_.emplace("c_int", TypeDef{"c_int", "int", {}, {}, false, {}});
-        types_.emplace("c_long", TypeDef{"c_long", "int", {}, {}, false, {}});
-        types_.emplace("c_ulong", TypeDef{"c_ulong", "int", {}, {}, false, {}});
-        types_.emplace("c_size_t", TypeDef{"c_size_t", "int", {{TokenKind::GreaterEqual, 0}}, {}, false, {}});
-        types_.emplace("c_string", TypeDef{"c_string", "", {}, {}, false, {}});
+        types_.emplace("int", TypeDef{"int", "", {}, {}, false, {}, false, {}});
+        types_.emplace("Bool", TypeDef{"Bool", "", {}, {}, false, {}, false, {}});
+        types_.emplace("c_int", TypeDef{"c_int", "int", {}, {}, false, {}, false, {}});
+        types_.emplace("c_long", TypeDef{"c_long", "int", {}, {}, false, {}, false, {}});
+        types_.emplace("c_ulong", TypeDef{"c_ulong", "int", {}, {}, false, {}, false, {}});
+        types_.emplace("c_size_t", TypeDef{"c_size_t", "int", {{TokenKind::GreaterEqual, 0}}, {}, false, {}, false, {}});
+        types_.emplace("c_string", TypeDef{"c_string", "", {}, {}, false, {}, false, {}});
         abiTypes_.emplace("c_string", AbiTypeDef{"c_string", "const char*", "borrowed", "read", "call", "false", "nul", {}, false});
     }
 
@@ -177,6 +179,8 @@ public:
                 parseTypeDecl();
             } else if (check(TokenKind::Identifier) && peek().text == "enum") {
                 parseEnumDecl();
+            } else if (check(TokenKind::Identifier) && peek().text == "variant") {
+                parseVariantDecl();
             } else if (check(TokenKind::Identifier) && peek().text == "abi") {
                 parseAbiBlock();
             } else if (match(TokenKind::KeywordFn)) {
@@ -1170,6 +1174,40 @@ private:
         types_[def.name] = std::move(def);
     }
 
+    void parseVariantDecl() {
+        static_cast<void>(expectIdentifier("expected 'variant'"));
+        const Token& nameToken = expectIdentifier("expected variant name");
+        if (types_.contains(nameToken.text)) { fail(nameToken, "duplicate type declaration '" + nameToken.text + "'"); }
+        TypeDef def;
+        def.name = nameToken.text;
+        def.isVariant = true;
+        expect(TokenKind::LeftBrace, "expected '{' before variant members");
+        skipNewlines();
+        while (!check(TokenKind::RightBrace) && !check(TokenKind::End)) {
+            const Token& memberToken = expectIdentifier("expected variant member");
+            if (def.variantMembers.contains(memberToken.text)) { fail(memberToken, "duplicate variant member '" + memberToken.text + "'"); }
+            std::vector<TypeField> fields;
+            if (match(TokenKind::LeftParen)) {
+                if (!check(TokenKind::RightParen)) {
+                    while (true) {
+                        const Token& fieldToken = expectIdentifier("expected variant payload field");
+                        expect(TokenKind::Colon, "expected ':' after variant payload field");
+                        const std::string fieldType = expectIdentifier("expected variant payload field type").text;
+                        if (!typeExists(fieldType) || isAbiPointerType(fieldType)) { fail(fieldToken, "variant payload field uses unknown or sealed type"); }
+                        fields.push_back(TypeField{fieldToken.text, fieldType});
+                        if (!match(TokenKind::Comma)) { break; }
+                    }
+                }
+                expect(TokenKind::RightParen, "expected ')' after variant payload");
+            }
+            def.variantMembers.emplace(memberToken.text, std::move(fields));
+            skipNewlines();
+        }
+        expect(TokenKind::RightBrace, "expected '}' after variant members");
+        if (def.variantMembers.empty()) { fail(nameToken, "variant must declare at least one member"); }
+        types_[def.name] = std::move(def);
+    }
+
 
     // -------- ABI declarations --------
     void parseAbiBlock() {
@@ -1274,7 +1312,7 @@ private:
         if (def.lifetime.empty()) { fail(nameToken, "ABI type '" + def.name + "' requires lifetime"); }
         if (def.nullable.empty()) { def.nullable = "false"; }
         abiTypes_[def.name] = std::move(def);
-        if (!typeExists(nameToken.text)) { types_.emplace(nameToken.text, TypeDef{nameToken.text, "", {}, {}, false, {}}); }
+        if (!typeExists(nameToken.text)) { types_.emplace(nameToken.text, TypeDef{nameToken.text, "", {}, {}, false, {}, false, {}}); }
     }
 
     void parseAbiStructDecl(const std::string&) {
@@ -1301,7 +1339,7 @@ private:
         expect(TokenKind::RightBrace, "expected '}' after abi struct body");
         if (def.fields.empty()) { fail(nameToken, "ABI struct '" + def.name + "' must have at least one field"); }
         abiStructs_[def.name] = def;
-        types_.emplace(def.name, TypeDef{def.name, "", {}, {}, false, {}});
+        types_.emplace(def.name, TypeDef{def.name, "", {}, {}, false, {}, false, {}});
     }
 
     void parseExternFunctionDecl(const std::string& abiName, const std::string& library, const std::string& convention) {

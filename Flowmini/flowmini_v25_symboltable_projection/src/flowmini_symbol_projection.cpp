@@ -857,6 +857,29 @@ struct ProjectTopLevelDecl {
         }
     }
 
+    void operator()(const VariantDecl& decl) const {
+        const auto typeSymbol = table.insertSymbol(moduleScope, decl.name, symboltable::SymbolKind::Type);
+        set_declaration_location(table, typeSymbol, decl.location);
+        record_symbol_origin(symbolOrigins,
+                             typeSymbol,
+                             astPath,
+                             make_origin(AstOriginEntityKind::Declaration,
+                                         AstOriginRole::EnumDeclaration,
+                                         decl.location,
+                                         declarationId));
+        for (const auto& member : decl.members) {
+            const auto memberSymbol = table.insertSymbol(moduleScope, member.name, symboltable::SymbolKind::Variable);
+            set_declaration_location(table, memberSymbol, member.location);
+            record_symbol_origin(symbolOrigins,
+                                 memberSymbol,
+                                 astPath + ".member[" + member.name + "]",
+                                 make_origin(AstOriginEntityKind::Declaration,
+                                             AstOriginRole::EnumDeclaration,
+                                             member.location,
+                                             declarationId));
+        }
+    }
+
     void operator()(const RefinedTypeDecl& decl) const {
         project_refined_type_decl(table,
                                   module,
