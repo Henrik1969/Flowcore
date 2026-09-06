@@ -29,6 +29,13 @@ multiple semantic cases. The current migration order is:
    outcome cases;
 4. preserve explicit branch provenance and boundedness in the lowering file.
 
+The UTF-8 source-reader probe now applies the first migration step: each
+validation invariant is a top-level guard with an explicit failure return.
+This keeps the maximum validation nesting at one conditional level while
+retaining the same success/failure result and the same C++ comparison surface.
+The temporary `validation_stage` carrier makes the true path non-empty until
+the language grows a dedicated guard statement.
+
 The `when`/`match` design is deferred until constants and outcome records have
 stable semantics. It must lower to the same branch meaning as the existing
 structured form and remain available to freestanding targets.
