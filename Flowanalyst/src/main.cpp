@@ -170,7 +170,7 @@ int run(const Json& bundle, int lowering_plan_version) {
     auto is_builtin = [&](const std::string& value) { for (const auto& item : builtin) if (item == value) return true; return false; };
     const std::vector<std::string> abi_types = {"c_int", "c_long", "c_ulong", "c_size_t", "c_string", "c_pointer"};
     auto is_abi_type = [&](const std::string& value) { for (const auto& item : abi_types) if (item == value) return true; return false; };
-    const std::vector<std::string> intrinsic_types = {"stdin.text", "start.record"};
+    const std::vector<std::string> intrinsic_types = {"stdin.text", "stdin.bytes", "start.record"};
     auto is_intrinsic_type = [&](const std::string& value) { for (const auto& item : intrinsic_types) if (item == value) return true; return false; };
     const std::vector<std::string> intrinsic_roots = {"stdin", "start"};
     const std::vector<std::string> intrinsic_functions = {"length"};

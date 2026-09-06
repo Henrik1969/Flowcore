@@ -9,6 +9,7 @@
 #include <dlfcn.h>
 #include <fstream>
 #include <iostream>
+#include <iterator>
 #include <limits>
 #include <sstream>
 #include <utility>
@@ -345,6 +346,22 @@ public:
         std::ostringstream buffer;
         buffer << std::cin.rdbuf();
         env.payload = TextPayload{buffer.str()};
+        return {Route{"out", std::move(env)}};
+    }
+};
+
+class StdinBytesNode final : public ConfiguredNode {
+public:
+    using ConfiguredNode::ConfiguredNode;
+
+    std::vector<Route> run(MiniEnvelope env) override {
+        RecordPayload record;
+        List bytes;
+        for (std::istreambuf_iterator<char> it{std::cin}, end; it != end; ++it) {
+            bytes.emplace_back(static_cast<int>(static_cast<unsigned char>(*it)));
+        }
+        setPathList(record, getPolicyString(config_, "out", "bytes"), std::move(bytes), "stdin.bytes");
+        env.payload = std::move(record);
         return {Route{"out", std::move(env)}};
     }
 };
@@ -1322,6 +1339,8 @@ AtomRegistry makeCoreAtomRegistry() {
 
     registry.registerAtom(AtomContract{"stdin.text", {{"in", "Unit"}}, {{"out", "Text"}}, {"stdin.read"}},
         [](NodeConfig) { return std::make_unique<StdinTextNode>(); });
+    registry.registerAtom(AtomContract{"stdin.bytes", {{"in", "Unit"}}, {{"out", "Record"}}, {"stdin.read"}},
+        [](NodeConfig config) { return std::make_unique<StdinBytesNode>(std::move(config)); });
 
     registry.registerAtom(AtomContract{"pager.input.fake", {{"in", "Unit"}}, {{"out", "Record"}}, {"pager.input.fake"}},
         [](NodeConfig config) { return std::make_unique<FakePagerInputNode>(std::move(config)); });

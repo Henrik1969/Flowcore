@@ -1,0 +1,9 @@
+program utf8_hosted_provider_probe
+
+main {
+    bytes : list<int>(stdin.bytes())
+    count : int(0)
+
+    length(bytes) -> count
+    print count
+}

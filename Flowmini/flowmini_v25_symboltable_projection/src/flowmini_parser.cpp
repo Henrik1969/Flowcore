@@ -107,7 +107,7 @@ struct AbiStructDef {
     std::vector<AbiStructFieldDef> fields;
 };
 
-enum class ExprKind { LiteralInt, LiteralBool, LiteralString, Identifier, StdinInt, ListIndex, ArrayIndex, FieldAccess, ListLength, FunctionCall, UnaryNot, Binary };
+enum class ExprKind { LiteralInt, LiteralBool, LiteralString, Identifier, StdinInt, StdinBytes, ListIndex, ArrayIndex, FieldAccess, ListLength, FunctionCall, UnaryNot, Binary };
 struct Expr {
     ExprKind kind = ExprKind::Identifier;
     int literal = 0;
@@ -536,8 +536,9 @@ private:
                 const std::string fn = expectIdentifier("expected stdin function").text;
                 expect(TokenKind::LeftParen, "expected '(' after stdin function");
                 expect(TokenKind::RightParen, "expected ')' after stdin function");
-                if (fn != "int") { fail(peek(), "only stdin.int() is supported"); }
-                Expr expr; expr.kind = ExprKind::StdinInt; return expr;
+                if (fn == "int") { Expr expr; expr.kind = ExprKind::StdinInt; return expr; }
+                if (fn == "bytes") { Expr expr; expr.kind = ExprKind::StdinBytes; return expr; }
+                fail(peek(), "only stdin.int() and stdin.bytes() are supported");
             }
 
             if (id == "length" && match(TokenKind::LeftParen)) {
@@ -691,6 +692,7 @@ private:
         if (expr.kind == ExprKind::LiteralString) { return "c_string"; }
         if (expr.kind == ExprKind::LiteralBool) { return "Bool"; }
         if (expr.kind == ExprKind::LiteralInt || expr.kind == ExprKind::StdinInt || expr.kind == ExprKind::ListLength) { return "int"; }
+        if (expr.kind == ExprKind::StdinBytes) { return "list<int>"; }
         if (expr.kind == ExprKind::Identifier) {
             const Symbol* sym = lookup(expr.ident);
             if (sym == nullptr) { throw flow::DiagnosticError{"lowerer", "use of undeclared identifier '" + expr.ident + "'"}; }
@@ -873,6 +875,14 @@ private:
             addNode("node", parseId, "parse.int.to_record"); addPolicy(parseId, "out", path);
             addWire({stdinId, "out"}, {parseId, "in"});
             if (step != nullptr) { appendStep(*step, Step{false, false, {stdinId, "out"}, {parseId, "out"}}); }
+            return path;
+        }
+        if (expr.kind == ExprKind::StdinBytes) {
+            const std::string stdinId = generatedId("stdin_bytes");
+            const std::string path = targetHint.empty() ? generatedId("tmp_bytes") : targetHint;
+            addNode("producer", stdinId, "stdin.bytes");
+            addPolicy(stdinId, "out", path);
+            if (step != nullptr) { appendStep(*step, Step{false, false, {stdinId, "out"}, {stdinId, "out"}}); }
             return path;
         }
 
@@ -1564,6 +1574,17 @@ private:
         if (!integerList && !recordList) { fail(peek(), "list element type must be int or a declared record type"); }
         expect(TokenKind::Greater, "expected '>' in list<int> declaration");
         expect(TokenKind::LeftParen, "list declaration requires initializer");
+        if (integerList && check(TokenKind::Identifier) && peek().text == "stdin" && lookahead(1).kind == TokenKind::Dot) {
+            Expr initializer = parseValueExpr();
+            expect(TokenKind::RightParen, "expected ')' after list initializer");
+            if (initializer.kind != ExprKind::StdinBytes) { fail(peek(), "list<int> provider initializer requires stdin.bytes()"); }
+            declareSymbol(idToken, id, "list<int>");
+            const std::string path = lookup(id)->path;
+            const std::string stdinId = generatedId("stdin_bytes");
+            addNode("producer", stdinId, "stdin.bytes");
+            addPolicy(stdinId, "out", path);
+            return Step{false, false, {stdinId, "out"}, {stdinId, "out"}};
+        }
         expect(TokenKind::LeftBracket, "list<int> initializer must start with '['");
         std::ostringstream values;
         std::ostringstream recordPaths;
