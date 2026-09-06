@@ -10,7 +10,8 @@ prepare=${FLOWPREPARE_BIN:?}
 llvm=${FLOWLOWER_BIN:?}
 tiny=${FLOWTINYLOWER_BIN:?}
 tiny_run=${FLOWTINYRUN_BIN:?}
-source="$root/Flowmini/flowmini_v25_symboltable_projection/examples/bootstrap/when_backend_parity_probe.flow"
+source=${MATCH_SOURCE:-$root/Flowmini/flowmini_v25_symboltable_projection/examples/bootstrap/when_backend_parity_probe.flow}
+expected=${MATCH_EXPECTED_RESULT:-37}
 tmpdir=$(mktemp -d)
 trap 'rm -rf "$tmpdir"' EXIT
 
@@ -28,10 +29,10 @@ set +e
 "$tmpdir/program.llvm"
 llvm_status=$?
 set -e
-test "$llvm_status" -eq 37
+test "$llvm_status" -eq "$expected"
 
 "$tiny" "$tmpdir/backend.json" "$tmpdir/program.tvm" > "$tmpdir/tiny-report.json"
 tiny_result=$("$tiny_run" "$tmpdir/program.tvm" | jq -r '.result')
-test "$tiny_result" -eq 37
+test "$tiny_result" -eq "$expected"
 
 echo 'integer match backend parity: PASS'

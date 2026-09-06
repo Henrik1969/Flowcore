@@ -1,0 +1,22 @@
+enum DecodeState {
+    ascii
+    malformed
+}
+
+program enum_backend_parity_probe
+
+main {
+    state : DecodeState(DecodeState.ascii)
+    result : int(0)
+
+    when state {
+        case DecodeState.ascii {
+            11 -> result
+        }
+        default {
+            99 -> result
+        }
+    }
+
+    return result
+}

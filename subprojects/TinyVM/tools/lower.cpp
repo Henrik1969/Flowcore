@@ -187,6 +187,12 @@ private:
             const auto id = storage.size() + 1; storage.push_back({id, static_cast<std::uint64_t>(bytes), 1, 1});
             const auto result = slot(); slot_types_[result] = TINYVM_CARRIER_OPAQUE_HANDLE; emit(TV1_STORAGE_HANDLE, result, id, 0); return result;
         }
+        if (kind == "field_access" && string(required(node, "type", "$.expression"), "$.expression.type") == "int") {
+            const auto text = string(required(node, "value", "$.expression"), "$.expression.value");
+            std::size_t consumed = 0; const auto value = std::stoll(text, &consumed, 10);
+            if (consumed != text.size()) throw Unsupported("non-canonical enum member value");
+            return literal(TINYVM_CARRIER_I32, static_cast<std::uint64_t>(static_cast<std::int32_t>(value)));
+        }
         if (kind == "identifier") return symbol_slot(integer(required(node, "symbol_id", "$.expression"), "$.expression.symbol_id"));
         if (kind == "call_result") {
             const auto identity = integer(required(node, "expression_id", "$.expression"), "$.expression.expression_id");
@@ -271,7 +277,8 @@ private:
             return;
         }
         if (kind == "match") {
-            if (string(required(operation, "selector_kind", "$.operation"), "$.operation.selector_kind") != "integer")
+            const auto selector_kind = string(required(operation, "selector_kind", "$.operation"), "$.operation.selector_kind");
+            if (selector_kind != "integer" && selector_kind != "enum")
                 throw Unsupported("named match selectors are not yet admitted by TinyVM");
             const auto selector = expression(operands.front());
             if (slot_types_.at(selector) != TINYVM_CARRIER_I32) throw Unsupported("integer match selector is not i32");

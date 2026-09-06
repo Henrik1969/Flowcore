@@ -600,3 +600,17 @@ payload contract for enum and variant matches.
 Use the preserved enum and tagged-variant match facts to specify a shared tag
 and payload representation, beginning with enum-only routing and rejecting
 variant payload access until its layout is explicit.
+
+## Enum match parity checkpoint
+
+- Enum selectors now carry an explicit `enum` selector kind through the
+  lowering plan; enum member construction is represented as its numeric tag.
+- LLVM and TinyVM both lower and execute the canonical enum match probe with
+  result `11`; variants remain rejected until payload layout is admitted.
+- The parity gate covers both integer and enum matches, and the full suite
+  remains the next required validation boundary.
+
+## Exact next action
+
+Run the complete suite, then define the shared tagged-variant runtime layout
+for tag-only routing before admitting payload bindings to either backend.

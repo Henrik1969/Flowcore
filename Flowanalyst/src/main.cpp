@@ -91,6 +91,18 @@ int run(const Json& bundle, int lowering_plan_version) {
         for (const auto& entry : list(field(ast, "block_pool"))) insert_identity(blocks, integer(field(entry, "id")), entry, "block");
         for (const auto& entry : list(field(ast, "declaration_pool"))) insert_identity(declarations, integer(field(entry, "id")), entry, "declaration");
     }
+    std::set<std::string> enum_types, variant_types;
+    std::map<std::string, std::map<std::string, int>> enum_members;
+    for (const auto& [identity, declaration] : declarations) {
+        const auto kind = text(field(*declaration, "kind"));
+        if (kind == "enum") {
+            const auto type = text(field(*declaration, "name"));
+            enum_types.insert(type);
+            int tag = 0;
+            for (const auto& member : list(field(*declaration, "members"))) enum_members[type][text(field(member, "name"))] = tag++;
+        }
+        if (kind == "variant") variant_types.insert(text(field(*declaration, "name")));
+    }
     std::vector<Diagnostic> diagnostics;
     auto add_diagnostic = [&](std::string code, std::string message, int symbol, std::string region = {}) {
         Diagnostic item{std::move(code), "error", std::move(message), {}, std::move(region), text(field(field(bundle, "source"), "path")), symbol};
@@ -593,7 +605,8 @@ int run(const Json& bundle, int lowering_plan_version) {
         operation.join_block = operation.block;
         const int selector_symbol = resolved_expression_symbols.count(operation.expression) ? resolved_expression_symbols.at(operation.expression) : -1;
         operation.selector_type = symbol_types.count(selector_symbol) ? symbol_types.at(selector_symbol) : std::string{};
-        operation.selector_kind = operation.selector_type == "int" || operation.selector_type.rfind("c_", 0) == 0 ? "integer" : "named";
+        operation.selector_kind = operation.selector_type == "int" || operation.selector_type.rfind("c_", 0) == 0 ? "integer" :
+            (enum_types.count(operation.selector_type) ? "enum" : (variant_types.count(operation.selector_type) ? "variant" : "named"));
         operation.kind = "match";
         if (operation.expression >= 0) operation.arguments.push_back(operation.expression);
         for (const auto& arm : list(field(payload, "cases"))) {
@@ -753,6 +766,15 @@ int run(const Json& bundle, int lowering_plan_version) {
             std::cout << ",\"type\":\"bool\",\"value\":" << quote(text(field(field(expression, "payload"), "value_text"), "false"));
         } else if (kind == "identifier") {
             std::cout << ",\"type\":" << quote(identifier_type) << ",\"symbol_id\":" << identifier_symbol;
+        } else if (kind == "field_access") {
+            const auto* payload = field(expression, "payload");
+            const auto member = text(field(payload, "field"));
+            const auto base = integer(field(payload, "base"));
+            const auto type = expressions.count(base) && text(field(*expressions.at(base), "kind")) == "identifier"
+                ? text(field(field(*expressions.at(base), "payload"), "name")) : std::string{};
+            const auto found_type = enum_members.find(type);
+            if (found_type == enum_members.end() || !found_type->second.count(member)) std::cout << ",\"type\":\"unsupported\"";
+            else std::cout << ",\"type\":\"int\",\"value\":\"" << found_type->second.at(member) << "\"";
         } else if (kind == "index") {
             const auto* payload = field(expression, "payload");
             const int base = integer(field(payload, "base"));
@@ -897,7 +919,7 @@ int run(const Json& bundle, int lowering_plan_version) {
         const int selector_symbol = resolved_expression_symbols.count(selector) ? resolved_expression_symbols.at(selector) : -1;
         const auto selector_type = symbol_types.count(selector_symbol) ? symbol_types.at(selector_symbol) : std::string{};
         const std::string selector_kind = selector_type == "int" || selector_type.rfind("c_", 0) == 0 ? "integer" :
-            (selector_type.empty() ? "unknown" : "named");
+            (enum_types.count(selector_type) ? "enum" : (variant_types.count(selector_type) ? "variant" : (selector_type.empty() ? "unknown" : "named")));
         if (!first_match) std::cout << ',';
         first_match = false;
         std::cout << "{\"kind\":\"match\",\"statement_id\":" << statement_id

@@ -81,7 +81,7 @@ int prepare(const Options& option) {
             if (string(required(match, "selector_type", "$.match_operations[]"), "$.match_operations[].selector_type").empty())
                 throw Error("$.match_operations[].selector_type", "match operation requires selector type");
             const auto selector_kind = string(required(match, "selector_kind", "$.match_operations[]"), "$.match_operations[].selector_kind");
-            if (selector_kind != "integer" && selector_kind != "named")
+            if (selector_kind != "integer" && selector_kind != "enum" && selector_kind != "named" && selector_kind != "variant")
                 throw Error("$.match_operations[].selector_kind", "unsupported match selector kind");
             const auto& cases = array(required(match, "cases", "$.match_operations[]"), "$.match_operations[].cases");
             for (const auto& arm_value : cases) {
@@ -91,7 +91,7 @@ int prepare(const Options& option) {
                 if (high < low) throw Error("$.match_operations[].cases[]", "match arm range is descending");
                 if (integer(required(arm, "body_block_id", "$.match_operations[].cases[]"), "$.match_operations[].cases[].body_block_id") < 0)
                     throw Error("$.match_operations[].cases[].body_block_id", "match arm requires body block");
-                if (selector_kind == "named") {
+                if (selector_kind == "named" || selector_kind == "variant") {
                     if (string(required(arm, "label_type", "$.match_operations[].cases[]"), "$.match_operations[].cases[].label_type").empty() ||
                         string(required(arm, "label_member", "$.match_operations[].cases[]"), "$.match_operations[].cases[].label_member").empty())
                         throw Error("$.match_operations[].cases[]", "named match arm requires label type and member");

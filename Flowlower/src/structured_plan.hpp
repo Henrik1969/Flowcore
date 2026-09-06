@@ -179,7 +179,7 @@ private:
                 match.default_block = integer(field(item, "default_block_id"), "match.default_block_id");
                 match.join_block = integer(field(item, "join_block_id"), "match.join_block_id");
                 if (match.selector_expression < 0 || match.selector_type.empty() ||
-                    (match.selector_kind != "integer" && match.selector_kind != "named") || match.join_block < 0)
+                    (match.selector_kind != "integer" && match.selector_kind != "enum" && match.selector_kind != "named" && match.selector_kind != "variant") || match.join_block < 0)
                     throw std::runtime_error("invalid target-neutral match operation");
                 for (const auto& value : array(field(item, "cases"), "match.cases")) {
                     MatchArm arm;
@@ -189,7 +189,7 @@ private:
                     arm.label_type = text(field(value, "label_type"));
                     arm.label_member = text(field(value, "label_member"));
                     if (arm.high < arm.value || arm.body_block < 0 ||
-                        (match.selector_kind == "named" && (arm.label_type.empty() || arm.label_member.empty())))
+                        ((match.selector_kind == "named" || match.selector_kind == "variant") && (arm.label_type.empty() || arm.label_member.empty())))
                         throw std::runtime_error("invalid target-neutral match arm");
                     match.cases.push_back(std::move(arm));
                 }
@@ -214,6 +214,10 @@ private:
                 op.match_cases.push_back(std::move(arm));
             }
             const auto& operands=array(field(item,"operands"),"operation.operands"); if (!operands.empty()) op.operand=&operands.front();
+            if (op.kind=="match" && op.selector_kind=="enum" && op.operand && text(field(*op.operand,"kind"))=="identifier") {
+                const auto selector_symbol = integer(field(*op.operand,"symbol_id"),"match.selector_symbol_id");
+                if (selector_symbol >= 0) symbol_types_[selector_symbol] = "int";
+            }
             if (const auto* facts=field(item,"provider")) {
                 op.provider=provider(*facts); providers_.insert(*op.provider);
                 if (flowlower::structured::llvm_type(op.provider->result).empty() && !llvm_type(op.provider->result).empty()) has_declared_carrier_=true;
@@ -346,6 +350,7 @@ private:
             return {};
         }
         if(kind=="string_literal" && text(field(value,"value")).empty()) return {"ptr","null"};
+        if(kind=="field_access" && llvm_type(type)=="i32") return {"i32", text(field(value,"value"))};
         if(kind=="identifier") {
             const int symbol=integer(field(value,"symbol_id"),"symbol_id"); const auto native_type=llvm_type(symbol_types_[symbol]); auto loaded=load_symbol(symbol,out);
             const auto wanted=expected.empty()?native_type:llvm_type(expected); if(wanted==native_type) return {native_type,loaded};
@@ -425,8 +430,8 @@ private:
                 out<<"  br i1 "<<condition<<", label %"<<then_label<<", label %"<<else_label<<"\n";
                 emit_block(op->then_block,out,join); if(op->else_block>=0) emit_block(op->else_block,out,join); out<<join<<":\n";
             } else if(op->kind=="match") {
-                if (op->selector_kind != "integer" || op->match_cases.empty()) throw std::runtime_error("unsupported structured match selector");
-                auto [selector_type, selector] = expression(*op->operand, out, op->selector_type);
+                if ((op->selector_kind != "integer" && op->selector_kind != "enum") || op->match_cases.empty()) throw std::runtime_error("unsupported structured match selector");
+                auto [selector_type, selector] = expression(*op->operand, out, op->selector_kind == "enum" ? "int" : op->selector_type);
                 if (selector_type != "i32" || selector.empty()) throw std::runtime_error("unsupported integer match selector");
                 const auto join = "flow_join_" + std::to_string(label_++);
                 std::vector<std::string> tests;
