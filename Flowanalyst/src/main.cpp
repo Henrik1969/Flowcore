@@ -844,7 +844,30 @@ int run(const Json& bundle, int lowering_plan_version) {
         }
         std::cout << "}";
     }
-    std::cout << "]},\n  \"effect_facts\": [";
+    std::cout << "]},\n  \"match_facts\": [";
+    bool first_match = true;
+    for (const auto& [statement_id, statement] : statements) {
+        if (text(field(*statement, "kind")) != "when") continue;
+        const auto* payload = field(*statement, "payload");
+        const int selector = integer(field(payload, "selector_expression"));
+        const int selector_symbol = resolved_expression_symbols.count(selector) ? resolved_expression_symbols.at(selector) : -1;
+        if (!first_match) std::cout << ',';
+        first_match = false;
+        std::cout << "{\"statement_id\":" << statement_id
+                  << ",\"selector_expression\":" << selector
+                  << ",\"selector_symbol_id\":" << selector_symbol
+                  << ",\"cases\":[";
+        const auto cases = list(field(payload, "cases"));
+        for (std::size_t index = 0; index < cases.size(); ++index) {
+            if (index) std::cout << ',';
+            const auto& arm = cases[index];
+            std::cout << "{\"value\":" << integer(field(arm, "value"))
+                      << ",\"high\":" << integer(field(arm, "high"))
+                      << ",\"body_block_id\":" << integer(field(arm, "block")) << "}";
+        }
+        std::cout << "] ,\"default_block_id\":" << integer(field(payload, "default_block")) << "}";
+    }
+    std::cout << "],\n  \"effect_facts\": [";
     for (std::size_t i = 0; i < effect_facts.size(); ++i) { if (i) std::cout << ','; const auto& fact = effect_facts[i]; std::cout << "{\"declaration_id\":" << fact.declaration << ",\"symbol_id\":" << fact.symbol << ",\"name\":" << quote(fact.name) << ",\"effect\":" << quote(fact.effect) << ",\"certainty\":" << quote(fact.certainty) << ",\"reason\":" << quote(fact.reason) << "}"; }
     std::cout << "],\n  \"external_operations\": [";
     for (std::size_t i = 0; i < call_sites.size(); ++i) {

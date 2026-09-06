@@ -394,3 +394,18 @@ for `when` control blocks before routing the classifier through LLVM/TinyVM.
 
 Emit the new `match` operation from Flowanalyst for the existing `when` AST and
 add preservation/validation tests before backend emission.
+
+## Flowanalyst `when` match-facts checkpoint
+
+- Flowanalyst now emits a generic `match_facts` collection for each `when`
+  statement, preserving selector expression/symbol identity, ordered case
+  labels, ranges, body blocks, and default block.
+- Existing Boolean branch operations remain unchanged, so current LLVM/TinyVM
+  lowering stays stable while the new control contract is introduced.
+- The tagged-variant probe asserts the semantic match fact; Flowmini runtime,
+  Flowanalyst, Flowparallel, and focused CTest gates pass.
+
+## Exact next action
+
+Carry `match_facts` through Flowparallel and Flowoptimize without loss, then
+promote it to the versioned `match` operation consumed by Flowlower.

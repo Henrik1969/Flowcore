@@ -156,6 +156,7 @@ test "${variant_when_output}" = "42"
 "${flowmini}" --dump-frontend-bundle "${variant_when_source}" > "${tmpdir}/variant-when-bundle.json"
 "${analyst}" --lowering-plan-version 2 "${tmpdir}/variant-when-bundle.json" > "${tmpdir}/variant-when-semantic.json"
 jq -e '.status == "ok"' "${tmpdir}/variant-when-semantic.json" >/dev/null
+jq -e '([.match_facts[]?] | length == 1) and ([.match_facts[0].cases[]?] | length == 1)' "${tmpdir}/variant-when-semantic.json" >/dev/null
 echo "Flow tagged variant when probe: PASS"
 
 if "${flowmini}" "${variant_cross_member_source}" >/dev/null 2>&1; then
