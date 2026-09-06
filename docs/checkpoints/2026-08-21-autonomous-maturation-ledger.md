@@ -79,6 +79,46 @@ delivered input, or require the broader node/plug design. No answer has yet
 been received. At this checkpoint state remains CONTINUE while the verified
 changes are committed and pushed.
 
+## Blocked continuation — 2026-09-06
+
+Verified checkpoint `3d15f72` is committed and pushed to
+`origin/v29-language-maturation`. The worktree was clean after that push; this
+state-only checkpoint records the remaining semantic dependency. Run state is
+**BLOCKED**, not DONE. The historical mission-complete claim is withdrawn.
+
+Exact blocker: source-defined graph receivers have no admitted activation
+contract. The current node schema names built-in factories only; ordinary
+callable v2 does not define when a delivered port activates a Flow function,
+how its result becomes an output signal, or whether receiver state persists.
+Selecting those rules materially changes public language/architecture. The
+mission's immediate steering override requires stopping for such a choice.
+
+Attempted alternatives and evidence are in
+[the decision note](../architecture/source-graph-activation-decision.md):
+renaming or relocating C++ navigation fails Flow ownership; sequential main
+calls erase graph delivery; existing callable v2 lacks port activation; a full
+stateful/join design introduces additional unapproved semantics. The safe
+independent work is complete: clean-build repair, sanitizer repair, unsupported
+projection refusal, adversarial tests, preserved native acceptance, and honest
+documentation. No failing test, missing credential, workload estimate or context
+limit is being used as a blocker.
+
+Smallest required decision from Henrik: admit the proposed stateless receiver
+contract (one delivered input invokes one explicitly identified Flow function;
+one return emits on an explicit output; fresh local state; attributed failure;
+scheduling remains separate), or require a broader node/plug contract first.
+The pending question has not received an answer. After that decision, restore
+CONTINUE and implement Gate 6 through the durable compiler boundaries before
+removing graph refusal or claiming Flow-owned paging. The final mission gates
+and native compiled graph demonstration remain open.
+
+Preserved verification: 76/76 normal and 76/76 ASan/UBSan, native acceptance ELF
+exit 42 with unchanged compiler hashes, and no build/log artifacts committed.
+Platform scope remains Linux x86-64/libc/LLVM with ncurses and a pseudo-terminal;
+positive c_pointer storage and single-provider import aliases remain documented
+compatibility behavior. No PR merge, force push or published-history rewrite
+was performed.
+
 ## Historical implementation record
 
 - Baseline audited: current v25 imports already preserve explicit aliases such
