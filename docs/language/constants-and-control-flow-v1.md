@@ -43,6 +43,10 @@ validation invariant, keeping the maximum validation nesting at one
 conditional level while retaining the same success/failure result and C++
 comparison surface.
 
+The value-oriented follow-up is specified in
+[`when-match-v1.md`](when-match-v1.md). It remains a separate construct so
+that `guard` continues to communicate invariant enforcement directly.
+
 The `when`/`match` design is deferred until constants and outcome records have
 stable semantics. It must lower to the same branch meaning as the existing
 structured form and remain available to freestanding targets.
