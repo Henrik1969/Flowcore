@@ -409,3 +409,18 @@ add preservation/validation tests before backend emission.
 
 Carry `match_facts` through Flowparallel and Flowoptimize without loss, then
 promote it to the versioned `match` operation consumed by Flowlower.
+
+## Match-fact preservation checkpoint
+
+- Added optional `match_facts` authority to the shared artifact contract.
+- Flowparallel execution plans and Flowoptimize reports now preserve the facts
+  losslessly when consuming semantic reports.
+- Existing Flowanalyst, Flowparallel, and Flowoptimize pipeline tests pass; the
+  tagged-variant Flowmini probe validates the semantic facts directly.
+- Variant `when` operations still carry temporary arm scopes outside the old
+  Boolean branch model, so backend promotion remains the next explicit step.
+
+## Exact next action
+
+Promote `match_facts` into a versioned `match` operation and teach Flowlower to
+consume its arm labels and join structure without application-specific logic.

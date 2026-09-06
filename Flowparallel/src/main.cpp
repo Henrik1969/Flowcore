@@ -45,6 +45,7 @@ int analyze(std::string_view input) {
                                     {"kind", text("graph_to_matrix")}, {"name", text(matrix.name)}, {"rows", matrix.rows},
                                     {"semiring", text(matrix.semiring)}, {"status", text("available")}, {"storage", text(matrix.storage)}}},
         {"input", Object{{"format", text("flowanalyst.semantic_report")}, {"version", Integer{1}}}},
+        {"match_facts", report.match_facts},
         {"lowering_plan", report.lowering_plan},
         {"message", text("parallel execution is policy- and runtime-deferred; no unsafe candidates emitted")},
         {"provider_selection", Object{{"policy", text("runtime")}, {"status", text("deferred")}}},
