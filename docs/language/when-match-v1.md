@@ -6,11 +6,11 @@ from a finite state or outcome value:
 
 ```flow
 when decode_state {
-    case ascii {
-        65 -> handle_ascii
+    case 1 {
+        11 -> result
     }
-    case lead_two_byte {
-        195 -> handle_lead
+    case 2 {
+        22 -> result
     }
     default {
         failure -> return
@@ -36,6 +36,8 @@ The initial Flow state-trace probe now compares scalar output and diagnostics
 against the existing C++ artifact and records the corresponding state codes
 before any broader pattern or enum syntax is admitted.
 
-The grammar is intentionally deferred until the selector and case semantics
-have a differential probe. This keeps `when`/`match` from becoming a second,
-less-tested control-flow implementation.
+The first integer `when` grammar is now implemented against this contract and
+covered by case, default, duplicate-case, and missing-default probes. Broader
+patterns, enum selectors, and tagged variants remain deferred until they have
+their own differential evidence. This keeps `when`/`match` from becoming a
+second, less-tested control-flow implementation.

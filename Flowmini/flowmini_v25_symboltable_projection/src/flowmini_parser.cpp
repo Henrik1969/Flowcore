@@ -49,6 +49,11 @@ struct Step {
     ChainEnd last;
 };
 
+struct WhenCase {
+    std::optional<int> value;
+    Step body;
+};
+
 struct LoopContext {
     ChainEnd continueTarget;
     ChainEnd breakTarget;
@@ -1936,6 +1941,97 @@ private:
         return Step{false, false, condStep.first, {joinId, "out"}};
     }
 
+    [[nodiscard]] Step parseWhenStatement() {
+        expectIdentifier("expected 'when'");
+        Expr selector = parseValueExpr();
+        if (selector.kind != ExprKind::Identifier || !isIntLikeType(exprType(selector))) {
+            throw flow::DiagnosticError{"lowerer", "when currently requires an integer identifier selector"};
+        }
+        expect(TokenKind::LeftBrace, "expected '{' after when selector");
+        skipNewlines();
+
+        std::vector<WhenCase> cases;
+        std::set<int> seenValues;
+        bool hasDefault = false;
+        while (!check(TokenKind::RightBrace) && !check(TokenKind::End)) {
+            skipNewlines();
+            if (check(TokenKind::RightBrace) || check(TokenKind::End)) { break; }
+
+            std::optional<int> value;
+            if (check(TokenKind::Identifier) && peek().text == "case") {
+                static_cast<void>(expectIdentifier("expected 'case'"));
+                const Token& valueToken = expect(TokenKind::Number, "expected integer literal after 'case'");
+                const int caseValue = parseIntToken(valueToken);
+                if (!seenValues.insert(caseValue).second) {
+                    throw flow::DiagnosticError{"lowerer", "duplicate when case value " + std::to_string(caseValue)};
+                }
+                value = caseValue;
+            } else if (check(TokenKind::Identifier) && peek().text == "default") {
+                static_cast<void>(expectIdentifier("expected 'default'"));
+                if (hasDefault) { throw flow::DiagnosticError{"lowerer", "duplicate when default arm"}; }
+                hasDefault = true;
+            } else {
+                fail(peek(), "expected 'case' or 'default' in when block");
+            }
+
+            expect(TokenKind::LeftBrace, "expected '{' after when arm");
+            skipNewlines();
+            enterScope("when_arm" + std::to_string(cases.size()));
+            Step body = parseBlockStatementsUntilRightBrace();
+            leaveScope();
+            if (body.empty) { fail(peek(), "when arm may not be empty"); }
+            cases.push_back(WhenCase{value, body});
+            skipNewlines();
+        }
+        expect(TokenKind::RightBrace, "expected '}' to close when block");
+        if (!hasDefault) { throw flow::DiagnosticError{"lowerer", "when requires a default arm"}; }
+
+        const std::string joinId = generatedId("when_join");
+        addNode("node", joinId, "record.nop");
+        std::vector<std::pair<std::string, Step>> routes;
+        std::optional<Step> defaultBody;
+        for (auto& arm : cases) {
+            if (!arm.value.has_value()) {
+                defaultBody = std::move(arm.body);
+                continue;
+            }
+            Expr left;
+            left.kind = ExprKind::Identifier;
+            left.ident = selector.ident;
+            Expr right;
+            right.kind = ExprKind::LiteralInt;
+            right.literal = *arm.value;
+            Expr condition;
+            condition.kind = ExprKind::Binary;
+            condition.op = TokenKind::EqualEqual;
+            condition.left = std::make_unique<Expr>(std::move(left));
+            condition.right = std::make_unique<Expr>(std::move(right));
+
+            Step condStep;
+            const std::string condPath = lowerExprToPath(condition, generatedId("when_case_cond"), &condStep);
+            const std::string routeId = generatedId("when_case_route");
+            addNode("node", routeId, "route.bool");
+            addPolicy(routeId, "path", condPath);
+            appendStep(condStep, Step{false, false, {routeId, "in"}, {routeId, "false"}});
+            routes.emplace_back(routeId, Step{false, false, condStep.first, {routeId, "false"}});
+            routes.back().second.last = {routeId, "false"};
+
+            addWire({routeId, "true"}, arm.body.first);
+            if (!arm.body.terminates) { addWire(arm.body.last, {joinId, "in"}); }
+        }
+
+        if (!defaultBody.has_value()) { throw flow::DiagnosticError{"lowerer", "when requires a default arm"}; }
+        if (routes.empty()) {
+            return Step{false, defaultBody->terminates, defaultBody->first, defaultBody->last};
+        }
+        addWire({routes.back().first, "false"}, defaultBody->first);
+        if (!defaultBody->terminates) { addWire(defaultBody->last, {joinId, "in"}); }
+        for (std::size_t i = 0; i + 1 < routes.size(); ++i) {
+            addWire({routes[i].first, "false"}, routes[i + 1].second.first);
+        }
+        return Step{false, false, routes.front().second.first, {joinId, "out"}};
+    }
+
     [[nodiscard]] Step parseWhileStatement() {
         expect(TokenKind::KeywordWhile, "expected 'while'");
         const int whileIndex = ++whileCounter_;
@@ -1988,6 +2084,7 @@ private:
         if (check(TokenKind::KeywordWhile)) { Step s = parseWhileStatement(); expectLineEnd("expected newline after while block"); return s; }
         if (check(TokenKind::KeywordIf)) { Step s = parseIfStatement(); expectLineEnd("expected newline after if block"); return s; }
         if (check(TokenKind::Identifier) && peek().text == "guard") { Step s = parseGuardStatement(); expectLineEnd("expected newline after guard block"); return s; }
+        if (check(TokenKind::Identifier) && peek().text == "when") { Step s = parseWhenStatement(); expectLineEnd("expected newline after when block"); return s; }
         if (check(TokenKind::KeywordBreak)) { Step s = parseBreakStatement(); expectLineEnd("expected newline after break"); return s; }
         if (check(TokenKind::KeywordContinue)) { Step s = parseContinueStatement(); expectLineEnd("expected newline after continue"); return s; }
         if (looksLikePlacement()) { Step s = parsePlacementAsStep(); expectLineEnd("expected newline after placement"); return s; }

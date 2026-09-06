@@ -1,0 +1,47 @@
+program when_state_probe
+
+main {
+    state : int(1)
+    marker : int(0)
+
+    when state {
+        case 1 {
+            11 -> marker
+        }
+        case 2 {
+            22 -> marker
+        }
+        default {
+            99 -> marker
+        }
+    }
+    print marker
+
+    2 -> state
+    when state {
+        case 1 {
+            11 -> marker
+        }
+        case 2 {
+            22 -> marker
+        }
+        default {
+            99 -> marker
+        }
+    }
+    print marker
+
+    7 -> state
+    when state {
+        case 1 {
+            11 -> marker
+        }
+        case 2 {
+            22 -> marker
+        }
+        default {
+            99 -> marker
+        }
+    }
+    print marker
+}

@@ -1,0 +1,16 @@
+program bad_when_duplicate
+
+main {
+    state : int(1)
+    when state {
+        case 1 {
+            1 -> return
+        }
+        case 1 {
+            2 -> return
+        }
+        default {
+            0 -> return
+        }
+    }
+}

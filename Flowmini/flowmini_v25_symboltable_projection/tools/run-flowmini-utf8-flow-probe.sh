@@ -12,6 +12,9 @@ malformed_runtime_source="${root}/Flowmini/flowmini_v25_symboltable_projection/e
 constant_failure_source="${root}/Flowmini/flowmini_v25_symboltable_projection/examples/fail/bad_constant_mutation.flow"
 guard_source="${root}/Flowmini/flowmini_v25_symboltable_projection/examples/bootstrap/guard_control_flow_probe.flow"
 state_source="${root}/Flowmini/flowmini_v25_symboltable_projection/examples/bootstrap/utf8_state_trace_probe.flow"
+when_source="${root}/Flowmini/flowmini_v25_symboltable_projection/examples/bootstrap/when_state_probe.flow"
+when_no_default_source="${root}/Flowmini/flowmini_v25_symboltable_projection/examples/fail/bad_when_no_default.flow"
+when_duplicate_source="${root}/Flowmini/flowmini_v25_symboltable_projection/examples/fail/bad_when_duplicate.flow"
 tmpdir="$(mktemp -d)"
 trap 'rm -rf "${tmpdir}"' EXIT
 
@@ -68,3 +71,17 @@ echo "${state_artifact}" | jq -e '
 state_output="$("${flowmini}" "${state_source}")"
 test "${state_output}" = $'1\n2\n3\n4\n5'
 echo "Flow UTF-8 state trace evidence probe: PASS"
+
+when_output="$("${flowmini}" "${when_source}")"
+test "${when_output}" = $'11\n22\n99'
+echo "Flow when case/default probe: PASS"
+
+if "${flowmini}" "${when_no_default_source}" >/dev/null 2>&1; then
+    echo "when without default was accepted" >&2
+    exit 1
+fi
+if "${flowmini}" "${when_duplicate_source}" >/dev/null 2>&1; then
+    echo "duplicate when case was accepted" >&2
+    exit 1
+fi
+echo "Flow when validation probe: PASS"

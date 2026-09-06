@@ -1,0 +1,10 @@
+program bad_when_no_default
+
+main {
+    state : int(1)
+    when state {
+        case 1 {
+            1 -> return
+        }
+    }
+}
