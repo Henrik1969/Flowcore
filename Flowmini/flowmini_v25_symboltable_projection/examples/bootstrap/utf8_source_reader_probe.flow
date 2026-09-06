@@ -30,6 +30,9 @@ main {
     diagnostic_count : int(0)
     first_diagnostic : Diagnostic({code: 1, offset: 1})
     second_diagnostic : Diagnostic({code: 2, offset: 2})
+    diagnostic_codes : list<int>([1,2])
+    diagnostic_offsets : list<int>([1,2])
+    diagnostic_index : int(0)
 
     while index < length(bytes) {
         if bytes[index] < 128 {
@@ -70,7 +73,20 @@ main {
                 if outcome.valid {
                     if first_diagnostic.code == 1 {
                         if second_diagnostic.offset == 2 {
-                            1 -> return
+                            diagnostic_codes[diagnostic_index] -> decoded
+                            diagnostic_offsets[diagnostic_index] -> index
+                            if decoded == 1 {
+                                if index == 1 {
+                                    diagnostic_index + 1 -> diagnostic_index
+                                    diagnostic_codes[diagnostic_index] -> decoded
+                                    diagnostic_offsets[diagnostic_index] -> index
+                                    if decoded == 2 {
+                                        if index == 2 {
+                                            1 -> return
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 }
