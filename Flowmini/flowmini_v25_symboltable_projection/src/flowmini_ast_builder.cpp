@@ -975,6 +975,7 @@ namespace flowmini::ast {
         bool is_expression_boundary_token(const flowmini::Token& token) {
             return token.kind == flowmini::TokenKind::Newline ||
                    token.kind == flowmini::TokenKind::PlaceArrow ||
+                   token.kind == flowmini::TokenKind::KeywordElse ||
                    token.kind == flowmini::TokenKind::RightBrace ||
                    token.kind == flowmini::TokenKind::End;
         }
@@ -2420,6 +2421,10 @@ namespace flowmini::ast {
                    is_identifier_text(token, "if");
         }
 
+        bool is_guard_token(const flowmini::Token& token) {
+            return is_identifier_text(token, "guard");
+        }
+
         bool is_while_token(const flowmini::Token& token) {
             return token.kind == flowmini::TokenKind::KeywordWhile ||
                    is_identifier_text(token, "while");
@@ -2504,6 +2509,44 @@ namespace flowmini::ast {
             return i;
         }
 
+        std::size_t parse_guard_statement_shell(const std::vector<flowmini::Token>& tokens,
+                                                std::size_t i,
+                                                std::vector<StatementId>& body,
+                                                std::vector<Block>& blockPool,
+                                                std::vector<Statement>& statementPool,
+                                                std::vector<Expression>& expressionPool) {
+            Statement statement;
+            statement.location = location_from_token(tokens[i]);
+            ++i; // consume guard
+
+            std::optional<std::size_t> conditionExpression;
+            if (has_expression_until_body_or_line_end(tokens, i)) {
+                conditionExpression = add_expression_placeholder_at(expressionPool, tokens, i);
+            }
+            i = skip_until_body_block_or_line_end(tokens, i);
+            if (i < tokens.size() && tokens[i].kind == flowmini::TokenKind::KeywordElse) {
+                ++i;
+            }
+            i = skip_nonsemantic_separators(tokens, i);
+
+            const BlockId trueBlock = blockPool.size();
+            blockPool.push_back(Block{location_from_token(tokens[i]), {}});
+            const BlockId falseBlock = blockPool.size();
+            blockPool.push_back(Block{location_from_token(tokens[i]), {}});
+            if (i < tokens.size() && tokens[i].kind == flowmini::TokenKind::LeftBrace) {
+                i = parse_body_statement_shells(tokens, i, falseBlock, blockPool, statementPool, expressionPool);
+            }
+
+            if (conditionExpression) {
+                statement.payload = IfStatement{*conditionExpression, trueBlock, ElseBlock{falseBlock}};
+            } else {
+                statement.payload = UnknownStatement{"incomplete guard statement"};
+            }
+            statementPool.push_back(std::move(statement));
+            body.push_back(statementPool.size() - 1);
+            return i;
+        }
+
         std::size_t parse_while_statement_shell(const std::vector<flowmini::Token>& tokens,
                                                 std::size_t i,
                                                 std::vector<StatementId>& body,
@@ -2575,6 +2618,11 @@ namespace flowmini::ast {
 
                 if (is_if_token(tokens[i])) {
                     i = parse_if_statement_shell(tokens, i, body, blockPool, statementPool, expressionPool);
+                    continue;
+                }
+
+                if (is_guard_token(tokens[i])) {
+                    i = parse_guard_statement_shell(tokens, i, body, blockPool, statementPool, expressionPool);
                     continue;
                 }
 

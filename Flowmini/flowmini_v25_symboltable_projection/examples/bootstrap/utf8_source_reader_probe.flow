@@ -35,8 +35,6 @@ main {
     diagnostics : list<Diagnostic>([first_diagnostic,second_diagnostic])
     diagnostic_collection_size : int(length(diagnostics))
     diagnostic_index : int(0)
-    validation_stage : int(0)
-    const validation_pass : int(1)
     const success : int(1)
     const failure : int(0)
 
@@ -73,65 +71,44 @@ main {
     }
     outcome : Utf8Outcome({valid: valid, scalar_count: scalar_count, diagnostic_count: diagnostic_count})
 
-    if ascii == 65 {
-        validation_pass -> validation_stage
-    } else {
+    guard ascii == 65 else {
         failure -> return
     }
-    if decoded == 230 {
-        validation_pass -> validation_stage
-    } else {
+    guard decoded == 230 else {
         failure -> return
     }
-    if scalar_count == 2 {
-        validation_pass -> validation_stage
-    } else {
+    guard scalar_count == 2 else {
         failure -> return
     }
-    if outcome.valid {
-        validation_pass -> validation_stage
-    } else {
+    guard outcome.valid else {
         failure -> return
     }
-    if diagnostic_collection_size == 2 {
-        validation_pass -> validation_stage
-    } else {
+    guard diagnostic_collection_size == 2 else {
         failure -> return
     }
-    if first_diagnostic.code == 1 {
-        validation_pass -> validation_stage
-    } else {
+    guard first_diagnostic.code == 1 else {
         failure -> return
     }
-    if second_diagnostic.offset == 2 {
-        validation_pass -> validation_stage
-    } else {
+    guard second_diagnostic.offset == 2 else {
         failure -> return
     }
 
     diagnostic_codes[diagnostic_index] -> decoded
     diagnostic_offsets[diagnostic_index] -> index
-    if decoded == 1 {
-        validation_pass -> validation_stage
-    } else {
+    guard decoded == 1 else {
         failure -> return
     }
-    if index == 1 {
-        validation_pass -> validation_stage
-    } else {
+    guard index == 1 else {
         failure -> return
     }
     diagnostic_index + 1 -> diagnostic_index
     diagnostic_codes[diagnostic_index] -> decoded
     diagnostic_offsets[diagnostic_index] -> index
-    if decoded == 2 {
-        validation_pass -> validation_stage
-    } else {
+    guard decoded == 2 else {
         failure -> return
     }
-    if index == 2 {
-        success -> return
-    } else {
+    guard index == 2 else {
         failure -> return
     }
+    success -> return
 }

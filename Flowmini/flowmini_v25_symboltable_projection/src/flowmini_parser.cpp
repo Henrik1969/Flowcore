@@ -1901,6 +1901,37 @@ private:
         return Step{false, ifTerminates, start.first, {joinId, "out"}};
     }
 
+    [[nodiscard]] Step parseGuardStatement() {
+        expectIdentifier("expected 'guard'");
+        const int guardIndex = ++ifCounter_;
+
+        Expr cond = parsePredicateExpr();
+        if (exprType(cond) != "Bool") { throw flow::DiagnosticError{"lowerer", "guard condition must be Bool"}; }
+        expect(TokenKind::KeywordElse, "expected 'else' after guard condition");
+        expect(TokenKind::LeftBrace, "expected '{' after guard else");
+        skipNewlines();
+
+        Step condStep;
+        const std::string condPath = lowerExprToPath(cond, generatedId("guard" + std::to_string(guardIndex) + "_cond_path"), &condStep);
+        const std::string routeId = generatedId("guard" + std::to_string(guardIndex) + "_route");
+        addNode("node", routeId, "route.bool");
+        addPolicy(routeId, "path", condPath);
+
+        const std::string joinId = generatedId("guard" + std::to_string(guardIndex) + "_join");
+        addNode("node", joinId, "record.nop");
+        appendStep(condStep, Step{false, false, {routeId, "in"}, {routeId, "false"}});
+
+        enterScope("guard" + std::to_string(guardIndex) + "_false");
+        Step falseBody = parseBlockStatementsUntilRightBrace();
+        leaveScope();
+        if (falseBody.empty) { fail(peek(), "guard else block may not be empty"); }
+
+        addWire({routeId, "true"}, {joinId, "in"});
+        addWire({routeId, "false"}, falseBody.first);
+        if (!falseBody.terminates) { addWire(falseBody.last, {joinId, "in"}); }
+        return Step{false, false, condStep.first, {joinId, "out"}};
+    }
+
     [[nodiscard]] Step parseWhileStatement() {
         expect(TokenKind::KeywordWhile, "expected 'while'");
         const int whileIndex = ++whileCounter_;
@@ -1952,6 +1983,7 @@ private:
         if (check(TokenKind::Identifier) && peek().text == "print") { Step s = parsePrintStatement(); expectLineEnd("expected newline after print"); return s; }
         if (check(TokenKind::KeywordWhile)) { Step s = parseWhileStatement(); expectLineEnd("expected newline after while block"); return s; }
         if (check(TokenKind::KeywordIf)) { Step s = parseIfStatement(); expectLineEnd("expected newline after if block"); return s; }
+        if (check(TokenKind::Identifier) && peek().text == "guard") { Step s = parseGuardStatement(); expectLineEnd("expected newline after guard block"); return s; }
         if (check(TokenKind::KeywordBreak)) { Step s = parseBreakStatement(); expectLineEnd("expected newline after break"); return s; }
         if (check(TokenKind::KeywordContinue)) { Step s = parseContinueStatement(); expectLineEnd("expected newline after continue"); return s; }
         if (looksLikePlacement()) { Step s = parsePlacementAsStep(); expectLineEnd("expected newline after placement"); return s; }
