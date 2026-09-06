@@ -5,6 +5,10 @@ stages are intentionally preserved as implementation checkpoints.
 
 ## Current checkpoint
 
+- Flowcore v0.29.0 promotes the cross-backend integer and enum `when` parity
+  gates and records the remaining tagged-variant, language-closure, and staged
+  self-hosting work in the maturation ledger.
+
 - Added the first executable read-only kernel profiles: `getpid` and
   `clock_gettime`, followed by the one-byte `getrandom` profile; each is
   policy-gated and tested through native LLVM-to-ELF execution. The remaining

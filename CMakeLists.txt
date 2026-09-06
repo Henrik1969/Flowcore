@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.22)
-project(flowcore LANGUAGES C CXX)
+file(STRINGS "${CMAKE_CURRENT_SOURCE_DIR}/VERSION" FLOWCORE_VERSION LIMIT_COUNT 1)
+project(flowcore VERSION ${FLOWCORE_VERSION} LANGUAGES C CXX)
 
 include(CTest)
 include(GNUInstallDirs)

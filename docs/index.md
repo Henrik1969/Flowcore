@@ -22,6 +22,8 @@ This is the soul of Flowcore.
 
 ## Foundational architecture
 
+- [Current v0.29 language-maturation status](checkpoints/2026-08-26-v028-maturation-ledger.md)
+
 - [Flowcore core promise](architecture/flowcore-core-promise.md)
 - [Transformation and revision architecture](architecture/compiler-transformation-revision-model.md)
 - [Current v0.28 typed artifact-contract status](checkpoints/2026-08-26-v0.28-typed-artifact-contracts.md)
@@ -50,7 +52,7 @@ See:
 Current checkpoint:
 
 ```text
-Flowcore v0.28 typed artifact-contract language-chain slice
+Flowcore v0.29 language-maturation and cross-backend parity slice
 AST golden tests: 28
 Symbol projection tests: 14
 Flowanalyst / Flowbind / Flowoptimize / Flowlower: CTest green
