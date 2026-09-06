@@ -1,0 +1,20 @@
+program variant_when_probe
+
+variant DecodeOutcome {
+    scalar(value : int)
+    diagnostic(code : int, offset : int)
+}
+
+main {
+    outcome : DecodeOutcome(DecodeOutcome.scalar(42))
+    marker : int(0)
+    when outcome {
+        case DecodeOutcome.scalar {
+            outcome.value -> marker
+        }
+        default {
+            99 -> marker
+        }
+    }
+    print marker
+}

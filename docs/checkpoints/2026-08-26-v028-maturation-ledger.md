@@ -274,3 +274,21 @@ payload field access.
 
 Add payload-aware variant `when` cases and arm-local field bindings, then reject
 cross-member payload access in frontend and Flowanalyst validation.
+
+## Tagged variant matching checkpoint
+
+- `when` now accepts tagged variant selectors and explicit member cases such as
+  `case DecodeOutcome.scalar`.
+- Routing compares the target-neutral internal variant tag while payload fields
+  remain ordinary record values, so runtime behavior stays independent of the
+  C++ reference implementation.
+- Added runtime, frontend, and Flowanalyst coverage for selecting a scalar
+  payload arm and reading its value.
+- Variant selectors still require `default`; exhaustive variant matching and
+  arm-local payload proof are deferred until the frontend carries selected
+  member context.
+
+## Exact next action
+
+Carry selected variant-member context into each `when` arm and reject payload
+field reads whose member is not the active case.

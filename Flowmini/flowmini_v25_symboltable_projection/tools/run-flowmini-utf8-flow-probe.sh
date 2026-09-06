@@ -22,6 +22,7 @@ enum_exhaustive_source="${root}/Flowmini/flowmini_v25_symboltable_projection/exa
 enum_nonexhaustive_source="${root}/Flowmini/flowmini_v25_symboltable_projection/examples/fail/bad_enum_nonexhaustive.flow"
 variant_source="${root}/Flowmini/flowmini_v25_symboltable_projection/examples/bootstrap/variant_declaration_probe.flow"
 variant_construction_source="${root}/Flowmini/flowmini_v25_symboltable_projection/examples/bootstrap/variant_construction_probe.flow"
+variant_when_source="${root}/Flowmini/flowmini_v25_symboltable_projection/examples/bootstrap/variant_when_probe.flow"
 classifier_source="${root}/Flowmini/flowmini_v25_symboltable_projection/examples/bootstrap/shared_scalar_classifier.flow"
 tmpdir="$(mktemp -d)"
 trap 'rm -rf "${tmpdir}"' EXIT
@@ -146,6 +147,12 @@ test "${variant_construction_output}" = "42"
 "${analyst}" --lowering-plan-version 2 "${tmpdir}/variant-construction-bundle.json" > "${tmpdir}/variant-construction-semantic.json"
 jq -e '.status == "ok"' "${tmpdir}/variant-construction-semantic.json" >/dev/null
 echo "Flow tagged variant construction probe: PASS"
+variant_when_output="$(${flowmini} "${variant_when_source}")"
+test "${variant_when_output}" = "42"
+"${flowmini}" --dump-frontend-bundle "${variant_when_source}" > "${tmpdir}/variant-when-bundle.json"
+"${analyst}" --lowering-plan-version 2 "${tmpdir}/variant-when-bundle.json" > "${tmpdir}/variant-when-semantic.json"
+jq -e '.status == "ok"' "${tmpdir}/variant-when-semantic.json" >/dev/null
+echo "Flow tagged variant when probe: PASS"
 
 classifier_output="$(${flowmini} "${classifier_source}")"
 test "${classifier_output}" = "53"

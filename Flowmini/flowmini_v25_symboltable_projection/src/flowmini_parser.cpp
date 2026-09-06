@@ -414,6 +414,7 @@ private:
         if (sym == nullptr) { throw flow::DiagnosticError{"lowerer", "use of undeclared field value '" + rootName + "'"}; }
         std::string curType = sym->type;
         for (const auto& field : fields) {
+            if (isVariantType(curType) && field == "__tag") { curType = "int"; continue; }
             const TypeField* f = findTypeField(curType, field);
             TypeField variantField;
             if (f == nullptr && isVariantType(curType)) {
@@ -2143,8 +2144,8 @@ private:
     [[nodiscard]] Step parseWhenStatement() {
         expectIdentifier("expected 'when'");
         Expr selector = parseValueExpr();
-        if (selector.kind != ExprKind::Identifier || (!isIntLikeType(exprType(selector)) && !isEnumType(exprType(selector)))) {
-            throw flow::DiagnosticError{"lowerer", "when requires an integer or enum identifier selector"};
+        if (selector.kind != ExprKind::Identifier || (!isIntLikeType(exprType(selector)) && !isEnumType(exprType(selector)) && !isVariantType(exprType(selector)))) {
+            throw flow::DiagnosticError{"lowerer", "when requires an integer, enum, or variant identifier selector"};
         }
         expect(TokenKind::LeftBrace, "expected '{' after when selector");
         skipNewlines();
@@ -2167,11 +2168,22 @@ private:
                     expect(TokenKind::Dot, "expected '.' between enum type and member");
                     const Token& member = expectIdentifier("expected enum member after '.'");
                     const TypeDef* enumDef = lookupType(enumType.text);
-                    if (enumDef == nullptr || !enumDef->isEnum) { fail(enumType, "unknown enum type in when case"); }
-                    const auto found = enumDef->enumMembers.find(member.text);
-                    if (found == enumDef->enumMembers.end()) { fail(member, "unknown enum member '" + member.text + "'"); }
+                    if (enumDef == nullptr || (!enumDef->isEnum && !enumDef->isVariant)) { fail(enumType, "unknown enum or variant type in when case"); }
+                    int foundValue = -1;
+                    if (enumDef->isEnum) {
+                        const auto found = enumDef->enumMembers.find(member.text);
+                        if (found == enumDef->enumMembers.end()) { fail(member, "unknown enum member '" + member.text + "'"); }
+                        foundValue = found->second;
+                    } else {
+                        int ordinal = 0;
+                        for (const auto& [name, payload] : enumDef->variantMembers) {
+                            if (name == member.text) { foundValue = ordinal; break; }
+                            ++ordinal;
+                        }
+                        if (foundValue < 0) { fail(member, "unknown variant member '" + member.text + "'"); }
+                    }
                     if (exprType(selector) != enumType.text) { fail(enumType, "when case enum type does not match selector"); }
-                    caseValue = found->second;
+                    caseValue = foundValue;
                 }
                 int highValue = caseValue;
                 if (match(TokenKind::Dot)) {
@@ -2214,7 +2226,7 @@ private:
         if (!hasDefault) {
             const std::string selectorType = exprType(selector);
             if (!isEnumType(selectorType)) {
-                throw flow::DiagnosticError{"lowerer", "when requires a default arm for open integer selectors"};
+                throw flow::DiagnosticError{"lowerer", "when requires a default arm for open integer or variant selectors"};
             }
             const TypeDef* enumDef = lookupType(selectorType);
             for (const auto& [memberName, memberValue] : enumDef->enumMembers) {
@@ -2231,8 +2243,14 @@ private:
         std::optional<Step> defaultBody;
         auto addConditionRoute = [&](TokenKind op, int literal, bool negate = false) {
             Expr left;
-            left.kind = ExprKind::Identifier;
-            left.ident = selector.ident;
+            if (isVariantType(exprType(selector))) {
+                left.kind = ExprKind::FieldAccess;
+                left.ident = selector.ident;
+                left.fields = {"__tag"};
+            } else {
+                left.kind = ExprKind::Identifier;
+                left.ident = selector.ident;
+            }
             Expr right;
             right.kind = ExprKind::LiteralInt;
             right.literal = literal;
