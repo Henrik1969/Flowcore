@@ -628,3 +628,80 @@ for tag-only routing before admitting payload bindings to either backend.
 
 Promote variant tag identity and arm field maps into the backend artifact, then
 admit tag-only variant routing with a negative payload-access gate.
+
+## Open work inventory
+
+This is the remaining work after the current integer and enum checkpoints. It
+is ordered by the next safe vertical slices and keeps confirmed evidence
+separate from proposals.
+
+### Tagged variants and match closure
+
+- Add explicit variant declaration metadata to the backend-neutral artifact:
+  declaration identity, member identity, numeric tag, payload field names,
+  payload types, and field order.
+- Emit variant construction as `{tag, payload}` only when the artifact carries
+  that layout; admit tag-only routing first and retain a negative gate for any
+  payload read without an arm-local field map.
+- Preserve arm-local payload bindings through Flowanalyst, Flowparallel,
+  Flowoptimize, Flowlower, TinyVM, and provenance records. Reject cross-member
+  access in both backends.
+- Add a frontend/AST acceptance probe for payload-free variant arms. The
+  runtime accepts this shape, but the current frontend projection still needs
+  to preserve it as a `when` statement instead of an incomplete statement.
+- Add positive, malformed, cross-member, missing-member, duplicate-tag, and
+  payload-layout parity fixtures for LLVM and TinyVM.
+
+### Backend and artifact completion
+
+- Keep the shared public lowering artifact authoritative for all match forms;
+  remove any remaining top-level metadata versus executable-operation drift.
+- Extend TinyVM/LLVM parity coverage to every currently admitted provider-free
+  form and maintain an explicit structured unsupported inventory for the rest.
+- Add differential diagnostics and provenance checks for match failures,
+  malformed ranges, invalid joins, unsupported selector kinds, and payload
+  access.
+- Run the required ASan/UBSan gates at each major backend checkpoint and record
+  environmental exclusions.
+- Keep target-policy selection independent of source and preserve at least two
+  genuinely distinct backend/target builds.
+
+### Language closure
+
+- Complete the remaining record/collection, tuple, generic-container, text,
+  bytes, outcome, diagnostic, serialization, and hashing facilities needed by
+  compiler-shaped programs.
+- Finish ownership, borrowing/observation, lifetime, cleanup, fallible
+  allocation, slices/views, and opaque resource-handle semantics.
+- Add functions/closures or callback contracts, bounded iteration, graph/stream
+  processing, concurrency, cancellation, async I/O, and scheduler-visible
+  effects with deterministic reference behavior.
+- Close modules, visibility, imports, namespaces, separate compilation,
+  package manifests, dependency identities, lock evidence, incremental builds,
+  compatibility, and deprecation contracts.
+
+### Compiler construction and self-hosting
+
+- Maintain the C++ implementation as Stage 0 evidence and capture every
+  boundary artifact needed for comparison.
+- Build the first compiler-construction vertical slice in Flow, compare its
+  outputs with Stage 0, and retain escape hatches until deterministic
+  fixed-point evidence exists.
+- Expand that slice to a staged Flowmini rebuild, independent replay after
+  producer exit, and reproducible next-stage artifacts.
+- Prove the same language/library contracts on a bare-metal-oriented target;
+  this is the system-development test before claiming language closure.
+- Keep FlowOpenOffice and full product-scale platform work behind the language,
+  package, provider, ownership, effect, and self-hosting gates above.
+
+### Evidence and repository discipline
+
+- Update this ledger before every major checkpoint, commit and annotated-tag
+  each green slice, push branch and tag, and keep `.codex-run-state` at
+  `CONTINUE` until the mission definition of done is actually met.
+- Preserve the C++ canon and mutate it only when new evidence requires it;
+  carry the reasoning and proof into Flowmini rather than treating a Flow
+  implementation as authority by itself.
+- The unrelated pre-existing `Flowselection/README.md` and
+  `Flowselection/sel-ui/` changes remain outside this maturation chain and are
+  intentionally preserved.
