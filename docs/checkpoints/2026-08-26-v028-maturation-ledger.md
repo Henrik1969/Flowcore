@@ -521,3 +521,17 @@ introduce the first backend branch-chain lowering for integer match arms.
 
 Introduce backend lowering for integer match arms using the validated selector,
 range, body, and join metadata.
+
+## Backend artifact match metadata checkpoint
+
+- The prepared backend artifact now carries the validated `match_operations`
+  collection, including the empty collection for artifacts without matches.
+- The canonical empty-artifact fixture tracks that schema explicitly; the
+  backend artifact gate is green again.
+- No backend emission behavior changed yet, preserving the existing C++
+  lowering evidence while the match branch contract is completed.
+
+## Exact next action
+
+Trace the existing structured backend plan and add a target-neutral integer
+match branch representation before emitting any LLVM or TinyVM instructions.
