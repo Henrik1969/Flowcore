@@ -43,12 +43,14 @@ add_executable(flowmini
         src/flowmini_ast_builder.cpp
         src/flowmini_symbol_projection.cpp
         src/flowmini_frontend_bundle.cpp
+        src/flowmini_utf8.cpp
         src/main.cpp
 
         include/flowmini_ast.h
         include/flowmini_ast_builder.h
         include/flowmini_symbol_projection.h
         include/flowmini_frontend_bundle.h
+        include/flowmini_utf8.h
 )
 
 target_include_directories(flowmini PRIVATE
@@ -221,3 +223,10 @@ add_custom_target(flowmini_ast_golden_tests
     COMMENT "Running Flowmini AST golden regression tests"
     VERBATIM
 )
+
+add_executable(flowmini_utf8_tests
+        tests/utf8_tests.cpp
+        src/flowmini_utf8.cpp
+)
+target_include_directories(flowmini_utf8_tests PRIVATE include)
+add_test(NAME flowmini_utf8_tests COMMAND flowmini_utf8_tests)
