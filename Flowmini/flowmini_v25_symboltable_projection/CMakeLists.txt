@@ -242,3 +242,9 @@ add_test(NAME flowmini_utf8_artifact_fixtures
         FLOWMINI_UTF8_ARTIFACT_BIN=$<TARGET_FILE:flowmini_utf8_artifact>
         ${CMAKE_SOURCE_DIR}/tools/run-flowmini-utf8-artifact-tests.sh
 )
+
+add_test(NAME flowmini_utf8_flow_probe
+        COMMAND ${CMAKE_COMMAND} -E env
+        FLOWMINI_BIN=$<TARGET_FILE:flowmini>
+        ${CMAKE_SOURCE_DIR}/tools/run-flowmini-utf8-flow-probe.sh
+)

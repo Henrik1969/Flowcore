@@ -1,16 +1,10 @@
 program utf8_source_reader_probe
 
 // This is the first Flow-side consumer of the captured UTF-8 contract. The
-// current language slice can represent byte lists, scalar arithmetic, and
-// indexed access. General byte/file input and diagnostic records remain the
-// next library work; the probe keeps those missing facilities visible.
-fn decode_two_byte(lead : int, continuation : int): int {
-    normalized_lead : int(lead - 192)
-    normalized_continuation : int(continuation - 128)
-    weighted : int(normalized_lead * 64)
-    scalar : int(weighted + normalized_continuation)
-    scalar -> return
-}
+// current language slice can represent byte lists, scalar arithmetic, indexed
+// access, and bounded loops. General byte/file input and diagnostic records
+// remain the next library work; the probe keeps those missing facilities
+// visible.
 
 main {
     bytes : list<int>([65,195,166])
@@ -18,11 +12,25 @@ main {
     lead : int(bytes[1])
     continuation : int(bytes[2])
     decoded : int(0)
+    index : int(0)
+    scalar_count : int(0)
 
-    decode_two_byte(lead, continuation) -> decoded
+    while index < length(bytes) {
+        if bytes[index] < 128 {
+            scalar_count + 1 -> scalar_count
+            index + 1 -> index
+        } else {
+            (bytes[index] - 192) * 64 + bytes[index + 1] - 128 -> decoded
+            scalar_count + 1 -> scalar_count
+            index + 2 -> index
+        }
+    }
+
     if ascii == 65 {
         if decoded == 230 {
-            1 -> return
+            if scalar_count == 2 {
+                1 -> return
+            }
         }
     }
     0 -> return
