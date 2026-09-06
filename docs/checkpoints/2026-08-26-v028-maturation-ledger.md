@@ -569,3 +569,19 @@ emitter to consume that representation.
 
 Route the same integer match operation through TinyVM and compare its execution
 with the LLVM branch-chain result before admitting named matches.
+
+## TinyVM integer match checkpoint
+
+- TinyVM now admits the shared integer `match` operation and lowers inclusive
+  ranges into ISA-v1 comparison/branch chains with explicit default and join
+  flow.
+- The canonical integer `when` artifact lowers and executes to completion in
+  TinyVM; named selectors remain rejected with a structured unsupported result.
+- Existing TinyVM backend, scalar parity, governed-provider, and cross-target
+  tests remain green.
+
+## Exact next action
+
+Add a parity fixture that records the integer match path in both LLVM and
+TinyVM artifacts, then use that evidence to define the target-neutral tag and
+payload contract for enum and variant matches.

@@ -69,7 +69,7 @@ public:
             const auto& operation = object(value, "$.lowering_plan.operations[]");
             const auto kind = string(required(operation, "kind", "$.lowering_plan.operations[]"), "$.lowering_plan.operations[].kind");
             if (kind == "call" && plan_version != 2) continue;
-            if (kind != "call" && kind != "value_definition" && kind != "assignment" && kind != "return_value" && kind != "branch" && kind != "loop" && kind != "external_call")
+            if (kind != "call" && kind != "value_definition" && kind != "assignment" && kind != "return_value" && kind != "branch" && kind != "loop" && kind != "match" && kind != "external_call")
                 throw Unsupported("operation kind '" + kind + "' is not admitted by the scalar slice");
             const auto block = optional(operation, "block_id") ? integer(*optional(operation, "block_id"), "$.operation.block_id") : 0;
             blocks_[block].push_back(&operation);
@@ -268,6 +268,52 @@ private:
             const bool body_terminal = compile_block(body);
             if (!body_terminal) { set_provenance(operation); emit(TV1_JMP, condition, 0, 0); }
             code[branch_index].pad = static_cast<std::int64_t>(code.size());
+            return;
+        }
+        if (kind == "match") {
+            if (string(required(operation, "selector_kind", "$.operation"), "$.operation.selector_kind") != "integer")
+                throw Unsupported("named match selectors are not yet admitted by TinyVM");
+            const auto selector = expression(operands.front());
+            if (slot_types_.at(selector) != TINYVM_CARRIER_I32) throw Unsupported("integer match selector is not i32");
+            const auto& cases = required_array(operation, "cases", "$.operation");
+            if (cases.empty()) throw Unsupported("integer match operation has no cases");
+            std::vector<std::size_t> false_jumps;
+            std::vector<std::size_t> body_jumps;
+            for (const auto& item : cases) {
+                for (const auto jump : false_jumps) code[jump].pad = static_cast<std::int64_t>(code.size());
+                false_jumps.clear();
+                const auto& arm = object(item, "$.operation.cases[]");
+                const auto low = integer(required(arm, "value", "$.operation.case"), "$.operation.case.value");
+                const auto high = integer(required(arm, "high", "$.operation.case"), "$.operation.case.high");
+                if (high < low) throw Unsupported("descending integer match range");
+                std::size_t branch_index;
+                if (low == high) {
+                    const auto literal_slot = literal(TINYVM_CARRIER_I32, static_cast<std::uint64_t>(static_cast<std::int64_t>(low)));
+                    const auto condition = slot(); slot_types_[condition] = TINYVM_CARRIER_I1; emit(TV1_CMP_EQ, condition, selector, literal_slot);
+                    branch_index = code.size(); emit(TV1_BRANCH, condition, 0, 0);
+                } else {
+                    const auto low_slot = literal(TINYVM_CARRIER_I32, static_cast<std::uint64_t>(static_cast<std::int64_t>(low)));
+                    const auto low_condition = slot(); slot_types_[low_condition] = TINYVM_CARRIER_I1; emit(TV1_CMP_GE, low_condition, selector, low_slot);
+                    branch_index = code.size(); emit(TV1_BRANCH, low_condition, 0, 0); false_jumps.push_back(branch_index);
+                    code[branch_index].b = static_cast<std::int64_t>(code.size());
+                    const auto high_slot = literal(TINYVM_CARRIER_I32, static_cast<std::uint64_t>(static_cast<std::int64_t>(high)));
+                    const auto high_condition = slot(); slot_types_[high_condition] = TINYVM_CARRIER_I1; emit(TV1_CMP_LE, high_condition, selector, high_slot);
+                    branch_index = code.size(); emit(TV1_BRANCH, high_condition, 0, 0); false_jumps.push_back(branch_index);
+                }
+                const auto body = integer(required(arm, "body_block_id", "$.operation.case"), "$.operation.case.body_block_id");
+                code[branch_index].b = static_cast<std::int64_t>(code.size());
+                const bool terminal = compile_block(body);
+                if (!terminal) { set_provenance(operation); body_jumps.push_back(code.size()); emit(TV1_JMP, 0, 0, 0); }
+                if (low == high) false_jumps.push_back(branch_index);
+            }
+            if (!false_jumps.empty()) code[false_jumps.back()].pad = static_cast<std::int64_t>(code.size());
+            const auto* otherwise = optional(operation, "default_block_id");
+            if (otherwise && integer(*otherwise, "$.operation.default_block_id") >= 0) {
+                const bool terminal = compile_block(integer(*otherwise, "$.operation.default_block_id"));
+                if (!terminal) { set_provenance(operation); body_jumps.push_back(code.size()); emit(TV1_JMP, 0, 0, 0); }
+            }
+            const auto join = static_cast<std::int64_t>(code.size());
+            for (const auto jump : body_jumps) code[jump].a = join;
             return;
         }
         if (kind == "external_call") {
