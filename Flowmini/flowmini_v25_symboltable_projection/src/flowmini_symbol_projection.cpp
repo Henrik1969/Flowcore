@@ -28,6 +28,7 @@ const char* to_string(const AstOriginRole role) {
         case AstOriginRole::FunctionDeclaration: return "function_declaration";
         case AstOriginRole::FunctionParameter:   return "function_parameter";
         case AstOriginRole::RecordDeclaration:   return "record_declaration";
+        case AstOriginRole::EnumDeclaration:     return "enum_declaration";
         case AstOriginRole::RecordField:         return "record_field";
         case AstOriginRole::RefinedTypeDeclaration: return "refined_type_declaration";
         case AstOriginRole::AbiDeclaration:      return "abi_declaration";
@@ -831,6 +832,29 @@ struct ProjectTopLevelDecl {
                             scopeOrigins,
                             astPath,
                             declarationId);
+    }
+
+    void operator()(const EnumDecl& decl) const {
+        const auto typeSymbol = table.insertSymbol(moduleScope, decl.name, symboltable::SymbolKind::Type);
+        set_declaration_location(table, typeSymbol, decl.location);
+        record_symbol_origin(symbolOrigins,
+                             typeSymbol,
+                             astPath,
+                             make_origin(AstOriginEntityKind::Declaration,
+                                         AstOriginRole::EnumDeclaration,
+                                         decl.location,
+                                         declarationId));
+        for (const auto& member : decl.members) {
+            const auto memberSymbol = table.insertSymbol(moduleScope, member.name, symboltable::SymbolKind::Variable);
+            set_declaration_location(table, memberSymbol, member.location);
+            record_symbol_origin(symbolOrigins,
+                                 memberSymbol,
+                                 astPath + ".member[" + member.name + "]",
+                                 make_origin(AstOriginEntityKind::Declaration,
+                                             AstOriginRole::EnumDeclaration,
+                                             member.location,
+                                             declarationId));
+        }
     }
 
     void operator()(const RefinedTypeDecl& decl) const {

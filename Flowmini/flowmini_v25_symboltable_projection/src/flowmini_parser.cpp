@@ -93,6 +93,8 @@ struct TypeDef {
     std::string base;
     std::vector<TypeInvariant> invariants;
     std::vector<TypeField> fields;
+    bool isEnum = false;
+    std::map<std::string, int> enumMembers;
 };
 
 struct AbiTypeDef {
@@ -144,13 +146,13 @@ struct Target {
 class Parser {
 public:
     explicit Parser(const std::vector<Token>& tokens) : tokens_(tokens) {
-        types_.emplace("int", TypeDef{"int", "", {}, {}});
-        types_.emplace("Bool", TypeDef{"Bool", "", {}, {}});
-        types_.emplace("c_int", TypeDef{"c_int", "int", {}, {}});
-        types_.emplace("c_long", TypeDef{"c_long", "int", {}, {}});
-        types_.emplace("c_ulong", TypeDef{"c_ulong", "int", {}, {}});
-        types_.emplace("c_size_t", TypeDef{"c_size_t", "int", {{TokenKind::GreaterEqual, 0}}, {}});
-        types_.emplace("c_string", TypeDef{"c_string", "", {}, {}});
+        types_.emplace("int", TypeDef{"int", "", {}, {}, false, {}});
+        types_.emplace("Bool", TypeDef{"Bool", "", {}, {}, false, {}});
+        types_.emplace("c_int", TypeDef{"c_int", "int", {}, {}, false, {}});
+        types_.emplace("c_long", TypeDef{"c_long", "int", {}, {}, false, {}});
+        types_.emplace("c_ulong", TypeDef{"c_ulong", "int", {}, {}, false, {}});
+        types_.emplace("c_size_t", TypeDef{"c_size_t", "int", {{TokenKind::GreaterEqual, 0}}, {}, false, {}});
+        types_.emplace("c_string", TypeDef{"c_string", "", {}, {}, false, {}});
         abiTypes_.emplace("c_string", AbiTypeDef{"c_string", "const char*", "borrowed", "read", "call", "false", "nul", {}, false});
     }
 
@@ -173,6 +175,8 @@ public:
                 parseMainBlock();
             } else if (check(TokenKind::Identifier) && peek().text == "type") {
                 parseTypeDecl();
+            } else if (check(TokenKind::Identifier) && peek().text == "enum") {
+                parseEnumDecl();
             } else if (check(TokenKind::Identifier) && peek().text == "abi") {
                 parseAbiBlock();
             } else if (match(TokenKind::KeywordFn)) {
@@ -382,6 +386,11 @@ private:
         return def != nullptr && !def->fields.empty();
     }
 
+    [[nodiscard]] bool isEnumType(const std::string& type) const {
+        const TypeDef* def = lookupType(type);
+        return def != nullptr && def->isEnum;
+    }
+
     [[nodiscard]] const TypeField* findTypeField(const std::string& type, const std::string& field) const {
         const TypeDef* def = lookupType(type);
         if (def == nullptr) { return nullptr; }
@@ -555,6 +564,18 @@ private:
                 const std::string listName = expectIdentifier("expected list identifier in length(...)").text;
                 expect(TokenKind::RightParen, "expected ')' after length argument");
                 Expr expr; expr.kind = ExprKind::ListLength; expr.ident = listName; return expr;
+            }
+
+            if (isEnumType(id) && match(TokenKind::Dot)) {
+                const Token& member = expectIdentifier("expected enum member after '.'");
+                const TypeDef* def = lookupType(id);
+                if (def->enumMembers.find(member.text) == def->enumMembers.end()) {
+                    fail(member, "unknown enum member '" + member.text + "'");
+                }
+                Expr expr;
+                expr.kind = ExprKind::Identifier;
+                expr.ident = member.text;
+                return expr;
             }
 
             if (match(TokenKind::Dot)) {
@@ -1127,6 +1148,28 @@ private:
         types_[def.name] = std::move(def);
     }
 
+    void parseEnumDecl() {
+        static_cast<void>(expectIdentifier("expected 'enum'"));
+        const Token& nameToken = expectIdentifier("expected enum name");
+        if (types_.contains(nameToken.text)) { fail(nameToken, "duplicate type declaration '" + nameToken.text + "'"); }
+        TypeDef def;
+        def.name = nameToken.text;
+        def.isEnum = true;
+        expect(TokenKind::LeftBrace, "expected '{' before enum members");
+        skipNewlines();
+        int ordinal = 0;
+        while (!check(TokenKind::RightBrace) && !check(TokenKind::End)) {
+            const Token& member = expectIdentifier("expected enum member");
+            if (def.enumMembers.contains(member.text)) { fail(member, "duplicate enum member '" + member.text + "'"); }
+            def.enumMembers.emplace(member.text, ordinal++);
+            currentScope().symbols[member.text] = Symbol{nameToken.text, pathFor(member.text), currentScope().qualifiedName + "::" + member.text, {}, true, ordinal - 1, {}};
+            skipNewlines();
+        }
+        expect(TokenKind::RightBrace, "expected '}' after enum members");
+        if (def.enumMembers.empty()) { fail(nameToken, "enum must declare at least one member"); }
+        types_[def.name] = std::move(def);
+    }
+
 
     // -------- ABI declarations --------
     void parseAbiBlock() {
@@ -1231,7 +1274,7 @@ private:
         if (def.lifetime.empty()) { fail(nameToken, "ABI type '" + def.name + "' requires lifetime"); }
         if (def.nullable.empty()) { def.nullable = "false"; }
         abiTypes_[def.name] = std::move(def);
-        if (!typeExists(nameToken.text)) { types_.emplace(nameToken.text, TypeDef{nameToken.text, "", {}, {}}); }
+        if (!typeExists(nameToken.text)) { types_.emplace(nameToken.text, TypeDef{nameToken.text, "", {}, {}, false, {}}); }
     }
 
     void parseAbiStructDecl(const std::string&) {
@@ -1258,7 +1301,7 @@ private:
         expect(TokenKind::RightBrace, "expected '}' after abi struct body");
         if (def.fields.empty()) { fail(nameToken, "ABI struct '" + def.name + "' must have at least one field"); }
         abiStructs_[def.name] = def;
-        types_.emplace(def.name, TypeDef{def.name, "", {}, {}});
+        types_.emplace(def.name, TypeDef{def.name, "", {}, {}, false, {}});
     }
 
     void parseExternFunctionDecl(const std::string& abiName, const std::string& library, const std::string& convention) {
@@ -1367,6 +1410,17 @@ private:
         }
         if (check(TokenKind::Identifier) && peek().text == "list" && lookahead(1).kind != TokenKind::Dot) {
             return parseListDeclaration(idToken, id);
+        }
+        if (check(TokenKind::Identifier) && isEnumType(peek().text)) {
+            const std::string enumType = expectIdentifier("expected enum type").text;
+            expect(TokenKind::LeftParen, "enum declaration requires initializer");
+            Expr initializer = parsePredicateExpr();
+            expect(TokenKind::RightParen, "expected ')' after enum initializer");
+            if (exprType(initializer) != enumType) { throw flow::DiagnosticError{"lowerer", "enum initializer for '" + id + "' has wrong enum type"}; }
+            declareSymbol(idToken, id, enumType);
+            Step step;
+            static_cast<void>(lowerExprToPath(initializer, lookup(id)->path, &step));
+            return step;
         }
         if (check(TokenKind::Identifier) && peek().text == "array" && lookahead(1).kind != TokenKind::Dot) {
             return parseArrayDeclaration(idToken, id);
@@ -1945,8 +1999,8 @@ private:
     [[nodiscard]] Step parseWhenStatement() {
         expectIdentifier("expected 'when'");
         Expr selector = parseValueExpr();
-        if (selector.kind != ExprKind::Identifier || !isIntLikeType(exprType(selector))) {
-            throw flow::DiagnosticError{"lowerer", "when currently requires an integer identifier selector"};
+        if (selector.kind != ExprKind::Identifier || (!isIntLikeType(exprType(selector)) && !isEnumType(exprType(selector)))) {
+            throw flow::DiagnosticError{"lowerer", "when requires an integer or enum identifier selector"};
         }
         expect(TokenKind::LeftBrace, "expected '{' after when selector");
         skipNewlines();
@@ -1961,8 +2015,20 @@ private:
             std::optional<int> value;
             if (check(TokenKind::Identifier) && peek().text == "case") {
                 static_cast<void>(expectIdentifier("expected 'case'"));
-                const Token& valueToken = expect(TokenKind::Number, "expected integer literal after 'case'");
-                const int caseValue = parseIntToken(valueToken);
+                int caseValue = 0;
+                if (check(TokenKind::Number)) {
+                    caseValue = parseIntToken(expect(TokenKind::Number, "expected integer literal after 'case'"));
+                } else {
+                    const Token& enumType = expectIdentifier("expected integer literal or enum member after 'case'");
+                    expect(TokenKind::Dot, "expected '.' between enum type and member");
+                    const Token& member = expectIdentifier("expected enum member after '.'");
+                    const TypeDef* enumDef = lookupType(enumType.text);
+                    if (enumDef == nullptr || !enumDef->isEnum) { fail(enumType, "unknown enum type in when case"); }
+                    const auto found = enumDef->enumMembers.find(member.text);
+                    if (found == enumDef->enumMembers.end()) { fail(member, "unknown enum member '" + member.text + "'"); }
+                    if (exprType(selector) != enumType.text) { fail(enumType, "when case enum type does not match selector"); }
+                    caseValue = found->second;
+                }
                 int highValue = caseValue;
                 if (match(TokenKind::Dot)) {
                     expect(TokenKind::Dot, "expected '..' in when range case");

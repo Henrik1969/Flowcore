@@ -17,6 +17,7 @@ when_no_default_source="${root}/Flowmini/flowmini_v25_symboltable_projection/exa
 when_duplicate_source="${root}/Flowmini/flowmini_v25_symboltable_projection/examples/fail/bad_when_duplicate.flow"
 when_overlap_source="${root}/Flowmini/flowmini_v25_symboltable_projection/examples/fail/bad_when_overlap.flow"
 when_descending_source="${root}/Flowmini/flowmini_v25_symboltable_projection/examples/fail/bad_when_descending.flow"
+enum_source="${root}/Flowmini/flowmini_v25_symboltable_projection/examples/bootstrap/enum_state_probe.flow"
 tmpdir="$(mktemp -d)"
 trap 'rm -rf "${tmpdir}"' EXIT
 
@@ -101,3 +102,13 @@ if "${flowmini}" "${when_descending_source}" >/dev/null 2>&1; then
     exit 1
 fi
 echo "Flow when validation probe: PASS"
+
+enum_output="$("${flowmini}" "${enum_source}")"
+test "${enum_output}" = "11"
+echo "Flow enum identity probe: PASS"
+
+"${flowmini}" --dump-frontend-bundle "${enum_source}" > "${tmpdir}/enum-bundle.json"
+"${analyst}" --lowering-plan-version 2 "${tmpdir}/enum-bundle.json" > "${tmpdir}/enum-semantic.json"
+jq -e '.status == "ok"' "${tmpdir}/enum-semantic.json" >/dev/null
+jq -e '([.ast.declaration_pool[]? | select(.kind == "enum")] | length == 1) and ([.ast.statement_pool[]? | select(.kind == "when")] | length == 1)' "${tmpdir}/enum-bundle.json" >/dev/null
+echo "Flow enum frontend integration probe: PASS"

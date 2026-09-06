@@ -27,6 +27,7 @@ enum class AstOriginRole {
     FunctionDeclaration,
     FunctionParameter,
     RecordDeclaration,
+    EnumDeclaration,
     RecordField,
     RefinedTypeDeclaration,
     AbiDeclaration,

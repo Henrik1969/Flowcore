@@ -30,6 +30,7 @@ enum class TopLevelKind {
     Import,
     Function,
     Record,
+    Enum,
     RefinedType,
     Abi,
     Target,
@@ -354,6 +355,15 @@ struct RecordDecl {
     std::vector<RecordField> fields;
     SourceLocation location;
 };
+struct EnumMember {
+    std::string name;
+    SourceLocation location;
+};
+struct EnumDecl {
+    std::string name;
+    std::vector<EnumMember> members;
+    SourceLocation location;
+};
 
 struct InvariantClause {
     std::size_t condition_expression = 0;
@@ -493,6 +503,7 @@ using TopLevelDecl = std::variant<
     ImportDecl,
     FunctionDecl,
     RecordDecl,
+    EnumDecl,
     RefinedTypeDecl,
     AbiDecl,
     TargetDecl,
