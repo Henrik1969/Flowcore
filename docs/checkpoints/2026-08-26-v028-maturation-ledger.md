@@ -585,3 +585,18 @@ with the LLVM branch-chain result before admitting named matches.
 Add a parity fixture that records the integer match path in both LLVM and
 TinyVM artifacts, then use that evidence to define the target-neutral tag and
 payload contract for enum and variant matches.
+
+## Integer match parity fixture checkpoint
+
+- Added a canonical `when_backend_parity_probe.flow` program that records one
+  integer match operation in the shared backend artifact.
+- The parity gate compiles and executes the same artifact through LLVM and
+  TinyVM; both return `37`, and the artifact contains both semantic match facts
+  and the executable lowering operation.
+- The new gate is registered in the root CTest suite and passes independently.
+
+## Exact next action
+
+Use the preserved enum and tagged-variant match facts to specify a shared tag
+and payload representation, beginning with enum-only routing and rejecting
+variant payload access until its layout is explicit.

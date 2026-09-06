@@ -214,6 +214,21 @@ add_test(NAME tinyvm_scalar_backend_parity
 set_tests_properties(tinyvm_scalar_backend_parity PROPERTIES
     DEPENDS "flowlower_backend_artifact;tinyvm_backend_lowering_boundary")
 
+add_test(NAME integer_match_backend_parity
+    COMMAND ${CMAKE_COMMAND} -E env
+        FLOWCORE_ROOT=${CMAKE_CURRENT_SOURCE_DIR}
+        FLOWMINI_BIN=$<TARGET_FILE:flowmini>
+        FLOWANALYST_BIN=$<TARGET_FILE:flowanalyst>
+        FLOWPARALLEL_BIN=$<TARGET_FILE:flowparallel>
+        FLOWOPTIMIZE_BIN=$<TARGET_FILE:flowoptimize>
+        FLOWPREPARE_BIN=$<TARGET_FILE:flowprepare>
+        FLOWLOWER_BIN=$<TARGET_FILE:flowlower>
+        FLOWTINYLOWER_BIN=$<TARGET_FILE:flowtinylower>
+        FLOWTINYRUN_BIN=$<TARGET_FILE:flowtinyrun>
+        ${CMAKE_CURRENT_SOURCE_DIR}/tools/test-integer-match-backend-parity.sh)
+set_tests_properties(integer_match_backend_parity PROPERTIES
+    DEPENDS "tinyvm_scalar_backend_parity")
+
 add_test(NAME tinyvm_governed_provider_parity
     COMMAND ${CMAKE_COMMAND} -E env
         FLOWCORE_ROOT=${CMAKE_CURRENT_SOURCE_DIR}

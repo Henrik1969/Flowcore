@@ -1,0 +1,17 @@
+program when_backend_parity_probe
+
+main {
+    state : int(2)
+    result : int(0)
+
+    when state {
+        case 1..2 {
+            37 -> result
+        }
+        default {
+            99 -> result
+        }
+    }
+
+    return result
+}
