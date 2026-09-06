@@ -494,3 +494,17 @@ lower the first integer `match` into structured backend branches.
 
 Carry explicit enum/variant member label identity in match arms, then lower
 integer matches into structured branch chains without application dispatch.
+
+## Explicit named match labels checkpoint
+
+- The Flow AST now preserves enum and variant case source identity as
+  `label_type` and `label_member` alongside numeric tags.
+- Flowanalyst carries those labels into match records; Flowlower requires them
+  for named selectors while retaining numeric ranges for integer selectors.
+- Full Flowmini language probes and focused frontend/backend preparation builds
+  pass.
+
+## Exact next action
+
+Add label-member consistency checks against the selector declaration, then
+introduce the first backend branch-chain lowering for integer match arms.

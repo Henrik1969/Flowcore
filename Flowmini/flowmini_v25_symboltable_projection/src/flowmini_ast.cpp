@@ -699,7 +699,12 @@ namespace flowmini::ast {
                             if (index > 0) { out << ", "; }
                             out << "{\"value\": " << whenStatement->cases[index].value
                                 << ", \"high\": " << whenStatement->cases[index].high
-                                << ", \"block\": " << whenStatement->cases[index].block << "}";
+                                << ", \"block\": " << whenStatement->cases[index].block;
+                            if (!whenStatement->cases[index].label_type.empty()) {
+                                out << ", \"label_type\": "; dump_json_string(out, whenStatement->cases[index].label_type);
+                                out << ", \"label_member\": "; dump_json_string(out, whenStatement->cases[index].label_member);
+                            }
+                            out << "}";
                         }
                         out << "], \"default_block\": " << whenStatement->default_block;
                     }

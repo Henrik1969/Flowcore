@@ -2586,12 +2586,16 @@ namespace flowmini::ast {
                 if (is_identifier_text(tokens[i], "case")) {
                     ++i;
                     int value = 0;
+                    std::string labelType;
+                    std::string labelMember;
                     if (i < tokens.size() && tokens[i].kind == flowmini::TokenKind::Number) {
                         value = std::stoi(tokens[i].text);
                         ++i;
                     } else if (i + 2 < tokens.size() && tokens[i].kind == flowmini::TokenKind::Identifier &&
                                tokens[i + 1].kind == flowmini::TokenKind::Dot &&
                                tokens[i + 2].kind == flowmini::TokenKind::Identifier) {
+                        labelType = tokens[i].text;
+                        labelMember = tokens[i + 2].text;
                         i += 3;
                     } else {
                         break;
@@ -2611,7 +2615,7 @@ namespace flowmini::ast {
                     const BlockId blockId = blockPool.size();
                     blockPool.push_back(Block{location_from_token(tokens[i]), {}});
                     i = parse_body_statement_shells(tokens, i, blockId, blockPool, statementPool, expressionPool);
-                    cases.push_back(WhenCase{value, high, blockId});
+                    cases.push_back(WhenCase{value, high, blockId, labelType, labelMember});
                 } else if (is_identifier_text(tokens[i], "default")) {
                     ++i;
                     i = skip_nonsemantic_separators(tokens, i);

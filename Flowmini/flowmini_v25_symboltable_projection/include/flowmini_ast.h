@@ -278,6 +278,8 @@ struct WhenCase {
     int value = 0;
     int high = 0;
     BlockId block = 0;
+    std::string label_type;
+    std::string label_member;
 };
 struct WhenStatement {
     std::size_t selector_expression = 0;

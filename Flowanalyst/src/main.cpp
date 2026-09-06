@@ -868,7 +868,12 @@ int run(const Json& bundle, int lowering_plan_version) {
             const auto& arm = cases[index];
             std::cout << "{\"value\":" << integer(field(arm, "value"))
                       << ",\"high\":" << integer(field(arm, "high"))
-                      << ",\"body_block_id\":" << integer(field(arm, "block")) << "}";
+                      << ",\"body_block_id\":" << integer(field(arm, "block"));
+            if (const auto* label = field(arm, "label_type")) {
+                std::cout << ",\"label_type\":" << quote(text(label));
+                if (const auto* member = field(arm, "label_member")) std::cout << ",\"label_member\":" << quote(text(member));
+            }
+            std::cout << "}";
         }
         std::cout << "] ,\"default_block_id\":" << integer(field(payload, "default_block"))
                   << ",\"join_block_id\":" << containing_block(statement_id) << "}";
