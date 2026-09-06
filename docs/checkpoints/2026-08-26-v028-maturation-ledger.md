@@ -455,3 +455,16 @@ validate arm labels, payload bindings, and join blocks before emitting code.
 
 Replace the temporary join marker with real lowered join blocks and add
 Flowlower structured emission for match arms.
+
+## Concrete match join checkpoint
+
+- Match facts now carry the containing parent block as a concrete join block
+  identity instead of the temporary `-1` marker.
+- Flowlower rejects match metadata without a non-negative join identity.
+- Focused Flowanalyst and Flowlower pipeline tests pass; arm emission remains
+  deferred until the structured backend can consume the multi-arm labels.
+
+## Exact next action
+
+Add arm-label validation against selector type and begin structured match-arm
+emission in Flowlower using the concrete join block.

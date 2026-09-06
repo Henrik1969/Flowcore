@@ -79,7 +79,8 @@ int prepare(const Options& option) {
                 throw Error("$.match_operations[].kind", "unsupported match operation kind");
             (void) required(match, "selector_expression", "$.match_operations[]");
             (void) required(match, "cases", "$.match_operations[]");
-            (void) required(match, "join_block_id", "$.match_operations[]");
+            if (integer(required(match, "join_block_id", "$.match_operations[]"), "$.match_operations[].join_block_id") < 0)
+                throw Error("$.match_operations[].join_block_id", "match operation requires a concrete join block");
         }
     }
     bool requires_binding = false;

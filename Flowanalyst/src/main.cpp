@@ -866,7 +866,7 @@ int run(const Json& bundle, int lowering_plan_version) {
                       << ",\"body_block_id\":" << integer(field(arm, "block")) << "}";
         }
         std::cout << "] ,\"default_block_id\":" << integer(field(payload, "default_block"))
-                  << ",\"join_block_id\":-1}";
+                  << ",\"join_block_id\":" << containing_block(statement_id) << "}";
     }
     std::cout << "],\n  \"effect_facts\": [";
     for (std::size_t i = 0; i < effect_facts.size(); ++i) { if (i) std::cout << ','; const auto& fact = effect_facts[i]; std::cout << "{\"declaration_id\":" << fact.declaration << ",\"symbol_id\":" << fact.symbol << ",\"name\":" << quote(fact.name) << ",\"effect\":" << quote(fact.effect) << ",\"certainty\":" << quote(fact.certainty) << ",\"reason\":" << quote(fact.reason) << "}"; }
