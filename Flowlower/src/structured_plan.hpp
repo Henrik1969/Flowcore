@@ -55,6 +55,12 @@ struct Operation {
     const Json* operand = nullptr;
     std::optional<Provider> provider;
 };
+struct MatchArm { int value = 0, high = 0, body_block = -1; std::string label_type, label_member; };
+struct MatchOperation {
+    int statement = -1, selector_expression = -1, selector_symbol = -1, default_block = -1, join_block = -1;
+    std::string selector_type, selector_kind;
+    std::vector<MatchArm> cases;
+};
 struct Callable { int symbol=-1, body_block=-1; bool entry=false; std::string name, result; std::vector<std::pair<int,std::string>> parameters; };
 
 inline std::string llvm_type(std::string_view carrier) {
@@ -110,13 +116,14 @@ public:
 private:
     const Json& root_; const Json& binding_;
     std::vector<Operation> operations_;
+    std::vector<MatchOperation> match_operations_;
     std::map<int,Callable> callables_;
     std::map<int, std::vector<const Operation*>> blocks_;
     std::map<int, std::string> symbol_types_;
     std::map<int, const Json*> definitions_;
     std::map<std::string, std::string> carrier_representations_;
     std::set<Provider> providers_, authorized_;
-    bool has_branch_ = false, has_declared_carrier_ = false, has_nonroot_block_ = false, invalid_control_ = false, unsupported_ = false, uses_args_ = false;
+    bool has_branch_ = false, has_match_ = false, has_declared_carrier_ = false, has_nonroot_block_ = false, invalid_control_ = false, unsupported_ = false, uses_args_ = false;
     int temporary_ = 0, label_ = 0, required_argc_ = 0;
     int plan_version_ = 1;
     std::map<int,std::pair<std::string,std::string>> call_results_;
@@ -157,6 +164,38 @@ private:
                 function.parameters.emplace_back(integer(field(parameter,"symbol_id"),"parameter.symbol_id"),text(field(parameter,"type")));
             for(const auto& [symbol,type]:function.parameters)symbol_types_[symbol]=type;
             callables_[function.symbol]=std::move(function);
+        }
+        if (const auto* matches = field(root_, "match_operations")) {
+            for (const auto& item : array(matches, "match_operations")) {
+                MatchOperation match;
+                match.statement = integer(field(item, "statement_id"), "match.statement_id");
+                match.selector_expression = integer(field(item, "selector_expression"), "match.selector_expression");
+                match.selector_symbol = integer(field(item, "selector_symbol_id"), "match.selector_symbol_id");
+                match.selector_type = text(field(item, "selector_type"));
+                match.selector_kind = text(field(item, "selector_kind"));
+                match.default_block = integer(field(item, "default_block_id"), "match.default_block_id");
+                match.join_block = integer(field(item, "join_block_id"), "match.join_block_id");
+                if (match.selector_expression < 0 || match.selector_type.empty() ||
+                    (match.selector_kind != "integer" && match.selector_kind != "named") || match.join_block < 0)
+                    throw std::runtime_error("invalid target-neutral match operation");
+                for (const auto& value : array(field(item, "cases"), "match.cases")) {
+                    MatchArm arm;
+                    arm.value = integer(field(value, "value"), "match.case.value");
+                    arm.high = integer(field(value, "high"), "match.case.high");
+                    arm.body_block = integer(field(value, "body_block_id"), "match.case.body_block_id");
+                    arm.label_type = text(field(value, "label_type"));
+                    arm.label_member = text(field(value, "label_member"));
+                    if (arm.high < arm.value || arm.body_block < 0 ||
+                        (match.selector_kind == "named" && (arm.label_type.empty() || arm.label_member.empty())))
+                        throw std::runtime_error("invalid target-neutral match arm");
+                    match.cases.push_back(std::move(arm));
+                }
+                match_operations_.push_back(std::move(match));
+            }
+            has_match_ = !match_operations_.empty();
+            // The backend now understands and preserves match metadata, but
+            // emission waits for a structured branch-chain representation.
+            unsupported_ = has_match_;
         }
         for (const auto& item : array(field(*plan,"operations"), "lowering_plan.operations")) {
             Operation op; op.id=integer(field(item,"id"),"id"); op.expression=integer(field(item,"expression_id"),"expression_id"); op.statement=integer(field(item,"statement_id"),"statement_id");

@@ -535,3 +535,19 @@ range, body, and join metadata.
 
 Trace the existing structured backend plan and add a target-neutral integer
 match branch representation before emitting any LLVM or TinyVM instructions.
+
+## Structured match intake checkpoint
+
+- Flowlower now parses the prepared `match_operations` contract into explicit
+  target-neutral match and arm records, validating selector identity, kind,
+  ranges, arm blocks, and joins at the structured backend boundary.
+- Match metadata is deliberately preserved without being mistaken for an
+  ordinary branch operation; LLVM/TinyVM emission remains gated until the
+  branch-chain representation is present.
+- Focused backend, pipeline, and TinyVM boundary tests pass.
+
+## Exact next action
+
+Add a target-neutral integer match branch chain to the lowering plan, with
+selector evaluation and explicit case/default/join edges, then teach the LLVM
+emitter to consume that representation.
