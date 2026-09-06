@@ -14,6 +14,9 @@ main {
     decoded : int(0)
     index : int(0)
     scalar_count : int(0)
+    malformed : list<int>([65,192,175,66])
+    malformed_index : int(0)
+    diagnostic_count : int(0)
 
     while index < length(bytes) {
         if bytes[index] < 128 {
@@ -26,10 +29,28 @@ main {
         }
     }
 
+    while malformed_index < length(malformed) {
+        if malformed[malformed_index] < 128 {
+            malformed_index + 1 -> malformed_index
+        } else {
+            if malformed[malformed_index] < 194 {
+                diagnostic_count + 1 -> diagnostic_count
+                malformed_index + 1 -> malformed_index
+            } else {
+                if malformed[malformed_index] <= 191 {
+                    diagnostic_count + 1 -> diagnostic_count
+                }
+                malformed_index + 1 -> malformed_index
+            }
+        }
+    }
+
     if ascii == 65 {
         if decoded == 230 {
             if scalar_count == 2 {
-                1 -> return
+                if diagnostic_count == 2 {
+                    1 -> return
+                }
             }
         }
     }
