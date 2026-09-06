@@ -481,3 +481,16 @@ emission in Flowlower using the concrete join block.
 
 Add selector-kind-aware label validation for enum and variant member tags, then
 lower the first integer `match` into structured backend branches.
+
+## Match selector-kind checkpoint
+
+- Match records now distinguish integer selectors from named enum/variant
+  selectors.
+- Flowlower rejects missing or unsupported selector kinds before preparation;
+  integer and named selectors remain accepted for the staged migration.
+- Focused Flowanalyst and Flowlower tests pass.
+
+## Exact next action
+
+Carry explicit enum/variant member label identity in match arms, then lower
+integer matches into structured branch chains without application dispatch.

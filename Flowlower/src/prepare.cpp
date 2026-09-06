@@ -80,6 +80,9 @@ int prepare(const Options& option) {
             (void) required(match, "selector_expression", "$.match_operations[]");
             if (string(required(match, "selector_type", "$.match_operations[]"), "$.match_operations[].selector_type").empty())
                 throw Error("$.match_operations[].selector_type", "match operation requires selector type");
+            const auto selector_kind = string(required(match, "selector_kind", "$.match_operations[]"), "$.match_operations[].selector_kind");
+            if (selector_kind != "integer" && selector_kind != "named")
+                throw Error("$.match_operations[].selector_kind", "unsupported match selector kind");
             const auto& cases = array(required(match, "cases", "$.match_operations[]"), "$.match_operations[].cases");
             for (const auto& arm_value : cases) {
                 const auto& arm = object(arm_value, "$.match_operations[].cases[]");
