@@ -44,3 +44,13 @@ test for the revised behavior.
 
 The existing lexer is intentionally unchanged in this checkpoint. It still
 operates on source bytes and remains outside this validated reader boundary.
+
+## Flow probe status
+
+`Flowmini/flowmini_v25_symboltable_projection/examples/bootstrap/utf8_source_reader_probe.flow`
+is the first Flow-side consumer. It reproduces the valid two-byte scalar
+calculation from the captured fixture using ordinary list values, indexing,
+arithmetic, and a function call. The probe is intentionally not called a full
+reader: general byte/file input and structured diagnostic collection are still
+language/library gaps to close before a Flow implementation can replace the
+C++ reference.
