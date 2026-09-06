@@ -36,6 +36,8 @@ using `when` arms, before any broader pattern or enum syntax is admitted.
 
 The first integer `when` grammar is now implemented against this contract and
 covered by case, default, duplicate-case, and missing-default probes. Broader
-patterns, enum selectors, and tagged variants remain deferred until they have
-their own differential evidence. This keeps `when`/`match` from becoming a
-second, less-tested control-flow implementation.
+patterns remain deferred until they have their own differential evidence.
+Enum and tagged-variant identity is specified separately in
+[`enums-and-tagged-variants-v1.md`](enums-and-tagged-variants-v1.md). This
+keeps `when`/`match` from becoming a second, less-tested control-flow
+implementation.
