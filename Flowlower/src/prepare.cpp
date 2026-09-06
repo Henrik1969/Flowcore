@@ -70,6 +70,18 @@ int prepare(const Options& option) {
         binding_provenance = Object{{"format", binding_header.format}, {"status", binding_header.status}, {"version", binding_header.version}};
     }
     const auto& operations = required_array(object(required(root, "lowering_plan"), "$.lowering_plan"), "operations", "$.lowering_plan");
+    Array match_operations;
+    if (const auto* matches = optional(root, "match_operations")) {
+        match_operations = array(*matches, "$.match_operations");
+        for (const auto& value : match_operations) {
+            const auto& match = object(value, "$.match_operations[]");
+            if (string(required(match, "kind", "$.match_operations[]"), "$.match_operations[].kind") != "match")
+                throw Error("$.match_operations[].kind", "unsupported match operation kind");
+            (void) required(match, "selector_expression", "$.match_operations[]");
+            (void) required(match, "cases", "$.match_operations[]");
+            (void) required(match, "join_block_id", "$.match_operations[]");
+        }
+    }
     bool requires_binding = false;
     for (const auto& value : operations)
         if (string(required(object(value, "$.lowering_plan.operations[]"), "kind", "$.lowering_plan.operations[]"), "$.lowering_plan.operations[].kind") == "external_call") requires_binding = true;
@@ -82,6 +94,7 @@ int prepare(const Options& option) {
         {"external_operations", required(root, "external_operations")},
         {"format", "flowcore.backend_lowering_artifact"},
         {"lowering_plan", required(root, "lowering_plan")},
+        {"match_operations", match_operations},
         {"provenance", Object{
             {"binding", binding_provenance},
             {"optimization", Object{{"format", optimization_header.format}, {"status", optimization_header.status}, {"version", optimization_header.version}}},

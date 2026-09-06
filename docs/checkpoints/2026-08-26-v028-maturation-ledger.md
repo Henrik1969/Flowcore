@@ -439,3 +439,19 @@ consume its arm labels and join structure without application-specific logic.
 
 Teach Flowlower's structured-plan reader to accept `match_operations` and
 validate arm labels, payload bindings, and join blocks before emitting code.
+
+## Flowlower match-operation acceptance checkpoint
+
+- `flowprepare` now validates and preserves `match_operations` as explicit
+  backend authority, requiring operation kind, selector, cases, and join
+  identity.
+- Flowanalyst match records now carry the operation-shaped `kind` and join
+  field; existing Flowanalyst, Flowparallel, Flowoptimize, and Flowlower
+  pipeline tests remain green.
+- Backend emission is intentionally not enabled yet; the acceptance boundary
+  prevents malformed match metadata from crossing into code generation.
+
+## Exact next action
+
+Replace the temporary join marker with real lowered join blocks and add
+Flowlower structured emission for match arms.
