@@ -51,3 +51,15 @@ case/default/join edges in both LLVM and TinyVM. Named enum and tagged-variant m
 to the semantic contract but are rejected by the LLVM emitter until their tag
 and payload representation is target-neutral. Existing `branch` remains
 canonical for Boolean `if` and `guard`.
+
+Variant routing follows a separate boundary. The target-neutral representation
+is a discriminant integer plus an arm-local payload record:
+
+```text
+variant value = { tag: 1, payload: { code: int, offset: int } }
+```
+
+Tag-only matches may consume `tag` once this layout is carried by the backend
+artifact. Payload bindings require the selected arm's field map and remain
+unsupported until that map is explicit; a backend must reject them rather than
+load a field from another arm by name or slot coincidence.

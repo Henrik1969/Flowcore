@@ -614,3 +614,17 @@ variant payload access until its layout is explicit.
 
 Run the complete suite, then define the shared tagged-variant runtime layout
 for tag-only routing before admitting payload bindings to either backend.
+
+## Tagged-variant layout checkpoint
+
+- The shared design now fixes the next representation boundary as a
+  discriminant integer plus an arm-local payload record.
+- Backend admission remains closed for variant payload construction and
+  bindings; no backend guesses a payload slot or silently drops a field.
+- The existing semantic/runtime variant probes remain the evidence source while
+  the artifact carries the explicit tag and field map.
+
+## Exact next action
+
+Promote variant tag identity and arm field maps into the backend artifact, then
+admit tag-only variant routing with a negative payload-access gate.

@@ -93,6 +93,7 @@ int run(const Json& bundle, int lowering_plan_version) {
     }
     std::set<std::string> enum_types, variant_types;
     std::map<std::string, std::map<std::string, int>> enum_members;
+    std::map<std::string, std::map<std::string, int>> variant_members;
     for (const auto& [identity, declaration] : declarations) {
         const auto kind = text(field(*declaration, "kind"));
         if (kind == "enum") {
@@ -101,7 +102,12 @@ int run(const Json& bundle, int lowering_plan_version) {
             int tag = 0;
             for (const auto& member : list(field(*declaration, "members"))) enum_members[type][text(field(member, "name"))] = tag++;
         }
-        if (kind == "variant") variant_types.insert(text(field(*declaration, "name")));
+        if (kind == "variant") {
+            const auto type = text(field(*declaration, "name"));
+            variant_types.insert(type);
+            int tag = 0;
+            for (const auto& member : list(field(*declaration, "members"))) variant_members[type][text(field(member, "name"))] = tag++;
+        }
     }
     std::vector<Diagnostic> diagnostics;
     auto add_diagnostic = [&](std::string code, std::string message, int symbol, std::string region = {}) {
@@ -790,6 +796,17 @@ int run(const Json& bundle, int lowering_plan_version) {
             const int base = integer(field(payload, "base"));
             const auto callee = expressions.count(base) && text(field(*expressions.at(base), "kind")) == "identifier"
                 ? text(field(field(*expressions.at(base), "payload"), "name")) : std::string{};
+            if (callee.empty() && expressions.count(base) && text(field(*expressions.at(base), "kind")) == "field_access") {
+                const auto* member_payload = field(*expressions.at(base), "payload");
+                const auto member = text(field(member_payload, "field"));
+                const auto member_base = integer(field(member_payload, "base"));
+                const auto type = expressions.count(member_base) && text(field(*expressions.at(member_base), "kind")) == "identifier"
+                    ? text(field(field(*expressions.at(member_base), "payload"), "name")) : std::string{};
+                if (variant_members.count(type) && variant_members.at(type).count(member)) {
+                    std::cout << ",\"type\":\"int\",\"value\":\"" << variant_members.at(type).at(member) << "\"";
+                    return;
+                }
+            }
             const auto arguments = list(field(payload, "arguments"));
             if (callee == "length" && arguments.size() == 1) {
                 const int argument = integer(&arguments.front());
