@@ -424,3 +424,18 @@ promote it to the versioned `match` operation consumed by Flowlower.
 
 Promote `match_facts` into a versioned `match` operation and teach Flowlower to
 consume its arm labels and join structure without application-specific logic.
+
+## Versioned match-operation promotion checkpoint
+
+- Match facts are now operation-shaped records with `kind: "match"`.
+- Flowparallel exposes them as `match_operations` while retaining
+  `match_facts` compatibility; Flowoptimize carries both fields forward.
+- Existing artifact consumers remain backward-compatible and focused pipeline
+  tests pass.
+- Backend emission is still deferred until arm-scope ownership and join
+  structure are consumed by Flowlower.
+
+## Exact next action
+
+Teach Flowlower's structured-plan reader to accept `match_operations` and
+validate arm labels, payload bindings, and join blocks before emitting code.

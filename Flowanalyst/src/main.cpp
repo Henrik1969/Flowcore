@@ -853,7 +853,7 @@ int run(const Json& bundle, int lowering_plan_version) {
         const int selector_symbol = resolved_expression_symbols.count(selector) ? resolved_expression_symbols.at(selector) : -1;
         if (!first_match) std::cout << ',';
         first_match = false;
-        std::cout << "{\"statement_id\":" << statement_id
+        std::cout << "{\"kind\":\"match\",\"statement_id\":" << statement_id
                   << ",\"selector_expression\":" << selector
                   << ",\"selector_symbol_id\":" << selector_symbol
                   << ",\"cases\":[";

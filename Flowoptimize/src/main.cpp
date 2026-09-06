@@ -46,6 +46,7 @@ int analyze(std::string_view input, const std::optional<flowcontracts::ProviderD
         plan.artifact = semantic.artifact; plan.source_path = semantic.source_path; plan.targets = semantic.targets;
         plan.external_operations = semantic.external_operations; plan.abi_type_contracts = semantic.abi_type_contracts;
         plan.match_facts = semantic.match_facts;
+        plan.match_operations = semantic.match_operations.empty() ? semantic.match_facts : semantic.match_operations;
         plan.lowering_plan = semantic.lowering_plan; plan.dependency_matrix = semantic.dependency_matrix;
         input_format = input_header.format;
     } else throw Error("$.format", "input is not a supported semantic report or execution plan");
@@ -72,6 +73,7 @@ int analyze(std::string_view input, const std::optional<flowcontracts::ProviderD
         {"abi_type_contracts", plan.abi_type_contracts}, {"external_operations", plan.external_operations},
         {"format", text("flowoptimize.optimization_report")},
         {"match_facts", plan.match_facts},
+        {"match_operations", plan.match_operations},
         {"input", Object{{"format", text(input_format)}, {"version", Integer{1}}}}, {"lowering_plan", plan.lowering_plan},
         {"message", text("optimization boundary reached; derived matrix views are available; provider selection remains runtime policy")},
         {"projections", Array{Object{{"columns", plan.dependency_matrix.columns}, {"kind", text("graph_to_matrix")},
