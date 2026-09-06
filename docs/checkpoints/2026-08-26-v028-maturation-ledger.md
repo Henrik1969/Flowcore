@@ -551,3 +551,21 @@ match branch representation before emitting any LLVM or TinyVM instructions.
 Add a target-neutral integer match branch chain to the lowering plan, with
 selector evaluation and explicit case/default/join edges, then teach the LLVM
 emitter to consume that representation.
+
+## Integer match branch-chain checkpoint
+
+- Flowanalyst now emits executable integer `match` operations in the lowering
+  plan, alongside the preserved semantic `match_operations` facts.
+- Flowlower consumes those operations as inclusive comparison chains with
+  explicit case, default, and join edges; the generated LLVM is accepted by
+  `llvm-as` for the canonical integer `when` probe.
+- Nested arm assignments now retain their uniquely resolved target symbols;
+  ambiguous fallback names remain unresolved rather than being guessed.
+- Named enum and tagged-variant matches remain semantically represented but are
+  rejected by the LLVM emitter until their target-neutral tag/payload layout is
+  defined.
+
+## Exact next action
+
+Route the same integer match operation through TinyVM and compare its execution
+with the LLVM branch-chain result before admitting named matches.

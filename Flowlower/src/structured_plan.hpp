@@ -49,13 +49,16 @@ struct Provider {
     auto tie() const { return std::tie(contract, library, convention, symbol, effect, parameters, result); }
     bool operator<(const Provider& other) const { return tie() < other.tie(); }
 };
+struct MatchArm { int value = 0, high = 0, body_block = -1; std::string label_type, label_member; };
 struct Operation {
     int id = -1, expression = -1, statement = -1, block = -1, function_symbol = -1, callee_symbol = -1, result_symbol = -1, then_block = -1, else_block = -1, body_block = -1;
     std::string kind;
     const Json* operand = nullptr;
+    int default_block = -1, join_block = -1;
+    std::string selector_type, selector_kind;
+    std::vector<MatchArm> match_cases;
     std::optional<Provider> provider;
 };
-struct MatchArm { int value = 0, high = 0, body_block = -1; std::string label_type, label_member; };
 struct MatchOperation {
     int statement = -1, selector_expression = -1, selector_symbol = -1, default_block = -1, join_block = -1;
     std::string selector_type, selector_kind;
@@ -193,9 +196,8 @@ private:
                 match_operations_.push_back(std::move(match));
             }
             has_match_ = !match_operations_.empty();
-            // The backend now understands and preserves match metadata, but
-            // emission waits for a structured branch-chain representation.
-            unsupported_ = has_match_;
+            // Match metadata is accepted when the lowering plan also carries
+            // its executable integer match operation.
         }
         for (const auto& item : array(field(*plan,"operations"), "lowering_plan.operations")) {
             Operation op; op.id=integer(field(item,"id"),"id"); op.expression=integer(field(item,"expression_id"),"expression_id"); op.statement=integer(field(item,"statement_id"),"statement_id");
@@ -204,6 +206,13 @@ private:
             op.result_symbol=integer(field(item,"result_symbol_id"),"result_symbol_id");
             op.then_block=integer(field(item,"then_block_id"),"then_block_id"); op.else_block=integer(field(item,"else_block_id"),"else_block_id");
             op.body_block=integer(field(item,"body_block_id"),"body_block_id");
+            op.default_block=integer(field(item,"default_block_id"),"default_block_id"); op.join_block=integer(field(item,"join_block_id"),"join_block_id");
+            op.selector_type=text(field(item,"selector_type")); op.selector_kind=text(field(item,"selector_kind"));
+            if (op.kind=="match") for (const auto& value : array(field(item,"cases"),"match.cases")) {
+                MatchArm arm; arm.value=integer(field(value,"value"),"match.case.value"); arm.high=integer(field(value,"high"),"match.case.high"); arm.body_block=integer(field(value,"body_block_id"),"match.case.body_block_id");
+                if (arm.high<arm.value || arm.body_block<0) throw std::runtime_error("invalid integer match operation");
+                op.match_cases.push_back(std::move(arm));
+            }
             const auto& operands=array(field(item,"operands"),"operation.operands"); if (!operands.empty()) op.operand=&operands.front();
             if (const auto* facts=field(item,"provider")) {
                 op.provider=provider(*facts); providers_.insert(*op.provider);
@@ -220,13 +229,15 @@ private:
                 has_branch_=true;
             }
             if (op.block!=0) has_nonroot_block_=true;
-            if (op.kind!="call" && op.kind!="external_call" && op.kind!="value_definition" && op.kind!="branch" && op.kind!="return_value" && op.kind!="loop" && op.kind!="assignment") unsupported_=true;
+            if (op.kind!="call" && op.kind!="external_call" && op.kind!="value_definition" && op.kind!="branch" && op.kind!="return_value" && op.kind!="loop" && op.kind!="assignment" && op.kind!="match") unsupported_=true;
             operations_.push_back(std::move(op));
         }
         for (auto& op:operations_) if (op.kind!="call" || plan_version_==2) blocks_[op.block].push_back(&op);
         for (const auto& op : operations_) {
             if (op.kind=="branch" && (op.then_block<0 || !blocks_.count(op.then_block) || (op.else_block>=0 && !blocks_.count(op.else_block)))) invalid_control_=true;
             if (op.kind=="loop" && (op.body_block<0 || !blocks_.count(op.body_block))) invalid_control_=true;
+            if (op.kind=="match" && (op.join_block<0 || !blocks_.count(op.join_block) || (op.default_block>=0 && !blocks_.count(op.default_block)))) invalid_control_=true;
+            if (op.kind=="match") for (const auto& arm : op.match_cases) if (!blocks_.count(arm.body_block)) invalid_control_=true;
         }
         std::map<int,int> block_start;
         for (const auto& [block,ops]:blocks_) for (const auto* op:ops)
@@ -247,6 +258,10 @@ private:
             for(int block:snapshot) for(const auto* op:blocks_[block]) {
                 const int children[]={op->then_block,op->else_block,op->body_block};
                 for(int child:children) if(child>=0 && reachable.insert(child).second) changed=true;
+                if (op->kind=="match") {
+                    if (op->default_block>=0 && reachable.insert(op->default_block).second) changed=true;
+                    for (const auto& arm : op->match_cases) if (reachable.insert(arm.body_block).second) changed=true;
+                }
             }
         }
         for(const auto& [block,ops]:blocks_) if(!ops.empty()&&!reachable.count(block)) invalid_control_=true;
@@ -409,6 +424,33 @@ private:
                 const auto join="flow_join_"+std::to_string(label_++); const auto then_label="flow_block_"+std::to_string(op->then_block); const auto else_label=op->else_block>=0?"flow_block_"+std::to_string(op->else_block):join;
                 out<<"  br i1 "<<condition<<", label %"<<then_label<<", label %"<<else_label<<"\n";
                 emit_block(op->then_block,out,join); if(op->else_block>=0) emit_block(op->else_block,out,join); out<<join<<":\n";
+            } else if(op->kind=="match") {
+                if (op->selector_kind != "integer" || op->match_cases.empty()) throw std::runtime_error("unsupported structured match selector");
+                auto [selector_type, selector] = expression(*op->operand, out, op->selector_type);
+                if (selector_type != "i32" || selector.empty()) throw std::runtime_error("unsupported integer match selector");
+                const auto join = "flow_join_" + std::to_string(label_++);
+                std::vector<std::string> tests;
+                for (std::size_t arm = 0; arm + 1 < op->match_cases.size(); ++arm) tests.push_back("flow_match_test_" + std::to_string(label_++));
+                for (std::size_t arm = 0; arm < op->match_cases.size(); ++arm) {
+                    const auto& match = op->match_cases[arm];
+                    const auto next = arm + 1 < op->match_cases.size() ? "%" + tests[arm] :
+                        (op->default_block >= 0 ? "%flow_block_" + std::to_string(op->default_block) : "%" + join);
+                    const auto low = "%flow_match_low_" + std::to_string(temporary_++);
+                    out << "  " << low << " = icmp sge i32 " << selector << ", " << match.value << "\n";
+                    std::string condition = low;
+                    if (match.high != match.value) {
+                        const auto high = "%flow_match_high_" + std::to_string(temporary_++);
+                        const auto bounded = "%flow_match_range_" + std::to_string(temporary_++);
+                        out << "  " << high << " = icmp sle i32 " << selector << ", " << match.high << "\n"
+                            << "  " << bounded << " = and i1 " << low << ", " << high << "\n";
+                        condition = bounded;
+                    }
+                    out << "  br i1 " << condition << ", label %flow_block_" << match.body_block << ", label " << next << "\n";
+                    if (arm + 1 < op->match_cases.size()) out << tests[arm] << ":\n";
+                }
+                for (const auto& match : op->match_cases) emit_block(match.body_block, out, join);
+                if (op->default_block >= 0) emit_block(op->default_block, out, join);
+                out << join << ":\n";
             } else if(op->kind=="loop") {
                 const auto condition_label="flow_loop_condition_"+std::to_string(label_++), exit_label="flow_loop_exit_"+std::to_string(label_++);
                 out<<"  br label %"<<condition_label<<"\n"<<condition_label<<":\n";

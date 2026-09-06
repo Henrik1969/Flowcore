@@ -4,7 +4,7 @@ Flowmini currently executes `when` directly in its record runtime. The
 semantic and backend chain needs a first-class control operation before enum
 and tagged-variant matching can cross into LLVM or TinyVM.
 
-The next lowering-plan revision adds one generic operation:
+The lowering plan now carries one generic operation for integer matching:
 
 ```json
 {
@@ -13,7 +13,7 @@ The next lowering-plan revision adds one generic operation:
   "selector_type": "DecodeOutcome",
   "function_symbol_id": 12,
   "block_id": 4,
-  "arms": [
+  "cases": [
     {
       "label": {"kind": "variant_member", "type": "DecodeOutcome", "member": "scalar", "tag": 0},
       "body_block_id": 5,
@@ -44,9 +44,10 @@ receives the selected variant tag and field paths explicitly, so it cannot
 accidentally read a payload belonging to another member. The operation joins
 all non-terminating arms at `join_block_id`.
 
-The migration is staged: Flowanalyst emits `match` alongside existing `branch`
-operations; Flowparallel and Flowoptimize preserve its arm order and identity;
-Flowlower adds structured emission; TinyVM receives the same operation through
-its target-neutral lowering. Existing `branch` remains canonical for Boolean
-`if` and `guard` until all consumers accept `match`.
-
+The migration is staged: Flowanalyst emits integer `match` operations alongside
+existing `branch` operations; Flowparallel and Flowoptimize preserve their case
+order and identity; Flowlower emits inclusive integer comparisons and explicit
+case/default/join edges. Named enum and tagged-variant matches remain admitted
+to the semantic contract but are rejected by the LLVM emitter until their tag
+and payload representation is target-neutral. Existing `branch` remains
+canonical for Boolean `if` and `guard`.

@@ -49,7 +49,7 @@ struct AggregateLayout { std::string contract, name; std::vector<std::pair<std::
 struct Region { std::string id, kind, status; std::vector<std::string> prerequisites; };
 struct EffectFact { int declaration = -1, symbol = -1; std::string name, effect, certainty, reason; };
 struct CallSite { int expression = -1, statement = -1, scope = -1, callee_symbol = -1, write_symbol = -1; std::string callee; bool pure = false; std::set<int> reads; std::string writes; std::vector<int> arguments; std::vector<int> independent_with; };
-struct LoweringOperation { int expression = -1, statement = -1, scope = -1, block = -1, function_symbol = -1, then_block = -1, else_block = -1, body_block = -1, callee_symbol = -1, result_symbol = -1; std::string callee, kind, contract, library, convention, symbol, effect, parameter_types, return_type; std::vector<int> arguments; };
+struct LoweringOperation { int expression = -1, statement = -1, scope = -1, block = -1, function_symbol = -1, then_block = -1, else_block = -1, body_block = -1, default_block = -1, join_block = -1, callee_symbol = -1, result_symbol = -1; std::string callee, kind, contract, library, convention, symbol, effect, parameter_types, return_type, selector_type, selector_kind; std::vector<int> arguments, match_values, match_highs, match_blocks; };
 struct Callable { int symbol = -1, scope = -1, body_block = -1; bool entry = false; std::string name, return_type, availability; std::vector<std::pair<int, std::string>> parameters; };
 struct Resolution { int expression = -1, statement = -1, scope = -1, symbol = -1; std::string name; };
 
@@ -581,6 +581,29 @@ int run(const Json& bundle, int lowering_plan_version) {
         lowering_operations.push_back(std::move(operation));
     }
     for (const auto& [statement_id, statement] : statements) {
+        if (text(field(*statement, "kind")) != "when") continue;
+        const auto* payload = field(*statement, "payload");
+        LoweringOperation operation;
+        operation.expression = integer(field(payload, "selector_expression"));
+        operation.statement = statement_id;
+        operation.scope = statement_scopes.count(statement_id) ? statement_scopes.at(statement_id) : -1;
+        operation.block = containing_block(statement_id);
+        operation.function_symbol = containing_function(operation.scope);
+        operation.default_block = integer(field(payload, "default_block"));
+        operation.join_block = operation.block;
+        const int selector_symbol = resolved_expression_symbols.count(operation.expression) ? resolved_expression_symbols.at(operation.expression) : -1;
+        operation.selector_type = symbol_types.count(selector_symbol) ? symbol_types.at(selector_symbol) : std::string{};
+        operation.selector_kind = operation.selector_type == "int" || operation.selector_type.rfind("c_", 0) == 0 ? "integer" : "named";
+        operation.kind = "match";
+        if (operation.expression >= 0) operation.arguments.push_back(operation.expression);
+        for (const auto& arm : list(field(payload, "cases"))) {
+            operation.match_values.push_back(integer(field(arm, "value")));
+            operation.match_highs.push_back(integer(field(arm, "high")));
+            operation.match_blocks.push_back(integer(field(arm, "block")));
+        }
+        lowering_operations.push_back(std::move(operation));
+    }
+    for (const auto& [statement_id, statement] : statements) {
         if (text(field(*statement, "kind")) != "placement") continue;
         const auto* payload = field(*statement, "payload");
         const int value_expression = integer(field(payload, "value_expression"));
@@ -593,6 +616,15 @@ int run(const Json& bundle, int lowering_plan_version) {
         operation.block = containing_block(statement_id);
         operation.function_symbol = containing_function(scope_id);
         operation.result_symbol = visible_symbol(scope_id, text(field(field(payload, "target"), "name")));
+        if (operation.result_symbol < 0) {
+            const auto target_name = text(field(field(payload, "target"), "name"));
+            int candidate = -1;
+            for (const auto& [symbol_id, symbol] : symbols) if (text(field(*symbol, "name")) == target_name) {
+                if (candidate >= 0) { candidate = -1; break; }
+                candidate = symbol_id;
+            }
+            operation.result_symbol = candidate;
+        }
         operation.kind = "assignment";
         operation.arguments.push_back(value_expression);
         lowering_operations.push_back(std::move(operation));
@@ -794,7 +826,7 @@ int run(const Json& bundle, int lowering_plan_version) {
         std::cout << "],\"operands\":[";
         for (std::size_t argument = 0; argument < operation.arguments.size(); ++argument) {
             if (argument) std::cout << ',';
-            const auto declared_type = operation.kind == "value_definition" && operation.result_symbol >= 0 && symbol_types.count(operation.result_symbol)
+            const auto declared_type = (operation.kind == "value_definition" || operation.kind == "assignment") && operation.result_symbol >= 0 && symbol_types.count(operation.result_symbol)
                 ? symbol_types.at(operation.result_symbol) : std::string{};
             emit_operand(operation.arguments[argument], declared_type);
         }
@@ -802,6 +834,18 @@ int run(const Json& bundle, int lowering_plan_version) {
         if (operation.result_symbol >= 0) std::cout << ",\"result_symbol_id\":" << operation.result_symbol;
         if (operation.kind == "branch") std::cout << ",\"then_block_id\":" << operation.then_block << ",\"else_block_id\":" << operation.else_block;
         if (operation.kind == "loop") std::cout << ",\"body_block_id\":" << operation.body_block;
+        if (operation.kind == "match") {
+            std::cout << ",\"selector_type\":" << quote(operation.selector_type)
+                      << ",\"selector_kind\":" << quote(operation.selector_kind) << ",\"default_block_id\":" << operation.default_block
+                      << ",\"join_block_id\":" << operation.join_block << ",\"cases\":[";
+            for (std::size_t arm = 0; arm < operation.match_values.size(); ++arm) {
+                if (arm) std::cout << ',';
+                std::cout << "{\"value\":" << operation.match_values[arm]
+                          << ",\"high\":" << operation.match_highs[arm]
+                          << ",\"body_block_id\":" << operation.match_blocks[arm] << "}";
+            }
+            std::cout << "]";
+        }
         if (operation.kind == "external_call") {
             std::cout << ",\"provider\":{\"contract\":" << quote(operation.contract)
                       << ",\"library\":" << quote(operation.library)
