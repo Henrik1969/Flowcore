@@ -348,3 +348,18 @@ remove the remaining conservative default requirement for closed variants.
 
 Run the complete canonical repository gate at this language boundary, then
 continue with richer semantic-report facts for variant case coverage.
+
+## Canonical gate wiring checkpoint
+
+- Added root CTest entry points for the preserved Flowmini UTF-8 artifact and
+  language probes; both previously referenced missing scripts.
+- Rebuilt the canonical tree after the variant changes. The artifact fixture and
+  Flowmini probe tests now pass through CTest.
+- The remaining full-gate failure is isolated to the existing
+  `callable_lowering_boundary` contract check, which reports an operation owner
+  mismatch in the function catalog and is independent of the variant sources.
+
+## Exact next action
+
+Repair the callable-boundary function-catalog mismatch, then rerun the complete
+canonical repository gate before continuing semantic-report maturation.
