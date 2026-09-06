@@ -1,6 +1,9 @@
 program utf8_malformed_runtime_probe
 
 main {
+    const ascii_limit : int(128)
+    const valid_two_byte_lead : int(194)
+    const diagnostic_increment : int(1)
     bytes : list<int>(stdin.bytes())
     index : int(0)
     byte : int(0)
@@ -8,11 +11,11 @@ main {
 
     while index < length(bytes) {
         bytes[index] -> byte
-        if byte < 128 {
+        if byte < ascii_limit {
             index + 1 -> index
         } else {
-            if byte < 194 {
-                diagnostic_count + 1 -> diagnostic_count
+            if byte < valid_two_byte_lead {
+                diagnostic_count + diagnostic_increment -> diagnostic_count
             }
             index + 1 -> index
         }

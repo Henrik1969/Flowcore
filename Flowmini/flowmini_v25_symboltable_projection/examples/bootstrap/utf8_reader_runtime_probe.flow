@@ -4,13 +4,15 @@ main {
     const lead_bias : int(192)
     const continuation_bias : int(128)
     const continuation_width : int(64)
+    const lead_offset : int(1)
+    const continuation_offset : int(2)
     bytes : list<int>(stdin.bytes())
     lead : int(0)
     continuation : int(0)
     scalar : int(0)
 
-    bytes[1] -> lead
-    bytes[2] -> continuation
+    bytes[lead_offset] -> lead
+    bytes[continuation_offset] -> continuation
     (lead - lead_bias) * continuation_width + continuation - continuation_bias -> scalar
     print scalar
 }
