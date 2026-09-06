@@ -508,3 +508,16 @@ integer matches into structured branch chains without application dispatch.
 
 Add label-member consistency checks against the selector declaration, then
 introduce the first backend branch-chain lowering for integer match arms.
+
+## Match label consistency checkpoint
+
+- Flowanalyst now rejects named match labels whose declaration type differs from
+  the selector type.
+- Integer selectors carrying named member labels are rejected explicitly.
+- Existing enum, variant, runtime, frontend, and Flowanalyst probes remain
+  green.
+
+## Exact next action
+
+Introduce backend lowering for integer match arms using the validated selector,
+range, body, and join metadata.

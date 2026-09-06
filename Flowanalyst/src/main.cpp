@@ -852,7 +852,7 @@ int run(const Json& bundle, int lowering_plan_version) {
         const int selector = integer(field(payload, "selector_expression"));
         const int selector_symbol = resolved_expression_symbols.count(selector) ? resolved_expression_symbols.at(selector) : -1;
         const auto selector_type = symbol_types.count(selector_symbol) ? symbol_types.at(selector_symbol) : std::string{};
-        const auto selector_kind = selector_type == "int" || selector_type.rfind("c_", 0) == 0 ? "integer" :
+        const std::string selector_kind = selector_type == "int" || selector_type.rfind("c_", 0) == 0 ? "integer" :
             (selector_type.empty() ? "unknown" : "named");
         if (!first_match) std::cout << ',';
         first_match = false;
@@ -870,6 +870,11 @@ int run(const Json& bundle, int lowering_plan_version) {
                       << ",\"high\":" << integer(field(arm, "high"))
                       << ",\"body_block_id\":" << integer(field(arm, "block"));
             if (const auto* label = field(arm, "label_type")) {
+                const auto label_type = text(label);
+                if (!selector_type.empty() && label_type != selector_type)
+                    add_diagnostic("FLOWANALYST_MATCH_LABEL_TYPE", "match label type '" + label_type + "' does not match selector type '" + selector_type + "'", selector_symbol, "statement:" + std::to_string(statement_id));
+                if (selector_kind == "integer")
+                    add_diagnostic("FLOWANALYST_MATCH_LABEL_ON_INTEGER", "integer match selector cannot use named member label", selector_symbol, "statement:" + std::to_string(statement_id));
                 std::cout << ",\"label_type\":" << quote(text(label));
                 if (const auto* member = field(arm, "label_member")) std::cout << ",\"label_member\":" << quote(text(member));
             }
