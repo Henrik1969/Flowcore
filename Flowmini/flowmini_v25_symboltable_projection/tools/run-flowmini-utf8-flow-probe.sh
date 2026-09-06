@@ -19,6 +19,7 @@ when_overlap_source="${root}/Flowmini/flowmini_v25_symboltable_projection/exampl
 when_descending_source="${root}/Flowmini/flowmini_v25_symboltable_projection/examples/fail/bad_when_descending.flow"
 enum_source="${root}/Flowmini/flowmini_v25_symboltable_projection/examples/bootstrap/enum_state_probe.flow"
 variant_source="${root}/Flowmini/flowmini_v25_symboltable_projection/examples/bootstrap/variant_declaration_probe.flow"
+classifier_source="${root}/Flowmini/flowmini_v25_symboltable_projection/examples/bootstrap/shared_scalar_classifier.flow"
 tmpdir="$(mktemp -d)"
 trap 'rm -rf "${tmpdir}"' EXIT
 
@@ -121,3 +122,10 @@ test "${variant_output}" = "1"
 jq -e '.status == "ok"' "${tmpdir}/variant-semantic.json" >/dev/null
 jq -e '([.ast.declaration_pool[]? | select(.kind == "variant")] | length == 1)' "${tmpdir}/variant-bundle.json" >/dev/null
 echo "Flow tagged variant declaration probe: PASS"
+
+classifier_output="$(${flowmini} "${classifier_source}")"
+test "${classifier_output}" = "53"
+"${flowmini}" --dump-frontend-bundle "${classifier_source}" > "${tmpdir}/classifier-bundle.json"
+"${analyst}" --lowering-plan-version 2 "${tmpdir}/classifier-bundle.json" > "${tmpdir}/classifier-semantic.json"
+jq -e '([.ast.declaration_pool[]? | select(.kind == "enum")] | length == 1) and ([.ast.statement_pool[]? | select(.kind == "when")] | length == 1)' "${tmpdir}/classifier-bundle.json" >/dev/null
+echo "Flow shared scalar classifier refactor probe: PASS"

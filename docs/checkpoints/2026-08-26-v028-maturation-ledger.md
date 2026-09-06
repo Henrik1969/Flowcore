@@ -213,3 +213,27 @@ All v0.28 definition-of-done gates are complete. Canonical Graph IR,
 revisioned persistent identity storage, executable safety admission,
 certification, self-hosting, permanent writable-storage syntax, and generalized
 ABI/CUDA lowering remain explicitly future work rather than hidden blockers.
+
+## Post-v0.28 language maturation checkpoint — enum-driven classifier
+
+- Preserved the C++ UTF-8 artifacts as the comparison authority while extending
+  the Flowmini language slice.
+- Completed enum values through callable function arguments and return values,
+  including enum equality and enum-member visibility while lowering nested
+  function calls.
+- Refactored the shared scalar classifier probe from magic integer class values
+  and nested branching to `ScalarClass` plus a bounded `when` range, with the
+  same behavior observed through tokenizer and document call paths.
+- Added the classifier to the canonical UTF-8/Flowmini probe chain. Runtime
+  output, frontend AST projection, Flowanalyst lowering, enum identity, tagged
+  variant declaration, guard behavior, malformed parity, and C++ artifact
+  parity all pass.
+- The tagged variant syntax and declaration metadata are now carried through
+  the language chain; payload construction and payload-aware `when` matching
+  remain the next unfinished semantic slice.
+
+## Exact next action
+
+Implement tagged variant construction and payload-aware `when` matching with a
+small runtime probe, then carry the same evidence through frontend projection
+and Flowanalyst while preserving the C++ artifacts unchanged.

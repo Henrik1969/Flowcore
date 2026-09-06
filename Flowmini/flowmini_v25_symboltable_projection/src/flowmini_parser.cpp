@@ -432,7 +432,7 @@ private:
     }
 
     [[nodiscard]] bool isCallableType(const std::string& type) const {
-        return isIntLikeType(type) || type == "Bool" || type == "c_string" || isAbiStructType(type) || isRecordType(type);
+        return isIntLikeType(type) || type == "Bool" || type == "c_string" || isAbiStructType(type) || isRecordType(type) || isEnumType(type);
     }
 
     [[nodiscard]] bool isSubtypeOf(const std::string& actual, const std::string& wanted) const {
@@ -775,6 +775,9 @@ private:
         if (expr.op == TokenKind::EqualEqual && lhs == "Bool" && rhs == "Bool") {
             return "Bool";
         }
+        if (expr.op == TokenKind::EqualEqual && lhs == rhs && isEnumType(lhs)) {
+            return "Bool";
+        }
         if (!isIntLikeType(lhs) || !isIntLikeType(rhs)) { throw flow::DiagnosticError{"lowerer", "binary operator requires int-like operands"}; }
         if (expr.op == TokenKind::Greater || expr.op == TokenKind::Less || expr.op == TokenKind::GreaterEqual || expr.op == TokenKind::LessEqual || expr.op == TokenKind::EqualEqual || expr.op == TokenKind::BangEqual) {
             return "Bool";
@@ -1035,10 +1038,21 @@ private:
         const auto savedScopes = scopes_;
         const std::size_t savedPos = pos_;
         const bool savedReturnSeen = currentFunctionSawReturn_;
+        const std::string savedReturnType = activeReturnType_;
         currentFunctionSawReturn_ = false;
+        activeReturnType_ = fn->returnType;
 
         scopes_.clear();
         scopes_.push_back(Scope{module_.name, module_.name, {}});
+        for (const auto& [typeName, typeDef] : types_) {
+            if (!typeDef.isEnum) { continue; }
+            for (const auto& [memberName, memberValue] : typeDef.enumMembers) {
+                scopes_.front().symbols[memberName] = Symbol{typeName,
+                    "__" + sanitize(module_.name) + "_" + memberName,
+                    module_.name + "::" + memberName,
+                    {}, true, memberValue, {}};
+            }
+        }
         enterScope("call_" + fn->name + "_" + std::to_string(++functionInstanceCounter_));
 
         for (std::size_t i = 0; i < fn->args.size(); ++i) {
@@ -1077,6 +1091,7 @@ private:
         scopes_ = savedScopes;
         pos_ = savedPos;
         currentFunctionSawReturn_ = savedReturnSeen;
+        activeReturnType_ = savedReturnType;
         callStepResultPath_ = requestedOutPath;
         return combined;
     }
@@ -1818,6 +1833,10 @@ private:
 
     [[nodiscard]] Step lowerAssignmentToTarget(const Expr& expr, const Target& target) {
         const Symbol* targetSymbol = lookup(target.ident);
+        if (targetSymbol == nullptr && target.ident == "return" && !activeReturnType_.empty()) {
+            currentScope().symbols["return"] = Symbol{activeReturnType_, pathFor("return"), currentScope().qualifiedName + "::return", {}, false, {}, {}};
+            targetSymbol = lookup("return");
+        }
         if (targetSymbol == nullptr) {
             throw flow::DiagnosticError{"lowerer", "cannot assign to undeclared target '" + target.ident + "'"};
         }
@@ -2296,6 +2315,7 @@ private:
     std::vector<std::string> functionCallStack_;
     int functionInstanceCounter_ = 0;
     bool currentFunctionSawReturn_ = false;
+    std::string activeReturnType_;
     bool mainSeen_ = false;
     bool declaringConstant_ = false;
     std::string callStepResultPath_;
