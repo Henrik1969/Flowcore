@@ -5,11 +5,8 @@ main {
     marker : int(0)
 
     when state {
-        case 1 {
+        case 1..2 {
             11 -> marker
-        }
-        case 2 {
-            22 -> marker
         }
         default {
             99 -> marker

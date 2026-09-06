@@ -51,6 +51,7 @@ struct Step {
 
 struct WhenCase {
     std::optional<int> value;
+    int high = 0;
     Step body;
 };
 
@@ -1962,10 +1963,21 @@ private:
                 static_cast<void>(expectIdentifier("expected 'case'"));
                 const Token& valueToken = expect(TokenKind::Number, "expected integer literal after 'case'");
                 const int caseValue = parseIntToken(valueToken);
-                if (!seenValues.insert(caseValue).second) {
-                    throw flow::DiagnosticError{"lowerer", "duplicate when case value " + std::to_string(caseValue)};
+                int highValue = caseValue;
+                if (match(TokenKind::Dot)) {
+                    expect(TokenKind::Dot, "expected '..' in when range case");
+                    highValue = parseIntToken(expect(TokenKind::Number, "expected range end after '..'"));
+                    if (highValue < caseValue || highValue - caseValue > 256) {
+                        throw flow::DiagnosticError{"lowerer", "when range must be ascending and at most 257 values"};
+                    }
+                }
+                for (int candidate = caseValue; candidate <= highValue; ++candidate) {
+                    if (!seenValues.insert(candidate).second) {
+                        throw flow::DiagnosticError{"lowerer", "duplicate when case value " + std::to_string(candidate)};
+                    }
                 }
                 value = caseValue;
+                cases.push_back(WhenCase{value, highValue, {}});
             } else if (check(TokenKind::Identifier) && peek().text == "default") {
                 static_cast<void>(expectIdentifier("expected 'default'"));
                 if (hasDefault) { throw flow::DiagnosticError{"lowerer", "duplicate when default arm"}; }
@@ -1980,7 +1992,12 @@ private:
             Step body = parseBlockStatementsUntilRightBrace();
             leaveScope();
             if (body.empty) { fail(peek(), "when arm may not be empty"); }
-            cases.push_back(WhenCase{value, body});
+            if (!cases.empty() && cases.back().value == value && cases.back().body.empty) {
+                cases.back().body = body;
+                cases.back().high = value.has_value() ? cases.back().high : 0;
+            } else {
+                cases.push_back(WhenCase{value, value.value_or(0), body});
+            }
             skipNewlines();
         }
         expect(TokenKind::RightBrace, "expected '}' to close when block");
@@ -1988,35 +2005,53 @@ private:
 
         const std::string joinId = generatedId("when_join");
         addNode("node", joinId, "record.nop");
-        std::vector<std::pair<std::string, Step>> routes;
+        struct RouteChain { ChainEnd first; ChainEnd failure; };
+        std::vector<RouteChain> routes;
         std::optional<Step> defaultBody;
-        for (auto& arm : cases) {
-            if (!arm.value.has_value()) {
-                defaultBody = std::move(arm.body);
-                continue;
-            }
+        auto addConditionRoute = [&](TokenKind op, int literal, bool negate = false) {
             Expr left;
             left.kind = ExprKind::Identifier;
             left.ident = selector.ident;
             Expr right;
             right.kind = ExprKind::LiteralInt;
-            right.literal = *arm.value;
+            right.literal = literal;
             Expr condition;
             condition.kind = ExprKind::Binary;
-            condition.op = TokenKind::EqualEqual;
+            condition.op = op;
             condition.left = std::make_unique<Expr>(std::move(left));
             condition.right = std::make_unique<Expr>(std::move(right));
-
+            if (negate) {
+                Expr inverted;
+                inverted.kind = ExprKind::UnaryNot;
+                inverted.left = std::make_unique<Expr>(std::move(condition));
+                condition = std::move(inverted);
+            }
             Step condStep;
             const std::string condPath = lowerExprToPath(condition, generatedId("when_case_cond"), &condStep);
             const std::string routeId = generatedId("when_case_route");
             addNode("node", routeId, "route.bool");
             addPolicy(routeId, "path", condPath);
             appendStep(condStep, Step{false, false, {routeId, "in"}, {routeId, "false"}});
-            routes.emplace_back(routeId, Step{false, false, condStep.first, {routeId, "false"}});
-            routes.back().second.last = {routeId, "false"};
-
-            addWire({routeId, "true"}, arm.body.first);
+            return RouteChain{condStep.first, {routeId, "false"}};
+        };
+        for (auto& arm : cases) {
+            if (!arm.value.has_value()) {
+                defaultBody = std::move(arm.body);
+                continue;
+            }
+            RouteChain chain = addConditionRoute(
+                arm.high == *arm.value ? TokenKind::EqualEqual : TokenKind::Greater,
+                arm.high == *arm.value ? *arm.value : *arm.value - 1);
+            if (arm.high != *arm.value) {
+                RouteChain upper = addConditionRoute(TokenKind::Greater, arm.high, true);
+                addWire({chain.failure.node, "true"}, upper.first);
+                routes.push_back(chain);
+                routes.push_back(upper);
+                addWire({upper.failure.node, "true"}, arm.body.first);
+            } else {
+                routes.push_back(chain);
+                addWire({chain.failure.node, "true"}, arm.body.first);
+            }
             if (!arm.body.terminates) { addWire(arm.body.last, {joinId, "in"}); }
         }
 
@@ -2024,12 +2059,12 @@ private:
         if (routes.empty()) {
             return Step{false, defaultBody->terminates, defaultBody->first, defaultBody->last};
         }
-        addWire({routes.back().first, "false"}, defaultBody->first);
+        addWire(routes.back().failure, defaultBody->first);
         if (!defaultBody->terminates) { addWire(defaultBody->last, {joinId, "in"}); }
         for (std::size_t i = 0; i + 1 < routes.size(); ++i) {
-            addWire({routes[i].first, "false"}, routes[i + 1].second.first);
+            addWire(routes[i].failure, routes[i + 1].first);
         }
-        return Step{false, false, routes.front().second.first, {joinId, "out"}};
+        return Step{false, false, routes.front().first, {joinId, "out"}};
     }
 
     [[nodiscard]] Step parseWhileStatement() {

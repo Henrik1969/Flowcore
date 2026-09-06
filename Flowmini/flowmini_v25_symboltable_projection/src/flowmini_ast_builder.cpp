@@ -2582,6 +2582,14 @@ namespace flowmini::ast {
                     }
                     const int value = std::stoi(tokens[i].text);
                     ++i;
+                    int high = value;
+                    if (i + 1 < tokens.size() && tokens[i].kind == flowmini::TokenKind::Dot &&
+                        tokens[i + 1].kind == flowmini::TokenKind::Dot) {
+                        i += 2;
+                        if (i >= tokens.size() || tokens[i].kind != flowmini::TokenKind::Number) { break; }
+                        high = std::stoi(tokens[i].text);
+                        ++i;
+                    }
                     i = skip_nonsemantic_separators(tokens, i);
                     if (i >= tokens.size() || tokens[i].kind != flowmini::TokenKind::LeftBrace) {
                         break;
@@ -2589,7 +2597,7 @@ namespace flowmini::ast {
                     const BlockId blockId = blockPool.size();
                     blockPool.push_back(Block{location_from_token(tokens[i]), {}});
                     i = parse_body_statement_shells(tokens, i, blockId, blockPool, statementPool, expressionPool);
-                    cases.push_back(WhenCase{value, blockId});
+                    cases.push_back(WhenCase{value, high, blockId});
                 } else if (is_identifier_text(tokens[i], "default")) {
                     ++i;
                     i = skip_nonsemantic_separators(tokens, i);

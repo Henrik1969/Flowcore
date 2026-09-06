@@ -6,11 +6,8 @@ from a finite state or outcome value:
 
 ```flow
 when decode_state {
-    case 1 {
+    case 1..2 {
         11 -> result
-    }
-    case 2 {
-        22 -> result
     }
     default {
         failure -> return
@@ -18,11 +15,12 @@ when decode_state {
 }
 ```
 
-The first implementation target is an integer selector with literal cases.
+The first implementation target is an integer selector with literal and
+bounded inclusive range cases.
 Each case is evaluated at most once, cases are ordered by source, and the
 `default` arm is mandatory until the language has an enum or tagged-variant
-type that can be checked for exhaustiveness. Duplicate literal cases are a
-frontend error. A case body may fall through to the join only when it does not
+type that can be checked for exhaustiveness. Duplicate or overlapping case
+values are a frontend error. A case body may fall through to the join only when it does not
 terminate; a terminating arm does not create a false continuation.
 
 The construct must lower to the same explicit route and join graph as an

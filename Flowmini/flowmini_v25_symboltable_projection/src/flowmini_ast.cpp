@@ -525,6 +525,7 @@ namespace flowmini::ast {
                     for (std::size_t index = 0; index < payload.cases.size(); ++index) {
                         if (index > 0) { out << ", "; }
                         out << "{\"value\": " << payload.cases[index].value
+                            << ", \"high\": " << payload.cases[index].high
                             << ", \"block\": " << payload.cases[index].block << "}";
                     }
                     out << "], \"default_block\": " << payload.default_block;
@@ -697,6 +698,7 @@ namespace flowmini::ast {
                         for (std::size_t index = 0; index < whenStatement->cases.size(); ++index) {
                             if (index > 0) { out << ", "; }
                             out << "{\"value\": " << whenStatement->cases[index].value
+                                << ", \"high\": " << whenStatement->cases[index].high
                                 << ", \"block\": " << whenStatement->cases[index].block << "}";
                         }
                         out << "], \"default_block\": " << whenStatement->default_block;

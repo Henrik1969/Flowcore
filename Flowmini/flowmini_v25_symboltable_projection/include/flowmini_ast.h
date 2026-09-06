@@ -274,6 +274,7 @@ struct IfStatement {
 };
 struct WhenCase {
     int value = 0;
+    int high = 0;
     BlockId block = 0;
 };
 struct WhenStatement {
