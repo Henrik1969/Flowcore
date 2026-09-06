@@ -363,3 +363,18 @@ continue with richer semantic-report facts for variant case coverage.
 
 Repair the callable-boundary function-catalog mismatch, then rerun the complete
 canonical repository gate before continuing semantic-report maturation.
+
+## Canonical callable gate checkpoint
+
+- Restored the generic callable boundary to its established `fn_demo` fixture
+  after confirming that Flowanalyst does not yet lower `when` control blocks into
+  backend branch operations.
+- The enum/variant classifier remains covered by the dedicated frontend,
+  Flowanalyst semantic, runtime, and C++ parity probes; backend lowering of
+  `when` is explicitly deferred rather than hidden behind a special dispatch.
+- Root CTest wiring and callable boundary now pass in focused verification.
+
+## Exact next action
+
+Run the complete 80-test repository gate, then add generic Flowanalyst lowering
+for `when` control blocks before routing the classifier through LLVM/TinyVM.

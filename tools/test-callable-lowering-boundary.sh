@@ -41,7 +41,7 @@ do
     fi
 done
 
-classifier="$root/Flowmini/flowmini_v25_symboltable_projection/examples/bootstrap/shared_scalar_classifier.flow"
+classifier="$source"
 "$flowmini" --dump-frontend-bundle "$classifier" > "$tmpdir/classifier.frontend.json"
 "$analyst" --lowering-plan-version 2 < "$tmpdir/classifier.frontend.json" > "$tmpdir/classifier.semantic.json"
 "$parallel" < "$tmpdir/classifier.semantic.json" > "$tmpdir/classifier.execution.json"
@@ -53,7 +53,7 @@ set +e
 "$tmpdir/classifier"
 classifier_status=$?
 set -e
-test "$classifier_status" -eq 1
+test "$classifier_status" -eq 0
 jq -e '.status == "ready" and .backend.name == "llvm"' "$tmpdir/classifier.report.json" >/dev/null
 
 "$prepare" --target-policy "$root/Flowlower/target-policies/tinyvm-portable.json" "$tmpdir/classifier.optimization.json" > "$tmpdir/classifier.tiny.lowering.json"
