@@ -705,3 +705,38 @@ separate from proposals.
 - The unrelated pre-existing `Flowselection/README.md` and
   `Flowselection/sel-ui/` changes remain outside this maturation chain and are
   intentionally preserved.
+
+## 2026-09-06 review freeze
+
+The published evidence boundary is commit `af769d403a2daf41c2f279a0bb40b7d06c09fa51`
+(`v0.29.0`) on `flowlfs-v0.1-alive`. No language or FlowLFS implementation work
+is admitted under the completed TinyVM bootstrap mission until a new bounded
+mission is approved.
+
+Verification recorded at this boundary:
+
+- Normal build configuration and `flowvalidate` build completed successfully.
+- `ctest --test-dir build --output-on-failure` passed 82/82 tests.
+- An ASan/UBSan Debug configure and build completed successfully with
+  `-fsanitize=address,undefined -fno-omit-frame-pointer`.
+- The sanitizer CTest run passed 81/82. `terminal_sel_pipeline` failed before
+  its assertions because the environment reported `ASan runtime does not come
+  first in initial library list`; no code diagnostic was emitted. This remains
+  an environmental exclusion to reproduce with a correctly preloaded runtime.
+
+The review identifies the finite decisions required before continuation:
+
+1. Choose whether tagged-variant payload parity is in the v0.29 closure or is
+   explicitly deferred to v0.30.
+2. Choose whether FlowLFS and Flowcore/Flowmini v0.29 become separate histories
+   now or remain a mixed recovery branch until integration.
+3. Choose the durable home for large FlowLFS artifacts and the manifest/digest
+   contract.
+4. Resolve the public name and authority boundary for the durable policy
+   decision versus the mutable execution context.
+5. Ratify proportional architecture as a repository-level design rule.
+
+The open work inventory above is retained as backlog context, not as an
+autonomous definition of done. `.codex-run-state` is therefore set to
+`BLOCKED` pending these concrete scope and authority decisions. The unrelated
+pre-existing Flowselection changes remain untouched.
