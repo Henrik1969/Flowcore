@@ -320,3 +320,17 @@ variant member identity into the semantic report as an explicit fact.
 
 Add explicit diagnostic payload routing and semantic-report facts for the
 selected variant member, then revisit exhaustive variant matching.
+
+## Diagnostic payload and member-fact checkpoint
+
+- Proved the second payload shape with `DecodeOutcome.diagnostic(code, offset)`
+  routed through a variant `when` arm and direct `code` binding.
+- Variant member and payload-field symbols now carry explicit
+  `variant_member_spelling` facts into the frontend bundle and semantic chain.
+- Runtime, frontend, Flowanalyst, positive payload routing, and cross-member
+  rejection probes all pass.
+
+## Exact next action
+
+Use the selected-member facts to make variant exhaustiveness explicit and
+remove the remaining conservative default requirement for closed variants.

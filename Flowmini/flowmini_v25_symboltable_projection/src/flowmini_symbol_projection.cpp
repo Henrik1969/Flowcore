@@ -855,6 +855,11 @@ struct ProjectTopLevelDecl {
                                              AstOriginRole::EnumDeclaration,
                                              member.location,
                                              declarationId));
+            add_string_fact(table,
+                            memberSymbol,
+                            symboltable::FactoidKind::Custom,
+                            "variant_member_spelling",
+                            decl.name + "." + member.name);
         }
     }
 
@@ -898,6 +903,11 @@ struct ProjectTopLevelDecl {
                                                  AstOriginRole::RecordField,
                                                  field.location));
                 add_type_spelling_fact(table, fieldSymbol, "declared_type_spelling", field.type);
+                add_string_fact(table,
+                                fieldSymbol,
+                                symboltable::FactoidKind::Custom,
+                                "variant_member_spelling",
+                                decl.name + "." + member.name);
             }
         }
     }
