@@ -23,6 +23,7 @@ enum_nonexhaustive_source="${root}/Flowmini/flowmini_v25_symboltable_projection/
 variant_source="${root}/Flowmini/flowmini_v25_symboltable_projection/examples/bootstrap/variant_declaration_probe.flow"
 variant_construction_source="${root}/Flowmini/flowmini_v25_symboltable_projection/examples/bootstrap/variant_construction_probe.flow"
 variant_when_source="${root}/Flowmini/flowmini_v25_symboltable_projection/examples/bootstrap/variant_when_probe.flow"
+variant_cross_member_source="${root}/Flowmini/flowmini_v25_symboltable_projection/examples/fail/bad_variant_cross_member_payload.flow"
 classifier_source="${root}/Flowmini/flowmini_v25_symboltable_projection/examples/bootstrap/shared_scalar_classifier.flow"
 tmpdir="$(mktemp -d)"
 trap 'rm -rf "${tmpdir}"' EXIT
@@ -153,6 +154,12 @@ test "${variant_when_output}" = "42"
 "${analyst}" --lowering-plan-version 2 "${tmpdir}/variant-when-bundle.json" > "${tmpdir}/variant-when-semantic.json"
 jq -e '.status == "ok"' "${tmpdir}/variant-when-semantic.json" >/dev/null
 echo "Flow tagged variant when probe: PASS"
+
+if "${flowmini}" "${variant_cross_member_source}" >/dev/null 2>&1; then
+    echo "cross-member variant payload access was accepted" >&2
+    exit 1
+fi
+echo "Flow tagged variant payload isolation probe: PASS"
 
 classifier_output="$(${flowmini} "${classifier_source}")"
 test "${classifier_output}" = "53"

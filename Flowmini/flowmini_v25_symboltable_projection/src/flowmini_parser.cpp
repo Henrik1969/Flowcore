@@ -419,6 +419,16 @@ private:
             TypeField variantField;
             if (f == nullptr && isVariantType(curType)) {
                 const TypeDef* variant = lookupType(curType);
+                if (curType == activeVariantArmType_ && !activeVariantArmMember_.empty()) {
+                    const auto active = variant->variantMembers.find(activeVariantArmMember_);
+                    if (active != variant->variantMembers.end()) {
+                        bool activeHasField = false;
+                        for (const auto& candidate : active->second) if (candidate.name == field) activeHasField = true;
+                        if (!activeHasField) {
+                            throw flow::DiagnosticError{"lowerer", "variant payload field '" + field + "' is not available in active member '" + activeVariantArmMember_ + "'"};
+                        }
+                    }
+                }
                 for (const auto& [member, payload] : variant->variantMembers) {
                     for (const auto& candidate : payload) {
                         if (candidate.name == field) { variantField = candidate; break; }
@@ -2158,6 +2168,7 @@ private:
             if (check(TokenKind::RightBrace) || check(TokenKind::End)) { break; }
 
             std::optional<int> value;
+            std::string caseVariantMember;
             if (check(TokenKind::Identifier) && peek().text == "case") {
                 static_cast<void>(expectIdentifier("expected 'case'"));
                 int caseValue = 0;
@@ -2181,6 +2192,7 @@ private:
                             ++ordinal;
                         }
                         if (foundValue < 0) { fail(member, "unknown variant member '" + member.text + "'"); }
+                        if (enumDef->isVariant) { caseVariantMember = member.text; }
                     }
                     if (exprType(selector) != enumType.text) { fail(enumType, "when case enum type does not match selector"); }
                     caseValue = foundValue;
@@ -2210,9 +2222,20 @@ private:
 
             expect(TokenKind::LeftBrace, "expected '{' after when arm");
             skipNewlines();
+            const std::string savedVariantType = activeVariantArmType_;
+            const std::string savedVariantMember = activeVariantArmMember_;
+            if (!caseVariantMember.empty()) {
+                activeVariantArmType_ = exprType(selector);
+                activeVariantArmMember_ = caseVariantMember;
+            } else {
+                activeVariantArmType_.clear();
+                activeVariantArmMember_.clear();
+            }
             enterScope("when_arm" + std::to_string(cases.size()));
             Step body = parseBlockStatementsUntilRightBrace();
             leaveScope();
+            activeVariantArmType_ = savedVariantType;
+            activeVariantArmMember_ = savedVariantMember;
             if (body.empty) { fail(peek(), "when arm may not be empty"); }
             if (!cases.empty() && cases.back().value == value && cases.back().body.empty) {
                 cases.back().body = body;
@@ -2436,6 +2459,8 @@ private:
     int functionInstanceCounter_ = 0;
     bool currentFunctionSawReturn_ = false;
     std::string activeReturnType_;
+    std::string activeVariantArmType_;
+    std::string activeVariantArmMember_;
     bool mainSeen_ = false;
     bool declaringConstant_ = false;
     std::string callStepResultPath_;

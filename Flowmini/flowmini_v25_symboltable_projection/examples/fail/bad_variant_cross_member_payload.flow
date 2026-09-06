@@ -1,0 +1,20 @@
+program bad_variant_cross_member_payload
+
+variant DecodeOutcome {
+    scalar(value : int)
+    diagnostic(code : int, offset : int)
+}
+
+main {
+    outcome : DecodeOutcome(DecodeOutcome.scalar(42))
+    marker : int(0)
+    when outcome {
+        case DecodeOutcome.scalar {
+            outcome.code -> marker
+        }
+        default {
+            99 -> marker
+        }
+    }
+    print marker
+}

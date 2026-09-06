@@ -292,3 +292,17 @@ cross-member payload access in frontend and Flowanalyst validation.
 
 Carry selected variant-member context into each `when` arm and reject payload
 field reads whose member is not the active case.
+
+## Tagged variant payload isolation checkpoint
+
+- Variant `when` arms now carry selected member context during frontend
+  lowering.
+- Payload field access is checked against the active member; reading
+  `diagnostic.code` from a `scalar` arm is rejected before runtime.
+- Added a negative probe for cross-member payload access, while preserving the
+  positive scalar construction and matching probes.
+
+## Exact next action
+
+Add arm-local payload bindings and prove diagnostic payload routing, then carry
+variant member identity into the semantic report as an explicit fact.
