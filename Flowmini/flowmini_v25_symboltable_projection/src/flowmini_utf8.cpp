@@ -1,5 +1,8 @@
 #include "flowmini_utf8.h"
 
+#include <iomanip>
+#include <ostream>
+
 namespace flowmini {
 namespace {
 
@@ -90,6 +93,34 @@ Utf8DecodeResult decodeUtf8(const std::string& bytes) {
     }
 
     return result;
+}
+
+void writeUtf8Artifact(std::ostream& out, std::string_view bytes) {
+    const auto result = decodeUtf8(std::string{bytes});
+    out << "{\"format\":\"flowcore.utf8_source\",\"version\":1"
+        << ",\"byte_length\":" << bytes.size()
+        << ",\"bytes_hex\":\"";
+    out << std::hex << std::setfill('0');
+    for (const unsigned char byte : bytes) {
+        out << std::setw(2) << static_cast<unsigned int>(byte);
+    }
+    out << std::dec << "\",\"valid\":" << (result.valid() ? "true" : "false")
+        << ",\"scalars\":[";
+    for (std::size_t index = 0; index < result.scalars.size(); ++index) {
+        if (index != 0) { out << ','; }
+        const auto& scalar = result.scalars[index];
+        out << "{\"value\":" << scalar.value
+            << ",\"byte_offset\":" << scalar.byte_offset
+            << ",\"byte_length\":" << scalar.byte_length << '}';
+    }
+    out << "],\"diagnostics\":[";
+    for (std::size_t index = 0; index < result.diagnostics.size(); ++index) {
+        if (index != 0) { out << ','; }
+        const auto& diagnostic = result.diagnostics[index];
+        out << "{\"code\":\"" << diagnostic.code
+            << "\",\"byte_offset\":" << diagnostic.byte_offset << '}';
+    }
+    out << "]}\n";
 }
 
 } // namespace flowmini

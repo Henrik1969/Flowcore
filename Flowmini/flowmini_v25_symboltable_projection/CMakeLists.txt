@@ -230,3 +230,9 @@ add_executable(flowmini_utf8_tests
 )
 target_include_directories(flowmini_utf8_tests PRIVATE include)
 add_test(NAME flowmini_utf8_tests COMMAND flowmini_utf8_tests)
+
+add_executable(flowmini_utf8_artifact
+        tools/flowmini_utf8_artifact.cpp
+        src/flowmini_utf8.cpp
+)
+target_include_directories(flowmini_utf8_artifact PRIVATE include)

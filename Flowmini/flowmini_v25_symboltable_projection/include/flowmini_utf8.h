@@ -4,7 +4,9 @@
 #include <cstddef>
 #include <cstdint>
 #include <string>
+#include <string_view>
 #include <vector>
+#include <iosfwd>
 
 namespace flowmini {
 
@@ -30,6 +32,11 @@ struct Utf8DecodeResult {
 // without throwing and the decoder advances one byte after each malformed
 // sequence so callers can inspect all independent failures deterministically.
 [[nodiscard]] Utf8DecodeResult decodeUtf8(const std::string& bytes);
+
+// Canonical JSON projection used as the captured Stage 0 boundary artifact.
+// The original bytes are represented as lowercase hexadecimal so the artifact
+// is valid JSON even when the input is malformed or contains NUL bytes.
+void writeUtf8Artifact(std::ostream& out, std::string_view bytes);
 
 } // namespace flowmini
 

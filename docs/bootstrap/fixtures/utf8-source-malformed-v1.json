@@ -1,0 +1,1 @@
+{"format":"flowcore.utf8_source","version":1,"byte_length":4,"bytes_hex":"41c0af42","valid":false,"scalars":[{"value":65,"byte_offset":0,"byte_length":1},{"value":66,"byte_offset":3,"byte_length":1}],"diagnostics":[{"code":"invalid-leading-byte","byte_offset":1},{"code":"unexpected-continuation","byte_offset":2}]}

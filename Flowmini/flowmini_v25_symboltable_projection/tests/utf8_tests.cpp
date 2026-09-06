@@ -1,6 +1,7 @@
 #include "flowmini_utf8.h"
 
 #include <cassert>
+#include <sstream>
 #include <string>
 
 using flowmini::decodeUtf8;
@@ -30,4 +31,13 @@ int main() {
     assert(!surrogate.valid());
     assert(surrogate.diagnostics.size() == 3);
     assert(surrogate.diagnostics[0].code == "surrogate-scalar");
+
+    std::ostringstream artifact;
+    flowmini::writeUtf8Artifact(artifact, "A\xC3\xA6");
+    assert(artifact.str() ==
+        "{\"format\":\"flowcore.utf8_source\",\"version\":1,"
+        "\"byte_length\":3,\"bytes_hex\":\"41c3a6\",\"valid\":true,"
+        "\"scalars\":[{\"value\":65,\"byte_offset\":0,\"byte_length\":1},"
+        "{\"value\":230,\"byte_offset\":1,\"byte_length\":2}],"
+        "\"diagnostics\":[]}\n");
 }
