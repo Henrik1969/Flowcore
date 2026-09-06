@@ -32,9 +32,9 @@ target-specific dispatch is permitted.
 
 The UTF-8 decoder is the first evidence target. Its C++ reference states are
 the ASCII byte, valid two-byte lead, continuation byte, and malformed byte.
-The initial Flow probe will compare scalar output, diagnostic count, and
-termination behavior against the existing C++ artifact before any broader
-pattern or enum syntax is admitted.
+The initial Flow state-trace probe now compares scalar output and diagnostics
+against the existing C++ artifact and records the corresponding state codes
+before any broader pattern or enum syntax is admitted.
 
 The grammar is intentionally deferred until the selector and case semantics
 have a differential probe. This keeps `when`/`match` from becoming a second,

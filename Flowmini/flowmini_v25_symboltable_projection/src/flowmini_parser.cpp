@@ -1735,11 +1735,15 @@ private:
             const std::string targetPath = targetSym->path;
             Step step;
             if (expr.kind == ExprKind::Identifier) {
-                const std::string sourcePath = lookup(expr.ident)->path;
-                const std::string id = generatedId("copy");
-                addNode("node", id, "record.copy");
-                addPolicy(id, "from", sourcePath); addPolicy(id, "to", targetPath);
-                step = Step{false, false, {id, "in"}, {id, "out"}};
+                const Symbol* sourceSym = lookup(expr.ident);
+                if (sourceSym->constantInt.has_value() || sourceSym->constantBool.has_value()) {
+                    static_cast<void>(lowerExprToPath(expr, targetPath, &step));
+                } else {
+                    const std::string id = generatedId("copy");
+                    addNode("node", id, "record.copy");
+                    addPolicy(id, "from", sourceSym->path); addPolicy(id, "to", targetPath);
+                    step = Step{false, false, {id, "in"}, {id, "out"}};
+                }
             } else {
                 static_cast<void>(lowerExprToPath(expr, targetPath, &step));
             }

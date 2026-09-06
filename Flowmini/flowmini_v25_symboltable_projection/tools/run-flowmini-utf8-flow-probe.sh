@@ -11,6 +11,7 @@ runtime_source="${root}/Flowmini/flowmini_v25_symboltable_projection/examples/bo
 malformed_runtime_source="${root}/Flowmini/flowmini_v25_symboltable_projection/examples/bootstrap/utf8_malformed_runtime_probe.flow"
 constant_failure_source="${root}/Flowmini/flowmini_v25_symboltable_projection/examples/fail/bad_constant_mutation.flow"
 guard_source="${root}/Flowmini/flowmini_v25_symboltable_projection/examples/bootstrap/guard_control_flow_probe.flow"
+state_source="${root}/Flowmini/flowmini_v25_symboltable_projection/examples/bootstrap/utf8_state_trace_probe.flow"
 tmpdir="$(mktemp -d)"
 trap 'rm -rf "${tmpdir}"' EXIT
 
@@ -52,3 +53,18 @@ echo "Flow constant immutability probe: PASS"
 guard_output="$("${flowmini}" "${guard_source}")"
 test "${guard_output}" = $'7\n7'
 echo "Flow guard true/false branch probe: PASS"
+
+state_artifact="$(printf '\101\303\246\300\257' | "${artifact}")"
+echo "${state_artifact}" | jq -e '
+    .scalars == [
+        {value: 65, byte_offset: 0, byte_length: 1},
+        {value: 230, byte_offset: 1, byte_length: 2}
+    ] and
+    .diagnostics == [
+        {code: "invalid-leading-byte", byte_offset: 3},
+        {code: "unexpected-continuation", byte_offset: 4}
+    ]
+' >/dev/null
+state_output="$("${flowmini}" "${state_source}")"
+test "${state_output}" = $'1\n2\n3\n4\n5'
+echo "Flow UTF-8 state trace evidence probe: PASS"

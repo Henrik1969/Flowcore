@@ -1,0 +1,53 @@
+program utf8_state_trace_probe
+
+main {
+    const state_ascii : int(1)
+    const state_lead : int(2)
+    const state_continuation : int(3)
+    const state_invalid_lead : int(4)
+    const state_unexpected_continuation : int(5)
+
+    bytes : list<int>([65,195,166,192,175])
+    byte0 : int(bytes[0])
+    byte1 : int(bytes[1])
+    byte2 : int(bytes[2])
+    byte3 : int(bytes[3])
+    byte4 : int(bytes[4])
+    state0 : int(0)
+    state1 : int(0)
+    state2 : int(0)
+    state3 : int(0)
+    state4 : int(0)
+
+    if byte0 < 128 {
+        state_ascii -> state0
+    } else {
+        state_invalid_lead -> state0
+    }
+    if not byte1 < 194 {
+        state_lead -> state1
+    } else {
+        state_invalid_lead -> state1
+    }
+    if not byte2 < 128 {
+        state_continuation -> state2
+    } else {
+        state_invalid_lead -> state2
+    }
+    if byte3 < 194 {
+        state_invalid_lead -> state3
+    } else {
+        state_lead -> state3
+    }
+    if byte4 < 192 {
+        state_unexpected_continuation -> state4
+    } else {
+        state_continuation -> state4
+    }
+
+    print state0
+    print state1
+    print state2
+    print state3
+    print state4
+}
