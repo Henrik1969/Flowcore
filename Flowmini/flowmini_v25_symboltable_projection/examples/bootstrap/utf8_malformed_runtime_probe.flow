@@ -11,14 +11,12 @@ main {
 
     while index < length(bytes) {
         bytes[index] -> byte
-        if byte < ascii_limit {
-            index + 1 -> index
-        } else {
+        guard byte < ascii_limit else {
             if byte < valid_two_byte_lead {
                 diagnostic_count + diagnostic_increment -> diagnostic_count
             }
-            index + 1 -> index
         }
+        index + 1 -> index
     }
 
     print diagnostic_count
