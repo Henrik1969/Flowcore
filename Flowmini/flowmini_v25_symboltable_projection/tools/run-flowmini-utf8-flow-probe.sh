@@ -15,6 +15,8 @@ state_source="${root}/Flowmini/flowmini_v25_symboltable_projection/examples/boot
 when_source="${root}/Flowmini/flowmini_v25_symboltable_projection/examples/bootstrap/when_state_probe.flow"
 when_no_default_source="${root}/Flowmini/flowmini_v25_symboltable_projection/examples/fail/bad_when_no_default.flow"
 when_duplicate_source="${root}/Flowmini/flowmini_v25_symboltable_projection/examples/fail/bad_when_duplicate.flow"
+when_overlap_source="${root}/Flowmini/flowmini_v25_symboltable_projection/examples/fail/bad_when_overlap.flow"
+when_descending_source="${root}/Flowmini/flowmini_v25_symboltable_projection/examples/fail/bad_when_descending.flow"
 tmpdir="$(mktemp -d)"
 trap 'rm -rf "${tmpdir}"' EXIT
 
@@ -88,6 +90,14 @@ if "${flowmini}" "${when_no_default_source}" >/dev/null 2>&1; then
 fi
 if "${flowmini}" "${when_duplicate_source}" >/dev/null 2>&1; then
     echo "duplicate when case was accepted" >&2
+    exit 1
+fi
+if "${flowmini}" "${when_overlap_source}" >/dev/null 2>&1; then
+    echo "overlapping when case was accepted" >&2
+    exit 1
+fi
+if "${flowmini}" "${when_descending_source}" >/dev/null 2>&1; then
+    echo "descending when range was accepted" >&2
     exit 1
 fi
 echo "Flow when validation probe: PASS"
