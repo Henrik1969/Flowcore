@@ -1,0 +1,20 @@
+program variant_exhaustive_probe
+
+variant DecodeOutcome {
+    scalar(value : int)
+    diagnostic(code : int, offset : int)
+}
+
+main {
+    outcome : DecodeOutcome(DecodeOutcome.diagnostic(7, 3))
+    marker : int(0)
+    when outcome {
+        case DecodeOutcome.scalar {
+            11 -> marker
+        }
+        case DecodeOutcome.diagnostic {
+            code -> marker
+        }
+    }
+    print marker
+}

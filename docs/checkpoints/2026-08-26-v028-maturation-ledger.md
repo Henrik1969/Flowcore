@@ -334,3 +334,17 @@ selected variant member, then revisit exhaustive variant matching.
 
 Use the selected-member facts to make variant exhaustiveness explicit and
 remove the remaining conservative default requirement for closed variants.
+
+## Tagged variant exhaustiveness checkpoint
+
+- Closed tagged variants may now omit `default` when every declared member is
+  covered exactly once.
+- Missing variant members are rejected with an explicit exhaustive-match
+  diagnostic; open integer selectors still require `default`.
+- Added positive and negative exhaustive variant probes alongside diagnostic
+  payload routing and member-fact assertions.
+
+## Exact next action
+
+Run the complete canonical repository gate at this language boundary, then
+continue with richer semantic-report facts for variant case coverage.

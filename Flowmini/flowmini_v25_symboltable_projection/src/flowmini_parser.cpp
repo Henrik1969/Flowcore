@@ -2273,13 +2273,23 @@ private:
         expect(TokenKind::RightBrace, "expected '}' to close when block");
         if (!hasDefault) {
             const std::string selectorType = exprType(selector);
-            if (!isEnumType(selectorType)) {
-                throw flow::DiagnosticError{"lowerer", "when requires a default arm for open integer or variant selectors"};
-            }
             const TypeDef* enumDef = lookupType(selectorType);
-            for (const auto& [memberName, memberValue] : enumDef->enumMembers) {
-                if (!seenValues.contains(memberValue)) {
-                    throw flow::DiagnosticError{"lowerer", "exhaustive enum when is missing case " + selectorType + "." + memberName};
+            if (!isEnumType(selectorType) && !isVariantType(selectorType)) {
+                throw flow::DiagnosticError{"lowerer", "when requires a default arm for open integer selectors"};
+            }
+            if (isEnumType(selectorType)) {
+                for (const auto& [memberName, memberValue] : enumDef->enumMembers) {
+                    if (!seenValues.contains(memberValue)) {
+                        throw flow::DiagnosticError{"lowerer", "exhaustive enum when is missing case " + selectorType + "." + memberName};
+                    }
+                }
+            } else {
+                int memberValue = 0;
+                for (const auto& [memberName, payload] : enumDef->variantMembers) {
+                    if (!seenValues.contains(memberValue)) {
+                        throw flow::DiagnosticError{"lowerer", "exhaustive variant when is missing case " + selectorType + "." + memberName};
+                    }
+                    ++memberValue;
                 }
             }
         }

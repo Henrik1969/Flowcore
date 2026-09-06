@@ -1,0 +1,17 @@
+program bad_variant_nonexhaustive
+
+variant DecodeOutcome {
+    scalar(value : int)
+    diagnostic(code : int, offset : int)
+}
+
+main {
+    outcome : DecodeOutcome(DecodeOutcome.scalar(7))
+    marker : int(0)
+    when outcome {
+        case DecodeOutcome.scalar {
+            value -> marker
+        }
+    }
+    print marker
+}

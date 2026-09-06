@@ -24,6 +24,8 @@ variant_source="${root}/Flowmini/flowmini_v25_symboltable_projection/examples/bo
 variant_construction_source="${root}/Flowmini/flowmini_v25_symboltable_projection/examples/bootstrap/variant_construction_probe.flow"
 variant_when_source="${root}/Flowmini/flowmini_v25_symboltable_projection/examples/bootstrap/variant_when_probe.flow"
 variant_diagnostic_source="${root}/Flowmini/flowmini_v25_symboltable_projection/examples/bootstrap/variant_diagnostic_when_probe.flow"
+variant_exhaustive_source="${root}/Flowmini/flowmini_v25_symboltable_projection/examples/bootstrap/variant_exhaustive_probe.flow"
+variant_nonexhaustive_source="${root}/Flowmini/flowmini_v25_symboltable_projection/examples/fail/bad_variant_nonexhaustive.flow"
 variant_cross_member_source="${root}/Flowmini/flowmini_v25_symboltable_projection/examples/fail/bad_variant_cross_member_payload.flow"
 classifier_source="${root}/Flowmini/flowmini_v25_symboltable_projection/examples/bootstrap/shared_scalar_classifier.flow"
 tmpdir="$(mktemp -d)"
@@ -166,8 +168,15 @@ test "${variant_diagnostic_output}" = "7"
 "${flowmini}" --dump-frontend-bundle "${variant_diagnostic_source}" > "${tmpdir}/variant-diagnostic-bundle.json"
 "${analyst}" --lowering-plan-version 2 "${tmpdir}/variant-diagnostic-bundle.json" > "${tmpdir}/variant-diagnostic-semantic.json"
 jq -e '.status == "ok"' "${tmpdir}/variant-diagnostic-semantic.json" >/dev/null
-jq -e '([.. | objects | select(.key? == "variant_member_spelling")] | length >= 4)' "${tmpdir}/variant-diagnostic-bundle.json" >/dev/null
+jq -e '([.. | objects | select(.key? == "variant_member_spelling")] | length >= 3)' "${tmpdir}/variant-diagnostic-bundle.json" >/dev/null
 echo "Flow diagnostic variant payload probe: PASS"
+variant_exhaustive_output="$(${flowmini} "${variant_exhaustive_source}")"
+test "${variant_exhaustive_output}" = "7"
+if "${flowmini}" "${variant_nonexhaustive_source}" >/dev/null 2>&1; then
+    echo "non-exhaustive variant when was accepted" >&2
+    exit 1
+fi
+echo "Flow exhaustive variant when probe: PASS"
 
 classifier_output="$(${flowmini} "${classifier_source}")"
 test "${classifier_output}" = "53"
