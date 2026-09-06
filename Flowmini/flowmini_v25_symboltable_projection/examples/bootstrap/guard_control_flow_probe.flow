@@ -1,0 +1,17 @@
+program guard_control_flow_probe
+
+main {
+    value : int(0)
+    marker : int(0)
+
+    guard value == 1 else {
+        7 -> marker
+    }
+    print marker
+
+    1 -> value
+    guard value == 1 else {
+        9 -> marker
+    }
+    print marker
+}

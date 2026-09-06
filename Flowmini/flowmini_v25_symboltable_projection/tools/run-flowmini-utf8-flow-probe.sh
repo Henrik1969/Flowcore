@@ -10,6 +10,7 @@ provider_source="${root}/Flowmini/flowmini_v25_symboltable_projection/examples/b
 runtime_source="${root}/Flowmini/flowmini_v25_symboltable_projection/examples/bootstrap/utf8_reader_runtime_probe.flow"
 malformed_runtime_source="${root}/Flowmini/flowmini_v25_symboltable_projection/examples/bootstrap/utf8_malformed_runtime_probe.flow"
 constant_failure_source="${root}/Flowmini/flowmini_v25_symboltable_projection/examples/fail/bad_constant_mutation.flow"
+guard_source="${root}/Flowmini/flowmini_v25_symboltable_projection/examples/bootstrap/guard_control_flow_probe.flow"
 tmpdir="$(mktemp -d)"
 trap 'rm -rf "${tmpdir}"' EXIT
 
@@ -47,3 +48,7 @@ if "${flowmini}" "${constant_failure_source}" >/dev/null 2>&1; then
     exit 1
 fi
 echo "Flow constant immutability probe: PASS"
+
+guard_output="$("${flowmini}" "${guard_source}")"
+test "${guard_output}" = $'7\n7'
+echo "Flow guard true/false branch probe: PASS"
