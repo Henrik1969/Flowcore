@@ -32,6 +32,8 @@ main {
     second_diagnostic : Diagnostic({code: 2, offset: 2})
     diagnostic_codes : list<int>([1,2])
     diagnostic_offsets : list<int>([1,2])
+    diagnostics : list<Diagnostic>([first_diagnostic,second_diagnostic])
+    diagnostic_collection_size : int(length(diagnostics))
     diagnostic_index : int(0)
 
     while index < length(bytes) {
@@ -71,6 +73,7 @@ main {
         if decoded == 230 {
             if scalar_count == 2 {
                 if outcome.valid {
+                    if diagnostic_collection_size == 2 {
                     if first_diagnostic.code == 1 {
                         if second_diagnostic.offset == 2 {
                             diagnostic_codes[diagnostic_index] -> decoded

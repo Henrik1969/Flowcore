@@ -800,7 +800,7 @@ private:
         if (expr.kind == ExprKind::ListLength) {
             const Symbol* listSym = lookup(expr.ident);
             if (listSym == nullptr) { throw flow::DiagnosticError{"lowerer", "use of undeclared list '" + expr.ident + "'"}; }
-            if (listSym->type != "list<int>") { throw flow::DiagnosticError{"lowerer", "length(...) requires list<int>, got " + listSym->type + " for '" + expr.ident + "'"}; }
+            if (listSym->type.rfind("list<", 0) != 0) { throw flow::DiagnosticError{"lowerer", "length(...) requires a list, got " + listSym->type + " for '" + expr.ident + "'"}; }
             const std::string id = generatedId("len");
             const std::string out = targetHint.empty() ? generatedId("tmp") : targetHint;
             addNode("node", id, "list.length");
@@ -1559,23 +1559,45 @@ private:
         expectIdentifier("expected 'list'");
         expect(TokenKind::Less, "expected '<' in list<int> declaration");
         const std::string elementType = expectIdentifier("expected list element type").text;
-        if (elementType != "int") { fail(peek(), "only list<int> is supported in flowmini v11 sugar"); }
+        const bool integerList = elementType == "int";
+        const bool recordList = isRecordType(elementType);
+        if (!integerList && !recordList) { fail(peek(), "list element type must be int or a declared record type"); }
         expect(TokenKind::Greater, "expected '>' in list<int> declaration");
         expect(TokenKind::LeftParen, "list declaration requires initializer");
         expect(TokenKind::LeftBracket, "list<int> initializer must start with '['");
         std::ostringstream values;
+        std::ostringstream recordPaths;
         bool first = true;
         if (!check(TokenKind::RightBracket)) {
             while (true) {
-                const Token& token = expect(TokenKind::Number, "expected integer in list initializer");
-                if (!first) { values << ','; }
-                values << parseIntToken(token); first = false;
+                if (integerList) {
+                    const Token& token = expect(TokenKind::Number, "expected integer in list initializer");
+                    if (!first) { values << ','; }
+                    values << parseIntToken(token);
+                } else {
+                    const Token& token = expectIdentifier("expected record value in list initializer");
+                    const Symbol* symbol = lookup(token.text);
+                    if (symbol == nullptr || symbol->type != elementType) {
+                        fail(token, "record list initializer expects a value of type " + elementType);
+                    }
+                    if (!first) { recordPaths << ','; }
+                    recordPaths << symbol->path;
+                }
+                first = false;
                 if (!match(TokenKind::Comma)) { break; }
             }
         }
         expect(TokenKind::RightBracket, "expected ']' after list initializer");
         expect(TokenKind::RightParen, "expected ')' after list initializer");
-        declareSymbol(idToken, id, "list<int>");
+        const std::string listType = "list<" + elementType + ">";
+        declareSymbol(idToken, id, listType);
+        if (recordList) {
+            const std::string nodeId = generatedId("list_records");
+            addNode("node", nodeId, "list.from_records");
+            addPolicy(nodeId, "records", recordPaths.str());
+            addPolicy(nodeId, "out", lookup(id)->path);
+            return Step{false, false, {nodeId, "in"}, {nodeId, "out"}};
+        }
         if (scopes_.size() == 1) {
             currentScope().symbols[id].path = id;
             addNode("node", id, "list.from_ints"); addPolicy(id, "out", id); addPolicy(id, "values", values.str());

@@ -619,6 +619,26 @@ public:
     }
 };
 
+class ListFromRecordsNode final : public ConfiguredNode {
+public:
+    using ConfiguredNode::ConfiguredNode;
+
+    std::vector<Route> run(MiniEnvelope env) override {
+        auto& record = requirePayload<RecordPayload>(env, "list.from_records");
+        const std::string out = getPolicyString(config_, "out", "list");
+        List values;
+        for (const auto& path : splitPathList(getPolicyString(config_, "records", ""))) {
+            const Value value = getPathValue(record, path, "list.from_records");
+            if (!std::holds_alternative<Record>(value.data)) {
+                throw flow::DiagnosticError{"list.from_records", "initializer path does not contain a record: " + path};
+            }
+            values.push_back(value);
+        }
+        setPathList(record, out, std::move(values), "list.from_records");
+        return {Route{"out", std::move(env)}};
+    }
+};
+
 class ListLengthNode final : public ConfiguredNode {
 public:
     using ConfiguredNode::ConfiguredNode;
@@ -1328,6 +1348,8 @@ AtomRegistry makeCoreAtomRegistry() {
 
     registry.registerAtom(AtomContract{"list.from_ints", {{"in", "Record"}}, {{"out", "Record"}}, {}},
         [](NodeConfig config) { return std::make_unique<ListFromIntsNode>(std::move(config)); });
+    registry.registerAtom(AtomContract{"list.from_records", {{"in", "Record"}}, {{"out", "Record"}}, {}},
+        [](NodeConfig config) { return std::make_unique<ListFromRecordsNode>(std::move(config)); });
     registry.registerAtom(AtomContract{"list.length", {{"in", "Record"}}, {{"out", "Record"}}, {}},
         [](NodeConfig config) { return std::make_unique<ListLengthNode>(std::move(config)); });
     registry.registerAtom(AtomContract{"list.get", {{"in", "Record"}}, {{"out", "Record"}}, {}},
