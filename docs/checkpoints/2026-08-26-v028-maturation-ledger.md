@@ -468,3 +468,16 @@ Flowlower structured emission for match arms.
 
 Add arm-label validation against selector type and begin structured match-arm
 emission in Flowlower using the concrete join block.
+
+## Match arm contract checkpoint
+
+- Flowanalyst match records now carry selector type identity.
+- Flowlower validates selector type presence, non-descending arm intervals,
+  concrete arm body blocks, and concrete joins before backend preparation.
+- Focused Flowanalyst and Flowlower tests pass; emission remains isolated behind
+  this validated contract.
+
+## Exact next action
+
+Add selector-kind-aware label validation for enum and variant member tags, then
+lower the first integer `match` into structured backend branches.

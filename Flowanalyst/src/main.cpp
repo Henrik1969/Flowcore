@@ -851,11 +851,13 @@ int run(const Json& bundle, int lowering_plan_version) {
         const auto* payload = field(*statement, "payload");
         const int selector = integer(field(payload, "selector_expression"));
         const int selector_symbol = resolved_expression_symbols.count(selector) ? resolved_expression_symbols.at(selector) : -1;
+        const auto selector_type = symbol_types.count(selector_symbol) ? symbol_types.at(selector_symbol) : std::string{};
         if (!first_match) std::cout << ',';
         first_match = false;
         std::cout << "{\"kind\":\"match\",\"statement_id\":" << statement_id
                   << ",\"selector_expression\":" << selector
                   << ",\"selector_symbol_id\":" << selector_symbol
+                  << ",\"selector_type\":" << quote(selector_type)
                   << ",\"cases\":[";
         const auto cases = list(field(payload, "cases"));
         for (std::size_t index = 0; index < cases.size(); ++index) {

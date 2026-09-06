@@ -78,7 +78,17 @@ int prepare(const Options& option) {
             if (string(required(match, "kind", "$.match_operations[]"), "$.match_operations[].kind") != "match")
                 throw Error("$.match_operations[].kind", "unsupported match operation kind");
             (void) required(match, "selector_expression", "$.match_operations[]");
-            (void) required(match, "cases", "$.match_operations[]");
+            if (string(required(match, "selector_type", "$.match_operations[]"), "$.match_operations[].selector_type").empty())
+                throw Error("$.match_operations[].selector_type", "match operation requires selector type");
+            const auto& cases = array(required(match, "cases", "$.match_operations[]"), "$.match_operations[].cases");
+            for (const auto& arm_value : cases) {
+                const auto& arm = object(arm_value, "$.match_operations[].cases[]");
+                const auto low = integer(required(arm, "value", "$.match_operations[].cases[]"), "$.match_operations[].cases[].value");
+                const auto high = integer(required(arm, "high", "$.match_operations[].cases[]"), "$.match_operations[].cases[].high");
+                if (high < low) throw Error("$.match_operations[].cases[]", "match arm range is descending");
+                if (integer(required(arm, "body_block_id", "$.match_operations[].cases[]"), "$.match_operations[].cases[].body_block_id") < 0)
+                    throw Error("$.match_operations[].cases[].body_block_id", "match arm requires body block");
+            }
             if (integer(required(match, "join_block_id", "$.match_operations[]"), "$.match_operations[].join_block_id") < 0)
                 throw Error("$.match_operations[].join_block_id", "match operation requires a concrete join block");
         }
