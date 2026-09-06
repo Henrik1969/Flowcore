@@ -520,6 +520,14 @@ namespace flowmini::ast {
                         out << "{\"kind\": \"else_if\", \"if_statement\": "
                             << elseIfArm.if_statement << "}";
                     }
+                } else if constexpr (std::is_same_v<Payload, WhenStatement>) {
+                    out << "\"selector_expression\": " << payload.selector_expression << ", \"cases\": [";
+                    for (std::size_t index = 0; index < payload.cases.size(); ++index) {
+                        if (index > 0) { out << ", "; }
+                        out << "{\"value\": " << payload.cases[index].value
+                            << ", \"block\": " << payload.cases[index].block << "}";
+                    }
+                    out << "], \"default_block\": " << payload.default_block;
                 } else if constexpr (std::is_same_v<Payload, WhileStatement>) {
                     out << "\"condition_expression\": ";
                     out << payload.condition_expression;
@@ -559,6 +567,7 @@ namespace flowmini::ast {
                     const auto* assignment = std::get_if<AssignmentStatement>(&statement.payload);
                     const auto* placement = std::get_if<PlacementStatement>(&statement.payload);
                     const auto* ifStatement = std::get_if<IfStatement>(&statement.payload);
+                    const auto* whenStatement = std::get_if<WhenStatement>(&statement.payload);
                     const auto* whileStatement = std::get_if<WhileStatement>(&statement.payload);
                     const auto* returnStatement = std::get_if<ReturnStatement>(&statement.payload);
                     const auto* expressionStatement = std::get_if<ExpressionStatement>(&statement.payload);
@@ -582,6 +591,8 @@ namespace flowmini::ast {
                         }
                     } else if (ifStatement) {
                         expressionIds.push_back(ifStatement->condition_expression);
+                    } else if (whenStatement) {
+                        expressionIds.push_back(whenStatement->selector_expression);
                     } else if (whileStatement) {
                         expressionIds.push_back(whileStatement->condition_expression);
                     } else if (returnStatement) {
@@ -646,7 +657,7 @@ namespace flowmini::ast {
                         out << "\"has_value\": true";
                     }
 
-                    if (ifStatement || whileStatement) {
+                    if (ifStatement || whenStatement || whileStatement) {
                         out << ",\n";
                         dump_indent(out, indent + 4);
                         out << "\"has_condition\": true";
@@ -679,6 +690,16 @@ namespace flowmini::ast {
                         out << ",\n";
                         dump_indent(out, indent + 4);
                         out << "\"body_block\": " << whileStatement->body_block;
+                    } else if (whenStatement) {
+                        out << ",\n";
+                        dump_indent(out, indent + 4);
+                        out << "\"selector\": " << whenStatement->selector_expression << ", \"cases\": [";
+                        for (std::size_t index = 0; index < whenStatement->cases.size(); ++index) {
+                            if (index > 0) { out << ", "; }
+                            out << "{\"value\": " << whenStatement->cases[index].value
+                                << ", \"block\": " << whenStatement->cases[index].block << "}";
+                        }
+                        out << "], \"default_block\": " << whenStatement->default_block;
                     }
 
                     if (ifStatement) {
@@ -1109,6 +1130,7 @@ namespace flowmini::ast {
             case StatementKind::Assignment: return "assignment";
             case StatementKind::Placement:  return "placement";
             case StatementKind::If:         return "if";
+            case StatementKind::When:       return "when";
             case StatementKind::While:      return "while";
             case StatementKind::Break:      return "break";
             case StatementKind::Continue:   return "continue";
@@ -1140,6 +1162,8 @@ namespace flowmini::ast {
                 return StatementKind::Placement;
             } else if constexpr (std::is_same_v<Payload, IfStatement>) {
                 return StatementKind::If;
+            } else if constexpr (std::is_same_v<Payload, WhenStatement>) {
+                return StatementKind::When;
             } else if constexpr (std::is_same_v<Payload, WhileStatement>) {
                 return StatementKind::While;
             } else if constexpr (std::is_same_v<Payload, BreakStatement>) {

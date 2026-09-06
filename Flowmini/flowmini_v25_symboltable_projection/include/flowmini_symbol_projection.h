@@ -48,6 +48,8 @@ enum class AstOriginRole {
     TargetScope,
     IfThenScope,
     WhileBodyScope,
+    WhenCaseScope,
+    WhenDefaultScope,
     ElseBlockScope,
 };
 

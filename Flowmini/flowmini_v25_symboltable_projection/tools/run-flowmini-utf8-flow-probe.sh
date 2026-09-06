@@ -76,6 +76,12 @@ when_output="$("${flowmini}" "${when_source}")"
 test "${when_output}" = $'11\n22\n99'
 echo "Flow when case/default probe: PASS"
 
+"${flowmini}" --dump-frontend-bundle "${when_source}" > "${tmpdir}/when-bundle.json"
+"${analyst}" --lowering-plan-version 2 "${tmpdir}/when-bundle.json" > "${tmpdir}/when-semantic.json"
+jq -e '.status == "ok"' "${tmpdir}/when-semantic.json" >/dev/null
+jq -e '([.ast.statement_pool[]? | select(.kind == "when")] | length == 3)' "${tmpdir}/when-bundle.json" >/dev/null
+echo "Flow when frontend integration probe: PASS"
+
 if "${flowmini}" "${when_no_default_source}" >/dev/null 2>&1; then
     echo "when without default was accepted" >&2
     exit 1

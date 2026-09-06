@@ -49,6 +49,8 @@ const char* to_string(const AstOriginRole role) {
         case AstOriginRole::TargetScope:         return "target_scope";
         case AstOriginRole::IfThenScope:         return "if_then_scope";
         case AstOriginRole::WhileBodyScope:      return "while_body_scope";
+        case AstOriginRole::WhenCaseScope:       return "when_case_scope";
+        case AstOriginRole::WhenDefaultScope:    return "when_default_scope";
         case AstOriginRole::ElseBlockScope:      return "else_block_scope";
     }
     return "source_unit";
@@ -284,6 +286,39 @@ void project_statement_binding(symboltable::SymbolTable& table,
                                       elseIf->if_statement,
                                       symbolOrigins,
                                       scopeOrigins);
+        }
+    }
+
+    if (const auto* whenStatement = std::get_if<WhenStatement>(&statement.payload)) {
+        for (const auto& arm : whenStatement->cases) {
+            if (arm.block >= module.block_pool.size()) { continue; }
+            const auto armScope = table.createScope(symboltable::ScopeKind::Block,
+                                                    owningScope,
+                                                    std::nullopt,
+                                                    "when_case");
+            record_scope_origin(scopeOrigins,
+                                armScope,
+                                block_ast_path(arm.block),
+                                make_origin(AstOriginEntityKind::Block,
+                                            AstOriginRole::WhenCaseScope,
+                                            statement.location,
+                                            arm.block));
+            project_block(table, module, armScope, arm.block, symbolOrigins, scopeOrigins);
+        }
+        if (whenStatement->default_block < module.block_pool.size()) {
+            const auto defaultScope = table.createScope(symboltable::ScopeKind::Block,
+                                                        owningScope,
+                                                        std::nullopt,
+                                                        "when_default");
+            record_scope_origin(scopeOrigins,
+                                defaultScope,
+                                block_ast_path(whenStatement->default_block),
+                                make_origin(AstOriginEntityKind::Block,
+                                            AstOriginRole::WhenDefaultScope,
+                                            statement.location,
+                                            whenStatement->default_block));
+            project_block(table, module, defaultScope, whenStatement->default_block,
+                          symbolOrigins, scopeOrigins);
         }
     }
 }

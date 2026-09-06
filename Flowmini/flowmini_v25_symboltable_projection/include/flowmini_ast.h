@@ -42,6 +42,7 @@ enum class StatementKind {
     Assignment,
     Placement,
     If,
+    When,
     While,
     Break,
     Continue,
@@ -271,6 +272,15 @@ struct IfStatement {
     BlockId then_block;
     std::optional<ElseArm> else_arm;
 };
+struct WhenCase {
+    int value = 0;
+    BlockId block = 0;
+};
+struct WhenStatement {
+    std::size_t selector_expression = 0;
+    std::vector<WhenCase> cases;
+    BlockId default_block = 0;
+};
 struct WhileStatement {
     std::size_t condition_expression;
     BlockId body_block;
@@ -292,6 +302,7 @@ struct Statement {
         AssignmentStatement,
         PlacementStatement,
         IfStatement,
+        WhenStatement,
         WhileStatement,
         BreakStatement,
         ContinueStatement,

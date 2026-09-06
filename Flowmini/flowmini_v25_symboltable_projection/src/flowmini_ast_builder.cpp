@@ -2425,6 +2425,10 @@ namespace flowmini::ast {
             return is_identifier_text(token, "guard");
         }
 
+        bool is_when_token(const flowmini::Token& token) {
+            return is_identifier_text(token, "when");
+        }
+
         bool is_while_token(const flowmini::Token& token) {
             return token.kind == flowmini::TokenKind::KeywordWhile ||
                    is_identifier_text(token, "while");
@@ -2547,6 +2551,74 @@ namespace flowmini::ast {
             return i;
         }
 
+        std::size_t parse_when_statement_shell(const std::vector<flowmini::Token>& tokens,
+                                               std::size_t i,
+                                               std::vector<StatementId>& body,
+                                               std::vector<Block>& blockPool,
+                                               std::vector<Statement>& statementPool,
+                                               std::vector<Expression>& expressionPool) {
+            Statement statement;
+            statement.location = location_from_token(tokens[i]);
+            ++i; // consume when
+
+            std::optional<std::size_t> selectorExpression;
+            if (has_expression_until_body_or_line_end(tokens, i)) {
+                selectorExpression = add_expression_placeholder_at(expressionPool, tokens, i);
+            }
+            i = skip_until_body_block_or_line_end(tokens, i);
+            if (i < tokens.size() && tokens[i].kind == flowmini::TokenKind::LeftBrace) {
+                ++i;
+            }
+            i = skip_nonsemantic_separators(tokens, i);
+
+            std::vector<WhenCase> cases;
+            std::optional<BlockId> defaultBlock;
+            while (i < tokens.size() && !is_end_token(tokens[i]) &&
+                   tokens[i].kind != flowmini::TokenKind::RightBrace) {
+                if (is_identifier_text(tokens[i], "case")) {
+                    ++i;
+                    if (i >= tokens.size() || tokens[i].kind != flowmini::TokenKind::Number) {
+                        break;
+                    }
+                    const int value = std::stoi(tokens[i].text);
+                    ++i;
+                    i = skip_nonsemantic_separators(tokens, i);
+                    if (i >= tokens.size() || tokens[i].kind != flowmini::TokenKind::LeftBrace) {
+                        break;
+                    }
+                    const BlockId blockId = blockPool.size();
+                    blockPool.push_back(Block{location_from_token(tokens[i]), {}});
+                    i = parse_body_statement_shells(tokens, i, blockId, blockPool, statementPool, expressionPool);
+                    cases.push_back(WhenCase{value, blockId});
+                } else if (is_identifier_text(tokens[i], "default")) {
+                    ++i;
+                    i = skip_nonsemantic_separators(tokens, i);
+                    if (i >= tokens.size() || tokens[i].kind != flowmini::TokenKind::LeftBrace) {
+                        break;
+                    }
+                    const BlockId blockId = blockPool.size();
+                    blockPool.push_back(Block{location_from_token(tokens[i]), {}});
+                    i = parse_body_statement_shells(tokens, i, blockId, blockPool, statementPool, expressionPool);
+                    defaultBlock = blockId;
+                } else {
+                    ++i;
+                }
+                i = skip_nonsemantic_separators(tokens, i);
+            }
+            if (i < tokens.size() && tokens[i].kind == flowmini::TokenKind::RightBrace) {
+                ++i;
+            }
+
+            if (selectorExpression && defaultBlock) {
+                statement.payload = WhenStatement{*selectorExpression, std::move(cases), *defaultBlock};
+            } else {
+                statement.payload = UnknownStatement{"incomplete when statement"};
+            }
+            statementPool.push_back(std::move(statement));
+            body.push_back(statementPool.size() - 1);
+            return i;
+        }
+
         std::size_t parse_while_statement_shell(const std::vector<flowmini::Token>& tokens,
                                                 std::size_t i,
                                                 std::vector<StatementId>& body,
@@ -2623,6 +2695,11 @@ namespace flowmini::ast {
 
                 if (is_guard_token(tokens[i])) {
                     i = parse_guard_statement_shell(tokens, i, body, blockPool, statementPool, expressionPool);
+                    continue;
+                }
+
+                if (is_when_token(tokens[i])) {
+                    i = parse_when_statement_shell(tokens, i, body, blockPool, statementPool, expressionPool);
                     continue;
                 }
 
