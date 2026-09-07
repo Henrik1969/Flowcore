@@ -44,6 +44,7 @@ enum class StatementKind {
     Assignment,
     Placement,
     If,
+    Guard,
     When,
     While,
     Break,
@@ -258,6 +259,7 @@ struct LetStatement {
     std::string name;
     TypeRef type;
     std::optional<std::size_t> initializer_expression;
+    bool is_const = false;
 };
 struct AssignmentStatement {
     AssignableTarget target;
@@ -273,6 +275,10 @@ struct IfStatement {
     std::size_t condition_expression;
     BlockId then_block;
     std::optional<ElseArm> else_arm;
+};
+struct GuardStatement {
+    std::size_t condition_expression = 0;
+    BlockId failure_block = 0;
 };
 struct WhenCase {
     int value = 0;
@@ -307,6 +313,7 @@ struct Statement {
         AssignmentStatement,
         PlacementStatement,
         IfStatement,
+        GuardStatement,
         WhenStatement,
         WhileStatement,
         BreakStatement,

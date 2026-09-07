@@ -491,6 +491,7 @@ namespace flowmini::ast {
                     dump_type_ref_json(out, payload.type);
                     out << ", \"initializer_expression\": ";
                     dump_optional_id(out, payload.initializer_expression);
+                    if (payload.is_const) out << ", \"is_const\": true";
                 } else if constexpr (std::is_same_v<Payload, AssignmentStatement>) {
                     out << "\"target\": ";
                     dump_assignable_target_json(out, payload.target);
@@ -520,13 +521,23 @@ namespace flowmini::ast {
                         out << "{\"kind\": \"else_if\", \"if_statement\": "
                             << elseIfArm.if_statement << "}";
                     }
+                } else if constexpr (std::is_same_v<Payload, GuardStatement>) {
+                    out << "\"condition_expression\": " << payload.condition_expression
+                        << ", \"failure_block\": " << payload.failure_block;
                 } else if constexpr (std::is_same_v<Payload, WhenStatement>) {
                     out << "\"selector_expression\": " << payload.selector_expression << ", \"cases\": [";
                     for (std::size_t index = 0; index < payload.cases.size(); ++index) {
                         if (index > 0) { out << ", "; }
                         out << "{\"value\": " << payload.cases[index].value
                             << ", \"high\": " << payload.cases[index].high
-                            << ", \"block\": " << payload.cases[index].block << "}";
+                            << ", \"block\": " << payload.cases[index].block;
+                        if (!payload.cases[index].label_type.empty()) {
+                            out << ", \"label_type\": ";
+                            dump_json_string(out, payload.cases[index].label_type);
+                            out << ", \"label_member\": ";
+                            dump_json_string(out, payload.cases[index].label_member);
+                        }
+                        out << "}";
                     }
                     out << "], \"default_block\": " << payload.default_block;
                 } else if constexpr (std::is_same_v<Payload, WhileStatement>) {
@@ -568,6 +579,7 @@ namespace flowmini::ast {
                     const auto* assignment = std::get_if<AssignmentStatement>(&statement.payload);
                     const auto* placement = std::get_if<PlacementStatement>(&statement.payload);
                     const auto* ifStatement = std::get_if<IfStatement>(&statement.payload);
+                    const auto* guardStatement = std::get_if<GuardStatement>(&statement.payload);
                     const auto* whenStatement = std::get_if<WhenStatement>(&statement.payload);
                     const auto* whileStatement = std::get_if<WhileStatement>(&statement.payload);
                     const auto* returnStatement = std::get_if<ReturnStatement>(&statement.payload);
@@ -592,6 +604,8 @@ namespace flowmini::ast {
                         }
                     } else if (ifStatement) {
                         expressionIds.push_back(ifStatement->condition_expression);
+                    } else if (guardStatement) {
+                        expressionIds.push_back(guardStatement->condition_expression);
                     } else if (whenStatement) {
                         expressionIds.push_back(whenStatement->selector_expression);
                     } else if (whileStatement) {
@@ -658,7 +672,7 @@ namespace flowmini::ast {
                         out << "\"has_value\": true";
                     }
 
-                    if (ifStatement || whenStatement || whileStatement) {
+                    if (ifStatement || guardStatement || whenStatement || whileStatement) {
                         out << ",\n";
                         dump_indent(out, indent + 4);
                         out << "\"has_condition\": true";
@@ -681,12 +695,20 @@ namespace flowmini::ast {
                         out << ",\n";
                         dump_indent(out, indent + 4);
                         out << "\"condition\": " << ifStatement->condition_expression;
+                    } else if (guardStatement) {
+                        out << ",\n";
+                        dump_indent(out, indent + 4);
+                        out << "\"condition\": " << guardStatement->condition_expression;
                     }
 
                     if (ifStatement) {
                         out << ",\n";
                         dump_indent(out, indent + 4);
                         out << "\"then_block\": " << ifStatement->then_block;
+                    } else if (guardStatement) {
+                        out << ",\n";
+                        dump_indent(out, indent + 4);
+                        out << "\"failure_block\": " << guardStatement->failure_block;
                     } else if (whileStatement) {
                         out << ",\n";
                         dump_indent(out, indent + 4);
@@ -1169,6 +1191,7 @@ namespace flowmini::ast {
             case StatementKind::Assignment: return "assignment";
             case StatementKind::Placement:  return "placement";
             case StatementKind::If:         return "if";
+            case StatementKind::Guard:      return "guard";
             case StatementKind::When:       return "when";
             case StatementKind::While:      return "while";
             case StatementKind::Break:      return "break";
@@ -1201,6 +1224,8 @@ namespace flowmini::ast {
                 return StatementKind::Placement;
             } else if constexpr (std::is_same_v<Payload, IfStatement>) {
                 return StatementKind::If;
+            } else if constexpr (std::is_same_v<Payload, GuardStatement>) {
+                return StatementKind::Guard;
             } else if constexpr (std::is_same_v<Payload, WhenStatement>) {
                 return StatementKind::When;
             } else if constexpr (std::is_same_v<Payload, WhileStatement>) {

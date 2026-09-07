@@ -154,9 +154,12 @@ echo "Flow tagged variant construction probe: PASS"
 variant_when_output="$(${flowmini} "${variant_when_source}")"
 test "${variant_when_output}" = "42"
 "${flowmini}" --dump-frontend-bundle "${variant_when_source}" > "${tmpdir}/variant-when-bundle.json"
-"${analyst}" --lowering-plan-version 2 "${tmpdir}/variant-when-bundle.json" > "${tmpdir}/variant-when-semantic.json"
-jq -e '.status == "ok"' "${tmpdir}/variant-when-semantic.json" >/dev/null
-jq -e '([.match_facts[]?] | length == 1) and ([.match_facts[0].cases[]?] | length == 1)' "${tmpdir}/variant-when-semantic.json" >/dev/null
+if "${analyst}" --lowering-plan-version 2 "${tmpdir}/variant-when-bundle.json" > "${tmpdir}/variant-when-semantic.json"; then
+    echo "variant match was silently admitted" >&2
+    exit 1
+fi
+jq -e '.status == "error" and any(.diagnostics[]; .code == "FLOWANALYST_VARIANT_MATCH_UNSUPPORTED")' "${tmpdir}/variant-when-semantic.json" >/dev/null
+jq -e '([.match_facts[]?] | length == 1) and ([.match_facts[0].cases[]?] | length == 1) and .match_facts[0].cases[0].label_member == "scalar"' "${tmpdir}/variant-when-semantic.json" >/dev/null
 echo "Flow tagged variant when probe: PASS"
 
 if "${flowmini}" "${variant_cross_member_source}" >/dev/null 2>&1; then
@@ -167,8 +170,11 @@ echo "Flow tagged variant payload isolation probe: PASS"
 variant_diagnostic_output="$(${flowmini} "${variant_diagnostic_source}")"
 test "${variant_diagnostic_output}" = "7"
 "${flowmini}" --dump-frontend-bundle "${variant_diagnostic_source}" > "${tmpdir}/variant-diagnostic-bundle.json"
-"${analyst}" --lowering-plan-version 2 "${tmpdir}/variant-diagnostic-bundle.json" > "${tmpdir}/variant-diagnostic-semantic.json"
-jq -e '.status == "ok"' "${tmpdir}/variant-diagnostic-semantic.json" >/dev/null
+if "${analyst}" --lowering-plan-version 2 "${tmpdir}/variant-diagnostic-bundle.json" > "${tmpdir}/variant-diagnostic-semantic.json"; then
+    echo "variant diagnostic match was silently admitted" >&2
+    exit 1
+fi
+jq -e '.status == "error" and any(.diagnostics[]; .code == "FLOWANALYST_VARIANT_MATCH_UNSUPPORTED")' "${tmpdir}/variant-diagnostic-semantic.json" >/dev/null
 jq -e '([.. | objects | select(.key? == "variant_member_spelling")] | length >= 3)' "${tmpdir}/variant-diagnostic-bundle.json" >/dev/null
 echo "Flow diagnostic variant payload probe: PASS"
 variant_exhaustive_output="$(${flowmini} "${variant_exhaustive_source}")"

@@ -1,0 +1,6 @@
+program bad_const_mutation_artifact
+main {
+    const answer : int(42)
+    answer -> answer
+    print answer
+}

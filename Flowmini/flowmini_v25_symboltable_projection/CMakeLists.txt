@@ -248,3 +248,21 @@ add_test(NAME flowmini_utf8_flow_probe
         FLOWMINI_BIN=$<TARGET_FILE:flowmini>
         ${CMAKE_SOURCE_DIR}/tools/run-flowmini-utf8-flow-probe.sh
 )
+
+add_test(NAME flowmini_const_guard_semantics
+        COMMAND ${CMAKE_COMMAND} -E env
+        FLOWMINI_BIN=$<TARGET_FILE:flowmini>
+        ${CMAKE_CURRENT_SOURCE_DIR}/tools/run-flowmini-const-guard-tests.sh
+)
+
+add_test(NAME flowmini_parser_differential
+        COMMAND ${CMAKE_COMMAND} -E env
+        FLOWMINI_BIN=$<TARGET_FILE:flowmini>
+        ${CMAKE_CURRENT_SOURCE_DIR}/tools/run-flowmini-parser-differential.sh
+)
+
+add_test(NAME flowmini_provider_contracts
+        COMMAND ${CMAKE_COMMAND} -E env
+        FLOWMINI_BIN=$<TARGET_FILE:flowmini>
+        ${CMAKE_CURRENT_SOURCE_DIR}/tools/run-flowmini-provider-contract-tests.sh
+)

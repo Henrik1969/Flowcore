@@ -40,7 +40,27 @@ int integer(const Json* value, int fallback = -1) {
     return static_cast<int>(parsed);
 }
 const Array& list(const Json* value) { static const Array empty; return value && std::holds_alternative<Array>(*value) ? std::get<Array>(*value) : empty; }
-std::string quote(std::string_view value) { std::ostringstream out; out << '"'; for (char c : value) { if (c == '"' || c == '\\') out << '\\'; if (c == '\n') out << "\\n"; else if (c == '\r') out << "\\r"; else if (c != '\n') out << c; } return out.str() + '"'; }
+std::string quote(std::string_view value) {
+    std::ostringstream out;
+    out << '"';
+    constexpr char hex[] = "0123456789abcdef";
+    for (unsigned char c : value) {
+        switch (c) {
+            case '"': out << "\\\""; break;
+            case '\\': out << "\\\\"; break;
+            case '\b': out << "\\b"; break;
+            case '\f': out << "\\f"; break;
+            case '\n': out << "\\n"; break;
+            case '\r': out << "\\r"; break;
+            case '\t': out << "\\t"; break;
+            default:
+                if (c < 0x20) out << "\\u00" << hex[c >> 4] << hex[c & 0x0f];
+                else out << static_cast<char>(c);
+                break;
+        }
+    }
+    return out.str() + '"';
+}
 struct Diagnostic { std::string code, severity, message, ast_path, region, source; int symbol = -1, line = -1, column = -1; };
 struct Target { int symbol = -1, mains = 0; std::string name; };
 struct BindingRequirement { int source_symbol = -1; std::string contract, library, convention, symbol, effect, parameter_types, return_type; };
@@ -49,7 +69,7 @@ struct AggregateLayout { std::string contract, name; std::vector<std::pair<std::
 struct Region { std::string id, kind, status; std::vector<std::string> prerequisites; };
 struct EffectFact { int declaration = -1, symbol = -1; std::string name, effect, certainty, reason; };
 struct CallSite { int expression = -1, statement = -1, scope = -1, callee_symbol = -1, write_symbol = -1; std::string callee; bool pure = false; std::set<int> reads; std::string writes; std::vector<int> arguments; std::vector<int> independent_with; };
-struct LoweringOperation { int expression = -1, statement = -1, scope = -1, block = -1, function_symbol = -1, then_block = -1, else_block = -1, body_block = -1, default_block = -1, join_block = -1, callee_symbol = -1, result_symbol = -1; std::string callee, kind, contract, library, convention, symbol, effect, parameter_types, return_type, selector_type, selector_kind; std::vector<int> arguments, match_values, match_highs, match_blocks; };
+struct LoweringOperation { int expression = -1, statement = -1, scope = -1, block = -1, function_symbol = -1, then_block = -1, else_block = -1, body_block = -1, default_block = -1, join_block = -1, callee_symbol = -1, result_symbol = -1; std::string callee, kind, contract, library, convention, symbol, effect, parameter_types, return_type, selector_type, selector_kind; std::vector<int> arguments, match_values, match_highs, match_blocks; std::vector<std::string> match_label_types, match_label_members; };
 struct Callable { int symbol = -1, scope = -1, body_block = -1; bool entry = false; std::string name, return_type, availability; std::vector<std::pair<int, std::string>> parameters; };
 struct Resolution { int expression = -1, statement = -1, scope = -1, symbol = -1; std::string name; };
 
@@ -138,6 +158,9 @@ int run(const Json& bundle, int lowering_plan_version) {
     auto fact_value = [&](const Json& symbol, const std::string& key) {
         for (const auto& fact : list(field(symbol, "facts"))) if (text(field(fact, "key")) == key) return text(field(field(fact, "value"), "value"));
         return std::string{};
+    };
+    auto symbol_is_const = [&](int symbol_id) {
+        return symbol_id >= 0 && symbols.count(symbol_id) && fact_value(*symbols.at(symbol_id), "mutability") == "const";
     };
     for (const auto& [contract_id, contract] : symbols) if (text(field(*contract, "kind")) == "Contract") {
         const auto library = fact_value(*contract, "library_spelling");
@@ -619,6 +642,8 @@ int run(const Json& bundle, int lowering_plan_version) {
             operation.match_values.push_back(integer(field(arm, "value")));
             operation.match_highs.push_back(integer(field(arm, "high")));
             operation.match_blocks.push_back(integer(field(arm, "block")));
+            operation.match_label_types.push_back(text(field(arm, "label_type")));
+            operation.match_label_members.push_back(text(field(arm, "label_member")));
         }
         lowering_operations.push_back(std::move(operation));
     }
@@ -626,7 +651,7 @@ int run(const Json& bundle, int lowering_plan_version) {
         if (text(field(*statement, "kind")) != "placement") continue;
         const auto* payload = field(*statement, "payload");
         const int value_expression = integer(field(payload, "value_expression"));
-        if (value_expression < 0 || (expressions.count(value_expression) && text(field(*expressions.at(value_expression), "kind")) == "call")) continue;
+        if (value_expression < 0) continue;
         const int scope_id = statement_scopes.count(statement_id) ? statement_scopes.at(statement_id) : -1;
         LoweringOperation operation;
         operation.expression = value_expression;
@@ -644,6 +669,13 @@ int run(const Json& bundle, int lowering_plan_version) {
             }
             operation.result_symbol = candidate;
         }
+        if (symbol_is_const(operation.result_symbol)) {
+            add_diagnostic("FLOWANALYST_CONST_MUTATION",
+                           "cannot assign to const binding",
+                           operation.result_symbol,
+                           "statement:" + std::to_string(statement_id));
+        }
+        if (expressions.count(value_expression) && text(field(*expressions.at(value_expression), "kind")) == "call") continue;
         operation.kind = "assignment";
         operation.arguments.push_back(value_expression);
         lowering_operations.push_back(std::move(operation));
@@ -680,6 +712,14 @@ int run(const Json& bundle, int lowering_plan_version) {
         for (auto& region : regions) if (region.id == "scope:" + std::to_string(resolution.scope) && region_id != region.id) region.prerequisites.push_back(region_id);
     }
     for (auto& region : regions) { std::sort(region.prerequisites.begin(), region.prerequisites.end()); region.prerequisites.erase(std::unique(region.prerequisites.begin(), region.prerequisites.end()), region.prerequisites.end()); }
+    for (const auto& operation : lowering_operations) {
+        if (operation.kind == "match" && operation.selector_kind == "variant") {
+            add_diagnostic("FLOWANALYST_VARIANT_MATCH_UNSUPPORTED",
+                           "variant match lowering is not admitted until a target-neutral payload contract exists",
+                           -1,
+                           "statement:" + std::to_string(operation.statement));
+        }
+    }
     for (const auto& diagnostic : diagnostics) for (auto& region : regions) if (region.id == diagnostic.region) region.status = "rejected";
     std::map<std::string, int> region_index;
     for (std::size_t index = 0; index < regions.size(); ++index) region_index[regions[index].id] = static_cast<int>(index);
@@ -804,6 +844,7 @@ int run(const Json& bundle, int lowering_plan_version) {
                     ? text(field(field(*expressions.at(member_base), "payload"), "name")) : std::string{};
                 if (variant_members.count(type) && variant_members.at(type).count(member)) {
                     std::cout << ",\"type\":\"int\",\"value\":\"" << variant_members.at(type).at(member) << "\"";
+                    std::cout << "}";
                     return;
                 }
             }
@@ -881,7 +922,12 @@ int run(const Json& bundle, int lowering_plan_version) {
                 if (arm) std::cout << ',';
                 std::cout << "{\"value\":" << operation.match_values[arm]
                           << ",\"high\":" << operation.match_highs[arm]
-                          << ",\"body_block_id\":" << operation.match_blocks[arm] << "}";
+                          << ",\"body_block_id\":" << operation.match_blocks[arm];
+                if (arm < operation.match_label_types.size() && !operation.match_label_types[arm].empty()) {
+                    std::cout << ",\"label_type\":" << quote(operation.match_label_types[arm])
+                              << ",\"label_member\":" << quote(operation.match_label_members[arm]);
+                }
+                std::cout << "}";
             }
             std::cout << "]";
         }

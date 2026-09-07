@@ -75,6 +75,7 @@ test-report/
 build/
 cmake-build-*/
 test-report/
+reports/
 .idea/
 CMakeFiles/
 CMakeCache.txt

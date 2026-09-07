@@ -2214,6 +2214,12 @@ namespace flowmini::ast {
 
         bool is_typed_binding_start(const std::vector<flowmini::Token>& tokens,
                                     const std::size_t i) {
+            if (i + 3 < tokens.size() && is_identifier_text(tokens[i], "const") &&
+                tokens[i + 1].kind == flowmini::TokenKind::Identifier &&
+                tokens[i + 2].kind == flowmini::TokenKind::Colon &&
+                is_identifier_like_type_token(tokens[i + 3])) {
+                return true;
+            }
             return i + 2 < tokens.size() &&
                    tokens[i].kind == flowmini::TokenKind::Identifier &&
                    tokens[i + 1].kind == flowmini::TokenKind::Colon &&
@@ -2227,9 +2233,11 @@ namespace flowmini::ast {
                                                         std::vector<Expression>& expressionPool) {
             Statement statement = make_statement(LetStatement{}, tokens[i]);
             LetStatement payload;
-            payload.name = tokens[i].text;
+            payload.is_const = is_identifier_text(tokens[i], "const");
+            const std::size_t nameIndex = payload.is_const ? i + 1 : i;
+            payload.name = tokens[nameIndex].text;
 
-            i += 2; // consume name and ':'
+            i = nameIndex + 2; // consume name and ':'
 
             if (i < tokens.size() && is_identifier_like_type_token(tokens[i])) {
                 payload.type = parse_type_ref(tokens, i);
@@ -2541,16 +2549,14 @@ namespace flowmini::ast {
             }
             i = skip_nonsemantic_separators(tokens, i);
 
-            const BlockId trueBlock = blockPool.size();
-            blockPool.push_back(Block{location_from_token(tokens[i]), {}});
-            const BlockId falseBlock = blockPool.size();
+            const BlockId failureBlock = blockPool.size();
             blockPool.push_back(Block{location_from_token(tokens[i]), {}});
             if (i < tokens.size() && tokens[i].kind == flowmini::TokenKind::LeftBrace) {
-                i = parse_body_statement_shells(tokens, i, falseBlock, blockPool, statementPool, expressionPool);
+                i = parse_body_statement_shells(tokens, i, failureBlock, blockPool, statementPool, expressionPool);
             }
 
             if (conditionExpression) {
-                statement.payload = IfStatement{*conditionExpression, trueBlock, ElseBlock{falseBlock}};
+                statement.payload = GuardStatement{*conditionExpression, failureBlock};
             } else {
                 statement.payload = UnknownStatement{"incomplete guard statement"};
             }

@@ -186,6 +186,7 @@ void project_import_decl(symboltable::SymbolTable& table,
 std::string statement_scope_debug_name(const Statement& statement) {
     switch (statement_kind(statement)) {
         case StatementKind::If:    return "if";
+        case StatementKind::Guard: return "guard";
         case StatementKind::While: return "while";
         default:                   return "block";
     }
@@ -227,6 +228,13 @@ void project_statement_binding(symboltable::SymbolTable& table,
                                variableSymbol,
                                "declared_type_spelling",
                                binding->type);
+        if (binding->is_const) {
+            add_string_fact(table,
+                            variableSymbol,
+                            symboltable::FactoidKind::Custom,
+                            "mutability",
+                            "const");
+        }
     }
 
     std::optional<BlockId> body;
@@ -234,6 +242,8 @@ void project_statement_binding(symboltable::SymbolTable& table,
     if (const auto* ifStatement = std::get_if<IfStatement>(&statement.payload)) {
         body = ifStatement->then_block;
         elseArm = &ifStatement->else_arm;
+    } else if (const auto* guardStatement = std::get_if<GuardStatement>(&statement.payload)) {
+        body = guardStatement->failure_block;
     } else if (const auto* whileStatement = std::get_if<WhileStatement>(&statement.payload)) {
         body = whileStatement->body_block;
     }
@@ -247,7 +257,9 @@ void project_statement_binding(symboltable::SymbolTable& table,
 
         const auto role = std::holds_alternative<IfStatement>(statement.payload)
             ? AstOriginRole::IfThenScope
-            : AstOriginRole::WhileBodyScope;
+            : (std::holds_alternative<GuardStatement>(statement.payload)
+                ? AstOriginRole::ElseBlockScope
+                : AstOriginRole::WhileBodyScope);
         record_scope_origin(scopeOrigins,
                             blockScope,
                             block_ast_path(*body),

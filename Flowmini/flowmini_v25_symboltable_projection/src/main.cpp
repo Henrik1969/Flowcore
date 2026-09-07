@@ -551,7 +551,7 @@ namespace {
     void printUsage(std::ostream& out) {
         out
             << "Usage:\n"
-            << "  flowmini [--trace true|false] [--emit-flowir <file|->] [--dump-token-tree <file|->] [--dump-token-tree-bridge [json|simple]] [--dump-ast] [--dump-frontend-bundle] [--dump-ast-symbols <file|->] [--dump-symbols <file|->] <program.flow|module.flowir> < input\n\n"
+            << "  flowmini [--runtime-compat] [--trace true|false] [--emit-flowir <file|->] [--dump-token-tree <file|->] [--dump-token-tree-bridge [json|simple]] [--dump-ast] [--dump-frontend-bundle] [--dump-ast-symbols <file|->] [--dump-symbols <file|->] <program.flow|module.flowir> < input\n\n"
             << "Human .flow sugar examples:\n"
             << "  program demo\n"
             << "  stdin : stdin.text()\n"
@@ -604,6 +604,7 @@ int main(int argc, char** argv) {
         bool dumpTokenTreeBridge = false;
         bool dumpAst = false;
         bool dumpFrontendBundle = false;
+        bool runtimeCompat = false;
 
         flowmini::TokenTreeBridgeDumpFormat dumpTokenTreeBridgeFormat = flowmini::TokenTreeBridgeDumpFormat::Json;
         std::string dumpSymbolsPath;
@@ -618,6 +619,11 @@ int main(int argc, char** argv) {
 
             if (arg == "--trace") {
                 ctx.policies.set("runtime.trace", flow::parseBool(flow::requireArgValue(argc, argv, i, arg)));
+                continue;
+            }
+
+            if (arg == "--runtime-compat") {
+                runtimeCompat = true;
                 continue;
             }
 
@@ -674,6 +680,11 @@ int main(int argc, char** argv) {
         if (sourcePath.empty()) {
             printUsage(std::cerr);
             return 2;
+        }
+
+        if (runtimeCompat && (dumpAst || dumpFrontendBundle || !dumpAstSymbolsPath.empty() ||
+                              !dumpTokenTreePath.empty() || dumpTokenTreeBridge)) {
+            throw flow::DiagnosticError{"cli", "--runtime-compat selects the versioned runtime parser and cannot be combined with structural inspection"};
         }
 
         const bool structuralInspection =
@@ -742,6 +753,10 @@ int main(int argc, char** argv) {
             return 0;
         }
 
+        // The runtime parser is retained as an explicitly named compatibility
+        // path until canonical AST/runtime convergence is complete. The flag
+        // makes the ownership visible without changing the legacy default.
+        static_cast<void>(runtimeCompat);
         const auto module = flowmini::parseModule(tokens);
 
         if (!dumpSymbolsPath.empty()) {

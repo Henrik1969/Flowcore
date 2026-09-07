@@ -83,6 +83,8 @@ int prepare(const Options& option) {
             const auto selector_kind = string(required(match, "selector_kind", "$.match_operations[]"), "$.match_operations[].selector_kind");
             if (selector_kind != "integer" && selector_kind != "enum" && selector_kind != "named" && selector_kind != "variant")
                 throw Error("$.match_operations[].selector_kind", "unsupported match selector kind");
+            if (selector_kind == "variant")
+                throw Error("$.match_operations[].selector_kind", "variant match lowering is not supported by the current backend contract");
             const auto& cases = array(required(match, "cases", "$.match_operations[]"), "$.match_operations[].cases");
             for (const auto& arm_value : cases) {
                 const auto& arm = object(arm_value, "$.match_operations[].cases[]");
