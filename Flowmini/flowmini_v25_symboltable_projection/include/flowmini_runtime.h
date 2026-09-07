@@ -47,6 +47,7 @@ public:
     void connect(std::string fromNode, std::string fromPort, std::string toNode, std::string toPort, std::string wireId);
 
     void startAt(const std::string& nodeId, MiniEnvelope env);
+    void setIdentityScope(std::string scope) { identity_scope_ = std::move(scope); }
 
 private:
     struct Pending {
@@ -70,6 +71,7 @@ private:
     std::queue<Pending> queue_;
     std::size_t next_signal_id_ = 0;
     std::size_t next_delivery_id_ = 0;
+    std::string identity_scope_;
 };
 
 struct BuildResult {

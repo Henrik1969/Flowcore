@@ -1477,7 +1477,7 @@ void RuntimeGraph::deliver(const std::string& fromNode, const std::string& fromP
     }
 
     const std::string key = wireKey(fromNode, fromPort);
-    env.signal_id = "signal:" + std::to_string(next_signal_id_++);
+    env.signal_id = identity_scope_ + "signal:" + std::to_string(next_signal_id_++);
     const auto it = wires_.find(key);
 
     if (it == wires_.end()) {
@@ -1493,7 +1493,7 @@ void RuntimeGraph::deliver(const std::string& fromNode, const std::string& fromP
         MiniEnvelope routed = env;
         routed.input_port = target.port;
         routed.wire_id = target.wire_id;
-        routed.delivery_id = "delivery:" + std::to_string(next_delivery_id_++);
+        routed.delivery_id = identity_scope_ + "delivery:" + std::to_string(next_delivery_id_++);
         trace("route " + key + " => " + target.node + "." + target.port + " [" + target.wire_id + "] [" + routed.signal_id + "] [" + routed.delivery_id + "]", routed);
         queue_.push(Pending{target.node, std::move(routed)});
     }
@@ -1516,18 +1516,78 @@ void RuntimeGraph::trace(const std::string& message, MiniEnvelope& env) const {
     }
 }
 
+namespace {
+class ReceiverResult final : public INode {
+public:
+    ReceiverResult(const ReceiverFrame& frame, std::vector<Value>& results)
+        : frame_(frame), results_(results) {}
+    std::vector<Route> run(MiniEnvelope env) override {
+        results_.push_back(getPathValue(requirePayload<RecordPayload>(env, "receiver"), frame_.result_path, "receiver"));
+        return {};
+    }
+private:
+    const ReceiverFrame& frame_;
+    std::vector<Value>& results_;
+};
+
+class SourceReceiver final : public INode {
+public:
+    SourceReceiver(std::shared_ptr<const ReceiverFrame> frame, AtomRegistry registry)
+        : frame_(std::move(frame)), registry_(std::move(registry)) {
+        // Validate the body even when no delivery will reach this receiver.
+        (void)buildCheckedGraph(frame_->body, registry_);
+    }
+    std::vector<Route> run(MiniEnvelope env) override {
+        if (env.input_port != "in") throw flow::DiagnosticError{"receiver", "receiver requires input port in"};
+        Value argument;
+        if (frame_->input_type == "Int") argument = requirePayload<IntPayload>(env, "receiver").value;
+        else if (frame_->input_type == "Bool") argument = requirePayload<BoolPayload>(env, "receiver").value;
+        else if (frame_->input_type == "Text") argument = requirePayload<TextPayload>(env, "receiver").value;
+        else throw flow::DiagnosticError{"receiver", "unsupported input carrier"};
+        auto activation = env;
+        activation.payload = RecordPayload{};
+        setPathValue(requirePayload<RecordPayload>(activation, "receiver"), frame_->input_path, std::move(argument), "receiver");
+        // Neither function-local record storage nor runtime queues survive a delivery.
+        auto body = buildCheckedGraph(frame_->body, registry_);
+        body.graph.setIdentityScope(env.delivery_id + "/");
+        std::vector<Value> results;
+        body.graph.addNode("__receiver_capture", std::make_unique<ReceiverResult>(*frame_, results));
+        body.graph.connect(frame_->result.node, frame_->result.port, "__receiver_capture", "in", "receiver:return");
+        body.graph.startAt(frame_->entry.node, std::move(activation));
+        if (results.size() != 1) throw flow::DiagnosticError{"receiver", "activation must return exactly one result"};
+        const auto& value = results.front().data;
+        if (frame_->output_type == "Int" && std::holds_alternative<std::int64_t>(value)) env.payload = IntPayload{std::get<std::int64_t>(value)};
+        else if (frame_->output_type == "Bool" && std::holds_alternative<bool>(value)) env.payload = BoolPayload{std::get<bool>(value)};
+        else if (frame_->output_type == "Text" && std::holds_alternative<std::string>(value)) env.payload = TextPayload{std::get<std::string>(value)};
+        else throw flow::DiagnosticError{"receiver", "activation result carrier mismatch"};
+        return {Route{"out", std::move(env)}};
+    }
+private:
+    std::shared_ptr<const ReceiverFrame> frame_;
+    AtomRegistry registry_;
+};
+}
+
 BuildResult buildCheckedGraph(const ModuleSpec& module, const AtomRegistry& registry) {
     std::map<std::string, NodeDecl> nodesById;
     std::map<std::string, NodePolicyMap> policiesByNode;
     std::vector<std::string> producerIds;
+    std::map<std::string, AtomContract> contracts;
 
     for (const auto& node : module.nodes) {
         if (nodesById.find(node.id) != nodesById.end()) {
             throw flow::DiagnosticError{"validator", "duplicate node id: " + node.id};
         }
 
-        if (!registry.contains(node.kind)) {
+        if (node.source_function) {
+            const auto frame = module.receivers.find(node.id);
+            if (node.role != "node" || frame == module.receivers.end() || !frame->second)
+                throw flow::DiagnosticError{"validator", "unresolved source receiver: " + node.id};
+            contracts.emplace(node.id, AtomContract{node.kind, {{"in", frame->second->input_type}}, {{"out", frame->second->output_type}}, {}});
+        } else if (!registry.contains(node.kind)) {
             throw flow::DiagnosticError{"validator", "unknown atom kind: " + node.kind};
+        } else {
+            contracts.emplace(node.id, registry.contractFor(node.kind));
         }
 
         if (node.role == "producer") {
@@ -1541,6 +1601,8 @@ BuildResult buildCheckedGraph(const ModuleSpec& module, const AtomRegistry& regi
         if (nodesById.find(policy.node) == nodesById.end()) {
             throw flow::DiagnosticError{"validator", "policy references unknown node: " + policy.node};
         }
+        if (nodesById.at(policy.node).source_function)
+            throw flow::DiagnosticError{"validator", "source receiver policies are unsupported: " + policy.node};
         policiesByNode[policy.node][policy.key] = policy.value;
     }
 
@@ -1562,8 +1624,8 @@ BuildResult buildCheckedGraph(const ModuleSpec& module, const AtomRegistry& regi
             throw flow::DiagnosticError{"validator", "wire references unknown target node: " + wire.to.node};
         }
 
-        const auto& fromContract = registry.contractFor(fromNodeIt->second.kind);
-        const auto& toContract = registry.contractFor(toNodeIt->second.kind);
+        const auto& fromContract = contracts.at(fromNodeIt->first);
+        const auto& toContract = contracts.at(toNodeIt->first);
 
         WireDecl resolved = wire;
         if (resolved.from.port.empty()) {
@@ -1596,8 +1658,8 @@ BuildResult buildCheckedGraph(const ModuleSpec& module, const AtomRegistry& regi
     }
 
     for (const auto& [id, node] : nodesById) {
-        if (node.role == "producer" || id.rfind("__", 0) == 0) continue;
-        const auto& contract = registry.contractFor(node.kind);
+        if (node.role == "producer" || (!node.source_function && id.rfind("__", 0) == 0)) continue;
+        const auto& contract = contracts.at(id);
         if (contract.terminal && !contract.outputs.empty())
             throw flow::DiagnosticError{"validator", "terminal atom exposes output ports: " + node.kind};
         for (const auto& [port, type] : contract.inputs) {
@@ -1608,6 +1670,23 @@ BuildResult buildCheckedGraph(const ModuleSpec& module, const AtomRegistry& regi
     }
 
     BuildResult result;
+    // Stateful/cyclic receiver activation is outside the bounded contract.
+    // Existing interpreter control-flow loops inside a frame remain valid.
+    for (const auto& [id, node] : nodesById) {
+        if (!node.source_function) continue;
+        std::set<std::string> visited;
+        std::vector<std::string> pending{id};
+        while (!pending.empty()) {
+            const auto current = pending.back();
+            pending.pop_back();
+            if (!visited.insert(current).second) continue;
+            for (const auto& wire : resolvedWires) if (wire.from.node == current) {
+                if (wire.to.node == id)
+                    throw flow::DiagnosticError{"validator", "cyclic source receiver graph is unsupported: " + id};
+                pending.push_back(wire.to.node);
+            }
+        }
+    }
     result.producerIds = producerIds;
 
     for (const auto& item : nodesById) {
@@ -1615,7 +1694,9 @@ BuildResult buildCheckedGraph(const ModuleSpec& module, const AtomRegistry& regi
         config.id = item.second.id;
         config.kind = item.second.kind;
         config.policies = policiesByNode[item.second.id];
-        result.graph.addNode(item.first, registry.create(std::move(config)));
+        if (item.second.source_function)
+            result.graph.addNode(item.first, std::make_unique<SourceReceiver>(module.receivers.at(item.first), registry));
+        else result.graph.addNode(item.first, registry.create(std::move(config)));
     }
 
     for (std::size_t index = 0; index < resolvedWires.size(); ++index) {

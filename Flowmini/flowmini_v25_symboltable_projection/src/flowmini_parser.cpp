@@ -189,6 +189,7 @@ public:
 
             expectLineEnd("expected newline after statement");
         }
+        lowerReceivers();
         return module_;
     }
 
@@ -240,8 +241,54 @@ private:
         decl.role = std::move(role);
         decl.id = expectIdentifier("expected node id").text;
         expect(TokenKind::Colon, "expected ':' after node id");
+        decl.source_function = match(TokenKind::KeywordFn);
         decl.kind = parseQualifiedName();
         return decl;
+    }
+
+    void lowerReceivers() {
+        for (const auto& node : module_.nodes) {
+            if (!node.source_function) continue;
+            const auto* function = lookupFunction(node.kind);
+            if (node.role != "node" || !function || function->isExtern || function->args.size() != 1)
+                throw flow::DiagnosticError{"receiver", "receiver requires a defined one-input function and node role: " + node.id};
+            auto payloadType = [](const std::string& type) -> std::string {
+                if (type == "int") return "Int";
+                if (type == "Bool") return "Bool";
+                if (type == "c_string") return "Text";
+                throw flow::DiagnosticError{"receiver", "unsupported receiver payload type: " + type};
+            };
+            auto frame = std::make_shared<ReceiverFrame>();
+            frame->input_type = payloadType(function->args.front().type);
+            frame->output_type = payloadType(function->returnType);
+            frame->input_path = "__receiver_argument";
+            frame->result_path = "__receiver_result";
+            Parser body{tokens_};
+            body.functions_ = functions_;
+            body.types_ = types_;
+            body.abiTypes_ = abiTypes_;
+            body.abiStructs_ = abiStructs_;
+            body.module_.name = module_.name + "_" + node.id;
+            body.scopes_.push_back(Scope{body.module_.name, body.module_.name, {}});
+            body.currentScope().symbols["argument"] = Symbol{function->args.front().type, frame->input_path, "argument", {}};
+            Expr call;
+            call.kind = ExprKind::FunctionCall;
+            call.ident = node.kind;
+            Expr argument;
+            argument.kind = ExprKind::Identifier;
+            argument.ident = "argument";
+            call.args.push_back(std::move(argument));
+            const auto step = body.lowerFunctionCall(call, frame->result_path);
+            frame->entry = {step.first.node, step.first.port};
+            frame->result = {step.last.node, step.last.port};
+            for (auto& operation : body.module_.nodes) {
+                if (operation.role == "producer")
+                    throw flow::DiagnosticError{"receiver", "receiver body cannot introduce a producer: " + node.id};
+                if (operation.id == frame->entry.node) operation.role = "producer";
+            }
+            frame->body = std::move(body.module_);
+            module_.receivers.emplace(node.id, std::move(frame));
+        }
     }
 
     [[nodiscard]] WireDecl parseWireDecl() {
@@ -1955,6 +2002,8 @@ std::string policyValueToText(const flow::PolicyValue& value) {
 ModuleSpec parseModule(const std::vector<Token>& tokens) { Parser parser{tokens}; return parser.parse(); }
 
 void writeFlowIr(const ModuleSpec& module, std::ostream& out) {
+    if (!module.receivers.empty())
+        throw flow::DiagnosticError{"flowir", "source receiver frames require a versioned graph artifact; legacy FlowIR export is unsupported"};
     out << "module " << module.name << "\n\n";
     for (const auto& node : module.nodes) { out << node.role << ' ' << node.id << " : " << node.kind << "\n"; }
     if (!module.policies.empty()) { out << "\n"; }

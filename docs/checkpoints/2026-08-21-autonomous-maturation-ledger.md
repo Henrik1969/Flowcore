@@ -1,5 +1,48 @@
 # Flowcore autonomous maturation ledger
 
+## Fresh compatibility receiver frames — 2026-09-07
+
+Recovered clean `4281338` on `v29-language-maturation`. Gate 6 remains the first
+unfinished gate. Added distinct source-function references to the compatibility
+runtime schema and isolated function-body projections. Every delivered scalar
+input constructs a fresh local record and execution graph; one captured result
+creates one outer output signal. Fan-out preserves that signal across distinct
+deliveries. Internal runtime identities are scoped to their incoming delivery.
+No function/application name selects a provider factory or compiler emitter.
+
+The new `source_receiver_frames` gate covers repeated input, local mutation,
+missing conditional results after a successful activation, two-way fan-out,
+int/Bool/text carriers, failure with no output, forward function definitions,
+wrong ports/types/roles, missing functions, cycles and refusal of lossy legacy
+FlowIR export. Existing graph refusal remains in place for native compilation.
+This interpreter slice retains its existing placement-based function semantics;
+modern native `return`/`guard`/`when` and aggregate graph receivers remain work.
+No Flow-owned paging or native graph completion is claimed.
+
+Exact verification:
+
+```sh
+cmake --build /tmp/flowcore-reusable-current -j4
+ctest --test-dir /tmp/flowcore-reusable-current -R 'source_receiver_frames|graph_lowering_refusal|flowcore_graph_routing' --output-on-failure
+ctest --test-dir /tmp/flowcore-reusable-current --output-on-failure -j4
+cmake --build /tmp/flowcore-reusable-current-sanitize -j4
+ASAN_OPTIONS=detect_leaks=0 LSAN_OPTIONS=detect_leaks=0 ctest --test-dir /tmp/flowcore-reusable-current-sanitize --output-on-failure -j4
+ASAN_OPTIONS=detect_leaks=0 LSAN_OPTIONS=detect_leaks=0 ctest --test-dir /tmp/flowcore-reusable-current-sanitize -R source_receiver_frames --output-on-failure
+sh /tmp/flowcore-reusable-acceptance/run.sh
+git diff --check
+```
+
+Both builds passed. Focused **3/3**, normal **77/77** in 5.30 seconds,
+ASan/UBSan **77/77** in 17.07 seconds; expanded carrier/diagnostic assertions
+also passed the focused normal and sanitizer test. Native acceptance exited 42,
+all six unchanged compiler hashes passed, and ELF SHA-256 remains
+`86ac3acba71f522aa13b5d58e733486737c1b4b9ffc19ed5224ab1c75470f400`.
+Logs are `/tmp/flowcore-receiver-frames-{ctest,sanitize}.log`.
+
+State stays CONTINUE. Next: preserve the complete graph and receiver identities
+through independently validated stage artifacts, implement native activation,
+and then move pager navigation to Flow. No new owner decision is required.
+
 ## Receiver connection and delivery identity checkpoint — 2026-09-07
 
 Continued immediately after pushing `2327913`. Source receivers now require

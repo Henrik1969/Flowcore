@@ -85,3 +85,22 @@ Compatibility runtime fan-out now records a separate delivery identity alongside
 wire and shared output-signal identities. Tests verify one producer invocation,
 distinct deliveries, and no successful output from a failed activation. This
 does not yet prove source-function execution or fresh function-local storage.
+
+## Compatibility receiver execution — 2026-09-07
+
+The compatibility interpreter now executes `node name : fn function_name` for
+`int`, `Bool`, and `c_string` payloads. The function's existing placement/control-
+flow operations execute in a new record and runtime instance for each delivery.
+Only a single successfully captured result becomes an outer output activation;
+fan-out retains that signal and never re-executes the function. Internal signal
+and delivery identities are scoped to the incoming delivery. Missing conditional
+results cannot reuse an earlier activation's result. Cyclic receiver graphs,
+producer bodies, wrong roles/ports/types, and unsupported carriers fail explicitly.
+
+This is the compatibility parser's existing function syntax, including `-> return`;
+it does not extend that parser to native `return`, `guard`, or `when` statements.
+Native source graph execution and its full approved expression surface are still
+unfinished. Legacy FlowIR export explicitly refuses receiver frames to avoid
+silently omitting their bodies. The durable frontend syntax remains available.
+`source_receiver_frames` covers repeated input, fresh state, fan-out, failure,
+carrier conversion boundaries, forward references, and hostile connections.

@@ -4,6 +4,7 @@
 #include "flow_common.h"
 
 #include <map>
+#include <memory>
 #include <set>
 #include <string>
 #include <utility>
@@ -20,6 +21,7 @@ struct NodeDecl {
     std::string role; // producer, node, sink
     std::string id;
     std::string kind;
+    bool source_function = false;
 };
 
 struct WireDecl {
@@ -33,11 +35,26 @@ struct PolicyDecl {
     flow::PolicyValue value;
 };
 
+struct ReceiverFrame;
+
 struct ModuleSpec {
     std::string name;
     std::vector<NodeDecl> nodes;
     std::vector<WireDecl> wires;
     std::vector<PolicyDecl> policies;
+    std::map<std::string, std::shared_ptr<const ReceiverFrame>> receivers;
+};
+
+// Compatibility interpreter projection of a source function. Each delivery
+// instantiates this body with a fresh record; it is never an atom factory name.
+struct ReceiverFrame {
+    ModuleSpec body;
+    Endpoint entry;
+    Endpoint result;
+    std::string input_type;
+    std::string output_type;
+    std::string input_path;
+    std::string result_path;
 };
 
 struct AtomContract {

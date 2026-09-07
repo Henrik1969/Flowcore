@@ -173,6 +173,11 @@ add_test(NAME graph_lowering_refusal
         FLOWPARALLEL_BIN=$<TARGET_FILE:flowparallel>
         sh ${CMAKE_CURRENT_SOURCE_DIR}/tools/test-graph-lowering-refusal.sh)
 
+add_test(NAME source_receiver_frames
+    COMMAND ${CMAKE_COMMAND} -E env
+        FLOWMINI_BIN=$<TARGET_FILE:flowmini>
+        sh ${CMAKE_CURRENT_SOURCE_DIR}/tools/test-source-receiver-frames.sh)
+
 add_test(NAME flow_less_ncurses_pager
     COMMAND ${CMAKE_COMMAND} -E env
         FLOWMINI_BIN=$<TARGET_FILE:flowmini>
