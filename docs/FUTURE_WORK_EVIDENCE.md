@@ -90,6 +90,34 @@ architecture cost of a new mechanism is not justified.
   labels.
 - **Priority:** high for tagged data; do not silently admit it.
 
+### LANGUAGE/COMPILER — restrained generic declarations
+
+- **Finding:** user-defined generic functions and records are not yet a
+  language feature; only a bounded set of generic type constructors is
+  recognized by existing type validation.
+- **Evidence:** `FunctionDecl` and `RecordDecl` have no type-parameter owner,
+  Flowanalyst's resolver has no substitution environment, and the guide marks
+  generic functions/collections unsupported. Adding syntax alone would make
+  the two parser paths disagree and would leave lowering without a concrete
+  carrier type.
+- **Why it matters:** reusable algorithms are needed for self-hosting, but an
+  accidental type-erasure implementation would hide invalid substitutions and
+  violate semantic evidence.
+- **Status:** NOT SUPPORTED — DEFERRED; no partial generic syntax was added.
+- **Possible direction:** add one canonical type-parameter representation,
+  inference/substitution diagnostics, and a provider-neutral specialization
+  contract together. Start with `identity<T>` only after a real use case and
+  differential corpus exist.
+- **Estimated scope/risk:** medium/high frontend, symbol, and lowering schema
+  change; high risk of parser divergence if introduced piecemeal.
+- **Dependencies:** parser convergence, type identity contract, backend carrier
+  strategy.
+- **Suggested gate:** generic identity and two-type record fixtures must pass
+  AST, facts, invalid-substitution, and deterministic LLVM/TinyVM artifact
+  checks before the feature is called IMPLEMENTED.
+- **Priority rationale:** strategic for future self-hosting, lower immediate
+  priority than preserving current scalar/control/provider contracts.
+
 ### TESTING/DOCUMENTATION — reconcile maturity counts
 
 - **Finding:** stale docs claim v0.25/v0.27 and 78/78 while current fixture

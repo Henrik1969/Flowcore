@@ -866,3 +866,17 @@ later instruction reopens them.
   /tmp/flowcore-growth-asan --output-on-failure` passes 88/88. This closes the
   sanitizer check for the current implementation; leak checks remain disabled
   consistently with the existing repository workflow.
+
+## 2026-09-07 remaining-boundary evidence
+
+- Variant backend parity remains NOT SUPPORTED — DEFERRED: current runtime and
+  artifact paths preserve tags and payload labels, but no target-neutral
+  discriminant/payload carrier is implemented. The backend continues to reject
+  variant matches explicitly.
+- User-defined generics remain NOT SUPPORTED — DEFERRED. Existing type
+  validation recognizes only bounded built-in generic constructors; no partial
+  generic syntax was introduced because the canonical AST, substitution facts,
+  and backend carrier contract are not yet present.
+- These are recorded as bounded architectural dependencies in
+  `docs/FUTURE_WORK_EVIDENCE.md`, with gates and cost rationale rather than
+  inflated readiness claims.
