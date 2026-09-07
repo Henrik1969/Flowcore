@@ -1,14 +1,31 @@
-# The FlowMini Programmer’s Manual
+# Flowmini Programmer’s Guide
 
-This manual teaches the current FlowMini language surface through runnable
-examples: source units, imports, declarations, expressions, functions,
-records, collections, control flow, refined types, and ABI declarations.
+Flowmini is Flowcore’s small experimental language for making computation,
+state movement, providers, and evidence visible to the toolchain. It is a
+language laboratory, not a replacement for C, C++, Rust, Python, or the other
+languages in this repository. **Flowmini is one tool among many. Choose
+according to the problem.**
 
-## 1. Your first program
+This guide describes the checkout’s v0.29 implementation. Status words have a
+precise meaning: **IMPLEMENTED** means the source path accepts it;
+**TESTED** means a repository test or verified probe covers it; **DESIGNED**
+and **PLANNED** are documents, not working features; **EXPERIMENTAL** means a
+working but compatibility-oriented path; **NOT SUPPORTED** and **UNKNOWN** are
+limits.
+
+## Start here
+
+```sh
+cmake -S . -B /tmp/flowcore-build -G Ninja
+cmake --build /tmp/flowcore-build
+cmake -S Flowmini/flowmini_v25_symboltable_projection -B /tmp/flowmini-build -G Ninja
+cmake --build /tmp/flowmini-build
+```
+
+A minimal runtime program is:
 
 ```flow
 program hello
-
 main {
     answer : int(40)
     answer + 2 -> answer
@@ -16,435 +33,213 @@ main {
 }
 ```
 
-`program hello` names the executable source unit. `main` is its root executable
-block. A declaration gives a name, type, and initializer. The arrow form
-evaluates an expression and places its result in a target.
+Run it with the built Flowmini executable and a source file. The `pass/`,
+`support/`, and `std/` trees contain runnable examples. The root CTest suite is
+the canonical contract; the Flowmini directory also has focused AST, symbol,
+bundle, UTF-8, and TokenTree tests.
 
-The simple source form has one root `main` block. For a program that describes
-several products, entrypoints are named by `target` blocks rather than by
-creating several anonymous root `main` blocks.
+## Two current entry paths
 
-```flow
-program toolset
+Flowmini currently has two executable paths and they must not be confused:
 
-target cli {
-    main {
-        print "command-line tool"
-    }
-}
+* **Structural/artifact path (IMPLEMENTED, TESTED):** `--dump-ast` and
+  `--dump-frontend-bundle` use the TokenTree/AST builder and publish symbols,
+  facts, and provenance for Flowanalyst, Flowbind, Flowoptimize, and Flowlower.
+* **Runtime graph path (EXPERIMENTAL, TESTED for admitted probes):** normal
+  execution uses the separate `flowmini::parseModule` parser and provider
+  runtime. It accepts useful constructs that the structural path does not yet
+  preserve. This is a compatibility path, not evidence that the two parsers
+  have identical semantics.
 
-target daemon {
-    main {
-        print "service"
-    }
-}
-```
+The compiler stages communicate through files. An AST, symbol projection,
+Graph IR, lowering plan, and runtime value are different representations with
+different owners; none is a universal authority.
 
-This gives the language model an important distinction:
+## Source units, layout, and names
 
-```text
-program = shared semantic universe
-target  = named buildable or runnable projection
-main    = entrypoint owned by a target
-```
+`program name` declares an executable root; `unit name` declares an importable
+source unit. `import "path/to/unit.flow"` names a unit. A plain root `main { … }`
+is the supported entry form. Named multi-target projections are **DESIGNED**
+but are not the active v0.29 executable contract.
 
-Each target has one meaningful `main`; target names remove the ambiguity that
-would arise from several anonymous root mains. Shared declarations may be used
-by more than one target, while target-local declarations belong only to that
-projection. A plain root `main` remains the compact single-product form. Named
-targets are the planned multiplexed-entrypoint form; the active v25 executable
-subset still accepts the plain one-root-`main` form only.
+Line comments use `//` and `#`; block comments use `/* … */` and may nest.
+Braces delimit blocks. Newlines normally separate statements. Identifiers are
+case-sensitive. Type names are source-level names, so `int`, `Bool`, `Point`,
+and `c_int` are distinct.
 
-## 2. Programs, units, and imports
+## Values, declarations, and expressions
 
-FlowMini has two source-unit roles:
-
-```flow
-program application
-unit math_helpers
-```
-
-A `program` is the executable root and may contain `main`. A `unit` is an
-importable defining source unit and must not contain `main`.
-
-Imports name a unit by path:
-
-```flow
-import "../../std/math.flow"
-import "../../std/collatz.flow"
-
-program import_demo
-
-main {
-    value : int(5)
-    result : int(0)
-    factorial(value) -> result
-    print result
-}
-```
-
-Imported files are units, not programs. The root program is the thing you run;
-units supply declarations and functions.
-
-## 3. Comments and layout
-
-Line comments use `//` or `#`:
-
-```flow
-// comment
-# another comment
-value : int(1) // trailing comment
-```
-
-Block comments use `/* ... */` and may be nested:
-
-```flow
-/* outer comment
-   /* nested comment */
-*/
-```
-
-Newlines normally separate statements. Braces delimit blocks; indentation is
-for readability.
-
-## 4. Declarations and types
-
-A local declaration has the form:
-
-```text
-name : Type(initializer)
-```
-
-Examples:
+The common declaration form is `name : Type(initializer)`:
 
 ```flow
 count : int(0)
 ready : Bool(false)
-text  : string("hello")
+message : string("hello")
 ```
 
-The current examples commonly use `int` and `Bool`. Other names may be
-declared by the program, imported from a unit, or supplied by an ABI surface.
-Written type spellings matter: `int`, `Bool`, `Point`, `Percent`, and `c_int`
-are distinct source names.
+The admitted expression forms are identifiers; integer and floating literals;
+strings (`\\n`, `\\t`, `\\r` escapes); booleans; unary `not` and prefix `-`;
+`+ - * / %`; comparisons `< <= > >= == !=`; calls; indexing; field access;
+list literals; and record literals. Parentheses group expressions. Postfix
+call, index, and field operators bind most tightly; multiplication binds more
+tightly than addition; comparisons bind below arithmetic. Prefer parentheses
+when readability or a provider boundary depends on grouping.
 
-Boolean literals are `true` and `false`; constructor-style initializers such as
-`Bool(false)` also occur in current examples. String literals use double quotes
-and support `\n`, `\t`, and `\r` escapes.
-
-## 5. Expressions
-
-FlowMini expressions include identifiers, integer and floating-point literals,
-strings, Boolean literals, unary `not` and prefix `-`, arithmetic operators
-`+ - * / %`, comparisons `< <= > >= == !=`, parentheses, calls, indexing,
-field access, list literals, and record literals.
+Placement is the central state operation:
 
 ```flow
-result : int(0)
-square(add(3, 4)) -> result
-
-value : int(0)
-(a + b) * c -> value
-```
-
-Calls, indexing, and field access compose as postfix expressions. Examples are
-`matrix[row, col]` and `person.address.city`.
-
-## 6. Placement, assignment, and return
-
-The central data-movement form is:
-
-```text
-expression -> target
-```
-
-Current assignable targets are identifiers, field paths, and indexed targets:
-
-```flow
-value -> name
+value -> variable
 value -> record.field
-value -> list[index]
-value -> matrix[row, col]
+value -> collection[index]
 ```
 
-For example:
+`=` assignment is retained as a structural compatibility spelling. The runtime
+path primarily uses placement and `expression -> return` for function results.
+Keyword `return expression` is accepted by some structural examples, but is not
+a portable runtime contract.
+
+## Functions and data
 
 ```flow
-arr : list<int>([1, 9, 3])
-i   : int(1)
-x   : int(0)
-
-arr[i] -> x
-42 -> arr[i]
-```
-
-Equals assignment also exists in the structural/provisional language surface:
-
-```flow
-x = expression
-```
-
-A function can return with either current spelling:
-
-```flow
-fn square(n : int): int {
-    n * n -> return
-}
-
-fn cube(n : int): int {
-    return n * n * n
-}
-```
-
-The canonical teaching form is the arrow: it reads as “evaluate this, then
-place the result there.” Use equals assignment only where the active consumer
-explicitly supports that compatibility form. `return` is control transfer, not
-an assignable variable.
-
-## 7. Functions
-
-Functions use `fn`, a name, typed parameters, a return type, and a braced body:
-
-```flow
-fn add_then_square(a : int, b : int): int {
-    sum : int(0)
-    a + b -> sum
-    square(sum) -> return
+fn add(a : int, b : int): int {
+    a + b -> return
 }
 
 main {
     result : int(0)
-    add_then_square(3, 4) -> result
+    add(20, 22) -> result
     print result
 }
 ```
 
-Parameters are named and typed. Functions may call local or imported
-functions. Keep the return path explicit with `-> return` or `return`.
-
-## 8. Records and field access
-
-Define a record with `type` and `field`:
+Records use `type` and `field`:
 
 ```flow
 type Point {
     field x : int
     field y : int
 }
-```
-
-Construct and use it with named fields:
-
-```flow
 p : Point({x:10, y:32})
-value : int(0)
-p.x -> value
-42 -> p.x
 ```
 
-Records can be passed to functions:
+`list<T>([values])` and shaped `array<T>[extent, ...]([values])` are present
+in runtime examples. Indexing is zero-based in those examples. Generic maps,
+user-defined generic functions, iterators, classes, and a standard library are
+**NOT SUPPORTED** as general language guarantees.
+
+Refined types are **EXPERIMENTAL**:
 
 ```flow
-fn sum_point(p : Point): int {
-    p.x + p.y -> return
-}
-```
-
-## 9. Lists and arrays
-
-Declare a list with an element type and list literal:
-
-```flow
-numbers : list<int>([1, 9, 3, 5])
-i : int(1)
-x : int(0)
-numbers[i] -> x
-42 -> numbers[i]
-```
-
-Shaped arrays include extents:
-
-```flow
-matrix : array<int>[2, 3]([1,2,3,4,5,6])
-row : int(1)
-col : int(2)
-value : int(0)
-matrix[row, col] -> value
-```
-
-The current examples use zero-based indexes. The programmer must supply an
-initializer and indexes appropriate to the value.
-
-## 10. Conditions and loops
-
-```flow
-if x == 0 {
-    print 10
-} else if x == 1 {
-    print 20
-} else {
-    print 30
-}
-```
-
-The `else` branch is optional. `while` repeats a braced block:
-
-```flow
-i : int(0)
-five : int(5)
-one : int(1)
-keep_going : Bool(true)
-
-while keep_going {
-    print i
-    i + one -> i
-    i < five -> keep_going
-}
-```
-
-`break` exits the current loop. `continue` skips to its next iteration:
-
-```flow
-while condition {
-    if finished {
-        break
-    }
-    if skip_this {
-        continue
-    }
-    work()
-}
-```
-
-## 11. Refined types
-
-A refined type names a base type and adds invariant clauses:
-
-```flow
-type PositiveInteger refines int {
-    invariant value > 0
-}
-
-type Percent refines PositiveInteger {
+type Percent refines int {
+    invariant value >= 0
     invariant value <= 100
 }
-
-main {
-    load : Percent(87)
-}
 ```
 
-An invariant is part of the type’s contract. Do not assume that every possible
-semantic check, conversion, or runtime enforcement is available on every path.
+Do not assume every conversion or runtime path enforces every invariant.
 
-## 12. ABI declarations
+## Control flow, constants, and variants
 
-An `abi` block describes an external library boundary:
+`if`/`else`, `while`, `break`, and `continue` are IMPLEMENTED and TESTED in
+runtime probes. `guard condition { … } else { … }` is readable guard sugar in
+the runtime path; the structural AST currently lowers it to an ordinary
+`IfStatement`, so guard identity is not preserved as an independent fact.
+
+The runtime parser accepts `const name : Type(value)` and enum/variant
+declarations and `when` over integer, enum, and variant values. Constants are
+not yet represented as immutable declarations in the frontend bundle, and the
+structural AST currently requires a `default` block for `when`; these are
+artifact-chain gaps, not promises of full language parity. Variant payload
+matching is runtime-probed but **NOT SUPPORTED** by the current backend-neutral
+lowering contract.
+
+## ABI and providers
+
+An ABI block declares an external library, calling convention, structs, and
+extern functions. Provider imports and ABI calls are the supported escape
+boundary:
 
 ```flow
-abi testabi {
-    library "./build/libflowmini_testabi.so"
+abi mathlib {
+    library "./libmath.so"
     convention c
-
-    struct Point {
-        x : c_int
-        y : c_int
-    }
-
-    extern fn point_sum(p : Point): c_int {
-        symbol "point_sum"
+    extern fn answer(): c_int {
+        symbol "answer"
         effect pure
     }
 }
 ```
 
-An ABI block may contain a library path, calling convention, ABI structs, and
-extern functions. Names such as `c_int` describe the foreign boundary and are
-not automatically interchangeable with every FlowMini type.
+The declared library and symbol must exist. `print` is a convenient provider
+operation, not proof of a complete standard library. There is currently no
+general `unsafe` block or inline-assembly mechanism (**NOT SUPPORTED**).
+Future work may add an explicit provider/target-specific boundary with declared
+inputs, outputs, effects, identity, and boundary provenance while leaving
+opaque internals outside normal Flowmini guarantees.
 
-After importing an ABI unit, an extern function is called normally:
+## Flowcore model in programmer terms
 
-```flow
-result : c_int(0)
-point_sum(point) -> result
-```
-
-The library must exist and export the declared symbol for the call to work.
-
-## 13. Output and capabilities
-
-Current examples use:
-
-```flow
-print value
-```
-
-Treat this as the current convenient output spelling. Conceptually, output is a
-capability/provider operation, and ordinary calls such as `print(value)` may be
-used where the available provider surface supports them. Do not infer a larger
-standard library from the keyword alone; use the functions and units actually
-provided by the environment.
-
-## 14. Complete example
-
-```flow
-program larger_demo
-
-fn larger(a : int, b : int): int {
-    if a > b {
-        a -> return
-    } else {
-        b -> return
-    }
-}
-
-main {
-    values : list<int>([4, 9, 2])
-    first : int(0)
-    second : int(0)
-    result : int(0)
-
-    values[0] -> first
-    values[1] -> second
-    larger(first, second) -> result
-    print result
-}
-```
-
-This combines a program, function, list, indexing, placement, conditionals,
-return, and output.
-
-## 15. Compact reference
+Think of a program as:
 
 ```text
-program name
-unit name
-import "path/to/unit.flow"
-
-main { statements }
-target name { main { statements } }
-fn name(param : Type, ...): ReturnType { statements }
-type Name { field member : Type ... }
-type Name refines BaseType { invariant expression ... }
-abi name { library "path"; convention name; ... }
-
-name : Type(initializer)
-expression -> target
-expression -> return
-name = expression
-if expression { ... } else if expression { ... } else { ... }
-while expression { ... }
-break
-continue
-
-list<Type>([values])
-array<Type>[extent, ...]([values])
-record.field
-value[index]
-function(arguments)
+input -> handling/computation -> output
 ```
 
-When learning, begin with a small `program`, add one typed declaration at a
-time, and keep expression-to-target placement explicit. The current `pass/`,
-`support/`, and `std/` examples are the companion reference for combinations of
-these forms.
+Inputs and observations become **facts**. Functions transform facts. A
+**capability** authorizes an effect such as output, storage, or a device call;
+a **provider** implements that capability for a target. **Policy** decides
+which provider/effect is admitted. A state update is a revision with lineage,
+not an unlabelled overwrite. A **projection** exposes selected facts to a
+consumer; it does not become authority merely because it is convenient. ABI
+and provider boundaries carry identity and **provenance**. Tests, captured
+artifacts, diagnostics, and gates are **evidence** for readiness claims.
+
+## Compilation pipeline
+
+```text
+source -> tokens/TokenTree -> structural AST -> symbol/fact projection
+       -> Flowanalyst/Flowbind/Flowoptimize -> backend-neutral lowering
+       -> provider/backend/runtime
+```
+
+The normal runtime parser is a separate path today. AST nodes, symbol tables,
+Graph IR, lowering operations, provider calls, and runtime values have distinct
+schemas and ownership. Integer and enum match lowering is tested; variant
+payload labels are currently dropped by analysis and rejected by preparation.
+
+## What to test next
+
+Use focused tests while learning, then run `ctest --test-dir build
+--output-on-failure`. The current root build has 81 passing tests and one baseline failure in the variant-construction JSON probe. The
+categorized `flowmini_suite` remains an honest maturity signal: its present
+fixture inventory is 87/136, with 49 expected-pass examples exposing parser,
+ABI, and profile gaps.
+
+## Compact reference
+
+```text
+program name                 unit name
+import "path"
+main { statements }
+fn name(a : Type): Return { statements }
+type Name { field member : Type }
+type Name refines Base { invariant expression }
+abi name { library "path"; convention c; ... }
+name : Type(initializer)       expression -> target
+expression -> return           if expression { ... } else { ... }
+while expression { ... }       guard expression { ... } else { ... }
+break                          continue
+list<Type>([values])           array<Type>[n, ...]([values])
+record.field                   value[index]
+```
+
+Unsupported or uncertain behavior is recorded in
+[`FUTURE_WORK_EVIDENCE.md`](../FUTURE_WORK_EVIDENCE.md) and the language
+comparison documents. When a claim is marked DESIGNED or PLANNED, write a
+probe before relying on it.
+
+Implementation evidence used for this guide includes the AST definitions in
+`Flowmini/flowmini_v25_symboltable_projection/include/flowmini_ast.h`, the
+structural builder in `src/flowmini_ast_builder.cpp`, runtime parsing in
+`src/main.cpp`, analysis in `flowanalyst/src/main.cpp`, and the executable
+probes under `Flowmini/flowmini_v25_symboltable_projection/examples/bootstrap`.

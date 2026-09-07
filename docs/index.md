@@ -18,6 +18,8 @@ This is the soul of Flowcore.
 - [Pattern explored](../Pattern_explored/README.md)
 - [Architecture notes](architecture/README.md)
 - [Flowmini docs](flowmini/README.md)
+- [Flowmini language comparisons](language-comparisons/README.md)
+- [Flowmini evidence-based future work](FUTURE_WORK_EVIDENCE.md)
 - [Session notes](sessions/)
 
 ## Foundational architecture
@@ -53,9 +55,9 @@ Current checkpoint:
 
 ```text
 Flowcore v0.29 language-maturation and cross-backend parity slice
-AST golden tests: 28
-Symbol projection tests: 14
-Flowanalyst / Flowbind / Flowoptimize / Flowlower: CTest green
-flowvalidate / identity mutation gates: CTest green
-flowcat: native ELF example PASS
+ AST golden tests: 28
+ Symbol projection tests: 14
+ Root CTest: 81/82 in the current build (one baseline failure in the variant-construction JSON probe)
+ Flowmini categorized fixture suite: 87/136 (49 known parser/ABI/profile gaps)
+ flowvalidate / identity mutation gates: CTest green
 ```

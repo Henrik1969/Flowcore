@@ -157,21 +157,21 @@ cmake --build cmake-build-debug --target flowmini_suite
 ctest --test-dir cmake-build-debug --output-on-failure
 ```
 
-Expected current result:
+Current focused result:
 
 ```text
 normal CMake/Ninja build:      PASS
 flowmini_ast_golden_tests:     PASS (28/28)
-flowmini_symbol_projection:    PASS (12/12)
-flowmini_frontend_bundle:      PASS (7 golden, 1 isolated, 19 negative)
-flowmini_suite:                PASS (78/78)
-CTest:                         PASS (2/2)
+flowmini_symbol_projection:    PASS (14/14)
+flowmini_frontend_bundle:      PASS (8 golden, 1 isolated, 19 negative)
+flowmini_suite:                87/136 (49 known parser/ABI/profile gaps)
+focused CTest:                 4/5 (one baseline failure)
 ```
 
 For the complete root build, the current result is:
 
 ```text
-root CTest:                    PASS (57/57)
+root CTest:                    81/82 (one baseline failure)
 integration corpus:            PASS (3/3)
 pipeline matrix:               PASS (9 accepted, 1 blocked)
 pass corpus:                   PASS (43 programs)

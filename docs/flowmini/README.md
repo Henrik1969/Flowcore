@@ -5,19 +5,19 @@ Flowmini is the executable prototype/lab language used to explore Flowcore ideas
 Current active version:
 
 ```text
-Flowmini v0.27 namespaced provider language-chain slice
+Flowmini v0.29 language-maturation and cross-backend parity slice
 
-Implementation base: `Flowmini/flowmini_v25_symboltable_projection`
+Implementation base: `Flowmini/flowmini_v25_symboltable_projection` (retained
+historical directory name)
 ```
 
 Current baseline:
 
 ```text
-build: PASS
-AST golden tests: 28
-Symbol projection tests: 14
-downstream language-chain CTest gates: PASS
-flowcat native ELF example: PASS
+root CTest: 81/82 (one baseline failure in the variant-construction JSON probe)
+AST golden tests: 28 PASS
+Symbol projection tests: 14 PASS
+categorized Flowmini fixture suite: 87/136 (49 known gaps)
 ```
 
 Current architecture checkpoint:
@@ -27,9 +27,12 @@ TokenTree remembers what the source looked like.
 AST states what the source means.
 ```
 
-The v0.24 frontend-export border is closed. The active v0.27 line makes its
-factual SymbolTable projection consumable by Flowanalyst, Flowbind,
-Flowoptimize, and Flowlower, with `flowcat` proving a native ELF artifact.
+The structural frontend export remains consumable by Flowanalyst, Flowbind,
+Flowoptimize, and Flowlower. Normal runtime execution still uses a separate
+parser; variant payload lowering is explicitly unsupported. See the
+[Programmer's Guide](../language/flowmini-programmers-manual.md),
+[comparisons](../language-comparisons/README.md), and
+[future-work evidence](../FUTURE_WORK_EVIDENCE.md).
 
 Documents in this directory:
 

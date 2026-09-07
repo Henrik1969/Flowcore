@@ -748,3 +748,21 @@ language semantics, frontend facts, lowering, backend parity, evidence, and
 the bounded self-hosting path. Flowselection and `Flowselection/sel-ui/` are
 explicitly excluded from this workstream and must remain untouched unless a
 later instruction reopens them.
+
+## 2026-09-07 Flowmini documentation and comparison evidence pass
+
+- Rewrote the Programmer’s Guide around the v0.29 checkout, separating the
+  structural artifact path from the experimental runtime parser and marking
+  unsupported or uncertain features explicitly.
+- Added the language-comparison index and nine problem-oriented comparison
+  documents covering C/C++, Rust/Zig, Mojo, Python/Julia, Go, Java/Kotlin/C#/
+  Swift, JavaScript/TypeScript, Haskell/OCaml, and Erlang/Elixir.
+- Added `docs/FUTURE_WORK_EVIDENCE.md` with repository evidence, comparison
+  lessons, gates, dependencies, scope/risk, and architecture-cost decisions.
+- Corrected stale version and test-count claims in the root, Flowmini, and
+  documentation indexes. Flowselection changes remain untouched.
+- Guide example executed successfully and AST, symbol, and frontend-bundle
+  focused targets passed. The current canonical CTest run is 81/82: the one
+  baseline failure is `flowmini_utf8_flow_probe`, where variant-construction
+  semantic JSON is malformed (`jq: Unmatched ']'`) after earlier probes pass.
+- This documentation checkpoint changes no compiler or runtime behavior.
