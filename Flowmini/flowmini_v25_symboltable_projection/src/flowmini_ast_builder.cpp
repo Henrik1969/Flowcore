@@ -2392,7 +2392,12 @@ namespace flowmini::ast {
 
             statementPool.push_back(std::move(statement));
             body.push_back(statementPool.size() - 1);
-            return skip_until_line_end(tokens, targetStart);
+            // The enclosing block still owns its closing brace, including inline placement.
+            std::size_t end = targetStart;
+            while (end < tokens.size() && !is_end_token(tokens[end]) &&
+                   tokens[end].kind != flowmini::TokenKind::Newline &&
+                   tokens[end].kind != flowmini::TokenKind::RightBrace) { ++end; }
+            return end;
         }
 
         std::size_t parse_plain_assignment_statement_shell(const std::vector<flowmini::Token>& tokens,

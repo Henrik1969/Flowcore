@@ -1,5 +1,69 @@
 # Flowcore autonomous maturation ledger
 
+## Flow-owned native pager — 2026-09-07
+
+Continued from pushed `51a4d0a`. The pager now owns key/command interpretation,
+page transitions, bounds, page extraction, output text and error-code selection
+in ordinary Flow functions. Its native source graph connects a selected input
+startup capability to navigation and rendering receivers. Independently linked
+application libraries provide immutable raw input batches, bounded ncurses input
+and generic output transport. Compiler tools link none of these providers.
+Removed all C++ pager node implementations and registrations after equivalent
+native positives, negatives and source-variation tests passed.
+
+Inline arrow placement had consumed an enclosing closing brace and silently
+lost later function declarations. The AST builder now leaves that brace to its
+block; the renamed/changed pager regression compiles an inline failure placement
+followed by navigation, rendering and main, and checks changed source behavior.
+Default graph-v1 refusal now uses its own historical fixture rather than relying
+on the migrated application's old shape.
+
+The pager driver generates deterministic, evidence-bearing contracts and exact
+policies and verifies all six compiler tools and selected provider/runtime hashes
+remain unchanged. Installed scripts, source, generator and libraries also support
+compilation with only `FLOWCORE_PREFIX`; no repository or build-tree compiler is
+needed. Both fake and terminal inputs use the same Flow source.
+
+Verification commands:
+
+```sh
+cmake --build /tmp/flowcore-reusable-current -j4
+ctest --test-dir /tmp/flowcore-reusable-current --output-on-failure -R 'flow_less|graph_lowering_refusal'
+ctest --test-dir /tmp/flowcore-reusable-current --output-on-failure -j4
+cmake --build /tmp/flowcore-reusable-current-sanitize -j4
+ASAN_OPTIONS=detect_leaks=0 LSAN_OPTIONS=detect_leaks=0 ctest --test-dir /tmp/flowcore-reusable-current-sanitize --output-on-failure -j4
+cmake --install /tmp/flowcore-reusable-current --prefix /tmp/flowcore-final-install
+FLOWCORE_PREFIX=/tmp/flowcore-final-install /tmp/flowcore-final-install/share/flowcore/examples/flow_less/build-flow-less.sh /tmp/flowcore-installed-pager
+/tmp/flowcore-installed-pager/flow_less
+sh /tmp/flowcore-reusable-acceptance/run-installed.sh
+git diff --check
+```
+
+Focused 3/3; final normal 80/80 (7.25 seconds), ASan/UBSan 80/80 (23.28
+seconds). Pager checks cover navigation order/bounds, quit, empty input, invalid
+page size, unknown command, changed source meaning with identical capabilities,
+injected failing output, real pseudo-terminal input, missing files, and injected
+terminal EOF with verified cleanup. Installed pager exits 0 with page 3/3 and
+`epsilon`; ELF SHA-256 is
+`6ae423e0a2f26a48bed8cc13a63ebf11275d5b99cfe6e85c8f029b79ff8e60e4`.
+Installed acceptance `september_unregistered_consumer` uses newly generated
+`gettid`, exits 42, preserves all six installed tool hashes, and retains ELF hash
+`86ac3acba71f522aa13b5d58e733486737c1b4b9ffc19ed5224ab1c75470f400`.
+Artifacts/logs are under `/tmp/flowcore-installed-pager`,
+`/tmp/flowcore-reusable-acceptance`, and `/tmp/flow-pager-*`, outside Git.
+
+Scope: Linux x86-64, scalar graph payloads, immutable bounded input batches, one
+startup activation, final rendering after the terminal batch (default one key).
+No streaming/redraw, persistent receiver state or aggregate graph contract is
+claimed. Provider evidence checks binding-time bytes; it does not pin later loads
+or recursively authorize dynamic dependencies. Existing writable-pointer and
+single-import short-name compatibility remain explicitly documented, not new
+language semantics. No pager-specific compiler dispatch remains.
+
+State stays CONTINUE through this checkpoint. Next: reconcile the presentation
+status and final mission gate inventory, verify the pushed clean checkpoint, then
+record completion only after every definition-of-done requirement is satisfied.
+
 ## Native scalar source-graph activation — 2026-09-07
 
 Continued from pushed `e8584a8`. Explicit `--graph-plan-version 2` with callable

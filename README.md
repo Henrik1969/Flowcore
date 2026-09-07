@@ -180,8 +180,9 @@ stdlib boundary:               PASS (6 ABI modules; libc/file I/O/memory/kernel 
 
 The reusable native chain includes bounded scalar source graphs with explicitly
 selected startup providers, durable FIFO delivery and fresh native receiver
-frames. The `flow_less` examples still execute C++ pager behavior through the
-compatibility interpreter; source-owned paging remains unfinished. See the
+frames. `flow_less` implements command interpretation, page bounds and rendering
+in Flow functions, with separately selected batch input, ncurses and output
+providers. The C++ pager algorithm has been removed. See the
 [activation decision](docs/architecture/source-graph-activation-decision.md) and
 [native graph boundary](docs/architecture/native-graph-provider-map.md).
 

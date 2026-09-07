@@ -1,18 +1,181 @@
+import "input.flow" as input
+import "output.flow" as output
+import "runtime.flow" as runtime
+import "strings.flow" as strings
+
 program flow_less
 
-producer source : pager.input.fake
-node navigate : pager.navigate
-node display : pager.render
-sink halt : halt.record
-
-policy source.lines = "alpha|beta|gamma|delta|epsilon"
-policy source.page_size = 2
-policy source.commands = "pgdown,end"
-
+producer source : pager.input
+node navigate : fn navigate_page
+node display : fn render_page
 wire source.out => navigate.in
 wire navigate.out => display.in
-wire display.out => halt.in
 
-main {
-    marker : int(1)
+fn classify(command : c_string): c_int {
+    comparison : c_int(0)
+    text_0 : c_string("")
+    strings.compare(command, text_0) -> comparison
+    if comparison == 0 { return 0 }
+    text_1 : c_string("down")
+    strings.compare(command, text_1) -> comparison
+    if comparison == 0 { return 1 }
+    text_2 : c_string("pgdown")
+    strings.compare(command, text_2) -> comparison
+    if comparison == 0 { return 1 }
+    text_3 : c_string("258")
+    strings.compare(command, text_3) -> comparison
+    if comparison == 0 { return 1 }
+    text_4 : c_string("338")
+    strings.compare(command, text_4) -> comparison
+    if comparison == 0 { return 1 }
+    text_5 : c_string("up")
+    strings.compare(command, text_5) -> comparison
+    if comparison == 0 { return 2 }
+    text_6 : c_string("pgup")
+    strings.compare(command, text_6) -> comparison
+    if comparison == 0 { return 2 }
+    text_7 : c_string("259")
+    strings.compare(command, text_7) -> comparison
+    if comparison == 0 { return 2 }
+    text_8 : c_string("339")
+    strings.compare(command, text_8) -> comparison
+    if comparison == 0 { return 2 }
+    text_9 : c_string("home")
+    strings.compare(command, text_9) -> comparison
+    if comparison == 0 { return 3 }
+    text_10 : c_string("262")
+    strings.compare(command, text_10) -> comparison
+    if comparison == 0 { return 3 }
+    text_11 : c_string("end")
+    strings.compare(command, text_11) -> comparison
+    if comparison == 0 { return 4 }
+    text_12 : c_string("360")
+    strings.compare(command, text_12) -> comparison
+    if comparison == 0 { return 4 }
+    text_13 : c_string("q")
+    strings.compare(command, text_13) -> comparison
+    if comparison == 0 { return 5 }
+    text_14 : c_string("113")
+    strings.compare(command, text_14) -> comparison
+    if comparison == 0 { return 5 }
+    text_15 : c_string("81")
+    strings.compare(command, text_15) -> comparison
+    if comparison == 0 { return 5 }
+    return -1
 }
+
+fn check_output(status : c_int): c_int {
+    failure : c_int(0)
+    if status < 0 {
+        runtime.raise(4) -> failure
+    }
+    return status
+}
+
+fn navigate_page(input_status : c_int): c_int {
+    failure : c_int(0)
+    if input_status != 0 {
+        runtime.raise(2) -> failure
+    }
+    size : c_int(0)
+    input.page_size() -> size
+    if size <= 0 {
+        message : c_string("page_size must be positive")
+        output.diagnostic(message) -> failure
+        runtime.raise(1) -> failure
+    }
+    count : c_int(0)
+    input.line_count() -> count
+    pages : c_int(1)
+    if count > 0 {
+        (count - 1) / size + 1 -> pages
+    }
+    last : c_int(0)
+    pages - 1 -> last
+    page : c_int(0)
+    command_count : c_int(0)
+    input.command_count() -> command_count
+    index : c_int(0)
+    command : c_string("")
+    action : c_int(0)
+    while index < command_count {
+        input.command_at(index) -> command
+        classify(command) -> action
+        if action < 0 {
+            message : c_string("unknown command: ")
+            output.error_text(message) -> failure
+            output.diagnostic(command) -> failure
+            runtime.raise(3) -> failure
+        }
+        if action == 1 {
+            if page < last {
+                page + 1 -> page
+            }
+        }
+        if action == 2 {
+            if page > 0 {
+                page - 1 -> page
+            }
+        }
+        if action == 3 {
+            0 -> page
+        }
+        if action == 4 {
+            last -> page
+        }
+        if action == 5 {
+            command_count -> index
+        }
+        index + 1 -> index
+    }
+    return page
+}
+
+fn render_page(page : c_int): c_int {
+    count : c_int(0)
+    size : c_int(0)
+    input.line_count() -> count
+    input.page_size() -> size
+    pages : c_int(1)
+    if count > 0 {
+        (count - 1) / size + 1 -> pages
+    }
+    displayed : c_int(0)
+    page + 1 -> displayed
+    prefix : c_string("-- page ")
+    separator : c_string("/")
+    suffix : c_string(" --")
+    written : c_int(0)
+    output.text(prefix) -> written
+    check_output(written) -> written
+    output.integer(displayed) -> written
+    check_output(written) -> written
+    output.text(separator) -> written
+    check_output(written) -> written
+    output.integer(pages) -> written
+    check_output(written) -> written
+    output.line(suffix) -> written
+    check_output(written) -> written
+    index : c_int(0)
+    page * size -> index
+    limit : c_int(0)
+    index + size -> limit
+    if limit > count {
+        count -> limit
+    }
+    line : c_string("")
+    while index < limit {
+        input.line_at(index) -> line
+        output.line(line) -> written
+        check_output(written) -> written
+        index + 1 -> index
+    }
+    if count == 0 {
+        empty : c_string("")
+        output.line(empty) -> written
+        check_output(written) -> written
+    }
+    return 0
+}
+
+main { return 0 }

@@ -27,6 +27,8 @@ set(FLOWCORE_FLOWLOWER "$<TARGET_FILE:flowlower>")
 add_subdirectory(Flowtools ${CMAKE_CURRENT_BINARY_DIR}/flowtools)
 add_subdirectory(Flowlower ${CMAKE_CURRENT_BINARY_DIR}/flowlower)
 add_subdirectory(Flowkernel ${CMAKE_CURRENT_BINARY_DIR}/flowkernel)
+add_subdirectory(Flowmini/flowmini_v25_symboltable_projection/examples/apps/flow_less
+    ${CMAKE_CURRENT_BINARY_DIR}/flow_less_providers)
 
 
 add_test(NAME flowcore_integration_corpus
@@ -164,6 +166,17 @@ set_tests_properties(flowcore_graph_routing PROPERTIES
 add_test(NAME flow_less_pager
     COMMAND ${CMAKE_COMMAND} -E env
         FLOWMINI_BIN=$<TARGET_FILE:flowmini>
+        FLOWANALYST_BIN=$<TARGET_FILE:flowanalyst>
+        FLOWBIND_BIN=$<TARGET_FILE:flowbind>
+        FLOWPARALLEL_BIN=$<TARGET_FILE:flowparallel>
+        FLOWOPTIMIZE_BIN=$<TARGET_FILE:flowoptimize>
+        FLOWPREPARE_BIN=$<TARGET_FILE:flowprepare>
+        FLOWLOWER_BIN=$<TARGET_FILE:flowlower>
+        FLOWGRAPH_RUNTIME=$<TARGET_FILE:flowgraph_runtime>
+        FLOWPAGER_INPUT=$<TARGET_FILE:flowpager_input>
+        FLOWPAGER_OUTPUT=$<TARGET_FILE:flowpager_output>
+        FLOWGRAPH_CXX=${CMAKE_CXX_COMPILER}
+        "FLOWGRAPH_LINK_FLAGS=${CMAKE_CXX_FLAGS}"
         ${CMAKE_CURRENT_SOURCE_DIR}/tools/test-flow-less.sh)
 set_tests_properties(flow_less_pager PROPERTIES
     DEPENDS "flowcore_graph_routing")
@@ -205,6 +218,17 @@ add_test(NAME provider_call_identity
 add_test(NAME flow_less_ncurses_pager
     COMMAND ${CMAKE_COMMAND} -E env
         FLOWMINI_BIN=$<TARGET_FILE:flowmini>
+        FLOWANALYST_BIN=$<TARGET_FILE:flowanalyst>
+        FLOWBIND_BIN=$<TARGET_FILE:flowbind>
+        FLOWPARALLEL_BIN=$<TARGET_FILE:flowparallel>
+        FLOWOPTIMIZE_BIN=$<TARGET_FILE:flowoptimize>
+        FLOWPREPARE_BIN=$<TARGET_FILE:flowprepare>
+        FLOWLOWER_BIN=$<TARGET_FILE:flowlower>
+        FLOWGRAPH_RUNTIME=$<TARGET_FILE:flowgraph_runtime>
+        FLOWPAGER_INPUT=$<TARGET_FILE:flowpager_ncurses_input>
+        FLOWPAGER_OUTPUT=$<TARGET_FILE:flowpager_output>
+        FLOWGRAPH_CXX=${CMAKE_CXX_COMPILER}
+        "FLOWGRAPH_LINK_FLAGS=${CMAKE_CXX_FLAGS}"
         ${CMAKE_CURRENT_SOURCE_DIR}/tools/test-flow-less-ncurses.sh)
 set_tests_properties(flow_less_ncurses_pager PROPERTIES
     DEPENDS "flow_less_pager")
@@ -337,6 +361,9 @@ install(FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/Flowmini/flowmini_v25_symboltable_projection/examples/apps/flowcat/policy.conf
     DESTINATION ${CMAKE_INSTALL_DATADIR}/flowcore/examples/flowcat
 )
+
+install(PROGRAMS tools/generate-flow-bindings.sh
+    DESTINATION ${CMAKE_INSTALL_BINDIR} RENAME generate-flow-bindings)
 
 install(FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/README.md

@@ -26,12 +26,6 @@ factory-like name nor successful resolution grants capability authority.
 the selection file for independent validation. Import aliases belong to the
 source reference, never the native symbol. Unused selections have no activation.
 
-The current checkpoint only captures and validates this evidence. All source
-graphs remain non-executable at downstream compiler boundaries. The next slice
-must authorize producer calls, publish graph scheduling with full endpoint,
-wire and signal identities, and lower source receiver invocation. Removing the
-existing graph refusal before that route works would silently change programs.
-
 ## Executable scalar graph boundary
 
 Request `--lowering-plan-version 2 --graph-plan-version 2` with the explicit
@@ -66,7 +60,10 @@ input selection and wire order, verifies an unused selection has no LLVM effect,
 and rejects missing grants, forged schedules, cycles and mutated provider identity.
 This initial native graph surface is Linux x86-64 and scalar; aggregate payloads,
 provider streaming/policies and native TinyVM graph execution remain unsupported.
-The existing pager migration is still unfinished.
+The pager uses this scalar graph with an input status and selected page as wire
+payloads; its input provider owns an immutable raw data batch accessed through
+explicit read-only capabilities. Navigation, bounds, key interpretation, failure
+selection and rendering belong to Flow. No persistent receiver state is used.
 
 The runtime also exports the explicitly bindable C capability
 `flow_graph_raise(c_int code): c_int`. It terminates the active graph invocation

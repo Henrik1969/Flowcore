@@ -1,25 +1,46 @@
 #!/bin/sh
 set -eu
-
 root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
-flowmini=${FLOWMINI_BIN:?FLOWMINI_BIN is required}
-source="$root/Flowmini/flowmini_v25_symboltable_projection/examples/apps/flow_less/flow_less_ncurses.flow"
+example="$root/Flowmini/flowmini_v25_symboltable_projection/examples/apps/flow_less"
 tmpdir=$(mktemp -d)
 trap 'rm -rf "$tmpdir"' EXIT
-
-test -x "$flowmini"
+"$example/build-flow-less.sh" "$tmpdir/app" >/dev/null
 printf '%s\n' alpha beta gamma delta epsilon > "$tmpdir/input.txt"
-sed "s|__FLOW_LESS_PATH__|$tmpdir/input.txt|g" "$source" > "$tmpdir/flow_less.flow"
-printf 'q' | TERM=xterm script -qec "$flowmini --trace true '$tmpdir/flow_less.flow'" "$tmpdir/terminal.log" >/dev/null
+printf q | FLOW_PAGER_PATH="$tmpdir/input.txt" FLOWCORE_GRAPH_TRACE=1 TERM=xterm script -qec "$tmpdir/app/flow_less" "$tmpdir/terminal.log" >/dev/null
 grep -Fq -- '-- page 1/3 --' "$tmpdir/terminal.log"
-grep -Fq 'alpha' "$tmpdir/terminal.log"
-grep -Fq 'beta' "$tmpdir/terminal.log"
-grep -Fq 'route source.out => navigate.in' "$tmpdir/terminal.log"
-grep -Fq 'route navigate.out => display.in' "$tmpdir/terminal.log"
-sed 's|__FLOW_LESS_PATH__|/definitely/missing/flow_less.txt|g' "$source" > "$tmpdir/missing.flow"
-if "$flowmini" "$tmpdir/missing.flow" >"$tmpdir/missing.out" 2>"$tmpdir/missing.err"; then
-    printf '%s\n' 'flow_less ncurses-provider test: missing file was accepted' >&2
-    exit 1
-fi
-grep -Fq 'unable to open text file' "$tmpdir/missing.err"
-printf '%s\n' 'flow_less ncurses-provider example: PASS'
+grep -Fq alpha "$tmpdir/terminal.log"
+grep -Fq beta "$tmpdir/terminal.log"
+grep -Fq '"node_id":"navigate"' "$tmpdir/terminal.log"
+grep -Fq '"node_id":"display"' "$tmpdir/terminal.log"
+set +e
+FLOW_PAGER_PATH=/definitely/missing/flow_less.txt "$tmpdir/app/flow_less" > "$tmpdir/out" 2> "$tmpdir/err"
+status=$?
+set -e
+test "$status" -eq 70
+test ! -s "$tmpdir/out"
+grep -Fq 'unable to open text file' "$tmpdir/err"
+tail -1 "$tmpdir/err" | jq -e '.format == "flowcore.graph_failure" and .activation.node_id == "navigate" and .code == 2' >/dev/null
+# An injected terminal transport reports EOF; it must close its acquired window.
+mkdir "$tmpdir/terminal"
+cat > "$tmpdir/terminal.cpp" <<'CPP'
+#include <cstdio>
+#include <cstdlib>
+extern "C" void* initscr() { static int window; return &window; }
+extern "C" int endwin() { auto* file = std::fopen(std::getenv("CLEANUP_LOG"), "w"); if (!file) return -1; std::fputs("closed\n", file); return std::fclose(file); }
+extern "C" int noecho() { return 0; }
+extern "C" int cbreak() { return 0; }
+extern "C" int keypad(void*, bool) { return 0; }
+extern "C" int wrefresh(void*) { return 0; }
+extern "C" int wgetch(void*) { return -1; }
+CPP
+"${FLOWGRAPH_CXX:-c++}" -shared -fPIC "$tmpdir/terminal.cpp" -o "$tmpdir/terminal/libncursesw.so.6"
+set +e
+CLEANUP_LOG="$tmpdir/closed" LD_LIBRARY_PATH="$tmpdir/terminal${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}" FLOW_PAGER_PATH="$tmpdir/input.txt" "$tmpdir/app/flow_less" > "$tmpdir/out" 2> "$tmpdir/err"
+status=$?
+set -e
+test "$status" -eq 70
+test ! -s "$tmpdir/out"
+grep -Fxq closed "$tmpdir/closed"
+grep -Fq 'terminal input failed' "$tmpdir/err"
+tail -1 "$tmpdir/err" | jq -e '.format == "flowcore.graph_failure" and .activation.node_id == "navigate" and .code == 2' >/dev/null
+printf '%s\n' 'Native pager terminal input selection: PASS'

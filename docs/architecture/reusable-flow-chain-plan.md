@@ -20,8 +20,9 @@ Flow source
 
 ## Current facts
 
-The native scalar/control-flow migration is implemented. Gate 6 is incomplete:
-`flow_less` wires built-in C++ atoms and does not yet own navigation in Flow.
+The native scalar/control-flow and Flow-owned pager migrations are implemented.
+`flow_less` uses ordinary source functions for navigation, validation and rendering;
+separate native libraries supply raw input and output transport.
 Explicit graph v2 supports selected scalar startup providers and native source
 receivers through durable FIFO scheduling. The default graph v1 remains
 non-executable evidence; unsupported graphs fail rather than being dropped. See the [activation decision](source-graph-activation-decision.md).

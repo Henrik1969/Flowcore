@@ -1,49 +1,51 @@
-# flow_less application example
+# Native Flow pager
 
-This is a compatibility-interpreter demonstration. Flow declares the wiring,
-but C++ `PagerNavigateNode` still implements navigation and page extraction.
-It does not yet satisfy the mission's Flow-owned application-behavior gate.
-Frontend bundle export reports `FLOWMINI_GRAPH_LOWERING_UNSUPPORTED`; the native
-compiler chain must not silently compile only the marker in `main`.
+`flow_less.flow` owns command interpretation, page bounds, page extraction,
+rendering and failure selection. Ordinary source functions receive native graph
+activations through `source.out => navigate.in => display.in` (two wires).
+Compiler tools contain no pager algorithm or application dispatch.
 
-`flow_less` is the first pager-shaped Flow application. Its source contains no
-terminal library calls, cursor arithmetic, or provider-specific state. It reads
-an actual text file and connects a pager provider to a plain renderer through
-ordinary graph contracts:
+Separate provider libraries supply raw input batches and generic text/integer
+output. The fake input reads `FLOW_PAGER_LINES` (pipe separated),
+`FLOW_PAGER_COMMANDS` (comma separated) and `FLOW_PAGER_PAGE_SIZE` (default 2).
+The terminal input reads `FLOW_PAGER_PATH` and a bounded batch of raw ncurses
+key codes. Flow interprets down/up, PageDown/PageUp, Home/End and q. Down/up each
+move one page. `q` stops processing the remainder of the delivered batch.
 
-```text
-pager provider -> page record -> renderer -> sink
-```
-
-The deterministic slice is source-composed from `pager.input.fake`, the
-provider-neutral `pager.navigate` state transition, `pager.render`, and a
-terminal sink. Lines and commands belong to the injectable input provider;
-page selection belongs to the separately wired navigation stage rather than
-the provider. The interactive application slice uses
-`pager.input.file.ncurses`, which opens the path declared by
-its policy, reads the file, and renders pages in a pseudo-terminal. The source
-template uses `__FLOW_LESS_PATH__`; the runner substitutes the concrete file
-under test, keeping the checked-in source portable.
-
-The provider contract is deliberately separate from navigation and projection.
-`pager.input.file.ncurses` reads the file and maps terminal keys to provider-
-neutral commands; the same `pager.navigate` node used by the fake input applies
-`q`, arrows, PageUp, PageDown, Home, and End behavior. It loads the existing
-ncurses provider dynamically; Flowcore does not reimplement ncurses. The
-terminal test feeds `q` through a pseudo-terminal and checks the rendered
-contents of a temporary text file.
-
-Run the deterministic slice with:
+Build the root project, then run:
 
 ```sh
-./run-flow-less.sh
+FLOWCORE_BUILD=/absolute/build/path ./run-flow-less.sh
+FLOWCORE_BUILD=/absolute/build/path ./run-flow-less-ncurses.sh /path/to/text.txt
 ```
 
-After building Flowmini, page any text file in the real terminal provider with:
+After `cmake --install BUILD --prefix PREFIX`, the scripts and source are under
+`PREFIX/share/flowcore/examples/flow_less`. Set `FLOWCORE_PREFIX=PREFIX` to use only
+the installed tools, generator and providers. Custom `lib64` installations can
+supply explicit library paths.
 
-```sh
-./run-flow-less-ncurses.sh /path/to/a/text-file
-```
+The terminal default is one key; `FLOW_PAGER_KEY_COUNT` selects 1–4096 raw keys.
+The provider closes ncurses before delivering the batch. Flow renders the final
+page after processing it. This bounded example does not redraw between keys or
+implement streams. Empty files render page 1/1 with an empty content line.
 
-Use `q` to quit, the arrow keys to move by line, PageUp/PageDown to move by
-page, and Home/End to jump to the first or last page.
+To retain native artifacts, use `build-flow-less.sh /tmp/native-pager` with the
+same build environment. It generates evidence-bearing ABI imports and exact
+policies, captures the source graph, runs the existing compiler stages, links
+LLVM with the selected providers and graph runtime, and verifies unchanged tool
+and provider hashes. Generated files remain outside the repository. The ncurses
+source path is a symlink to the same Flow program; selection changes providers,
+not application source. `FLOWPAGER_INPUT`, `FLOWPAGER_OUTPUT`,
+`FLOWPAGER_NCURSES_INPUT` (terminal runner) and explicit stage binary paths support
+injection without rebuilding compiler tools.
+
+Input data stays valid until process exit after the single startup activation.
+Source failures exit 70 with operation, activation, port, wire and signal evidence;
+invalid page size, input failure, unknown command and output failure select codes
+1, 2, 3 and 4 respectively. `FLOWCORE_GRAPH_TRACE=1` enables delivery traces.
+Unconnected final output always emits a structured drop diagnostic.
+
+This example targets Linux x86-64 with clang, a C++ linker and ncursesw.so.6.
+The provider's dynamic ncurses dependency follows the platform loader; generated
+binding evidence authenticates the selected provider bytes at bind time, not its
+transitive dependencies or future process-time replacements.

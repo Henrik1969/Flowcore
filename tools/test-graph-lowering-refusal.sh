@@ -6,7 +6,27 @@ trap 'rm -rf "$tmpdir"' EXIT
 
 # Graph interpretation is supported, but exporting only the marker in main
 # would erase the behavior. A fresh consumer must reject that captured bundle.
-source="$root/Flowmini/flowmini_v25_symboltable_projection/examples/apps/flow_less/flow_less.flow"
+source="$tmpdir/legacy-graph.flow"
+cat > "$source" <<'EOF'
+program flow_less
+
+producer source : pager.input.fake
+node navigate : pager.navigate
+node display : pager.render
+sink halt : halt.record
+
+policy source.lines = "alpha|beta|gamma|delta|epsilon"
+policy source.page_size = 2
+policy source.commands = "pgdown,end"
+
+wire source.out => navigate.in
+wire navigate.out => display.in
+wire display.out => halt.in
+
+main {
+    marker : int(1)
+}
+EOF
 sed 's/program flow_less/program unrelated_graph_name/' "$source" > "$tmpdir/renamed.flow"
 for input in "$source" "$tmpdir/renamed.flow"; do
     "$FLOWMINI_BIN" --dump-frontend-bundle "$input" > "$tmpdir/bundle.json"

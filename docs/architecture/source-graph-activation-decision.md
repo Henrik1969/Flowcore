@@ -124,5 +124,16 @@ delivery with a fresh native frame. Successful fan-out reuses the output value.
 Missing function results are rejected, and arithmetic failure publishes a
 structured activation diagnostic without a normal output. See
 [native graph provider selection](native-graph-provider-map.md) for exact commands,
-runtime linking and scope. Aggregate receivers and the pager remain unfinished;
+runtime linking and scope. Aggregate receivers remain outside this scalar surface;
 this checkpoint does not broaden the approved activation contract.
+
+## Flow-owned pager migration — 2026-09-07
+
+The pager now uses ordinary native source receivers for navigation and rendering.
+Selected input providers return one startup status and retain an immutable raw
+batch. Explicit accessor capabilities expose lines and raw commands; all command
+classification, page bounds, page extraction and output text live in Flow.
+The terminal provider acquires ncurses, reads a bounded raw-key batch, and closes
+it before returning. The default is one key, with final rendering after the batch;
+this is not a streaming or continuously redrawing pager. C++ pager navigation and
+rendering atoms have been removed after native positive/negative coverage passed.
