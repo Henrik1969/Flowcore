@@ -37,6 +37,22 @@ done
 
 tmpdir=$(mktemp -d)
 trap 'rm -rf "$tmpdir"' EXIT
+# Report-only mode validates the same artifact authority as LLVM emission.
+"$flowmini" --dump-frontend-bundle "$fixture" | "$analyst" | "$parallel" | "$optimizer" > "$tmpdir/valid.optimization.json"
+for mutation in \
+    'del(.lowering_plan)' \
+    '.lowering_plan.status = "blocked"' \
+    '.lowering_plan.version = 99' \
+    '.lowering_plan.operations[0].operands = {}' \
+    '.lowering_plan.operations[1].id = .lowering_plan.operations[0].id' \
+    '.transforms[0].semantics_preserved = "yes"'
+do
+    jq "$mutation" "$tmpdir/valid.optimization.json" > "$tmpdir/malformed.optimization.json"
+    if "$lowerer" < "$tmpdir/malformed.optimization.json" > "$tmpdir/refused.json" 2> "$tmpdir/refused.log"; then
+        echo "report-only mode accepted malformed authority: $mutation" >&2; exit 1
+    fi
+    jq -e '.status == "blocked" and .diagnostic.code == "FLOWLOWER_CONTRACT" and (.diagnostic.path | startswith("$."))' "$tmpdir/refused.json" >/dev/null
+done
 trial="$root/Flowlower/tests/empty_program_main.flow"
 "$flowmini" --dump-frontend-bundle "$trial" | "$analyst" > "$tmpdir/trial.semantic.json"
 jq -e '.lowering_plan.format == "flowcore.lowering_plan" and .lowering_plan.version == 1 and (.lowering_plan.operations | length) == 0' "$tmpdir/trial.semantic.json" >/dev/null
@@ -477,7 +493,8 @@ jq -e '([.lowering_plan.operations[] | select(.kind == "loop")] | length) == 2' 
 "$parallel" < "$tmpdir/arbitrary-stream-copy.semantic.json" | "$optimizer" > "$tmpdir/arbitrary-stream-copy.optimized.json"
 "$lowerer" --emit-llvm "$tmpdir/arbitrary-stream-copy.ll" --binding-report "$tmpdir/arbitrary-stream-copy.binding.json" < "$tmpdir/arbitrary-stream-copy.optimized.json" >/dev/null
 grep -q 'generic structured lowering plan' "$tmpdir/arbitrary-stream-copy.ll"
-target_report='{"format": "flowoptimize.optimization_report", "version": 1, "status": "ready", "targets": [{"name":"cli","main_count":1},{"name":"daemon","main_count":1}]}'
+"$parallel" < "$tmpdir/trial.semantic.json" | "$optimizer" > "$tmpdir/trial.optimization.json"
+target_report=$(jq '.targets = [{"symbol_id":0,"name":"cli","main_count":1},{"symbol_id":1,"name":"daemon","main_count":1}]' "$tmpdir/trial.optimization.json")
 printf '%s\n' "$target_report" | "$lowerer" --target cli > "$tmpdir/target-cli.json"
 jq -e '.status == "ready" and .target.name == "cli"' "$tmpdir/target-cli.json" >/dev/null
 set +e
@@ -486,7 +503,7 @@ target_rc=$?
 set -e
 test "$target_rc" -eq 2
 jq -e '.status == "blocked" and (.reason | contains("explicit --target"))' "$tmpdir/target-missing.json" >/dev/null
-target_artifact_report='{"format": "flowoptimize.optimization_report", "version": 1, "status": "ready", "lowering_plan":{"format":"flowcore.lowering_plan","version":1,"operations":[]}, "targets": [{"name":"cli","main_count":1},{"name":"daemon","main_count":1}]}'
+target_artifact_report=$target_report
 printf '%s\n' "$target_artifact_report" | "$lowerer" --target cli --emit-llvm "$tmpdir/cli.ll" > "$tmpdir/cli-lowering.json"
 printf '%s\n' "$target_artifact_report" | "$lowerer" --target daemon --emit-llvm "$tmpdir/daemon.ll" > "$tmpdir/daemon-lowering.json"
 jq -e '.status == "ready" and .target.name == "cli" and .artifact.target_specific == true and .artifact.status == "emitted"' "$tmpdir/cli-lowering.json" >/dev/null

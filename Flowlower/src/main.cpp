@@ -37,13 +37,7 @@ std::string read_file_or_stdin(const std::string& path) {
 }
 
 std::string quote(std::string_view value) {
-    std::string result = "\"";
-    for (const char character : value) {
-        if (character == '\\' || character == '"') result.push_back('\\');
-        result.push_back(character);
-    }
-    result.push_back('"');
-    return result;
+    return flowcontracts::json::serialize(std::string(value));
 }
 
 int lower(std::string_view report, const Options& options, std::string_view binding_report) {
@@ -86,6 +80,13 @@ int lower(std::string_view report, const Options& options, std::string_view bind
     if (text(field(root, "status")) != "ready") {
         std::cout << "{\n  \"format\": \"flowlower.lowering_report\",\n  \"version\": 1,\n  \"status\": \"blocked\",\n  \"backend\": \"llvm\",\n  \"reason\": \"optimization stage is not ready\"\n}\n";
         return 2;
+    }
+    if (input_format == "flowoptimize.optimization_report") {
+        flowcontracts::validate_optimization_report(root);
+        const auto* plan = field(root, "lowering_plan");
+        flowcontracts::validate_lowering_authority(*plan);
+        if (text(field(*plan, "status")) != "ready")
+            throw flowcontracts::json::Error("$.lowering_plan.status", "lowering plan is not ready");
     }
 
     const auto* targets_value = field(root, "targets");
@@ -155,5 +156,15 @@ int main(int argc, char** argv) {
         const auto optimization_report = read_file_or_stdin(options.optimization_path);
         const auto binding_report = options.binding_path.empty() ? std::string{} : read_file_or_stdin(options.binding_path);
         return lower(optimization_report, options, binding_report);
-    } catch (const std::exception& error) { std::cerr << "flowlower error: " << error.what() << '\n'; return 1; }
+    } catch (const flowcontracts::json::Error& error) {
+        std::cout << "{\"format\":\"flowlower.lowering_report\",\"version\":1,\"status\":\"blocked\","
+                     "\"backend\":\"llvm\",\"diagnostic\":{\"code\":\"FLOWLOWER_CONTRACT\",\"path\":"
+                  << quote(error.path()) << ",\"reason\":" << quote(error.reason()) << "}}\n";
+        std::cerr << "flowlower error: " << error.what() << '\n'; return 1;
+    } catch (const std::exception& error) {
+        std::cout << "{\"format\":\"flowlower.lowering_report\",\"version\":1,\"status\":\"unsupported\","
+                     "\"backend\":\"llvm\",\"diagnostic\":{\"code\":\"FLOWLOWER_REFUSAL\",\"reason\":"
+                  << quote(error.what()) << "}}\n";
+        std::cerr << "flowlower error: " << error.what() << '\n'; return 1;
+    }
 }

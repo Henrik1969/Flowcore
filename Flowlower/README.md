@@ -51,3 +51,10 @@ target artifact emission is proven with separate
 `--emit-llvm` paths. Each output contains an attributable target marker and
 the lowering report records `artifact.target_specific: true`. Unsupported
 target profiles remain blocked.
+
+Report-only invocations validate the optimization envelope and lowering-plan
+authority, including plan readiness, versions, operand arrays and operation
+identity. They cannot bypass those checks by omitting `--emit-llvm`. Contract
+failures return a structured `FLOWLOWER_CONTRACT` diagnostic with a JSON artifact
+path; emission/CLI refusals return `FLOWLOWER_REFUSAL`. A ready report without
+an emitted artifact is still boundary validation, not native execution evidence.

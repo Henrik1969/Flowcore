@@ -1,5 +1,42 @@
 # Flowcore autonomous maturation ledger
 
+## Report-only lowering validation — 2026-09-07
+
+Continued from pushed `05a08fc`. Flowlower now runs the shared optimization and
+lowering-authority validators before reporting readiness, even without an LLVM
+output request. Missing plans, blocked plan states, incompatible versions,
+malformed operand arrays, duplicate operation IDs and invalid transformation
+field types are refused. Contract failures publish structured JSON diagnostics
+with the failing artifact path; other refusals also publish JSON. The common
+JSON serializer now escapes report strings, including hostile control characters.
+
+The focused test exposed two historical target fixtures containing incomplete
+synthetic reports. They now derive from a complete captured optimization artifact.
+No unsupported native execution is claimed by report-only boundary validation.
+
+Exact verification:
+
+```sh
+cmake --build /tmp/flowcore-reusable-current -j4
+ctest --test-dir /tmp/flowcore-reusable-current -R 'flowlower_pipeline|source_graph_artifact|provider_call_identity|flowvalidate_artifacts' --output-on-failure
+ctest --test-dir /tmp/flowcore-reusable-current --output-on-failure -j4
+cmake --build /tmp/flowcore-reusable-current-sanitize -j4
+ASAN_OPTIONS=detect_leaks=0 LSAN_OPTIONS=detect_leaks=0 ctest --test-dir /tmp/flowcore-reusable-current-sanitize --output-on-failure -j4
+sh /tmp/flowcore-reusable-acceptance/run.sh
+git diff --check
+```
+
+Focused **4/4**, normal **79/79** (5.58 seconds), ASan/UBSan **79/79**
+(16.80 seconds). Builds and whitespace checks passed. Generated native acceptance
+still exits 42 with all six compiler hashes unchanged during compilation.
+Logs: `/tmp/flowcore-lower-validation-{ctest,sanitize,acceptance}.log`.
+
+State is CONTINUE. The exact next implementation is generated contract/evidence
+identity propagation and enforcement (Gate 1), followed by executable durable
+graph lowering and Flow-owned paging (Gate 6). Generated manifest hashes currently
+remain outside the authorization tuple; do not repeat historical completion
+claims. No total blocker or new owner decision is recorded.
+
 ## Resolved provider calls and native symbol separation — 2026-09-07
 
 Continued from pushed `55b7c0b`. Inspection confirmed an actual Gate 1 correctness
