@@ -857,3 +857,12 @@ later instruction reopens them.
   91 pass / 140 total / 49 known gaps.
 - No historical checkpoint counts were rewritten; current indexes now point to
   the verified 88/88 and 91/140 evidence.
+
+## 2026-09-07 sanitizer verification checkpoint
+
+- Fresh Debug AddressSanitizer/UndefinedBehaviorSanitizer configuration and
+  build completed in `/tmp/flowcore-growth-asan`.
+- `ASAN_OPTIONS=detect_leaks=0 LSAN_OPTIONS=detect_leaks=0 ctest --test-dir
+  /tmp/flowcore-growth-asan --output-on-failure` passes 88/88. This closes the
+  sanitizer check for the current implementation; leak checks remain disabled
+  consistently with the existing repository workflow.

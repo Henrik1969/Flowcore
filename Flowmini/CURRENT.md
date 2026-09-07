@@ -23,6 +23,7 @@ variant payload lowering:           NOT SUPPORTED — DEFERRED (labels preserved
 compile-time constants:            IMPLEMENTED/TESTED (bounded deterministic expressions)
 canonical guard lowering:           IMPLEMENTED/TESTED (LLVM backend)
 std.math v0:                        IMPLEMENTED/TESTED (pure integer helpers)
+ASan/UBSan CTest:                   PASS (88/88, leak checks disabled)
 ```
 
 The structural chain publishes TokenTree/AST, symbol and fact projections for

@@ -22,6 +22,9 @@ architecture cost of a new mechanism is not justified.
   versioned JSON and Markdown projection of root CTest, focused CTest, and the
   categorized suite. The current report is 88/88 root, 11/11 focused, and
   91/140 categorized (49 known gaps). Tests remain authoritative.
+- **Sanitizer verification:** a fresh Debug AddressSanitizer/UndefinedBehavior
+  Sanitizer configure and build passes the complete 88/88 CTest suite with
+  leak checks disabled as required by the existing workflow.
 - **Unsafe policy:** unsafe regions, inline assembly, and embedded foreign
   source are **NOT SUPPORTED — INTENTIONALLY EXCLUDED**. External unsafe work
   must arrive as a declared provider/ABI artifact with boundary paperwork.
