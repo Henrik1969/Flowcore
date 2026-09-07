@@ -43,3 +43,12 @@ malformed, duplicate, unsupported, or conflicting authority.
 
 The component intentionally does not depend on Flowmini AST internals,
 Flowlower emitters, provider implementations, or application names.
+
+`flowcore.source_graph` v1 is independently validated, canonical analysis evidence.
+It retains complete explicit node/wire endpoints, source locations, literal
+provider policies, and resolved receiver identities in `lowering_plan.source_graph`.
+Its status is `non_executable`: validation does not authorize providers or admit
+native graph execution. Every execution consumer rejects this retained graph even
+if an outer status has been changed to ready. Captured graph evidence is tested
+without running its producer, with deterministic canonical round-trips and hostile
+identity, port, policy, provenance and activation-contract mutations.

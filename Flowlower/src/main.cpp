@@ -49,6 +49,11 @@ std::string quote(std::string_view value) {
 int lower(std::string_view report, const Options& options, std::string_view binding_report) {
     using namespace flowlower::structured;
     const auto root = Parser{std::string(report)}.parse();
+    if (const auto* plan = field(root, "lowering_plan"))
+        if (const auto* graph = field(*plan, "source_graph")) {
+            (void)flowcontracts::source_graph(*graph, "$.lowering_plan.source_graph");
+            throw std::runtime_error("source graph execution is not admitted");
+        }
     const auto input_format = text(field(root, "format"));
     if (input_format != "flowoptimize.optimization_report" && input_format != "flowcore.backend_lowering_artifact")
         throw std::runtime_error("input is not a backend lowering artifact");

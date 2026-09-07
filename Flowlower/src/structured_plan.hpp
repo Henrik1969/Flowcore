@@ -1,6 +1,7 @@
 #pragma once
 
 #include <flowcontracts/json.hpp>
+#include <flowcontracts/source_graph.hpp>
 
 #include <algorithm>
 #include <cctype>
@@ -147,6 +148,10 @@ private:
             }
         const auto* plan = field(root_, "lowering_plan");
         if (!plan || text(field(*plan,"format")) != "flowcore.lowering_plan") return;
+        if (const auto* graph = field(*plan, "source_graph")) {
+            (void)flowcontracts::source_graph(*graph, "$.lowering_plan.source_graph");
+            throw std::runtime_error("source graph execution is not admitted");
+        }
         plan_version_=integer(field(*plan,"version"),"lowering_plan.version");
         if(plan_version_!=1&&plan_version_!=2)return;
         if(plan_version_==2) for(const auto& item:array(field(*plan,"functions"),"lowering_plan.functions")) {

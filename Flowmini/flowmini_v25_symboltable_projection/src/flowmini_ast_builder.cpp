@@ -2782,7 +2782,7 @@ namespace flowmini::ast {
             const auto start = i;
             const auto kind = tokens[i].kind;
             if (kind != K::KeywordProducer && kind != K::KeywordNode &&
-                kind != K::KeywordSink && kind != K::KeywordWire) continue;
+                kind != K::KeywordSink && kind != K::KeywordWire && kind != K::KeywordPolicy) continue;
             auto require = [&](K expected) -> const flowmini::Token& {
                 if (i >= tokens.size() || tokens[i].kind != expected)
                     throw flow::DiagnosticError{"parser", "malformed graph declaration at line " +
@@ -2798,7 +2798,24 @@ namespace flowmini::ast {
                 return value;
             };
             ++i;
-            if (kind == K::KeywordWire) {
+            if (kind == K::KeywordPolicy) {
+                GraphPolicySyntax policy;
+                policy.location = location_from_token(tokens[start]);
+                policy.node = require(K::Identifier).text;
+                require(K::Dot);
+                policy.key = name();
+                require(K::Equals);
+                bool negative = i < tokens.size() && tokens[i].kind == K::Minus;
+                if (negative) ++i;
+                if (i >= tokens.size()) require(K::Number);
+                const auto value_kind = tokens[i].kind;
+                if (value_kind == K::Number) policy.value_kind = "integer";
+                else if (!negative && value_kind == K::String) policy.value_kind = "string";
+                else if (!negative && (value_kind == K::KeywordTrue || value_kind == K::KeywordFalse)) policy.value_kind = "boolean";
+                else throw flow::DiagnosticError{"parser", "graph policy requires a literal at line " + std::to_string(tokens[start].line)};
+                policy.value_text = (negative ? "-" : "") + tokens[i++].text;
+                module.graph_policies.push_back(std::move(policy));
+            } else if (kind == K::KeywordWire) {
                 auto endpoint = [&]() {
                     GraphEndpointSyntax result;
                     result.location = location_from_token(tokens.at(i));

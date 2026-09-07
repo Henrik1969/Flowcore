@@ -154,6 +154,10 @@ void validate_lowering_plan(const std::string& report, const std::vector<Require
     const Json root = JsonParser{report}.parse();
     const Json* plan = json_field(root, "lowering_plan");
     if (plan == nullptr) return;
+    if (const auto* graph = json_field(*plan, "source_graph")) {
+        (void)flowcontracts::source_graph(*graph, "$.lowering_plan.source_graph");
+        throw std::runtime_error("source graph execution is not admitted");
+    }
     const auto plan_version = json_integer(json_field(*plan, "version"), "lowering_plan.version");
     if (json_text(json_field(*plan, "format")) != "flowcore.lowering_plan" ||
         (plan_version != 1 && plan_version != 2)) {

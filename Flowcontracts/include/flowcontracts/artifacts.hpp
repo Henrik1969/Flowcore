@@ -1,6 +1,7 @@
 #pragma once
 
 #include <flowcontracts/json.hpp>
+#include <flowcontracts/source_graph.hpp>
 
 #include <set>
 #include <string>
@@ -68,6 +69,10 @@ inline void validate_abi_contracts(const json::Object& root) {
 
 inline void validate_lowering_authority(const json::Value& value, std::string_view base = "$.lowering_plan") {
     const auto& plan = json::object(value, base);
+    if (const auto* graph = json::optional(plan, "source_graph")) {
+        (void)source_graph(*graph, std::string(base) + ".source_graph");
+        throw json::Error(std::string(base) + ".source_graph", "source graph execution is not admitted");
+    }
     if (json::string(json::required(plan, "format", base), std::string(base) + ".format") != "flowcore.lowering_plan") throw json::Error(std::string(base) + ".format", "unsupported lowering plan format");
     const auto version = json::integer(json::required(plan, "version", base), std::string(base) + ".version");
     if (version != 1 && version != 2) throw json::Error(std::string(base) + ".version", "unsupported lowering plan version");

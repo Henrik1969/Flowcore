@@ -514,6 +514,14 @@ struct GraphWireSyntax {
     SourceLocation location;
 };
 
+struct GraphPolicySyntax {
+    std::string node;
+    std::string key;
+    std::string value_kind;
+    std::string value_text;
+    SourceLocation location;
+};
+
 struct AstModule {
     SourceUnit source_unit;
     std::vector<TopLevelDecl> declaration_pool;
@@ -525,6 +533,7 @@ struct AstModule {
     std::vector<SourceLocation> unsupported_graph_locations;
     std::vector<GraphNodeSyntax> graph_nodes;
     std::vector<GraphWireSyntax> graph_wires;
+    std::vector<GraphPolicySyntax> graph_policies;
 };
 
 const char* to_string(SourceUnitKind kind);

@@ -1,5 +1,46 @@
 # Flowcore autonomous maturation ledger
 
+## Durable graph evidence and downstream refusal — 2026-09-07
+
+Continued from pushed `946b5c1`. Frontend capture now retains provider policy
+literals (kind, text, node/key identity and provenance). Flowanalyst preserves
+explicit graph nodes, wires, endpoint provenance, policies and receiver resolutions
+inside `lowering_plan.source_graph`, using the new non-executable
+`flowcore.source_graph` v1 evidence contract. A typed Flowcontracts reader validates
+identities, ports, receiver shape, policy values and provenance; standalone captured
+files round-trip canonically after the producer exits.
+
+Adversarial status-laundering tests exposed Flowlower accepting graph evidence when
+no LLVM output was requested. Both its driver and emitter now refuse the graph.
+Flowbind, Flowparallel, Flowoptimize, Flowprepare and the backend-artifact validator
+also refuse independently. No native graph admission or authorization is inferred
+from syntax or from a provider name. Invalid graphs remain evidence, never an
+executable scalar projection.
+
+Exact verification:
+
+```sh
+cmake --build /tmp/flowcore-reusable-current -j4
+ctest --test-dir /tmp/flowcore-reusable-current -R 'source_graph_artifact|graph_lowering_refusal|source_receiver_frames' --output-on-failure
+ctest --test-dir /tmp/flowcore-reusable-current --output-on-failure -j4
+cmake --build /tmp/flowcore-reusable-current-sanitize -j4
+ASAN_OPTIONS=detect_leaks=0 LSAN_OPTIONS=detect_leaks=0 ctest --test-dir /tmp/flowcore-reusable-current-sanitize --output-on-failure -j4
+sh /tmp/flowcore-reusable-acceptance/run.sh
+git diff --check
+```
+
+Both builds passed. Focused **3/3**; normal **78/78**, 5.45 seconds;
+ASan/UBSan **78/78**, 18.12 seconds. Native acceptance exited 42 and all six
+compiler hashes remained unchanged during compilation. ELF SHA-256 remains
+`86ac3acba71f522aa13b5d58e733486737c1b4b9ffc19ed5224ab1c75470f400`.
+Logs: `/tmp/flowcore-graph-artifact-{ctest,sanitize}.log`.
+
+State remains CONTINUE. During the next native graph investigation, inspection
+found Flowanalyst selecting external-call metadata by leaf/native symbol instead
+of its already resolved function identity. Investigate and repair that exact
+provider-identity boundary first, then continue native graph execution and
+Flow-owned paging. No semantic blocker is claimed.
+
 ## Fresh compatibility receiver frames — 2026-09-07
 
 Recovered clean `4281338` on `v29-language-maturation`. Gate 6 remains the first

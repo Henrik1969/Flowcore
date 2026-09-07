@@ -185,6 +185,17 @@ void dump_frontend_bundle_json(std::ostream& out,
         out << ",\"provenance\":"; provenance(wire.location);
         out << '}';
     }
+    out << "],\"policies\":[";
+    for (std::size_t i = 0; i < module.graph_policies.size(); ++i) {
+        const auto& policy = module.graph_policies[i];
+        if (i) out << ',';
+        out << "{\"node_id\":"; dump_json_string(out, policy.node);
+        out << ",\"key\":"; dump_json_string(out, policy.key);
+        out << ",\"value_kind\":"; dump_json_string(out, policy.value_kind);
+        out << ",\"value_text\":"; dump_json_string(out, policy.value_text);
+        out << ",\"provenance\":"; provenance(policy.location);
+        out << '}';
+    }
     out << "]},\n  \"diagnostics\": [";
     for (std::size_t index = 0; index < module.unsupported_graph_locations.size(); ++index) {
         const auto& location = module.unsupported_graph_locations[index];

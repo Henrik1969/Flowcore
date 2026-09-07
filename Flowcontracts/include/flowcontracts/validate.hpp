@@ -369,6 +369,7 @@ inline ValidationResult validate(const json::Value& value) {
         if (result.format == "flowmini.frontend_bundle") validate_frontend_bundle(value);
         else if (result.format == "flowanalyst.semantic_report") (void)semantic_report(value);
         else if (result.format == "flowcore.lowering_plan") validate_lowering_plan(value);
+        else if (result.format == "flowcore.source_graph") (void)source_graph(value);
         else if (result.format == "flowbind.binding_report") validate_binding_report(value);
         else if (result.format == "flowparallel.execution_plan") (void)execution_plan(value);
         else if (result.format == "flowparallel.graph_provider_decision") (void)provider_decision(value);

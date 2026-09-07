@@ -341,6 +341,18 @@ int run(const Json& bundle, int lowering_plan_version) {
             if (receiver_functions.count(id) && !connected_receivers.count(id))
                 graph_diagnostic("FLOWANALYST_GRAPH_RECEIVER_INPUT", "source receiver requires a connected input", node);
         }
+        std::set<std::pair<std::string, std::string>> policy_ids;
+        for (const auto& policy : list(field(graph, "policies"))) {
+            const auto node = text(field(policy, "node_id"));
+            const auto key = text(field(policy, "key"));
+            if (!node_ids.count(node) || key.empty() || !policy_ids.emplace(node, key).second)
+                graph_diagnostic("FLOWANALYST_GRAPH_POLICY", "unknown policy node or empty/duplicate policy identity", policy);
+            const auto kind = text(field(policy, "value_kind"));
+            if (kind != "integer" && kind != "string" && kind != "boolean")
+                graph_diagnostic("FLOWANALYST_GRAPH_POLICY_VALUE", "unsupported graph policy value kind", policy);
+            if (receiver_functions.count(node))
+                graph_diagnostic("FLOWANALYST_GRAPH_RECEIVER_POLICY", "source receiver policies are unsupported", policy);
+        }
     }
     std::vector<Resolution> resolutions;
     std::map<int, std::pair<int, int>> expression_context;
@@ -756,6 +768,13 @@ int run(const Json& bundle, int lowering_plan_version) {
     std::cout << "],\n  \"graph_analysis\":{\"format\":\"flowanalyst.graph_analysis\",\"version\":1,\"status\":\"non_executable\",\"receivers\":"
               << flowcontracts::json::serialize(graph_receivers) << "},\n  \"lowering_plan\": {\"format\":\"flowcore.lowering_plan\",\"version\":" << lowering_plan_version << ",\"status\":\""
               << (diagnostics.empty() ? "ready" : "blocked") << "\"";
+    if (const auto* graph = field(bundle, "graph_syntax")) {
+        if (!list(field(graph, "nodes")).empty() || !list(field(graph, "wires")).empty() || !list(field(graph, "policies")).empty())
+            std::cout << ",\"source_graph\":" << flowcontracts::json::serialize(Object{
+                {"format", std::string("flowcore.source_graph")}, {"version", 1},
+                {"status", std::string("non_executable")}, {"syntax", *graph},
+                {"receivers", graph_receivers}});
+    }
     if (lowering_plan_version == 2) {
         std::cout << ",\"functions\":[";
         for (std::size_t index = 0; index < callables.size(); ++index) {

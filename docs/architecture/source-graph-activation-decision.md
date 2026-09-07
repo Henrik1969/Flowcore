@@ -104,3 +104,13 @@ unfinished. Legacy FlowIR export explicitly refuses receiver frames to avoid
 silently omitting their bodies. The durable frontend syntax remains available.
 `source_receiver_frames` covers repeated input, fresh state, fan-out, failure,
 carrier conversion boundaries, forward references, and hostile connections.
+
+## Durable graph evidence — 2026-09-07
+
+Frontend graph syntax now retains literal policies as well as explicit nodes,
+wires, endpoint locations and implementation references. Flowanalyst embeds those
+facts and receiver resolutions as `flowcore.source_graph` v1 in the lowering plan.
+The standalone Flowcontracts reader validates this non-executable evidence;
+execution consumers refuse it independently of an outer artifact's status. This
+prevents scalar projection when captured reports are altered. Native provider
+contracts, executable graph planning and activation lowering remain unfinished.
