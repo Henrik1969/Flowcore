@@ -1,5 +1,26 @@
 # Flowcore autonomous maturation ledger
 
+## Mission completion reconciliation — 2026-09-07
+
+Implementation and Firetest checkpoint `8c2b19d` is pushed and was verified clean.
+Every definition-of-done item is mapped to its evidence in
+[the final result](2026-09-07-reusable-flow-chain-result.md). The current presentation
+index now points to that verified code checkpoint, records 81/81 and preserves
+explicit experimental/platform limitations. This update is part of the owner's
+authorized mission reconciliation, not an independent presentation-only refresh.
+
+Final canonical rerun: `cmake --build /tmp/flowcore-reusable-current -j3` and
+`ctest --test-dir /tmp/flowcore-reusable-current --output-on-failure -j3` passed
+81/81 in 8.46 seconds. Reinstallation followed by
+`sh /tmp/flowcore-reusable-acceptance/run-installed.sh` again exited 42 and
+confirmed unchanged installed tool hashes and the recorded ELF digest.
+
+All required implementation, tests, native proofs and documentation gates are
+complete. State remains CONTINUE only through publication of this reconciliation;
+a final state-only DONE checkpoint follows verification that it is pushed and
+clean. No force push, merge, branch deletion, settings change or external PR
+mutation was performed. The next action after DONE is outside this mission.
+
 ## Final Firetest hardening — 2026-09-07
 
 Continued from pushed `bb3b3c7`. Fresh GCC and Clang builds exposed a real clean-

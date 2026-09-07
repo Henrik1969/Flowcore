@@ -8,15 +8,14 @@
     "production_ready": false
   },
   "source_state": {
-    "as_of": "2026-08-26",
-    "branch": "v25-symboltable-projection",
-    "commit": "2d222a03c101434984ae7cf6b632755b75e65def",
-    "closure_tag": "tinyvm-cross-target-bootstrap-complete"
+    "as_of": "2026-09-07",
+    "branch": "v29-language-maturation",
+    "commit": "8c2b19d32c877c16d581fde14ed2f56598110e6a"
   },
   "current_milestone": {
-    "name": "TinyVM cross-target/bootstrap mission",
+    "name": "Reusable native Flow compiler chain",
     "status": "complete",
-    "result": "TinyVM is an independently validated backend for the admitted surface, target names select governed backend policy, and the staged bootstrap path has executable evidence plus an exact remaining-work inventory."
+    "result": "Installed compiler tools compile new supported source and generated native bindings without rebuilding; exact evidence authorization, native scalar graph activation and Flow-owned pager behavior are verified."
   },
   "verified_capabilities": [
     "Deterministic and independently validated TinyVM executable artifacts",
@@ -26,17 +25,25 @@
     "Exact governed host-call admission with unsupported tuples inventoried",
     "Name-only llvm-host and tinyvm-portable target-policy builds without implicit fallback",
     "One shared tokenizer/document scalar classifier executed through LLVM and both TinyVM engines",
-    "Validated dependency graph for remaining Stage 1, Stage 2, and Stage 3 bootstrap work"
+    "Validated dependency graph for remaining Stage 1, Stage 2, and Stage 3 bootstrap work",
+    "Exact generated contract and live-provider evidence authorization",
+    "Native scalar source graphs with durable FIFO scheduling and fresh receiver frames",
+    "Flow-owned paging with injectable batch input, terminal and output providers",
+    "Installed newly named gettid acceptance with unchanged compiler binaries"
   ],
   "verification": {
     "gcc_superbuild": "pass",
     "canonical_ctest": {
-      "passed": 75,
-      "total": 75
+      "passed": 81,
+      "total": 81
     },
-    "clang_18_asan_ubsan_focused_suites": "pass with documented detect_leaks=0 environmental exclusion",
     "callable_artifact_deterministic": true,
-    "callable_observable_result": "LLVM = TinyVM switch = TinyVM computed = 1"
+    "callable_observable_result": "LLVM = TinyVM switch = TinyVM computed = 1",
+    "clang_superbuild": "pass (81/81)",
+    "gcc_asan_ubsan": "pass (81/81), documented detect_leaks=0 environmental exclusion",
+    "valgrind": "zero errors in six compiler stages, native pager and 53 negative/support cases",
+    "native_pass_corpus": 91,
+    "concurrent_frontend_captures": 64
   },
   "explicit_non_claims": [
     "Flowmini is not self-hosted",
@@ -44,9 +51,13 @@
     "FlowOpenOffice has not been ported",
     "Flowcore is not production-ready",
     "Arbitrary target architectures are not implemented",
-    "Safety certification is not claimed"
+    "Safety certification is not claimed",
+    "Native graph execution does not cover aggregate payloads or streaming",
+    "The pager renders after a bounded input batch, not continuously",
+    "Provider evidence is checked at binding time and does not pin future loads"
   ],
   "authority": [
+    "docs/checkpoints/2026-09-07-reusable-flow-chain-result.md",
     "docs/checkpoints/2026-08-26-tinyvm-cross-target-bootstrap-result.md"
   ],
   "evidence": [
@@ -55,7 +66,11 @@
     "docs/bootstrap/remaining-bootstrap-inventory-v1.json",
     "docs/architecture/target-policy-artifact-v1.md",
     "docs/architecture/callable-lowering-plan-v2.md",
-    "docs/architecture/product-scale-and-self-hosting-plan.md"
+    "docs/architecture/product-scale-and-self-hosting-plan.md",
+    "docs/tasks/reusable-flow-chain-autonomous.md",
+    "docs/checkpoints/2026-08-21-autonomous-maturation-ledger.md",
+    "docs/architecture/native-graph-provider-map.md",
+    "docs/architecture/writable-storage-design.md"
   ],
   "presentation_policy": {
     "may_update": [
