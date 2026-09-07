@@ -1,0 +1,15 @@
+program variant_nested_payload_probe
+
+variant Inner {
+    value(item : int)
+}
+
+variant Outer {
+    inner(item : Inner)
+}
+
+main {
+    result : Outer(Outer.inner(Inner.value(42)))
+    marker : int(1)
+    print marker
+}

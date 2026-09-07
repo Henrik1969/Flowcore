@@ -8,6 +8,7 @@ remain deterministic and do not imply that the missing facilities are solved.
 | `examples/apps/flowstats/flowstats.flow` | list construction/indexing, `length`, `while`, guards, constants, arithmetic, `std/math` | `flowmini_mature_programs`; output `5`, `1`, `9`, `25` | collection helpers cannot yet be abstracted over `T`; loop mutation is verbose |
 | `examples/apps/flowconfig/flowconfig.flow` | enum declaration, `when`, guard, constant declaration, branch output | `flowmini_mature_programs`; production branch outputs `20` | configuration parsing and file/CLI APIs are not yet standard units |
 | `examples/flowcat/flowcat.flow` | external C provider, file descriptor lifecycle, capability policy | `flowcat_flowcore_pipeline` | provider contracts expose effects, but resource cleanup is descriptive |
+| `examples/bootstrap/variant_result_probe.flow` | concrete result variant, payload extraction, match routing, guard continuation | `flowmini_variant_backend`; LLVM + `lli` return 0 | repeated concrete `*Result` variants provide evidence for later generics; wider payload layouts still need a carrier contract |
 
 The attempted generic collection helper is recorded in
 [`FUTURE_WORK_EVIDENCE.md`](../FUTURE_WORK_EVIDENCE.md): an imported

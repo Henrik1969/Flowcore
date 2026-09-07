@@ -910,3 +910,33 @@ later instruction reopens them.
   the runtime/artifact gate. This is a small concrete library increment using
   existing language semantics; floating-point and text APIs remain deferred
   pending verified carriers and callable collection/text types.
+
+## 2026-09-07 canonical variant backend completion checkpoint
+
+- Traced the variant path from structural AST through Flowanalyst,
+  Flowoptimize, Flowprepare, and Flowlower. The missing facts were payload
+  field types, arm-local payload symbols, and a backend-neutral construction /
+  extraction contract; none of these required changing canonical variant
+  meaning.
+- Added additive `variant_carriers` and `enum_types` artifact fields. Variant
+  member discriminants are assigned deterministically from declaration order,
+  starting at zero. Match facts and lowering operations preserve variant type,
+  member, discriminant, payload types, and payload-binding provenance.
+- Implemented the smallest LLVM carrier: `{ i32 discriminant, i32 payload }`.
+  Integer and enum payloads construct, route through a match, extract into an
+  arm-local binding, and execute under `lli`. Multi-field, record, and nested
+  payloads are retained canonically and rejected explicitly by Flowlower until
+  a wider carrier is justified. TinyVM remains an explicit backend limitation.
+- Added `variant_enum_payload_probe`, `variant_multi_field_payload_probe`, and
+  `variant_nested_payload_probe`, plus the `flowmini_variant_backend` gate.
+  Updated parser differential, UTF-8, and carrier experiment gates to expect
+  the now-admitted semantic path. The empty backend artifact golden was updated
+  for additive empty carrier arrays.
+- Verification: normal root CTest 93/93; focused Flowmini CTest 14/14;
+  categorized suite 91/140 (49 known gaps); Debug ASan/UBSan CTest 93/93 with
+  leak checks disabled. No parser syntax was added and no unsafe Flowmini source
+  mechanism was introduced.
+- Remaining work is intentionally bounded: wider target-neutral payload storage,
+  record/resource carrier policy, and TinyVM parity require concrete programs
+  and a cost review. Generic syntax remains deferred; repeated concrete result
+  variants are now evidence for that later mission.

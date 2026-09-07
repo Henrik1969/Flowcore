@@ -167,15 +167,17 @@ The runtime parser accepts `const name : Type(value)` and enum/variant
 declarations and `when` over integer, enum, and variant values. Constants are
 represented as `is_const` declarations and `mutability=const` symbol facts in
 the frontend bundle. The structural AST still requires a `default` block for
-`when`. Variant payload labels now survive AST, facts, and lowering-plan
-serialization, but Flowanalyst deliberately rejects variant lowering with
-`FLOWANALYST_VARIANT_MATCH_UNSUPPORTED` until a backend-neutral payload layout
-is admitted.
+`when`.
 
-The bounded carrier experiment records the current contract: variant identity
-and discriminants are preserved, payload identity is inspectable, and payload
-layout is an explicit backend blocker. LLVM and TinyVM therefore reject this
-case rather than claiming parity.
+Variants have a target-neutral carrier in the semantic artifact. Member
+discriminants are deterministic zero-based declaration-order values, and each
+member records its canonical payload fields and types. LLVM currently lowers a
+carrier as `{ i32 discriminant, i32 payload }`; integer and enum payloads are
+implemented and tested, including payload extraction and arm-local bindings.
+Multi-field, record, nested, and other non-`i32` payload layouts are retained
+canonically but rejected by Flowlower with an explicit backend limitation.
+TinyVM payload lowering is also **NOT SUPPORTED — BACKEND LIMITATION**. Backend
+layout remains an implementation choice and is not part of Flowmini semantics.
 
 ## ABI and providers
 
@@ -237,8 +239,8 @@ source -> tokens/TokenTree -> structural AST -> symbol/fact projection
 The normal runtime parser is a separate path today. AST nodes, symbol tables,
 Graph IR, lowering operations, provider calls, and runtime values have distinct
 schemas and ownership. Integer and enum match lowering is tested. Variant
-payload labels are preserved, then rejected early by Flowanalyst as an explicit
-unsupported backend contract.
+construction, discriminant selection, payload extraction, and provenance are
+represented in the lowering plan before backend-specific layout is chosen.
 
 ## What to test next
 

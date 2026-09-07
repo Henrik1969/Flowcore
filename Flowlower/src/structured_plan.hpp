@@ -49,13 +49,16 @@ struct Provider {
     auto tie() const { return std::tie(contract, library, convention, symbol, effect, parameters, result); }
     bool operator<(const Provider& other) const { return tie() < other.tie(); }
 };
-struct MatchArm { int value = 0, high = 0, body_block = -1; std::string label_type, label_member; };
+struct PayloadBinding { int symbol = -1; std::string name, type; };
+struct MatchArm { int value = 0, high = 0, body_block = -1; std::string label_type, label_member; std::vector<PayloadBinding> payload_bindings; };
 struct Operation {
     int id = -1, expression = -1, statement = -1, block = -1, function_symbol = -1, callee_symbol = -1, result_symbol = -1, then_block = -1, else_block = -1, body_block = -1, failure_block = -1;
     std::string kind;
     const Json* operand = nullptr;
     int default_block = -1, join_block = -1;
-    std::string selector_type, selector_kind;
+    std::string selector_type, selector_kind, variant_type, variant_member;
+    int variant_discriminant = -1;
+    std::vector<std::string> payload_types;
     std::vector<MatchArm> match_cases;
     std::optional<Provider> provider;
 };
@@ -131,6 +134,9 @@ private:
     int plan_version_ = 1;
     std::map<int,std::pair<std::string,std::string>> call_results_;
     bool has_list_length_ = false;
+    std::set<std::string> enum_types_;
+    std::map<std::string, std::string> variant_llvm_types_;
+    std::map<int, std::pair<int, std::vector<PayloadBinding>>> variant_bindings_;
 
     static Provider provider(const Json& value) {
         return {text(field(value,"contract")), text(field(value,"library")), text(field(value,"convention")),
@@ -139,6 +145,8 @@ private:
     std::string llvm_type(std::string_view carrier) const {
         const auto builtin = flowlower::structured::llvm_type(carrier);
         if (!builtin.empty()) return builtin;
+        if (enum_types_.count(std::string{carrier})) return "i32";
+        if (variant_llvm_types_.count(std::string{carrier})) return variant_llvm_types_.at(std::string{carrier});
         const auto found = carrier_representations_.find(std::string{carrier});
         if (found != carrier_representations_.end() && (found->second == "void*" || found->second == "const void*")) return "ptr";
         return {};
@@ -155,6 +163,14 @@ private:
                 const auto representation = text(field(item, "repr"));
                 if (!name.empty() && !representation.empty()) carrier_representations_[name] = representation;
             }
+        if (const auto* enums = field(root_, "enum_types"))
+            for (const auto& item : array(enums, "enum_types")) enum_types_.insert(text(&item));
+        if (const auto* carriers = field(root_, "variant_carriers")) {
+            for (const auto& carrier : array(carriers, "variant_carriers")) {
+                const auto name = text(field(carrier, "variant_type"));
+                if (!name.empty()) variant_llvm_types_[name] = "%flow_variant_" + name;
+            }
+        }
         const auto* plan = field(root_, "lowering_plan");
         if (!plan || text(field(*plan,"format")) != "flowcore.lowering_plan") return;
         plan_version_=integer(field(*plan,"version"),"lowering_plan.version");
@@ -209,8 +225,16 @@ private:
             op.failure_block=integer(field(item,"failure_block_id"),"failure_block_id");
             op.default_block=integer(field(item,"default_block_id"),"default_block_id"); op.join_block=integer(field(item,"join_block_id"),"join_block_id");
             op.selector_type=text(field(item,"selector_type")); op.selector_kind=text(field(item,"selector_kind"));
+            op.variant_type=text(field(item,"variant_type")); op.variant_member=text(field(item,"variant_member"));
+            op.variant_discriminant=integer(field(item,"variant_discriminant"),"variant_discriminant");
+            if (const auto* payload_types = field(item,"payload_types")) for (const auto& payload_type : array(payload_types,"payload_types")) op.payload_types.push_back(text(&payload_type));
             if (op.kind=="match") for (const auto& value : array(field(item,"cases"),"match.cases")) {
                 MatchArm arm; arm.value=integer(field(value,"value"),"match.case.value"); arm.high=integer(field(value,"high"),"match.case.high"); arm.body_block=integer(field(value,"body_block_id"),"match.case.body_block_id");
+                arm.label_type=text(field(value,"label_type")); arm.label_member=text(field(value,"label_member"));
+                if (const auto* bindings = field(value,"payload_bindings")) for (const auto& binding : array(bindings,"match.case.payload_bindings")) {
+                    arm.payload_bindings.push_back({integer(field(binding,"symbol_id"),"payload.symbol_id"), text(field(binding,"name")), text(field(binding,"type"))});
+                    symbol_types_[arm.payload_bindings.back().symbol] = arm.payload_bindings.back().type;
+                }
                 if (arm.high<arm.value || arm.body_block<0) throw std::runtime_error("invalid integer match operation");
                 op.match_cases.push_back(std::move(arm));
             }
@@ -227,6 +251,7 @@ private:
                 if (op.result_symbol>=0) symbol_types_[op.result_symbol]=op.provider->result;
             }
             if (op.kind=="value_definition" && op.result_symbol>=0 && op.operand) { definitions_[op.result_symbol]=op.operand; symbol_types_[op.result_symbol]=text(field(*op.operand,"type")); }
+            if (op.kind=="variant_construct" && op.result_symbol>=0) symbol_types_[op.result_symbol]=op.variant_type;
             if(op.kind=="call"&&plan_version_==2&&callables_.count(op.callee_symbol)) {
                 if(op.result_symbol>=0)symbol_types_[op.result_symbol]=callables_.at(op.callee_symbol).result;
             }
@@ -237,7 +262,7 @@ private:
                 has_branch_=true;
             }
             if (op.block!=0) has_nonroot_block_=true;
-            if (op.kind!="call" && op.kind!="external_call" && op.kind!="value_definition" && op.kind!="branch" && op.kind!="guard" && op.kind!="return_value" && op.kind!="loop" && op.kind!="assignment" && op.kind!="match") unsupported_=true;
+            if (op.kind!="call" && op.kind!="external_call" && op.kind!="value_definition" && op.kind!="variant_construct" && op.kind!="branch" && op.kind!="guard" && op.kind!="return_value" && op.kind!="loop" && op.kind!="assignment" && op.kind!="match") unsupported_=true;
             operations_.push_back(std::move(op));
         }
         for (auto& op:operations_) if (op.kind!="call" || plan_version_==2) blocks_[op.block].push_back(&op);
@@ -313,6 +338,8 @@ private:
         }
     }
     void emit_declarations(std::ostringstream& out) const {
+        for (const auto& [name, type] : variant_llvm_types_)
+            out << type << " = type {i32, i32}\n";
         for (const auto& p:providers_) {
             if (!c_symbol(p.symbol) || llvm_type(p.result).empty()) throw std::runtime_error("unsupported structured provider ABI");
             out << "declare "<<llvm_type(p.result)<<" @"<<p.symbol<<"("; const auto params=carriers(p.parameters);
@@ -359,6 +386,20 @@ private:
             return {};
         }
         if(kind=="string_literal" && text(field(value,"value")).empty()) return {"ptr","null"};
+        if(kind=="variant_extract") {
+            const int selector_symbol = integer(field(value,"selector_symbol_id"),"selector_symbol_id");
+            const auto variant_type = text(field(value,"variant_type"));
+            if (selector_symbol < 0 || variant_llvm_types_.count(variant_type) == 0) return {};
+            const auto carrier = load_symbol(selector_symbol, out);
+            if (carrier.empty()) return {};
+            const auto payload_type = llvm_type(text(field(value,"type")));
+            if (payload_type != "i32") return {};
+            const auto tag = integer(field(value,"discriminant"),"discriminant");
+            if (tag < 0) return {};
+            const auto result = "%flow_variant_payload_" + std::to_string(temporary_++);
+            out << "  " << result << " = extractvalue " << variant_llvm_types_.at(variant_type) << " " << carrier << ", 1\n";
+            return {"i32", result};
+        }
         if(kind=="field_access" && llvm_type(type)=="i32") return {"i32", text(field(value,"value"))};
         if(kind=="identifier") {
             const int symbol=integer(field(value,"symbol_id"),"symbol_id"); const auto native_type=llvm_type(symbol_types_[symbol]); auto loaded=load_symbol(symbol,out);
@@ -407,7 +448,18 @@ private:
         return {};
     }
     bool emit_block(int block,std::ostringstream& out,const std::string& continuation) {
-        out<<"flow_block_"<<block<<":\n"; bool terminated=false;
+        out<<"flow_block_"<<block<<":\n";
+        if (variant_bindings_.count(block)) {
+            const auto [selector_symbol, bindings] = variant_bindings_.at(block);
+            const auto carrier = load_symbol(selector_symbol, out);
+            for (const auto& binding : bindings) {
+                if (llvm_type(binding.type) != "i32") throw std::runtime_error("unsupported variant payload binding carrier");
+                const auto payload = "%flow_variant_case_payload_" + std::to_string(temporary_++);
+                out << "  " << payload << " = extractvalue " << variant_llvm_types_.at(symbol_types_.at(selector_symbol)) << " " << carrier << ", 1\n";
+                out << "  store i32 " << payload << ", ptr " << slot(binding.symbol) << "\n";
+            }
+        }
+        bool terminated=false;
         for(const auto* op:blocks_[block]) {
             if(terminated) break;
             if(op->kind=="value_definition") {
@@ -415,6 +467,18 @@ private:
                 if(kind=="writable_storage") out<<"  store ptr %flow_storage_ptr_"<<op->result_symbol<<", ptr "<<slot(op->result_symbol)<<"\n";
                 else if(kind=="string_literal") out<<"  store ptr @flow_string_"<<op->result_symbol<<", ptr "<<slot(op->result_symbol)<<"\n";
                 else { auto [type,value]=expression(*op->operand,out); if(value.empty()) throw std::runtime_error("unsupported structured value definition"); out<<"  store "<<type<<" "<<value<<", ptr "<<slot(op->result_symbol)<<"\n"; }
+            } else if(op->kind=="variant_construct") {
+                if (variant_llvm_types_.count(op->variant_type) == 0 || op->variant_discriminant < 0 || op->payload_types.size() != 1 || llvm_type(op->payload_types.front()) != "i32")
+                    throw std::runtime_error("unsupported variant carrier payload layout");
+                const auto& operands = array(field(find_json_operation(op->id),"operands"),"operation.operands");
+                if (operands.size() != 1) throw std::runtime_error("variant construction requires one payload operand");
+                const auto [payload_type, payload] = expression(operands.front(), out, op->payload_types.front());
+                if (payload_type != "i32" || payload.empty()) throw std::runtime_error("unsupported variant construction payload");
+                const auto aggregate = "%flow_variant_value_" + std::to_string(temporary_++);
+                out << "  " << aggregate << " = insertvalue " << variant_llvm_types_.at(op->variant_type) << " undef, i32 " << op->variant_discriminant << ", 0\n";
+                const auto complete = "%flow_variant_value_" + std::to_string(temporary_++);
+                out << "  " << complete << " = insertvalue " << variant_llvm_types_.at(op->variant_type) << " " << aggregate << ", i32 " << payload << ", 1\n";
+                out << "  store " << variant_llvm_types_.at(op->variant_type) << " " << complete << ", ptr " << slot(op->result_symbol) << "\n";
             } else if(op->kind=="call") {
                 if(!callables_.count(op->callee_symbol))throw std::runtime_error("ordinary call target is unavailable");
                 const auto& function=callables_.at(op->callee_symbol); if(function.body_block<0)throw std::runtime_error("ordinary call definition is unavailable");
@@ -444,8 +508,15 @@ private:
                 out<<"  br i1 "<<condition<<", label %"<<continuation_label<<", label %flow_block_"<<op->failure_block<<"\n";
                 emit_block(op->failure_block,out,continuation_label); out<<continuation_label<<":\n";
             } else if(op->kind=="match") {
-                if ((op->selector_kind != "integer" && op->selector_kind != "enum") || op->match_cases.empty()) throw std::runtime_error("unsupported structured match selector");
+                if ((op->selector_kind != "integer" && op->selector_kind != "enum" && op->selector_kind != "variant") || op->match_cases.empty()) throw std::runtime_error("unsupported structured match selector");
                 auto [selector_type, selector] = expression(*op->operand, out, op->selector_kind == "enum" ? "int" : op->selector_type);
+                if (op->selector_kind == "variant") {
+                    if (variant_llvm_types_.count(op->selector_type) == 0 || selector.empty()) throw std::runtime_error("unsupported variant match selector");
+                    const auto tag = "%flow_variant_tag_" + std::to_string(temporary_++);
+                    out << "  " << tag << " = extractvalue " << variant_llvm_types_.at(op->selector_type) << " " << selector << ", 0\n";
+                    selector_type = "i32";
+                    selector = tag;
+                }
                 if (selector_type != "i32" || selector.empty()) throw std::runtime_error("unsupported integer match selector");
                 const auto join = "flow_join_" + std::to_string(label_++);
                 std::vector<std::string> tests;
@@ -467,7 +538,13 @@ private:
                     out << "  br i1 " << condition << ", label %flow_block_" << match.body_block << ", label " << next << "\n";
                     if (arm + 1 < op->match_cases.size()) out << tests[arm] << ":\n";
                 }
-                for (const auto& match : op->match_cases) emit_block(match.body_block, out, join);
+                for (const auto& match : op->match_cases) {
+                    if (op->selector_kind == "variant" && !match.payload_bindings.empty())
+                        variant_bindings_[match.body_block] = std::make_pair(
+                            integer(field(*op->operand,"symbol_id"),"match.selector_symbol_id"),
+                            match.payload_bindings);
+                    emit_block(match.body_block, out, join);
+                }
                 if (op->default_block >= 0) emit_block(op->default_block, out, join);
                 out << join << ":\n";
             } else if(op->kind=="loop") {

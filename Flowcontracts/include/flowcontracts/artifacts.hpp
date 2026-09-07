@@ -27,7 +27,7 @@ struct MatrixEntry { json::Integer row = 0; json::Integer column = 0; bool value
 struct MatrixView { std::string name; json::Integer rows = 0; json::Integer columns = 0; std::string semiring; std::string storage; std::vector<MatrixEntry> entries; };
 struct SemanticReport {
     Header artifact; std::string source_path; json::Array targets; json::Array external_operations;
-    json::Array abi_type_contracts; json::Array match_facts; json::Array match_operations; json::Value lowering_plan; std::size_t proven_pure_count = 0;
+    json::Array abi_type_contracts; json::Array match_facts; json::Array match_operations; json::Array variant_carriers; json::Array enum_types; json::Value lowering_plan; std::size_t proven_pure_count = 0;
     std::size_t independent_candidate_count = 0; MatrixView dependency_matrix;
 };
 
@@ -194,6 +194,8 @@ inline SemanticReport semantic_report(const json::Value& value) {
     result.external_operations = required_array(root, "external_operations");
     if (const auto* matches = json::optional(root, "match_facts")) result.match_facts = json::array(*matches, "$.match_facts");
     if (const auto* matches = json::optional(root, "match_operations")) result.match_operations = json::array(*matches, "$.match_operations");
+    if (const auto* carriers = json::optional(root, "variant_carriers")) result.variant_carriers = json::array(*carriers, "$.variant_carriers");
+    if (const auto* enums = json::optional(root, "enum_types")) result.enum_types = json::array(*enums, "$.enum_types");
     validate_abi_contracts(root); result.abi_type_contracts = required_array(root, "abi_type_contracts");
     result.lowering_plan = json::required(root, "lowering_plan");
     validate_lowering_authority(result.lowering_plan);

@@ -1,0 +1,23 @@
+program variant_result_probe
+
+variant ParseResult {
+    value(item : int)
+    error(code : int)
+}
+
+main {
+    result : ParseResult(ParseResult.value(42))
+    marker : int(0)
+    when result {
+        case ParseResult.value {
+            item -> marker
+        }
+        default {
+            -1 -> marker
+        }
+    }
+    guard marker > 0 else {
+        99 -> marker
+    }
+    print marker
+}

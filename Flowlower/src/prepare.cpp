@@ -83,8 +83,6 @@ int prepare(const Options& option) {
             const auto selector_kind = string(required(match, "selector_kind", "$.match_operations[]"), "$.match_operations[].selector_kind");
             if (selector_kind != "integer" && selector_kind != "enum" && selector_kind != "named" && selector_kind != "variant")
                 throw Error("$.match_operations[].selector_kind", "unsupported match selector kind");
-            if (selector_kind == "variant")
-                throw Error("$.match_operations[].selector_kind", "variant match lowering is not supported by the current backend contract");
             const auto& cases = array(required(match, "cases", "$.match_operations[]"), "$.match_operations[].cases");
             for (const auto& arm_value : cases) {
                 const auto& arm = object(arm_value, "$.match_operations[].cases[]");
@@ -111,6 +109,7 @@ int prepare(const Options& option) {
     const auto optimization_header = header(optimization);
     Object output{
         {"abi_type_contracts", required(root, "abi_type_contracts")},
+        {"enum_types", optional(root, "enum_types") ? *optional(root, "enum_types") : Array{}},
         {"authorization", Object{{"capabilities", capabilities}, {"status", requires_binding ? "authorized" : "not-required"}}},
         {"external_operations", required(root, "external_operations")},
         {"format", "flowcore.backend_lowering_artifact"},
@@ -126,6 +125,7 @@ int prepare(const Options& option) {
         {"targets", required(root, "targets")},
         {"version", Integer{option.target_policy_path.empty() ? 1 : 2}}
     };
+    output.emplace("variant_carriers", optional(root, "variant_carriers") ? *optional(root, "variant_carriers") : Array{});
     if (!option.target_policy_path.empty()) {
         const auto target_policy = parse(read(option.target_policy_path));
         validate_target_policy(target_policy);

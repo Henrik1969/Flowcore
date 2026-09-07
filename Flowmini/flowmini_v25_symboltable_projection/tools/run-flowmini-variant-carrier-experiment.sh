@@ -11,15 +11,12 @@ trap 'rm -rf "${tmpdir}"' EXIT
 "${flowmini}" --dump-frontend-bundle "${fixture}" > "${tmpdir}/bundle.json"
 jq -e 'any(.ast.statement_pool[]?; .kind == "when" and any(.payload.cases[]?; .label_type == "DecodeOutcome" and .label_member == "scalar"))' "${tmpdir}/bundle.json" >/dev/null
 
-if "${analyst}" --lowering-plan-version 2 "${tmpdir}/bundle.json" > "${tmpdir}/semantic.json"; then
-    echo "variant carrier experiment unexpectedly admitted backend lowering" >&2
-    exit 1
-fi
-jq -e 'any(.diagnostics[]?; .code == "FLOWANALYST_VARIANT_MATCH_UNSUPPORTED")' "${tmpdir}/semantic.json" >/dev/null
+"${analyst}" --lowering-plan-version 2 "${tmpdir}/bundle.json" > "${tmpdir}/semantic.json"
+jq -e '.status == "ok" and any(.variant_carriers[]?.members[]?; .member == "scalar" and .discriminant == 0 and any(.payload_fields[]?; .type == "int"))' "${tmpdir}/semantic.json" >/dev/null
 
-# The smallest useful carrier is still a target-neutral design question: the
-# canonical facts retain identity and labels, while payload layout is not yet
-# owned by the backend-neutral contract. Keep that result machine-checkable.
+# The first useful carrier keeps canonical identity and labels while admitting
+# one i32 payload slot in the LLVM backend. Larger payload layouts remain an
+# explicit backend limitation.
 cat > "${tmpdir}/carrier-report.json" <<'EOF'
 {
   "format": "flowmini.variant_carrier_experiment",
@@ -27,13 +24,13 @@ cat > "${tmpdir}/carrier-report.json" <<'EOF'
   "canonical_identity": "preserved",
   "discriminant": "label_member",
   "payload_identity": "preserved_in_ast_and_facts",
-  "payload_layout": "NOT_SUPPORTED — DEFERRED",
-  "llvm_lowering": "explicit_reject",
+  "payload_layout": "one-slot i32 carrier",
+  "llvm_lowering": "implemented_for_i32_payloads",
   "tinyvm": "explicit_unsupported",
   "next_gate": "admit_one_payload_layout_without_changing_canonical_facts"
 }
 EOF
-jq -e '.canonical_identity == "preserved" and .payload_layout == "NOT_SUPPORTED — DEFERRED" and .llvm_lowering == "explicit_reject"' "${tmpdir}/carrier-report.json" >/dev/null
+jq -e '.canonical_identity == "preserved" and .payload_layout == "one-slot i32 carrier" and .llvm_lowering == "implemented_for_i32_payloads"' "${tmpdir}/carrier-report.json" >/dev/null
 echo "Flowmini variant carrier experiment: PASS"
 echo "  canonical tag/label identity is preserved"
-echo "  payload layout remains an explicit backend contract blocker"
+echo "  one-slot i32 payload layout is lowered through LLVM"

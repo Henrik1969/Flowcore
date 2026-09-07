@@ -1083,7 +1083,16 @@ namespace flowmini::ast {
                     if (i > 0) { out << ", "; }
                     out << "{\"name\": ";
                     dump_json_string(out, variantDecl->members[i].name);
-                    out << ", \"field_count\": " << variantDecl->members[i].fields.size() << "}";
+                    out << ", \"field_count\": " << variantDecl->members[i].fields.size() << ", \"fields\": [";
+                    for (std::size_t field = 0; field < variantDecl->members[i].fields.size(); ++field) {
+                        if (field > 0) { out << ", "; }
+                        out << "{\"name\": ";
+                        dump_json_string(out, variantDecl->members[i].fields[field].name);
+                        out << ", \"type\": ";
+                        dump_json_string(out, type_ref_text(variantDecl->members[i].fields[field].type));
+                        out << "}";
+                    }
+                    out << "]}";
                 }
                 out << "], \"location\": ";
                 dump_source_location_json(out, variantDecl->location);

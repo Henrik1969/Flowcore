@@ -38,6 +38,7 @@ int analyze(std::string_view input, const std::optional<flowcontracts::ProviderD
     const auto root = parse(input);
     const auto input_header = header(root);
     ExecutionPlan plan;
+    json::Array variant_carriers, enum_types;
     std::string input_format;
     if (input_header.format == "flowparallel.execution_plan") {
         plan = execution_plan(root); input_format = input_header.format;
@@ -45,6 +46,7 @@ int analyze(std::string_view input, const std::optional<flowcontracts::ProviderD
         const auto semantic = semantic_report(root);
         plan.artifact = semantic.artifact; plan.source_path = semantic.source_path; plan.targets = semantic.targets;
         plan.external_operations = semantic.external_operations; plan.abi_type_contracts = semantic.abi_type_contracts;
+        variant_carriers = semantic.variant_carriers; enum_types = semantic.enum_types;
         plan.match_facts = semantic.match_facts;
         plan.match_operations = semantic.match_operations.empty() ? semantic.match_facts : semantic.match_operations;
         plan.lowering_plan = semantic.lowering_plan; plan.dependency_matrix = semantic.dependency_matrix;
@@ -70,10 +72,11 @@ int analyze(std::string_view input, const std::optional<flowcontracts::ProviderD
     const auto reason = decision ? decision->reason : "";
 
     Object output{
-        {"abi_type_contracts", plan.abi_type_contracts}, {"external_operations", plan.external_operations},
+        {"abi_type_contracts", plan.abi_type_contracts}, {"enum_types", enum_types}, {"external_operations", plan.external_operations},
         {"format", text("flowoptimize.optimization_report")},
         {"match_facts", plan.match_facts},
         {"match_operations", plan.match_operations},
+        {"variant_carriers", variant_carriers},
         {"input", Object{{"format", text(input_format)}, {"version", Integer{1}}}}, {"lowering_plan", plan.lowering_plan},
         {"message", text("optimization boundary reached; derived matrix views are available; provider selection remains runtime policy")},
         {"projections", Array{Object{{"columns", plan.dependency_matrix.columns}, {"kind", text("graph_to_matrix")},

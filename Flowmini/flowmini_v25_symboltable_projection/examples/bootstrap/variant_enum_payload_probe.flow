@@ -1,0 +1,25 @@
+program variant_enum_payload_probe
+
+enum Mode {
+    development
+    production
+}
+
+variant Selection {
+    chosen(mode : Mode)
+    rejected(code : int)
+}
+
+main {
+    outcome : Selection(Selection.chosen(Mode.production))
+    marker : int(0)
+    when outcome {
+        case Selection.chosen {
+            mode -> marker
+        }
+        default {
+            99 -> marker
+        }
+    }
+    print marker
+}

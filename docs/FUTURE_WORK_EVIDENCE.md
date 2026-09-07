@@ -8,25 +8,25 @@ architecture cost of a new mechanism is not justified.
 
 - **Parser authority:** the structural frontend remains canonical for artifacts;
   the runtime parser is explicitly named `--runtime-compat` and a differential
-  corpus covers four equivalent fixtures plus one declared runtime/backend
-  boundary. Full parser convergence remains future work.
+  corpus now covers five equivalent fixtures. Full parser convergence remains
+  future work.
 - **Const and guard identity:** `is_const`, a `mutability=const` symbol fact,
   and a dedicated structural `guard` node with failure-block provenance are
   now preserved and tested.
-- **Variant information:** AST and semantic/lowering serialization now retain
-  `label_type` and `label_member`. Flowanalyst rejects variant lowering early
-  with `FLOWANALYST_VARIANT_MATCH_UNSUPPORTED` until payload layout is admitted.
+- **Variant carrier:** AST and semantic/lowering serialization retain
+  `label_type`, `label_member`, payload types, and deterministic discriminants.
+  LLVM now lowers one-slot `i32` carriers and extracts payloads in match arms;
+  larger layouts and TinyVM remain explicit backend limitations.
 - **Semantic JSON:** the malformed variant operand object was fixed at the
   Flowanalyst producer and the UTF-8 flow probe now validates it successfully.
 - **Evidence reporting:** `tools/report-flowmini-test-status.sh` emits a
   versioned JSON and Markdown projection of root CTest, focused CTest, and the
-  categorized suite. The current report is 92/92 root, 13/13 focused, and
+  categorized suite. The current report is 93/93 root, 14/14 focused, and
   91/140 categorized (49 known gaps). Tests remain authoritative.
 - **Sanitizer verification:** a fresh Debug AddressSanitizer/UndefinedBehavior
-  Sanitizer configure and build passed 91/92 tests with leak checks disabled;
-  `terminal_sel_pipeline` remains the known environment-only ASan preload
-  failure (`ASan runtime does not come first`). The new Flowmini and Flowbind
-  gates pass under sanitizers.
+  Sanitizer configure and build passed 93/93 tests with leak checks disabled.
+  The new Flowmini variant carrier and backend artifact gates pass under
+  sanitizers; no variant memory error was observed.
 - **Unsafe policy:** unsafe regions, inline assembly, and embedded foreign
   source are **NOT SUPPORTED — INTENTIONALLY EXCLUDED**. External unsafe work
   must arrive as a declared provider/ABI artifact with boundary paperwork.
@@ -50,10 +50,16 @@ architecture cost of a new mechanism is not justified.
   TESTED runtime probes combining lists, loops, guards, constants, enum
   branching, and pure math. They are architectural probes, not an ecosystem
   readiness claim.
-- **Variant carrier experiment:** a new gate proves canonical variant labels
-  and payload identity survive the frontend while Flowanalyst returns
-  `FLOWANALYST_VARIANT_MATCH_UNSUPPORTED`. A target-neutral `{tag,payload}`
-  layout remains an explicit blocker; no backend-specific carrier was added.
+- **Variant backend completion:** a target-neutral carrier now preserves
+  variant/member identity, discriminants, payload type identity, and arm-local
+  extraction facts. LLVM implements a straightforward `{i32 tag, i32 payload}`
+  representation for one-slot integer/enum payloads. Multi-field, record,
+  nested, and TinyVM payload lowering remain explicitly unsupported at the
+  backend boundary with regression gates.
+- **Variant result probe:** `variant_result_probe.flow` combines a concrete
+  `ParseResult`-style variant, payload extraction, match routing, and a guard;
+  its LLVM artifact executes successfully. Repeated concrete result shapes are
+  now generic-pressure evidence, but no generic syntax was introduced.
 
 ## Findings
 
@@ -94,12 +100,17 @@ architecture cost of a new mechanism is not justified.
 
 - **Finding:** variant payload labels previously did not survive analysis and
   lowering.
-- **Evidence:** labels now survive AST and semantic serialization; the
-  explicit Flowanalyst diagnostic rejects backend admission until layout exists.
+- **Evidence:** `variant_carriers` and `payload_bindings` survive AST,
+  semantic, prepared, and lowering artifacts; `flowmini_variant_backend`
+  executes integer and enum payload probes through LLVM and rejects larger
+  layouts with a structured Flowlower diagnostic.
 - **Why it matters:** runtime success is not backend evidence.
-- **Status:** labels IMPLEMENTED/TESTED; payload backend contract NOT SUPPORTED.
-- **Direction:** define a versioned variant operation with payload layout,
-  exhaustiveness, and provider target rules, or retain explicit unsupported.
+- **Status:** carrier and one-slot LLVM payload lowering IMPLEMENTED/TESTED;
+  multi-field/record/nested and TinyVM parity NOT SUPPORTED — BACKEND
+  LIMITATION.
+- **Direction:** add a wider target-neutral payload storage contract only when
+  a concrete structured variant program demonstrates that its complexity is
+  proportionate. Keep backend layout decisions local to each provider.
 - **Scope/risk:** medium/high IR and backend work.
 - **Dependencies:** representation ownership and target-neutral layout.
 - **Gate:** captured artifact replay across LLVM/TinyVM with negative malformed

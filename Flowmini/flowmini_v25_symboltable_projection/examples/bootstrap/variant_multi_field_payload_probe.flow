@@ -1,0 +1,11 @@
+program variant_multi_field_payload_probe
+
+variant Diagnostic {
+    failure(code : int, offset : int)
+}
+
+main {
+    result : Diagnostic(Diagnostic.failure(7, 3))
+    marker : int(1)
+    print marker
+}

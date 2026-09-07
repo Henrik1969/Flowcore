@@ -322,8 +322,41 @@ void project_statement_binding(symboltable::SymbolTable& table,
                                 block_ast_path(arm.block),
                                 make_origin(AstOriginEntityKind::Block,
                                             AstOriginRole::WhenCaseScope,
-                                            statement.location,
-                                            arm.block));
+                                        statement.location,
+                                        arm.block));
+            if (!arm.label_type.empty() && !arm.label_member.empty()) {
+                for (const auto& declaration : module.declaration_pool) {
+                    const auto* variant = std::get_if<VariantDecl>(&declaration);
+                    if (variant == nullptr || variant->name != arm.label_type) {
+                        continue;
+                    }
+                    for (const auto& member : variant->members) {
+                        if (member.name != arm.label_member) {
+                            continue;
+                        }
+                        for (const auto& field : member.fields) {
+                            const auto payloadSymbol = table.insertSymbol(
+                                armScope, field.name, symboltable::SymbolKind::Variable);
+                            set_declaration_location(table, payloadSymbol, field.location);
+                            record_symbol_origin(
+                                symbolOrigins,
+                                payloadSymbol,
+                                statement_ast_path(statementId) + ".case[" + arm.label_member + "].field[" + field.name + "]",
+                                make_origin(AstOriginEntityKind::Field,
+                                            AstOriginRole::RecordField,
+                                            field.location));
+                            add_type_spelling_fact(table, payloadSymbol,
+                                                   "declared_type_spelling", field.type);
+                            add_string_fact(table, payloadSymbol,
+                                            symboltable::FactoidKind::Custom,
+                                            "variant_payload_binding",
+                                            arm.label_type + "." + arm.label_member + "." + field.name);
+                        }
+                        break;
+                    }
+                    break;
+                }
+            }
             project_block(table, module, armScope, arm.block, symbolOrigins, scopeOrigins);
         }
         if (whenStatement->default_block < module.block_pool.size()) {

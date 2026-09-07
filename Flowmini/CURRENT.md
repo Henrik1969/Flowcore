@@ -3,7 +3,7 @@
 Current checkout status:
 
 ```text
-Flowmini v0.29 language-maturation and cross-backend parity slice
+Flowmini v0.30 canonical variant backend completion slice
 implementation directory: flowmini_v25_symboltable_projection
 ```
 
@@ -14,26 +14,30 @@ The structural frontend and normal runtime are separate paths; see the
 ## Verified status
 
 ```text
-root CTest:                         PASS (92/92)
+root CTest:                         PASS (93/93)
 AST golden tests:                   PASS (28)
 symbol projection tests:            PASS (14)
-Flowmini focused CTest:             PASS (13/13)
+Flowmini focused CTest:             PASS (14/14)
 categorized flowmini_suite:         91/140 (49 known parser/ABI/profile gaps)
-variant payload lowering:           NOT SUPPORTED — DEFERRED (labels preserved)
+variant payload lowering:           IMPLEMENTED/TESTED (LLVM i32 carrier; enum payload)
 compile-time constants:            IMPLEMENTED/TESTED (bounded deterministic expressions)
 canonical guard lowering:           IMPLEMENTED/TESTED (LLVM backend)
 std.math v0:                        IMPLEMENTED/TESTED (pure integer helpers)
 Flowbind C generator:               EXPERIMENTAL/TESTED (Clang C subset, partial artifacts)
 mature program probes:              IMPLEMENTED/TESTED (flowstats, flowconfig)
-variant carrier experiment:         EXPERIMENTAL/TESTED (explicit payload-layout blocker)
-ASan/UBSan CTest:                   91/92 (terminal_sel_pipeline environment preload failure)
+variant carrier experiment:         IMPLEMENTED/TESTED (target-neutral identity; one-slot LLVM carrier)
+multi-field/record/nested variants: NOT SUPPORTED — BACKEND LIMITATION (explicit lowering diagnostic)
+TinyVM variant payload lowering:    NOT SUPPORTED — BACKEND LIMITATION
+ASan/UBSan CTest:                   PASS (93/93; leak checks disabled)
 ```
 
 The structural chain publishes TokenTree/AST, symbol and fact projections for
 Flowanalyst, Flowbind, Flowoptimize, and Flowlower. Integer and enum match
 lowering is tested. Variant payload labels survive the AST and semantic
-artifacts, but Flowanalyst rejects variant lowering until a backend-neutral
-payload contract exists. Runtime probes cover a broader compatibility parser,
+artifacts. A target-neutral carrier now preserves variant type/member/discriminant
+and payload type identity; LLVM lowers one i32 payload slot and extracts it in
+match arms. Larger payload layouts and TinyVM remain explicit backend limits.
+Runtime probes cover a broader compatibility parser,
 including constants, guards, records, collections, enums, and variants; that
 does not establish artifact-chain parity.
 
@@ -72,7 +76,7 @@ canonical parser/semantic convergence
 target selection and multitarget artifact emission
 generic collections and broader standard library
 text/io/fs/time/net APIs and generated binding declarations
-variant payload lowering and backend parity
+multi-field variant carrier layouts and TinyVM parity
 ownership, resource, effect, and concurrency semantics
 unsafe/opaque source regions intentionally excluded; provider paperwork remains bounded work
 optimizer breadth, debugging/tooling, and self-hosting

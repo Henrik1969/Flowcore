@@ -23,10 +23,7 @@ for source in "${shared[@]}"; do
 variant="${root}/examples/bootstrap/variant_when_probe.flow"
 "${flowmini}" --dump-frontend-bundle "${variant}" > "${tmpdir}/variant.json"
 jq -e 'any(.ast.statement_pool[]?; .kind == "when" and any(.payload.cases[]?; .label_type == "DecodeOutcome" and .label_member == "scalar"))' "${tmpdir}/variant.json" >/dev/null
-if "${analyst}" --lowering-plan-version 2 "${tmpdir}/variant.json" > "${tmpdir}/variant-semantic.json"; then
-  echo "variant backend divergence was not declared" >&2
-  exit 1
-fi
-jq -e 'any(.diagnostics[]?; .code == "FLOWANALYST_VARIANT_MATCH_UNSUPPORTED")' "${tmpdir}/variant-semantic.json" >/dev/null
+"${analyst}" --lowering-plan-version 2 "${tmpdir}/variant.json" > "${tmpdir}/variant-semantic.json"
+jq -e '.status == "ok" and any(.variant_carriers[]?.members[]?; .member == "scalar" and .discriminant == 0)' "${tmpdir}/variant-semantic.json" >/dev/null
 "${flowmini}" --runtime-compat "${variant}" >/dev/null
-echo "Flow parser differential corpus: PASS (4 equivalent fixtures, 1 declared compatibility divergence)"
+echo "Flow parser differential corpus: PASS (5 equivalent fixtures)"

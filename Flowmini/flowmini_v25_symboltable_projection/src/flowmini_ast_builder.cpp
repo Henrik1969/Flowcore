@@ -884,6 +884,9 @@ namespace flowmini::ast {
                     is_main_token(token) ||
                     is_import_token(token) ||
                     is_type_token(token) ||
+                    is_record_token(token) ||
+                    is_enum_token(token) ||
+                    is_variant_token(token) ||
                     is_abi_token(token) ||
                     token.kind == flowmini::TokenKind::KeywordMain ||
                     token.kind == flowmini::TokenKind::KeywordUnit ||

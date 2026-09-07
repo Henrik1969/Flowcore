@@ -68,8 +68,9 @@ struct AbiTypeContract { std::string contract, name, repr, ownership, access, li
 struct AggregateLayout { std::string contract, name; std::vector<std::pair<std::string, std::string>> fields; };
 struct Region { std::string id, kind, status; std::vector<std::string> prerequisites; };
 struct EffectFact { int declaration = -1, symbol = -1; std::string name, effect, certainty, reason; };
+struct VariantPayloadBinding { int symbol = -1; std::string name, type; };
 struct CallSite { int expression = -1, statement = -1, scope = -1, callee_symbol = -1, write_symbol = -1; std::string callee; bool pure = false; std::set<int> reads; std::string writes; std::vector<int> arguments; std::vector<int> independent_with; };
-struct LoweringOperation { int expression = -1, statement = -1, scope = -1, block = -1, function_symbol = -1, then_block = -1, else_block = -1, body_block = -1, failure_block = -1, default_block = -1, join_block = -1, callee_symbol = -1, result_symbol = -1; std::string callee, kind, contract, library, convention, symbol, effect, parameter_types, return_type, selector_type, selector_kind, compile_time_value; std::vector<int> arguments, match_values, match_highs, match_blocks; std::vector<std::string> match_label_types, match_label_members; };
+struct LoweringOperation { int expression = -1, statement = -1, scope = -1, block = -1, function_symbol = -1, then_block = -1, else_block = -1, body_block = -1, failure_block = -1, default_block = -1, join_block = -1, callee_symbol = -1, result_symbol = -1, variant_discriminant = -1; std::string callee, kind, contract, library, convention, symbol, effect, parameter_types, return_type, selector_type, selector_kind, compile_time_value, variant_type, variant_member; std::vector<int> arguments, match_values, match_highs, match_blocks; std::vector<std::string> match_label_types, match_label_members, variant_payload_types; std::vector<std::vector<VariantPayloadBinding>> match_payload_bindings; };
 struct Callable { int symbol = -1, scope = -1, body_block = -1; bool entry = false; std::string name, return_type, availability; std::vector<std::pair<int, std::string>> parameters; };
 struct Resolution { int expression = -1, statement = -1, scope = -1, symbol = -1; std::string name; };
 
@@ -114,6 +115,7 @@ int run(const Json& bundle, int lowering_plan_version) {
     std::set<std::string> enum_types, variant_types;
     std::map<std::string, std::map<std::string, int>> enum_members;
     std::map<std::string, std::map<std::string, int>> variant_members;
+    std::map<std::string, std::map<std::string, std::vector<std::pair<std::string, std::string>>>> variant_payloads;
     for (const auto& [identity, declaration] : declarations) {
         const auto kind = text(field(*declaration, "kind"));
         if (kind == "enum") {
@@ -126,7 +128,14 @@ int run(const Json& bundle, int lowering_plan_version) {
             const auto type = text(field(*declaration, "name"));
             variant_types.insert(type);
             int tag = 0;
-            for (const auto& member : list(field(*declaration, "members"))) variant_members[type][text(field(member, "name"))] = tag++;
+            for (const auto& member : list(field(*declaration, "members"))) {
+                const auto member_name = text(field(member, "name"));
+                variant_members[type][member_name] = tag++;
+                for (const auto& payload : list(field(member, "fields"))) {
+                    variant_payloads[type][member_name].emplace_back(
+                        text(field(payload, "name")), text(field(payload, "type")));
+                }
+            }
         }
     }
     std::vector<Diagnostic> diagnostics;
@@ -369,6 +378,52 @@ int run(const Json& bundle, int lowering_plan_version) {
             break;
         }
     }
+    std::function<std::string(int)> expression_type = [&](int expression_id) -> std::string {
+        if (!expressions.count(expression_id)) return {};
+        const auto* expression = expressions.at(expression_id);
+        const auto kind = text(field(*expression, "kind"));
+        if (kind == "integer_literal") return "int";
+        if (kind == "bool_literal") return "Bool";
+        if (kind == "string_literal") return "string";
+        if (kind == "identifier") {
+            const auto found = resolved_expression_symbols.find(expression_id);
+            return found != resolved_expression_symbols.end() && symbol_types.count(found->second) ? symbol_types.at(found->second) : std::string{};
+        }
+        if (kind == "field_access") {
+            const auto* payload = field(*expression, "payload");
+            const int base = integer(field(payload, "base"));
+            const auto found = resolved_expression_symbols.find(base);
+            const auto base_type = found != resolved_expression_symbols.end() && symbol_types.count(found->second) ? symbol_types.at(found->second) : std::string{};
+            const auto member = text(field(payload, "field"));
+            if (variant_payloads.count(base_type)) {
+                for (const auto& [member_name, fields] : variant_payloads.at(base_type)) {
+                    if (member_name != member) for (const auto& [field_name, field_type] : fields) if (field_name == member) return field_type;
+                }
+            }
+            const auto enum_found = enum_members.find(base_type);
+            if (enum_found != enum_members.end() && enum_found->second.count(member)) return base_type;
+            return {};
+        }
+        if (kind == "call") {
+            const int base = integer(field(field(*expression, "payload"), "base"));
+            if (expressions.count(base) && text(field(*expressions.at(base), "kind")) == "field_access") {
+                const auto* base_payload = field(*expressions.at(base), "payload");
+                const int type_expression = integer(field(base_payload, "base"));
+                const auto type_name = expressions.count(type_expression) && text(field(*expressions.at(type_expression), "kind")) == "identifier"
+                    ? text(field(field(*expressions.at(type_expression), "payload"), "name")) : std::string{};
+                const auto member = text(field(base_payload, "field"));
+                if (variant_members.count(type_name) && variant_members.at(type_name).count(member)) return type_name;
+            }
+            const auto found = resolved_expression_symbols.find(base);
+            return found != resolved_expression_symbols.end() && symbol_types.count(found->second) ? symbol_types.at(found->second) : std::string{};
+        }
+        if (kind == "binary") {
+            const auto op = text(field(field(*expression, "payload"), "operator"));
+            return (op == "==" || op == "!=" || op == "<" || op == "<=" || op == ">" || op == ">=") ? "Bool" : "int";
+        }
+        if (kind == "unary") return expression_type(integer(field(field(*expression, "payload"), "operand")));
+        return {};
+    };
     for (const auto& [expression_id, expression] : expressions) if (text(field(*expression, "kind")) == "field_access") {
         const auto* payload = field(*expression, "payload");
         const int base = integer(field(*payload, "base"));
@@ -603,6 +658,43 @@ int run(const Json& bundle, int lowering_plan_version) {
             }
         }
         operation.arguments.push_back(initializer);
+        if (expressions.count(initializer) && text(field(*expressions.at(initializer), "kind")) == "call") {
+            const auto* call_payload = field(*expressions.at(initializer), "payload");
+            const int base = integer(field(call_payload, "base"));
+            if (expressions.count(base) && text(field(*expressions.at(base), "kind")) == "field_access") {
+                const auto* member_payload = field(*expressions.at(base), "payload");
+                const int type_expression = integer(field(member_payload, "base"));
+                const auto variant_type = expressions.count(type_expression) && text(field(*expressions.at(type_expression), "kind")) == "identifier"
+                    ? text(field(field(*expressions.at(type_expression), "payload"), "name")) : std::string{};
+                const auto variant_member = text(field(member_payload, "field"));
+                if (variant_members.count(variant_type) && variant_members.at(variant_type).count(variant_member)) {
+                    operation.kind = "variant_construct";
+                    operation.variant_type = variant_type;
+                    operation.variant_member = variant_member;
+                    operation.variant_discriminant = variant_members.at(variant_type).at(variant_member);
+                    for (const auto& [field_name, field_type] : variant_payloads.at(variant_type).at(variant_member)) {
+                        static_cast<void>(field_name);
+                        operation.variant_payload_types.push_back(field_type);
+                    }
+                    const auto arguments = list(field(call_payload, "arguments"));
+                    operation.arguments.clear();
+                    for (const auto& argument : arguments) operation.arguments.push_back(integer(&argument));
+                    if (operation.arguments.size() != operation.variant_payload_types.size()) {
+                        add_diagnostic("FLOWANALYST_VARIANT_PAYLOAD_ARITY",
+                                       "variant member '" + variant_type + "." + variant_member + "' payload count does not match its declaration",
+                                       result_symbol, "statement:" + std::to_string(statement_id));
+                    }
+                    for (std::size_t index = 0; index < operation.arguments.size() && index < operation.variant_payload_types.size(); ++index) {
+                        const auto actual_type = expression_type(operation.arguments[index]);
+                        if (!actual_type.empty() && actual_type != operation.variant_payload_types[index]) {
+                            add_diagnostic("FLOWANALYST_VARIANT_PAYLOAD_TYPE",
+                                           "variant member '" + variant_type + "." + variant_member + "' payload type does not match its declaration",
+                                           result_symbol, "statement:" + std::to_string(statement_id));
+                        }
+                    }
+                }
+            }
+        }
         lowering_operations.push_back(std::move(operation));
     }
     for (const auto& [statement_id, statement] : statements) {
@@ -671,8 +763,26 @@ int run(const Json& bundle, int lowering_plan_version) {
             operation.match_values.push_back(integer(field(arm, "value")));
             operation.match_highs.push_back(integer(field(arm, "high")));
             operation.match_blocks.push_back(integer(field(arm, "block")));
-            operation.match_label_types.push_back(text(field(arm, "label_type")));
-            operation.match_label_members.push_back(text(field(arm, "label_member")));
+            const auto label_type = text(field(arm, "label_type"));
+            const auto label_member = text(field(arm, "label_member"));
+            operation.match_label_types.push_back(label_type);
+            operation.match_label_members.push_back(label_member);
+            std::vector<VariantPayloadBinding> bindings;
+            const int arm_block = integer(field(arm, "block"));
+            const int arm_scope = block_scopes.count(arm_block) ? block_scopes.at(arm_block) : -1;
+            if (operation.selector_kind == "variant" && arm_scope >= 0) {
+                const auto prefix = label_type + "." + label_member + ".";
+                for (const auto& candidate : list(field(*scopes.at(arm_scope), "symbol_ids"))) {
+                    const int candidate_id = integer(&candidate);
+                    if (!symbols.count(candidate_id)) continue;
+                    const auto binding = fact_value(*symbols.at(candidate_id), "variant_payload_binding");
+                    if (binding.rfind(prefix, 0) == 0) {
+                        bindings.push_back({candidate_id, text(field(*symbols.at(candidate_id), "name")), symbol_types.count(candidate_id) ? symbol_types.at(candidate_id) : std::string{}});
+                    }
+                }
+                std::sort(bindings.begin(), bindings.end(), [](const auto& left, const auto& right) { return left.name < right.name; });
+            }
+            operation.match_payload_bindings.push_back(std::move(bindings));
         }
         lowering_operations.push_back(std::move(operation));
     }
@@ -741,14 +851,6 @@ int run(const Json& bundle, int lowering_plan_version) {
         for (auto& region : regions) if (region.id == "scope:" + std::to_string(resolution.scope) && region_id != region.id) region.prerequisites.push_back(region_id);
     }
     for (auto& region : regions) { std::sort(region.prerequisites.begin(), region.prerequisites.end()); region.prerequisites.erase(std::unique(region.prerequisites.begin(), region.prerequisites.end()), region.prerequisites.end()); }
-    for (const auto& operation : lowering_operations) {
-        if (operation.kind == "match" && operation.selector_kind == "variant") {
-            add_diagnostic("FLOWANALYST_VARIANT_MATCH_UNSUPPORTED",
-                           "variant match lowering is not admitted until a target-neutral payload contract exists",
-                           -1,
-                           "statement:" + std::to_string(operation.statement));
-        }
-    }
     for (const auto& diagnostic : diagnostics) for (auto& region : regions) if (region.id == diagnostic.region) region.status = "rejected";
     std::map<std::string, int> region_index;
     for (std::size_t index = 0; index < regions.size(); ++index) region_index[regions[index].id] = static_cast<int>(index);
@@ -847,6 +949,39 @@ int run(const Json& bundle, int lowering_plan_version) {
             const auto base = integer(field(payload, "base"));
             const auto type = expressions.count(base) && text(field(*expressions.at(base), "kind")) == "identifier"
                 ? text(field(field(*expressions.at(base), "payload"), "name")) : std::string{};
+            const int base_symbol = resolved_expression_symbols.count(base) ? resolved_expression_symbols.at(base) : -1;
+            const auto base_type = symbol_types.count(base_symbol) ? symbol_types.at(base_symbol) : std::string{};
+            if (variant_payloads.count(base_type)) {
+                std::string payload_type;
+                std::string payload_member;
+                int discriminant = -1;
+                for (const auto& [member_name, fields] : variant_payloads.at(base_type)) {
+                    for (const auto& [field_name, field_type] : fields) {
+                        if (field_name == member) {
+                            if (!payload_type.empty()) {
+                                add_diagnostic("FLOWANALYST_VARIANT_PAYLOAD_AMBIGUOUS",
+                                               "variant payload field '" + member + "' is ambiguous for type '" + base_type + "'",
+                                               base_symbol, "expression:" + std::to_string(expression_id));
+                            }
+                            payload_type = field_type;
+                            payload_member = member_name;
+                            discriminant = variant_members.at(base_type).at(member_name);
+                        }
+                    }
+                }
+                if (!payload_type.empty()) {
+                    std::cout << ",\"type\":" << quote(payload_type)
+                              << ",\"variant_type\":" << quote(base_type)
+                              << ",\"variant_member\":" << quote(payload_member)
+                              << ",\"discriminant\":" << discriminant
+                              << ",\"payload_field\":" << quote(member)
+                              << ",\"selector_symbol_id\":" << base_symbol
+                              << ",\"provenance\":{\"source\":\"variant\",\"member\":" << quote(base_type + "." + payload_member)
+                              << "}";
+                    std::cout << "}";
+                    return;
+                }
+            }
             const auto found_type = enum_members.find(type);
             if (found_type == enum_members.end() || !found_type->second.count(member)) std::cout << ",\"type\":\"unsupported\"";
             else std::cout << ",\"type\":\"int\",\"value\":\"" << found_type->second.at(member) << "\"";
@@ -935,14 +1070,29 @@ int run(const Json& bundle, int lowering_plan_version) {
         std::cout << "],\"operands\":[";
         for (std::size_t argument = 0; argument < operation.arguments.size(); ++argument) {
             if (argument) std::cout << ',';
-            const auto declared_type = (operation.kind == "value_definition" || operation.kind == "assignment") && operation.result_symbol >= 0 && symbol_types.count(operation.result_symbol)
-                ? symbol_types.at(operation.result_symbol) : std::string{};
+            std::string declared_type;
+            if (operation.kind == "variant_construct" && argument < operation.variant_payload_types.size()) {
+                declared_type = operation.variant_payload_types[argument];
+            } else if ((operation.kind == "value_definition" || operation.kind == "assignment") && operation.result_symbol >= 0 && symbol_types.count(operation.result_symbol)) {
+                declared_type = symbol_types.at(operation.result_symbol);
+            }
             emit_operand(operation.arguments[argument], declared_type);
         }
         std::cout << "]";
         if (operation.result_symbol >= 0) std::cout << ",\"result_symbol_id\":" << operation.result_symbol;
         if (operation.kind == "value_definition" && !operation.compile_time_value.empty()) {
             std::cout << ",\"evaluation\":\"compile_time\",\"compile_time_value\":" << quote(operation.compile_time_value);
+        }
+        if (operation.kind == "variant_construct") {
+            std::cout << ",\"variant_type\":" << quote(operation.variant_type)
+                      << ",\"variant_member\":" << quote(operation.variant_member)
+                      << ",\"variant_discriminant\":" << operation.variant_discriminant
+                      << ",\"payload_types\":[";
+            for (std::size_t index = 0; index < operation.variant_payload_types.size(); ++index) {
+                if (index) std::cout << ',';
+                std::cout << quote(operation.variant_payload_types[index]);
+            }
+            std::cout << "]";
         }
         if (operation.kind == "branch") std::cout << ",\"then_block_id\":" << operation.then_block << ",\"else_block_id\":" << operation.else_block;
         if (operation.kind == "guard") std::cout << ",\"failure_block_id\":" << operation.failure_block << ",\"join_block_id\":" << operation.join_block;
@@ -959,6 +1109,17 @@ int run(const Json& bundle, int lowering_plan_version) {
                 if (arm < operation.match_label_types.size() && !operation.match_label_types[arm].empty()) {
                     std::cout << ",\"label_type\":" << quote(operation.match_label_types[arm])
                               << ",\"label_member\":" << quote(operation.match_label_members[arm]);
+                }
+                if (arm < operation.match_payload_bindings.size() && !operation.match_payload_bindings[arm].empty()) {
+                    std::cout << ",\"payload_bindings\":[";
+                    for (std::size_t binding = 0; binding < operation.match_payload_bindings[arm].size(); ++binding) {
+                        if (binding) std::cout << ',';
+                        const auto& item = operation.match_payload_bindings[arm][binding];
+                        std::cout << "{\"symbol_id\":" << item.symbol
+                                  << ",\"name\":" << quote(item.name)
+                                  << ",\"type\":" << quote(item.type) << "}";
+                    }
+                    std::cout << "]";
                 }
                 std::cout << "}";
             }
@@ -1040,10 +1201,58 @@ int run(const Json& bundle, int lowering_plan_version) {
                 std::cout << ",\"label_type\":" << quote(text(label));
                 if (const auto* member = field(arm, "label_member")) std::cout << ",\"label_member\":" << quote(text(member));
             }
+            const LoweringOperation* match_operation = nullptr;
+            for (const auto& candidate : lowering_operations) {
+                if (candidate.kind == "match" && candidate.statement == statement_id) {
+                    match_operation = &candidate;
+                    break;
+                }
+            }
+            if (match_operation != nullptr && index < match_operation->match_payload_bindings.size() &&
+                !match_operation->match_payload_bindings[index].empty()) {
+                std::cout << ",\"payload_bindings\": [";
+                const auto& bindings = match_operation->match_payload_bindings[index];
+                for (std::size_t binding = 0; binding < bindings.size(); ++binding) {
+                    if (binding) std::cout << ',';
+                    std::cout << "{\"symbol_id\":" << bindings[binding].symbol
+                              << ",\"name\":" << quote(bindings[binding].name)
+                              << ",\"type\":" << quote(bindings[binding].type) << "}";
+                }
+                std::cout << "]";
+            }
             std::cout << "}";
         }
         std::cout << "] ,\"default_block_id\":" << integer(field(payload, "default_block"))
                   << ",\"join_block_id\":" << containing_block(statement_id) << "}";
+    }
+    std::cout << "],\n  \"variant_carriers\": [";
+    bool first_variant = true;
+    for (const auto& [variant_type, members] : variant_payloads) {
+        if (!first_variant) std::cout << ',';
+        first_variant = false;
+        std::cout << "{\"variant_type\":" << quote(variant_type) << ",\"members\":[";
+        bool first_member = true;
+        for (const auto& [member_name, fields] : members) {
+            if (!first_member) std::cout << ',';
+            first_member = false;
+            std::cout << "{\"member\":" << quote(member_name)
+                      << ",\"discriminant\":" << variant_members.at(variant_type).at(member_name)
+                      << ",\"payload_fields\":[";
+            for (std::size_t field_index = 0; field_index < fields.size(); ++field_index) {
+                if (field_index) std::cout << ',';
+                std::cout << "{\"name\":" << quote(fields[field_index].first)
+                          << ",\"type\":" << quote(fields[field_index].second) << "}";
+            }
+            std::cout << "]}";
+        }
+        std::cout << "]}";
+    }
+    std::cout << "],\n  \"enum_types\":[";
+    bool first_enum_type = true;
+    for (const auto& enum_type : enum_types) {
+        if (!first_enum_type) std::cout << ',';
+        first_enum_type = false;
+        std::cout << quote(enum_type);
     }
     std::cout << "],\n  \"effect_facts\": [";
     for (std::size_t i = 0; i < effect_facts.size(); ++i) { if (i) std::cout << ','; const auto& fact = effect_facts[i]; std::cout << "{\"declaration_id\":" << fact.declaration << ",\"symbol_id\":" << fact.symbol << ",\"name\":" << quote(fact.name) << ",\"effect\":" << quote(fact.effect) << ",\"certainty\":" << quote(fact.certainty) << ",\"reason\":" << quote(fact.reason) << "}"; }
