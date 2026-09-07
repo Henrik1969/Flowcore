@@ -23,7 +23,7 @@ constexpr std::string_view VERSION = "0.1.0";
 struct Requirement { std::string contract, library, convention, symbol, effect, parameter_types, return_type; };
 struct Grant { std::string library, symbol, convention, effect, parameter_types, return_type; bool exact_signature = false; };
 
-struct Options { std::string report_path, policy_path, abi_manifest_path; };
+struct Options { std::string report_path, policy_path, abi_manifest_path, resolution = "dynamic"; };
 
 using Json = flowcontracts::json::Value;
 using JsonArray = flowcontracts::json::Array;
@@ -68,6 +68,11 @@ Options parse_options(int argc, char** argv) {
         } else if (argument == "--abi-manifest") {
             if (++i >= argc) throw std::runtime_error("--abi-manifest requires a path");
             options.abi_manifest_path = argv[i];
+        } else if (argument == "--resolution") {
+            if (++i >= argc) throw std::runtime_error("--resolution requires linked or dynamic");
+            options.resolution = argv[i];
+            if (options.resolution != "linked" && options.resolution != "dynamic")
+                throw std::runtime_error("--resolution must be linked or dynamic");
         } else if (argument == "-h" || argument == "--help" || argument == "-?" || argument == "-a" || argument == "--about" || argument == "-v" || argument == "--version") {
             continue;
         } else if (!argument.empty() && argument.front() == '-') {
@@ -386,7 +391,7 @@ bool manifest_verifies_aggregates(const std::string& report, const std::string& 
     return true;
 }
 
-int verify(const std::string& report, const std::string& policy_path, const std::string& abi_manifest_path) {
+int verify(const std::string& report, const std::string& policy_path, const std::string& abi_manifest_path, const std::string& resolution) {
     const auto public_header = flowcontracts::require_header(flowcontracts::json::parse(report), "flowanalyst.semantic_report", 1);
     if (public_header.status != "ok") {
         std::cout << "{\n  \"format\": \"flowbind.binding_report\",\n  \"version\": 1,\n  \"status\": \"blocked\",\n  \"reason\": \"semantic report is not ready\"\n}\n";
@@ -430,14 +435,14 @@ int verify(const std::string& report, const std::string& policy_path, const std:
     }
     for (const auto& [library, handle] : handles) if (handle) dlclose(handle);
     if (!failures.empty()) {
-        std::cout << "{\n  \"format\": \"flowbind.binding_report\",\n  \"version\": 1,\n  \"status\": \"blocked\",\n  \"provider\": \"dlopen+dlsym\",\n  \"failures\": [";
+        std::cout << "{\n  \"format\": \"flowbind.binding_report\",\n  \"version\": 1,\n  \"status\": \"blocked\",\n  \"provider\": {\"name\": \"dlopen+dlsym\", \"resolution\": " << json_string(resolution) << "},\n  \"failures\": [";
         for (std::size_t i = 0; i < failures.size(); ++i) { if (i) std::cout << ','; std::cout << '"' << failures[i] << '"'; }
         std::cout << "]";
         if (aggregate_manifest_verified) std::cout << ",\n  \"aggregate_abi\": \"verified\"";
         std::cout << "\n}\n";
         return 2;
     }
-    std::cout << "{\n  \"format\": \"flowbind.binding_report\",\n  \"version\": 1,\n  \"status\": \"ready\",\n  \"provider\": {\"name\": \"dlopen+dlsym\", \"requirements\": " << needed.size() << "},\n  \"symbols\": [";
+    std::cout << "{\n  \"format\": \"flowbind.binding_report\",\n  \"version\": 1,\n  \"status\": \"ready\",\n  \"provider\": {\"name\": \"dlopen+dlsym\", \"resolution\": " << json_string(resolution) << ", \"requirements\": " << needed.size() << "},\n  \"symbols\": [";
     for (std::size_t i = 0; i < needed.size(); ++i) { if (i) std::cout << ','; std::cout << '"' << needed[i].symbol << '"'; }
     std::cout << "],\n  \"capabilities\": [";
     for (std::size_t i = 0; i < needed.size(); ++i) {
@@ -478,6 +483,6 @@ int main(int argc, char** argv) {
             if (option == "-a" || option == "--about") { std::cout << "Flowbind verifies declared external libraries and symbols without executing them.\nMore help: Flowbind/README.md\n"; return 0; }
             if (option == "-v" || option == "--version") { std::cout << VERSION << '\n'; return 0; }
         }
-        return verify(read_input(options), options.policy_path, options.abi_manifest_path);
+        return verify(read_input(options), options.policy_path, options.abi_manifest_path, options.resolution);
     } catch (const std::exception& error) { std::cerr << "flowbind error: " << error.what() << '\n'; return 1; }
 }

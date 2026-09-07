@@ -43,6 +43,10 @@ printf '%s\n' "$report" | grep -q '"execution": "not-performed"'
 printf '%s\n' "$report" | grep -q '"carrier_types_supported": true'
 printf '%s\n' "$report" | grep -q '"provider_signature_evidence": "not-provided"'
 
+linked_report=$("$flowmini" --dump-frontend-bundle "$fixture" | "$flowanalyst" | "$bin" --policy "$policy" --resolution linked)
+printf '%s\n' "$linked_report" | jq -e '.status == "ready" and .provider.resolution == "linked"' >/dev/null
+printf '%s\n' "$report" | jq -e '.provider.resolution == "dynamic"' >/dev/null
+
 set +e
 wrong_signature=$(printf '%s' '{"format":"flowanalyst.semantic_report","version":1,"status":"ok","binding_requirements":[{"contract":"bad","library":"libc.so.6","convention":"c","symbol":"strlen","effect":"pure","parameter_types":"c_string","return_type":"c_int"}]}' | "$bin" --policy "$policy")
 wrong_signature_rc=$?

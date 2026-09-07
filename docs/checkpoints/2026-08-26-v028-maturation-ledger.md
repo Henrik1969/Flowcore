@@ -836,3 +836,13 @@ later instruction reopens them.
   contract supports them.
 - Updated the Programmer's Guide, Flowmini current status, and evidence ledger
   to distinguish this tested slice from a complete standard library.
+
+## 2026-09-07 binding resolution policy checkpoint
+
+- Flowbind now accepts `--resolution dynamic|linked` and records the selected
+  deployment mode in `provider.resolution` while retaining host-loader
+  verification for both modes. This keeps one semantic binding contract for
+  runtime loading and conventional linking; final linking remains the build
+  provider's responsibility.
+- Flowbind provider tests cover both modes and continue to reject missing
+  symbols, policy mismatches, and unsupported ABI declarations.

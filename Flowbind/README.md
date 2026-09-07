@@ -22,6 +22,18 @@ Ready reports also contain a `capabilities` array. Each entry preserves the
 declared contract, provider library, symbol, calling convention, effect, ABI
 types, and authorization status for downstream inspectors and lowerers.
 
+Resolution is an explicit deployment policy on the same binding contract:
+
+```text
+flowbind --resolution dynamic report.json   # runtime provider loading
+flowbind --resolution linked report.json    # conventional link-time artifact
+```
+
+Both modes use the host loader during verification so missing libraries,
+symbols, and unsupported declarations are rejected before lowering. The
+`provider.resolution` field records the intended deployment mode; Flowbind
+does not perform the final static link and does not execute a foreign call.
+
 An optional `--abi-manifest manifest.json` consumes provider-owned aggregate
 layout evidence. Flowbind reports `aggregate_abi: verified` when the manifest
 matches the semantic aggregate declaration, but aggregate calls remain blocked
