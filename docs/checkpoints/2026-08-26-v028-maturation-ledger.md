@@ -846,3 +846,14 @@ later instruction reopens them.
   provider's responsibility.
 - Flowbind provider tests cover both modes and continue to reject missing
   symbols, policy mismatches, and unsupported ABI declarations.
+
+## 2026-09-07 canonical evidence report checkpoint
+
+- Full root CTest passes 88/88, including the new constants, guard backend,
+  std.math, and binding-mode gates. Focused Flowmini CTest passes 11/11.
+- The evidence reporter now runs focused CTest from the root superbuild's
+  `build/flowmini` directory and invokes the categorized runner with explicit
+  root/build paths. It reports the current categorized inventory mechanically:
+  91 pass / 140 total / 49 known gaps.
+- No historical checkpoint counts were rewritten; current indexes now point to
+  the verified 88/88 and 91/140 evidence.

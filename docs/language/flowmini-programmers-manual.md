@@ -233,7 +233,7 @@ Use focused tests while learning, then run `ctest --test-dir build
 --output-on-failure`. The current root build and focused suite are green after
 the semantic JSON producer fix and the parser/const/guard/provider gates. The
 categorized `flowmini_suite` remains an honest maturity signal: its present
-fixture inventory is 87/136, with 49 expected-pass examples exposing parser,
+fixture inventory is 91/140, with 49 expected-pass examples exposing parser,
 ABI, and profile gaps.
 
 ## Compact reference

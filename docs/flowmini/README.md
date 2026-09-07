@@ -14,10 +14,10 @@ historical directory name)
 Current baseline:
 
 ```text
-root CTest: PASS (85/85)
+root CTest: PASS (88/88)
 AST golden tests: 28 PASS
 Symbol projection tests: 14 PASS
-categorized Flowmini fixture suite: 87/136 (49 known gaps)
+categorized Flowmini fixture suite: 91/140 (49 known gaps)
 ```
 
 Current architecture checkpoint:

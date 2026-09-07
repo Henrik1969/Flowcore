@@ -14,11 +14,11 @@ The structural frontend and normal runtime are separate paths; see the
 ## Verified status
 
 ```text
-root CTest:                         PASS (87/87)
+root CTest:                         PASS (88/88)
 AST golden tests:                   PASS (28)
 symbol projection tests:            PASS (14)
-Flowmini focused CTest:             PASS (10/10)
-categorized flowmini_suite:         87/136 (49 known parser/ABI/profile gaps)
+Flowmini focused CTest:             PASS (11/11)
+categorized flowmini_suite:         91/140 (49 known parser/ABI/profile gaps)
 variant payload lowering:           NOT SUPPORTED — DEFERRED (labels preserved)
 compile-time constants:            IMPLEMENTED/TESTED (bounded deterministic expressions)
 canonical guard lowering:           IMPLEMENTED/TESTED (LLVM backend)

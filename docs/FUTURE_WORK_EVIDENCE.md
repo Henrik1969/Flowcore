@@ -20,7 +20,8 @@ architecture cost of a new mechanism is not justified.
   Flowanalyst producer and the UTF-8 flow probe now validates it successfully.
 - **Evidence reporting:** `tools/report-flowmini-test-status.sh` emits a
   versioned JSON and Markdown projection of root CTest, focused CTest, and the
-  categorized suite. Tests remain authoritative.
+  categorized suite. The current report is 88/88 root, 11/11 focused, and
+  91/140 categorized (49 known gaps). Tests remain authoritative.
 - **Unsafe policy:** unsafe regions, inline assembly, and embedded foreign
   source are **NOT SUPPORTED — INTENTIONALLY EXCLUDED**. External unsafe work
   must arrive as a declared provider/ABI artifact with boundary paperwork.
@@ -89,7 +90,7 @@ architecture cost of a new mechanism is not justified.
 ### TESTING/DOCUMENTATION — reconcile maturity counts
 
 - **Finding:** stale docs claim v0.25/v0.27 and 78/78 while current fixture
-  inventory is 87/136.
+  inventory is 91/140.
 - **Evidence:** `Flowmini/CURRENT.md`, `docs/flowmini/README.md`, and manual
   disagree with v0.29 and current `flowmini_suite`; the pre-remedy root CTest evidence was 81/82.
 - **Why it matters:** readiness claims need reproducible evidence.
