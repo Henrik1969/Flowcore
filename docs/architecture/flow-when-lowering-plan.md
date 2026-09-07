@@ -47,10 +47,11 @@ all non-terminating arms at `join_block_id`.
 The migration is staged: Flowanalyst emits integer `match` operations alongside
 existing `branch` operations; Flowparallel and Flowoptimize preserve their case
 order and identity; Flowlower emits inclusive integer comparisons and explicit
-case/default/join edges in both LLVM and TinyVM. Named enum and tagged-variant matches remain admitted
-to the semantic contract but are rejected by the LLVM emitter until their tag
-and payload representation is target-neutral. Existing `branch` remains
-canonical for Boolean `if` and `guard`.
+case/default/join edges in both LLVM and TinyVM. Named enum matches are admitted
+to the semantic contract. Tagged-variant labels are preserved in the artifacts,
+but Flowanalyst rejects variant lowering until their tag and payload
+representation is target-neutral. Boolean `if` uses `branch`; `guard` retains
+its dedicated frontend identity and failure-block provenance.
 
 Variant routing follows a separate boundary. The target-neutral representation
 is a discriminant integer plus an arm-local payload record:
