@@ -812,3 +812,15 @@ later instruction reopens them.
   const/guard gates pass 3/3. Variant backend parity remains explicitly
   deferred pending a target-neutral payload contract; no backend claim was
   widened by this checkpoint.
+
+## 2026-09-07 guard backend contract correction
+
+- Guard failure blocks with ordinary lowering operations remain admitted.
+  Failure blocks containing runtime-only expression forms (for example
+  `print`) are no longer rejected by Flowanalyst's semantic stage; Flowlower
+  now rejects an empty failure block explicitly instead of silently erasing
+  the failure path. This preserves the distinction between semantic analysis
+  and backend capability while preventing false backend success.
+- Added nested `when` case/default block ownership propagation alongside guard
+  blocks, so all nested operations retain their enclosing function identity.
+- Focused UTF-8, const, guard semantics, and guard backend gates pass 4/4.

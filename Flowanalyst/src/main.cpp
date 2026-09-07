@@ -748,17 +748,6 @@ int run(const Json& bundle, int lowering_plan_version) {
                            -1,
                            "statement:" + std::to_string(operation.statement));
         }
-        if (operation.kind == "guard") {
-            const bool has_lowerable_failure = std::any_of(lowering_operations.begin(), lowering_operations.end(), [&](const auto& candidate) {
-                return candidate.block == operation.failure_block && candidate.kind != "guard";
-            });
-            if (!has_lowerable_failure) {
-                add_diagnostic("FLOWANALYST_GUARD_BACKEND_UNSUPPORTED",
-                               "guard failure block has no lowerable operation in the current backend contract",
-                               -1,
-                               "statement:" + std::to_string(operation.statement));
-            }
-        }
     }
     for (const auto& diagnostic : diagnostics) for (auto& region : regions) if (region.id == diagnostic.region) region.status = "rejected";
     std::map<std::string, int> region_index;

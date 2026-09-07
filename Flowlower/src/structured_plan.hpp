@@ -275,6 +275,9 @@ private:
             }
         }
         for(const auto& [block,ops]:blocks_) if(!ops.empty()&&!reachable.count(block)) invalid_control_=true;
+        for(const auto& op : operations_)
+            if (op.kind == "guard" && (!blocks_.count(op.failure_block) || blocks_.at(op.failure_block).empty()))
+                unsupported_ = true;
         const Json* authorization = nullptr;
         if (text(field(binding_,"format"))=="flowbind.binding_report" && text(field(binding_,"status"))=="ready") authorization = &binding_;
         else if (format == "flowcore.backend_lowering_artifact") authorization = field(root_, "authorization");
