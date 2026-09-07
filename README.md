@@ -128,7 +128,7 @@ cmake --build /tmp/flowcore-build
 ctest --test-dir /tmp/flowcore-build --output-on-failure
 ```
 
-The clean root build currently registers 78 tests, including the larger
+The clean root build currently registers 79 tests, including the larger
 integration corpus, pipeline matrix, pass corpus, sibling CTest suites, CUDA
 provider contracts, and Frankencore conformance probes.
 
@@ -171,7 +171,7 @@ CTest:                         PASS (2/2)
 For the complete root build, the current result is:
 
 ```text
-root CTest:                    PASS (78/78)
+root CTest:                    PASS (79/79)
 integration corpus:            PASS (3/3)
 pipeline matrix:               PASS (7 accepted, 2 semantic-only, 1 blocked)
 pass corpus:                   PASS (91 programs)

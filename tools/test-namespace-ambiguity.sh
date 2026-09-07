@@ -41,7 +41,7 @@ main {
 EOF
 "$flowmini" --dump-frontend-bundle "$tmpdir/single.flow" |
     "$analyst" > "$tmpdir/single.json"
-jq -e '.status == "ok" and any(.lowering_plan.operations[]; .kind == "call" and .callee == "shared")' "$tmpdir/single.json" >/dev/null
+jq -e '.status == "ok" and any(.lowering_plan.operations[]; .kind == "external_call" and .callee == "shared" and .provider.contract == "first" and .provider.symbol == "puts")' "$tmpdir/single.json" >/dev/null
 
 for count in 2 3 4; do
     imports="import \"$tmpdir/first.flow\"\nimport \"$tmpdir/second.flow\""
@@ -86,5 +86,8 @@ EOF
 "$flowmini" --dump-frontend-bundle "$tmpdir/qualified.flow" |
     "$analyst" > "$tmpdir/qualified.json"
 jq -e '.status == "ok" and (.diagnostics | length) == 0 and ((.lowering_plan.operations | map(select(.callee == "first.shared" or .callee == "second.shared" or .callee == "third.shared" or .callee == "fourth.shared")) | length) == 4)' "$tmpdir/qualified.json" >/dev/null
+
+jq -e '[.lowering_plan.operations[] | select(.kind == "external_call") | .provider.contract] == ["first", "second", "third", "fourth"] and
+    [.lowering_plan.operations[] | select(.kind == "external_call") | .provider.parameter_types] == ["first_string", "second_string", "third_string", "fourth_string"]' "$tmpdir/qualified.json" >/dev/null
 
 printf '%s\n' 'Namespace ambiguity (one through four providers): PASS'

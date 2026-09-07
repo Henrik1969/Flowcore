@@ -39,3 +39,10 @@ and emits the complete callable boundary with
 source-name dispatch. The default changes only after both backend consumers
 pass the callable parity corpus, preserving existing captured pipelines while
 the new file contract is independently testable.
+
+LLVM callable names now derive from stable symbol identity (`flow.function.ID`),
+keeping Flow function names separate from native C symbols. A source `abs`
+function can coexist with an exactly authorized native `abs` declaration. Multiple
+authorized contracts sharing one library and LLVM ABI share one native declaration;
+conflicting library or ABI declarations for a single native symbol are explicitly
+unsupported until provider-specific link resolution is implemented.

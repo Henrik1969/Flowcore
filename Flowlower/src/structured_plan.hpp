@@ -251,12 +251,24 @@ private:
         }
     }
     void emit_declarations(std::ostringstream& out) const {
+        std::map<std::string, std::pair<std::string, std::string>> native_symbols;
         for (const auto& p:providers_) {
             if (!c_symbol(p.symbol) || llvm_type(p.result).empty()) throw std::runtime_error("unsupported structured provider ABI");
-            out << "declare "<<llvm_type(p.result)<<" @"<<p.symbol<<"("; const auto params=carriers(p.parameters);
-            for (std::size_t i=0;i<params.size();++i) { if(i) out<<", "; const auto type=llvm_type(params[i]); if(type.empty()) throw std::runtime_error("unsupported structured parameter carrier"); out<<type; }
-            out << ")\n";
+            if (p.symbol == "main") throw std::runtime_error("external symbol conflicts with native entry point");
+            std::ostringstream declaration;
+            declaration << "declare "<<llvm_type(p.result)<<" @"<<p.symbol<<"("; const auto params=carriers(p.parameters);
+            for (std::size_t i=0;i<params.size();++i) { if(i) declaration<<", "; const auto type=llvm_type(params[i]); if(type.empty()) throw std::runtime_error("unsupported structured parameter carrier"); declaration<<type; }
+            declaration << ")\n";
+            const auto identity = std::make_pair(p.library + ":" + p.convention, declaration.str());
+            const auto [found, inserted] = native_symbols.emplace(p.symbol, identity);
+            if (!inserted && found->second != identity)
+                throw std::runtime_error("native symbol has conflicting provider libraries or ABI declarations: " + p.symbol);
+            if (inserted) out << declaration.str();
         }
+    }
+    static std::string callable_name(const Callable& function) {
+        if (function.symbol < 0) throw std::runtime_error("invalid callable symbol identity");
+        return function.entry ? "main" : "flow.function." + std::to_string(function.symbol);
     }
     void emit_allocations(std::ostringstream& out) const {
         for (const auto& [symbol,type]:symbol_types_) { const auto llvm=llvm_type(type); if(!llvm.empty()) out<<"  "<<slot(symbol)<<" = alloca "<<llvm<<", align "<<(llvm=="i32"?4:8)<<"\n"; }
@@ -269,8 +281,8 @@ private:
     }
     void emit_function(const Callable& function,std::ostringstream& out) {
         temporary_=0; label_=0; call_results_.clear();
-        const auto name=function.entry?"main":function.name;
-        if(!c_symbol(name)||llvm_type(function.result)!="i32")throw std::runtime_error("unsupported callable function signature");
+        const auto name=callable_name(function);
+        if(llvm_type(function.result)!="i32")throw std::runtime_error("unsupported callable function signature");
         out<<"define i32 @"<<name<<"(";
         for(std::size_t index=0;index<function.parameters.size();++index){if(index)out<<", ";const auto type=llvm_type(function.parameters[index].second);if(type.empty())throw std::runtime_error("unsupported callable parameter type");out<<type<<" %flow_arg_"<<function.parameters[index].first;}
         out<<") {\nentry:\n"; emit_allocations(out);
@@ -359,7 +371,7 @@ private:
                 if(operands.size()!=function.parameters.size())throw std::runtime_error("ordinary call operand count mismatch");
                 std::vector<std::pair<std::string,std::string>> args;
                 for(std::size_t index=0;index<operands.size();++index)args.push_back(expression(operands[index],out,function.parameters[index].second));
-                const auto result="%flow_call_"+std::to_string(op->id); out<<"  "<<result<<" = call i32 @"<<function.name<<"(";
+                const auto result="%flow_call_"+std::to_string(op->id); out<<"  "<<result<<" = call i32 @"<<callable_name(function)<<"(";
                 for(std::size_t index=0;index<args.size();++index){if(index)out<<", ";out<<args[index].first<<" "<<args[index].second;}out<<")\n";
                 call_results_[op->expression]={"i32",result};
                 if(op->result_symbol>=0)out<<"  store i32 "<<result<<", ptr "<<slot(op->result_symbol)<<"\n";

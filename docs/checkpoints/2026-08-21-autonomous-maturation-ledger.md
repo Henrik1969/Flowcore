@@ -1,5 +1,54 @@
 # Flowcore autonomous maturation ledger
 
+## Resolved provider calls and native symbol separation — 2026-09-07
+
+Continued from pushed `55b7c0b`. Inspection confirmed an actual Gate 1 correctness
+gap: Flowanalyst selected external-call metadata by native leaf name rather than
+resolved function identity. Renamed external functions were emitted as ordinary
+calls; colliding provider names could select the first requirement; ordinary
+source names could discover unused external capabilities. Provider facts are now
+catalogued by resolved function symbol and binding requirements derive only from
+actual calls to those symbols. The one-through-four namespace gate now asserts
+exact external provider contracts and distinct carrier tuples.
+
+LLVM ordinary function definitions/calls now use symbol-derived `flow.function.ID`
+names, separate from provider native names. Identical native declarations for one
+library/ABI are deduplicated after every exact contract is authorized. Conflicting
+library/ABI identities for one native symbol fail explicitly before an LLVM file
+is written. The native entry name is reserved. No application/profile dispatch
+was introduced.
+
+The `provider_call_identity` gate compiles two separately authorized renamed libc
+bindings plus a source function named `abs`; native exit is **81**. It proves that
+omitting the second effect grant fails, unused external declarations do not become
+requirements from a source-name collision, and incompatible native providers do
+not collapse by symbol. All artifacts are generated after building the tools.
+
+Exact verification:
+
+```sh
+cmake --build /tmp/flowcore-reusable-current -j4
+ctest --test-dir /tmp/flowcore-reusable-current -R 'provider_call_identity|callable_lowering_boundary|namespace_ambiguity' --output-on-failure
+ctest --test-dir /tmp/flowcore-reusable-current --output-on-failure -j4
+cmake --build /tmp/flowcore-reusable-current-sanitize -j4
+ASAN_OPTIONS=detect_leaks=0 LSAN_OPTIONS=detect_leaks=0 ctest --test-dir /tmp/flowcore-reusable-current-sanitize --output-on-failure -j4
+sh /tmp/flowcore-reusable-acceptance/run.sh
+git diff --check
+```
+
+Focused **3/3**, normal **79/79** (5.59 seconds), ASan/UBSan **79/79**
+(16.62 seconds). Both builds passed. Existing generated acceptance exits **42**
+and all six compiler hashes remain unchanged during compilation. Logs are
+`/tmp/flowcore-provider-identity-{ctest,sanitize,acceptance}.log`.
+
+The audit also found that generated manifests record hashes but Flowbind does not
+yet bind those versioned evidence identities into plan authorization; its report
+still states provider-signature evidence is not provided. Historical claims of
+complete Gate 1 evidence binding are therefore too broad. Next: carry generated
+contract/evidence identities through semantic requirements, exact policy grants,
+binding capabilities and lowering; then continue native graph delivery and
+Flow-owned paging. State remains CONTINUE, with ordinary work and no total blocker.
+
 ## Durable graph evidence and downstream refusal — 2026-09-07
 
 Continued from pushed `946b5c1`. Frontend capture now retains provider policy

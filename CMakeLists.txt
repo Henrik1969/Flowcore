@@ -190,6 +190,16 @@ add_test(NAME source_graph_artifact
         FLOWVALIDATE_BIN=$<TARGET_FILE:flowvalidate>
         sh ${CMAKE_CURRENT_SOURCE_DIR}/tools/test-source-graph-artifact.sh)
 
+add_test(NAME provider_call_identity
+    COMMAND ${CMAKE_COMMAND} -E env
+        FLOWMINI_BIN=$<TARGET_FILE:flowmini>
+        FLOWANALYST_BIN=$<TARGET_FILE:flowanalyst>
+        FLOWBIND_BIN=$<TARGET_FILE:flowbind>
+        FLOWPARALLEL_BIN=$<TARGET_FILE:flowparallel>
+        FLOWOPTIMIZE_BIN=$<TARGET_FILE:flowoptimize>
+        FLOWLOWER_BIN=$<TARGET_FILE:flowlower>
+        sh ${CMAKE_CURRENT_SOURCE_DIR}/tools/test-provider-call-identity.sh)
+
 add_test(NAME flow_less_ncurses_pager
     COMMAND ${CMAKE_COMMAND} -E env
         FLOWMINI_BIN=$<TARGET_FILE:flowmini>

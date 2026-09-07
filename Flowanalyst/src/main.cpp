@@ -113,17 +113,7 @@ int run(const Json& bundle, int lowering_plan_version) {
     std::vector<BindingRequirement> binding_requirements;
     std::vector<AbiTypeContract> abi_type_contracts;
     std::vector<AggregateLayout> aggregate_layouts;
-    std::set<std::string> called_names;
-    for (const auto& [expression_id, expression] : expressions) {
-        if (text(field(*expression, "kind")) != "call") continue;
-        const auto* payload = field(*expression, "payload");
-        const int base = integer(field(payload, "base"));
-        if (expressions.count(base) && text(field(*expressions[base], "kind")) == "identifier") {
-            called_names.insert(text(field(field(*expressions[base], "payload"), "name")));
-        } else if (expressions.count(base) && text(field(*expressions[base], "kind")) == "field_access") {
-            called_names.insert(text(field(field(*expressions[base], "payload"), "field")));
-        }
-    }
+    std::map<int, BindingRequirement> provider_functions;
     auto fact_value = [&](const Json& symbol, const std::string& key) {
         for (const auto& fact : list(field(symbol, "facts"))) if (text(field(fact, "key")) == key) return text(field(field(fact, "value"), "value"));
         return std::string{};
@@ -136,8 +126,6 @@ int run(const Json& bundle, int lowering_plan_version) {
         for (const auto& child : list(field(*scopes[contract_scope], "symbol_ids"))) {
             const int child_id = integer(&child); if (!symbols.count(child_id) || text(field(*symbols[child_id], "kind")) != "Function") continue;
             const auto external = fact_value(*symbols[child_id], "external_symbol_spelling"); if (external.empty()) continue;
-            const auto function_name = text(field(*symbols[child_id], "name"));
-            if (!called_names.count(function_name)) continue;
             std::string parameter_types;
             const int function_scope = integer(field(*symbols[child_id], "introduced_scope_id"));
             if (scopes.count(function_scope)) for (const auto& parameter : list(field(*scopes[function_scope], "symbol_ids"))) {
@@ -145,7 +133,7 @@ int run(const Json& bundle, int lowering_plan_version) {
                 if (!parameter_types.empty()) parameter_types += ',';
                 parameter_types += fact_value(*symbols[parameter_id], "declared_type_spelling");
             }
-            binding_requirements.push_back({text(field(*contract, "name")), library, convention, external, fact_value(*symbols[child_id], "effect_spelling"), parameter_types, fact_value(*symbols[child_id], "return_type_spelling")});
+            provider_functions.emplace(child_id, BindingRequirement{text(field(*contract, "name")), library, convention, external, fact_value(*symbols[child_id], "effect_spelling"), parameter_types, fact_value(*symbols[child_id], "return_type_spelling")});
         }
         for (const auto& child : list(field(*scopes[contract_scope], "symbol_ids"))) {
             const int child_id = integer(&child);
@@ -582,6 +570,10 @@ int run(const Json& bundle, int lowering_plan_version) {
             second.independent_with.push_back(first.expression);
         }
     }
+    std::set<int> called_provider_symbols;
+    for (const auto& site : call_sites) if (provider_functions.count(site.callee_symbol))
+        called_provider_symbols.insert(site.callee_symbol);
+    for (const auto symbol : called_provider_symbols) binding_requirements.push_back(provider_functions.at(symbol));
     std::vector<LoweringOperation> lowering_operations;
     auto containing_function = [&](int scope_id) {
         int current = scope_id;
@@ -611,11 +603,8 @@ int run(const Json& bundle, int lowering_plan_version) {
         operation.callee = site.callee;
         operation.kind = "call";
         operation.arguments = site.arguments;
-        std::string leaf = site.callee;
-        const auto separator = leaf.rfind('.');
-        if (separator != std::string::npos) leaf = leaf.substr(separator + 1);
-        for (const auto& requirement : binding_requirements) {
-            if (requirement.symbol != leaf) continue;
+        if (const auto provider = provider_functions.find(site.callee_symbol); provider != provider_functions.end()) {
+            const auto& requirement = provider->second;
             operation.kind = "external_call";
             operation.contract = requirement.contract;
             operation.library = requirement.library;
@@ -624,7 +613,6 @@ int run(const Json& bundle, int lowering_plan_version) {
             operation.effect = requirement.effect;
             operation.parameter_types = requirement.parameter_types;
             operation.return_type = requirement.return_type;
-            break;
         }
         lowering_operations.push_back(std::move(operation));
     }
