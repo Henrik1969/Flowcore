@@ -1,5 +1,42 @@
 # Flowcore autonomous maturation ledger
 
+## Explicit startup-provider selection evidence — 2026-09-07
+
+Continued from pushed `f2983af`. Added the non-authorizing
+`flowcore.graph_provider_map` v1 selection artifact and Flowanalyst
+`--graph-providers` input. Arbitrary graph implementation names resolve to one
+qualified external source callable; no application/factory-name compiler table
+selects the adapter. The bounded contract is a producer invoked once at startup,
+zero arguments, one returned output on `out`. It follows the existing initial
+producer activation and does not change the approved receiver contract.
+
+Source graph evidence now retains selection, function identity, provider tuple,
+carrier/effect/evidence facts and provenance. The standalone validator rejects
+invalid selection versions, duplicate names, wrong activation/ports, invalid
+producer identity, arguments, carrier mismatch and invented evidence. Semantic
+checks diagnose producer-to-receiver port/type mismatches. Selecting a provider
+still cannot authorize or execute a graph; all downstream refusals remain.
+
+Verification commands:
+
+```sh
+cmake --build /tmp/flowcore-reusable-current -j4
+ctest --test-dir /tmp/flowcore-reusable-current -R source_graph_artifact --output-on-failure
+ctest --test-dir /tmp/flowcore-reusable-current --output-on-failure -j4
+cmake --build /tmp/flowcore-reusable-current-sanitize -j4
+ASAN_OPTIONS=detect_leaks=0 LSAN_OPTIONS=detect_leaks=0 ctest --test-dir /tmp/flowcore-reusable-current-sanitize --output-on-failure -j4
+sh /tmp/flowcore-reusable-acceptance/run.sh
+git diff --check
+```
+
+Focused 1/1, complete normal 79/79 and complete ASan/UBSan 79/79 pass; native
+acceptance still exits 42 with unchanged compiler binaries. Logs remain under
+`/tmp/flow-graph-provider-*`. The design note distinguishes selection evidence
+from executable authority. State remains CONTINUE. Next: authorize the selected
+startup calls, publish bounded serial graph activation scheduling, and lower
+native receiver invocations without erasing ports, wires or fan-out signals.
+No total blocker exists; Flow-owned paging remains unfinished.
+
 ## Typed callable results for receiver preparation — 2026-09-07
 
 Continued from pushed `6b4ed54`. Native callable definitions previously hardcoded

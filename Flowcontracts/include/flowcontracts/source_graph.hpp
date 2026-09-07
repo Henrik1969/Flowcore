@@ -1,6 +1,8 @@
 #pragma once
 
 #include <flowcontracts/json.hpp>
+#include <flowcontracts/binding_evidence.hpp>
+#include <flowcontracts/graph_provider_map.hpp>
 #include <set>
 
 namespace flowcontracts {
@@ -13,7 +15,7 @@ struct SourceGraphWire { std::string id; SourceGraphEndpoint from, to; };
 struct SourceGraph {
     std::vector<SourceGraphNode> nodes;
     std::vector<SourceGraphWire> wires;
-    json::Array policies, receivers;
+    json::Array policies, receivers, providers;
 };
 
 // This contract preserves analysis evidence. It grants no provider authority and
@@ -108,8 +110,47 @@ inline SourceGraph source_graph(const json::Value& value, std::string path = "$"
         types[node] = {nonempty(item, "input_type", p), nonempty(item, "output_type", p)};
         provenance(item, p);
     }
+    std::map<std::string, std::string> provider_types;
+    if (const auto* providers = optional(root, "providers")) {
+        result.providers = array(*providers, path + ".providers");
+        const auto selections = graph_provider_map(required(root, "provider_selection", path));
+        for (std::size_t i = 0; i < result.providers.size(); ++i) {
+            const auto p = path + ".providers[" + std::to_string(i) + "]";
+            const auto& item = object(result.providers[i], p);
+            const auto node = nonempty(item, "node_id", p);
+            if (!nodes.count(node) || nodes.at(node).role != "producer" ||
+                nodes.at(node).implementation_kind != "provider_atom" || provider_types.count(node))
+                throw Error(p, "provider resolution does not match one producer node");
+            const auto implementation = nonempty(item, "implementation", p);
+            const auto callable = nonempty(item, "source_callable", p);
+            bool selected = false;
+            for (const auto& selection : selections)
+                if (selection.implementation == implementation && selection.source_callable == callable) selected = true;
+            if (!selected || implementation != nodes.at(node).implementation_name)
+                throw Error(p, "provider resolution differs from explicit selection");
+            if (integer(required(item, "function_symbol_id", p), p + ".function_symbol_id") < 0 ||
+                str(item, "activation", p) != "startup_once" || str(item, "output_port", p) != "out")
+                throw Error(p, "unsupported startup producer contract");
+            const auto& provider = object(required(item, "provider", p), p + ".provider");
+            for (const auto* key : {"contract", "library", "symbol", "convention", "effect", "return_type"})
+                (void)nonempty(provider, key, p + ".provider");
+            (void)binding_evidence(provider, p + ".provider");
+            const auto type = nonempty(item, "output_type", p);
+            if (!str(provider, "parameter_types", p + ".provider").empty() ||
+                str(provider, "return_type", p + ".provider") != type || type == "void")
+                throw Error(p, "startup producer requires a zero-argument value-returning ABI");
+            provider_types.emplace(node, type);
+            provenance(item, p);
+        }
+    }
     std::set<std::string> connected;
     for (const auto& wire : result.wires) {
+        if (provider_types.count(wire.to.node)) throw Error(path + ".syntax.wires", "startup producer has no input port");
+        if (provider_types.count(wire.from.node)) {
+            if (wire.from.port != "out") throw Error(path + ".syntax.wires", "invalid startup producer output port");
+            if (receivers.count(wire.to.node) && provider_types.at(wire.from.node) != types.at(wire.to.node).first)
+                throw Error(path + ".syntax.wires", "incompatible producer and receiver port types");
+        }
         if (receivers.count(wire.from.node) && wire.from.port != "out") throw Error(path + ".syntax.wires", "invalid receiver output port");
         if (receivers.count(wire.to.node)) {
             if (wire.to.port != "in") throw Error(path + ".syntax.wires", "invalid receiver input port");

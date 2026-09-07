@@ -84,3 +84,45 @@ jq --slurpfile graph "$tmpdir/graph.json" '.lowering_plan.source_graph = $graph[
 refuse "$tmpdir/forged.backend.json" "$FLOWLOWER_BIN"
 refuse "$tmpdir/forged.backend.json" "$FLOWVALIDATE_BIN"
 echo 'Source graph artifact: PASS'
+# An explicit map resolves arbitrary provider names to external source identity.
+cat > "$tmpdir/providers.json" <<'JSON'
+{"format":"flowcore.graph_provider_map","version":1,"providers":[{"implementation":"injected.renamed","source_callable":"host.selected","activation":"startup_once","output_port":"out"}]}
+JSON
+cat > "$tmpdir/producer.flow" <<'FLOW'
+program arbitrarily_selected_producer
+abi host {
+    library "libc.so.6"
+    convention c
+    extern fn selected(): c_int {
+        symbol "getpid"
+        effect readonly
+    }
+}
+producer source : injected.renamed
+node receiver : fn identity
+wire source.out => receiver.in
+fn identity(value : c_int): c_int { return value }
+main { return 0 }
+FLOW
+"$FLOWVALIDATE_BIN" "$tmpdir/providers.json" | jq -e '.classification == "valid"' >/dev/null
+"$FLOWMINI_BIN" --dump-frontend-bundle "$tmpdir/producer.flow" > "$tmpdir/producer.frontend.json"
+if "$FLOWANALYST_BIN" --lowering-plan-version 2 --graph-providers "$tmpdir/providers.json" < "$tmpdir/producer.frontend.json" > "$tmpdir/producer.semantic.json"; then
+    echo 'producer selection became execution authority' >&2; exit 1
+fi
+jq '.lowering_plan.source_graph' "$tmpdir/producer.semantic.json" > "$tmpdir/producer.graph.json"
+jq -e '.providers[0] | .node_id == "source" and .source_callable == "host.selected" and .output_type == "c_int" and .provider.symbol == "getpid" and .function_symbol_id >= 0' "$tmpdir/producer.graph.json" >/dev/null
+"$FLOWVALIDATE_BIN" "$tmpdir/producer.graph.json" | jq -e '.classification == "valid"' >/dev/null
+for mutation in '.version = 2' '.providers += [.providers[0]]' '.providers[0].activation = "stream"' '.providers[0].source_callable = ""'; do
+    jq "$mutation" "$tmpdir/providers.json" > "$tmpdir/bad-providers.json"
+    if "$FLOWVALIDATE_BIN" "$tmpdir/bad-providers.json" >/dev/null; then
+        echo "invalid provider map accepted: $mutation" >&2; exit 1
+    fi
+done
+for mutation in '.providers[0].node_id = "receiver"' '.providers[0].implementation = "other"' '.providers[0].provider.parameter_types = "c_int"' '.providers[0].output_type = "Bool"' '.providers[0].provider.evidence = "invented"' '.syntax.wires[0].from.port_id = "wrong"'; do
+    jq "$mutation" "$tmpdir/producer.graph.json" > "$tmpdir/bad-producer.graph.json"
+    if "$FLOWVALIDATE_BIN" "$tmpdir/bad-producer.graph.json" >/dev/null; then
+        echo "invalid producer resolution accepted: $mutation" >&2; exit 1
+    fi
+done
+
+echo 'source graph artifact and provider selection: PASS'

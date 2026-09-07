@@ -1,4 +1,5 @@
 #include <flowcontracts/json.hpp>
+#include <flowcontracts/graph_provider_map.hpp>
 #include <cctype>
 #include <fstream>
 #include <functional>
@@ -72,7 +73,8 @@ bool numeric_extents(const std::string& value) {
     return true;
 }
 
-int run(const Json& bundle, int lowering_plan_version) {
+int run(const Json& bundle, int lowering_plan_version, const Json& provider_map) {
+    const auto graph_provider_selections = flowcontracts::graph_provider_map(provider_map);
     if (text(field(bundle, "format")) != "flowmini.frontend_bundle" || integer(field(bundle, "version")) != 2) throw std::runtime_error("unsupported FlowMini frontend bundle");
     const auto* snapshot = field(bundle, "symbol_table"); if (!snapshot) throw std::runtime_error("bundle has no symbol_table");
     std::map<int, const Json*> symbols, scopes, origins;
@@ -243,7 +245,7 @@ int run(const Json& bundle, int lowering_plan_version) {
         }
         callables.push_back(std::move(callable));
     }
-    Array graph_receivers;
+    Array graph_receivers, graph_providers;
     if (const auto* graph = field(bundle, "graph_syntax")) {
         if (text(field(graph, "format")) != "flowmini.graph_syntax" || integer(field(graph, "version")) != 1)
             add_diagnostic("FLOWANALYST_GRAPH_VERSION", "unsupported graph syntax contract", -1);
@@ -271,7 +273,36 @@ int run(const Json& bundle, int lowering_plan_version) {
             if (id.empty() || !node_ids.insert(id).second)
                 graph_diagnostic("FLOWANALYST_GRAPH_NODE_ID", "empty or duplicate graph node identity", node);
             const auto implementation_kind = text(field(node, "implementation_kind"));
-            if (implementation_kind == "provider_atom") continue;
+            if (implementation_kind == "provider_atom") {
+                const auto implementation = text(field(node, "implementation_name"));
+                for (const auto& selection : graph_provider_selections) if (selection.implementation == implementation) {
+                    std::vector<int> candidates;
+                    for (const auto& [identity, provider] : provider_functions)
+                        if (provider.contract + "." + text(field(*symbols.at(identity), "name")) == selection.source_callable)
+                            candidates.push_back(identity);
+                    if (candidates.size() != 1) {
+                        graph_diagnostic("FLOWANALYST_GRAPH_PROVIDER_RESOLUTION", "graph provider requires one resolved external declaration: " + selection.source_callable, node);
+                        continue;
+                    }
+                    const auto identity = candidates.front();
+                    const auto& provider = provider_functions.at(identity);
+                    if (text(field(node, "role")) != "producer" || !provider.parameter_types.empty() ||
+                        provider.return_type.empty() || provider.return_type == "void") {
+                        graph_diagnostic("FLOWANALYST_GRAPH_PROVIDER_CONTRACT", "startup provider requires a producer role and zero-argument value-returning external declaration", node);
+                        continue;
+                    }
+                    graph_providers.push_back(Object{{"node_id", id}, {"function_symbol_id", identity},
+                        {"implementation", implementation}, {"source_callable", selection.source_callable},
+                        {"activation", std::string("startup_once")}, {"output_port", std::string("out")},
+                        {"output_type", provider.return_type},
+                        {"provenance", field(node, "provenance") ? *field(node, "provenance") : Json(nullptr)},
+                        {"provider", Object{{"contract", provider.contract}, {"library", provider.library},
+                            {"convention", provider.convention}, {"symbol", provider.symbol},
+                            {"effect", provider.effect}, {"parameter_types", provider.parameter_types},
+                            {"return_type", provider.return_type}, {"evidence", provider.evidence}}}});
+                }
+                continue;
+            }
             if (implementation_kind != "source_function") {
                 graph_diagnostic("FLOWANALYST_GRAPH_IMPLEMENTATION", "unknown graph implementation kind", node);
                 continue;
@@ -320,6 +351,14 @@ int run(const Json& bundle, int lowering_plan_version) {
             }
             const auto from = text(field(field(wire, "from"), "node_id"));
             const auto to = text(field(field(wire, "to"), "node_id"));
+            for (const auto& provider : graph_providers) {
+                const auto provider_node = text(field(provider, "node_id"));
+                if (to == provider_node || (from == provider_node && text(field(field(wire, "from"), "port_id")) != "out"))
+                    graph_diagnostic("FLOWANALYST_GRAPH_PROVIDER_PORT", "startup provider exposes only the out port", wire);
+                if (from == provider_node && receiver_functions.count(to) &&
+                    text(field(provider, "output_type")) != receiver_functions.at(to)->parameters.front().second)
+                    graph_diagnostic("FLOWANALYST_GRAPH_PROVIDER_TYPE", "provider output and receiver input types differ", wire);
+            }
             if (receiver_functions.count(from) && receiver_functions.count(to) &&
                 receiver_functions.at(from)->return_type != receiver_functions.at(to)->parameters.front().second)
                 graph_diagnostic("FLOWANALYST_GRAPH_RECEIVER_TYPE", "source receiver output and input types differ", wire);
@@ -762,7 +801,7 @@ int run(const Json& bundle, int lowering_plan_version) {
             std::cout << ",\"source_graph\":" << flowcontracts::json::serialize(Object{
                 {"format", std::string("flowcore.source_graph")}, {"version", 1},
                 {"status", std::string("non_executable")}, {"syntax", *graph},
-                {"receivers", graph_receivers}});
+                {"receivers", graph_receivers}, {"providers", graph_providers}, {"provider_selection", provider_map}});
     }
     if (lowering_plan_version == 2) {
         std::cout << ",\"functions\":[";
@@ -1020,13 +1059,16 @@ int main(int argc, char** argv) {
             }
             if (option == "-v" || option == "--version") { std::cout << FLOWANALYST_VERSION << '\n'; return 0; }
         }
-        int lowering_plan_version = 1; std::string input_path;
+        int lowering_plan_version = 1; std::string input_path, graph_provider_path;
         for (int index = 1; index < argc; ++index) {
             const std::string argument = argv[index];
             if (argument == "--lowering-plan-version") {
                 if (++index >= argc) throw std::runtime_error("--lowering-plan-version requires 1 or 2");
                 lowering_plan_version = std::stoi(argv[index]);
                 if (lowering_plan_version != 1 && lowering_plan_version != 2) throw std::runtime_error("unsupported lowering plan version");
+            } else if (argument == "--graph-providers") {
+                if (++index >= argc || !graph_provider_path.empty()) throw std::runtime_error("--graph-providers requires one selection artifact");
+                graph_provider_path = argv[index];
             } else if (!argument.empty() && argument.front() == '-') throw std::runtime_error("unknown option: " + argument);
             else if (input_path.empty()) input_path = argument;
             else throw std::runtime_error("too many input paths");
@@ -1034,7 +1076,14 @@ int main(int argc, char** argv) {
         std::ostringstream input;
         if (!input_path.empty()) { std::ifstream file(input_path); if (!file) throw std::runtime_error("cannot open bundle"); input << file.rdbuf(); }
         else input << std::cin.rdbuf();
-        return run(Parser(input.str()).parse(), lowering_plan_version);
+        Json provider_map = Object{{"format", std::string("flowcore.graph_provider_map")}, {"version", 1}, {"providers", Array{}}};
+        if (!graph_provider_path.empty()) {
+            std::ifstream file(graph_provider_path);
+            if (!file) throw std::runtime_error("cannot open graph provider map");
+            std::ostringstream contents; contents << file.rdbuf();
+            provider_map = Parser(contents.str()).parse();
+        }
+        return run(Parser(input.str()).parse(), lowering_plan_version, provider_map);
     }
     catch (const std::exception& error) { std::cerr << "flowanalyst error: " << error.what() << '\n'; return 1; }
 }
