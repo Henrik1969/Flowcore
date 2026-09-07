@@ -10,8 +10,9 @@ This guide describes the checkout’s v0.29 implementation. Status words have a
 precise meaning: **IMPLEMENTED** means the source path accepts it;
 **TESTED** means a repository test or verified probe covers it; **DESIGNED**
 and **PLANNED** are documents, not working features; **EXPERIMENTAL** means a
-working but compatibility-oriented path; **NOT SUPPORTED** and **UNKNOWN** are
-limits.
+working but compatibility-oriented path; **NOT SUPPORTED — MISSING**,
+**NOT SUPPORTED — DEFERRED**, **NOT SUPPORTED — INTENTIONALLY EXCLUDED**, and
+**UNKNOWN** are limits.
 
 ## Start here
 
@@ -46,10 +47,12 @@ Flowmini currently has two executable paths and they must not be confused:
   `--dump-frontend-bundle` use the TokenTree/AST builder and publish symbols,
   facts, and provenance for Flowanalyst, Flowbind, Flowoptimize, and Flowlower.
 * **Runtime graph path (EXPERIMENTAL, TESTED for admitted probes):** normal
-  execution uses the separate `flowmini::parseModule` parser and provider
-  runtime. It accepts useful constructs that the structural path does not yet
-  preserve. This is a compatibility path, not evidence that the two parsers
-  have identical semantics.
+  execution uses the versioned compatibility parser `flowmini::parseModule`
+  and provider runtime. Pass `--runtime-compat` to make that choice explicit;
+  the legacy no-flag invocation remains an alias for compatibility. It accepts
+  useful constructs that the structural path does not yet preserve. This is a
+  compatibility path, not evidence that the two parsers have identical
+  semantics.
 
 The compiler stages communicate through files. An AST, symbol projection,
 Graph IR, lowering plan, and runtime value are different representations with
@@ -141,17 +144,18 @@ Do not assume every conversion or runtime path enforces every invariant.
 ## Control flow, constants, and variants
 
 `if`/`else`, `while`, `break`, and `continue` are IMPLEMENTED and TESTED in
-runtime probes. `guard condition { … } else { … }` is readable guard sugar in
-the runtime path; the structural AST currently lowers it to an ordinary
-`IfStatement`, so guard identity is not preserved as an independent fact.
+runtime probes. `guard condition else { … }` is IMPLEMENTED and TESTED; the
+structural AST preserves a dedicated `guard` node and the failure block’s
+provenance.
 
 The runtime parser accepts `const name : Type(value)` and enum/variant
 declarations and `when` over integer, enum, and variant values. Constants are
-not yet represented as immutable declarations in the frontend bundle, and the
-structural AST currently requires a `default` block for `when`; these are
-artifact-chain gaps, not promises of full language parity. Variant payload
-matching is runtime-probed but **NOT SUPPORTED** by the current backend-neutral
-lowering contract.
+represented as `is_const` declarations and `mutability=const` symbol facts in
+the frontend bundle. The structural AST still requires a `default` block for
+`when`. Variant payload labels now survive AST, facts, and lowering-plan
+serialization, but Flowanalyst deliberately rejects variant lowering with
+`FLOWANALYST_VARIANT_MATCH_UNSUPPORTED` until a backend-neutral payload layout
+is admitted.
 
 ## ABI and providers
 
@@ -172,10 +176,11 @@ abi mathlib {
 
 The declared library and symbol must exist. `print` is a convenient provider
 operation, not proof of a complete standard library. There is currently no
-general `unsafe` block or inline-assembly mechanism (**NOT SUPPORTED**).
-Future work may add an explicit provider/target-specific boundary with declared
-inputs, outputs, effects, identity, and boundary provenance while leaving
-opaque internals outside normal Flowmini guarantees.
+general `unsafe` block or inline-assembly mechanism (**NOT SUPPORTED —
+INTENTIONALLY EXCLUDED**). Flowmini source cannot embed foreign or opaque
+regions. Machine-specific functionality must be an external provider/artifact
+with declared identity, ABI, target constraints, inputs, outputs, effects,
+resource obligations, provenance, and verification evidence.
 
 ## Flowcore model in programmer terms
 
@@ -204,13 +209,15 @@ source -> tokens/TokenTree -> structural AST -> symbol/fact projection
 
 The normal runtime parser is a separate path today. AST nodes, symbol tables,
 Graph IR, lowering operations, provider calls, and runtime values have distinct
-schemas and ownership. Integer and enum match lowering is tested; variant
-payload labels are currently dropped by analysis and rejected by preparation.
+schemas and ownership. Integer and enum match lowering is tested. Variant
+payload labels are preserved, then rejected early by Flowanalyst as an explicit
+unsupported backend contract.
 
 ## What to test next
 
 Use focused tests while learning, then run `ctest --test-dir build
---output-on-failure`. The current root build has 81 passing tests and one baseline failure in the variant-construction JSON probe. The
+--output-on-failure`. The current root build and focused suite are green after
+the semantic JSON producer fix and the parser/const/guard/provider gates. The
 categorized `flowmini_suite` remains an honest maturity signal: its present
 fixture inventory is 87/136, with 49 expected-pass examples exposing parser,
 ABI, and profile gaps.

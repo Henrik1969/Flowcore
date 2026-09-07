@@ -57,7 +57,7 @@ Current checkpoint:
 Flowcore v0.29 language-maturation and cross-backend parity slice
  AST golden tests: 28
  Symbol projection tests: 14
- Root CTest: 81/82 in the current build (one baseline failure in the variant-construction JSON probe)
+ Root CTest: PASS (85/85) in the current build
  Flowmini categorized fixture suite: 87/136 (49 known parser/ABI/profile gaps)
  flowvalidate / identity mutation gates: CTest green
 ```

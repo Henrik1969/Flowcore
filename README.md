@@ -165,13 +165,13 @@ flowmini_ast_golden_tests:     PASS (28/28)
 flowmini_symbol_projection:    PASS (14/14)
 flowmini_frontend_bundle:      PASS (8 golden, 1 isolated, 19 negative)
 flowmini_suite:                87/136 (49 known parser/ABI/profile gaps)
-focused CTest:                 4/5 (one baseline failure)
+focused CTest:                 PASS (8/8)
 ```
 
 For the complete root build, the current result is:
 
 ```text
-root CTest:                    81/82 (one baseline failure)
+root CTest:                    PASS (85/85)
 integration corpus:            PASS (3/3)
 pipeline matrix:               PASS (9 accepted, 1 blocked)
 pass corpus:                   PASS (43 programs)

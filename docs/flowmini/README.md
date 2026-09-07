@@ -14,7 +14,7 @@ historical directory name)
 Current baseline:
 
 ```text
-root CTest: 81/82 (one baseline failure in the variant-construction JSON probe)
+root CTest: PASS (85/85)
 AST golden tests: 28 PASS
 Symbol projection tests: 14 PASS
 categorized Flowmini fixture suite: 87/136 (49 known gaps)
@@ -29,7 +29,8 @@ AST states what the source means.
 
 The structural frontend export remains consumable by Flowanalyst, Flowbind,
 Flowoptimize, and Flowlower. Normal runtime execution still uses a separate
-parser; variant payload lowering is explicitly unsupported. See the
+parser; variant payload labels are preserved in artifacts, while variant
+payload lowering is **NOT SUPPORTED — DEFERRED**. See the
 [Programmer's Guide](../language/flowmini-programmers-manual.md),
 [comparisons](../language-comparisons/README.md), and
 [future-work evidence](../FUTURE_WORK_EVIDENCE.md).

@@ -766,3 +766,30 @@ later instruction reopens them.
   baseline failure is `flowmini_utf8_flow_probe`, where variant-construction
   semantic JSON is malformed (`jq: Unmatched ']'`) after earlier probes pass.
 - This documentation checkpoint changes no compiler or runtime behavior.
+
+## 2026-09-07 evidence-backed remedy checkpoint
+
+- Fixed Flowanalyst’s variant-construction operand serializer: a variant field
+  call returned before closing its operand object, producing malformed JSON.
+  `flowmini_utf8_flow_probe` now passes and validates the producer output.
+- Preserved `const` in the structural AST (`is_const`) and as a symbol
+  `mutability=const` fact. Added a dedicated structural `GuardStatement` with
+  failure-block provenance; runtime behavior remains compatible.
+- Added `--runtime-compat` as the explicit name for the legacy runtime parser
+  and a differential corpus covering four equivalent fixtures plus one
+  declared backend boundary.
+- Preserved variant `label_type`/`label_member` through AST payloads and
+  Flowanalyst lowering operations. Flowanalyst now rejects variant backend
+  admission early with `FLOWANALYST_VARIANT_MATCH_UNSUPPORTED`; no backend
+  claims payload parity.
+- Added const/guard identity, parser differential, and provider-paperwork CTest
+  gates, plus `tools/report-flowmini-test-status.sh` for reproducible machine
+  and Markdown evidence.
+- Normal root build and CTest pass: 85/85. Focused Flowmini CTest passes 8/8.
+  Categorized suite remains 87/136 with 49 known parser/ABI/profile gaps.
+- ASan/UBSan build passes. Sanitizer CTest passes 84/85; `terminal_sel_pipeline`
+  remains an environment-only failure because ASan runtime does not come first
+  in the initial library list. Re-run with the project’s preload setup.
+- Unsafe regions, inline assembly, embedded foreign source, and opaque source
+  escapes are explicitly **NOT SUPPORTED — INTENTIONALLY EXCLUDED**. External
+  unsafe functionality remains provider/ABI artifact work.

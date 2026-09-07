@@ -49,7 +49,8 @@ that `guard` continues to communicate invariant enforcement directly.
 
 The runtime parser accepts `when`/`match` for integer, enum, and variant probes.
 The structural AST still requires a default block, and variant payload labels
-are not preserved through analysis/lowering. Integer and enum lowering is
-tested; variant payload lowering remains explicitly unsupported. The
+are preserved through analysis serialization. Integer and enum lowering is
+tested; Flowanalyst rejects variant payload lowering until a backend-neutral
+payload contract exists. The
 backend-neutral form must lower to the same branch meaning as the existing
 structured form and remain available to freestanding targets.

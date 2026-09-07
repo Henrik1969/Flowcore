@@ -9,8 +9,10 @@ deployment; Flowcore semantics; and a problem-oriented recommendation.
 
 Status labels in every document are **IMPLEMENTED**, **TESTED**, **DESIGNED**,
 **PLANNED**, **EXPERIMENTAL**, **SPECULATIVE**, **NOT SUPPORTED**, and
-**UNKNOWN**. Flowmini claims are limited to the v0.29 checkout and linked
-probes. External claims point to current language documentation.
+**UNKNOWN**. For absent features, use **NOT SUPPORTED — MISSING**,
+**NOT SUPPORTED — DEFERRED**, or **NOT SUPPORTED — INTENTIONALLY EXCLUDED**.
+Flowmini claims are limited to the v0.29 checkout and linked probes. External
+claims point to current language documentation.
 
 | Comparison | Languages | Main decision pressure |
 |---|---|---|

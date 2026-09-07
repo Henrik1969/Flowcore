@@ -6,7 +6,7 @@
 | Execution/types/memory | native/runtime providers plus planned TinyVM; no ownership, lifetime, allocator, or generic type contract | ahead-of-time native code, algebraic types, traits, ownership/borrowing checked by compiler | native code, explicit allocators, comptime, manual error unions |
 | Mutation/concurrency/errors | placement; concurrency and effect typing **NOT SUPPORTED** | controlled mutation, `Send`/`Sync`, `Result`/`Option`; async ecosystem | explicit mutation, error unions; concurrency libraries and safety are programmer-led |
 | FFI/compiler/IR | ABI declarations, split AST/Graph path, incomplete variant lowering | strong C ABI, LLVM-based compiler, mature cargo/rustc tooling | C interop, self-hosted compiler work, explicit build system |
-| Hardware/portability/tooling | targets and low-level escape **PLANNED**; small debugger/tooling surface | broad tiered targets, excellent diagnostics, growing embedded support | strong freestanding/embedded story; ecosystem smaller than Rust |
+| Hardware/portability/tooling | targets **PLANNED**; source-level unsafe escape intentionally excluded; small debugger/tooling surface | broad tiered targets, excellent diagnostics, growing embedded support | strong freestanding/embedded story; ecosystem smaller than Rust |
 | Ecosystem/performance/deployment | **UNKNOWN** outside probes | production ecosystem and predictable native performance | fast native builds and transparent costs; library maturity varies |
 
 Flowmini’s Flowcore facts, capabilities, providers, policy, provenance,

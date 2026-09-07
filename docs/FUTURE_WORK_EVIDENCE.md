@@ -4,6 +4,27 @@ This ledger records work exposed by inspecting the v0.29 language chain. It is
 not a wish list. “Do nothing” or “use a provider” is retained where the
 architecture cost of a new mechanism is not justified.
 
+## Resolved or narrowed by the remedy mission
+
+- **Parser authority:** the structural frontend remains canonical for artifacts;
+  the runtime parser is explicitly named `--runtime-compat` and a differential
+  corpus covers four equivalent fixtures plus one declared runtime/backend
+  boundary. Full parser convergence remains future work.
+- **Const and guard identity:** `is_const`, a `mutability=const` symbol fact,
+  and a dedicated structural `guard` node with failure-block provenance are
+  now preserved and tested.
+- **Variant information:** AST and semantic/lowering serialization now retain
+  `label_type` and `label_member`. Flowanalyst rejects variant lowering early
+  with `FLOWANALYST_VARIANT_MATCH_UNSUPPORTED` until payload layout is admitted.
+- **Semantic JSON:** the malformed variant operand object was fixed at the
+  Flowanalyst producer and the UTF-8 flow probe now validates it successfully.
+- **Evidence reporting:** `tools/report-flowmini-test-status.sh` emits a
+  versioned JSON and Markdown projection of root CTest, focused CTest, and the
+  categorized suite. Tests remain authoritative.
+- **Unsafe policy:** unsafe regions, inline assembly, and embedded foreign
+  source are **NOT SUPPORTED — INTENTIONALLY EXCLUDED**. External unsafe work
+  must arrive as a declared provider/ABI artifact with boundary paperwork.
+
 ## Findings
 
 ### LANGUAGE — converge the two parsers
@@ -23,13 +44,15 @@ architecture cost of a new mechanism is not justified.
   structured unsupported diagnostics elsewhere.
 - **Priority:** highest; every later language claim depends on it.
 
-### LANGUAGE/COMPILER — preserve constants and guard identity
+### LANGUAGE/COMPILER — preserve constants and guard identity (resolved)
 
-- **Finding:** runtime constants and guard syntax lose meaning in artifacts.
-- **Evidence:** `LetStatement` has no const flag; AST builder turns `guard` into
-  `IfStatement`; bundle probes report const as an ordinary variable.
+- **Finding:** runtime constants and guard syntax previously lost meaning in
+  artifacts.
+- **Evidence:** the remedy adds `LetStatement::is_const`, `GuardStatement`,
+  symbol mutability facts, and `flowmini_const_guard_semantics`.
 - **Why it matters:** immutability and control intent cannot be audited.
-- **Status:** runtime IMPLEMENTED; artifact preservation NOT SUPPORTED.
+- **Status:** IMPLEMENTED and TESTED for the structural artifact path; runtime
+  compatibility behavior remains covered.
 - **Direction:** add semantic fields only if a concrete consumer needs them;
   otherwise document compatibility lowering.
 - **Scope/risk:** medium AST/schema migration.
@@ -37,14 +60,14 @@ architecture cost of a new mechanism is not justified.
 - **Priority:** high because the feature was introduced to remove magic values
   and deep nesting.
 
-### COMPILER/GRAPH IR/LOWERING — variant match parity
+### COMPILER/GRAPH IR/LOWERING — variant match parity (narrowed)
 
-- **Finding:** variant payload labels do not survive analysis and lowering.
-- **Evidence:** variant AST contains `label_type`/`label_member`, but
-  Flowanalyst’s match payload contains only cases; `flowprepare` reports the
-  labels missing and Flowlower rejects variant selectors.
+- **Finding:** variant payload labels previously did not survive analysis and
+  lowering.
+- **Evidence:** labels now survive AST and semantic serialization; the
+  explicit Flowanalyst diagnostic rejects backend admission until layout exists.
 - **Why it matters:** runtime success is not backend evidence.
-- **Status:** runtime TESTED; backend-neutral contract NOT SUPPORTED.
+- **Status:** labels IMPLEMENTED/TESTED; payload backend contract NOT SUPPORTED.
 - **Direction:** define a versioned variant operation with payload layout,
   exhaustiveness, and provider target rules, or retain explicit unsupported.
 - **Scope/risk:** medium/high IR and backend work.
@@ -58,7 +81,7 @@ architecture cost of a new mechanism is not justified.
 - **Finding:** stale docs claim v0.25/v0.27 and 78/78 while current fixture
   inventory is 87/136.
 - **Evidence:** `Flowmini/CURRENT.md`, `docs/flowmini/README.md`, and manual
-  disagree with v0.29 and current `flowmini_suite`; root CTest is 82/82.
+  disagree with v0.29 and current `flowmini_suite`; the pre-remedy root CTest evidence was 81/82.
 - **Why it matters:** readiness claims need reproducible evidence.
 - **Status:** documentation correction in this mission; fixture gaps remain.
 - **Direction:** generate counts from the test runner and label expected-pass
@@ -67,11 +90,10 @@ architecture cost of a new mechanism is not justified.
 - **Gate:** one CI report with root, focused, and categorized totals.
 - **Priority:** high for developer trust.
 
-The current canonical run also reproduces one baseline failure after the
-preceding probes pass: `flowmini_utf8_flow_probe` reaches the variant
-construction step and `jq` reports malformed semantic JSON (`Unmatched ']'`).
-This is retained as an implementation/test finding, not hidden behind a
-documentation-only green claim.
+The pre-remedy canonical run reproduced one baseline failure after the
+preceding probes passed: `flowmini_utf8_flow_probe` reached the variant
+construction step and `jq` reported malformed semantic JSON (`Unmatched ']').
+The producer fix is now covered by the passing regression gate.
 
 ### LANGUAGE — ownership, resources, and effects
 
@@ -88,7 +110,7 @@ documentation-only green claim.
 - **Gate:** a resource lifecycle probe and cost comparison with Rust/C.
 - **Priority:** high only if self-hosted/bare-metal work requires it.
 
-### INTEROPERABILITY/SAFETY — explicit opaque escape boundary
+### INTEROPERABILITY/SAFETY — explicit opaque escape boundary (policy settled)
 
 - **Finding:** ABI/provider calls exist, but no general unsafe or
   provider-specific opaque region exists.
@@ -96,9 +118,11 @@ documentation-only green claim.
   inline assembly construct is parsed.
 - **Why it matters:** low-level work is either unavailable or risks being
   presented as normally accountable.
-- **Status:** ABI IMPLEMENTED; unsafe boundary NOT SUPPORTED; proposal PLANNED.
-- **Direction:** specify declared inputs, outputs, effects, target/provider
-  identity, and boundary provenance; leave internals opaque.
+- **Status:** ABI IMPLEMENTED; unsafe boundary NOT SUPPORTED — INTENTIONALLY
+  EXCLUDED.
+- **Direction:** external providers may carry declared inputs, outputs, effects,
+  target/provider identity, artifact identity, and boundary provenance; no
+  opaque computation is embedded in Flowmini source.
 - **Scope/risk:** medium language and contract work.
 - **Gate:** malformed-boundary rejection and captured provenance replay.
 - **Priority:** medium; use existing providers until a real need appears.

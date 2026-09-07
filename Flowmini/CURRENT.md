@@ -14,20 +14,21 @@ The structural frontend and normal runtime are separate paths; see the
 ## Verified status
 
 ```text
-root CTest:                         81/82 (one baseline failure)
+root CTest:                         PASS (85/85)
 AST golden tests:                   PASS (28)
 symbol projection tests:            PASS (14)
-Flowmini focused CTest:             4/5 (one baseline failure)
+Flowmini focused CTest:             PASS (8/8)
 categorized flowmini_suite:         87/136 (49 known parser/ABI/profile gaps)
-variant payload lowering:           NOT SUPPORTED
+variant payload lowering:           NOT SUPPORTED — DEFERRED (labels preserved)
 ```
 
 The structural chain publishes TokenTree/AST, symbol and fact projections for
 Flowanalyst, Flowbind, Flowoptimize, and Flowlower. Integer and enum match
-lowering is tested. Variant payload labels are currently lost during analysis
-and rejected by preparation/lowering. Runtime probes cover a broader
-compatibility parser, including constants, guards, records, collections,
-enums, and variants; that does not establish artifact-chain parity.
+lowering is tested. Variant payload labels survive the AST and semantic
+artifacts, but Flowanalyst rejects variant lowering until a backend-neutral
+payload contract exists. Runtime probes cover a broader compatibility parser,
+including constants, guards, records, collections, enums, and variants; that
+does not establish artifact-chain parity.
 
 ## Build and test
 
@@ -65,7 +66,7 @@ target selection and multitarget artifact emission
 generic collections and standard library
 variant payload lowering and backend parity
 ownership, resource, effect, and concurrency semantics
-low-level opaque/provider-specific escape boundary
+unsafe/opaque source regions intentionally excluded; provider paperwork remains bounded work
 optimizer breadth, debugging/tooling, and self-hosting
 ```
 
