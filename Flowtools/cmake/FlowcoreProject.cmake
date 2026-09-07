@@ -4,11 +4,26 @@
 set(FLOWCORE_CMAKE_DIR "${CMAKE_CURRENT_LIST_DIR}" CACHE INTERNAL "Flowcore CMake helper directory")
 
 set(FLOWCORE_ROOT "${CMAKE_CURRENT_LIST_DIR}/../.." CACHE PATH "Flowcore source root")
-set(FLOWCORE_FLOWMINI "${FLOWCORE_ROOT}/Flowmini/flowmini_v25_symboltable_projection/cmake-build-debug/flowmini" CACHE FILEPATH "FlowMini executable")
-set(FLOWCORE_FLOWANALYST "${FLOWCORE_ROOT}/Flowanalyst/build/flowanalyst" CACHE FILEPATH "Flowanalyst executable")
-set(FLOWCORE_FLOWBIND "${FLOWCORE_ROOT}/Flowbind/build/flowbind" CACHE FILEPATH "Flowbind executable")
-set(FLOWCORE_FLOWOPTIMIZE "${FLOWCORE_ROOT}/Flowoptimize/build/flowoptimize" CACHE FILEPATH "Flowoptimize executable")
-set(FLOWCORE_FLOWLOWER "${FLOWCORE_ROOT}/Flowlower/build/flowlower" CACHE FILEPATH "Flowlower executable")
+# Preserve superbuild target expressions before initializing a standalone cache default.
+if(NOT DEFINED FLOWCORE_FLOWMINI)
+    set(FLOWCORE_FLOWMINI "${FLOWCORE_ROOT}/Flowmini/flowmini_v25_symboltable_projection/cmake-build-debug/flowmini" CACHE FILEPATH "FlowMini executable")
+endif()
+
+if(NOT DEFINED FLOWCORE_FLOWANALYST)
+    set(FLOWCORE_FLOWANALYST "${FLOWCORE_ROOT}/Flowanalyst/build/flowanalyst" CACHE FILEPATH "Flowanalyst executable")
+endif()
+
+if(NOT DEFINED FLOWCORE_FLOWBIND)
+    set(FLOWCORE_FLOWBIND "${FLOWCORE_ROOT}/Flowbind/build/flowbind" CACHE FILEPATH "Flowbind executable")
+endif()
+
+if(NOT DEFINED FLOWCORE_FLOWOPTIMIZE)
+    set(FLOWCORE_FLOWOPTIMIZE "${FLOWCORE_ROOT}/Flowoptimize/build/flowoptimize" CACHE FILEPATH "Flowoptimize executable")
+endif()
+
+if(NOT DEFINED FLOWCORE_FLOWLOWER)
+    set(FLOWCORE_FLOWLOWER "${FLOWCORE_ROOT}/Flowlower/build/flowlower" CACHE FILEPATH "Flowlower executable")
+endif()
 set(FLOWCORE_CLANG "clang" CACHE STRING "C compiler used for Flowcore lowered artifacts")
 
 function(flowcore_project_tools)

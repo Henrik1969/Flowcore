@@ -9,9 +9,9 @@ flowmini_v25_symboltable_projection
 Current milestone:
 
 ```text
-Flowmini v0.27 namespaced provider language-chain slice
-frontend export, semantic analysis, policy binding, optimization boundary,
-LLVM lowering, executable application proof, and qualified provider imports
+Flowcore v0.29 reusable native language chain
+exact generated ABI evidence, generic scalar/control-flow LLVM lowering,
+durable source graphs, fresh receiver frames and Flow-owned paging
 ```
 
 ## Status
@@ -24,7 +24,11 @@ downstream sibling CTest gates: PASS
 flowcat native ELF example:    PASS
 ```
 
-Flowmini is still experimental and unfinished.
+Flowmini is still experimental and unfinished. The current verified boundary is
+recorded in the [maturation ledger](../docs/checkpoints/2026-08-21-autonomous-maturation-ledger.md):
+81/81 GCC, Clang and ASan/UBSan root tests, installed native acceptance with
+unchanged tools, and native graph/pager execution. Historical frontend milestones
+below describe how the current implementation was reached.
 
 The active v0.26 line inherits the closed, observable, regression-guarded v0.24 expression
 and type-reference graph plus arena-owned declaration/statement/block
@@ -140,8 +144,8 @@ docs/language/named-targets.md
 The following are still future or incomplete work:
 
 ```text
-general source lowering beyond accepted profiles
-target selection and separate artifact emission for named multitarget programs
+aggregate/streaming graph activation beyond the admitted scalar surface
+additional target architectures beyond governed LLVM/TinyVM policies
 general list/string/file I/O standard library
 optimizer transformations beyond the identity boundary
 parallelism and CUDA execution policies
@@ -160,9 +164,9 @@ The binding canonical type identities and layer boundary are recorded in:
 docs/flowmini/v0.24-type-policy.md
 ```
 
-The raw AST preserves written type references. Alias resolution, type checking,
-ABI lowering, and complete runtime storage for the canonical primitive family
-are not yet implemented.
+The raw AST preserves written type references. Downstream stages resolve and
+validate the admitted scalar/ABI surface; complete aggregate runtime storage and
+a permanent writable-storage language representation remain outside this slice.
 
 The completed C5 implementation checkpoint is recorded in:
 

@@ -1,5 +1,61 @@
 # Flowcore autonomous maturation ledger
 
+## Final Firetest hardening — 2026-09-07
+
+Continued from pushed `bb3b3c7`. Fresh GCC and Clang builds exposed a real clean-
+configure defect: the example project's older CMake policy discarded inherited
+superbuild target expressions when creating cache defaults. `FlowcoreProject`
+now initializes a standalone tool default only if no value is already defined.
+Both fresh builds then passed after clearing the affected cache entries, proving
+first-initialization behavior rather than relying on a warmed cache.
+
+The historical categorized driver ran migrated native `return`, argv and ABI
+programs in the compatibility interpreter (50 expected-native positives failed,
+with zero Valgrind errors). This was the wrong execution boundary, not evidence
+of native compiler failure. Added an explicit `--native-pass-boundary` mode:
+91 positives use the existing canonical chain, while the 37 negative fixtures
+and 16 support fragments retain their refusal expectations. The corrected
+support-inclusive Valgrind run passed 53/53 with zero errors. A dedicated support
+boundary is now in root CTest, raising the current count to 81.
+
+Exact additional pressure commands (in addition to the preceding checkpoint):
+
+```sh
+cmake -S . -B /tmp/flowcore-final-gcc -G Ninja -DCMAKE_BUILD_TYPE=Debug -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++
+cmake -S . -B /tmp/flowcore-final-clang -G Ninja -DCMAKE_BUILD_TYPE=Debug -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
+# After diagnosing and fixing first-cache initialization:
+cmake -S . -B /tmp/flowcore-final-gcc -U 'FLOWCORE_FLOW*'
+cmake -S . -B /tmp/flowcore-final-clang -U 'FLOWCORE_FLOW*'
+cmake --build /tmp/flowcore-final-gcc -j3
+ctest --test-dir /tmp/flowcore-final-gcc --output-on-failure -j3
+cmake --build /tmp/flowcore-final-clang -j3
+ctest --test-dir /tmp/flowcore-final-clang --output-on-failure -j3
+cmake --build /tmp/flowcore-reusable-current-sanitize -j3
+ASAN_OPTIONS=detect_leaks=0 LSAN_OPTIONS=detect_leaks=0 ctest --test-dir /tmp/flowcore-reusable-current-sanitize --output-on-failure -j3
+FLOWCORE_ROOT="$PWD" FLOWMINI_BIN=/tmp/flowcore-reusable-current/flowmini/flowmini FLOWANALYST_BIN=/tmp/flowcore-reusable-current/flowanalyst/flowanalyst FLOWPARALLEL_BIN=/tmp/flowcore-reusable-current/flowtools/flowparallel/flowparallel FLOWOPTIMIZE_BIN=/tmp/flowcore-reusable-current/flowoptimize/flowoptimize FLOWBIND_BIN=/tmp/flowcore-reusable-current/flowbind/flowbind FLOWLOWER_BIN=/tmp/flowcore-reusable-current/flowlower/flowlower bash tools/run-flowmini-test-suite.sh --root Flowmini/flowmini_v25_symboltable_projection --build-dir /tmp/flowcore-reusable-current/flowmini --no-build --native-pass-boundary --run-support --valgrind --timeout 60 --report /tmp/flowcore-final-categorized
+```
+
+GCC 13.3.0: 81/81 (8.42 seconds). Clang 18.1.3: 81/81 (7.78 seconds).
+GCC ASan/UBSan: 81/81 (26.09 seconds), retaining the documented environment's
+`detect_leaks=0` exclusion; independent Valgrind 3.22.0 checks cover leaks.
+Valgrind `--leak-check=full --errors-for-leak-kinds=definite,indirect,possible
+--error-exitcode=99` ran the installed pager plus each of Flowmini, Flowanalyst,
+Flowbind, Flowparallel, Flowoptimize and Flowlower on the retained pager artifacts:
+all seven reports have zero errors and all heap blocks freed. Logs and inputs are
+`/tmp/flow-final-*-valgrind.*` and `/tmp/flowcore-installed-pager`.
+
+A Python ThreadPoolExecutor with eight workers ran 64 independent installed
+Flowmini `--dump-frontend-bundle /tmp/flowcore-installed-pager/flow_less.flow`
+processes. Every valid JSON capture had SHA-256
+`73a8508f698e5a97c6a15b45712c89289fe5a8dc0bfe9a2a50695bf6bfb7a095`.
+No new build warnings were reported. Markdown has no configured repository lint
+tool here; changed local links and `git diff --check` are checked directly.
+No in-repository PR title/body metadata file exists to reconcile; no PR was merged
+or externally modified. Historical ledgers retain their checkpoint-specific counts.
+
+State remains CONTINUE until this hardening checkpoint and the reconciled final
+status are committed and pushed. No implementation gate or semantic blocker remains.
+
 ## Flow-owned native pager — 2026-09-07
 
 Continued from pushed `51a4d0a`. The pager now owns key/command interpretation,

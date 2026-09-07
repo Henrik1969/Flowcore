@@ -15,12 +15,13 @@ Flowmini/flowmini_v25_symboltable_projection
 Current stage theme:
 
 ```text
-Flowmini v0.27 namespaced provider language-chain slice
+Flowcore v0.29 reusable native language chain
 ```
 
-The v0.27 line now carries a source program through AST, SymbolTable,
-Flowanalyst, Flowoptimize, Flowlower, LLVM, and a native ELF executable for a
-small accepted application subset.
+The current chain carries source through AST, SymbolTable, Flowanalyst, exact
+Flowbind authorization, Flowparallel, Flowoptimize and generic LLVM lowering.
+Scalar source graphs execute fresh receiver frames, and `flow_less` owns its
+pager semantics in Flow. See the [verified ledger](../docs/checkpoints/2026-08-21-autonomous-maturation-ledger.md).
 
 ## Current status
 
@@ -36,8 +37,8 @@ structural SymbolTable projection   typed origins independently validated
 canonical type policy               represented and checked at current boundary
 semantic analysis                   initial report, regions, names, calls, types
 type checking                       accepted subset and explicit diagnostics
-Graph IR lowering                   downstream boundary not yet generalized
-runtime semantics                   executable profiles only
+Graph IR lowering                   bounded native scalar graphs with durable FIFO delivery
+runtime semantics                   generic scalar/control-flow lowering; no application profiles
 ```
 
 The inherited v0.24 AST represents a recursive, precedence-aware expression graph

@@ -105,3 +105,15 @@ public closure:    recorded Tier 3 evidence, or no closure claim
 
 Flowmini commands and current baselines are maintained in
 [Flowmini Testing](../flowmini/testing.md).
+
+## Current native-chain categorized gate
+
+The historical categorized runner executes pass files in the compatibility
+interpreter by default. Migrated native `return`, argv and ABI declarations must
+use `tools/run-flowmini-test-suite.sh --native-pass-boundary --run-support` with
+all six stage binary variables set. This validates the 91-program pass corpus
+through the canonical native chain and keeps the 37 negative fixtures and 16
+support fragments at their interpreter refusal boundary. `--valgrind` instruments
+those negative/support runs; native compiler stages and linked applications can
+be checked separately with `valgrind --error-exitcode=99 --leak-check=full`.
+The root CTest suite includes the support-fragment gate.

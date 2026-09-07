@@ -24,7 +24,8 @@ This is the soul of Flowcore.
 
 - [Flowcore core promise](architecture/flowcore-core-promise.md)
 - [Transformation and revision architecture](architecture/compiler-transformation-revision-model.md)
-- [Current v0.28 typed artifact-contract status](checkpoints/2026-08-26-v0.28-typed-artifact-contracts.md)
+- [Current reusable native chain and pager](checkpoints/2026-08-21-autonomous-maturation-ledger.md)
+- [Historical v0.28 typed artifact-contract status](checkpoints/2026-08-26-v0.28-typed-artifact-contracts.md)
 - [Historical v0.27 namespaced provider language-chain status](checkpoints/2026-08-21-v0.27-namespaced-provider-chain.md)
 - [FrankenCore conformance declaration](architecture/frankencore-conformance.md)
 - [Prerequisites](architecture/prerequisites.md)
@@ -50,10 +51,8 @@ See:
 Current checkpoint:
 
 ```text
-Flowcore v0.28 typed artifact-contract language-chain slice
-AST golden tests: 28
-Symbol projection tests: 14
-Flowanalyst / Flowbind / Flowoptimize / Flowlower: CTest green
-flowvalidate / identity mutation gates: CTest green
-flowcat: native ELF example PASS
+Flowcore v0.29 reusable native language chain
+GCC / Clang / ASan+UBSan root CTest: 81/81
+Native Flow-owned pager and graph activation laws: PASS
+Installed new-capability acceptance: exit 42, unchanged compiler binaries
 ```

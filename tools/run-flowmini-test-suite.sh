@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+SUITE_TOOL_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+
 # Flowmini categorized test-suite runner with environment-variable defaults.
 #
 # Black-box integration runner:
@@ -48,6 +50,7 @@ DO_VALGRIND=0
 GDB_FAILURES=0
 GDB_ALL=0
 RUN_SUPPORT=0
+NATIVE_PASS_BOUNDARY=0
 KEEP_REPORT=0
 
 truthy "${FLOWMINI_NO_BUILD:-}" && DO_BUILD=0
@@ -77,6 +80,8 @@ Options:
   --gdb-failures      Rerun bad/unexpected results under GDB and save backtraces.
   --gdb-all           Rerun every test under GDB and save backtraces.
   --run-support       Run examples/support/*.flow as expected-fail.
+  --native-pass-boundary  Validate migrated pass examples with the canonical native chain
+                      (requires FLOWMINI_BIN and the other stage binary variables).
   --keep-report       Do not delete old report before running.
   --print-env         Print useful export lines for this root and exit.
   --help              Show this help.
@@ -119,6 +124,7 @@ while [[ $# -gt 0 ]]; do
         --gdb-failures) GDB_FAILURES=1; shift ;;
         --gdb-all) GDB_ALL=1; shift ;;
         --run-support) RUN_SUPPORT=1; shift ;;
+        --native-pass-boundary) NATIVE_PASS_BOUNDARY=1; shift ;;
         --keep-report) KEEP_REPORT=1; shift ;;
         --print-env) PRINT_ENV=1; shift ;;
         --help|-h) usage; exit 0 ;;
@@ -365,7 +371,13 @@ run_test() {
 echo "== running categorized Flowmini suite =="
 
 shopt -s nullglob
-for f in "$PASS_DIR"/*.flow; do run_test pass "$f"; done
+if [[ "$NATIVE_PASS_BOUNDARY" -eq 1 ]]; then
+    # Migrated native return/argv/ABI syntax is not the compatibility interpreter.
+    # Preserve standalone historical use, but explicitly choose the current chain.
+    "$SUITE_TOOL_DIR/run-flowcore-pass-corpus.sh"
+else
+    for f in "$PASS_DIR"/*.flow; do run_test pass "$f"; done
+fi
 for f in "$FAIL_DIR"/*.flow; do run_test fail "$f"; done
 
 if [[ "$RUN_SUPPORT" -eq 1 && -d "$SUPPORT_DIR" ]]; then

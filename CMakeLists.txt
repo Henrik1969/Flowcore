@@ -387,3 +387,9 @@ add_test(NAME native_source_graph
         FLOWGRAPH_CXX=${CMAKE_CXX_COMPILER}
         "FLOWGRAPH_LINK_FLAGS=${CMAKE_CXX_FLAGS}"
         ${CMAKE_CURRENT_SOURCE_DIR}/tools/test-native-source-graph.sh)
+
+add_test(NAME flowmini_support_boundary
+    COMMAND ${CMAKE_COMMAND} -E env
+        FLOWCORE_ROOT=${CMAKE_CURRENT_SOURCE_DIR}
+        FLOWMINI_BIN=$<TARGET_FILE:flowmini>
+        ${CMAKE_CURRENT_SOURCE_DIR}/tools/test-support-boundary.sh)

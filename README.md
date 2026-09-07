@@ -5,7 +5,7 @@ Flowcore is experimental language and system-architecture work.
 The current active implementation is:
 
 ```text
-Flowcore v0.28 typed artifact-contract language-chain slice
+Flowcore v0.29 reusable native language chain
 ```
 
 Active implementation path:
@@ -22,8 +22,8 @@ This repository is not a finished language or runtime. It is a design and implem
 status: experimental
 production-ready: no
 active branch: v29-language-maturation
-active prototype: Flowcore v0.28 typed artifact-contract language-chain slice
-current milestone: independently validated, identity-preserving frontend-to-ELF chain
+active prototype: Flowcore v0.29 reusable native language chain
+current milestone: reusable native source graphs and Flow-owned pager
 ```
 
 Current known green gates:
@@ -168,10 +168,11 @@ flowmini_suite:                PASS (78/78)
 CTest:                         PASS (2/2)
 ```
 
-For the complete root build, the current result is:
+For the complete root build, the current result is (see the
+[maturation ledger](docs/checkpoints/2026-08-21-autonomous-maturation-ledger.md)):
 
 ```text
-root CTest:                    PASS (80/80)
+root CTest:                    PASS (81/81)
 integration corpus:            PASS (3/3)
 pipeline matrix:               PASS (7 accepted, 2 semantic-only, 1 blocked)
 pass corpus:                   PASS (91 programs)
