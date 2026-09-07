@@ -260,6 +260,7 @@ struct LetStatement {
     TypeRef type;
     std::optional<std::size_t> initializer_expression;
     bool is_const = false;
+    std::optional<std::string> compile_time_value;
 };
 struct AssignmentStatement {
     AssignableTarget target;

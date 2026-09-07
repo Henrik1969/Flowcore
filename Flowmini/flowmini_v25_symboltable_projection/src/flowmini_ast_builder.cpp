@@ -1,5 +1,11 @@
 #include <cstddef>
+#include <cstdint>
+#include <functional>
+#include <limits>
+#include <map>
 #include <memory>
+#include <optional>
+#include <variant>
 #include "flow_common.h"
 #include "flowmini_ast_builder.h"
 
@@ -17,6 +23,95 @@ namespace flowmini::ast {
 
     namespace {
         constexpr std::size_t max_expression_population_depth = 64;
+
+        using CompileTimeValue = std::variant<std::int64_t, bool>;
+
+        std::optional<CompileTimeValue> evaluate_compile_time_expression(
+            const std::size_t expression_id,
+            const std::vector<Expression>& expressions,
+            const std::map<std::string, CompileTimeValue>& values) {
+            if (expression_id >= expressions.size()) return std::nullopt;
+            const auto& expression = expressions[expression_id];
+            if (const auto* literal = std::get_if<IntegerLiteralExpr>(&expression.payload)) {
+                try {
+                    std::size_t parsed = 0;
+                    const auto value = std::stoll(literal->text, &parsed, 0);
+                    if (parsed != literal->text.size()) return std::nullopt;
+                    return CompileTimeValue{static_cast<std::int64_t>(value)};
+                } catch (...) {
+                    return std::nullopt;
+                }
+            }
+            if (const auto* literal = std::get_if<BoolLiteralExpr>(&expression.payload)) {
+                if (literal->text == "true") return CompileTimeValue{true};
+                if (literal->text == "false") return CompileTimeValue{false};
+                return std::nullopt;
+            }
+            if (const auto* identifier = std::get_if<IdentifierExpr>(&expression.payload)) {
+                const auto found = values.find(identifier->name);
+                return found == values.end() ? std::nullopt : std::optional<CompileTimeValue>{found->second};
+            }
+            if (const auto* unary = std::get_if<UnaryExpr>(&expression.payload)) {
+                if (!unary->operand) return std::nullopt;
+                const auto operand = evaluate_compile_time_expression(*unary->operand, expressions, values);
+                if (!operand) return std::nullopt;
+                if (unary->op == "-" && std::holds_alternative<std::int64_t>(*operand)) {
+                    const auto value = std::get<std::int64_t>(*operand);
+                    if (value == std::numeric_limits<std::int64_t>::min()) return std::nullopt;
+                    return CompileTimeValue{-value};
+                }
+                if (unary->op == "not" && std::holds_alternative<bool>(*operand)) {
+                    return CompileTimeValue{!std::get<bool>(*operand)};
+                }
+                return std::nullopt;
+            }
+            if (const auto* binary = std::get_if<BinaryExpr>(&expression.payload)) {
+                if (!binary->left || !binary->right) return std::nullopt;
+                const auto left = evaluate_compile_time_expression(*binary->left, expressions, values);
+                const auto right = evaluate_compile_time_expression(*binary->right, expressions, values);
+                if (!left || !right) return std::nullopt;
+                if (std::holds_alternative<std::int64_t>(*left) && std::holds_alternative<std::int64_t>(*right)) {
+                    const auto lhs = std::get<std::int64_t>(*left);
+                    const auto rhs = std::get<std::int64_t>(*right);
+                    if (binary->op == "==" || binary->op == "!=" || binary->op == "<" || binary->op == "<=" || binary->op == ">" || binary->op == ">=") {
+                        bool result = false;
+                        if (binary->op == "==") result = lhs == rhs;
+                        else if (binary->op == "!=") result = lhs != rhs;
+                        else if (binary->op == "<") result = lhs < rhs;
+                        else if (binary->op == "<=") result = lhs <= rhs;
+                        else if (binary->op == ">") result = lhs > rhs;
+                        else result = lhs >= rhs;
+                        return CompileTimeValue{result};
+                    }
+                    std::int64_t result = 0;
+                    if (binary->op == "+") {
+                        if (__builtin_add_overflow(lhs, rhs, &result)) return std::nullopt;
+                    } else if (binary->op == "-") {
+                        if (__builtin_sub_overflow(lhs, rhs, &result)) return std::nullopt;
+                    } else if (binary->op == "*") {
+                        if (__builtin_mul_overflow(lhs, rhs, &result)) return std::nullopt;
+                    } else if (binary->op == "/") {
+                        if (rhs == 0 || (lhs == std::numeric_limits<std::int64_t>::min() && rhs == -1)) return std::nullopt;
+                        result = lhs / rhs;
+                    } else if (binary->op == "%") {
+                        if (rhs == 0) return std::nullopt;
+                        result = lhs % rhs;
+                    } else return std::nullopt;
+                    return CompileTimeValue{result};
+                }
+                if (std::holds_alternative<bool>(*left) && std::holds_alternative<bool>(*right) &&
+                    (binary->op == "==" || binary->op == "!=")) {
+                    const bool lhs = std::get<bool>(*left), rhs = std::get<bool>(*right);
+                    return CompileTimeValue{binary->op == "==" ? lhs == rhs : lhs != rhs};
+                }
+            }
+            return std::nullopt;
+        }
+
+        std::string compile_time_value_text(const CompileTimeValue& value) {
+            if (const auto* integer = std::get_if<std::int64_t>(&value)) return std::to_string(*integer);
+            return std::get<bool>(value) ? "true" : "false";
+        }
 
         bool is_end_token(const flowmini::Token& token);
         Expression::Payload make_leaf_payload(const flowmini::Token& token);
@@ -2925,6 +3020,49 @@ namespace flowmini::ast {
             return i;
         }
 
+        void evaluate_compile_time_constants(AstModule& module) {
+            using Values = std::map<std::string, CompileTimeValue>;
+            std::function<void(BlockId, Values)> visit_block = [&](const BlockId block_id, Values values) {
+                if (block_id >= module.block_pool.size()) return;
+                for (const auto statement_id : module.block_pool[block_id].statements) {
+                    if (statement_id >= module.statement_pool.size()) continue;
+                    auto& statement = module.statement_pool[statement_id];
+                    if (auto* binding = std::get_if<LetStatement>(&statement.payload)) {
+                        if (!binding->is_const || !binding->initializer_expression) continue;
+                        const auto value = evaluate_compile_time_expression(*binding->initializer_expression, module.expression_pool, values);
+                        if (value) {
+                            binding->compile_time_value = compile_time_value_text(*value);
+                            values[binding->name] = *value;
+                        }
+                        continue;
+                    }
+                    if (const auto* branch = std::get_if<IfStatement>(&statement.payload)) {
+                        visit_block(branch->then_block, values);
+                        if (branch->else_arm && std::holds_alternative<ElseBlock>(*branch->else_arm)) visit_block(std::get<ElseBlock>(*branch->else_arm).block, values);
+                    } else if (const auto* guard = std::get_if<GuardStatement>(&statement.payload)) {
+                        visit_block(guard->failure_block, values);
+                    } else if (const auto* match = std::get_if<WhenStatement>(&statement.payload)) {
+                        for (const auto& arm : match->cases) visit_block(arm.block, values);
+                        visit_block(match->default_block, values);
+                    } else if (const auto* loop = std::get_if<WhileStatement>(&statement.payload)) {
+                        visit_block(loop->body_block, values);
+                    }
+                }
+            };
+            std::function<void(const TopLevelDecl&)> visit_decl = [&](const TopLevelDecl& declaration) {
+                if (const auto* function = std::get_if<FunctionDecl>(&declaration)) {
+                    if (function->body) visit_block(*function->body, {});
+                } else if (const auto* main = std::get_if<MainBlock>(&declaration)) {
+                    if (main->body) visit_block(*main->body, {});
+                } else if (const auto* target = std::get_if<TargetDecl>(&declaration)) {
+                    for (const auto declaration_id : target->declarations) {
+                        if (declaration_id < module.declaration_pool.size()) visit_decl(module.declaration_pool[declaration_id]);
+                    }
+                }
+            };
+            for (const auto& declaration : module.declaration_pool) visit_decl(declaration);
+        }
+
     } // namespace
 
     AstModule build_source_header_ast(const std::vector<flowmini::Token>& tokens) {
@@ -3120,6 +3258,7 @@ namespace flowmini::ast {
 
             ++i;
         }
+        evaluate_compile_time_constants(module);
         return module;
     }
 

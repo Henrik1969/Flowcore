@@ -492,6 +492,10 @@ namespace flowmini::ast {
                     out << ", \"initializer_expression\": ";
                     dump_optional_id(out, payload.initializer_expression);
                     if (payload.is_const) out << ", \"is_const\": true";
+                    if (payload.compile_time_value) {
+                        out << ", \"compile_time_value\": ";
+                        dump_json_string(out, *payload.compile_time_value);
+                    }
                 } else if constexpr (std::is_same_v<Payload, AssignmentStatement>) {
                     out << "\"target\": ";
                     dump_assignable_target_json(out, payload.target);

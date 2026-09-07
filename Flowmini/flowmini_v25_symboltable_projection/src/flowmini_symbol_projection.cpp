@@ -235,6 +235,13 @@ void project_statement_binding(symboltable::SymbolTable& table,
                             "mutability",
                             "const");
         }
+        if (binding->compile_time_value) {
+            add_string_fact(table,
+                            variableSymbol,
+                            symboltable::FactoidKind::Custom,
+                            "compile_time_value",
+                            *binding->compile_time_value);
+        }
     }
 
     std::optional<BlockId> body;

@@ -255,6 +255,18 @@ add_test(NAME flowmini_const_guard_semantics
         ${CMAKE_CURRENT_SOURCE_DIR}/tools/run-flowmini-const-guard-tests.sh
 )
 
+add_test(NAME flowmini_const_evaluation
+        COMMAND ${CMAKE_COMMAND} -E env
+        FLOWMINI_BIN=$<TARGET_FILE:flowmini>
+        ${CMAKE_CURRENT_SOURCE_DIR}/tools/run-flowmini-const-evaluation-tests.sh
+)
+
+add_test(NAME flowmini_guard_backend
+        COMMAND ${CMAKE_COMMAND} -E env
+        FLOWMINI_BIN=$<TARGET_FILE:flowmini>
+        ${CMAKE_CURRENT_SOURCE_DIR}/tools/run-flowmini-guard-backend-tests.sh
+)
+
 add_test(NAME flowmini_parser_differential
         COMMAND ${CMAKE_COMMAND} -E env
         FLOWMINI_BIN=$<TARGET_FILE:flowmini>

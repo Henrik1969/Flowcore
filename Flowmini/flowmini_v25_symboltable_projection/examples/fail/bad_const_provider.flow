@@ -1,0 +1,7 @@
+import "../../std/abi/libc.flow"
+
+program bad_const_provider
+main {
+    const value : int(abs(1))
+    print value
+}

@@ -1,0 +1,9 @@
+program guard_backend_probe
+main {
+    ready : Bool(false)
+    value : int(1)
+    guard ready else {
+        value + 1 -> value
+    }
+    return value
+}

@@ -51,7 +51,7 @@ struct Provider {
 };
 struct MatchArm { int value = 0, high = 0, body_block = -1; std::string label_type, label_member; };
 struct Operation {
-    int id = -1, expression = -1, statement = -1, block = -1, function_symbol = -1, callee_symbol = -1, result_symbol = -1, then_block = -1, else_block = -1, body_block = -1;
+    int id = -1, expression = -1, statement = -1, block = -1, function_symbol = -1, callee_symbol = -1, result_symbol = -1, then_block = -1, else_block = -1, body_block = -1, failure_block = -1;
     std::string kind;
     const Json* operand = nullptr;
     int default_block = -1, join_block = -1;
@@ -206,6 +206,7 @@ private:
             op.result_symbol=integer(field(item,"result_symbol_id"),"result_symbol_id");
             op.then_block=integer(field(item,"then_block_id"),"then_block_id"); op.else_block=integer(field(item,"else_block_id"),"else_block_id");
             op.body_block=integer(field(item,"body_block_id"),"body_block_id");
+            op.failure_block=integer(field(item,"failure_block_id"),"failure_block_id");
             op.default_block=integer(field(item,"default_block_id"),"default_block_id"); op.join_block=integer(field(item,"join_block_id"),"join_block_id");
             op.selector_type=text(field(item,"selector_type")); op.selector_kind=text(field(item,"selector_kind"));
             if (op.kind=="match") for (const auto& value : array(field(item,"cases"),"match.cases")) {
@@ -232,13 +233,17 @@ private:
             if (op.kind=="branch") {
                 has_branch_=true;
             }
+            if (op.kind=="guard") {
+                has_branch_=true;
+            }
             if (op.block!=0) has_nonroot_block_=true;
-            if (op.kind!="call" && op.kind!="external_call" && op.kind!="value_definition" && op.kind!="branch" && op.kind!="return_value" && op.kind!="loop" && op.kind!="assignment" && op.kind!="match") unsupported_=true;
+            if (op.kind!="call" && op.kind!="external_call" && op.kind!="value_definition" && op.kind!="branch" && op.kind!="guard" && op.kind!="return_value" && op.kind!="loop" && op.kind!="assignment" && op.kind!="match") unsupported_=true;
             operations_.push_back(std::move(op));
         }
         for (auto& op:operations_) if (op.kind!="call" || plan_version_==2) blocks_[op.block].push_back(&op);
         for (const auto& op : operations_) {
             if (op.kind=="branch" && (op.then_block<0 || !blocks_.count(op.then_block) || (op.else_block>=0 && !blocks_.count(op.else_block)))) invalid_control_=true;
+            if (op.kind=="guard" && (op.failure_block<0 || !blocks_.count(op.failure_block))) invalid_control_=true;
             if (op.kind=="loop" && (op.body_block<0 || !blocks_.count(op.body_block))) invalid_control_=true;
             if (op.kind=="match" && (op.join_block<0 || !blocks_.count(op.join_block) || (op.default_block>=0 && !blocks_.count(op.default_block)))) invalid_control_=true;
             if (op.kind=="match") for (const auto& arm : op.match_cases) if (!blocks_.count(arm.body_block)) invalid_control_=true;
@@ -262,6 +267,7 @@ private:
             for(int block:snapshot) for(const auto* op:blocks_[block]) {
                 const int children[]={op->then_block,op->else_block,op->body_block};
                 for(int child:children) if(child>=0 && reachable.insert(child).second) changed=true;
+                if (op->kind=="guard" && op->failure_block>=0 && reachable.insert(op->failure_block).second) changed=true;
                 if (op->kind=="match") {
                     if (op->default_block>=0 && reachable.insert(op->default_block).second) changed=true;
                     for (const auto& arm : op->match_cases) if (reachable.insert(arm.body_block).second) changed=true;
@@ -429,6 +435,11 @@ private:
                 const auto join="flow_join_"+std::to_string(label_++); const auto then_label="flow_block_"+std::to_string(op->then_block); const auto else_label=op->else_block>=0?"flow_block_"+std::to_string(op->else_block):join;
                 out<<"  br i1 "<<condition<<", label %"<<then_label<<", label %"<<else_label<<"\n";
                 emit_block(op->then_block,out,join); if(op->else_block>=0) emit_block(op->else_block,out,join); out<<join<<":\n";
+            } else if(op->kind=="guard") {
+                auto [type,condition]=expression(*op->operand,out); if(type!="i1"||condition.empty()) throw std::runtime_error("unsupported structured guard condition");
+                const auto continuation_label="flow_guard_continue_"+std::to_string(label_++);
+                out<<"  br i1 "<<condition<<", label %"<<continuation_label<<", label %flow_block_"<<op->failure_block<<"\n";
+                emit_block(op->failure_block,out,continuation_label); out<<continuation_label<<":\n";
             } else if(op->kind=="match") {
                 if ((op->selector_kind != "integer" && op->selector_kind != "enum") || op->match_cases.empty()) throw std::runtime_error("unsupported structured match selector");
                 auto [selector_type, selector] = expression(*op->operand, out, op->selector_kind == "enum" ? "int" : op->selector_type);

@@ -2,8 +2,9 @@ program const_guard_semantics
 main {
     const answer : int(42)
     ready : Bool(true)
+    attempts : int(0)
     guard ready else {
-        print answer
+        attempts + 1 -> attempts
     }
     print answer
 }

@@ -793,3 +793,22 @@ later instruction reopens them.
 - Unsafe regions, inline assembly, embedded foreign source, and opaque source
   escapes are explicitly **NOT SUPPORTED — INTENTIONALLY EXCLUDED**. External
   unsafe functionality remains provider/ABI artifact work.
+
+## 2026-09-07 Flowmini language-growth checkpoint — constants and guards
+
+- Set `.codex-run-state` to `CONTINUE` for the active language-growth mission.
+- Compile-time constant evaluation now covers deterministic integer and Boolean
+  literals, transitive references, unary operators, arithmetic, and comparisons
+  in the structural AST and runtime compatibility parser. Checked overflow,
+  divide-by-zero, provider calls, runtime state, and unsupported expressions are
+  rejected with evidence-producing tests.
+- `compile_time_value` is preserved in AST, symbol facts, and Flowanalyst
+  lowering operations. The dedicated const gate passes.
+- Canonical guard lowering now preserves failure-block provenance through
+  Flowanalyst, Flowoptimize, and Flowlower LLVM emission. Nested guard failure
+  blocks retain enclosing function ownership; a compiled failing guard exits via
+  its declared failure path. The dedicated backend gate passes.
+- New tests: `flowmini_const_evaluation` and `flowmini_guard_backend`; focused
+  const/guard gates pass 3/3. Variant backend parity remains explicitly
+  deferred pending a target-neutral payload contract; no backend claim was
+  widened by this checkpoint.

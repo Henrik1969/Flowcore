@@ -1,0 +1,7 @@
+program const_compile_time_probe
+main {
+    const a : int(10)
+    const b : int(a + 5)
+    const c : int(2 * b)
+    print c
+}

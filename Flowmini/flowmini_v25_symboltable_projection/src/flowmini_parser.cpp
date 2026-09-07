@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <cctype>
+#include <limits>
 #include <map>
 #include <memory>
 #include <optional>
@@ -514,6 +515,57 @@ private:
         // int may flow into invariant-free semantic aliases such as Integer refines int.
         if (actual == "int" && isIntLikeType(wanted) && !typeHasAnyInvariants(wanted)) { return true; }
         return false;
+    }
+
+    [[nodiscard]] std::optional<int> evaluateConstantInt(const Expr& expr) const {
+        if (expr.kind == ExprKind::LiteralInt) return expr.literal;
+        if (expr.kind == ExprKind::Identifier) {
+            const auto* symbol = lookup(expr.ident);
+            return symbol && symbol->constantInt ? symbol->constantInt : std::nullopt;
+        }
+        if (expr.kind == ExprKind::Binary && expr.left && expr.right) {
+            const auto left = evaluateConstantInt(*expr.left);
+            const auto right = evaluateConstantInt(*expr.right);
+            if (!left || !right) return std::nullopt;
+            const int lhs = *left;
+            const int rhs = *right;
+            int result = 0;
+            if (expr.op == TokenKind::Plus) {
+                if (__builtin_add_overflow(lhs, rhs, &result)) return std::nullopt;
+            } else if (expr.op == TokenKind::Minus) {
+                if (__builtin_sub_overflow(lhs, rhs, &result)) return std::nullopt;
+            } else if (expr.op == TokenKind::Star) {
+                if (__builtin_mul_overflow(lhs, rhs, &result)) return std::nullopt;
+            } else if (expr.op == TokenKind::Slash) {
+                if (rhs == 0 || (lhs == std::numeric_limits<int>::min() && rhs == -1)) return std::nullopt;
+                result = lhs / rhs;
+            } else if (expr.op == TokenKind::Percent) {
+                if (rhs == 0) return std::nullopt;
+                result = lhs % rhs;
+            } else return std::nullopt;
+            return result;
+        }
+        if (expr.kind == ExprKind::UnaryNot && expr.left) return std::nullopt;
+        return std::nullopt;
+    }
+
+    [[nodiscard]] std::optional<bool> evaluateConstantBool(const Expr& expr) const {
+        if (expr.kind == ExprKind::LiteralBool) return expr.boolLiteral;
+        if (expr.kind == ExprKind::Identifier) {
+            const auto* symbol = lookup(expr.ident);
+            return symbol && symbol->constantBool ? symbol->constantBool : std::nullopt;
+        }
+        if (expr.kind == ExprKind::UnaryNot && expr.left) {
+            const auto value = evaluateConstantBool(*expr.left);
+            return value ? std::optional<bool>{!*value} : std::nullopt;
+        }
+        if (expr.kind == ExprKind::Binary && expr.left && expr.right &&
+            (expr.op == TokenKind::EqualEqual || expr.op == TokenKind::BangEqual)) {
+            const auto left = evaluateConstantBool(*expr.left);
+            const auto right = evaluateConstantBool(*expr.right);
+            if (left && right) return expr.op == TokenKind::EqualEqual ? *left == *right : *left != *right;
+        }
+        return std::nullopt;
     }
 
     void declareSymbol(const Token& token, const std::string& name, const std::string& type) {
@@ -1565,6 +1617,7 @@ private:
             return parseListDeclaration(idToken, id);
         }
         if (check(TokenKind::Identifier) && isEnumType(peek().text)) {
+            if (declaringConstant_) throw flow::DiagnosticError{"lowerer", "compile-time constants currently support only int-like and Bool values"};
             const std::string enumType = expectIdentifier("expected enum type").text;
             expect(TokenKind::LeftParen, "enum declaration requires initializer");
             Expr initializer = parsePredicateExpr();
@@ -1576,6 +1629,7 @@ private:
             return step;
         }
         if (check(TokenKind::Identifier) && isVariantType(peek().text)) {
+            if (declaringConstant_) throw flow::DiagnosticError{"lowerer", "compile-time constants currently support only int-like and Bool values"};
             const std::string variantType = expectIdentifier("expected variant type").text;
             expect(TokenKind::LeftParen, "variant declaration requires initializer");
             Expr initializer = parsePredicateExpr();
@@ -1587,6 +1641,7 @@ private:
             return step;
         }
         if (check(TokenKind::Identifier) && peek().text == "array" && lookahead(1).kind != TokenKind::Dot) {
+            if (declaringConstant_) throw flow::DiagnosticError{"lowerer", "compile-time constants currently support only int-like and Bool values"};
             return parseArrayDeclaration(idToken, id);
         }
         if (check(TokenKind::Identifier) && peek().text == "Bool" && lookahead(1).kind != TokenKind::Dot) {
@@ -1596,12 +1651,15 @@ private:
             return parseTypedIntegerDeclaration(idToken, id);
         }
         if (check(TokenKind::Identifier) && peek().text == "c_string" && lookahead(1).kind != TokenKind::Dot) {
+            if (declaringConstant_) throw flow::DiagnosticError{"lowerer", "compile-time constants currently support only int-like and Bool values"};
             return parseCStringDeclaration(idToken, id);
         }
         if (check(TokenKind::Identifier) && isAbiStructType(peek().text) && lookahead(1).kind != TokenKind::Dot) {
+            if (declaringConstant_) throw flow::DiagnosticError{"lowerer", "compile-time constants currently support only int-like and Bool values"};
             return parseAbiStructValueDeclaration(idToken, id);
         }
         if (check(TokenKind::Identifier) && isRecordType(peek().text) && lookahead(1).kind != TokenKind::Dot) {
+            if (declaringConstant_) throw flow::DiagnosticError{"lowerer", "compile-time constants currently support only int-like and Bool values"};
             return parseRecordValueDeclaration(idToken, id);
         }
         if (check(TokenKind::Identifier) && isAbiPointerType(peek().text) && lookahead(1).kind != TokenKind::Dot) {
@@ -1653,6 +1711,12 @@ private:
             currentScope().symbols[id].constantInt = initializer.literal;
             return Step{};
         }
+        if (declaringConstant_) {
+            const auto value = evaluateConstantInt(initializer);
+            if (!value) throw flow::DiagnosticError{"lowerer", "const int initializer must be deterministic and compile-time evaluable"};
+            currentScope().symbols[id].constantInt = *value;
+            return Step{};
+        }
         const std::string path = lookup(id)->path;
         Step step;
         static_cast<void>(lowerExprToPath(initializer, path, &step));
@@ -1668,6 +1732,12 @@ private:
         declareSymbol(idToken, id, "Bool");
         if (declaringConstant_ && initializer.kind == ExprKind::LiteralBool) {
             currentScope().symbols[id].constantBool = initializer.boolLiteral;
+            return Step{};
+        }
+        if (declaringConstant_) {
+            const auto value = evaluateConstantBool(initializer);
+            if (!value) throw flow::DiagnosticError{"lowerer", "const Bool initializer must be deterministic and compile-time evaluable"};
+            currentScope().symbols[id].constantBool = *value;
             return Step{};
         }
         const std::string path = lookup(id)->path;
@@ -1694,8 +1764,13 @@ private:
             throw flow::DiagnosticError{"lowerer", "initializer for refined type '" + declaredType + "' must be a satisfying literal or a value already known to satisfy that type"};
         }
         declareSymbol(idToken, id, declaredType);
-        if (declaringConstant_ && initializer.kind == ExprKind::LiteralInt) {
-            currentScope().symbols[id].constantInt = initializer.literal;
+        if (declaringConstant_) {
+            const auto value = evaluateConstantInt(initializer);
+            if (!value) throw flow::DiagnosticError{"lowerer", "const integer initializer must be deterministic and compile-time evaluable"};
+            if (!literalSatisfiesType(*value, declaredType)) {
+                throw flow::DiagnosticError{"lowerer", "compile-time value " + std::to_string(*value) + " does not satisfy type contract " + declaredType + " for '" + id + "'"};
+            }
+            currentScope().symbols[id].constantInt = *value;
             return Step{};
         }
         const std::string path = lookup(id)->path;
@@ -2044,7 +2119,9 @@ private:
         Step step;
         if (isIntLikeType(type)) {
             std::string path;
-            if (expr.kind == ExprKind::Identifier) { path = lookup(expr.ident)->path; }
+            if (expr.kind == ExprKind::Identifier && lookup(expr.ident)->constantInt.has_value()) {
+                path = lowerExprToPath(expr, generatedId("print_tmp"), &step);
+            } else if (expr.kind == ExprKind::Identifier) { path = lookup(expr.ident)->path; }
             else { path = lowerExprToPath(expr, generatedId("print_tmp"), &step); }
             const std::string id = generatedId("print");
             addNode("node", id, "stdout.int_line"); addPolicy(id, "path", path);
@@ -2053,7 +2130,9 @@ private:
         }
         if (type == "Bool") {
             std::string path;
-            if (expr.kind == ExprKind::Identifier) { path = lookup(expr.ident)->path; }
+            if (expr.kind == ExprKind::Identifier && lookup(expr.ident)->constantBool.has_value()) {
+                path = lowerExprToPath(expr, generatedId("print_bool_tmp"), &step);
+            } else if (expr.kind == ExprKind::Identifier) { path = lookup(expr.ident)->path; }
             else { path = lowerExprToPath(expr, generatedId("print_bool_tmp"), &step); }
             const std::string id = generatedId("print_bool");
             addNode("node", id, "stdout.bool_line"); addPolicy(id, "path", path);

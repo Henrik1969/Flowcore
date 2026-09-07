@@ -1,0 +1,5 @@
+program bad_const_runtime_dependency
+main {
+    const value : int(stdin.int())
+    print value
+}

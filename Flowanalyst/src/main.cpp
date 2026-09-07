@@ -69,7 +69,7 @@ struct AggregateLayout { std::string contract, name; std::vector<std::pair<std::
 struct Region { std::string id, kind, status; std::vector<std::string> prerequisites; };
 struct EffectFact { int declaration = -1, symbol = -1; std::string name, effect, certainty, reason; };
 struct CallSite { int expression = -1, statement = -1, scope = -1, callee_symbol = -1, write_symbol = -1; std::string callee; bool pure = false; std::set<int> reads; std::string writes; std::vector<int> arguments; std::vector<int> independent_with; };
-struct LoweringOperation { int expression = -1, statement = -1, scope = -1, block = -1, function_symbol = -1, then_block = -1, else_block = -1, body_block = -1, default_block = -1, join_block = -1, callee_symbol = -1, result_symbol = -1; std::string callee, kind, contract, library, convention, symbol, effect, parameter_types, return_type, selector_type, selector_kind; std::vector<int> arguments, match_values, match_highs, match_blocks; std::vector<std::string> match_label_types, match_label_members; };
+struct LoweringOperation { int expression = -1, statement = -1, scope = -1, block = -1, function_symbol = -1, then_block = -1, else_block = -1, body_block = -1, failure_block = -1, default_block = -1, join_block = -1, callee_symbol = -1, result_symbol = -1; std::string callee, kind, contract, library, convention, symbol, effect, parameter_types, return_type, selector_type, selector_kind, compile_time_value; std::vector<int> arguments, match_values, match_highs, match_blocks; std::vector<std::string> match_label_types, match_label_members; };
 struct Callable { int symbol = -1, scope = -1, body_block = -1; bool entry = false; std::string name, return_type, availability; std::vector<std::pair<int, std::string>> parameters; };
 struct Resolution { int expression = -1, statement = -1, scope = -1, symbol = -1; std::string name; };
 
@@ -239,8 +239,12 @@ int run(const Json& bundle, int lowering_plan_version) {
     }
     auto nested_block = [&](const Json& statement) -> std::vector<int> {
         std::vector<int> result; const auto* payload = field(statement, "payload");
-        for (const auto& key : {"body_block", "then_block"}) { int block = integer(field(payload, key)); if (block >= 0) result.push_back(block); }
+        for (const auto& key : {"body_block", "then_block", "failure_block"}) { int block = integer(field(payload, key)); if (block >= 0) result.push_back(block); }
         const auto* else_arm = field(payload, "else_arm"); int else_block = integer(field(else_arm, "block")); if (else_block >= 0) result.push_back(else_block);
+        for (const auto& arm : list(field(payload, "cases"))) {
+            const int block = integer(field(arm, "block")); if (block >= 0) result.push_back(block);
+        }
+        const int default_block = integer(field(payload, "default_block")); if (default_block >= 0) result.push_back(default_block);
         return result;
     };
     std::function<void(int, int)> assign_statements = [&](int block_id, int owner_scope) {
@@ -588,6 +592,16 @@ int run(const Json& bundle, int lowering_plan_version) {
         operation.function_symbol = containing_function(scope_id);
         operation.result_symbol = result_symbol;
         operation.kind = "value_definition";
+        const auto* is_const = field(payload, "is_const");
+        if (is_const && std::holds_alternative<bool>(*is_const) && std::get<bool>(*is_const)) {
+            operation.compile_time_value = text(field(payload, "compile_time_value"));
+            if (operation.compile_time_value.empty()) {
+                add_diagnostic("FLOWANALYST_CONST_NOT_COMPILE_TIME",
+                               "const initializer is not a deterministic compile-time value",
+                               result_symbol,
+                               "statement:" + std::to_string(statement_id));
+            }
+        }
         operation.arguments.push_back(initializer);
         lowering_operations.push_back(std::move(operation));
     }
@@ -618,6 +632,21 @@ int run(const Json& bundle, int lowering_plan_version) {
         operation.then_block = integer(field(payload, "then_block"));
         operation.else_block = integer(field(field(payload, "else_arm"), "block"));
         operation.kind = "branch";
+        if (operation.expression >= 0) operation.arguments.push_back(operation.expression);
+        lowering_operations.push_back(std::move(operation));
+    }
+    for (const auto& [statement_id, statement] : statements) {
+        if (text(field(*statement, "kind")) != "guard") continue;
+        const auto* payload = field(*statement, "payload");
+        LoweringOperation operation;
+        operation.expression = integer(field(payload, "condition_expression"));
+        operation.statement = statement_id;
+        operation.scope = statement_scopes.count(statement_id) ? statement_scopes.at(statement_id) : -1;
+        operation.block = containing_block(statement_id);
+        operation.function_symbol = containing_function(operation.scope);
+        operation.failure_block = integer(field(payload, "failure_block"));
+        operation.join_block = operation.block;
+        operation.kind = "guard";
         if (operation.expression >= 0) operation.arguments.push_back(operation.expression);
         lowering_operations.push_back(std::move(operation));
     }
@@ -718,6 +747,17 @@ int run(const Json& bundle, int lowering_plan_version) {
                            "variant match lowering is not admitted until a target-neutral payload contract exists",
                            -1,
                            "statement:" + std::to_string(operation.statement));
+        }
+        if (operation.kind == "guard") {
+            const bool has_lowerable_failure = std::any_of(lowering_operations.begin(), lowering_operations.end(), [&](const auto& candidate) {
+                return candidate.block == operation.failure_block && candidate.kind != "guard";
+            });
+            if (!has_lowerable_failure) {
+                add_diagnostic("FLOWANALYST_GUARD_BACKEND_UNSUPPORTED",
+                               "guard failure block has no lowerable operation in the current backend contract",
+                               -1,
+                               "statement:" + std::to_string(operation.statement));
+            }
         }
     }
     for (const auto& diagnostic : diagnostics) for (auto& region : regions) if (region.id == diagnostic.region) region.status = "rejected";
@@ -912,7 +952,11 @@ int run(const Json& bundle, int lowering_plan_version) {
         }
         std::cout << "]";
         if (operation.result_symbol >= 0) std::cout << ",\"result_symbol_id\":" << operation.result_symbol;
+        if (operation.kind == "value_definition" && !operation.compile_time_value.empty()) {
+            std::cout << ",\"evaluation\":\"compile_time\",\"compile_time_value\":" << quote(operation.compile_time_value);
+        }
         if (operation.kind == "branch") std::cout << ",\"then_block_id\":" << operation.then_block << ",\"else_block_id\":" << operation.else_block;
+        if (operation.kind == "guard") std::cout << ",\"failure_block_id\":" << operation.failure_block << ",\"join_block_id\":" << operation.join_block;
         if (operation.kind == "loop") std::cout << ",\"body_block_id\":" << operation.body_block;
         if (operation.kind == "match") {
             std::cout << ",\"selector_type\":" << quote(operation.selector_type)
