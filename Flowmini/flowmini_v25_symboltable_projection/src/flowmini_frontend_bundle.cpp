@@ -150,7 +150,42 @@ void dump_frontend_bundle_json(std::ostream& out,
         out << '\n';
     }
 
-    out << "  ],\n  \"diagnostics\": [";
+    out << "  ],\n  \"graph_syntax\": {\"format\":\"flowmini.graph_syntax\",\"version\":1,\"nodes\":[";
+    auto provenance = [&](const SourceLocation& location) {
+        const auto index = location.line ? location.line - 1 : lineOrigins.size();
+        const bool mapped = index < lineOrigins.size();
+        out << "{\"source\":";
+        dump_json_string(out, mapped ? std::string_view(lineOrigins[index].source_path) : sourcePath);
+        out << ",\"line\":" << (mapped ? lineOrigins[index].source_line : location.line)
+            << ",\"column\":" << location.column << '}';
+    };
+    for (std::size_t i = 0; i < module.graph_nodes.size(); ++i) {
+        const auto& node = module.graph_nodes[i];
+        if (i) out << ',';
+        out << "{\"node_id\":"; dump_json_string(out, node.name);
+        out << ",\"role\":"; dump_json_string(out, node.role);
+        out << ",\"implementation_kind\":"; dump_json_string(out, node.source_function ? "source_function" : "provider_atom");
+        out << ",\"implementation_name\":"; dump_json_string(out, node.implementation);
+        out << ",\"provenance\":"; provenance(node.location);
+        out << '}';
+    }
+    out << "],\"wires\":[";
+    auto endpoint = [&](const GraphEndpointSyntax& value) {
+        out << "{\"node_id\":"; dump_json_string(out, value.node);
+        out << ",\"port_id\":"; dump_json_string(out, value.port);
+        out << ",\"provenance\":"; provenance(value.location);
+        out << '}';
+    };
+    for (std::size_t i = 0; i < module.graph_wires.size(); ++i) {
+        const auto& wire = module.graph_wires[i];
+        if (i) out << ',';
+        out << "{\"wire_id\":"; dump_json_string(out, "wire:" + std::to_string(i));
+        out << ",\"from\":"; endpoint(wire.from);
+        out << ",\"to\":"; endpoint(wire.to);
+        out << ",\"provenance\":"; provenance(wire.location);
+        out << '}';
+    }
+    out << "]},\n  \"diagnostics\": [";
     for (std::size_t index = 0; index < module.unsupported_graph_locations.size(); ++index) {
         const auto& location = module.unsupported_graph_locations[index];
         if (index) out << ',';

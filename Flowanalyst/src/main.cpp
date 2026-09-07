@@ -255,6 +255,73 @@ int run(const Json& bundle, int lowering_plan_version) {
         }
         callables.push_back(std::move(callable));
     }
+    Array graph_receivers;
+    if (const auto* graph = field(bundle, "graph_syntax")) {
+        if (text(field(graph, "format")) != "flowmini.graph_syntax" || integer(field(graph, "version")) != 1)
+            add_diagnostic("FLOWANALYST_GRAPH_VERSION", "unsupported graph syntax contract", -1);
+        const auto* nodes = field(graph, "nodes");
+        const auto* wires = field(graph, "wires");
+        if (!nodes || !wires || !std::holds_alternative<Array>(*nodes) || !std::holds_alternative<Array>(*wires))
+            add_diagnostic("FLOWANALYST_GRAPH_SCHEMA", "graph nodes and wires must be arrays", -1);
+        auto graph_diagnostic = [&](const std::string& code, const std::string& message, const Json& subject) {
+            add_diagnostic(code, message, -1);
+            if (const auto* provenance = field(subject, "provenance")) {
+                diagnostics.back().source = text(field(provenance, "source"), diagnostics.back().source);
+                diagnostics.back().line = integer(field(provenance, "line"));
+                diagnostics.back().column = integer(field(provenance, "column"));
+            }
+        };
+        // A captured file cannot become executable by deleting frontend diagnostics.
+        if (!list(nodes).empty() || !list(wires).empty())
+            graph_diagnostic("FLOWANALYST_GRAPH_EXECUTION_UNSUPPORTED",
+                "graph syntax is preserved but graph execution lowering is not yet implemented",
+                !list(nodes).empty() ? list(nodes).front() : list(wires).front());
+        std::set<std::string> node_ids, wire_ids;
+        for (const auto& node : list(nodes)) {
+            const auto id = text(field(node, "node_id"));
+            if (id.empty() || !node_ids.insert(id).second)
+                graph_diagnostic("FLOWANALYST_GRAPH_NODE_ID", "empty or duplicate graph node identity", node);
+            const auto implementation_kind = text(field(node, "implementation_kind"));
+            if (implementation_kind == "provider_atom") continue;
+            if (implementation_kind != "source_function") {
+                graph_diagnostic("FLOWANALYST_GRAPH_IMPLEMENTATION", "unknown graph implementation kind", node);
+                continue;
+            }
+            const auto name = text(field(node, "implementation_name"));
+            std::vector<const Callable*> candidates;
+            for (const auto& callable : callables)
+                if (!callable.entry && callable.name == name) candidates.push_back(&callable);
+            if (candidates.size() != 1) {
+                graph_diagnostic("FLOWANALYST_GRAPH_RECEIVER_RESOLUTION",
+                    "source receiver requires one unambiguous function: " + name, node);
+                continue;
+            }
+            const auto& callable = *candidates.front();
+            if (text(field(node, "role")) != "node" || callable.availability != "definition" ||
+                callable.body_block < 0 || callable.parameters.size() != 1 ||
+                callable.return_type.empty() || callable.return_type == "void") {
+                graph_diagnostic("FLOWANALYST_GRAPH_RECEIVER_CONTRACT",
+                    "source receiver requires a defined one-input one-result function and node role", node);
+                continue;
+            }
+            graph_receivers.push_back(Object{{"node_id", id}, {"function_symbol_id", callable.symbol},
+                {"parameter_symbol_id", callable.parameters.front().first},
+                {"input_port", std::string("in")}, {"input_type", callable.parameters.front().second},
+                {"output_port", std::string("out")}, {"output_type", callable.return_type},
+                {"provenance", field(node, "provenance") ? *field(node, "provenance") : Json(nullptr)},
+                {"activation_contract", std::string("fresh_single_input_v1")}});
+        }
+        for (const auto& wire : list(wires)) {
+            const auto id = text(field(wire, "wire_id"));
+            if (id.empty() || !wire_ids.insert(id).second)
+                graph_diagnostic("FLOWANALYST_GRAPH_WIRE_ID", "empty or duplicate graph wire identity", wire);
+            for (const auto* side : {"from", "to"}) {
+                const auto* endpoint = field(wire, side);
+                if (!node_ids.count(text(field(endpoint, "node_id"))) || text(field(endpoint, "port_id")).empty())
+                    graph_diagnostic("FLOWANALYST_GRAPH_ENDPOINT", "unknown node or empty graph port", wire);
+            }
+        }
+    }
     std::vector<Resolution> resolutions;
     std::map<int, std::pair<int, int>> expression_context;
     std::set<std::pair<int, int>> visited_expressions;
@@ -666,7 +733,8 @@ int run(const Json& bundle, int lowering_plan_version) {
                   << ",\"opaque\":" << quote(type.opaque)
                   << ",\"cleanup\":" << quote(type.cleanup) << "}";
     }
-    std::cout << "],\n  \"lowering_plan\": {\"format\":\"flowcore.lowering_plan\",\"version\":" << lowering_plan_version << ",\"status\":\""
+    std::cout << "],\n  \"graph_analysis\":{\"format\":\"flowanalyst.graph_analysis\",\"version\":1,\"status\":\"non_executable\",\"receivers\":"
+              << flowcontracts::json::serialize(graph_receivers) << "},\n  \"lowering_plan\": {\"format\":\"flowcore.lowering_plan\",\"version\":" << lowering_plan_version << ",\"status\":\""
               << (diagnostics.empty() ? "ready" : "blocked") << "\"";
     if (lowering_plan_version == 2) {
         std::cout << ",\"functions\":[";

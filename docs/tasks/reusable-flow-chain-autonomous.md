@@ -288,3 +288,54 @@ checkpoint, then continue the remaining mission autonomously.
 
 Stop only for a genuine public-language or architectural choice that materially
 changes the design. Do not treat ordinary implementation work as a blocker.
+
+## Owner decision — source graph activation contract
+
+Henrik approves the proposed receiver contract in
+`docs/architecture/source-graph-activation-decision.md` for the bounded v0.29
+language-chain surface, with the following normative interpretation.
+
+One delivered input creates exactly one fresh activation frame and invokes the
+receiving Flow function exactly once.
+
+The activation frame owns fresh function-local state. Local variables and
+temporary control-flow state MUST NOT leak between activations.
+
+One successful function return creates one logical output activation carrying
+the returned value. Runtime fan-out MAY create one delivery per connected wire,
+but MUST NOT re-execute the Flow function. All fan-out deliveries MUST preserve
+the originating output activation's signal identity while retaining distinct
+wire and delivery identities.
+
+A failed activation MUST NOT emit a normal result. It produces the structured
+failure or diagnostic behavior already admitted by the current runtime
+contract.
+
+For the v0.29 admitted surface:
+
+- input delivery is the activation trigger;
+- the function body executes once per delivered input;
+- `guard` and `when` operate inside that activation;
+- the selector and other source expressions obey their existing evaluation-count
+  contracts;
+- successful return emits one logical result;
+- fan-out belongs to runtime delivery rather than function evaluation;
+- activation-local storage is fresh for every invocation.
+
+This decision is deliberately narrow. It does not define:
+
+- multi-input joins or readiness rules;
+- persistent or shared node state;
+- streams or repeated output from one activation;
+- asynchronous suspension or continuation;
+- reentrant or parallel scheduling;
+- cancellation, retries or backpressure;
+- zero-output sinks or generalized multi-result functions;
+- distributed execution or durable signal identity.
+
+Those remain outside the v0.29 mission and require separate contracts if a
+concrete use case demands them.
+
+Implement this bounded receiver contract, add positive and hostile tests, update
+the decision note and recovery ledger, keep all complete gates green, and
+continue the remaining mission without requesting this decision again.

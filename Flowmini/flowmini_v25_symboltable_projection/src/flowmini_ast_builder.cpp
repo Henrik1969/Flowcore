@@ -2770,8 +2770,74 @@ namespace flowmini::ast {
 
     } // namespace
 
+    // Preserve graph spelling independently of the compatibility interpreter.
+    // This is syntax evidence only; it cannot authorize a factory or function.
+    static void capture_graph_syntax(const std::vector<flowmini::Token>& tokens, AstModule& module) {
+        using K = flowmini::TokenKind;
+        std::size_t depth = 0;
+        for (std::size_t i = 0; i < tokens.size(); ++i) {
+            if (tokens[i].kind == K::LeftBrace) { ++depth; continue; }
+            if (tokens[i].kind == K::RightBrace) { if (depth) --depth; continue; }
+            if (depth) continue;
+            const auto start = i;
+            const auto kind = tokens[i].kind;
+            if (kind != K::KeywordProducer && kind != K::KeywordNode &&
+                kind != K::KeywordSink && kind != K::KeywordWire) continue;
+            auto require = [&](K expected) -> const flowmini::Token& {
+                if (i >= tokens.size() || tokens[i].kind != expected)
+                    throw flow::DiagnosticError{"parser", "malformed graph declaration at line " +
+                        std::to_string(tokens[start].line)};
+                return tokens[i++];
+            };
+            auto name = [&]() {
+                auto value = require(K::Identifier).text;
+                while (i < tokens.size() && tokens[i].kind == K::Dot) {
+                    ++i;
+                    value += "." + require(K::Identifier).text;
+                }
+                return value;
+            };
+            ++i;
+            if (kind == K::KeywordWire) {
+                auto endpoint = [&]() {
+                    GraphEndpointSyntax result;
+                    result.location = location_from_token(tokens.at(i));
+                    result.node = require(K::Identifier).text;
+                    require(K::Dot);
+                    if (i < tokens.size() && (tokens[i].kind == K::KeywordTrue || tokens[i].kind == K::KeywordFalse))
+                        result.port = tokens[i++].text;
+                    else result.port = require(K::Identifier).text;
+                    return result;
+                };
+                GraphWireSyntax wire;
+                wire.location = location_from_token(tokens[start]);
+                wire.from = endpoint();
+                require(K::Arrow);
+                wire.to = endpoint();
+                module.graph_wires.push_back(std::move(wire));
+            } else {
+                GraphNodeSyntax node;
+                node.location = location_from_token(tokens[start]);
+                node.role = kind == K::KeywordProducer ? "producer" : kind == K::KeywordSink ? "sink" : "node";
+                node.name = require(K::Identifier).text;
+                require(K::Colon);
+                if (i < tokens.size() && tokens[i].kind == K::KeywordFn) {
+                    ++i;
+                    node.source_function = true;
+                }
+                node.implementation = name();
+                module.graph_nodes.push_back(std::move(node));
+            }
+            if (i < tokens.size() && tokens[i].kind != K::Newline && tokens[i].kind != K::End)
+                throw flow::DiagnosticError{"parser", "unexpected graph declaration suffix at line " +
+                    std::to_string(tokens[start].line)};
+            if (i) --i;
+        }
+    }
+
     AstModule build_source_header_ast(const std::vector<flowmini::Token>& tokens) {
         AstModule module = make_empty_ast_module();
+        capture_graph_syntax(tokens, module);
         for (const auto& token : tokens) {
             switch (token.kind) {
                 case flowmini::TokenKind::KeywordProducer:
@@ -2832,6 +2898,15 @@ namespace flowmini::ast {
 
             if (is_import_token(tokens[i])) {
                 i = parse_import_declaration(tokens, i, module);
+                continue;
+            }
+
+            if (tokens[i].kind == flowmini::TokenKind::KeywordProducer ||
+                tokens[i].kind == flowmini::TokenKind::KeywordNode ||
+                tokens[i].kind == flowmini::TokenKind::KeywordSink ||
+                tokens[i].kind == flowmini::TokenKind::KeywordWire ||
+                tokens[i].kind == flowmini::TokenKind::KeywordPolicy) {
+                i = skip_until_line_end(tokens, i);
                 continue;
             }
 

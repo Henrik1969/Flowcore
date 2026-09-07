@@ -1,5 +1,48 @@
 # Flowcore autonomous maturation ledger
 
+## Approved receiver recovery and syntax boundary — 2026-09-07
+
+Recovered `8f77f84` on `v29-language-maturation`, synchronized with origin.
+Incoming user changes were the owner activation decision in the mission and
+`.codex-run-state = CONTINUE`; both are preserved in this checkpoint. The owner
+has approved fresh state per delivered input, one function invocation, one
+logical successful output, and runtime fan-out preserving signal identity.
+The historical receiver blocker below is resolved and must not be asked again.
+
+Gate 6 remains the first unfinished gate. Recovery CTest passed **76/76**.
+This slice captures `flowmini.graph_syntax` v1 node references and full wire
+endpoints with original source provenance. Explicit `node receiver : fn name`
+references remain distinct from provider factories and function declarations.
+Flowanalyst resolves receiver function/parameter identities, enforces the bounded
+one-parameter/one-result definition shape, and publishes non-executable analysis.
+It independently rejects graph execution even if frontend diagnostics are removed
+from a captured bundle. Unknown graph versions, malformed arrays, duplicate
+node/wire identities and unknown endpoints are diagnosed. Unsupported native
+execution is retained; this is not a completed graph backend or Flow-owned pager.
+
+Focused `graph_lowering_refusal` passes with renamed source, preserved endpoints,
+receiver identity, malformed syntax and hostile captured-file coverage. Exact
+complete verification commands (same Debug/sanitizer configurations as below):
+
+```sh
+cmake --build /tmp/flowcore-reusable-current -j4
+ctest --test-dir /tmp/flowcore-reusable-current --output-on-failure -j4
+cmake --build /tmp/flowcore-reusable-current-sanitize -j4
+ASAN_OPTIONS=detect_leaks=0 LSAN_OPTIONS=detect_leaks=0 \
+  ctest --test-dir /tmp/flowcore-reusable-current-sanitize --output-on-failure -j4
+git diff --check
+```
+
+Both builds passed. Normal CTest: **76/76**, 5.44 seconds. ASan/UBSan:
+**76/76**, 18.30 seconds. `git diff --check` passed. Logs remain outside Git in
+`/tmp/flowcore-graph-syntax-{ctest,sanitize}.log`.
+
+Exact next action: validate receiver port/type connections, then implement
+fresh invocation frames and graph delivery through durable stage artifacts and
+native lowering. Move pager navigation into ordinary Flow functions after that
+path executes. State remains **CONTINUE**, with no semantic blocker and no
+mission completion claim. Existing scalar and platform limitations are unchanged.
+
 ## Resumed recovery and negative-result repair — 2026-09-06
 
 Recovered `71381d7` on `v29-language-maturation`, synchronized with origin.

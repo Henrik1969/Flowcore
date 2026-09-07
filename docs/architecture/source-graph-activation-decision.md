@@ -1,6 +1,7 @@
-# Source-defined graph activation: decision required
+# Source-defined graph activation: approved bounded contract
 
-Status: proposal, not confirmed language semantics (2026-09-06).
+Status: approved by Henrik in the autonomous mission (2026-09-07).
+Implementation is in progress; approval does not imply native graph support.
 
 ## Recovered gap
 
@@ -20,9 +21,9 @@ The new `FLOWMINI_GRAPH_LOWERING_UNSUPPORTED` diagnostic prevents that projectio
 and retains original source locations. Interpreter graph demonstrations remain
 supported. This refusal is a correctness fix, not a completed graph backend.
 
-## Smallest proposed decision
+## Approved v0.29 contract
 
-Admit a stateless, single-input/single-output source receiver as the first slice:
+Admit a single-input/single-output source receiver with fresh activation-local state:
 
 - A node explicitly references an ordinary Flow function by semantic identity.
 - Delivery on its declared input activates that function once with the payload
@@ -36,14 +37,24 @@ Admit a stateless, single-input/single-output source receiver as the first slice
 - Multi-input joins, repeated outputs, cycles and persistent receiver state
   remain unsupported until their own explicit activation contracts are defined.
 
-Surface spelling and public artifact representation would be specified and
-reviewed against these laws before implementation. The choice does not declare
-the existing compatibility ModuleSpec to be canonical Graph IR.
+One delivered input creates exactly one fresh activation frame and invokes the
+receiving function exactly once. A successful return creates one logical output
+activation. Fan-out copies deliveries, preserves that output's signal identity,
+and never re-executes the function. Failure emits no normal result. `guard`,
+`when` and selector evaluation retain their existing intra-activation contracts.
+Scheduling policy remains separate from activation semantics.
 
-Henrik's decision: accept this bounded receiver contract, or require the broader
-node/plug activation design first. The material choice is whether one delivered
-input is sufficient to activate a source function, and whether its local state
-is fresh or persistent. Ordinary function lowering cannot answer that choice.
+Multi-input joins, persistent/shared state, streams, repeated outputs, suspension,
+reentrant or parallel scheduling, cancellation, retries, backpressure, zero-output
+sinks, generalized multi-result functions, distributed execution and durable
+signal identity are outside this bounded mission.
+
+The first explicit syntax spelling is `node receiver : fn function_name`; the
+function is resolved semantically, never as an AtomRegistry factory. Existing
+provider nodes retain their spelling. `flowmini.graph_syntax` v1 captures node
+roles, implementation references and full wire endpoints with source provenance.
+It is syntax evidence, not authorization or canonical Graph IR. Native export
+continues to refuse graphs until semantic validation and execution are admitted.
 
 ## Alternatives checked
 
@@ -55,7 +66,7 @@ is fresh or persistent. Ordinary function lowering cannot answer that choice.
 - Implementing a general stateful/join-capable receiver now would select broader
   public semantics without a documented activation contract.
 
-After approval, implement the selected contract through durable frontend,
+Implement the approved contract through durable frontend,
 semantic, execution and lowering artifacts; add independently replayed boundary
 tests; then express pager navigation in Flow and remove the built-in algorithm
 after equivalent positive, negative, order and native execution coverage passes.

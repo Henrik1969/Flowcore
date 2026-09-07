@@ -494,6 +494,26 @@ struct SourceUnit {
     SourceLocation location;
 };
 
+struct GraphNodeSyntax {
+    std::string role;
+    std::string name;
+    std::string implementation;
+    bool source_function = false;
+    SourceLocation location;
+};
+
+struct GraphEndpointSyntax {
+    std::string node;
+    std::string port;
+    SourceLocation location;
+};
+
+struct GraphWireSyntax {
+    GraphEndpointSyntax from;
+    GraphEndpointSyntax to;
+    SourceLocation location;
+};
+
 struct AstModule {
     SourceUnit source_unit;
     std::vector<TopLevelDecl> declaration_pool;
@@ -503,6 +523,8 @@ struct AstModule {
     // Syntax admitted by the compatibility interpreter but not represented in
     // the structured AST must never disappear into an executable plan.
     std::vector<SourceLocation> unsupported_graph_locations;
+    std::vector<GraphNodeSyntax> graph_nodes;
+    std::vector<GraphWireSyntax> graph_wires;
 };
 
 const char* to_string(SourceUnitKind kind);
