@@ -16,6 +16,34 @@ fn cube(n : int): int {
     n * n * n -> return
 }
 
+fn min(a : int, b : int): int {
+    if a < b {
+        a -> return
+    } else {
+        b -> return
+    }
+}
+
+fn max(a : int, b : int): int {
+    if a > b {
+        a -> return
+    } else {
+        b -> return
+    }
+}
+
+fn clamp(value : int, lower : int, upper : int): int {
+    if value < lower {
+        lower -> return
+    } else {
+        if value > upper {
+            upper -> return
+        } else {
+            value -> return
+        }
+    }
+}
+
 fn factorial(n : int): int {
     one : int(1)
     acc : int(1)

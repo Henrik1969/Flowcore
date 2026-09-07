@@ -24,6 +24,16 @@ architecture cost of a new mechanism is not justified.
 - **Unsafe policy:** unsafe regions, inline assembly, and embedded foreign
   source are **NOT SUPPORTED — INTENTIONALLY EXCLUDED**. External unsafe work
   must arrive as a declared provider/ABI artifact with boundary paperwork.
+- **Compile-time constants:** deterministic integer and Boolean constant
+  evaluation is now IMPLEMENTED/TESTED, including transitive references and
+  checked arithmetic. Runtime/provider dependencies and overflow are rejected.
+- **Canonical guards:** guard identity and failure provenance now reach
+  Flowlower's LLVM branch emission; unsupported failure blocks are rejected at
+  the backend boundary instead of being erased.
+- **Pure standard library v0:** `std/math.flow` now has tested integer
+  `min`, `max`, and `clamp` helpers alongside its existing arithmetic helpers.
+  Floating-point transcendental APIs remain deferred until a carrier/provider
+  contract exists.
 
 ## Findings
 

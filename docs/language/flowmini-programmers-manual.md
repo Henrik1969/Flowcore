@@ -127,8 +127,12 @@ p : Point({x:10, y:32})
 
 `list<T>([values])` and shaped `array<T>[extent, ...]([values])` are present
 in runtime examples. Indexing is zero-based in those examples. Generic maps,
-user-defined generic functions, iterators, classes, and a standard library are
-**NOT SUPPORTED** as general language guarantees.
+user-defined generic functions, iterators, and classes are **NOT SUPPORTED**
+as general language guarantees. The pure `std/math.flow` unit is the first
+small standard-library slice: `identity`, `add`, `square`, `cube`, `factorial`,
+`min`, `max`, and `clamp` over `int` are IMPLEMENTED and TESTED by
+`flowmini_stdlib_math`; this is a narrow library surface, not a complete
+standard library.
 
 Refined types are **EXPERIMENTAL**:
 
@@ -146,7 +150,17 @@ Do not assume every conversion or runtime path enforces every invariant.
 `if`/`else`, `while`, `break`, and `continue` are IMPLEMENTED and TESTED in
 runtime probes. `guard condition else { … }` is IMPLEMENTED and TESTED; the
 structural AST preserves a dedicated `guard` node and the failure block’s
-provenance.
+provenance. Flowanalyst carries that operation into the lowering plan and the
+LLVM backend emits its condition, failure block, and continuation. A backend
+rejects a failure block it cannot represent instead of silently dropping it.
+
+Compile-time constants are IMPLEMENTED for deterministic integer and Boolean
+expressions made from literals, earlier constants, unary operators, arithmetic,
+and comparisons. Their evaluated value is retained as `compile_time_value` in
+the AST, symbol facts, and lowering plan. Provider calls, runtime state,
+unsupported expressions, overflow, and divide-by-zero are rejected during
+constant evaluation. This is a bounded compile-time fact facility, not a
+general compile-time programming language.
 
 The runtime parser accepts `const name : Type(value)` and enum/variant
 declarations and `when` over integer, enum, and variant values. Constants are

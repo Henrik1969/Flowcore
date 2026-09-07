@@ -1,0 +1,13 @@
+import "../../std/math.flow"
+
+program stdlib_math_v0
+
+main {
+    result : int(0)
+    min(7, 3) -> result
+    print result
+    max(7, 3) -> result
+    print result
+    clamp(12, 0, 10) -> result
+    print result
+}

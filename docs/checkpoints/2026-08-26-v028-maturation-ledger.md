@@ -824,3 +824,15 @@ later instruction reopens them.
 - Added nested `when` case/default block ownership propagation alongside guard
   blocks, so all nested operations retain their enclosing function identity.
 - Focused UTF-8, const, guard semantics, and guard backend gates pass 4/4.
+
+## 2026-09-07 std.math v0 checkpoint
+
+- Added the first intentionally narrow pure Flowmini standard-library slice in
+  `std/math.flow`: integer `min`, `max`, and `clamp` alongside existing
+  arithmetic helpers.
+- Added `stdlib_math_v0.flow` and `flowmini_stdlib_math`; the runtime result and
+  structural declaration inventory are both verified. Floating-point
+  transcendental functions remain deferred until the ABI carrier/provider
+  contract supports them.
+- Updated the Programmer's Guide, Flowmini current status, and evidence ledger
+  to distinguish this tested slice from a complete standard library.
