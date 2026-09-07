@@ -122,6 +122,11 @@ struct Parameter {
     SourceLocation location;
 };
 
+struct TypeParameter {
+    std::string name;
+    SourceLocation location;
+};
+
 struct Expression;
 
 struct IdentifierExpr {
@@ -157,6 +162,7 @@ struct BinaryExpr {
 
 struct CallExpr {
     std::optional<std::size_t> base;
+    std::vector<TypeRef> type_arguments;
     std::vector<std::size_t> arguments;
 };
 
@@ -335,6 +341,7 @@ struct Block {
 
 struct FunctionDecl {
     std::string name;
+    std::vector<TypeParameter> type_parameters;
     std::vector<Parameter> parameters;
     TypeRef return_type;
     std::optional<BlockId> body;
@@ -363,6 +370,7 @@ struct RecordField {
 
 struct RecordDecl {
     std::string name;
+    std::vector<TypeParameter> type_parameters;
     std::vector<RecordField> fields;
     SourceLocation location;
 };

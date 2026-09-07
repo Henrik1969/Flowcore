@@ -7,13 +7,14 @@ Earlier stages are historical snapshots. They are useful for understanding devel
 Current active version:
 
 ```text
-v27 — namespaced provider language-chain slice
+v31 — restrained canonical generics slice
 ```
 
 ## Active version
 
 | Version | Directory | Main purpose |
 |---:|---|---|
+| v31 | `flowmini_v25_symboltable_projection` | Restrained generic functions/records with explicit substitutions and concrete LLVM lowering |
 | v27 | `flowmini_v25_symboltable_projection` | Namespaced provider language chain from frontend export through semantic analysis, capability binding, LLVM, and native ELF |
 
 ## Recent historical versions

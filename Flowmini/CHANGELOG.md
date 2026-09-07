@@ -1,6 +1,15 @@
 # Flowmini Changelog
 
-## v27_namespaced_provider_chain — active
+## v31_restrained_canonical_generics — active
+
+- Added canonical type parameters for user-defined functions and records.
+- Added explicit substitutions, deterministic instance identities, and a
+  simple single-answer inference path.
+- Added the tested `identity<T>` forwarding subset and `Pair<A,B>` artifact
+  preservation; generic constraints, variants, collection carriers, and
+  runtime-compat parsing remain deferred.
+
+## v27_namespaced_provider_chain — historical
 
 - Promoted the language-chain slice to the active v0.27 milestone.
 - Added explicit namespace aliases for imports and qualified ABI calls such as

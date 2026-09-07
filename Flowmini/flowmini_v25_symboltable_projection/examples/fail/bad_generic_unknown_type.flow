@@ -1,0 +1,9 @@
+program bad_generic_unknown_type
+
+fn identity<T>(value : T) : T {
+    value -> return
+}
+
+main {
+    value : int(identity<Nope>(42))
+}

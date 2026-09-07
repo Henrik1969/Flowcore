@@ -293,6 +293,16 @@ add_test(NAME flowmini_variant_backend
         ${CMAKE_CURRENT_SOURCE_DIR}/tools/run-flowmini-variant-backend-tests.sh
 )
 
+add_test(NAME flowmini_generics
+        COMMAND ${CMAKE_COMMAND} -E env
+        FLOWMINI_BIN=$<TARGET_FILE:flowmini>
+        FLOWANALYST_BIN=$<TARGET_FILE:flowanalyst>
+        FLOWOPTIMIZE_BIN=$<TARGET_FILE:flowoptimize>
+        FLOWPREPARE_BIN=$<TARGET_FILE:flowprepare>
+        FLOWLOWER_BIN=$<TARGET_FILE:flowlower>
+        ${CMAKE_CURRENT_SOURCE_DIR}/tools/run-flowmini-generic-tests.sh
+)
+
 add_test(NAME flowmini_parser_differential
         COMMAND ${CMAKE_COMMAND} -E env
         FLOWMINI_BIN=$<TARGET_FILE:flowmini>

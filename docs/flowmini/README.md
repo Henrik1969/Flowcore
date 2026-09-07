@@ -5,7 +5,7 @@ Flowmini is the executable prototype/lab language used to explore Flowcore ideas
 Current active version:
 
 ```text
-Flowmini v0.29 language-maturation and cross-backend parity slice
+Flowmini v0.31 restrained canonical generics slice
 
 Implementation base: `Flowmini/flowmini_v25_symboltable_projection` (retained
 historical directory name)
@@ -14,9 +14,10 @@ historical directory name)
 Current baseline:
 
 ```text
-root CTest: PASS (92/92)
+root CTest: PASS (94/94)
 AST golden tests: 28 PASS
 Symbol projection tests: 14 PASS
+focused Flowmini CTest: 15/15
 categorized Flowmini fixture suite: 91/140 (49 known gaps)
 ```
 
@@ -30,7 +31,9 @@ AST states what the source means.
 The structural frontend export remains consumable by Flowanalyst, Flowbind,
 Flowoptimize, and Flowlower. Normal runtime execution still uses a separate
 parser; variant payload labels are preserved in artifacts, while variant
-payload lowering is **NOT SUPPORTED — DEFERRED**. See the
+integer and enum payload lowering is IMPLEMENTED/TESTED and larger layouts
+remain an explicit backend limitation. User-defined generics are
+EXPERIMENTAL/TESTED for identity and generic record artifacts. See the
 [Programmer's Guide](../language/flowmini-programmers-manual.md),
 [comparisons](../language-comparisons/README.md), and
 [future-work evidence](../FUTURE_WORK_EVIDENCE.md).

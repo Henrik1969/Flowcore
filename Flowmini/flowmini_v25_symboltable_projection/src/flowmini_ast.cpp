@@ -190,7 +190,16 @@ namespace flowmini::ast {
                 return render_child(value->left) + value->op + render_child(value->right);
             }
             if (const auto* value = std::get_if<CallExpr>(&expression.payload)) {
-                std::string result = render_postfix_base(value->base) + "(";
+                std::string result = render_postfix_base(value->base);
+                if (!value->type_arguments.empty()) {
+                    result += "<";
+                    for (std::size_t i = 0; i < value->type_arguments.size(); ++i) {
+                        if (i != 0) result += ",";
+                        result += type_ref_text(value->type_arguments[i]);
+                    }
+                    result += ">";
+                }
+                result += "(";
                 for (std::size_t i = 0; i < value->arguments.size(); ++i) {
                     if (i != 0) { result += ","; }
                     result += render_expression_full(value->arguments[i], expressions, depth + 1);
@@ -417,7 +426,12 @@ namespace flowmini::ast {
                 out << ", \"right\": "; dump_optional_id(out, value->right);
             } else if (const auto* value = std::get_if<CallExpr>(&expression.payload)) {
                 out << "\"base\": "; dump_optional_id(out, value->base);
-                out << ", \"arguments\": "; dump_id_array(out, value->arguments);
+                out << ", \"type_arguments\": [";
+                for (std::size_t i = 0; i < value->type_arguments.size(); ++i) {
+                    if (i != 0) out << ", ";
+                    dump_type_ref_json(out, value->type_arguments[i]);
+                }
+                out << "], \"arguments\": "; dump_id_array(out, value->arguments);
             } else if (const auto* value = std::get_if<IndexExpr>(&expression.payload)) {
                 out << "\"base\": "; dump_optional_id(out, value->base);
                 out << ", \"indexes\": "; dump_id_array(out, value->indexes);
@@ -884,6 +898,16 @@ namespace flowmini::ast {
                 out << ",\n";
 
                 dump_indent(out, indent + 2);
+                out << "\"type_parameters\": [";
+                for (std::size_t index = 0; index < functionDecl->type_parameters.size(); ++index) {
+                    if (index) out << ", ";
+                    out << "{\"name\": ";
+                    dump_json_string(out, functionDecl->type_parameters[index].name);
+                    out << ", \"index\": " << index << "}";
+                }
+                out << "],\n";
+
+                dump_indent(out, indent + 2);
                 out << "\"parameter_count\": " << functionDecl->parameters.size() << ",\n";
 
                 dump_indent(out, indent + 2);
@@ -1003,6 +1027,16 @@ namespace flowmini::ast {
                 out << "\"name\": ";
                 dump_json_string(out, recordDecl->name);
                 out << ",\n";
+
+                dump_indent(out, indent + 2);
+                out << "\"type_parameters\": [";
+                for (std::size_t index = 0; index < recordDecl->type_parameters.size(); ++index) {
+                    if (index) out << ", ";
+                    out << "{\"name\": ";
+                    dump_json_string(out, recordDecl->type_parameters[index].name);
+                    out << ", \"index\": " << index << "}";
+                }
+                out << "],\n";
 
                 dump_indent(out, indent + 2);
                 out << "\"field_count\": " << recordDecl->fields.size() << ",\n";

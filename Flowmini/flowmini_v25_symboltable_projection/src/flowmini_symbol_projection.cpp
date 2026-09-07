@@ -423,6 +423,12 @@ void project_function_decl(symboltable::SymbolTable& table,
                            fnSymbol,
                            "return_type_spelling",
                            decl.return_type);
+    for (std::size_t index = 0; index < decl.type_parameters.size(); ++index) {
+        add_string_fact(table, fnSymbol,
+                        symboltable::FactoidKind::Custom,
+                        "generic_type_parameter_" + std::to_string(index),
+                        decl.type_parameters[index].name);
+    }
 
     const auto fnScope =
         table.createScope(symboltable::ScopeKind::Function,
@@ -491,6 +497,12 @@ void project_record_decl(symboltable::SymbolTable& table,
                                      AstOriginRole::RecordDeclaration,
                                      decl.location,
                                      declarationId));
+    for (std::size_t index = 0; index < decl.type_parameters.size(); ++index) {
+        add_string_fact(table, recordSymbol,
+                        symboltable::FactoidKind::Custom,
+                        "generic_type_parameter_" + std::to_string(index),
+                        decl.type_parameters[index].name);
+    }
 
     const auto recordScope =
         table.createScope(symboltable::ScopeKind::Struct,

@@ -1,0 +1,14 @@
+program generic_record_probe
+
+record Pair<A, B> {
+    first : A
+    second : B
+}
+
+fn take_pair(value : Pair<int, Bool>) : int {
+    1 -> return
+}
+
+main {
+    1 -> return
+}

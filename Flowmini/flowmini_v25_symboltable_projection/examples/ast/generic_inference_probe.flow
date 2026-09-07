@@ -1,0 +1,10 @@
+program generic_inference_probe
+
+fn identity<T>(value : T) : T {
+    value -> return
+}
+
+main {
+    value : int(identity(42))
+    print value
+}

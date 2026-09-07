@@ -940,3 +940,29 @@ later instruction reopens them.
   record/resource carrier policy, and TinyVM parity require concrete programs
   and a cost review. Generic syntax remains deferred; repeated concrete result
   variants are now evidence for that later mission.
+
+## 2026-09-07 restrained canonical generics checkpoint
+
+- Added one canonical type-parameter representation to Flowmini AST and symbol
+  facts. Generic function owners preserve parameter identity/order; record
+  owners preserve their parameters and field uses.
+- Added explicit generic call arguments and a semantic substitution map. The
+  initial executable subset is intentionally limited to a one-argument
+  forwarding function such as `identity<T>`; simple deterministic inference
+  (`identity(42)`) resolves to the same concrete instance.
+- Generic declarations are carried in the lowering plan as metadata, while
+  generic calls resolve to concrete carrier types before LLVM. Generic record
+  applications such as `Pair<int,Bool>` are validated and preserved in
+  `generic_records`; record construction/layout remains outside this slice.
+- Added structured wrong-arity and unknown-type diagnostics and a dedicated
+  `flowmini_generics` gate. Generic syntax remains canonical on the structural
+  artifact path; the named runtime compatibility parser explicitly remains
+  pre-generics.
+- Verification: root CTest 94/94; focused Flowmini CTest 15/15;
+  categorized suite remains 91/140 (49 known gaps); Debug ASan/UBSan CTest
+  94/94 with leak checks disabled. No unsafe source mechanism or generic
+  metaprogramming facility was introduced.
+- Deliberately deferred: constraints/traits, value-level generics, generic
+  variants, generic collection carriers, broad inference, and TinyVM generic
+  parity. The next generic step should be chosen from real collection/provider
+  pressure rather than syntax expansion.

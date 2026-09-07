@@ -56,9 +56,11 @@ struct Operation {
     std::string kind;
     const Json* operand = nullptr;
     int default_block = -1, join_block = -1;
-    std::string selector_type, selector_kind, variant_type, variant_member;
+    std::string selector_type, selector_kind, variant_type, variant_member, generic_owner, generic_return_type, instantiation_id;
     int variant_discriminant = -1;
     std::vector<std::string> payload_types;
+    std::vector<std::string> generic_type_arguments;
+    std::vector<std::pair<std::string, std::string>> generic_substitutions;
     std::vector<MatchArm> match_cases;
     std::optional<Provider> provider;
 };
@@ -228,6 +230,9 @@ private:
             op.variant_type=text(field(item,"variant_type")); op.variant_member=text(field(item,"variant_member"));
             op.variant_discriminant=integer(field(item,"variant_discriminant"),"variant_discriminant");
             if (const auto* payload_types = field(item,"payload_types")) for (const auto& payload_type : array(payload_types,"payload_types")) op.payload_types.push_back(text(&payload_type));
+            op.generic_owner=text(field(item,"generic_owner")); op.generic_return_type=text(field(item,"generic_return_type")); op.instantiation_id=text(field(item,"instantiation_id"));
+            if (const auto* type_arguments = field(item,"type_arguments")) for (const auto& type_argument : array(type_arguments,"type_arguments")) op.generic_type_arguments.push_back(text(&type_argument));
+            if (const auto* substitutions = field(item,"substitutions")) for (const auto& substitution : array(substitutions,"substitutions")) op.generic_substitutions.emplace_back(text(field(substitution,"parameter")), text(field(substitution,"type")));
             if (op.kind=="match") for (const auto& value : array(field(item,"cases"),"match.cases")) {
                 MatchArm arm; arm.value=integer(field(value,"value"),"match.case.value"); arm.high=integer(field(value,"high"),"match.case.high"); arm.body_block=integer(field(value,"body_block_id"),"match.case.body_block_id");
                 arm.label_type=text(field(value,"label_type")); arm.label_member=text(field(value,"label_member"));
@@ -252,6 +257,7 @@ private:
             }
             if (op.kind=="value_definition" && op.result_symbol>=0 && op.operand) { definitions_[op.result_symbol]=op.operand; symbol_types_[op.result_symbol]=text(field(*op.operand,"type")); }
             if (op.kind=="variant_construct" && op.result_symbol>=0) symbol_types_[op.result_symbol]=op.variant_type;
+            if (op.kind=="generic_call" && op.result_symbol>=0) symbol_types_[op.result_symbol]=op.generic_return_type;
             if(op.kind=="call"&&plan_version_==2&&callables_.count(op.callee_symbol)) {
                 if(op.result_symbol>=0)symbol_types_[op.result_symbol]=callables_.at(op.callee_symbol).result;
             }
@@ -262,7 +268,7 @@ private:
                 has_branch_=true;
             }
             if (op.block!=0) has_nonroot_block_=true;
-            if (op.kind!="call" && op.kind!="external_call" && op.kind!="value_definition" && op.kind!="variant_construct" && op.kind!="branch" && op.kind!="guard" && op.kind!="return_value" && op.kind!="loop" && op.kind!="assignment" && op.kind!="match") unsupported_=true;
+            if (op.kind!="call" && op.kind!="generic_call" && op.kind!="external_call" && op.kind!="value_definition" && op.kind!="variant_construct" && op.kind!="branch" && op.kind!="guard" && op.kind!="return_value" && op.kind!="loop" && op.kind!="assignment" && op.kind!="match") unsupported_=true;
             operations_.push_back(std::move(op));
         }
         for (auto& op:operations_) if (op.kind!="call" || plan_version_==2) blocks_[op.block].push_back(&op);
@@ -479,6 +485,15 @@ private:
                 const auto complete = "%flow_variant_value_" + std::to_string(temporary_++);
                 out << "  " << complete << " = insertvalue " << variant_llvm_types_.at(op->variant_type) << " " << aggregate << ", i32 " << payload << ", 1\n";
                 out << "  store " << variant_llvm_types_.at(op->variant_type) << " " << complete << ", ptr " << slot(op->result_symbol) << "\n";
+            } else if(op->kind=="generic_call") {
+                const auto& operands = array(field(find_json_operation(op->id),"operands"),"operation.operands");
+                if (operands.size() != 1 || op->generic_return_type.empty()) throw std::runtime_error("unsupported generic callable shape");
+                const auto concrete_type = llvm_type(op->generic_return_type);
+                if (concrete_type.empty()) throw std::runtime_error("unsupported generic instantiated carrier");
+                const auto [argument_type, argument] = expression(operands.front(), out, op->generic_return_type);
+                if (argument.empty() || argument_type != concrete_type) throw std::runtime_error("generic substitution carrier mismatch");
+                if (op->result_symbol >= 0) out << "  store " << concrete_type << " " << argument << ", ptr " << slot(op->result_symbol) << "\n";
+                call_results_[op->expression] = {concrete_type, argument};
             } else if(op->kind=="call") {
                 if(!callables_.count(op->callee_symbol))throw std::runtime_error("ordinary call target is unavailable");
                 const auto& function=callables_.at(op->callee_symbol); if(function.body_block<0)throw std::runtime_error("ordinary call definition is unavailable");

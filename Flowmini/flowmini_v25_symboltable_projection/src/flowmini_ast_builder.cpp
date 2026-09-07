@@ -338,6 +338,21 @@ namespace flowmini::ast {
             return i;
         }
 
+        std::size_t parse_type_parameters(const std::vector<flowmini::Token>& tokens,
+                                          std::size_t i,
+                                          std::vector<TypeParameter>& parameters) {
+            if (i >= tokens.size() || tokens[i].kind != flowmini::TokenKind::Less) return i;
+            ++i;
+            while (i < tokens.size() && tokens[i].kind != flowmini::TokenKind::Greater && !is_end_token(tokens[i])) {
+                if (tokens[i].kind == flowmini::TokenKind::Comma || tokens[i].kind == flowmini::TokenKind::Newline) { ++i; continue; }
+                if (tokens[i].kind != flowmini::TokenKind::Identifier) { ++i; continue; }
+                parameters.push_back(TypeParameter{tokens[i].text, location_from_token(tokens[i])});
+                ++i;
+            }
+            if (i < tokens.size() && tokens[i].kind == flowmini::TokenKind::Greater) ++i;
+            return i;
+        }
+
 
         bool is_identifier_text(const flowmini::Token& token, const std::string& text) {
             return token.kind == flowmini::TokenKind::Identifier && token.text == text;
@@ -1111,6 +1126,7 @@ namespace flowmini::ast {
 
             std::size_t parenDepth = 0;
             std::size_t bracketDepth = 0;
+            std::size_t angleDepth = 0;
             std::size_t selectedOperator = tokens.size();
             int selectedPrecedence = 0;
 
@@ -1139,6 +1155,32 @@ namespace flowmini::ast {
 
                 if (token.kind == flowmini::TokenKind::LeftBracket) {
                     ++bracketDepth;
+                    ++i;
+                    continue;
+                }
+
+                if (parenDepth == 0 && bracketDepth == 0 && token.kind == flowmini::TokenKind::Less &&
+                    i > expressionStart && i + 1 < tokens.size() &&
+                    tokens[i + 1].kind == flowmini::TokenKind::Identifier) {
+                    std::size_t probe = i + 1;
+                    std::size_t depth = 0;
+                    for (; probe < tokens.size(); ++probe) {
+                        if (tokens[probe].kind == flowmini::TokenKind::Less) ++depth;
+                        else if (tokens[probe].kind == flowmini::TokenKind::Greater) {
+                            if (depth == 0) break;
+                            --depth;
+                        }
+                    }
+                    if (probe < tokens.size() && probe + 1 < tokens.size() &&
+                        tokens[probe + 1].kind == flowmini::TokenKind::LeftParen) {
+                        angleDepth = 0;
+                        i = probe + 1;
+                        continue;
+                    }
+                }
+                if (angleDepth > 0) {
+                    if (token.kind == flowmini::TokenKind::Less) ++angleDepth;
+                    else if (token.kind == flowmini::TokenKind::Greater) --angleDepth;
                     ++i;
                     continue;
                 }
@@ -1508,11 +1550,32 @@ namespace flowmini::ast {
             return;
         }
 
+        std::size_t baseEnd = postfix.operator_index;
+        std::vector<TypeRef> typeArguments;
+        if (baseEnd > expressionStart + 1 && tokens[expressionStart].kind == flowmini::TokenKind::Identifier &&
+            tokens[expressionStart + 1].kind == flowmini::TokenKind::Less) {
+            std::size_t cursor = expressionStart + 2;
+            while (cursor < baseEnd && tokens[cursor].kind != flowmini::TokenKind::Greater) {
+                if (tokens[cursor].kind == flowmini::TokenKind::Comma || tokens[cursor].kind == flowmini::TokenKind::Newline) { ++cursor; continue; }
+                if (tokens[cursor].kind != flowmini::TokenKind::Identifier) { ++cursor; continue; }
+                typeArguments.push_back(parse_type_ref(tokens, cursor));
+            }
+            if (cursor < baseEnd && tokens[cursor].kind == flowmini::TokenKind::Greater) {
+                ++cursor;
+                if (cursor == baseEnd) baseEnd = expressionStart + 1;
+                else typeArguments.clear();
+            } else {
+                typeArguments.clear();
+            }
+        }
+        if (auto* call = std::get_if<CallExpr>(&expressionPool[callExpressionId].payload)) {
+            call->type_arguments = typeArguments;
+        }
         append_populated_expression_child(
             expressionPool,
             callExpressionId,
             std::vector<flowmini::Token>{tokens.begin() + expressionStart,
-                                         tokens.begin() + postfix.operator_index},
+                                         tokens.begin() + baseEnd},
             depth);
 
         const auto closeParenIndex = postfix.end_index;
@@ -3134,6 +3197,7 @@ namespace flowmini::ast {
                     recordDecl.name = tokens[i].text;
                     ++i;
                 }
+                i = parse_type_parameters(tokens, i, recordDecl.type_parameters);
 
                 i = parse_record_fields(tokens, i, recordDecl);
                 append_top_level_declaration(module, std::move(recordDecl));
@@ -3229,6 +3293,7 @@ namespace flowmini::ast {
                     fn.name = tokens[i].text;
                     ++i;
                 }
+                i = parse_type_parameters(tokens, i, fn.type_parameters);
 
                 i = parse_function_signature(tokens, i, fn);
                 i = mark_body_container(tokens, i, fn.has_body, fn.body_location, fn.body,

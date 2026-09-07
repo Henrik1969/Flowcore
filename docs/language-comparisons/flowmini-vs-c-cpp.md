@@ -2,7 +2,7 @@
 
 ## Common matrix
 
-| Area | Flowmini v0.29 | C | C++ |
+| Area | Flowmini v0.31 | C | C++ |
 |---|---|---|---|
 | Domain/philosophy | **EXPERIMENTAL** accountable data-flow language | portable systems language with direct machine model | systems language with zero-cost abstractions and large legacy |
 | Runtime/types/memory | typed scalars, records, lists; two parser paths; no ownership or allocator contract (**UNKNOWN**) | native compilation, explicit storage and pointer arithmetic | native compilation, RAII, templates, value/reference types |

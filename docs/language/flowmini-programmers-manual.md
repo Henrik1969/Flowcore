@@ -6,7 +6,7 @@ language laboratory, not a replacement for C, C++, Rust, Python, or the other
 languages in this repository. **Flowmini is one tool among many. Choose
 according to the problem.**
 
-This guide describes the checkout’s v0.29 implementation. Status words have a
+This guide describes the checkout’s v0.30 implementation. Status words have a
 precise meaning: **IMPLEMENTED** means the source path accepts it;
 **TESTED** means a repository test or verified probe covers it; **DESIGNED**
 and **PLANNED** are documents, not working features; **EXPERIMENTAL** means a
@@ -127,8 +127,8 @@ p : Point({x:10, y:32})
 
 `list<T>([values])` and shaped `array<T>[extent, ...]([values])` are present
 in runtime examples. Indexing is zero-based in those examples. Generic maps,
-user-defined generic functions, iterators, and classes are **NOT SUPPORTED**
-as general language guarantees. The pure `std/math.flow` unit is the first
+iterators, and classes are **NOT SUPPORTED** as general language guarantees.
+The pure `std/math.flow` unit is the first
 small standard-library slice: `identity`, `add`, `abs`, `square`, `cube`,
 `factorial`, `min`, `max`, and `clamp` over `int` are IMPLEMENTED and TESTED by
 `flowmini_stdlib_math`; this is a narrow library surface, not a complete
@@ -145,6 +145,48 @@ type Percent refines int {
 ```
 
 Do not assume every conversion or runtime path enforces every invariant.
+
+## User-defined generics (v0.30)
+
+User-defined type parameters are **EXPERIMENTAL/TESTED** on the structural
+artifact path. A generic function declares its parameters once:
+
+```flow
+fn identity<T>(value : T) : T {
+    value -> return
+}
+
+main {
+    answer : int(identity<int>(42))
+}
+```
+
+Generic records preserve their parameter names and field uses in semantic
+artifacts:
+
+```flow
+record Pair<A, B> {
+    first : A
+    second : B
+}
+```
+
+Explicit type arguments are supported first (`identity<int>(42)`). A simple
+single-answer inference form (`identity(42)`) is also tested. The compiler
+records a substitution map and deterministic instance identity such as
+`identity<int>` before lowering; LLVM receives only the concrete carrier type.
+The initial executable generic function subset is deliberately small: the
+tested implementation forwards one argument to the return path. Generic
+record declarations and concrete applications such as `Pair<int, Bool>` are
+validated and preserved in artifacts; general record construction/layout is
+still limited by the existing record backend.
+
+Generic constraints, value-level generics, specialization syntax, generic
+variants (`Result<T,E>`), and generic collection carriers are **NOT SUPPORTED —
+DEFERRED**. Compile-time constants remain a separate value-level facility.
+The runtime compatibility parser is an explicitly named legacy path and does
+not yet execute generic syntax; use `--dump-frontend-bundle` followed by the
+semantic/lowering stages for the tested generic path.
 
 ## Control flow, constants, and variants
 

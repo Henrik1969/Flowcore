@@ -1,0 +1,9 @@
+program bad_generic_arity
+
+fn choose<T, U>(value : T, fallback : U) : T {
+    value -> return
+}
+
+main {
+    value : int(choose<int>(42, 7))
+}

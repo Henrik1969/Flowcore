@@ -69,8 +69,9 @@ struct AggregateLayout { std::string contract, name; std::vector<std::pair<std::
 struct Region { std::string id, kind, status; std::vector<std::string> prerequisites; };
 struct EffectFact { int declaration = -1, symbol = -1; std::string name, effect, certainty, reason; };
 struct VariantPayloadBinding { int symbol = -1; std::string name, type; };
+struct GenericSignature { int symbol = -1, declaration = -1; std::string name, return_type; std::vector<std::string> parameters, value_parameters, parameter_types; bool forward_first_argument = false; };
 struct CallSite { int expression = -1, statement = -1, scope = -1, callee_symbol = -1, write_symbol = -1; std::string callee; bool pure = false; std::set<int> reads; std::string writes; std::vector<int> arguments; std::vector<int> independent_with; };
-struct LoweringOperation { int expression = -1, statement = -1, scope = -1, block = -1, function_symbol = -1, then_block = -1, else_block = -1, body_block = -1, failure_block = -1, default_block = -1, join_block = -1, callee_symbol = -1, result_symbol = -1, variant_discriminant = -1; std::string callee, kind, contract, library, convention, symbol, effect, parameter_types, return_type, selector_type, selector_kind, compile_time_value, variant_type, variant_member; std::vector<int> arguments, match_values, match_highs, match_blocks; std::vector<std::string> match_label_types, match_label_members, variant_payload_types; std::vector<std::vector<VariantPayloadBinding>> match_payload_bindings; };
+struct LoweringOperation { int expression = -1, statement = -1, scope = -1, block = -1, function_symbol = -1, then_block = -1, else_block = -1, body_block = -1, failure_block = -1, default_block = -1, join_block = -1, callee_symbol = -1, result_symbol = -1, variant_discriminant = -1; std::string callee, kind, contract, library, convention, symbol, effect, parameter_types, return_type, selector_type, selector_kind, compile_time_value, variant_type, variant_member, generic_owner, generic_return_type, instantiation_id; std::vector<int> arguments, match_values, match_highs, match_blocks; std::vector<std::string> match_label_types, match_label_members, variant_payload_types, generic_type_arguments; std::vector<std::pair<std::string, std::string>> generic_substitutions; std::vector<std::vector<VariantPayloadBinding>> match_payload_bindings; };
 struct Callable { int symbol = -1, scope = -1, body_block = -1; bool entry = false; std::string name, return_type, availability; std::vector<std::pair<int, std::string>> parameters; };
 struct Resolution { int expression = -1, statement = -1, scope = -1, symbol = -1; std::string name; };
 
@@ -116,6 +117,9 @@ int run(const Json& bundle, int lowering_plan_version) {
     std::map<std::string, std::map<std::string, int>> enum_members;
     std::map<std::string, std::map<std::string, int>> variant_members;
     std::map<std::string, std::map<std::string, std::vector<std::pair<std::string, std::string>>>> variant_payloads;
+    std::map<std::string, std::size_t> generic_record_arities;
+    std::set<std::string> generic_parameter_names;
+    std::vector<std::pair<int, std::string>> duplicate_generic_parameters;
     for (const auto& [identity, declaration] : declarations) {
         const auto kind = text(field(*declaration, "kind"));
         if (kind == "enum") {
@@ -137,6 +141,64 @@ int run(const Json& bundle, int lowering_plan_version) {
                 }
             }
         }
+        if (kind == "record") {
+            const auto parameters = list(field(*declaration, "type_parameters"));
+            if (!parameters.empty()) {
+                generic_record_arities[text(field(*declaration, "name"))] = parameters.size();
+                std::set<std::string> seen;
+                for (const auto& parameter : parameters) {
+                    const auto name = text(field(parameter, "name"));
+                    if (!seen.insert(name).second) duplicate_generic_parameters.emplace_back(identity, name);
+                    generic_parameter_names.insert(name);
+                }
+            }
+        }
+    }
+    std::map<int, GenericSignature> generic_functions;
+    for (const auto& [declaration_id, declaration] : declarations) {
+        if (text(field(*declaration, "kind")) != "function") continue;
+        const auto parameters = list(field(*declaration, "type_parameters"));
+        if (parameters.empty()) continue;
+        int function_symbol = -1;
+        for (const auto& [symbol_id, origin] : origins) {
+            if (text(field(*origin, "ast_path")) == "/declaration_pool/" + std::to_string(declaration_id)) {
+                function_symbol = symbol_id;
+                break;
+            }
+        }
+        if (function_symbol < 0) continue;
+        GenericSignature signature;
+        signature.symbol = function_symbol;
+        signature.declaration = declaration_id;
+        signature.name = text(field(*declaration, "name"));
+        signature.return_type = text(field(*declaration, "return_type"));
+        for (const auto& parameter : parameters) {
+            const auto name = text(field(parameter, "name"));
+            signature.parameters.push_back(name);
+            if (std::count(signature.parameters.begin(), signature.parameters.end() - 1, name) != 0)
+                duplicate_generic_parameters.emplace_back(function_symbol, name);
+            generic_parameter_names.insert(name);
+        }
+        for (const auto& parameter : list(field(*declaration, "parameters"))) {
+            signature.value_parameters.push_back(text(field(parameter, "name")));
+            signature.parameter_types.push_back(text(field(parameter, "type")));
+        }
+        const int body = integer(field(*declaration, "body_block"));
+        const auto body_statements = blocks.count(body) ? list(field(*blocks.at(body), "statements")) : list(nullptr);
+        if (signature.parameters.size() == 1 && signature.parameter_types.size() == 1 && signature.return_type == signature.parameter_types.front() && body_statements.size() == 1 && statements.count(integer(&body_statements.front()))) {
+            const auto* statement = statements.at(integer(&body_statements.front()));
+            if (text(field(*statement, "kind")) == "return" || text(field(*statement, "kind")) == "placement") {
+                const auto* payload = field(*statement, "payload");
+                const int value = integer(field(payload, "value_expression"));
+                const auto* expression = expressions.count(value) ? expressions.at(value) : nullptr;
+                signature.forward_first_argument = expression != nullptr &&
+                    text(field(*statement, "kind")) == "return" &&
+                    text(field(*expression, "kind")) == "identifier" &&
+                    !signature.value_parameters.empty() &&
+                    text(field(field(*expression, "payload"), "name")) == signature.value_parameters.front();
+            }
+        }
+        generic_functions[function_symbol] = std::move(signature);
     }
     std::vector<Diagnostic> diagnostics;
     auto add_diagnostic = [&](std::string code, std::string message, int symbol, std::string region = {}) {
@@ -149,6 +211,8 @@ int run(const Json& bundle, int lowering_plan_version) {
         diagnostics.push_back(std::move(item));
     };
     for (const auto& entry : list(field(bundle, "diagnostics"))) add_diagnostic("FLOWMINI_FRONTEND_DIAGNOSTIC", text(field(entry, "message"), "FlowMini frontend diagnostic"), -1);
+    for (const auto& [symbol, name] : duplicate_generic_parameters)
+        add_diagnostic("FLOWANALYST_GENERIC_DUPLICATE_PARAMETER", "generic parameter '" + name + "' is declared more than once", symbol, "generic:" + name);
     std::vector<Target> targets;
     std::vector<BindingRequirement> binding_requirements;
     std::vector<AbiTypeContract> abi_type_contracts;
@@ -228,11 +292,14 @@ int run(const Json& bundle, int lowering_plan_version) {
     for (const auto& [id, symbol] : symbols) { auto kind = text(field(*symbol, "kind")); if (kind == "Type" || kind == "Struct" || kind == "Contract") type_symbols[text(field(*symbol, "name"))] = id; }
     const std::vector<std::string> generic_constructors = {"list", "array", "optional", "collection.list", "result.Result"};
     std::function<bool(const std::string&)> is_resolved_type = [&](const std::string& raw_value) {
-        const auto value = trim_copy(raw_value); if (is_builtin(value) || is_abi_type(value) || is_intrinsic_type(value) || type_symbols.count(value) != 0) return true;
+        const auto value = trim_copy(raw_value); if (is_builtin(value) || is_abi_type(value) || is_intrinsic_type(value) || type_symbols.count(value) != 0 || generic_parameter_names.count(value) != 0) return true;
         std::string core = value; const auto shape = value.find("["); if (shape != std::string::npos) { if (!numeric_extents(value.substr(shape)) || shape == 0) return false; core = value.substr(0, shape); }
         const auto open = core.find('<'); if (open == std::string::npos || core.back() != '>') return false;
-        const auto constructor = core.substr(0, open); bool known = false; for (const auto& candidate : generic_constructors) if (constructor == candidate) known = true; if (!known) return false;
-        const auto arguments = split_generic_arguments(core.substr(open + 1, core.size() - open - 2)); if (arguments.empty()) return false;
+        const auto constructor = core.substr(0, open); bool known = false; for (const auto& candidate : generic_constructors) if (constructor == candidate) known = true;
+        const auto arguments = split_generic_arguments(core.substr(open + 1, core.size() - open - 2));
+        if (generic_record_arities.count(constructor) != 0) known = arguments.size() == generic_record_arities.at(constructor);
+        if (!known) return false;
+        if (arguments.empty()) return false;
         for (const auto& argument : arguments) if (!is_resolved_type(argument)) return false;
         return true;
     };
@@ -378,6 +445,17 @@ int run(const Json& bundle, int lowering_plan_version) {
             break;
         }
     }
+    auto generic_argument_texts = [&](const Json& expression) {
+        std::vector<std::string> result;
+        const auto* payload = field(expression, "payload");
+        for (const auto& argument : list(field(payload, "type_arguments")))
+            result.push_back(text(field(argument, "text")));
+        return result;
+    };
+    auto substitute_type = [](const std::string& type, const std::map<std::string, std::string>& substitutions) {
+        const auto found = substitutions.find(type);
+        return found == substitutions.end() ? type : found->second;
+    };
     std::function<std::string(int)> expression_type = [&](int expression_id) -> std::string {
         if (!expressions.count(expression_id)) return {};
         const auto* expression = expressions.at(expression_id);
@@ -415,7 +493,38 @@ int run(const Json& bundle, int lowering_plan_version) {
                 if (variant_members.count(type_name) && variant_members.at(type_name).count(member)) return type_name;
             }
             const auto found = resolved_expression_symbols.find(base);
-            return found != resolved_expression_symbols.end() && symbol_types.count(found->second) ? symbol_types.at(found->second) : std::string{};
+            if (found == resolved_expression_symbols.end()) return {};
+            const auto generic = generic_functions.find(found->second);
+            if (generic == generic_functions.end())
+                return symbol_types.count(found->second) ? symbol_types.at(found->second) : std::string{};
+            const auto* call_payload = field(*expression, "payload");
+            auto arguments = generic_argument_texts(*expression);
+            const auto call_arguments = list(field(call_payload, "arguments"));
+            if (arguments.empty()) {
+                for (std::size_t index = 0; index < call_arguments.size() && index < generic->second.parameters.size(); ++index)
+                    arguments.push_back(expression_type(integer(&call_arguments[index])));
+            }
+            if (arguments.size() != generic->second.parameters.size()) {
+                add_diagnostic("FLOWANALYST_GENERIC_ARITY",
+                               "generic function '" + generic->second.name + "' expects " + std::to_string(generic->second.parameters.size()) + " type argument(s), got " + std::to_string(arguments.size()),
+                               found->second, "expression:" + std::to_string(expression_id));
+                return {};
+            }
+            std::map<std::string, std::string> substitutions;
+            for (std::size_t index = 0; index < arguments.size(); ++index) {
+                if (!is_resolved_type(arguments[index])) {
+                    add_diagnostic("FLOWANALYST_GENERIC_UNKNOWN_TYPE", "generic type argument '" + arguments[index] + "' cannot be resolved", found->second, "expression:" + std::to_string(expression_id));
+                    continue;
+                }
+                substitutions[generic->second.parameters[index]] = arguments[index];
+            }
+            for (std::size_t index = 0; index < call_arguments.size() && index < generic->second.parameter_types.size(); ++index) {
+                const auto actual = expression_type(integer(&call_arguments[index]));
+                const auto expected = substitute_type(generic->second.parameter_types[index], substitutions);
+                if (!actual.empty() && !expected.empty() && actual != expected)
+                    add_diagnostic("FLOWANALYST_GENERIC_TYPE_MISMATCH", "generic call argument does not match substituted parameter type", found->second, "expression:" + std::to_string(expression_id));
+            }
+            return substitute_type(generic->second.return_type, substitutions);
         }
         if (kind == "binary") {
             const auto op = text(field(field(*expression, "payload"), "operator"));
@@ -624,6 +733,38 @@ int run(const Json& bundle, int lowering_plan_version) {
             operation.parameter_types = requirement.parameter_types;
             operation.return_type = requirement.return_type;
             break;
+        }
+        const auto generic = generic_functions.find(operation.callee_symbol);
+        if (generic != generic_functions.end() && operation.kind == "call") {
+            const auto analyzed_return_type = expression_type(site.expression);
+            if (!generic->second.forward_first_argument) {
+                add_diagnostic("FLOWANALYST_GENERIC_BODY_UNSUPPORTED",
+                               "generic function body is outside the initial supported forwarding subset",
+                               operation.callee_symbol, "expression:" + std::to_string(site.expression));
+            }
+            operation.kind = "generic_call";
+            operation.generic_owner = generic->second.name;
+            auto type_arguments = generic_argument_texts(*expressions.at(site.expression));
+            if (type_arguments.empty()) {
+                for (const auto argument : site.arguments) type_arguments.push_back(expression_type(argument));
+            }
+            if (type_arguments.size() == generic->second.parameters.size()) {
+                for (std::size_t index = 0; index < type_arguments.size(); ++index)
+                operation.generic_substitutions.emplace_back(generic->second.parameters[index], type_arguments[index]);
+                operation.generic_type_arguments = type_arguments;
+                std::ostringstream identity;
+                identity << generic->second.name << "<";
+                for (std::size_t index = 0; index < type_arguments.size(); ++index) {
+                    if (index) identity << ",";
+                    identity << type_arguments[index];
+                }
+                identity << ">";
+                operation.instantiation_id = identity.str();
+                operation.generic_return_type = analyzed_return_type.empty()
+                    ? substitute_type(generic->second.return_type,
+                                      std::map<std::string, std::string>(operation.generic_substitutions.begin(), operation.generic_substitutions.end()))
+                    : analyzed_return_type;
+            }
         }
         lowering_operations.push_back(std::move(operation));
     }
@@ -890,8 +1031,11 @@ int run(const Json& bundle, int lowering_plan_version) {
               << (diagnostics.empty() ? "ready" : "blocked") << "\"";
     if (lowering_plan_version == 2) {
         std::cout << ",\"functions\":[";
+        bool emitted_callable = false;
         for (std::size_t index = 0; index < callables.size(); ++index) {
-            if (index) std::cout << ',';
+            if (generic_functions.count(callables[index].symbol)) continue;
+            if (emitted_callable) std::cout << ',';
+            emitted_callable = true;
             const auto& callable = callables[index];
             std::cout << "{\"symbol_id\":" << callable.symbol << ",\"name\":" << quote(callable.name)
                       << ",\"scope_id\":" << callable.scope << ",\"body_block_id\":" << callable.body_block
@@ -906,8 +1050,61 @@ int run(const Json& bundle, int lowering_plan_version) {
             std::cout << "]}";
         }
         std::cout << "]";
+        std::cout << ",\"generic_declarations\":[";
+        bool emitted_generic = false;
+        for (const auto& [symbol, generic] : generic_functions) {
+            if (emitted_generic) std::cout << ',';
+            emitted_generic = true;
+            std::cout << "{\"symbol_id\":" << symbol
+                      << ",\"name\":" << quote(generic.name)
+                      << ",\"declaration_id\":" << generic.declaration
+                      << ",\"type_parameters\":[";
+            for (std::size_t index = 0; index < generic.parameters.size(); ++index) {
+                if (index) std::cout << ',';
+                std::cout << quote(generic.parameters[index]);
+            }
+            std::cout << "],\"parameter_types\":[";
+            for (std::size_t index = 0; index < generic.parameter_types.size(); ++index) {
+                if (index) std::cout << ',';
+                std::cout << quote(generic.parameter_types[index]);
+            }
+            std::cout << "],\"return_type\":" << quote(generic.return_type) << "}";
+        }
+        std::cout << "]";
+        std::cout << ",\"generic_records\":[";
+        bool emitted_record = false;
+        for (const auto& [declaration_id, declaration] : declarations) {
+            if (text(field(*declaration, "kind")) != "record") continue;
+            const auto parameters = list(field(*declaration, "type_parameters"));
+            if (parameters.empty()) continue;
+            int record_symbol = -1;
+            for (const auto& [symbol_id, symbol] : symbols)
+                if (text(field(*symbol, "kind")) == "Struct" && text(field(*symbol, "name")) == text(field(*declaration, "name"))) { record_symbol = symbol_id; break; }
+            if (emitted_record) std::cout << ',';
+            emitted_record = true;
+            std::cout << "{\"symbol_id\":" << record_symbol
+                      << ",\"name\":" << quote(text(field(*declaration, "name")))
+                      << ",\"declaration_id\":" << declaration_id << ",\"type_parameters\":[";
+            for (std::size_t index = 0; index < parameters.size(); ++index) {
+                if (index) std::cout << ',';
+                std::cout << quote(text(field(parameters[index], "name")));
+            }
+            std::cout << "],\"fields\":[";
+            const auto fields = list(field(*declaration, "fields"));
+            for (std::size_t index = 0; index < fields.size(); ++index) {
+                if (index) std::cout << ',';
+                std::cout << "{\"name\":" << quote(text(field(fields[index], "name")))
+                          << ",\"type\":" << quote(text(field(fields[index], "type"))) << "}";
+            }
+            std::cout << "]}";
+        }
+        std::cout << "]";
     }
     std::cout << ",\"operations\":[";
+    std::map<int, std::string> generic_expression_types;
+    for (const auto& operation : lowering_operations)
+        if (operation.kind == "generic_call" && !operation.generic_return_type.empty())
+            generic_expression_types[operation.expression] = operation.generic_return_type;
     std::function<void(int, const std::string&)> emit_operand = [&](int expression_id, const std::string& declared_type) {
         const auto* expression = expressions.count(expression_id) ? expressions.at(expression_id) : nullptr;
         const auto kind = text(field(expression, "kind"));
@@ -1023,7 +1220,8 @@ int run(const Json& bundle, int lowering_plan_version) {
             } else {
                 const int callee_symbol = resolved_expression_symbols.count(base) ? resolved_expression_symbols.at(base) : -1;
                 if (lowering_plan_version == 2 && symbols.count(callee_symbol) && text(field(*symbols.at(callee_symbol), "kind")) == "Function") {
-                    std::cout << ",\"type\":" << quote(fact_value(*symbols.at(callee_symbol), "return_type_spelling"))
+                    const auto return_type = generic_expression_types.count(expression_id) ? generic_expression_types.at(expression_id) : fact_value(*symbols.at(callee_symbol), "return_type_spelling");
+                    std::cout << ",\"type\":" << quote(return_type)
                               << ",\"callee_symbol_id\":" << callee_symbol << ",\"arguments\":[";
                     for (std::size_t index = 0; index < arguments.size(); ++index) {
                         if (index) std::cout << ',';
@@ -1049,9 +1247,12 @@ int run(const Json& bundle, int lowering_plan_version) {
         }
         std::cout << "}";
     };
+    bool emitted_operation = false;
     for (std::size_t i = 0; i < lowering_operations.size(); ++i) {
-        if (i) std::cout << ',';
         const auto& operation = lowering_operations[i];
+        if (generic_functions.count(operation.function_symbol)) continue;
+        if (emitted_operation) std::cout << ',';
+        emitted_operation = true;
         std::cout << "{\"id\":" << i
                   << ",\"kind\":" << quote(operation.kind)
                   << ",\"expression_id\":" << operation.expression
@@ -1091,6 +1292,24 @@ int run(const Json& bundle, int lowering_plan_version) {
             for (std::size_t index = 0; index < operation.variant_payload_types.size(); ++index) {
                 if (index) std::cout << ',';
                 std::cout << quote(operation.variant_payload_types[index]);
+            }
+            std::cout << "]";
+        }
+        if (operation.kind == "generic_call") {
+            std::cout << ",\"generic_owner\":" << quote(operation.generic_owner)
+                      << ",\"generic_mode\":\"forward_first_argument\""
+                      << ",\"generic_return_type\":" << quote(operation.generic_return_type)
+                      << ",\"instantiation_id\":" << quote(operation.instantiation_id)
+                      << ",\"type_arguments\":[";
+            for (std::size_t index = 0; index < operation.generic_type_arguments.size(); ++index) {
+                if (index) std::cout << ',';
+                std::cout << quote(operation.generic_type_arguments[index]);
+            }
+            std::cout << "],\"substitutions\":[";
+            for (std::size_t index = 0; index < operation.generic_substitutions.size(); ++index) {
+                if (index) std::cout << ',';
+                std::cout << "{\"parameter\":" << quote(operation.generic_substitutions[index].first)
+                          << ",\"type\":" << quote(operation.generic_substitutions[index].second) << "}";
             }
             std::cout << "]";
         }

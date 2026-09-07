@@ -1,0 +1,10 @@
+program generic_identity_probe
+
+fn identity<T>(value : T) : T {
+    value -> return
+}
+
+main {
+    value : int(identity<int>(42))
+    print value
+}

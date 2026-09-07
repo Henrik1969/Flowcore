@@ -1,6 +1,6 @@
 # Flowmini future work evidence
 
-This ledger records work exposed by inspecting the v0.29 language chain. It is
+This ledger records work exposed by inspecting the v0.31 language chain. It is
 not a wish list. “Do nothing” or “use a provider” is retained where the
 architecture cost of a new mechanism is not justified.
 
@@ -117,24 +117,23 @@ architecture cost of a new mechanism is not justified.
   labels.
 - **Priority:** high for tagged data; do not silently admit it.
 
-### LANGUAGE/COMPILER — restrained generic declarations
+### LANGUAGE/COMPILER — restrained generic declarations (resolved in v0.31)
 
-- **Finding:** user-defined generic functions and records are not yet a
-  language feature; only a bounded set of generic type constructors is
-  recognized by existing type validation.
-- **Evidence:** `FunctionDecl` and `RecordDecl` have no type-parameter owner,
-  Flowanalyst's resolver has no substitution environment, and the guide marks
-  generic functions/collections unsupported. Adding syntax alone would make
-  the two parser paths disagree and would leave lowering without a concrete
-  carrier type.
+- **Finding:** user-defined generic functions and records needed an explicit
+  owner, substitution environment, and concrete lowering boundary.
+- **Evidence:** the `flowmini_generics` gate now preserves `FunctionDecl` and
+  `RecordDecl` parameters, validates `Pair<int,Bool>`, records `T -> int`, and
+  executes `identity<int>` through LLVM. The runtime compatibility parser
+  remains explicitly pre-generics.
 - **Why it matters:** reusable algorithms are needed for self-hosting, but an
   accidental type-erasure implementation would hide invalid substitutions and
   violate semantic evidence.
-- **Status:** NOT SUPPORTED — DEFERRED; no partial generic syntax was added.
-- **Possible direction:** add one canonical type-parameter representation,
-  inference/substitution diagnostics, and a provider-neutral specialization
-  contract together. Start with `identity<T>` only after a real use case and
-  differential corpus exist.
+- **Status:** IMPLEMENTED/TESTED for explicit type arguments, deterministic
+  single-answer inference, and generic record artifacts. Constraints, generic
+  variants, and generic collection carriers remain NOT SUPPORTED — DEFERRED.
+- **Possible direction:** gather real collection/provider pressure before
+  extending inference or adding constraints; keep concrete carrier resolution
+  before backend lowering.
 - **Estimated scope/risk:** medium/high frontend, symbol, and lowering schema
   change; high risk of parser divergence if introduced piecemeal.
 - **Dependencies:** parser convergence, type identity contract, backend carrier
@@ -262,6 +261,35 @@ The producer fix is now covered by the passing regression gate.
 - **Priority rationale:** high for ecosystem usefulness, but bounded growth is
   safer than ABI completeness by enumeration.
 
+### LANGUAGE — restrained generic type relationships
+
+- **Finding:** the language now admits one canonical type-parameter
+  representation for user-defined functions and records. Explicit application
+  and deterministic single-argument inference work for the initial forwarding
+  function subset.
+- **Evidence:** `flowmini_generics` preserves `identity<T>`, `Pair<A,B>`,
+  `identity<int>` substitutions, deterministic instance identity, and executes
+  the concrete LLVM lowering. `bad_generic_unknown_type.flow` and
+  `bad_generic_arity.flow` produce structured Flowanalyst diagnostics.
+- **Why it matters:** reusable type relationships are now visible in AST,
+  facts, lowering plans, and concrete backend input instead of textual
+  substitution. This is the minimum foundation for later collection and result
+  abstractions.
+- **Current status:** IMPLEMENTED/TESTED for explicit generic functions,
+  simple inference, and generic record declaration/application artifacts;
+  generic record construction/layout and generic variants remain deferred.
+- **Possible direction:** gather pressure from real collection and provider
+  programs before adding constraints, generic variants, or broader inference.
+- **Estimated scope/risk:** medium compiler/schema work; high if expanded into
+  value-level metaprogramming or a global constraint solver.
+- **Dependencies:** canonical parser ownership, concrete carrier lowering, and
+  a separately justified collection representation.
+- **Suggested verification/gate:** every future generic construct must preserve
+  owner, parameter order, substitutions, and deterministic instance identity,
+  then lower only after concrete carrier resolution.
+- **Priority rationale:** this resolves the demonstrated identity/record reuse
+  gap while keeping generic programming deliberately small.
+
 ### LANGUAGE — concrete generic pressure from probes
 
 - **Finding:** a reusable `length(list<T>)` helper cannot currently be expressed
@@ -272,11 +300,12 @@ The producer fix is now covered by the passing regression gate.
   directly and keeps its list element type concrete.
 - **Why it matters:** this is measured pressure for later generics and
   collection APIs, while avoiding speculative generic syntax now.
-- **Status:** NOT SUPPORTED — DEFERRED; no syntax or type-erasure workaround was
-  added.
-- **Possible direction:** when generics resume, make one canonical type
-  parameter/substitution path and first prove `length<T>` or `identity<T>`
-  through AST, facts, and lowering.
+- **Status:** NOT SUPPORTED — DEFERRED for collection carriers; the first
+  canonical type-parameter/substitution path is now implemented for identity
+  and record artifacts.
+- **Possible direction:** use the generic identity/record evidence to design a
+  callable collection carrier, then prove `length<T>` through AST, facts, and
+  lowering rather than adding a type-erasure workaround.
 - **Estimated scope/risk:** medium/high frontend and backend schema work.
 - **Dependencies:** parser convergence and a type-carrier contract.
 - **Suggested gate:** generic identity, invalid substitution, and deterministic
