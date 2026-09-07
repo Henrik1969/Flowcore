@@ -1,4 +1,8 @@
 #include <dlfcn.h>
+#include <link.h>
+#include <openssl/evp.h>
+#include <array>
+#include <memory>
 #include <flowcontracts/artifacts.hpp>
 #include <algorithm>
 #include <cstddef>
@@ -132,12 +136,28 @@ bool granted(const std::vector<Grant>& grants, const Requirement& requirement) {
 }
 
 std::string json_string(const std::string& text) {
-    std::string result = "\"";
-    for (const char character : text) {
-        if (character == '\\' || character == '"') result += '\\';
-        result += character;
+    return flowcontracts::json::serialize(Json{text});
+}
+
+std::string provider_digest(const std::string& path) {
+    std::ifstream file(path, std::ios::binary);
+    if (!file) throw std::runtime_error("cannot read loaded provider bytes: " + path);
+    std::unique_ptr<EVP_MD_CTX, decltype(&EVP_MD_CTX_free)> context(EVP_MD_CTX_new(), EVP_MD_CTX_free);
+    if (!context || EVP_DigestInit_ex(context.get(), EVP_sha256(), nullptr) != 1)
+        throw std::runtime_error("cannot initialize provider SHA-256");
+    std::array<char, 65536> buffer;
+    while (file.read(buffer.data(), buffer.size()) || file.gcount()) {
+        if (EVP_DigestUpdate(context.get(), buffer.data(), static_cast<std::size_t>(file.gcount())) != 1)
+            throw std::runtime_error("cannot hash provider bytes");
     }
-    result += '"';
+    if (!file.eof()) throw std::runtime_error("cannot read complete provider bytes");
+    std::array<unsigned char, EVP_MAX_MD_SIZE> digest;
+    unsigned int size = 0;
+    if (EVP_DigestFinal_ex(context.get(), digest.data(), &size) != 1 || size != 32)
+        throw std::runtime_error("cannot finish provider SHA-256");
+    const char hex[] = "0123456789abcdef";
+    std::string result;
+    for (unsigned int i = 0; i < size; ++i) { result += hex[digest[i] >> 4]; result += hex[digest[i] & 15]; }
     return result;
 }
 
@@ -422,6 +442,7 @@ int verify(const std::string& report, const std::string& policy_path, const std:
     };
     std::map<std::string, void*> handles;
     std::vector<std::string> failures;
+    std::map<std::string, std::pair<std::string, std::string>> verified_providers;
     for (const auto& item : needed) {
         if (!granted(grants, item)) failures.push_back(item.library + ": symbol '" + item.symbol + "' denied by capability policy");
         if (item.convention != "c") failures.push_back(item.symbol + ": unsupported calling convention '" + item.convention + "'");
@@ -440,12 +461,33 @@ int verify(const std::string& report, const std::string& policy_path, const std:
         if (!granted(grants, item)) continue;
         if (!handles.count(item.library)) handles[item.library] = dlopen(item.library.c_str(), RTLD_LAZY | RTLD_LOCAL);
         if (!handles[item.library]) { failures.push_back(item.library + ": library unavailable"); continue; }
-        if (!dlsym(handles[item.library], item.symbol.c_str())) failures.push_back(item.library + ": symbol '" + item.symbol + "' unavailable");
+        void* symbol_address = dlsym(handles[item.library], item.symbol.c_str());
+        if (!symbol_address) { failures.push_back(item.library + ": symbol '" + item.symbol + "' unavailable"); continue; }
+        if (!item.evidence.empty()) {
+            try {
+                const auto expected = item.evidence.substr(item.evidence.size() - 64);
+                if (!verified_providers.count(item.library)) {
+                    link_map* mapping = nullptr;
+                    if (dlinfo(handles[item.library], RTLD_DI_LINKMAP, &mapping) != 0 || !mapping || !mapping->l_name || !mapping->l_name[0])
+                        throw std::runtime_error("loaded provider path is unavailable");
+                    const std::string path = mapping->l_name;
+                    verified_providers.emplace(item.library, std::pair{path, provider_digest(path)});
+                }
+                if (verified_providers.at(item.library).second != expected)
+                    throw std::runtime_error("loaded provider SHA-256 does not match authorized evidence");
+                Dl_info symbol_provider{};
+                if (!dladdr(symbol_address, &symbol_provider) || !symbol_provider.dli_fname ||
+                    provider_digest(symbol_provider.dli_fname) != expected)
+                    throw std::runtime_error("resolved symbol is outside the authorized provider evidence");
+            } catch (const std::exception& error) {
+                failures.push_back(item.library + ": " + error.what());
+            }
+        }
     }
     for (const auto& [library, handle] : handles) if (handle) dlclose(handle);
     if (!failures.empty()) {
         std::cout << "{\n  \"format\": \"flowbind.binding_report\",\n  \"version\": 1,\n  \"status\": \"blocked\",\n  \"provider\": \"dlopen+dlsym\",\n  \"failures\": [";
-        for (std::size_t i = 0; i < failures.size(); ++i) { if (i) std::cout << ','; std::cout << '"' << failures[i] << '"'; }
+        for (std::size_t i = 0; i < failures.size(); ++i) { if (i) std::cout << ','; std::cout << json_string(failures[i]); }
         std::cout << "]";
         if (aggregate_manifest_verified) std::cout << ",\n  \"aggregate_abi\": \"verified\"";
         std::cout << "\n}\n";
@@ -466,6 +508,16 @@ int verify(const std::string& report, const std::string& policy_path, const std:
                   << ",\"return_type\":" << json_string(item.return_type)
                   << ",\"evidence\":" << json_string(item.evidence)
                   << ",\"status\":\"authorized\"}";
+    }
+    std::cout << "],\n  \"provider_evidence\": [";
+    bool first_provider = true;
+    for (const auto& [library, evidence] : verified_providers) {
+        if (!first_provider) std::cout << ',';
+        first_provider = false;
+        std::cout << "{\"library\":" << json_string(library)
+                  << ",\"path\":" << json_string(evidence.first)
+                  << ",\"sha256\":" << json_string(evidence.second)
+                  << ",\"status\":\"loaded-bytes-verified\"}";
     }
     std::size_t generic_operation_count = 0;
     try {

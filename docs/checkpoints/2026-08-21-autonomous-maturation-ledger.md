@@ -1,5 +1,39 @@
 # Flowcore autonomous maturation ledger
 
+## Loaded-provider evidence verification — 2026-09-07
+
+Continued from pushed `fb43581`. Flowbind now hashes the actual loaded library
+and the file owning each resolved symbol, comparing SHA-256 to the generated
+evidence already authorized by the exact policy. A matching semantic/policy
+identity with invented provider bytes is refused. A generated custom library
+passes, then fails after replacement with a different implementation exporting
+exactly the same symbol. Ready binding reports retain loaded path/hash evidence.
+The Linux loader (`dlinfo`/`dladdr`) and OpenSSL Crypto supply this provider check.
+The JSON serializer also escapes all capability and failure text correctly.
+
+Verification:
+
+```sh
+cmake --build /tmp/flowcore-reusable-current -j4
+ctest --test-dir /tmp/flowcore-reusable-current -R 'native_binding_generation|flowbind_provider' --output-on-failure
+ctest --test-dir /tmp/flowcore-reusable-current --output-on-failure -j4
+cmake --build /tmp/flowcore-reusable-current-sanitize -j4
+ASAN_OPTIONS=detect_leaks=0 LSAN_OPTIONS=detect_leaks=0 ctest --test-dir /tmp/flowcore-reusable-current-sanitize --output-on-failure -j4
+sh /tmp/flowcore-reusable-acceptance/run.sh
+git diff --check
+```
+
+Focused 2/2, normal 79/79 (5.57 seconds), ASan/UBSan 79/79 (17.45 seconds).
+Native acceptance exits 42 with all six unchanged compiler hashes and the same
+recorded ELF digest. Logs are `/tmp/flow-provider-*`; no transient files enter Git.
+Provider byte checks occur at binding time, not through a pinned native runtime
+loader, and do not prove C prototypes independently of the explicit specification.
+These limits remain documented rather than hidden behind a readiness claim.
+
+State remains CONTINUE. Next: implement native graph provider/receiver contracts
+and ordered activation through durable artifacts, then Flow-owned pager behavior.
+The owner receiver decision remains approved; no total blocker is recorded.
+
 ## Generated evidence authorization identity — 2026-09-07
 
 Recovered clean `ba61221`; focused recovery passed 3/3. Generated ABI blocks

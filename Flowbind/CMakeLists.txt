@@ -5,9 +5,11 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+find_package(OpenSSL REQUIRED COMPONENTS Crypto)
+
 add_executable(flowbind src/main.cpp)
 target_compile_options(flowbind PRIVATE -Wall -Wextra -Wpedantic)
-target_link_libraries(flowbind PRIVATE flowcontracts ${CMAKE_DL_LIBS})
+target_link_libraries(flowbind PRIVATE flowcontracts OpenSSL::Crypto ${CMAKE_DL_LIBS})
 
 enable_testing()
 add_test(NAME flowbind_provider

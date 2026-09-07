@@ -171,6 +171,31 @@ for mutation in 'del(.capabilities[].evidence)' '.capabilities[].evidence |= sub
         echo 'mutated authorization evidence accepted by backend preparation' >&2; exit 1
     fi
 done
+# Even matching semantic/policy hashes cannot invent evidence for loaded bytes.
+wrong_evidence="${evidence%:*}:0000000000000000000000000000000000000000000000000000000000000000"
+jq --arg evidence "$wrong_evidence" '.binding_requirements[].evidence = $evidence | (.lowering_plan.operations[] | select(.kind == "external_call") | .provider.evidence) = $evidence' "$tmpdir/tid.semantic.json" > "$tmpdir/drift.semantic.json"
+awk -v evidence="$wrong_evidence" '{$8=evidence; print}' "$tmpdir/tid.policy" > "$tmpdir/drift.policy"
+if "$bind" --policy "$tmpdir/drift.policy" < "$tmpdir/drift.semantic.json" > "$tmpdir/drift.binding.json"; then
+    echo 'invented loaded-provider hash accepted' >&2; exit 1
+fi
+jq -e '.status == "blocked" and any(.failures[]; contains("loaded provider SHA-256"))' "$tmpdir/drift.binding.json" >/dev/null
+jq -e --arg digest "${evidence##*:}" 'any(.provider_evidence[]; .sha256 == $digest and .status == "loaded-bytes-verified")' "$tmpdir/tid.binding.json" >/dev/null
+
+# A replacement library exporting exactly the same name must be regenerated.
+printf '%s\n' 'int evidence_probe(void) { return 42; }' > "$tmpdir/provider.c"
+clang -shared -fPIC "$tmpdir/provider.c" -o "$tmpdir/libevidence.so"
+jq -n --arg provider "$tmpdir/libevidence.so" '{format:"flowcore.native_binding_spec",version:1,unit:"replacement_provider",namespace:"proof",provider:{soname:$provider,path:$provider,convention:"c"},functions:[{name:"probe",symbol:"evidence_probe",effect:"pure",parameters:[],return_type:"c_int"}]}' > "$tmpdir/replacement.spec.json"
+"$root/tools/generate-flow-bindings.sh" --spec "$tmpdir/replacement.spec.json" --flow-output "$tmpdir/replacement.flow" --policy-output "$tmpdir/replacement.policy" --manifest-output "$tmpdir/replacement.manifest.json" >/dev/null
+printf '%s\n' 'import "replacement.flow" as proof' 'program replaced_bytes' 'main {' '    result : c_int(0)' '    proof.probe() -> result' '    return result' '}' > "$tmpdir/replacement.consumer.flow"
+"$flowmini" --dump-frontend-bundle "$tmpdir/replacement.consumer.flow" | "$analyst" > "$tmpdir/replacement.semantic.json"
+"$bind" --policy "$tmpdir/replacement.policy" < "$tmpdir/replacement.semantic.json" > "$tmpdir/replacement.binding.json"
+printf '%s\n' 'int evidence_probe(void) { return 7; }' > "$tmpdir/provider.c"
+clang -shared -fPIC "$tmpdir/provider.c" -o "$tmpdir/libevidence.so"
+if "$bind" --policy "$tmpdir/replacement.policy" < "$tmpdir/replacement.semantic.json" > "$tmpdir/replacement-drift.binding.json"; then
+    echo 'replaced library accepted with old evidence' >&2; exit 1
+fi
+jq -e '.status == "blocked" and any(.failures[]; contains("loaded provider SHA-256"))' "$tmpdir/replacement-drift.binding.json" >/dev/null
+
 # Repeated generation has no timestamp-dependent bytes.
 "$root/tools/generate-flow-bindings.sh" --spec "$tmpdir/tid.spec.json" --flow-output "$tmpdir/repeated.flow" --policy-output "$tmpdir/repeated.policy" --manifest-output "$tmpdir/repeated.manifest.json" >/dev/null
 cmp "$tmpdir/tid.flow" "$tmpdir/repeated.flow"

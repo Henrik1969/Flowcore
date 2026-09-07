@@ -49,8 +49,13 @@ Provider changes require regeneration and review. A changed provider hash is
 evidence of substrate drift; it is not an automatic authorization to accept a
 new ABI.
 
-The hashes identify generation inputs; this boundary does not yet rehash the
-loaded provider at binding or native-link time. The manifest is inspectable
+Flowbind hashes the loaded provider file and the file owning each resolved
+symbol with SHA-256, and compares those bytes to the authorized evidence.
+Replacing a library while retaining the same exported symbol is refused.
+Ready reports include `provider_evidence` paths and verified hashes. The current
+loader implementation targets Linux (`dlinfo`/`dladdr`) and uses OpenSSL Crypto.
+This is a binding-time check; replacing provider files after authorization or
+at native execution time is outside this checkpoint. The manifest is inspectable
 generation evidence, not a cryptographic signature or independent prototype
 verification. Handwritten declarations with no evidence remain a compatibility
 path; their grants cannot authorize a generated declaration carrying evidence.

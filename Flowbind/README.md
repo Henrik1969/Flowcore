@@ -65,3 +65,9 @@ do not alter this identity. Historical grants cannot authorize an operation with
 generated evidence. Reports preserve it in each capability; the ABI summary
 `provider_signature_evidence` still reports `not-provided` because symbol
 discovery does not independently prove a C prototype.
+
+For generated evidence, Flowbind also verifies the SHA-256 of the loaded library
+and the file owning the resolved symbol. Its `provider_evidence` array records
+the loaded path, hash and `loaded-bytes-verified` status. This requires the Linux
+loader interface and OpenSSL Crypto. It does not pin a provider against changes
+after binding, or independently prove its C prototype.
