@@ -277,6 +277,7 @@ int run(const Json& bundle, int lowering_plan_version) {
                 "graph syntax is preserved but graph execution lowering is not yet implemented",
                 !list(nodes).empty() ? list(nodes).front() : list(wires).front());
         std::set<std::string> node_ids, wire_ids;
+        std::map<std::string, const Callable*> receiver_functions;
         for (const auto& node : list(nodes)) {
             const auto id = text(field(node, "node_id"));
             if (id.empty() || !node_ids.insert(id).second)
@@ -310,7 +311,9 @@ int run(const Json& bundle, int lowering_plan_version) {
                 {"output_port", std::string("out")}, {"output_type", callable.return_type},
                 {"provenance", field(node, "provenance") ? *field(node, "provenance") : Json(nullptr)},
                 {"activation_contract", std::string("fresh_single_input_v1")}});
+            receiver_functions.emplace(id, &callable);
         }
+        std::set<std::string> connected_receivers;
         for (const auto& wire : list(wires)) {
             const auto id = text(field(wire, "wire_id"));
             if (id.empty() || !wire_ids.insert(id).second)
@@ -319,7 +322,24 @@ int run(const Json& bundle, int lowering_plan_version) {
                 const auto* endpoint = field(wire, side);
                 if (!node_ids.count(text(field(endpoint, "node_id"))) || text(field(endpoint, "port_id")).empty())
                     graph_diagnostic("FLOWANALYST_GRAPH_ENDPOINT", "unknown node or empty graph port", wire);
+                const auto node = text(field(endpoint, "node_id"));
+                if (receiver_functions.count(node)) {
+                    const bool input = std::string_view(side) == "to";
+                    if (text(field(endpoint, "port_id")) != (input ? "in" : "out"))
+                        graph_diagnostic("FLOWANALYST_GRAPH_RECEIVER_PORT", "source receiver endpoint has wrong port direction or identity", wire);
+                    else if (input) connected_receivers.insert(node);
+                }
             }
+            const auto from = text(field(field(wire, "from"), "node_id"));
+            const auto to = text(field(field(wire, "to"), "node_id"));
+            if (receiver_functions.count(from) && receiver_functions.count(to) &&
+                receiver_functions.at(from)->return_type != receiver_functions.at(to)->parameters.front().second)
+                graph_diagnostic("FLOWANALYST_GRAPH_RECEIVER_TYPE", "source receiver output and input types differ", wire);
+        }
+        for (const auto& node : list(nodes)) {
+            const auto id = text(field(node, "node_id"));
+            if (receiver_functions.count(id) && !connected_receivers.count(id))
+                graph_diagnostic("FLOWANALYST_GRAPH_RECEIVER_INPUT", "source receiver requires a connected input", node);
         }
     }
     std::vector<Resolution> resolutions;

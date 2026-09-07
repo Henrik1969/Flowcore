@@ -88,6 +88,8 @@ struct Envelope {
     // One output activation creates one signal identity; fan-out deliveries
     // retain it while each destination keeps its own wire identity.
     std::string signal_id;
+    // A delivery is distinct even when fan-out shares one output signal.
+    std::string delivery_id{};
 };
 
 class StdinProducer {

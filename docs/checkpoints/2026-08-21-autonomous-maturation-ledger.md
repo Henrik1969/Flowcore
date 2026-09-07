@@ -1,5 +1,44 @@
 # Flowcore autonomous maturation ledger
 
+## Receiver connection and delivery identity checkpoint — 2026-09-07
+
+Continued immediately after pushing `2327913`. Source receivers now require
+explicit input/output direction, connected input and matching declared types
+between receiver functions. Specific diagnostic assertions cover wrong ports,
+missing input, invalid role, unresolved function, duplicate node/wire identity,
+unknown endpoint, incompatible types and unsupported syntax version. A compatible
+two-function graph has only the expected temporary execution-refusal diagnostics.
+
+The compatibility runtime assigns each routed envelope a distinct delivery ID,
+while fan-out retains the originating signal ID and distinct wire identities.
+Runtime failure diagnostics include delivery identity. The graph gate verifies
+one producer evaluation and one evaluation of each destination, plus no normal
+output from a failing activation. This is runtime identity evidence, not yet
+source-function execution or activation-local storage proof.
+
+Exact verification:
+
+```sh
+cmake --build /tmp/flowcore-reusable-current -j4
+ctest --test-dir /tmp/flowcore-reusable-current -R 'graph_lowering_refusal|flowcore_graph_routing' --output-on-failure
+ctest --test-dir /tmp/flowcore-reusable-current --output-on-failure -j4
+cmake --build /tmp/flowcore-reusable-current-sanitize -j4
+ASAN_OPTIONS=detect_leaks=0 LSAN_OPTIONS=detect_leaks=0 \
+  ctest --test-dir /tmp/flowcore-reusable-current-sanitize --output-on-failure -j4
+sh /tmp/flowcore-reusable-acceptance/run.sh
+git diff --check
+```
+
+Both builds passed. Focused **2/2**; complete normal **76/76** (5.23 seconds);
+complete ASan/UBSan **76/76** (17.19 seconds). Native generated-binding acceptance
+exited **42**, checked all six unchanged compiler hashes during compilation, and
+retained Linux x86-64 ELF SHA-256
+`86ac3acba71f522aa13b5d58e733486737c1b4b9ffc19ed5224ab1c75470f400`.
+Logs are `/tmp/flowcore-receiver-contract-{ctest,sanitize}.log`; no generated build
+or log output is committed. Source activation/native graph execution and Flow-owned
+paging remain ordinary unfinished work. State remains **CONTINUE**, not BLOCKED
+or DONE. Next: executable fresh receiver frames and durable graph lowering.
+
 ## Approved receiver recovery and syntax boundary — 2026-09-07
 
 Recovered `8f77f84` on `v29-language-maturation`, synchronized with origin.
@@ -718,6 +757,8 @@ was performed.
 
 ## Exact next action
 
-Gate 6 remains unfinished. Resolve the source receiver activation contract,
-then implement source-defined navigation and durable graph lowering. Historical
-DONE and branch-synchronization claims do not describe this recovered checkout.
+Gate 6 remains unfinished. The receiver activation decision is approved. Implement
+fresh source-function activation frames, preserve the complete graph through the
+middle stages and native lowering, then move pager navigation into Flow. Do not
+ask for the approved decision again. State remains CONTINUE; no total blocker is
+recorded. Historical DONE claims do not describe this checkout.

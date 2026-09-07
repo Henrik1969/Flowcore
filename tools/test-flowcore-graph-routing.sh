@@ -46,6 +46,14 @@ right_route=$(grep -E 'route start\.out => right\.right \[wire:1\] \[signal:[0-9
 left_signal=$(printf '%s\n' "$left_route" | sed -E 's/.*\[(signal:[0-9]+)\].*/\1/')
 right_signal=$(printf '%s\n' "$right_route" | sed -E 's/.*\[(signal:[0-9]+)\].*/\1/')
 test "$left_signal" = "$right_signal"
+left_delivery=$(printf '%s\n' "$left_route" | sed -E 's/.*\[(delivery:[0-9]+)\].*/\1/')
+right_delivery=$(printf '%s\n' "$right_route" | sed -E 's/.*\[(delivery:[0-9]+)\].*/\1/')
+test "$left_delivery" = 'delivery:0'
+test "$right_delivery" = 'delivery:1'
+# Fan-out schedules two deliveries, without evaluating the producer twice.
+test "$(grep -c 'enter start with' "$tmpdir/fanout.stderr")" -eq 1
+test "$(grep -c 'enter left with' "$tmpdir/fanout.stderr")" -eq 1
+test "$(grep -c 'enter right with' "$tmpdir/fanout.stderr")" -eq 1
 
 cat > "$tmpdir/unconnected.flow" <<'EOF'
 program unconnected
@@ -104,11 +112,15 @@ wire input.out => parse.in
 wire parse.out => halt.in
 main { marker : int(1) }
 EOF
-if printf 'not-an-integer\n' | "$flowmini" "$tmpdir/failure.flow" >/dev/null 2> "$tmpdir/failure.stderr"; then
+if printf 'not-an-integer\n' | "$flowmini" --trace true "$tmpdir/failure.flow" >/dev/null 2> "$tmpdir/failure.stderr"; then
     echo 'failing graph node unexpectedly succeeded' >&2
     exit 1
 fi
 grep -Eq 'failure at parse\.in via wire:0 signal:[0-9]+: expected integer input' "$tmpdir/failure.stderr"
 grep -Fq 'fatal in parse.int: expected integer input' "$tmpdir/failure.stderr"
+grep -Eq 'failure at parse\.in via wire:0 signal:[0-9]+: .*\[delivery:[0-9]+\]' "$tmpdir/failure.stderr"
+if grep -Fq 'route parse.out =>' "$tmpdir/failure.stderr"; then
+    echo 'failed activation emitted a normal output' >&2; exit 1
+fi
 
 echo 'Flowcore graph routing: PASS'

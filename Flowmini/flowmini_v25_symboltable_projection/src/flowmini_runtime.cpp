@@ -1445,6 +1445,7 @@ void RuntimeGraph::startAt(const std::string& nodeId, MiniEnvelope env) {
         const auto failureInputPort = pending.envelope.input_port;
         const auto failureWire = pending.envelope.wire_id;
         const auto failureSignal = pending.envelope.signal_id;
+        const auto failureDelivery = pending.envelope.delivery_id;
         std::vector<Route> routes;
         try {
             routes = it->second->run(std::move(pending.envelope));
@@ -1455,7 +1456,7 @@ void RuntimeGraph::startAt(const std::string& nodeId, MiniEnvelope env) {
                     "runtime",
                     "failure at " + pending.nodeId + "." + failureInputPort +
                         " via " + failureWire + " " + failureSignal +
-                        ": " + error.what()
+                        ": " + error.what() + " [" + failureDelivery + "]"
                 });
             }
             throw;
@@ -1492,7 +1493,8 @@ void RuntimeGraph::deliver(const std::string& fromNode, const std::string& fromP
         MiniEnvelope routed = env;
         routed.input_port = target.port;
         routed.wire_id = target.wire_id;
-        trace("route " + key + " => " + target.node + "." + target.port + " [" + target.wire_id + "] [" + routed.signal_id + "]", routed);
+        routed.delivery_id = "delivery:" + std::to_string(next_delivery_id_++);
+        trace("route " + key + " => " + target.node + "." + target.port + " [" + target.wire_id + "] [" + routed.signal_id + "] [" + routed.delivery_id + "]", routed);
         queue_.push(Pending{target.node, std::move(routed)});
     }
 }

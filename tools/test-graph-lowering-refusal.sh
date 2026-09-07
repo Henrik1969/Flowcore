@@ -36,6 +36,7 @@ done
 cat > "$tmpdir/receiver.flow" <<'EOF'
 program arbitrary_receiver
 node receiver : fn transform
+producer source : start.record
 wire source.out => receiver.in
 fn transform(value : int): int {
     return value + 1
@@ -64,6 +65,48 @@ for mutation in '.diagnostics = []' '.diagnostics = [] | .graph_syntax.version =
         any(.diagnostics[]; .code == "FLOWANALYST_GRAPH_EXECUTION_UNSUPPORTED")' \
         "$tmpdir/mutated.semantic.json" >/dev/null
 done
+
+# Assert specific semantic failures independently of the temporary execution refusal.
+check_receiver_mutation() {
+    jq "$1" "$tmpdir/receiver.json" > "$tmpdir/mutated.json"
+    if "$FLOWANALYST_BIN" --lowering-plan-version 2 < "$tmpdir/mutated.json" > "$tmpdir/mutated.semantic.json"; then
+        echo "hostile receiver graph admitted: $1" >&2; exit 1
+    fi
+    jq -e --arg code "$2" 'any(.diagnostics[]; .code == $code)' "$tmpdir/mutated.semantic.json" >/dev/null
+}
+check_receiver_mutation '.graph_syntax.wires[0].to.port_id = "out"' FLOWANALYST_GRAPH_RECEIVER_PORT
+check_receiver_mutation '.graph_syntax.wires = []' FLOWANALYST_GRAPH_RECEIVER_INPUT
+check_receiver_mutation '.graph_syntax.nodes[0].role = "sink"' FLOWANALYST_GRAPH_RECEIVER_CONTRACT
+check_receiver_mutation '.graph_syntax.nodes[0].implementation_name = "absent"' FLOWANALYST_GRAPH_RECEIVER_RESOLUTION
+check_receiver_mutation '.graph_syntax.nodes += [.graph_syntax.nodes[0]]' FLOWANALYST_GRAPH_NODE_ID
+check_receiver_mutation '.graph_syntax.wires += [.graph_syntax.wires[0]]' FLOWANALYST_GRAPH_WIRE_ID
+check_receiver_mutation '.graph_syntax.wires[0].from.node_id = "absent"' FLOWANALYST_GRAPH_ENDPOINT
+check_receiver_mutation '.graph_syntax.version = 99' FLOWANALYST_GRAPH_VERSION
+
+cat > "$tmpdir/typed.flow" <<'EOF'
+program typed_receivers
+producer source : start.record
+node left : fn first
+node right : fn second
+wire source.out => left.in
+wire left.out => right.in
+fn first(value : int): int { return value }
+fn second(value : Bool): Bool { return value }
+main { return 0 }
+EOF
+"$FLOWMINI_BIN" --dump-frontend-bundle "$tmpdir/typed.flow" > "$tmpdir/typed.json"
+if "$FLOWANALYST_BIN" --lowering-plan-version 2 < "$tmpdir/typed.json" > "$tmpdir/typed.semantic.json"; then
+    echo 'incompatible receiver types admitted' >&2; exit 1
+fi
+jq -e 'any(.diagnostics[]; .code == "FLOWANALYST_GRAPH_RECEIVER_TYPE")' "$tmpdir/typed.semantic.json" >/dev/null
+sed 's/Bool/int/g' "$tmpdir/typed.flow" > "$tmpdir/compatible.flow"
+"$FLOWMINI_BIN" --dump-frontend-bundle "$tmpdir/compatible.flow" > "$tmpdir/compatible.json"
+if "$FLOWANALYST_BIN" --lowering-plan-version 2 < "$tmpdir/compatible.json" > "$tmpdir/compatible.semantic.json"; then
+    echo 'syntax-only graph unexpectedly executed' >&2; exit 1
+fi
+jq -e '(.graph_analysis.receivers | length) == 2 and
+    all(.diagnostics[]; .code == "FLOWMINI_GRAPH_LOWERING_UNSUPPORTED" or
+        .code == "FLOWANALYST_GRAPH_EXECUTION_UNSUPPORTED")' "$tmpdir/compatible.semantic.json" >/dev/null
 for declaration in 'node x : fn' 'wire a.out -> b.in' 'wire a.out => b' 'node x : provider extra'; do
     printf 'program malformed\n%s\nmain { return 0 }\n' "$declaration" > "$tmpdir/malformed.flow"
     if "$FLOWMINI_BIN" --dump-frontend-bundle "$tmpdir/malformed.flow" > /dev/null 2>&1; then

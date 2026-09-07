@@ -71,3 +71,17 @@ semantic, execution and lowering artifacts; add independently replayed boundary
 tests; then express pager navigation in Flow and remove the built-in algorithm
 after equivalent positive, negative, order and native execution coverage passes.
 Keep graph projection refusal until that full route is admitted.
+
+## Verified implementation boundary — 2026-09-07
+
+Frontend capture and semantic receiver analysis now preserve function/parameter
+identity, source provenance and explicit `in`/`out` port mapping. Receiver-to-
+receiver wires require matching declared types. Wrong ports, unconnected inputs,
+missing/ambiguous functions, invalid roles and duplicate graph identities receive
+specific diagnostics even while execution remains refused. Provider port contracts
+and executable activation frames are still required before native admission.
+
+Compatibility runtime fan-out now records a separate delivery identity alongside
+wire and shared output-signal identities. Tests verify one producer invocation,
+distinct deliveries, and no successful output from a failed activation. This
+does not yet prove source-function execution or fresh function-local storage.

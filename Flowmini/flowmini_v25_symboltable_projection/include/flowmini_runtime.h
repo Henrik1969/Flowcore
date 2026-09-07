@@ -69,6 +69,7 @@ private:
     std::map<std::string, std::vector<Connection>> wires_;
     std::queue<Pending> queue_;
     std::size_t next_signal_id_ = 0;
+    std::size_t next_delivery_id_ = 0;
 };
 
 struct BuildResult {
