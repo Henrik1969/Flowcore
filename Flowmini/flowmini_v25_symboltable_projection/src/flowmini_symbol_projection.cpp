@@ -525,6 +525,9 @@ void project_abi_decl(symboltable::SymbolTable& table,
                                 symboltable::FactoidKind::AbiTag,
                                 "library_spelling",
                                 value.spelling);
+            } else if constexpr (std::is_same_v<Member, AbiEvidenceClause>) {
+                add_string_fact(table, abiSymbol, symboltable::FactoidKind::AbiTag,
+                                "evidence_spelling", value.spelling);
             } else if constexpr (std::is_same_v<Member, AbiConventionClause>) {
                 add_string_fact(table,
                                 abiSymbol,

@@ -20,8 +20,8 @@ namespace {
 
 constexpr std::string_view VERSION = "0.1.0";
 
-struct Requirement { std::string contract, library, convention, symbol, effect, parameter_types, return_type; };
-struct Grant { std::string library, symbol, convention, effect, parameter_types, return_type; bool exact_signature = false; };
+struct Requirement { std::string contract, library, convention, symbol, effect, parameter_types, return_type, evidence; };
+struct Grant { std::string library, symbol, convention, effect, parameter_types, return_type, evidence; bool exact_signature = false; };
 
 struct Options { std::string report_path, policy_path, abi_manifest_path; };
 
@@ -110,6 +110,14 @@ std::vector<Grant> read_policy(const std::string& path) {
         if (!words || verb != "allow") throw std::runtime_error("invalid binding policy line");
         const bool has_parameter_types = static_cast<bool>(words >> grant.parameter_types);
         const bool has_return_type = static_cast<bool>(words >> grant.return_type);
+        if (has_parameter_types != has_return_type) throw std::runtime_error("incomplete binding signature grant");
+        if (has_return_type) {
+            if (words >> grant.evidence) {
+                (void)flowcontracts::binding_evidence(JsonObject{{"evidence", grant.evidence}}, "$.policy");
+                std::string extra;
+                if (words >> extra) throw std::runtime_error("unexpected binding policy fields");
+            }
+        }
         grant.exact_signature = has_parameter_types || has_return_type;
         if (!grant.parameter_types.empty() && grant.parameter_types == "-") grant.parameter_types.clear();
         if (!grant.return_type.empty() && grant.return_type == "-") grant.return_type.clear();
@@ -119,7 +127,7 @@ std::vector<Grant> read_policy(const std::string& path) {
 }
 
 bool granted(const std::vector<Grant>& grants, const Requirement& requirement) {
-    for (const auto& grant : grants) if (grant.library == requirement.library && grant.symbol == requirement.symbol && grant.convention == requirement.convention && grant.effect == requirement.effect && (!grant.exact_signature || (grant.parameter_types == requirement.parameter_types && grant.return_type == requirement.return_type))) return true;
+    for (const auto& grant : grants) if (grant.library == requirement.library && grant.symbol == requirement.symbol && grant.convention == requirement.convention && grant.effect == requirement.effect && grant.evidence == requirement.evidence && (!grant.exact_signature || (grant.parameter_types == requirement.parameter_types && grant.return_type == requirement.return_type))) return true;
     return false;
 }
 
@@ -144,7 +152,8 @@ std::vector<Requirement> requirements(const std::string& report) {
             json_text(json_field(item, "symbol")),
             json_text(json_field(item, "effect")),
             json_text(json_field(item, "parameter_types")),
-            json_text(json_field(item, "return_type"))
+            json_text(json_field(item, "return_type")),
+            flowcontracts::binding_evidence(flowcontracts::json::object(item), "$.binding_requirements")
         });
     }
     return result;
@@ -189,7 +198,8 @@ void validate_lowering_plan(const std::string& report, const std::vector<Require
         for (const auto& requirement : needed) {
             if (requirement.contract == contract && requirement.library == library && requirement.convention == convention &&
                 requirement.symbol == symbol && requirement.effect == effect &&
-                requirement.parameter_types == parameter_types && requirement.return_type == return_type) {
+                requirement.parameter_types == parameter_types && requirement.return_type == return_type &&
+                requirement.evidence == flowcontracts::binding_evidence(flowcontracts::json::object(*provider), "$.lowering_plan.provider")) {
                 found = true;
                 break;
             }
@@ -454,6 +464,7 @@ int verify(const std::string& report, const std::string& policy_path, const std:
                   << ",\"effect\":" << json_string(item.effect)
                   << ",\"parameter_types\":" << json_string(item.parameter_types)
                   << ",\"return_type\":" << json_string(item.return_type)
+                  << ",\"evidence\":" << json_string(item.evidence)
                   << ",\"status\":\"authorized\"}";
     }
     std::size_t generic_operation_count = 0;

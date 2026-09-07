@@ -1,5 +1,46 @@
 # Flowcore autonomous maturation ledger
 
+## Generated evidence authorization identity — 2026-09-07
+
+Recovered clean `ba61221`; focused recovery passed 3/3. Generated ABI blocks
+now carry a quoted versioned evidence identity containing exact specification
+and provider SHA-256 hashes. AST and symbol projection preserve it separately
+from source import aliases. Semantic requirements, external operations, exact
+policy grants and binding capabilities retain the identity. LLVM and backend
+artifact preparation compare it; malformed versions/digests, removed evidence,
+changed semantic identity and changed grants are refused. Historical handwritten
+bindings retain explicitly empty evidence compatibility; their grants cannot
+satisfy an evidence-bearing generated declaration. No prototype verification
+claim is inferred from symbol discovery.
+
+The generator no longer emits wall-clock timestamps, and all three generated
+outputs compare byte-for-byte across repeated generation. The generated native
+acceptance continues to use previously built binaries without source changes.
+
+Exact commands:
+
+```sh
+cmake --build /tmp/flowcore-reusable-current -j4
+ctest --test-dir /tmp/flowcore-reusable-current -R 'native_binding_generation|flowbind_provider|flowlower_pipeline' --output-on-failure
+ctest --test-dir /tmp/flowcore-reusable-current --output-on-failure -j4
+cmake --build /tmp/flowcore-reusable-current-sanitize -j4
+ASAN_OPTIONS=detect_leaks=0 LSAN_OPTIONS=detect_leaks=0 ctest --test-dir /tmp/flowcore-reusable-current-sanitize --output-on-failure -j4
+sh /tmp/flowcore-reusable-acceptance/run.sh
+git diff --check
+```
+
+Focused 3/3, complete normal 79/79 and complete ASan/UBSan 79/79 pass.
+Native acceptance exits 42, all six compiler hashes remain unchanged during
+compilation, and ELF SHA-256 remains
+`86ac3acba71f522aa13b5d58e733486737c1b4b9ffc19ed5224ab1c75470f400`.
+Logs and generated artifacts remain under `/tmp/flow-evidence-*` and the existing
+acceptance directory. No generated output enters Git.
+
+State remains CONTINUE. Next: compare the actually loaded provider bytes against
+this evidence at Flowbind, then continue native graph delivery and Flow-owned
+paging. This checkpoint establishes identity propagation, not live-provider drift
+verification, native graphs, or mission completion. No total blocker exists.
+
 ## Report-only lowering validation — 2026-09-07
 
 Continued from pushed `05a08fc`. Flowlower now runs the shared optimization and

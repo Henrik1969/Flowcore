@@ -34,10 +34,23 @@ change is handled by regenerating artifacts and rerunning the normal Flowmini
 → Flowanalyst → Flowbind → Flowparallel → Flowoptimize → Flowlower gates.
 
 Generated capability policies include the exact declared parameter carriers and
-return carrier. Flowbind therefore binds generated authorization to that
-declared signature. This remains declaration/policy evidence; it is not a claim
+return carrier and a versioned `flowcore.generated_binding.v1:SPEC_SHA256:PROVIDER_SHA256`
+evidence identity. The generated ABI block declares that same quoted `evidence`
+value; frontend and semantic artifacts preserve it independently of import aliases.
+Flowbind requires the exact identity in the policy and each operation, and LLVM
+and backend-artifact validation compare it against authorized capabilities.
+Missing, malformed, mismatched and unknown-version identities are refused.
+The manifest is deterministic: it records content hashes without a timestamp.
+Flowbind therefore binds generated authorization to the declared signature and
+the selected specification/provider evidence. This remains declaration/policy evidence; it is not a claim
 that ELF symbol inspection independently proves the provider's C prototype.
 
 Provider changes require regeneration and review. A changed provider hash is
 evidence of substrate drift; it is not an automatic authorization to accept a
 new ABI.
+
+The hashes identify generation inputs; this boundary does not yet rehash the
+loaded provider at binding or native-link time. The manifest is inspectable
+generation evidence, not a cryptographic signature or independent prototype
+verification. Handwritten declarations with no evidence remain a compatibility
+path; their grants cannot authorize a generated declaration carrying evidence.

@@ -99,6 +99,7 @@ inline void validate_binding_report(const json::Value& value) {
     for (std::size_t index = 0; index < capabilities.size(); ++index) {
         const auto path = "$.capabilities[" + std::to_string(index) + "]";
         const auto& item = json::object(capabilities[index], path);
+        (void)binding_evidence(item, path);
         for (const auto field : {"contract", "library", "symbol", "convention", "effect", "parameter_types", "return_type", "status"})
             (void)json::string(json::required(item, field, path), path + "." + field);
     }
@@ -278,6 +279,7 @@ inline void validate_backend_lowering_artifact(const json::Value& value) {
             if (field != std::string_view{"status"}) identity += value + "\x1f";
             else if (value != "authorized") throw json::Error(path + ".status", "capability is not authorized");
         }
+        identity += binding_evidence(capability, path);
         if (!authorized.insert(identity).second) throw json::Error(path, "duplicate authorized capability identity");
     }
     std::set<std::string> required_capabilities;
@@ -291,6 +293,7 @@ inline void validate_backend_lowering_artifact(const json::Value& value) {
         std::string identity;
         for (const auto field : {"contract", "library", "symbol", "convention", "effect", "parameter_types", "return_type"})
             identity += json::string(json::required(provider, field, path + ".provider"), path + ".provider." + field) + "\x1f";
+        identity += binding_evidence(provider, path + ".provider");
         required_capabilities.insert(identity);
     }
     if (required_capabilities != authorized)

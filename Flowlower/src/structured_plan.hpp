@@ -46,8 +46,8 @@ inline const Array& array(const Json* value, const char* name) {
 }
 
 struct Provider {
-    std::string contract, library, convention, symbol, effect, parameters, result;
-    auto tie() const { return std::tie(contract, library, convention, symbol, effect, parameters, result); }
+    std::string contract, library, convention, symbol, effect, parameters, result, evidence;
+    auto tie() const { return std::tie(contract, library, convention, symbol, effect, parameters, result, evidence); }
     bool operator<(const Provider& other) const { return tie() < other.tie(); }
 };
 struct Operation {
@@ -125,7 +125,7 @@ private:
 
     static Provider provider(const Json& value) {
         return {text(field(value,"contract")), text(field(value,"library")), text(field(value,"convention")),
-                text(field(value,"symbol")), text(field(value,"effect")), text(field(value,"parameter_types")), text(field(value,"return_type"))};
+                text(field(value,"symbol")), text(field(value,"effect")), text(field(value,"parameter_types")), text(field(value,"return_type")), flowcontracts::binding_evidence(flowcontracts::json::object(value), "$.provider")};
     }
     std::string llvm_type(std::string_view carrier) const {
         const auto builtin = flowlower::structured::llvm_type(carrier);

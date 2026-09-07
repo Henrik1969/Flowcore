@@ -333,6 +333,8 @@ namespace flowmini::ast {
                 if constexpr (std::is_same_v<Member, AbiLibraryClause>) {
                     dump_indent(out, indent);
                     dump_spelling_clause_json(out, "library", value);
+                } else if constexpr (std::is_same_v<Member, AbiEvidenceClause>) {
+                    dump_spelling_clause_json(out, "evidence", value);
                 } else if constexpr (std::is_same_v<Member, AbiConventionClause>) {
                     dump_indent(out, indent);
                     dump_spelling_clause_json(out, "convention", value);

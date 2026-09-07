@@ -74,22 +74,27 @@ for symbol in $(jq -r '.functions[].symbol' "$spec"); do
     fi
 done
 
+spec_sha256=$(sha256sum "$spec" | awk '{print $1}')
+provider_sha256=$(sha256sum "$provider" | awk '{print $1}')
+evidence="flowcore.generated_binding.v1:$spec_sha256:$provider_sha256"
+
 mkdir -p "$(dirname "$flow_output")" "$(dirname "$policy_output")" "$(dirname "$manifest_output")"
 
 {
     printf 'unit %s\n\nabi %s {\n' "$(jq -r '.unit' "$spec")" "$(jq -r '.namespace' "$spec")"
     printf '    library "%s"\n    convention c\n\n' "$(jq -r '.provider.soname' "$spec")"
+    printf '    evidence "%s"\n\n' "$evidence"
     jq -r '.functions[] | "    extern fn " + .name + "(" + ([.parameters[] | .name + " : " + .type] | join(", ")) + "): " + .return_type + " {\n        symbol \"" + .symbol + "\"\n        effect " + .effect + "\n    }\n"' "$spec"
     printf '}\n'
 } > "$flow_output"
 
-jq -r '. as $root | .functions[] | "allow " + $root.provider.soname + " " + .symbol + " c " + .effect + " " + (if (.parameters | length) == 0 then "-" else ([.parameters[].type] | join(",")) end) + " " + .return_type' "$spec" > "$policy_output"
+jq -r --arg evidence "$evidence" '. as $root | .functions[] | "allow " + $root.provider.soname + " " + .symbol + " c " + .effect + " " + (if (.parameters | length) == 0 then "-" else ([.parameters[].type] | join(",")) end) + " " + .return_type + " " + $evidence' "$spec" > "$policy_output"
 
-jq --arg generated_at "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
-   --arg spec_sha256 "$(sha256sum "$spec" | awk '{print $1}')" \
-   --arg provider_sha256 "$(sha256sum "$provider" | awk '{print $1}')" \
+jq --arg evidence "$evidence" \
+   --arg spec_sha256 "$spec_sha256" \
+   --arg provider_sha256 "$provider_sha256" \
    '{format:"flowcore.generated_binding_manifest",version:1,status:"verified",
-     generated_at:$generated_at,spec_sha256:$spec_sha256,
+     evidence:$evidence,spec_sha256:$spec_sha256,
      provider:(.provider + {sha256:$provider_sha256}),
      unit:.unit,namespace:.namespace,convention:.provider.convention,
      functions:[.functions[] | {name,symbol,effect,parameters,return_type,

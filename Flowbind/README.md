@@ -46,7 +46,7 @@ allow libc.so.6 strlen c pure c_string c_size_t
 allow libc.so.6 puts c io
 ```
 
-The optional final two fields bind a grant to the declared parameter and
+The optional parameter and result fields bind a grant to the declared parameter and
 return ABI types. Older four-field grants remain accepted for compatibility,
 but do not make a signature-specific claim.
 
@@ -57,3 +57,11 @@ until a provider manifest supplies it.
 Pass the policy with `--policy path`. The policy is intentionally small and
 explicit; environment and configuration discovery belong to a later policy
 boundary.
+
+Generated grants append one additional evidence field after the return type:
+`flowcore.generated_binding.v1:SPEC_SHA256:PROVIDER_SHA256`. It must exactly
+match the declaration, semantic requirement and operation. Source import aliases
+do not alter this identity. Historical grants cannot authorize an operation with
+generated evidence. Reports preserve it in each capability; the ABI summary
+`provider_signature_evidence` still reports `not-provided` because symbol
+discovery does not independently prove a C prototype.

@@ -117,6 +117,7 @@ add_test(NAME native_binding_generation
         FLOWPARALLEL_BIN=$<TARGET_FILE:flowparallel>
         FLOWOPTIMIZE_BIN=$<TARGET_FILE:flowoptimize>
         FLOWLOWER_BIN=$<TARGET_FILE:flowlower>
+        FLOWPREPARE_BIN=$<TARGET_FILE:flowprepare>
         ${CMAKE_CURRENT_SOURCE_DIR}/tools/test-generate-flow-bindings.sh)
 
 add_test(NAME native_ncurses_binding

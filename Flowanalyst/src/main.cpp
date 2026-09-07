@@ -43,13 +43,13 @@ const Array& list(const Json* value) { static const Array empty; return value &&
 std::string quote(std::string_view value) { std::ostringstream out; out << '"'; for (char c : value) { if (c == '"' || c == '\\') out << '\\'; if (c == '\n') out << "\\n"; else if (c == '\r') out << "\\r"; else if (c != '\n') out << c; } return out.str() + '"'; }
 struct Diagnostic { std::string code, severity, message, ast_path, region, source; int symbol = -1, line = -1, column = -1; };
 struct Target { int symbol = -1, mains = 0; std::string name; };
-struct BindingRequirement { std::string contract, library, convention, symbol, effect, parameter_types, return_type; };
+struct BindingRequirement { std::string contract, library, convention, symbol, effect, parameter_types, return_type, evidence; };
 struct AbiTypeContract { std::string contract, name, repr, ownership, access, lifetime, nullable, opaque, cleanup; };
 struct AggregateLayout { std::string contract, name; std::vector<std::pair<std::string, std::string>> fields; };
 struct Region { std::string id, kind, status; std::vector<std::string> prerequisites; };
 struct EffectFact { int declaration = -1, symbol = -1; std::string name, effect, certainty, reason; };
 struct CallSite { int expression = -1, statement = -1, scope = -1, callee_symbol = -1, write_symbol = -1; std::string callee; bool pure = false; std::set<int> reads; std::string writes; std::vector<int> arguments; std::vector<int> independent_with; };
-struct LoweringOperation { int expression = -1, statement = -1, scope = -1, block = -1, function_symbol = -1, then_block = -1, else_block = -1, body_block = -1, callee_symbol = -1, result_symbol = -1; std::string callee, kind, contract, library, convention, symbol, effect, parameter_types, return_type; std::vector<int> arguments; };
+struct LoweringOperation { int expression = -1, statement = -1, scope = -1, block = -1, function_symbol = -1, then_block = -1, else_block = -1, body_block = -1, callee_symbol = -1, result_symbol = -1; std::string callee, kind, contract, library, convention, symbol, effect, parameter_types, return_type, evidence; std::vector<int> arguments; };
 struct Callable { int symbol = -1, scope = -1, body_block = -1; bool entry = false; std::string name, return_type, availability; std::vector<std::pair<int, std::string>> parameters; };
 struct Resolution { int expression = -1, statement = -1, scope = -1, symbol = -1; std::string name; };
 
@@ -133,7 +133,7 @@ int run(const Json& bundle, int lowering_plan_version) {
                 if (!parameter_types.empty()) parameter_types += ',';
                 parameter_types += fact_value(*symbols[parameter_id], "declared_type_spelling");
             }
-            provider_functions.emplace(child_id, BindingRequirement{text(field(*contract, "name")), library, convention, external, fact_value(*symbols[child_id], "effect_spelling"), parameter_types, fact_value(*symbols[child_id], "return_type_spelling")});
+            provider_functions.emplace(child_id, BindingRequirement{text(field(*contract, "name")), library, convention, external, fact_value(*symbols[child_id], "effect_spelling"), parameter_types, fact_value(*symbols[child_id], "return_type_spelling"), fact_value(*contract, "evidence_spelling")});
         }
         for (const auto& child : list(field(*scopes[contract_scope], "symbol_ids"))) {
             const int child_id = integer(&child);
@@ -607,6 +607,7 @@ int run(const Json& bundle, int lowering_plan_version) {
             const auto& requirement = provider->second;
             operation.kind = "external_call";
             operation.contract = requirement.contract;
+            operation.evidence = requirement.evidence;
             operation.library = requirement.library;
             operation.convention = requirement.convention;
             operation.symbol = requirement.symbol;
@@ -724,7 +725,7 @@ int run(const Json& bundle, int lowering_plan_version) {
     std::cout << "{\n  \"format\": \"flowanalyst.semantic_report\",\n  \"version\": 1,\n  \"status\": \"" << (diagnostics.empty() ? "ok" : "error") << "\",\n  \"source\": {\"path\": " << quote(text(field(field(bundle, "source"), "path"))) << "},\n  \"frontend_bundle\": {\"format\": \"flowmini.frontend_bundle\", \"version\": 2},\n  \"diagnostics\": [";
     for (std::size_t i = 0; i < diagnostics.size(); ++i) { const auto& d = diagnostics[i]; if (i) std::cout << ','; std::cout << "{\"code\":" << quote(d.code) << ",\"severity\":" << quote(d.severity) << ",\"message\":" << quote(d.message) << ",\"root_cause\":true"; if (d.symbol >= 0) { std::cout << ",\"subject\":{\"kind\":\"symbol\",\"id\":" << d.symbol << "}"; } if (d.symbol >= 0 || d.line >= 0) { std::cout << ",\"provenance\":{\"source\":" << quote(d.source) << ",\"ast_path\":" << quote(d.ast_path) << ",\"line\":" << d.line << ",\"column\":" << d.column << "}"; } if (!d.region.empty()) std::cout << ",\"region\":" << quote(d.region); std::cout << '}'; }
     std::cout << "],\n  \"binding_requirements\": [";
-    for (std::size_t i = 0; i < binding_requirements.size(); ++i) { if (i) std::cout << ','; const auto& requirement = binding_requirements[i]; std::cout << "{\"contract\":" << quote(requirement.contract) << ",\"library\":" << quote(requirement.library) << ",\"convention\":" << quote(requirement.convention) << ",\"symbol\":" << quote(requirement.symbol) << ",\"effect\":" << quote(requirement.effect) << ",\"parameter_types\":" << quote(requirement.parameter_types) << ",\"return_type\":" << quote(requirement.return_type) << "}"; }
+    for (std::size_t i = 0; i < binding_requirements.size(); ++i) { if (i) std::cout << ','; const auto& requirement = binding_requirements[i]; std::cout << "{\"contract\":" << quote(requirement.contract) << ",\"library\":" << quote(requirement.library) << ",\"convention\":" << quote(requirement.convention) << ",\"symbol\":" << quote(requirement.symbol) << ",\"effect\":" << quote(requirement.effect) << ",\"parameter_types\":" << quote(requirement.parameter_types) << ",\"return_type\":" << quote(requirement.return_type) << ",\"evidence\":" << quote(requirement.evidence) << "}"; }
     std::cout << "],\n  \"aggregate_abi_layouts\": [";
     for (std::size_t i = 0; i < aggregate_layouts.size(); ++i) {
         if (i) std::cout << ',';
@@ -900,7 +901,7 @@ int run(const Json& bundle, int lowering_plan_version) {
         if (operation.kind == "branch") std::cout << ",\"then_block_id\":" << operation.then_block << ",\"else_block_id\":" << operation.else_block;
         if (operation.kind == "loop") std::cout << ",\"body_block_id\":" << operation.body_block;
         if (operation.kind == "external_call") {
-            std::cout << ",\"provider\":{\"contract\":" << quote(operation.contract)
+            std::cout << ",\"provider\":{\"contract\":" << quote(operation.contract) << ",\"evidence\":" << quote(operation.evidence)
                       << ",\"library\":" << quote(operation.library)
                       << ",\"convention\":" << quote(operation.convention)
                       << ",\"symbol\":" << quote(operation.symbol)

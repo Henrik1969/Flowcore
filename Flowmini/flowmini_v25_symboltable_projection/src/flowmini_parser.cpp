@@ -1147,6 +1147,7 @@ private:
 
         std::string library;
         std::string convention = "c";
+        bool hasEvidence = false;
 
         while (!check(TokenKind::RightBrace) && !check(TokenKind::End)) {
             skipNewlines();
@@ -1155,6 +1156,14 @@ private:
             if (head.text == "library") {
                 library = expect(TokenKind::String, "expected quoted library path/name").text;
                 expectLineEnd("expected newline after library declaration");
+                continue;
+            }
+            if (head.text == "evidence") {
+                if (hasEvidence) fail(head, "duplicate ABI evidence identity");
+                hasEvidence = true;
+                const auto identity = expect(TokenKind::String, "expected quoted evidence identity");
+                if (identity.text.empty()) fail(identity, "empty ABI evidence identity");
+                expectLineEnd("expected newline after evidence declaration");
                 continue;
             }
             if (head.text == "convention") {

@@ -729,6 +729,16 @@ namespace flowmini::ast {
                     i = skip_until_line_end(tokens, i);
                     continue;
                 }
+                if (is_identifier_text(tokens[i], "evidence")) {
+                    const auto location = location_from_token(tokens[i]);
+                    ++i;
+                    if (i < tokens.size()) {
+                        declaration.members.emplace_back(AbiEvidenceClause{tokens[i].text, location});
+                        ++i;
+                    }
+                    i = skip_until_line_end(tokens, i);
+                    continue;
+                }
                 if (is_identifier_text(tokens[i], "convention")) {
                     const auto location = location_from_token(tokens[i]);
                     ++i;

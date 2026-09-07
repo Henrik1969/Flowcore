@@ -360,6 +360,11 @@ struct AbiLibraryClause {
     SourceLocation location;
 };
 
+struct AbiEvidenceClause {
+    std::string spelling;
+    SourceLocation location;
+};
+
 struct AbiConventionClause {
     std::string spelling;
     SourceLocation location;
@@ -451,6 +456,7 @@ struct ExternFunctionDecl {
 using AbiMember = std::variant<
     AbiLibraryClause,
     AbiConventionClause,
+    AbiEvidenceClause,
     AbiTypeDecl,
     AbiStructDecl,
     ExternFunctionDecl

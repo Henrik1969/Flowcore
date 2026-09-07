@@ -8,6 +8,7 @@ bind=${FLOWBIND_BIN:-$root/build/flowbind/flowbind}
 parallel=${FLOWPARALLEL_BIN:-$root/build/flowtools/flowparallel/flowparallel}
 optimizer=${FLOWOPTIMIZE_BIN:-$root/build/flowoptimize/flowoptimize}
 lowerer=${FLOWLOWER_BIN:-$root/build/flowlower/flowlower}
+prepare=${FLOWPREPARE_BIN:-$root/build/flowlower/flowprepare}
 tmpdir=$(mktemp -d)
 trap 'rm -rf "$tmpdir"' EXIT
 
@@ -97,7 +98,7 @@ printf '%s\n' \
 "$analyst" < "$tmpdir/login.bundle.json" > "$tmpdir/login.semantic.json"
 jq -e '.status == "ok" and any(.lowering_plan.operations[]; .kind == "branch")' "$tmpdir/login.semantic.json" >/dev/null
 "$bind" --policy "$tmpdir/login.policy" < "$tmpdir/login.semantic.json" > "$tmpdir/login.binding.json"
-sed 's/ c_string$/ c_long/' "$tmpdir/login.policy" > "$tmpdir/login-hostile.policy"
+sed 's/ c_string / c_long /' "$tmpdir/login.policy" > "$tmpdir/login-hostile.policy"
 if "$bind" --policy "$tmpdir/login-hostile.policy" < "$tmpdir/login.semantic.json" > "$tmpdir/login-hostile.binding.json" 2>/dev/null; then
     echo 'hostile generated signature policy unexpectedly accepted' >&2
     exit 1
@@ -141,6 +142,40 @@ grep -q '"status": "emitted"' "$tmpdir/tid.lowering.json"
 grep -Fq 'call i32 @gettid' "$tmpdir/tid.ll"
 clang "$tmpdir/tid.ll" -o "$tmpdir/tid"
 "$tmpdir/tid"
+
+# Evidence is independent of source aliases and survives every durable stage.
+evidence=$(jq -r '.evidence' "$tmpdir/tid.manifest.json")
+for artifact in tid.semantic tid.optimized; do
+    jq -e --arg evidence "$evidence" 'all(.lowering_plan.operations[] | select(.kind == "external_call"); .provider.evidence == $evidence)' "$tmpdir/$artifact.json" >/dev/null
+done
+jq -e --arg evidence "$evidence" 'all(.capabilities[]; .evidence == $evidence)' "$tmpdir/tid.binding.json" >/dev/null
+"$prepare" --binding-report "$tmpdir/tid.binding.json" < "$tmpdir/tid.optimized.json" > "$tmpdir/tid.backend.json"
+# A policy stripped to the historical signature cannot authorize generated input.
+awk '{print $1,$2,$3,$4,$5,$6,$7}' "$tmpdir/tid.policy" > "$tmpdir/no-evidence.policy"
+if "$bind" --policy "$tmpdir/no-evidence.policy" < "$tmpdir/tid.semantic.json" > "$tmpdir/no-evidence.binding.json"; then
+    echo 'generated binding accepted without evidence grant' >&2; exit 1
+fi
+for mutation in 'del(.lowering_plan.operations[].provider.evidence)' '.lowering_plan.operations[].provider.evidence = "flowcore.generated_binding.v2:invalid"' '.binding_requirements[].evidence = ""'; do
+    jq "$mutation" "$tmpdir/tid.semantic.json" > "$tmpdir/hostile-evidence.semantic.json"
+    if "$bind" --policy "$tmpdir/tid.policy" < "$tmpdir/hostile-evidence.semantic.json" > "$tmpdir/hostile-evidence.binding.json" 2>/dev/null; then
+        echo 'mutated semantic evidence accepted' >&2; exit 1
+    fi
+done
+for mutation in 'del(.capabilities[].evidence)' '.capabilities[].evidence |= sub("v1:"; "v2:")' '.capabilities[].evidence |= sub("[a-f0-9]{64}:"; "0000000000000000000000000000000000000000000000000000000000000000:")' '.capabilities[].evidence = 42'; do
+    jq "$mutation" "$tmpdir/tid.binding.json" > "$tmpdir/hostile-evidence.binding.json"
+    if "$lowerer" --emit-llvm "$tmpdir/hostile-evidence.ll" --binding-report "$tmpdir/hostile-evidence.binding.json" < "$tmpdir/tid.optimized.json" > "$tmpdir/hostile-evidence.lowering.json" 2>/dev/null; then
+        echo 'mutated authorization evidence accepted by LLVM lowerer' >&2; exit 1
+    fi
+    test ! -e "$tmpdir/hostile-evidence.ll"
+    if "$prepare" --binding-report "$tmpdir/hostile-evidence.binding.json" < "$tmpdir/tid.optimized.json" > "$tmpdir/hostile-evidence.backend.json" 2>/dev/null; then
+        echo 'mutated authorization evidence accepted by backend preparation' >&2; exit 1
+    fi
+done
+# Repeated generation has no timestamp-dependent bytes.
+"$root/tools/generate-flow-bindings.sh" --spec "$tmpdir/tid.spec.json" --flow-output "$tmpdir/repeated.flow" --policy-output "$tmpdir/repeated.policy" --manifest-output "$tmpdir/repeated.manifest.json" >/dev/null
+cmp "$tmpdir/tid.flow" "$tmpdir/repeated.flow"
+cmp "$tmpdir/tid.policy" "$tmpdir/repeated.policy"
+cmp "$tmpdir/tid.manifest.json" "$tmpdir/repeated.manifest.json"
 
 jq -n --arg provider "$provider" '
   {format:"flowcore.native_binding_spec",version:1,unit:"generated_system_info",namespace:"linux",
