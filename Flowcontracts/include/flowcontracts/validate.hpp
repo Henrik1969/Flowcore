@@ -110,6 +110,7 @@ inline void validate_optimization_report(const json::Value& value) {
     if (artifact.status != "ready") return;
     const auto& root = json::object(value);
     validate_lowering_plan(json::required(root, "lowering_plan"), "$.lowering_plan");
+    validate_graph_schedule(root);
     (void)required_array(root, "targets");
     const auto& transforms = required_array(root, "transforms");
     for (std::size_t index = 0; index < transforms.size(); ++index) {
@@ -246,6 +247,7 @@ inline void validate_backend_lowering_artifact(const json::Value& value) {
     validate_targets(root);
     validate_abi_contracts(root);
     validate_lowering_authority(json::required(root, "lowering_plan"));
+    validate_graph_schedule(root);
     (void)required_array(root, "external_operations");
     const auto& target = required_object(root, "target");
     const auto target_name = json::string(json::required(target, "name", "$.target"), "$.target.name");
@@ -273,13 +275,9 @@ inline void validate_backend_lowering_artifact(const json::Value& value) {
     for (std::size_t index = 0; index < capabilities.size(); ++index) {
         const auto path = "$.authorization.capabilities[" + std::to_string(index) + "]";
         const auto& capability = json::object(capabilities[index], path);
-        std::string identity;
-        for (const auto field : {"contract", "library", "symbol", "convention", "effect", "parameter_types", "return_type", "status"}) {
-            const auto value = json::string(json::required(capability, field, path), path + "." + field);
-            if (field != std::string_view{"status"}) identity += value + "\x1f";
-            else if (value != "authorized") throw json::Error(path + ".status", "capability is not authorized");
-        }
-        identity += binding_evidence(capability, path);
+        if (json::string(json::required(capability, "status", path), path + ".status") != "authorized")
+            throw json::Error(path + ".status", "capability is not authorized");
+        const auto identity = capability_identity(capability, path);
         if (!authorized.insert(identity).second) throw json::Error(path, "duplicate authorized capability identity");
     }
     std::set<std::string> required_capabilities;
@@ -290,12 +288,14 @@ inline void validate_backend_lowering_artifact(const json::Value& value) {
         const auto& operation = json::object(operations[index], path);
         if (json::string(json::required(operation, "kind", path), path + ".kind") != "external_call") continue;
         const auto& provider = required_object(operation, "provider", path);
-        std::string identity;
-        for (const auto field : {"contract", "library", "symbol", "convention", "effect", "parameter_types", "return_type"})
-            identity += json::string(json::required(provider, field, path + ".provider"), path + ".provider." + field) + "\x1f";
-        identity += binding_evidence(provider, path + ".provider");
+        const auto identity = capability_identity(provider, path + ".provider");
         required_capabilities.insert(identity);
     }
+    if (const auto* graph_value = json::optional(plan, "source_graph"))
+        for (const auto& node : source_graph(*graph_value).providers) {
+            const auto& provider = required_object(json::object(node), "provider");
+            required_capabilities.insert(capability_identity(provider, "$.source_graph.providers"));
+        }
     if (required_capabilities != authorized)
         throw json::Error("$.authorization.capabilities", "authorized capability identities do not exactly match external operations");
     if ((required_capabilities.empty() && authorization_status != "not-required") ||

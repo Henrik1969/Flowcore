@@ -92,9 +92,10 @@ public:
         out << "; Flowcore generic structured lowering plan: ordered blocks, calls, branches and returns\n"
                "target triple = \"x86_64-pc-linux-gnu\"\n";
         emit_globals(out); emit_declarations(out);
+        if(graph_native_) emit_graph_globals(out);
         if(plan_version_==2) {
             for(const auto& [identity,function]:callables_)if(!function.entry&&function.body_block>=0)emit_function(function,out);
-            for(const auto& [identity,function]:callables_)if(function.entry){emit_function(function,out);return out.str();}
+            for(const auto& [identity,function]:callables_)if(function.entry){emit_function(function,out); if(graph_native_) emit_graph_main(function,out); return out.str();}
             throw std::runtime_error("callable lowering plan has no selected entry definition");
         }
         out << (uses_args_ ? "define i32 @main(i32 %argc, ptr %argv) {\n" : "define i32 @main() {\n") << "entry:\n";
@@ -120,6 +121,10 @@ private:
     bool has_branch_ = false, has_declared_carrier_ = false, has_nonroot_block_ = false, invalid_control_ = false, unsupported_ = false, uses_args_ = false;
     int temporary_ = 0, label_ = 0, required_argc_ = 0;
     int plan_version_ = 1;
+    bool graph_native_ = false;
+    const Json* graph_json_ = nullptr;
+    std::optional<flowcontracts::SourceGraph> graph_model_;
+    int active_operation_ = -1;
     std::string return_carrier_ = "c_int";
     std::map<int,std::pair<std::string,std::string>> call_results_;
     bool has_list_length_ = false;
@@ -150,8 +155,11 @@ private:
         const auto* plan = field(root_, "lowering_plan");
         if (!plan || text(field(*plan,"format")) != "flowcore.lowering_plan") return;
         if (const auto* graph = field(*plan, "source_graph")) {
-            (void)flowcontracts::source_graph(*graph, "$.lowering_plan.source_graph");
-            throw std::runtime_error("source graph execution is not admitted");
+            graph_model_ = flowcontracts::source_graph(*graph, "$.lowering_plan.source_graph");
+            if (!graph_model_->executable) throw std::runtime_error("source graph execution is not admitted");
+            graph_native_ = true; graph_json_ = graph;
+            flowcontracts::validate_graph_schedule(flowcontracts::json::object(root_));
+            for (const auto& node : graph_model_->providers) providers_.insert(provider(*field(node, "provider")));
         }
         plan_version_=integer(field(*plan,"version"),"lowering_plan.version");
         if(plan_version_!=1&&plan_version_!=2)return;
@@ -255,6 +263,8 @@ private:
         std::map<std::string, std::pair<std::string, std::string>> native_symbols;
         for (const auto& p:providers_) {
             if (!c_symbol(p.symbol) || llvm_type(p.result).empty()) throw std::runtime_error("unsupported structured provider ABI");
+            if (graph_native_ && (p.symbol == "flow_graph_enter" || p.symbol == "flow_graph_event" || p.symbol == "flow_graph_drop" || p.symbol == "flow_graph_fail" || p.symbol == "flow_graph_operation"))
+                throw std::runtime_error("external symbol conflicts with native graph runtime");
             if (p.symbol == "main") throw std::runtime_error("external symbol conflicts with native entry point");
             std::ostringstream declaration;
             declaration << "declare "<<llvm_type(p.result)<<" @"<<p.symbol<<"("; const auto params=carriers(p.parameters);
@@ -267,9 +277,9 @@ private:
             if (inserted) out << declaration.str();
         }
     }
-    static std::string callable_name(const Callable& function) {
+    std::string callable_name(const Callable& function) const {
         if (function.symbol < 0) throw std::runtime_error("invalid callable symbol identity");
-        return function.entry ? "main" : "flow.function." + std::to_string(function.symbol);
+        return function.entry ? (graph_native_ ? "flow.source.entry" : "main") : "flow.function." + std::to_string(function.symbol);
     }
     void emit_allocations(std::ostringstream& out) const {
         for (const auto& [symbol,type]:symbol_types_) { const auto llvm=llvm_type(type); if(!llvm.empty()) out<<"  "<<slot(symbol)<<" = alloca "<<llvm<<", align "<<(llvm=="i32"?4:8)<<"\n"; }
@@ -279,6 +289,63 @@ private:
             out<<"  %flow_storage_"<<symbol<<" = alloca ["<<bytes<<" x i8], align 1\n"
                <<"  %flow_storage_ptr_"<<symbol<<" = getelementptr ["<<bytes<<" x i8], ptr %flow_storage_"<<symbol<<", i64 0, i64 0\n";
         }
+    }
+    const Array& graph_steps() const {
+        return array(field(*field(root_, "graph_schedule"), "steps"), "graph_schedule.steps");
+    }
+    std::string graph_record(const Json& step, const std::string& event) const {
+        auto record = flowcontracts::json::object(step);
+        record.emplace("format", "flowcore.graph_activation"); record.emplace("version", flowcontracts::json::Integer{1});
+        record.emplace("event", event);
+        const auto node = text(field(step, "node_id"));
+        for (const auto& item : array(field(*field(*graph_json_, "syntax"), "nodes"), "graph.nodes"))
+            if (text(field(item, "node_id")) == node) record.emplace("node_provenance", *field(item, "provenance"));
+        for (const auto& item : array(field(*field(*graph_json_, "syntax"), "wires"), "graph.wires"))
+            if (text(field(item, "wire_id")) == text(field(step, "wire_id"))) record.emplace("wire_provenance", *field(item, "provenance"));
+        return flowcontracts::json::serialize(record);
+    }
+    void emit_graph_globals(std::ostringstream& out) const {
+        out<<"declare void @flow_graph_enter(ptr)\ndeclare void @flow_graph_operation(i64)\ndeclare void @flow_graph_event(ptr)\ndeclare void @flow_graph_drop(ptr)\ndeclare void @flow_graph_fail(i64, ptr) noreturn\n";
+        out<<"@flow.graph.division = private constant [17 x i8] c\"invalid_division\\00\"\n";
+        for (const auto& step : graph_steps()) {
+            const auto id = integer(field(step, "activation_id"), "activation_id");
+            for (const auto* event : {"enter", "output", "drop"}) {
+                const auto value = graph_record(step, event);
+                out<<"@flow.graph."<<event<<"."<<id<<" = private constant ["<<value.size()+1<<" x i8] c\""<<escaped_string(value)<<"\"\n";
+            }
+        }
+    }
+    void emit_graph_main(const Callable& entry, std::ostringstream& out) {
+        std::map<std::string, const Json*> providers, receivers;
+        for (const auto& node : graph_model_->providers) providers.emplace(text(field(node, "node_id")), &node);
+        for (const auto& node : graph_model_->receivers) receivers.emplace(text(field(node, "node_id")), &node);
+        std::map<int, std::string> output_types;
+        out<<"define i32 @main() {\nentry:\n";
+        for (const auto& step : graph_steps()) {
+            const auto id = integer(field(step, "activation_id"), "activation_id");
+            const auto node = text(field(step, "node_id"));
+            out<<"  call void @flow_graph_enter(ptr @flow.graph.enter."<<id<<")\n";
+            if (text(field(step, "kind")) == "startup") {
+                if (!providers.count(node)) throw std::runtime_error("graph startup provider is absent");
+                const auto p = provider(*field(*providers.at(node), "provider"));
+                output_types[id] = llvm_type(p.result);
+                out<<"  %graph.value."<<id<<" = call "<<output_types[id]<<" @"<<p.symbol<<"()\n";
+            } else {
+                if (!receivers.count(node)) throw std::runtime_error("graph receiver is absent");
+                const auto& receiver = *receivers.at(node);
+                const auto function = integer(field(receiver, "function_symbol_id"), "function_symbol_id");
+                const auto input = integer(field(step, "input_activation_id"), "input_activation_id");
+                if (!callables_.count(function) || !output_types.count(input)) throw std::runtime_error("graph receiver invocation identity is unavailable");
+                const auto& callable = callables_.at(function);
+                if (callable.parameters.size()!=1 || llvm_type(callable.parameters.front().second)!=output_types.at(input))
+                    throw std::runtime_error("graph delivery carrier mismatch");
+                output_types[id] = llvm_type(callable.result);
+                out<<"  %graph.value."<<id<<" = call "<<output_types[id]<<" @"<<callable_name(callable)<<"("<<output_types.at(input)<<" %graph.value."<<input<<")\n";
+            }
+            out<<"  call void @flow_graph_event(ptr @flow.graph.output."<<id<<")\n";
+            if (!std::get<bool>(*field(step, "output_connected"))) out<<"  call void @flow_graph_drop(ptr @flow.graph.drop."<<id<<")\n";
+        }
+        out<<"  call void @flow_graph_enter(ptr null)\n  %graph.exit = call i32 @"<<callable_name(entry)<<"()\n  ret i32 %graph.exit\n}\n";
     }
     void emit_function(const Callable& function,std::ostringstream& out) {
         temporary_=0; label_=0; call_results_.clear();
@@ -355,6 +422,19 @@ private:
             }
             if(op=="+")instruction="add"; else if(op=="-")instruction="sub"; else if(op=="*")instruction="mul"; else if(op=="/")instruction="sdiv"; else return {};
             if(left.empty()||right.empty()||left_type!=right_type) return {};
+            if (graph_native_ && instruction == "sdiv") {
+                if (left_type != "i32" && left_type != "i64") throw std::runtime_error("unsupported graph division carrier");
+                const auto id = std::to_string(temporary_++);
+                const auto minimum = left_type == "i32" ? "-2147483648" : "-9223372036854775808";
+                out<<"  %graph.zero."<<id<<" = icmp eq "<<left_type<<" "<<right<<", 0\n"
+                   <<"  %graph.min."<<id<<" = icmp eq "<<left_type<<" "<<left<<", "<<minimum<<"\n"
+                   <<"  %graph.neg."<<id<<" = icmp eq "<<left_type<<" "<<right<<", -1\n"
+                   <<"  %graph.overflow."<<id<<" = and i1 %graph.min."<<id<<", %graph.neg."<<id<<"\n"
+                   <<"  %graph.bad."<<id<<" = or i1 %graph.zero."<<id<<", %graph.overflow."<<id<<"\n"
+                   <<"  br i1 %graph.bad."<<id<<", label %graph.fail."<<id<<", label %graph.valid."<<id<<"\n"
+                   <<"graph.fail."<<id<<":\n  call void @flow_graph_fail(i64 "<<active_operation_<<", ptr @flow.graph.division)\n  unreachable\n"
+                   <<"graph.valid."<<id<<":\n";
+            }
             const auto result="%flow_arithmetic_"+std::to_string(temporary_++); out<<"  "<<result<<" = "<<instruction<<" "<<left_type<<" "<<left<<", "<<right<<"\n"; return {left_type,result};
         }
         return {};
@@ -363,6 +443,7 @@ private:
         out<<"flow_block_"<<block<<":\n"; bool terminated=false;
         for(const auto* op:blocks_[block]) {
             if(terminated) break;
+            active_operation_ = op->id;
             if(op->kind=="value_definition") {
                 const auto kind=text(field(*op->operand,"kind"));
                 if(kind=="writable_storage") out<<"  store ptr %flow_storage_ptr_"<<op->result_symbol<<", ptr "<<slot(op->result_symbol)<<"\n";
@@ -384,6 +465,7 @@ private:
                 call_results_[op->expression]={result_type,result};
                 if(op->result_symbol>=0)out<<"  store "<<result_type<<" "<<result<<", ptr "<<slot(op->result_symbol)<<"\n";
             } else if(op->kind=="external_call") {
+                if (graph_native_) out<<"  call void @flow_graph_operation(i64 "<<op->id<<")\n";
                 const auto& p=*op->provider; const auto params=carriers(p.parameters); const auto& operands=array(field(find_json_operation(op->id),"operands"),"operation.operands");
                 if(params.size()!=operands.size()) throw std::runtime_error("structured call operand count mismatch");
                 std::vector<std::pair<std::string,std::string>> args; for(std::size_t i=0;i<params.size();++i) args.push_back(expression(operands[i],out,params[i]));

@@ -1,5 +1,59 @@
 # Flowcore autonomous maturation ledger
 
+## Native scalar source-graph activation — 2026-09-07
+
+Continued from pushed `e8584a8`. Explicit `--graph-plan-version 2` with callable
+plan v2 admits completely resolved scalar producer/receiver graphs. External
+startup calls match captured callable provider identities and exact Flowbind
+grants, including generated/live-provider evidence. Default graph v1 remains
+non-executable; unknown providers, cycles, unsupported policies and mismatched
+ports/types/identities are refused.
+
+Flowparallel now publishes a separate deterministic FIFO graph schedule with
+activation, wire, input/output signal and delivery identity. Flowoptimize and
+backend preparation preserve and validate it against the source graph. LLVM
+emits one fresh function invocation per delivery; fan-out reuses its result.
+The installed shared `flowgraph_runtime` emits attributed output/drop traces and
+structured arithmetic failures with no successful output. Its explicitly bindable
+`flow_graph_raise(c_int)` capability also supports source-selected failure codes
+with active operation and wire provenance. It requires an ordinary exact grant.
+TinyVM explicitly refuses native graphs rather than silently projecting scalars.
+
+The new native test generates a provider after the tools are built, checks all
+six compiler hashes remain unchanged, and proves repeated receiver invocation,
+fresh initialized locals, FIFO order, shared fan-out signals, distinct deliveries,
+full endpoint/source identity, unconnected-output diagnostics, input selection,
+unused-selection independence, renamed source behavior, arithmetic and explicit
+source failure, and refusal of missing grants, changed provider identities,
+forged schedules and cycles. A prior graph-refusal test exposed preparation
+checking binding presence before version-1 graph refusal; that ordering is fixed.
+
+Exact verification:
+
+```sh
+cmake --build /tmp/flowcore-reusable-current -j4
+ctest --test-dir /tmp/flowcore-reusable-current -R 'native_source_graph|provider_call_identity|source_graph_artifact' --output-on-failure
+ctest --test-dir /tmp/flowcore-reusable-current --output-on-failure -j4
+cmake --build /tmp/flowcore-reusable-current-sanitize -j4
+ASAN_OPTIONS=detect_leaks=0 LSAN_OPTIONS=detect_leaks=0 ctest --test-dir /tmp/flowcore-reusable-current-sanitize --output-on-failure -j4
+sh /tmp/flowcore-reusable-acceptance/run.sh
+git diff --check
+```
+
+Focused 3/3, complete normal 80/80 (5.84 seconds), ASan/UBSan 80/80
+(17.99 seconds). Generated scalar acceptance remains exit 42 with unchanged
+compiler hashes and the same ELF digest. A retained native graph ELF and captured
+artifacts are `/tmp/native-graph*`; test/build logs are `/tmp/flow-native-graph-*`.
+All generated files remain outside Git. Native graph scope is Linux x86-64,
+scalar payloads, one startup output, no cycles or provider policies, and at most
+65,536 statically scheduled activations. No streaming or aggregate receiver
+contract is implied.
+
+State remains CONTINUE. Next: move pager command interpretation, page bounds and
+rendering into Flow functions using this native graph path and injectable I/O
+providers; remove the C++ navigation implementation after equivalent gates pass.
+The wider mission is not complete and no total blocker is recorded.
+
 ## Explicit startup-provider selection evidence — 2026-09-07
 
 Continued from pushed `f2983af`. Added the non-authorizing

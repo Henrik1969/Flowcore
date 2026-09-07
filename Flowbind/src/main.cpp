@@ -184,8 +184,21 @@ void validate_lowering_plan(const std::string& report, const std::vector<Require
     const Json* plan = json_field(root, "lowering_plan");
     if (plan == nullptr) return;
     if (const auto* graph = json_field(*plan, "source_graph")) {
-        (void)flowcontracts::source_graph(*graph, "$.lowering_plan.source_graph");
-        throw std::runtime_error("source graph execution is not admitted");
+        const auto model = flowcontracts::source_graph(*graph, "$.lowering_plan.source_graph");
+        if (!model.executable) throw std::runtime_error("source graph execution is not admitted");
+        for (const auto& node : model.providers) {
+            const auto& provider = flowcontracts::json::object(*json_field(node, "provider"));
+            bool found = false;
+            for (const auto& requirement : needed) {
+                const JsonObject tuple{{"contract", requirement.contract}, {"library", requirement.library},
+                    {"symbol", requirement.symbol}, {"convention", requirement.convention},
+                    {"effect", requirement.effect}, {"parameter_types", requirement.parameter_types},
+                    {"return_type", requirement.return_type}, {"evidence", requirement.evidence}};
+                if (flowcontracts::capability_identity(tuple, "$.binding_requirements") ==
+                    flowcontracts::capability_identity(provider, "$.source_graph.providers")) found = true;
+            }
+            if (!found) throw std::runtime_error("graph provider does not match a semantic binding requirement");
+        }
     }
     const auto plan_version = json_integer(json_field(*plan, "version"), "lowering_plan.version");
     if (json_text(json_field(*plan, "format")) != "flowcore.lowering_plan" ||

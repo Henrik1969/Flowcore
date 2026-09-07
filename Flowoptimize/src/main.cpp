@@ -46,6 +46,7 @@ int analyze(std::string_view input, const std::optional<flowcontracts::ProviderD
         plan.artifact = semantic.artifact; plan.source_path = semantic.source_path; plan.targets = semantic.targets;
         plan.external_operations = semantic.external_operations; plan.abi_type_contracts = semantic.abi_type_contracts;
         plan.lowering_plan = semantic.lowering_plan; plan.dependency_matrix = semantic.dependency_matrix;
+        if (optional(object(plan.lowering_plan), "source_graph")) throw Error("$.input", "native graph requires Flowparallel scheduling");
         input_format = input_header.format;
     } else throw Error("$.format", "input is not a supported semantic report or execution plan");
     const bool accepted = input_format == "flowanalyst.semantic_report" ? plan.artifact.status == "ok" : plan.artifact.status == "ready";
@@ -90,6 +91,7 @@ int analyze(std::string_view input, const std::optional<flowcontracts::ProviderD
                                     {"semantics_preserved", true}, {"status", text(deduplicated ? "applied" : "not-needed")}}}},
         {"version", Integer{1}}
     };
+    if (!std::holds_alternative<std::nullptr_t>(plan.graph_schedule)) output.emplace("graph_schedule", plan.graph_schedule);
     std::cout << serialize(output) << '\n'; return 0;
 }
 } // namespace

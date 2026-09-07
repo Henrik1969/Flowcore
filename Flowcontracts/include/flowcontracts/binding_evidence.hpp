@@ -23,4 +23,12 @@ inline std::string binding_evidence(const json::Object& object, const std::strin
     return value;
 }
 
+inline std::string capability_identity(const json::Object& provider, const std::string& path) {
+    json::Object tuple;
+    for (const auto* field : {"contract", "library", "symbol", "convention", "effect", "parameter_types", "return_type"})
+        tuple.emplace(field, json::string(json::required(provider, field, path), path + "." + field));
+    tuple.emplace("evidence", binding_evidence(provider, path));
+    return json::serialize(tuple);
+}
+
 } // namespace flowcontracts

@@ -2,6 +2,7 @@
 
 #include <flowcontracts/json.hpp>
 #include <flowcontracts/source_graph.hpp>
+#include <flowcontracts/graph_execution.hpp>
 #include <flowcontracts/binding_evidence.hpp>
 
 #include <set>
@@ -71,8 +72,8 @@ inline void validate_abi_contracts(const json::Object& root) {
 inline void validate_lowering_authority(const json::Value& value, std::string_view base = "$.lowering_plan") {
     const auto& plan = json::object(value, base);
     if (const auto* graph = json::optional(plan, "source_graph")) {
-        (void)source_graph(*graph, std::string(base) + ".source_graph");
-        throw json::Error(std::string(base) + ".source_graph", "source graph execution is not admitted");
+        if (!source_graph(*graph, std::string(base) + ".source_graph").executable)
+            throw json::Error(std::string(base) + ".source_graph", "source graph execution is not admitted");
     }
     if (json::string(json::required(plan, "format", base), std::string(base) + ".format") != "flowcore.lowering_plan") throw json::Error(std::string(base) + ".format", "unsupported lowering plan format");
     const auto version = json::integer(json::required(plan, "version", base), std::string(base) + ".version");
@@ -140,6 +141,50 @@ inline void validate_lowering_authority(const json::Value& value, std::string_vi
                     (void)json::string(json::required(resource, field, resource_path), resource_path + "." + field);
             }
         }
+    }
+    if (const auto* graph_value = json::optional(plan, "source_graph")) {
+        if (version != 2) throw json::Error(std::string(base), "native graph requires callable plan version 2");
+        const auto graph = source_graph(*graph_value);
+        const auto& functions = required_array(plan, "functions", base);
+        std::map<json::Integer, const json::Object*> catalog;
+        std::size_t entries = 0;
+        for (const auto& item : functions) {
+            const auto& fn = json::object(item);
+            catalog.emplace(json::integer(json::required(fn, "symbol_id"), "$.symbol_id"), &fn);
+            if (json::boolean(json::required(fn, "entry"), "$.entry")) {
+                ++entries;
+                if (!required_array(fn, "parameters").empty()) throw json::Error(std::string(base), "native graph entry arguments are unsupported");
+            }
+        }
+        if (entries != 1) throw json::Error(std::string(base), "native graph requires one entry");
+        auto resolve = [&](const json::Value& item, bool receiver) {
+            const auto& node = json::object(item);
+            const auto id = json::integer(json::required(node, "function_symbol_id"), "$.function_symbol_id");
+            if (!catalog.count(id)) throw json::Error(std::string(base), "graph function identity is absent from callable catalog");
+            const auto& fn = *catalog.at(id);
+            if (json::boolean(json::required(fn, "entry"), "$.entry")) throw json::Error(std::string(base), "graph node cannot invoke native entry");
+            const auto& parameters = required_array(fn, "parameters");
+            if (parameters.size() != (receiver ? 1u : 0u) ||
+                json::string(json::required(fn, "return_type"), "$.return_type") != json::string(json::required(node, "output_type"), "$.output_type"))
+                throw json::Error(std::string(base), "graph function signature differs from callable catalog");
+            if (!receiver) {
+                const auto& provider = required_object(node, "provider");
+                const auto& declared = required_object(fn, "provider");
+                if (capability_identity(provider, "$.graph.provider") != capability_identity(declared, "$.function.provider") ||
+                    json::string(json::required(node, "source_callable"), "$.source_callable") !=
+                        json::string(json::required(provider, "contract"), "$.contract") + "." + json::string(json::required(fn, "name"), "$.name"))
+                    throw json::Error(std::string(base), "graph provider differs from external callable identity");
+            }
+            if (receiver) {
+                const auto& param = json::object(parameters.front());
+                if (json::integer(json::required(param, "symbol_id"), "$.symbol_id") != json::integer(json::required(node, "parameter_symbol_id"), "$.parameter_symbol_id") ||
+                    json::string(json::required(param, "type"), "$.type") != json::string(json::required(node, "input_type"), "$.input_type") ||
+                    json::string(json::required(fn, "availability"), "$.availability") != "definition")
+                    throw json::Error(std::string(base), "graph receiver definition differs from callable catalog");
+            }
+        };
+        for (const auto& node : graph.receivers) resolve(node, true);
+        for (const auto& node : graph.providers) resolve(node, false);
     }
     for (std::size_t index = 0; index < operations.size(); ++index) {
         const auto path = std::string(base) + ".operations[" + std::to_string(index) + "]";
@@ -226,7 +271,7 @@ inline json::Value matrix_entries(const MatrixView& matrix) {
 
 struct ExecutionPlan {
     Header artifact; std::string source_path; json::Array targets; json::Array external_operations;
-    json::Array abi_type_contracts; json::Value lowering_plan; MatrixView dependency_matrix;
+    json::Array abi_type_contracts; json::Value lowering_plan; json::Value graph_schedule; MatrixView dependency_matrix;
 };
 
 inline MatrixView execution_matrix(const json::Object& root) {
@@ -265,6 +310,8 @@ inline ExecutionPlan execution_plan(const json::Value& value) {
     validate_abi_contracts(root); result.abi_type_contracts = required_array(root, "abi_type_contracts");
     result.lowering_plan = json::required(root, "lowering_plan");
     validate_lowering_authority(result.lowering_plan);
+    validate_graph_schedule(root);
+    if (const auto* schedule = json::optional(root, "graph_schedule")) result.graph_schedule = *schedule;
     const auto& plan = json::object(result.lowering_plan, "$.lowering_plan");
     if (json::string(json::required(plan, "format", "$.lowering_plan"), "$.lowering_plan.format") != "flowcore.lowering_plan") throw json::Error("$.lowering_plan.format", "unsupported lowering plan format");
     const auto plan_version = json::integer(json::required(plan, "version", "$.lowering_plan"), "$.lowering_plan.version");

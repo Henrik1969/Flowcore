@@ -114,3 +114,15 @@ The standalone Flowcontracts reader validates this non-executable evidence;
 execution consumers refuse it independently of an outer artifact's status. This
 prevents scalar projection when captured reports are altered. Native provider
 contracts, executable graph planning and activation lowering remain unfinished.
+
+## Native scalar activation — 2026-09-07
+
+Explicit graph v2 now admits selected zero-argument external startup providers
+and source-defined scalar receivers. Flowparallel's durable FIFO schedule keeps
+wire, port, signal and delivery identity; LLVM invokes each receiver once per
+delivery with a fresh native frame. Successful fan-out reuses the output value.
+Missing function results are rejected, and arithmetic failure publishes a
+structured activation diagnostic without a normal output. See
+[native graph provider selection](native-graph-provider-map.md) for exact commands,
+runtime linking and scope. Aggregate receivers and the pager remain unfinished;
+this checkpoint does not broaden the approved activation contract.

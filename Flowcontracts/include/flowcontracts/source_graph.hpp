@@ -13,6 +13,7 @@ struct SourceGraphNode {
 struct SourceGraphEndpoint { std::string node, port; };
 struct SourceGraphWire { std::string id; SourceGraphEndpoint from, to; };
 struct SourceGraph {
+    bool executable = false;
     std::vector<SourceGraphNode> nodes;
     std::vector<SourceGraphWire> wires;
     json::Array policies, receivers, providers;
@@ -39,14 +40,17 @@ inline SourceGraph source_graph(const json::Value& value, std::string path = "$"
             if (integer(required(p, key, where), where + "." + key) < 1)
                 throw Error(where + "." + key, "graph provenance must be positive");
     };
-    if (str(root, "format", path) != "flowcore.source_graph" || integer(required(root, "version", path), path + ".version") != 1)
+    const auto version = integer(required(root, "version", path), path + ".version");
+    if (str(root, "format", path) != "flowcore.source_graph" || (version != 1 && version != 2))
         throw Error(path, "unsupported source graph contract");
-    if (str(root, "status", path) != "non_executable") throw Error(path + ".status", "source graph execution is not admitted");
+    if (str(root, "status", path) != (version == 2 ? "ready" : "non_executable"))
+        throw Error(path + ".status", "source graph execution is not admitted");
     const auto syntax_path = path + ".syntax";
     const auto& syntax = object(required(root, "syntax", path), syntax_path);
     if (str(syntax, "format", syntax_path) != "flowmini.graph_syntax" || integer(required(syntax, "version", syntax_path), syntax_path + ".version") != 1)
         throw Error(syntax_path, "unsupported graph syntax contract");
     SourceGraph result;
+    result.executable = version == 2;
     std::map<std::string, SourceGraphNode> nodes;
     for (const auto& value : array(required(syntax, "nodes", syntax_path), syntax_path + ".nodes")) {
         const auto p = syntax_path + ".nodes[" + std::to_string(result.nodes.size()) + "]";
@@ -161,6 +165,23 @@ inline SourceGraph source_graph(const json::Value& value, std::string path = "$"
     }
     for (const auto& node : result.nodes) if (node.implementation_kind == "source_function" && (!receivers.count(node.id) || !connected.count(node.id)))
         throw Error(path + ".receivers", "missing receiver resolution or input connection");
+    if (result.executable) {
+        if (!result.policies.empty() || result.providers.empty() ||
+            result.providers.size() + result.receivers.size() != result.nodes.size())
+            throw Error(path, "native graph requires fully resolved startup producers and source receivers without policies");
+        for (const auto& [node, type] : provider_types)
+            if (type != "c_int" && type != "c_long" && type != "c_ulong" && type != "c_size_t" && type != "c_string")
+                throw Error(path + ".providers", "unsupported native producer result carrier");
+        std::map<std::string, std::size_t> indegree;
+        for (const auto& node : result.nodes) indegree[node.id] = 0;
+        for (const auto& wire : result.wires) ++indegree.at(wire.to.node);
+        std::vector<std::string> pending;
+        for (const auto& node : result.nodes) if (!indegree.at(node.id)) pending.push_back(node.id);
+        for (std::size_t i = 0; i < pending.size(); ++i)
+            for (const auto& wire : result.wires) if (wire.from.node == pending[i] && --indegree.at(wire.to.node) == 0)
+                pending.push_back(wire.to.node);
+        if (pending.size() != result.nodes.size()) throw Error(path, "cyclic native graph is unsupported");
+    }
     return result;
 }
 

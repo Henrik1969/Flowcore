@@ -52,6 +52,8 @@ int analyze(std::string_view input) {
         {"source", Object{{"path", text(report.source_path)}}}, {"status", text("ready")},
         {"targets", report.targets}, {"version", Integer{1}}
     };
+    if (const auto* graph = optional(object(report.lowering_plan), "source_graph"))
+        output.emplace("graph_schedule", graph_schedule(*graph));
     std::cout << serialize(output) << '\n';
     return 0;
 }

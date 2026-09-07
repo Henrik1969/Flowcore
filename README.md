@@ -171,18 +171,19 @@ CTest:                         PASS (2/2)
 For the complete root build, the current result is:
 
 ```text
-root CTest:                    PASS (79/79)
+root CTest:                    PASS (80/80)
 integration corpus:            PASS (3/3)
 pipeline matrix:               PASS (7 accepted, 2 semantic-only, 1 blocked)
 pass corpus:                   PASS (91 programs)
 stdlib boundary:               PASS (6 ABI modules; libc/file I/O/memory/kernel ready at binding boundary)
 ```
 
-The reusable native chain is covered by generated-binding and native execution
-tests. The `flow_less` examples still execute C++ pager behavior through Flow
-wiring in the compatibility interpreter. Source-owned navigation and compiled
-graph delivery remain unfinished; see the
-[activation decision](docs/architecture/source-graph-activation-decision.md).
+The reusable native chain includes bounded scalar source graphs with explicitly
+selected startup providers, durable FIFO delivery and fresh native receiver
+frames. The `flow_less` examples still execute C++ pager behavior through the
+compatibility interpreter; source-owned paging remains unfinished. See the
+[activation decision](docs/architecture/source-graph-activation-decision.md) and
+[native graph boundary](docs/architecture/native-graph-provider-map.md).
 
 ## Recommended reading
 

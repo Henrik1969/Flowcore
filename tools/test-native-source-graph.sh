@@ -1,0 +1,164 @@
+#!/bin/sh
+set -eu
+root=${FLOWCORE_ROOT:?}
+tmpdir=$(mktemp -d)
+trap 'rm -rf "$tmpdir"' EXIT
+sha256sum "$FLOWMINI_BIN" "$FLOWANALYST_BIN" "$FLOWBIND_BIN" "$FLOWPARALLEL_BIN" "$FLOWOPTIMIZE_BIN" "$FLOWLOWER_BIN" > "$tmpdir/tools.sha256"
+cat > "$tmpdir/provider.c" <<'C'
+#include <stdio.h>
+static int calls;
+int input_value(void) { ++calls; return 3; }
+int other_value(void) { ++calls; return 8; }
+int input_count(void) { return calls; }
+int observe_value(int value) { printf("%d\n", value); return 0; }
+C
+clang -shared -fPIC "$tmpdir/provider.c" -o "$tmpdir/provider.so"
+jq -n --arg path "$tmpdir/provider.so" '{format:"flowcore.native_binding_spec",version:1,unit:"unregistered_graph_provider",namespace:"host",provider:{soname:$path,path:$path,convention:"c"},functions:[{name:"input",symbol:"input_value",effect:"io",parameters:[],return_type:"c_int"},{name:"other",symbol:"other_value",effect:"io",parameters:[],return_type:"c_int"},{name:"count",symbol:"input_count",effect:"readonly",parameters:[],return_type:"c_int"},{name:"observe",symbol:"observe_value",effect:"io",parameters:[{name:"value",type:"c_int"}],return_type:"c_int"}]}' > "$tmpdir/spec.json"
+"$root/tools/generate-flow-bindings.sh" --spec "$tmpdir/spec.json" --flow-output "$tmpdir/provider.flow" --policy-output "$tmpdir/policy" --manifest-output "$tmpdir/manifest.json" >/dev/null
+cat > "$tmpdir/selection.json" <<'JSON'
+{"format":"flowcore.graph_provider_map","version":1,"providers":[{"implementation":"injected.batch","source_callable":"host.input","activation":"startup_once","output_port":"out"}]}
+JSON
+cat > "$tmpdir/program.flow" <<'FLOW'
+import "provider.flow" as host
+program fresh_native_graph
+producer source : injected.batch
+node receiver : fn transform
+node left : fn observe_left
+node right : fn observe_right
+wire source.out => receiver.in
+wire source.out => receiver.in
+wire receiver.out => left.in
+wire receiver.out => right.in
+fn transform(value : c_int): c_int {
+    local : c_int(0)
+    local + value -> local
+    return local
+}
+fn observe_left(value : c_int): c_int {
+    result : c_int(0)
+    host.observe(value) -> result
+    return result
+}
+fn observe_right(value : c_int): c_int {
+    result : c_int(0)
+    next : c_int(0)
+    value + 1 -> next
+    host.observe(next) -> result
+    return result
+}
+main {
+    calls : c_int(0)
+    host.count() -> calls
+    return calls - 1
+}
+FLOW
+compile() {
+    "$FLOWMINI_BIN" --dump-frontend-bundle "$tmpdir/program.flow" > "$tmpdir/frontend.json"
+    "$FLOWANALYST_BIN" --lowering-plan-version 2 --graph-plan-version 2 --graph-providers "$tmpdir/selection.json" < "$tmpdir/frontend.json" > "$tmpdir/semantic.json"
+    "$FLOWBIND_BIN" --policy "$tmpdir/policy" < "$tmpdir/semantic.json" > "$tmpdir/binding.json"
+    "$FLOWPARALLEL_BIN" < "$tmpdir/semantic.json" > "$tmpdir/execution.json"
+    "$FLOWOPTIMIZE_BIN" < "$tmpdir/execution.json" > "$tmpdir/optimization.json"
+    "$FLOWPREPARE_BIN" --binding-report "$tmpdir/binding.json" < "$tmpdir/optimization.json" > "$tmpdir/backend.json"
+    "$FLOWLOWER_BIN" --emit-llvm "$tmpdir/program.ll" < "$tmpdir/backend.json" > "$tmpdir/lowering.json"
+    clang -c "$tmpdir/program.ll" -o "$tmpdir/program.o"
+    # These flags are supplied by CMake so sanitizer runtime archives link with
+    # their own compiler/runtime rather than silently disabling instrumentation.
+    "$FLOWGRAPH_CXX" ${FLOWGRAPH_LINK_FLAGS:-} "$tmpdir/program.o" "-Wl,-rpath,$(dirname "$FLOWGRAPH_RUNTIME")" "$FLOWGRAPH_RUNTIME" "$tmpdir/provider.so" -o "$tmpdir/program"
+}
+compile
+FLOWCORE_GRAPH_TRACE=1 "$tmpdir/program" > "$tmpdir/output" 2> "$tmpdir/trace"
+printf '3\n4\n3\n4\n' > "$tmpdir/expected"
+cmp "$tmpdir/output" "$tmpdir/expected"
+python3 - "$tmpdir/trace" <<'PY'
+import json, sys
+records = [json.loads(line) for line in open(sys.argv[1])]
+enters = [r for r in records if r['event'] == 'enter']
+assert [r['node_id'] for r in enters] == ['source', 'receiver', 'receiver', 'left', 'right', 'left', 'right']
+assert enters[1]['input_signal_id'] == enters[2]['input_signal_id']
+assert enters[1]['wire_id'] != enters[2]['wire_id']
+assert enters[3]['input_signal_id'] == enters[4]['input_signal_id'] != enters[5]['input_signal_id'] == enters[6]['input_signal_id']
+assert len({r['delivery_id'] for r in enters[1:]}) == 6
+assert all(r['input_port'] == 'in' and r['source_port'] == 'out' and r['wire_provenance']['line'] > 0 for r in enters[1:])
+assert len([r for r in records if r['event'] == 'drop']) == 4
+PY
+# Every consumer reads a durable captured file and refuses mutated scheduling.
+for mutation in '.graph_schedule.steps |= reverse' '.graph_schedule.steps[1].wire_id = "wrong"' '.graph_schedule.steps[2].input_signal_id = 99' '.graph_schedule.steps[1].input_port = "out"' 'del(.graph_schedule)' '.lowering_plan.source_graph.syntax.wires += [(.lowering_plan.source_graph.syntax.wires[0] | .wire_id = "cycle" | .from.node_id = "left")]' '.lowering_plan.source_graph.receivers[0].function_symbol_id = 999' '.lowering_plan.source_graph.providers[0].provider.symbol = "other_value"'; do
+    jq "$mutation" "$tmpdir/execution.json" > "$tmpdir/bad.execution.json"
+    if "$FLOWOPTIMIZE_BIN" < "$tmpdir/bad.execution.json" >/dev/null 2>&1; then echo 'mutated graph schedule optimized' >&2; exit 1; fi
+    jq "$mutation" "$tmpdir/backend.json" > "$tmpdir/bad.backend.json"
+    if "$FLOWLOWER_BIN" --emit-llvm "$tmpdir/bad.ll" < "$tmpdir/bad.backend.json" >/dev/null 2>&1; then echo 'mutated graph schedule lowered' >&2; exit 1; fi
+    test ! -e "$tmpdir/bad.ll"
+done
+# No matching graph producer grant means no authority, even with symbol evidence.
+grep -v ' input_value ' "$tmpdir/policy" > "$tmpdir/denied.policy"
+if "$FLOWBIND_BIN" --policy "$tmpdir/denied.policy" < "$tmpdir/semantic.json" >/dev/null 2>&1; then echo 'ungranted graph producer accepted' >&2; exit 1; fi
+# An unused provider selection cannot change emitted behavior.
+cp "$tmpdir/program.ll" "$tmpdir/original.ll"
+jq '.providers += [{implementation:"unused.input",source_callable:"host.other",activation:"startup_once",output_port:"out"}]' "$tmpdir/selection.json" > "$tmpdir/unused.json"
+mv "$tmpdir/unused.json" "$tmpdir/selection.json"
+compile
+cmp "$tmpdir/program.ll" "$tmpdir/original.ll"
+# Input selection is explicit, separate from receiver evaluation and scheduling.
+jq '(.providers[] | select(.implementation == "injected.batch")).source_callable = "host.other"' "$tmpdir/selection.json" > "$tmpdir/other.json"
+mv "$tmpdir/other.json" "$tmpdir/selection.json"
+compile
+"$tmpdir/program" > "$tmpdir/output" 2> "$tmpdir/trace"
+printf '8\n9\n8\n9\n' > "$tmpdir/expected"
+cmp "$tmpdir/output" "$tmpdir/expected"
+# Wire order changes delivery order without changing receiver evaluation rules.
+python3 - "$tmpdir/program.flow" <<'PYTHON'
+import sys
+p = sys.argv[1]
+s = open(p).read().replace('fresh_native_graph', 'renamed_successful_graph')
+s = s.replace('wire receiver.out => left.in\nwire receiver.out => right.in', 'wire receiver.out => right.in\nwire receiver.out => left.in')
+open(p, 'w').write(s)
+PYTHON
+compile
+"$tmpdir/program" > "$tmpdir/output" 2> "$tmpdir/trace"
+printf '9\n8\n9\n8\n' > "$tmpdir/expected"
+cmp "$tmpdir/output" "$tmpdir/expected"
+# A failed receiver produces no normal result and never activates its fan-out.
+sed 's/local + value -> local/value \/ 0 -> local/; s/program fresh_native_graph/program renamed_failed_graph/' "$tmpdir/program.flow" > "$tmpdir/failure.flow"
+mv "$tmpdir/failure.flow" "$tmpdir/program.flow"
+compile
+set +e
+FLOWCORE_GRAPH_TRACE=1 "$tmpdir/program" > "$tmpdir/output" 2> "$tmpdir/trace"
+status=$?
+set -e
+test "$status" -eq 70
+test ! -s "$tmpdir/output"
+python3 - "$tmpdir/trace" <<'PY'
+import json, sys
+records = [json.loads(line) for line in open(sys.argv[1])]
+failures = [r for r in records if r['format'] == 'flowcore.graph_failure']
+assert len(failures) == 1
+failure = failures[0]
+assert failure['reason'] == 'invalid_division' and failure['operation_id'] >= 0
+assert failure['activation']['node_id'] == 'receiver' and failure['activation']['wire_id'] == 'wire:0'
+assert not any(r.get('event') == 'output' and r['node_id'] == 'receiver' for r in records)
+assert not any(r.get('node_id') in ['left', 'right'] for r in records)
+PY
+# Source can reject an activation through an explicitly authorized runtime ABI.
+jq -n --arg path "$FLOWGRAPH_RUNTIME" '{format:"flowcore.native_binding_spec",version:1,unit:"graph_failures",namespace:"runtime",provider:{soname:$path,path:$path,convention:"c"},functions:[{name:"raise",symbol:"flow_graph_raise",effect:"failure",parameters:[{name:"code",type:"c_int"}],return_type:"c_int"}]}' > "$tmpdir/runtime.spec.json"
+"$root/tools/generate-flow-bindings.sh" --spec "$tmpdir/runtime.spec.json" --flow-output "$tmpdir/runtime.flow" --policy-output "$tmpdir/runtime.policy" --manifest-output "$tmpdir/runtime.manifest.json" >/dev/null
+cat "$tmpdir/runtime.policy" >> "$tmpdir/policy"
+sed '1i import "runtime.flow" as runtime' "$tmpdir/program.flow" | sed 's/value \/ 0 -> local/runtime.raise(17) -> local/' > "$tmpdir/raised.flow"
+mv "$tmpdir/raised.flow" "$tmpdir/program.flow"
+compile
+set +e
+FLOWCORE_GRAPH_TRACE=1 "$tmpdir/program" > "$tmpdir/output" 2> "$tmpdir/trace"
+status=$?
+set -e
+test "$status" -eq 70
+test ! -s "$tmpdir/output"
+python3 - "$tmpdir/trace" <<'PY'
+import json, sys
+records = [json.loads(line) for line in open(sys.argv[1])]
+failure = records[-1]
+assert failure['format'] == 'flowcore.graph_failure' and failure['reason'] == 'source_failure'
+assert failure['code'] == 17 and failure['operation_id'] >= 0
+assert failure['activation']['node_id'] == 'receiver' and failure['activation']['wire_id'] == 'wire:0'
+assert not any(r.get('event') == 'output' and r['node_id'] == 'receiver' for r in records)
+PY
+sha256sum --check --status "$tmpdir/tools.sha256"
+echo 'native source graph: PASS'

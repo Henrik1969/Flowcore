@@ -49,6 +49,7 @@ public:
 
     void compile() {
         const auto& plan = required_object(root_, "lowering_plan");
+        if (optional(plan, "source_graph")) throw Unsupported("native source graph execution is not yet admitted by TinyVM");
         const auto plan_version = integer(required(plan, "version", "$.lowering_plan"), "$.lowering_plan.version");
         if (plan_version == 2) for (const auto& value : required_array(plan, "functions", "$.lowering_plan")) {
             const auto& function = object(value, "$.lowering_plan.functions[]");

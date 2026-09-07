@@ -66,3 +66,6 @@ if(TARGET flowmini AND TARGET flowanalyst AND TARGET flowparallel AND TARGET flo
     set_tests_properties(flowcore_pipeline_matrix flowcore_pass_corpus PROPERTIES
         ENVIRONMENT "FLOWMINI_BIN=$<TARGET_FILE:flowmini>;FLOWANALYST_BIN=$<TARGET_FILE:flowanalyst>;FLOWPARALLEL_BIN=$<TARGET_FILE:flowparallel>;FLOWOPTIMIZE_BIN=$<TARGET_FILE:flowoptimize>;FLOWBIND_BIN=$<TARGET_FILE:flowbind>")
 endif()
+
+add_library(flowgraph_runtime SHARED src/graph_runtime.cpp)
+target_compile_options(flowgraph_runtime PRIVATE -Wall -Wextra -Wpedantic)

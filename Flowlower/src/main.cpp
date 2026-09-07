@@ -45,8 +45,8 @@ int lower(std::string_view report, const Options& options, std::string_view bind
     const auto root = Parser{std::string(report)}.parse();
     if (const auto* plan = field(root, "lowering_plan"))
         if (const auto* graph = field(*plan, "source_graph")) {
-            (void)flowcontracts::source_graph(*graph, "$.lowering_plan.source_graph");
-            throw std::runtime_error("source graph execution is not admitted");
+            if (!flowcontracts::source_graph(*graph, "$.lowering_plan.source_graph").executable)
+                throw std::runtime_error("source graph execution is not admitted");
         }
     const auto input_format = text(field(root, "format"));
     if (input_format != "flowoptimize.optimization_report" && input_format != "flowcore.backend_lowering_artifact")
@@ -118,6 +118,7 @@ int lower(std::string_view report, const Options& options, std::string_view bind
         llvm << "; Flowcore target artifact: " << selected_target << '\n' << *llvm_body;
     }
 
+    const bool native_graph = field(*field(root, "lowering_plan"), "source_graph") != nullptr;
     std::string source_path;
     if (const auto* source = field(root, "source")) source_path = text(field(*source, "path"));
     std::cout << "{\n  \"format\": \"flowlower.lowering_report\",\n"
@@ -128,6 +129,7 @@ int lower(std::string_view report, const Options& options, std::string_view bind
                  "  \"artifact\": {\"backend\": \"llvm\", \"target_specific\": true, \"status\": \"" << (options.llvm_path.empty() ? "not-emitted" : "emitted") << "\"},\n"
                  "  \"backend\": {\"name\": \"llvm\", \"provider_status\": \"available\"},\n"
                  "  \"ir\": {\"format\": \"llvm-ir\", \"status\": \"" << (options.llvm_path.empty() ? "not-emitted" : "emitted") << "\"},\n"
+                 "  \"runtime\": {\"library\": " << quote(native_graph ? "flowgraph_runtime" : "none") << ", \"required\": " << (native_graph ? "true" : "false") << "},\n"
                  "  \"message\": \"LLVM lowering boundary reached for the accepted lowering plan\"\n"
                  "}\n";
     return 0;

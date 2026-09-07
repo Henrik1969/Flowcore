@@ -73,6 +73,10 @@ int prepare(const Options& option) {
     bool requires_binding = false;
     for (const auto& value : operations)
         if (string(required(object(value, "$.lowering_plan.operations[]"), "kind", "$.lowering_plan.operations[]"), "$.lowering_plan.operations[].kind") == "external_call") requires_binding = true;
+    if (const auto* graph = optional(object(required(root, "lowering_plan")), "source_graph")) {
+        if (!source_graph(*graph).executable) throw Error("$.lowering_plan.source_graph", "source graph execution is not admitted");
+        requires_binding = true;
+    }
     if (requires_binding && capabilities.empty()) throw Error("$.authorization.capabilities", "external calls require a ready binding report");
 
     const auto optimization_header = header(optimization);
@@ -92,6 +96,7 @@ int prepare(const Options& option) {
         {"targets", required(root, "targets")},
         {"version", Integer{option.target_policy_path.empty() ? 1 : 2}}
     };
+    if (const auto* schedule = optional(root, "graph_schedule")) output.emplace("graph_schedule", *schedule);
     if (!option.target_policy_path.empty()) {
         const auto target_policy = parse(read(option.target_policy_path));
         validate_target_policy(target_policy);

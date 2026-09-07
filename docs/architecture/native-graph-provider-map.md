@@ -31,3 +31,47 @@ graphs remain non-executable at downstream compiler boundaries. The next slice
 must authorize producer calls, publish graph scheduling with full endpoint,
 wire and signal identities, and lower source receiver invocation. Removing the
 existing graph refusal before that route works would silently change programs.
+
+## Executable scalar graph boundary
+
+Request `--lowering-plan-version 2 --graph-plan-version 2` with the explicit
+provider map to publish `flowcore.source_graph` v2. Admission requires complete
+producer/receiver resolution, compatible port types, one native entry, no graph
+cycles, and no provider policies on this initial scalar adapter. Version 1
+remains non-executable evidence and cannot be upgraded by changing its status.
+External callable catalog entries retain their provider tuple; producer identity
+must match that catalog and an exact Flowbind capability grant.
+
+Flowparallel publishes `flowcore.graph_schedule` v1 with FIFO delivery per root
+in source order. Every step records activation, input/output signals, delivery,
+wire, full endpoints and its input activation reference. The one-successful-output
+contract permits static scheduling: fan-out reuses the originating result rather
+than invoking the function again. The admitted expansion is bounded at 65,536
+activations. Optimization and backend preparation preserve and independently
+validate the complete schedule against the graph. Scheduling remains separate
+from the fresh-single-input receiver contract.
+
+LLVM emits actual function invocations with fresh native stack storage. Link the
+emitted object with `libflowgraph_runtime.so` (installed under `lib/flowcore`) and
+the explicitly selected provider libraries. Lowering reports declare that runtime
+requirement. `FLOWCORE_GRAPH_TRACE=1` produces JSON activation/output records;
+unconnected outputs always produce a drop diagnostic. Records retain source and
+wire provenance. Division by zero or signed division overflow produces a
+`flowcore.graph_failure` with the current activation and operation identity, exits
+70, and never publishes a normal receiver result or invokes its fan-out.
+
+The `native_source_graph` gate generates a new provider after the tools are built,
+checks unchanged compiler hashes, executes repeated receivers and fan-out, changes
+input selection and wire order, verifies an unused selection has no LLVM effect,
+and rejects missing grants, forged schedules, cycles and mutated provider identity.
+This initial native graph surface is Linux x86-64 and scalar; aggregate payloads,
+provider streaming/policies and native TinyVM graph execution remain unsupported.
+The existing pager migration is still unfinished.
+
+The runtime also exports the explicitly bindable C capability
+`flow_graph_raise(c_int code): c_int`. It terminates the active graph invocation
+with a structured `source_failure`, the source-selected code, current operation
+and activation provenance, and exit 70. Calling it requires the same generated
+provider evidence and explicit grant as any other external capability. Its
+implementation never returns a normal result. It permits Flow-owned validation
+without encoding application-specific error cases in the compiler or runtime.
