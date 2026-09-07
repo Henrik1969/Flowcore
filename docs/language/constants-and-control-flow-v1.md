@@ -47,6 +47,9 @@ The value-oriented follow-up is specified in
 [`when-match-v1.md`](when-match-v1.md). It remains a separate construct so
 that `guard` continues to communicate invariant enforcement directly.
 
-The `when`/`match` design is deferred until constants and outcome records have
-stable semantics. It must lower to the same branch meaning as the existing
+The runtime parser accepts `when`/`match` for integer, enum, and variant probes.
+The structural AST still requires a default block, and variant payload labels
+are not preserved through analysis/lowering. Integer and enum lowering is
+tested; variant payload lowering remains explicitly unsupported. The
+backend-neutral form must lower to the same branch meaning as the existing
 structured form and remain available to freestanding targets.
