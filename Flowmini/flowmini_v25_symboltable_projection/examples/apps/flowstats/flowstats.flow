@@ -1,0 +1,36 @@
+import "../../../std/math.flow"
+
+program flowstats
+
+main(args : list<string>) {
+    const expected_count : int(5)
+    values : list<int>([1, 9, 3, 5, 7])
+    count : int(length(values))
+    guard count == expected_count else {
+        print 2
+    }
+
+    one : int(1)
+    index : int(0)
+    current : int(0)
+    total : int(0)
+    minimum : int(2147483647)
+    maximum : int(-2147483647)
+
+    while index < count {
+        values[index] -> current
+        total + current -> total
+        if current < minimum {
+            current -> minimum
+        }
+        if current > maximum {
+            current -> maximum
+        }
+        index + one -> index
+    }
+
+    print count
+    print minimum
+    print maximum
+    print total
+}

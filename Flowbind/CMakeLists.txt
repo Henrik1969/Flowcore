@@ -20,3 +20,11 @@ add_test(NAME flowbind_fuzz
     COMMAND ${CMAKE_COMMAND} -E env
         FLOWBIND_BIN=$<TARGET_FILE:flowbind>
         ${CMAKE_CURRENT_SOURCE_DIR}/../tools/run-flowbind-fuzz.sh)
+add_test(NAME flowbind_generator
+    COMMAND ${CMAKE_COMMAND} -E env
+        FLOWBIND_GEN=${CMAKE_CURRENT_SOURCE_DIR}/../tools/flowbind-gen
+        ${CMAKE_CURRENT_SOURCE_DIR}/../tools/run-flowbind-generator-tests.sh)
+add_test(NAME flowbind_real_libraries
+    COMMAND ${CMAKE_COMMAND} -E env
+        FLOWBIND_GEN=${CMAKE_CURRENT_SOURCE_DIR}/../tools/flowbind-gen
+        ${CMAKE_CURRENT_SOURCE_DIR}/../tools/run-flowbind-real-library-tests.sh)

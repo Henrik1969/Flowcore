@@ -20,11 +20,13 @@ architecture cost of a new mechanism is not justified.
   Flowanalyst producer and the UTF-8 flow probe now validates it successfully.
 - **Evidence reporting:** `tools/report-flowmini-test-status.sh` emits a
   versioned JSON and Markdown projection of root CTest, focused CTest, and the
-  categorized suite. The current report is 88/88 root, 11/11 focused, and
+  categorized suite. The current report is 92/92 root, 13/13 focused, and
   91/140 categorized (49 known gaps). Tests remain authoritative.
 - **Sanitizer verification:** a fresh Debug AddressSanitizer/UndefinedBehavior
-  Sanitizer configure and build passes the complete 88/88 CTest suite with
-  leak checks disabled as required by the existing workflow.
+  Sanitizer configure and build passed 91/92 tests with leak checks disabled;
+  `terminal_sel_pipeline` remains the known environment-only ASan preload
+  failure (`ASan runtime does not come first`). The new Flowmini and Flowbind
+  gates pass under sanitizers.
 - **Unsafe policy:** unsafe regions, inline assembly, and embedded foreign
   source are **NOT SUPPORTED — INTENTIONALLY EXCLUDED**. External unsafe work
   must arrive as a declared provider/ABI artifact with boundary paperwork.
@@ -38,6 +40,20 @@ architecture cost of a new mechanism is not justified.
   `min`, `max`, and `clamp` helpers alongside its existing arithmetic helpers.
   Floating-point transcendental APIs remain deferred until a carrier/provider
   contract exists.
+- **C binding generator:** `tools/flowbind-gen` is an EXPERIMENTAL,
+  deterministic Clang AST-JSON prototype. It emits partial artifacts for a
+  scalar/enum/opaque-handle subset and preserves explicitly declared
+  create/use/release metadata. Real installed libm, zlib, sqlite3, and libcurl
+  headers are exercised by passing gates; unsupported declarations are
+  reported rather than guessed.
+- **Mature program probes:** `flowstats` and `flowconfig` are IMPLEMENTED and
+  TESTED runtime probes combining lists, loops, guards, constants, enum
+  branching, and pure math. They are architectural probes, not an ecosystem
+  readiness claim.
+- **Variant carrier experiment:** a new gate proves canonical variant labels
+  and payload identity survive the frontend while Flowanalyst returns
+  `FLOWANALYST_VARIANT_MATCH_UNSUPPORTED`. A target-neutral `{tag,payload}`
+  layout remains an explicit blocker; no backend-specific carrier was added.
 
 ## Findings
 
@@ -212,6 +228,71 @@ The producer fix is now covered by the passing regression gate.
 - **Scope/risk:** high.
 - **Gate:** deterministic two-target artifact differential and measured cost.
 - **Priority:** high for bare-metal goals.
+
+### INTEROPERABILITY/TOOLING — C binding generator and real-library pressure
+
+- **Finding:** the provider contract can now be populated from real C headers,
+  but only a deliberately small carrier subset is supported.
+- **Evidence:** `flowbind_generator` and `flowbind_real_libraries` pass for
+  libm, zlib, sqlite3, and libcurl; libm floating-point declarations remain in
+  the explicit `unsupported` list, while sqlite3/curl resource contracts are
+  preserved as metadata.
+- **Why it matters:** external reuse is inspectable without claiming that
+  Flowmini governs foreign internals or can call every ABI shape.
+- **Status:** EXPERIMENTAL/TESTED prototype; generated Flowmini declarations,
+  callbacks, complex structs, and static lifetime enforcement remain deferred.
+- **Possible direction:** add one carrier only when a concrete binding needs it,
+  retaining Clang as parser and the provider artifact as authority.
+- **Estimated scope/risk:** medium tooling work; high risk if expanded into a
+  universal foreign-object framework.
+- **Dependencies:** stable carrier and resource contracts.
+- **Suggested gate:** deterministic generated artifacts plus a real linked and
+  dynamic provider test for each new carrier.
+- **Priority rationale:** high for ecosystem usefulness, but bounded growth is
+  safer than ABI completeness by enumeration.
+
+### LANGUAGE — concrete generic pressure from probes
+
+- **Finding:** a reusable `length(list<T>)` helper cannot currently be expressed
+  through the imported function path; the runtime parser rejects a list-valued
+  function parameter as a callable value type.
+- **Evidence:** the attempted `std/collections.flow` helper was removed after
+  that parser error; `flowstats` therefore uses the existing `length` intrinsic
+  directly and keeps its list element type concrete.
+- **Why it matters:** this is measured pressure for later generics and
+  collection APIs, while avoiding speculative generic syntax now.
+- **Status:** NOT SUPPORTED — DEFERRED; no syntax or type-erasure workaround was
+  added.
+- **Possible direction:** when generics resume, make one canonical type
+  parameter/substitution path and first prove `length<T>` or `identity<T>`
+  through AST, facts, and lowering.
+- **Estimated scope/risk:** medium/high frontend and backend schema work.
+- **Dependencies:** parser convergence and a type-carrier contract.
+- **Suggested gate:** generic identity, invalid substitution, and deterministic
+  backend artifacts on both admitted parser paths.
+- **Priority rationale:** the probe demonstrates real need, but variant and
+  binding contracts remain nearer-term correctness constraints.
+
+### INTEROPERABILITY — resource contract v0 evidence
+
+- **Finding:** handle libraries need lifecycle paperwork before Flowmini can
+  present them as ordinary values.
+- **Evidence:** generator artifacts preserve `created_by`, `resource_type`,
+  `released_by`, and `required_cleanup` for sqlite3 and libcurl; the provider
+  does not claim static lifetime enforcement.
+- **Why it matters:** callers can inspect obligations and tooling can reject
+  absent declarations without pretending to prove all paths.
+- **Status:** IMPLEMENTED/TESTED descriptive metadata; automatic ownership and
+  lifetime checking remain NOT SUPPORTED — DEFERRED.
+- **Possible direction:** add path-sensitive enforcement only after a concrete
+  missed-cleanup defect and cost comparison with an external wrapper.
+- **Estimated scope/risk:** medium metadata, very high if promoted to a type
+  system.
+- **Dependencies:** provider ABI and effect identity.
+- **Suggested gate:** create/use/release artifacts, missing-release diagnostics,
+  and linked/dynamic parity where the provider can observe cleanup.
+- **Priority rationale:** useful immediately for honesty; stronger enforcement
+  is not justified by current evidence.
 
 ## Lessons from other languages
 

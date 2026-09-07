@@ -272,6 +272,17 @@ add_test(NAME flowmini_stdlib_math
         FLOWMINI_BIN=$<TARGET_FILE:flowmini>
         ${CMAKE_CURRENT_SOURCE_DIR}/tools/run-flowmini-stdlib-math-tests.sh
 )
+add_test(NAME flowmini_mature_programs
+        COMMAND ${CMAKE_COMMAND} -E env
+        FLOWMINI_BIN=$<TARGET_FILE:flowmini>
+        ${CMAKE_CURRENT_SOURCE_DIR}/tools/run-flowmini-mature-probes.sh
+)
+add_test(NAME flowmini_variant_carrier_experiment
+        COMMAND ${CMAKE_COMMAND} -E env
+        FLOWMINI_BIN=$<TARGET_FILE:flowmini>
+        FLOWANALYST_BIN=$<TARGET_FILE:flowanalyst>
+        ${CMAKE_CURRENT_SOURCE_DIR}/tools/run-flowmini-variant-carrier-experiment.sh
+)
 
 add_test(NAME flowmini_parser_differential
         COMMAND ${CMAKE_COMMAND} -E env

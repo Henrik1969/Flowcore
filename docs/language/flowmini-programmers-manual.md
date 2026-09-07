@@ -132,7 +132,8 @@ as general language guarantees. The pure `std/math.flow` unit is the first
 small standard-library slice: `identity`, `add`, `square`, `cube`, `factorial`,
 `min`, `max`, and `clamp` over `int` are IMPLEMENTED and TESTED by
 `flowmini_stdlib_math`; this is a narrow library surface, not a complete
-standard library.
+standard library. The verified availability index is
+[`stdlib-index.md`](../flowmini/stdlib-index.md).
 
 Refined types are **EXPERIMENTAL**:
 
@@ -171,6 +172,11 @@ serialization, but Flowanalyst deliberately rejects variant lowering with
 `FLOWANALYST_VARIANT_MATCH_UNSUPPORTED` until a backend-neutral payload layout
 is admitted.
 
+The bounded carrier experiment records the current contract: variant identity
+and discriminants are preserved, payload identity is inspectable, and payload
+layout is an explicit backend blocker. LLVM and TinyVM therefore reject this
+case rather than claiming parity.
+
 ## ABI and providers
 
 An ABI block declares an external library, calling convention, structs, and
@@ -195,6 +201,13 @@ INTENTIONALLY EXCLUDED**). Flowmini source cannot embed foreign or opaque
 regions. Machine-specific functionality must be an external provider/artifact
 with declared identity, ABI, target constraints, inputs, outputs, effects,
 resource obligations, provenance, and verification evidence.
+
+`tools/flowbind-gen` is an EXPERIMENTAL Clang-backed C declaration generator.
+It emits deterministic `flowbind.c_binding` JSON for scalar functions, enums,
+opaque handles, and explicitly declared create/use/release contracts. It marks
+unsupported carriers as `partial`; it does not parse C++ or execute foreign
+calls. The real-library probe covers installed libm, zlib, sqlite3, and libcurl
+headers.
 
 ## Flowcore model in programmer terms
 
@@ -231,10 +244,11 @@ unsupported backend contract.
 
 Use focused tests while learning, then run `ctest --test-dir build
 --output-on-failure`. The current root build and focused suite are green after
-the semantic JSON producer fix and the parser/const/guard/provider gates. The
-categorized `flowmini_suite` remains an honest maturity signal: its present
-fixture inventory is 91/140, with 49 expected-pass examples exposing parser,
-ABI, and profile gaps.
+the semantic JSON producer fix and the parser/const/guard/provider gates. Two
+mature probes combine lists, loops, guards, constants, enums, and math; run
+the evidence reporter for current categorized-suite totals rather than copying
+a frozen count. Their evidence and known workarounds are listed in
+[`mature-program-probes.md`](../flowmini/mature-program-probes.md).
 
 ## Compact reference
 

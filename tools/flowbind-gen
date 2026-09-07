@@ -1,0 +1,100 @@
+#!/usr/bin/env python3
+"""Generate a deterministic, inspectable Flowbind C ABI declaration artifact."""
+import argparse
+import json
+import re
+import subprocess
+import sys
+from pathlib import Path
+
+SCALARS = {"void": "void", "int": "c_int", "long": "c_long",
+           "unsigned long": "c_ulong", "size_t": "c_size_t",
+           "const char *": "c_string", "char const *": "c_string"}
+
+def children(nodes, kind):
+    return [node for node in nodes if node.get("kind") == kind]
+
+def normalize_type(spelling):
+    spelling = re.sub(r"\s+", " ", spelling.strip())
+    if spelling in SCALARS:
+        return SCALARS[spelling]
+    pointer = re.fullmatch(r"(?:const )?([A-Za-z_]\w*) \*", spelling)
+    if pointer:
+        return pointer.group(1) + "_handle"
+    return None
+
+def main():
+    parser = argparse.ArgumentParser(description="Generate a Flowbind C ABI artifact using Clang")
+    parser.add_argument("--header", required=True)
+    parser.add_argument("--library", required=True)
+    parser.add_argument("--out", required=True)
+    parser.add_argument("--clang", default="clang")
+    parser.add_argument("--resource", action="append", default=[], metavar="CREATE:TYPE:RELEASE",
+                        help="declare a create/use/release contract")
+    args = parser.parse_args()
+    header = Path(args.header).resolve()
+    result = subprocess.run([args.clang, "-Xclang", "-ast-dump=json", "-fsyntax-only", str(header)],
+                            check=True, capture_output=True, text=True)
+    nodes = json.loads(result.stdout).get("inner", [])
+    opaque = {node["name"] for node in children(nodes, "RecordDecl")
+              if node.get("tagUsed") == "struct" and node.get("name")}
+    functions, unsupported = [], []
+    for node in children(nodes, "FunctionDecl"):
+        name = node.get("name", "")
+        qual = node.get("type", {}).get("qualType", "")
+        match = re.match(r"(.+?)\s*\((.*)\)$", qual)
+        if not match:
+            unsupported.append({"kind": "function", "name": name, "reason": "unparseable signature", "clang_type": qual})
+            continue
+        return_type, parameter_text = match.groups()
+        params = []
+        if parameter_text.strip() and parameter_text.strip() != "void":
+            for index, param in enumerate(node.get("inner", [])):
+                if param.get("kind") != "ParmVarDecl":
+                    continue
+                spelling = param.get("type", {}).get("qualType", "")
+                flow_type = normalize_type(spelling)
+                item = {"name": param.get("name") or f"arg{index}", "clang_type": spelling}
+                if flow_type is None:
+                    item["status"] = "unsupported"
+                else:
+                    item["type"] = flow_type
+                params.append(item)
+        flow_return = normalize_type(return_type)
+        if flow_return is None or any(param.get("status") == "unsupported" for param in params):
+            unsupported.append({"kind": "function", "name": name, "reason": "unsupported carrier", "clang_type": qual})
+            continue
+        functions.append({"name": name, "symbol": name, "return_type": flow_return, "parameters": params})
+    enums = []
+    for node in children(nodes, "EnumDecl"):
+        members = []
+        for child in children(node.get("inner", []), "EnumConstantDecl"):
+            value = next((item.get("value") for item in child.get("inner", []) if item.get("kind") == "ConstantExpr"), None)
+            members.append({"name": child.get("name"), "value": value})
+        if node.get("name") and members:
+            enums.append({"name": node["name"], "members": members})
+    resources = []
+    for spec in args.resource:
+        fields = spec.split(":")
+        if len(fields) != 3 or not all(fields):
+            parser.error("--resource must be CREATE:TYPE:RELEASE")
+        resources.append({"created_by": fields[0], "resource_type": fields[1],
+                          "released_by": fields[2], "required_cleanup": True})
+    artifact = {"format": "flowbind.c_binding", "version": 1,
+                "status": "ready" if not unsupported else "partial",
+                "header": str(header), "library": args.library,
+                "provider": {"kind": "c_abi", "parser": "clang-ast-json", "clang": args.clang},
+                "enums": sorted(enums, key=lambda item: item["name"]),
+                "opaque_handles": [{"name": name + "_handle", "source": name, "repr": "void*", "ownership": "external"}
+                                   for name in sorted(opaque)],
+                "resource_contracts": sorted(resources, key=lambda item: (item["resource_type"], item["created_by"])),
+                "functions": sorted(functions, key=lambda item: item["name"]),
+                "unsupported": sorted(unsupported, key=lambda item: (item["kind"], item["name"]))}
+    Path(args.out).write_text(json.dumps(artifact, indent=2, sort_keys=True) + "\n")
+
+if __name__ == "__main__":
+    try:
+        main()
+    except subprocess.CalledProcessError as error:
+        print(error.stderr, file=sys.stderr, end="")
+        raise

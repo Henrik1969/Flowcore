@@ -1,0 +1,27 @@
+program flowconfig
+
+enum Mode {
+    development
+    production
+}
+
+main {
+    const max_retries : int(3)
+    retries : int(2)
+    ready : Bool(true)
+    mode : Mode(Mode.production)
+    guard ready else {
+        print 2
+    }
+    when mode {
+        case Mode.development {
+            print 10
+        }
+        case Mode.production {
+            print 20
+        }
+        default {
+            print 3
+        }
+    }
+}

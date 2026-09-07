@@ -14,16 +14,19 @@ The structural frontend and normal runtime are separate paths; see the
 ## Verified status
 
 ```text
-root CTest:                         PASS (88/88)
+root CTest:                         PASS (92/92)
 AST golden tests:                   PASS (28)
 symbol projection tests:            PASS (14)
-Flowmini focused CTest:             PASS (11/11)
+Flowmini focused CTest:             PASS (13/13)
 categorized flowmini_suite:         91/140 (49 known parser/ABI/profile gaps)
 variant payload lowering:           NOT SUPPORTED — DEFERRED (labels preserved)
 compile-time constants:            IMPLEMENTED/TESTED (bounded deterministic expressions)
 canonical guard lowering:           IMPLEMENTED/TESTED (LLVM backend)
 std.math v0:                        IMPLEMENTED/TESTED (pure integer helpers)
-ASan/UBSan CTest:                   PASS (88/88, leak checks disabled)
+Flowbind C generator:               EXPERIMENTAL/TESTED (Clang C subset, partial artifacts)
+mature program probes:              IMPLEMENTED/TESTED (flowstats, flowconfig)
+variant carrier experiment:         EXPERIMENTAL/TESTED (explicit payload-layout blocker)
+ASan/UBSan CTest:                   91/92 (terminal_sel_pipeline environment preload failure)
 ```
 
 The structural chain publishes TokenTree/AST, symbol and fact projections for
@@ -68,6 +71,7 @@ one independently tested language boundary at a time.
 canonical parser/semantic convergence
 target selection and multitarget artifact emission
 generic collections and broader standard library
+text/io/fs/time/net APIs and generated binding declarations
 variant payload lowering and backend parity
 ownership, resource, effect, and concurrency semantics
 unsafe/opaque source regions intentionally excluded; provider paperwork remains bounded work

@@ -51,6 +51,25 @@ The binding report is a versioned consumer boundary. A ready report means only
 that provider discovery succeeded; `execution` is explicitly
 `not-performed`.
 
+## C binding generator prototype
+
+`tools/flowbind-gen` is an EXPERIMENTAL, deterministic prototype for
+C-compatible headers. It delegates declaration parsing to Clang's AST JSON
+output and emits an inspectable `flowbind.c_binding` artifact. The current
+subset covers scalar carriers, enums, function declarations, opaque pointer
+handles, and explicit resource metadata supplied with repeatable options such
+as:
+
+```text
+--resource sqlite3_open:sqlite3_handle:sqlite3_close
+```
+
+Unsupported declarations remain in an `unsupported` array and make the
+artifact `partial`. Generator tests exercise installed libm, zlib, sqlite3,
+and libcurl headers; this is binding evidence, not a claim that Flowbind calls
+or fully models those libraries. C++/Rust/Zig/Mojo use remains an external
+C-compatible adapter/provider decision.
+
 External use is denied unless an exact capability grant is supplied:
 
 ```text

@@ -14,7 +14,7 @@ historical directory name)
 Current baseline:
 
 ```text
-root CTest: PASS (88/88)
+root CTest: PASS (92/92)
 AST golden tests: 28 PASS
 Symbol projection tests: 14 PASS
 categorized Flowmini fixture suite: 91/140 (49 known gaps)
@@ -34,6 +34,11 @@ payload lowering is **NOT SUPPORTED — DEFERRED**. See the
 [Programmer's Guide](../language/flowmini-programmers-manual.md),
 [comparisons](../language-comparisons/README.md), and
 [future-work evidence](../FUTURE_WORK_EVIDENCE.md).
+
+The C binding generator is an EXPERIMENTAL Clang-backed subset with explicit
+partial results. Mature runtime probes and the verified standard-library
+surface are documented in the [probe report](mature-program-probes.md) and
+[stdlib index](stdlib-index.md).
 
 Documents in this directory:
 

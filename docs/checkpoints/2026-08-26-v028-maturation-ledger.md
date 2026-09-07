@@ -880,3 +880,26 @@ later instruction reopens them.
 - These are recorded as bounded architectural dependencies in
   `docs/FUTURE_WORK_EVIDENCE.md`, with gates and cost rationale rather than
   inflated readiness claims.
+
+## 2026-09-07 bindings, stdlib, and mature-probe checkpoint
+
+- Added the EXPERIMENTAL `tools/flowbind-gen` Clang AST-JSON prototype. Its
+  deterministic `flowbind.c_binding` artifact supports a bounded scalar/enum/
+  opaque-handle C subset and explicit create/use/release metadata. Installed
+  libm, zlib, sqlite3, and libcurl headers are exercised with explicit partial
+  results; no foreign calls or C++ ABI claims were added.
+- Added `flowbind_generator` and `flowbind_real_libraries` gates. Both pass,
+  including sqlite3 and libcurl resource metadata and deterministic output.
+- Added `flowstats` and `flowconfig` runtime probes and the
+  `flowmini_mature_programs` gate. They combine lists, loops, constants,
+  guards, enums, and the tested math unit. A failed generic collection helper
+  attempt is preserved as evidence rather than hidden behind new syntax.
+- Added `flowmini_variant_carrier_experiment`. It proves tag/label identity is
+  preserved while payload layout remains an explicit backend blocker; LLVM and
+  TinyVM are not claimed to support variant payload lowering.
+- Updated the Programmer's Guide, Flowbind README, stdlib index, current
+  status, and future-work evidence. Current normal gates are root CTest 92/92,
+  focused Flowmini CTest 13/13, categorized suite 91/140 (49 known gaps).
+  The fresh sanitizer run passes 91/92: `terminal_sel_pipeline` remains the
+  existing environment-only ASan preload failure; all new Flowmini/Flowbind
+  gates pass under ASan/UBSan with leak checks disabled.
