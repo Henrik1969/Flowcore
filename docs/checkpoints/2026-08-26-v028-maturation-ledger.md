@@ -903,3 +903,10 @@ later instruction reopens them.
   The fresh sanitizer run passes 91/92: `terminal_sel_pipeline` remains the
   existing environment-only ASan preload failure; all new Flowmini/Flowbind
   gates pass under ASan/UBSan with leak checks disabled.
+
+## 2026-09-07 std.math extension checkpoint
+
+- Added pure integer `abs` to the tested `std/math.flow` surface and extended
+  the runtime/artifact gate. This is a small concrete library increment using
+  existing language semantics; floating-point and text APIs remain deferred
+  pending verified carriers and callable collection/text types.

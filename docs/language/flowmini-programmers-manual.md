@@ -129,8 +129,8 @@ p : Point({x:10, y:32})
 in runtime examples. Indexing is zero-based in those examples. Generic maps,
 user-defined generic functions, iterators, and classes are **NOT SUPPORTED**
 as general language guarantees. The pure `std/math.flow` unit is the first
-small standard-library slice: `identity`, `add`, `square`, `cube`, `factorial`,
-`min`, `max`, and `clamp` over `int` are IMPLEMENTED and TESTED by
+small standard-library slice: `identity`, `add`, `abs`, `square`, `cube`,
+`factorial`, `min`, `max`, and `clamp` over `int` are IMPLEMENTED and TESTED by
 `flowmini_stdlib_math`; this is a narrow library surface, not a complete
 standard library. The verified availability index is
 [`stdlib-index.md`](../flowmini/stdlib-index.md).

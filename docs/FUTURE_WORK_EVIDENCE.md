@@ -36,7 +36,7 @@ architecture cost of a new mechanism is not justified.
 - **Canonical guards:** guard identity and failure provenance now reach
   Flowlower's LLVM branch emission; unsupported failure blocks are rejected at
   the backend boundary instead of being erased.
-- **Pure standard library v0:** `std/math.flow` now has tested integer
+- **Pure standard library v0:** `std/math.flow` now has tested integer `abs`,
   `min`, `max`, and `clamp` helpers alongside its existing arithmetic helpers.
   Floating-point transcendental APIs remain deferred until a carrier/provider
   contract exists.

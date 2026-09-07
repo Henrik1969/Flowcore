@@ -8,6 +8,14 @@ fn add(a : int, b : int): int {
     a + b -> return
 }
 
+fn abs(value : int): int {
+    if value < 0 {
+        0 - value -> return
+    } else {
+        value -> return
+    }
+}
+
 fn square(n : int): int {
     n * n -> return
 }

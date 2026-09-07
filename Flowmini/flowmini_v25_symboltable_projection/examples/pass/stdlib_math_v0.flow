@@ -4,6 +4,8 @@ program stdlib_math_v0
 
 main {
     result : int(0)
+    abs(-7) -> result
+    print result
     min(7, 3) -> result
     print result
     max(7, 3) -> result
