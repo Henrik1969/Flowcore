@@ -53,6 +53,7 @@ public:
         if (plan_version == 2) for (const auto& value : required_array(plan, "functions", "$.lowering_plan")) {
             const auto& function = object(value, "$.lowering_plan.functions[]");
             Callable callable; callable.body = integer(required(function, "body_block_id", "$.function"), "$.function.body_block_id");
+            callable.result = string(required(function, "return_type", "$.function"), "$.function.return_type");
             callable.entry = boolean(required(function, "entry", "$.function"), "$.function.entry");
             callable.available = string(required(function, "availability", "$.function"), "$.function.availability") == "definition";
             for (const auto& parameter : required_array(function, "parameters", "$.function")) {
@@ -112,7 +113,7 @@ public:
     std::uint32_t isa_version() const { return uses_arguments_ ? 2 : 1; }
 
 private:
-    struct Callable { Integer body=-1; bool entry=false, available=false; std::vector<std::pair<Integer,std::string>> parameters; };
+    struct Callable { Integer body=-1; bool entry=false, available=false; std::string result; std::vector<std::pair<Integer,std::string>> parameters; };
     const Object& root_;
     std::string source_, derivation_;
     std::map<Integer, std::size_t> symbols_;
@@ -123,6 +124,7 @@ private:
     std::size_t* function_result_ = nullptr;
     std::vector<std::size_t>* function_return_jumps_ = nullptr;
     std::set<Integer> active_blocks_;
+    std::set<const Object*> terminal_branches_;
     std::deque<std::string> string_data_;
     std::size_t next_slot_ = 0;
     std::size_t required_argument_count_ = 0;
@@ -217,7 +219,17 @@ private:
         }
         if (kind == "binary") {
             const auto left = expression(required(node, "left", "$.expression"));
-            const auto right = expression(required(node, "right", "$.expression"));
+            auto right = expression(required(node, "right", "$.expression"));
+            const auto left_type = slot_types_.at(left), right_type = slot_types_.at(right);
+            if (left_type != right_type) {
+                const bool integers = (left_type == TINYVM_CARRIER_I32 || left_type == TINYVM_CARRIER_I64) &&
+                                      (right_type == TINYVM_CARRIER_I32 || right_type == TINYVM_CARRIER_I64);
+                if (!integers) throw Unsupported("binary operand carrier mismatch");
+                const auto converted = slot(); slot_types_[converted] = left_type;
+                emit(TV1_CONVERT, converted, right, left_type); right = converted;
+            }
+            if (left_type == TINYVM_CARRIER_OPAQUE_HANDLE)
+                throw Unsupported("opaque handle binary operations are not admitted");
             const auto operation = string(required(node, "operator", "$.expression"), "$.expression.operator");
             const std::map<std::string, std::int64_t> opcodes{{"+",TV1_ADD},{"-",TV1_SUB},{"*",TV1_MUL},{"/",TV1_SDIV},{"==",TV1_CMP_EQ},{"!=",TV1_CMP_NE},{"<",TV1_CMP_LT},{"<=",TV1_CMP_LE},{">",TV1_CMP_GT},{">=",TV1_CMP_GE}};
             const auto found = opcodes.find(operation); if (found == opcodes.end()) throw Unsupported("binary operator '" + operation + "' is not admitted");
@@ -249,6 +261,7 @@ private:
             if (otherwise_block >= 0) {
                 code[branch_index].pad = static_cast<std::int64_t>(code.size());
                 const bool else_terminal = compile_block(otherwise_block);
+                if (then_terminal && else_terminal) terminal_branches_.insert(&operation);
                 std::size_t else_jump = SIZE_MAX;
                 if (!else_terminal) { set_provenance(operation); else_jump = code.size(); emit(TV1_JMP, 0, 0, 0); }
                 const auto join = static_cast<std::int64_t>(code.size());
@@ -316,21 +329,24 @@ private:
                 if(slot_types_.at(values[index])!=slot_types_.at(destination))throw Unsupported("ordinary call argument carrier mismatch");
                 emit(TV1_MOVE,destination,values[index],0);
             }
-            auto result=slot(); slot_types_[result]=TINYVM_CARRIER_I32;
+            auto result=slot(); slot_types_[result]=carrier(callable.result);
             std::vector<std::size_t> return_jumps; auto* previous_result=function_result_; auto* previous_jumps=function_return_jumps_;
-            function_result_=&result; function_return_jumps_=&return_jumps; compile_block(callable.body);
+            function_result_=&result; function_return_jumps_=&return_jumps;
+            if (!compile_block(callable.body)) throw Unsupported("callable function has a path without a result");
             const auto continuation=static_cast<std::int64_t>(code.size()); for(const auto jump:return_jumps)code[jump].a=continuation;
             function_result_=previous_result; function_return_jumps_=previous_jumps;
             const auto expression_id=integer(required(operation,"expression_id","$.operation"),"$.operation.expression_id"); call_results_[expression_id]=result;
             if(const auto* result_identity=optional(operation,"result_symbol_id")) {
-                const auto destination=symbol_slot(integer(*result_identity,"$.operation.result_symbol_id")); slot_types_[destination]=TINYVM_CARRIER_I32;
+                const auto destination=symbol_slot(integer(*result_identity,"$.operation.result_symbol_id")); slot_types_[destination]=carrier(callable.result);
                 emit(TV1_MOVE,destination,result,0);
             }
             return;
         }
         const auto value = expression(operands.front());
         if (kind == "return_value") {
-            if(function_result_) { emit(TV1_MOVE,*function_result_,value,0); const auto jump=code.size(); emit(TV1_JMP,0,0,0); function_return_jumps_->push_back(jump); }
+            if(function_result_) {
+                if (slot_types_.at(*function_result_) != slot_types_.at(value)) throw Unsupported("callable return carrier mismatch");
+                emit(TV1_MOVE,*function_result_,value,0); const auto jump=code.size(); emit(TV1_JMP,0,0,0); function_return_jumps_->push_back(jump); }
             else emit(TV1_RETURN, value, 0, 0);
             return;
         }
@@ -347,7 +363,7 @@ private:
         for (const auto* operation : found->second) {
             if (terminal) break;
             compile_operation(*operation);
-            terminal = string(required(*operation, "kind", "$.operation"), "$.operation.kind") == "return_value";
+            terminal = string(required(*operation, "kind", "$.operation"), "$.operation.kind") == "return_value" || terminal_branches_.count(operation);
         }
         active_blocks_.erase(block);
         return terminal;

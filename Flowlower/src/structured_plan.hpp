@@ -120,6 +120,7 @@ private:
     bool has_branch_ = false, has_declared_carrier_ = false, has_nonroot_block_ = false, invalid_control_ = false, unsupported_ = false, uses_args_ = false;
     int temporary_ = 0, label_ = 0, required_argc_ = 0;
     int plan_version_ = 1;
+    std::string return_carrier_ = "c_int";
     std::map<int,std::pair<std::string,std::string>> call_results_;
     bool has_list_length_ = false;
 
@@ -282,14 +283,17 @@ private:
     void emit_function(const Callable& function,std::ostringstream& out) {
         temporary_=0; label_=0; call_results_.clear();
         const auto name=callable_name(function);
-        if(llvm_type(function.result)!="i32")throw std::runtime_error("unsupported callable function signature");
-        out<<"define i32 @"<<name<<"(";
+        return_carrier_ = function.result;
+        const auto result_type = llvm_type(return_carrier_);
+        if(result_type.empty() || (result_type == "ptr" && function.result != "c_string") || (function.entry && result_type != "i32"))throw std::runtime_error("unsupported callable function signature");
+        out<<"define "<<result_type<<" @"<<name<<"(";
         for(std::size_t index=0;index<function.parameters.size();++index){if(index)out<<", ";const auto type=llvm_type(function.parameters[index].second);if(type.empty())throw std::runtime_error("unsupported callable parameter type");out<<type<<" %flow_arg_"<<function.parameters[index].first;}
         out<<") {\nentry:\n"; emit_allocations(out);
         for(const auto& [symbol,type]:function.parameters)out<<"  store "<<llvm_type(type)<<" %flow_arg_"<<symbol<<", ptr "<<slot(symbol)<<"\n";
         out<<"  br label %flow_block_"<<function.body_block<<"\n";
-        emit_block(function.body_block,out,"flow_function_exit");
-        out<<"flow_function_exit:\n  ret i32 0\n}\n";
+        if (!emit_block(function.body_block,out,"flow_function_exit") && !function.entry)
+            throw std::runtime_error("callable function has a path without a result: " + std::to_string(function.symbol));
+        out<<"flow_function_exit:\n  ret "<<result_type<<" "<<(result_type == "ptr" ? "null" : "0")<<"\n}\n";
     }
     std::string load_symbol(int symbol,std::ostringstream& out) {
         const auto found=symbol_types_.find(symbol); if(found==symbol_types_.end()) return {};
@@ -371,10 +375,14 @@ private:
                 if(operands.size()!=function.parameters.size())throw std::runtime_error("ordinary call operand count mismatch");
                 std::vector<std::pair<std::string,std::string>> args;
                 for(std::size_t index=0;index<operands.size();++index)args.push_back(expression(operands[index],out,function.parameters[index].second));
-                const auto result="%flow_call_"+std::to_string(op->id); out<<"  "<<result<<" = call i32 @"<<callable_name(function)<<"(";
+                for (std::size_t index=0; index<args.size(); ++index)
+                    if (args[index].first != llvm_type(function.parameters[index].second) || args[index].second.empty())
+                        throw std::runtime_error("ordinary call argument carrier mismatch");
+                const auto result_type = llvm_type(function.result);
+                const auto result="%flow_call_"+std::to_string(op->id); out<<"  "<<result<<" = call "<<result_type<<" @"<<callable_name(function)<<"(";
                 for(std::size_t index=0;index<args.size();++index){if(index)out<<", ";out<<args[index].first<<" "<<args[index].second;}out<<")\n";
-                call_results_[op->expression]={"i32",result};
-                if(op->result_symbol>=0)out<<"  store i32 "<<result<<", ptr "<<slot(op->result_symbol)<<"\n";
+                call_results_[op->expression]={result_type,result};
+                if(op->result_symbol>=0)out<<"  store "<<result_type<<" "<<result<<", ptr "<<slot(op->result_symbol)<<"\n";
             } else if(op->kind=="external_call") {
                 const auto& p=*op->provider; const auto params=carriers(p.parameters); const auto& operands=array(field(find_json_operation(op->id),"operands"),"operation.operands");
                 if(params.size()!=operands.size()) throw std::runtime_error("structured call operand count mismatch");
@@ -386,7 +394,10 @@ private:
                 auto [type,condition]=expression(*op->operand,out); if(type!="i1"||condition.empty()) throw std::runtime_error("unsupported structured branch condition");
                 const auto join="flow_join_"+std::to_string(label_++); const auto then_label="flow_block_"+std::to_string(op->then_block); const auto else_label=op->else_block>=0?"flow_block_"+std::to_string(op->else_block):join;
                 out<<"  br i1 "<<condition<<", label %"<<then_label<<", label %"<<else_label<<"\n";
-                emit_block(op->then_block,out,join); if(op->else_block>=0) emit_block(op->else_block,out,join); out<<join<<":\n";
+                const bool then_returns = emit_block(op->then_block,out,join);
+                const bool else_returns = op->else_block>=0 && emit_block(op->else_block,out,join);
+                out<<join<<":\n";
+                if (then_returns && else_returns) { out<<"  unreachable\n"; terminated=true; }
             } else if(op->kind=="loop") {
                 const auto condition_label="flow_loop_condition_"+std::to_string(label_++), exit_label="flow_loop_exit_"+std::to_string(label_++);
                 out<<"  br label %"<<condition_label<<"\n"<<condition_label<<":\n";
@@ -398,7 +409,7 @@ private:
                 if(target==symbol_types_.end()||type!=llvm_type(target->second)||value.empty()) throw std::runtime_error("unsupported structured assignment");
                 out<<"  store "<<type<<" "<<value<<", ptr "<<slot(op->result_symbol)<<"\n";
             } else if(op->kind=="return_value") {
-                auto [type,value]=expression(*op->operand,out,"c_int"); if(type!="i32"||value.empty()) throw std::runtime_error("unsupported structured return"); out<<"  ret i32 "<<value<<"\n"; terminated=true;
+                auto [type,value]=expression(*op->operand,out,return_carrier_); if(type!=llvm_type(return_carrier_)||value.empty()) throw std::runtime_error("unsupported structured return"); out<<"  ret "<<type<<" "<<value<<"\n"; terminated=true;
             }
         }
         if(!terminated) out<<"  br label %"<<continuation<<"\n";

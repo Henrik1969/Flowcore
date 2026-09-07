@@ -892,8 +892,13 @@ int run(const Json& bundle, int lowering_plan_version) {
         std::cout << "],\"operands\":[";
         for (std::size_t argument = 0; argument < operation.arguments.size(); ++argument) {
             if (argument) std::cout << ',';
-            const auto declared_type = operation.kind == "value_definition" && operation.result_symbol >= 0 && symbol_types.count(operation.result_symbol)
+            auto declared_type = operation.kind == "value_definition" && operation.result_symbol >= 0 && symbol_types.count(operation.result_symbol)
                 ? symbol_types.at(operation.result_symbol) : std::string{};
+            if (operation.kind == "return_value" && lowering_plan_version == 2)
+                for (const auto& callable : callables) if (callable.symbol == operation.function_symbol) {
+                    declared_type = callable.return_type;
+                    break;
+                }
             emit_operand(operation.arguments[argument], declared_type);
         }
         std::cout << "]";

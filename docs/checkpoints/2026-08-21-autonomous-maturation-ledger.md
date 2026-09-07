@@ -1,5 +1,41 @@
 # Flowcore autonomous maturation ledger
 
+## Typed callable results for receiver preparation — 2026-09-07
+
+Continued from pushed `6b4ed54`. Native callable definitions previously hardcoded
+all results to i32. LLVM and TinyVM now retain declared boolean, wide integer,
+size and text result carriers. Return literals use the callable result contract.
+Both consumers reject missing return paths and result-carrier mismatches; two
+returning branch arms satisfy the result requirement. LLVM refuses escaping
+writable pointer results. This is callable preparation, not graph admission.
+
+The expanded captured-artifact test executes a wide value beyond 32 bits, a
+wide literal fallback, both-arm boolean returns, text returned to an authorized
+strlen operation, and repeated initialized local computation. Native execution
+and both TinyVM engines return 42. It rejects missing results and mutated
+boolean result contracts. The test exposed TinyVM's missing mixed integer
+conversion and opaque comparison admission: integer operands now match existing
+LLVM conversion behavior, while unsupported opaque binary operations fail at
+compilation rather than at execution.
+
+Exact verification:
+
+```sh
+cmake --build /tmp/flowcore-reusable-current -j4
+ctest --test-dir /tmp/flowcore-reusable-current -R callable_lowering_boundary --output-on-failure
+ctest --test-dir /tmp/flowcore-reusable-current --output-on-failure -j4
+cmake --build /tmp/flowcore-reusable-current-sanitize -j4
+ASAN_OPTIONS=detect_leaks=0 LSAN_OPTIONS=detect_leaks=0 ctest --test-dir /tmp/flowcore-reusable-current-sanitize --output-on-failure -j4
+sh /tmp/flowcore-reusable-acceptance/run.sh
+git diff --check
+```
+
+Focused 1/1, normal 79/79 (5.75 seconds), ASan/UBSan 79/79 (17.90 seconds).
+Generated acceptance remains exit 42 with all six compiler hashes unchanged
+through compilation. Logs are `/tmp/flow-callable-*`. State stays CONTINUE;
+next is governed producer contracts and native graph activation. No new owner
+decision or total blocker is recorded. The broader pager mission remains open.
+
 ## Loaded-provider evidence verification — 2026-09-07
 
 Continued from pushed `fb43581`. Flowbind now hashes the actual loaded library

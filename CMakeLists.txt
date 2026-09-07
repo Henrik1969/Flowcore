@@ -97,6 +97,7 @@ add_test(NAME callable_lowering_boundary
         FLOWTINYLOWER_BIN=$<TARGET_FILE:flowtinylower>
         FLOWTINYVALIDATE_BIN=$<TARGET_FILE:flowtinyvalidate>
         FLOWTINYRUN_BIN=$<TARGET_FILE:flowtinyrun>
+        FLOWBIND_BIN=$<TARGET_FILE:flowbind>
         ${CMAKE_CURRENT_SOURCE_DIR}/tools/test-callable-lowering-boundary.sh)
 
 add_test(NAME bootstrap_gap_inventory

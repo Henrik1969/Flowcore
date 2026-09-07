@@ -46,3 +46,17 @@ function can coexist with an exactly authorized native `abs` declaration. Multip
 authorized contracts sharing one library and LLVM ABI share one native declaration;
 conflicting library or ABI declarations for a single native symbol are explicitly
 unsupported until provider-specific link resolution is implemented.
+
+The current scalar callable slice preserves `int`/`c_int`, boolean, 64-bit C
+integer/size, and `c_string` result carriers through LLVM calls and TinyVM result
+slots. Return literals and explicit carrier conversions use the declared result
+type. Text returned from a parameter can feed an authorized external operation.
+Returning writable `c_pointer` storage through LLVM remains unsupported; no
+escaping local allocation or generalized ownership contract is implied.
+
+Non-entry definitions must return on every reachable path. Both consumers reject
+missing results and mismatched carriers rather than inventing a zero result.
+Branches whose two arms return satisfy that rule. TinyVM aligns mixed integer
+operands with the existing LLVM conversion behavior and refuses opaque-handle
+binary operations during compilation. Native graph delivery is still a separate
+unfinished boundary; ordinary function parity alone is not receiver admission.
