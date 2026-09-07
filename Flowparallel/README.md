@@ -12,10 +12,13 @@ the dependency-analysis boundary, preserves source provenance, requires a
 runtime capability snapshot, and always declares a serial CPU fallback.
 
 It emits only runtime-deferred candidates whose current proof includes pure
-callee behavior, disjoint inputs, and distinct outputs. Dependency structure
-alone does not prove purity, absence of mutation, ordering freedom, or safe
-external effects. The CPU execution API accepts only this explicitly approved
-task boundary; all other work remains serial or deferred.
+callee behavior, disjoint inputs, and distinct outputs. Each candidate carries
+machine-readable proof fields for dependency independence, effect
+compatibility, mutation conflict, resource status, input symbols, and output
+identity. Dependency structure alone does not prove purity, absence of
+mutation, ordering freedom, or safe external effects. Unknown or rejected
+evidence is retained as a serial fallback with an explicit reason. The CPU
+execution API accepts only this explicitly approved task boundary.
 
 Provider selection is deferred to runtime policy. A deployment may eventually
 ship the plan with a Frankencore runtime/JIT layer that discovers local CPU,
@@ -37,6 +40,20 @@ tasks. The execution smoke test obtains its task count from the proven
 `parallel_candidates` count, compares serial and threaded results, and verifies
 failure propagation. User regions are not executed unless they cross this
 approved-task boundary.
+
+`flowparallel_flowmini_probe` is the first current-language bridge. It takes a
+Flowmini semantic report through Flowparallel, optimization, preparation, and
+LLVM lowering, loads the resulting artifact, reconstructs two approved scalar
+call sites from the plan, and executes those compiled Flowmini functions
+through both `cpu.serial` and `cpu.threadpool`. The probe compares their
+observable results. This is an execution gate, not a source-level thread
+feature.
+
+Flowanalyst's `parallel_rejections` records pairs that remain serial because
+of unknown/effectful callees, conflicting outputs, read-after-write
+dependencies, different scopes, or missing disjoint-input proof. Resource and
+opaque-provider relationships remain conservative until explicit alias
+evidence exists.
 
 The optional `flowparallel_cuda` provider currently probes the CUDA driver and
 emits a linear-algebra workload contract for matrix multiplication. It includes

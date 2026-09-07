@@ -71,6 +71,7 @@ struct EffectFact { int declaration = -1, symbol = -1; std::string name, effect,
 struct VariantPayloadBinding { int symbol = -1; std::string name, type; };
 struct GenericSignature { int symbol = -1, declaration = -1; std::string name, return_type; std::vector<std::string> parameters, value_parameters, parameter_types; bool forward_first_argument = false; };
 struct CallSite { int expression = -1, statement = -1, scope = -1, callee_symbol = -1, write_symbol = -1; std::string callee; bool pure = false; std::set<int> reads; std::string writes; std::vector<int> arguments; std::vector<int> independent_with; };
+struct ParallelRejection { int left = -1, right = -1; std::string reason; };
 struct LoweringOperation { int expression = -1, statement = -1, scope = -1, block = -1, function_symbol = -1, then_block = -1, else_block = -1, body_block = -1, failure_block = -1, default_block = -1, join_block = -1, callee_symbol = -1, result_symbol = -1, variant_discriminant = -1; std::string callee, kind, contract, library, convention, symbol, effect, parameter_types, return_type, selector_type, selector_kind, compile_time_value, variant_type, variant_member, generic_owner, generic_return_type, instantiation_id; std::vector<int> arguments, match_values, match_highs, match_blocks; std::vector<std::string> match_label_types, match_label_members, variant_payload_types, generic_type_arguments; std::vector<std::pair<std::string, std::string>> generic_substitutions; std::vector<std::vector<VariantPayloadBinding>> match_payload_bindings; };
 struct Callable { int symbol = -1, scope = -1, body_block = -1; bool entry = false; std::string name, return_type, availability; std::vector<std::pair<int, std::string>> parameters; };
 struct Resolution { int expression = -1, statement = -1, scope = -1, symbol = -1; std::string name; };
@@ -673,9 +674,13 @@ int run(const Json& bundle, int lowering_plan_version) {
         }
         call_sites.push_back(std::move(site));
     }
+    std::vector<ParallelRejection> parallel_rejections;
     for (std::size_t left = 0; left < call_sites.size(); ++left) for (std::size_t right = left + 1; right < call_sites.size(); ++right) {
         auto& first = call_sites[left]; auto& second = call_sites[right];
-        if (!first.pure || !second.pure || first.scope != second.scope || first.statement == second.statement) continue;
+        auto reject = [&](std::string reason) { parallel_rejections.push_back({first.expression, second.expression, std::move(reason)}); };
+        if (!first.pure || !second.pure) { reject("unknown-or-effectful-callee"); continue; }
+        if (first.scope != second.scope) { reject("different-scope"); continue; }
+        if (first.statement == second.statement) { reject("same-statement"); continue; }
         bool shared_read = false;
         for (const auto symbol : first.reads) if (second.reads.count(symbol)) shared_read = true;
         const bool output_conflict = first.write_symbol >= 0 && first.write_symbol == second.write_symbol;
@@ -683,7 +688,9 @@ int run(const Json& bundle, int lowering_plan_version) {
         if (!shared_read && !output_conflict && !read_after_write) {
             first.independent_with.push_back(second.expression);
             second.independent_with.push_back(first.expression);
-        }
+        } else if (output_conflict) reject("conflicting-output");
+        else if (read_after_write) reject("read-after-write-dependency");
+        else reject("shared-input-disjointness-proof-missing");
     }
     std::vector<LoweringOperation> lowering_operations;
     auto containing_function = [&](int scope_id) {
@@ -1495,9 +1502,18 @@ int run(const Json& bundle, int lowering_plan_version) {
     for (const auto& site : call_sites) if (!site.independent_with.empty()) {
         if (!first_candidate) std::cout << ',';
         first_candidate = false;
-        std::cout << "{\"call_expression\":" << site.expression << ",\"statement_id\":" << site.statement << ",\"callee\":" << quote(site.callee) << ",\"proof\":\"pure-callee-disjoint-inputs\",\"status\":\"deferred\",\"independent_with\":[";
+        std::cout << "{\"call_expression\":" << site.expression << ",\"statement_id\":" << site.statement << ",\"callee\":" << quote(site.callee) << ",\"proof\":\"pure-callee-disjoint-inputs\",\"proof_status\":\"proven\",\"status\":\"deferred\",\"provenance\":{\"source\":" << quote(text(field(field(bundle, "source"), "path"))) << ",\"ast_path\":\"/statement_pool/" << site.statement << "\"},\"evidence\":{\"dependency_independent\":true,\"effect_compatible\":true,\"mutation_conflict\":false,\"resource_compatibility\":\"unknown-resources-not-present\",\"input_symbols\":[";
+        bool first_read = true;
+        for (const auto symbol : site.reads) { if (!first_read) std::cout << ','; first_read = false; std::cout << symbol; }
+        std::cout << "],\"output_symbol\":" << site.write_symbol << "},\"independent_with\":[";
         for (std::size_t i = 0; i < site.independent_with.size(); ++i) { if (i) std::cout << ','; std::cout << site.independent_with[i]; }
         std::cout << "]}";
+    }
+    std::cout << "],\n  \"parallel_rejections\":[";
+    for (std::size_t index = 0; index < parallel_rejections.size(); ++index) {
+        if (index) std::cout << ',';
+        const auto& rejection = parallel_rejections[index];
+        std::cout << "{\"left_call_expression\":" << rejection.left << ",\"right_call_expression\":" << rejection.right << ",\"reason\":" << quote(rejection.reason) << ",\"proof_status\":\"not-proven\",\"fallback\":\"serial\",\"provenance\":{\"source\":" << quote(text(field(field(bundle, "source"), "path"))) << "}}";
     }
     std::cout << "],\n  \"facts\": [{\"kind\":\"semantic_summary\",\"scopes\":" << scopes.size() << ",\"symbols\":" << symbols.size() << ",\"resolved_types\":" << resolved_types << ",\"unresolved_types\":" << unresolved_types << ",\"refined_types\":" << refined_types << ",\"resolved_names\":" << resolutions.size() << ",\"targets\":" << targets.size() << ",\"regions\":" << regions.size() << "}],\n  \"resolved_names\": [";
     bool first_resolution = true; for (const auto& resolution : resolutions) if (resolution.symbol >= 0) { if (!first_resolution) std::cout << ','; first_resolution = false; std::cout << "{\"expression_id\":" << resolution.expression << ",\"statement_id\":" << resolution.statement << ",\"name\":" << quote(resolution.name) << ",\"symbol_id\":" << resolution.symbol << ",\"scope_id\":" << resolution.scope << "}"; }

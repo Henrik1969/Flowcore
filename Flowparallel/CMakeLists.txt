@@ -53,6 +53,10 @@ add_executable(flowparallel_execution_smoketest tests/execution_smoketest.cpp)
 target_compile_options(flowparallel_execution_smoketest PRIVATE -Wall -Wextra -Wpedantic)
 target_link_libraries(flowparallel_execution_smoketest PRIVATE flowparallel_cpu_runtime)
 
+add_executable(flowparallel_flowmini_probe tests/flowmini_execution_probe.cpp)
+target_compile_options(flowparallel_flowmini_probe PRIVATE -Wall -Wextra -Wpedantic)
+target_link_libraries(flowparallel_flowmini_probe PRIVATE flowparallel_cpu_runtime flowcontracts ${CMAKE_DL_LIBS})
+
 add_test(NAME flowparallel_pipeline
     COMMAND ${CMAKE_COMMAND} -E env
         FLOWPARALLEL_BIN=$<TARGET_FILE:flowparallel>
@@ -75,6 +79,23 @@ add_test(NAME flowparallel_cpu_execution
         FLOWMINI_BIN=$<TARGET_FILE:flowmini>
         FLOWANALYST_BIN=$<TARGET_FILE:flowanalyst>
         ${CMAKE_CURRENT_SOURCE_DIR}/tests/run-cpu-execution-tests.sh)
+add_test(NAME flowparallel_flowmini_execution
+    COMMAND ${CMAKE_COMMAND} -E env
+        FLOWPARALLEL_FLOWMINI_PROBE_BIN=$<TARGET_FILE:flowparallel_flowmini_probe>
+        FLOWPARALLEL_CPU_BIN=$<TARGET_FILE:flowparallel_cpu>
+        FLOWPARALLEL_BIN=$<TARGET_FILE:flowparallel>
+        FLOWMINI_BIN=$<TARGET_FILE:flowmini>
+        FLOWANALYST_BIN=$<TARGET_FILE:flowanalyst>
+        FLOWOPTIMIZE_BIN=$<TARGET_FILE:flowoptimize>
+        FLOWPREPARE_BIN=$<TARGET_FILE:flowprepare>
+        FLOWLOWER_BIN=$<TARGET_FILE:flowlower>
+        ${CMAKE_CURRENT_SOURCE_DIR}/tests/run-flowmini-execution-tests.sh)
+add_test(NAME flowparallel_flowmini_reconnection
+    COMMAND ${CMAKE_COMMAND} -E env
+        FLOWPARALLEL_BIN=$<TARGET_FILE:flowparallel>
+        FLOWMINI_BIN=$<TARGET_FILE:flowmini>
+        FLOWANALYST_BIN=$<TARGET_FILE:flowanalyst>
+        ${CMAKE_CURRENT_SOURCE_DIR}/tests/run-flowmini-reconnection-tests.sh)
 add_test(NAME flowparallel_cuda_provider
     COMMAND ${CMAKE_COMMAND} -E env
         FLOWPARALLEL_CUDA_BIN=$<TARGET_FILE:flowparallel_cuda>

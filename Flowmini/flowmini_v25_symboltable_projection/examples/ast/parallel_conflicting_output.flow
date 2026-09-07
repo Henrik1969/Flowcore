@@ -1,0 +1,16 @@
+program parallel_conflicting_output
+
+fn left(a : int): int {
+    a + 1 -> return
+}
+
+fn right(b : int): int {
+    b * 2 -> return
+}
+
+main {
+    input : int(2)
+    output : int(0)
+    left(input) -> output
+    right(input) -> output
+}

@@ -1,0 +1,17 @@
+program parallel_dependent
+
+fn left(a : int): int {
+    a + 1 -> return
+}
+
+fn right(b : int): int {
+    b * 2 -> return
+}
+
+main {
+    input : int(2)
+    middle : int(0)
+    output : int(0)
+    left(input) -> middle
+    right(middle) -> output
+}

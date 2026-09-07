@@ -65,4 +65,6 @@ jq '.lowering_plan.operations = [(.lowering_plan.operations[0]),(.lowering_plan.
 reject duplicate-operation
 jq '(.analysis_graph.matrix_views[] | select(.name == "region_dependency") | .entries[0].row) = .analysis_graph.matrix_views[0].rows' "$tmpdir/semantic.json" > "$tmpdir/out-of-range-matrix.json"
 reject out-of-range-matrix
+jq '.parallel_candidates[0] |= del(.evidence)' "$tmpdir/semantic.json" > "$tmpdir/missing-candidate-evidence.json"
+reject missing-candidate-evidence
 echo 'Flowparallel tests: PASS'

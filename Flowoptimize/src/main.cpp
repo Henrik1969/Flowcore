@@ -49,6 +49,8 @@ int analyze(std::string_view input, const std::optional<flowcontracts::ProviderD
         variant_carriers = semantic.variant_carriers; enum_types = semantic.enum_types;
         plan.match_facts = semantic.match_facts;
         plan.match_operations = semantic.match_operations.empty() ? semantic.match_facts : semantic.match_operations;
+        plan.parallel_candidates = semantic.parallel_candidates;
+        plan.parallel_rejections = semantic.parallel_rejections;
         plan.lowering_plan = semantic.lowering_plan; plan.dependency_matrix = semantic.dependency_matrix;
         input_format = input_header.format;
     } else throw Error("$.format", "input is not a supported semantic report or execution plan");
@@ -76,6 +78,8 @@ int analyze(std::string_view input, const std::optional<flowcontracts::ProviderD
         {"format", text("flowoptimize.optimization_report")},
         {"match_facts", plan.match_facts},
         {"match_operations", plan.match_operations},
+        {"parallel_candidates", plan.parallel_candidates},
+        {"parallel_rejections", plan.parallel_rejections},
         {"variant_carriers", variant_carriers},
         {"input", Object{{"format", text(input_format)}, {"version", Integer{1}}}}, {"lowering_plan", plan.lowering_plan},
         {"message", text("optimization boundary reached; derived matrix views are available; provider selection remains runtime policy")},

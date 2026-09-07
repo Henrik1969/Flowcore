@@ -966,3 +966,36 @@ later instruction reopens them.
   variants, generic collection carriers, broad inference, and TinyVM generic
   parity. The next generic step should be chosen from real collection/provider
   pressure rather than syntax expansion.
+
+## 2026-09-07 Flowparallel reconnection checkpoint
+
+- Added a contract inventory at `docs/flowparallel/flowmini-reconnection-ledger.md`.
+  It records the producer/consumer boundaries from Flowmini frontend bundles
+  through Flowanalyst semantic reports, Flowparallel execution plans, runtime
+  policy, and CPU execution.
+- Flowanalyst now preserves candidate proof fields and emits explicit
+  `parallel_rejections` for unknown/effectful calls, conflicting outputs,
+  read-after-write dependencies, scope separation, and missing disjoint-input
+  evidence. Unknown resource/alias relationships remain serial by policy.
+- Flowparallel carries only candidates with `proof_status=proven` into its
+  execution plan and preserves rejection evidence. Runtime CPU policy can
+  still select `cpu.serial` for a legal candidate when measured speedup is
+  below policy.
+- Flowcontracts and Flowoptimize now preserve candidate proof/evidence and
+  rejection arrays as additive execution-plan fields. Flowparallel rejects a
+  forged approved candidate when its provenance or evidence paperwork is
+  missing.
+- Added `flowparallel_flowmini_probe`: a real current Flowmini program is
+  lowered to LLVM, loaded as an artifact, and its two approved pure call sites
+  execute through both `cpu.serial` and `cpu.threadpool` with equal results.
+  Hostile Flowmini probes verify serial fallback for unknown effects,
+  conflicting outputs, and dependencies.
+- The CPU executor remains closure-based and does not pretend to be a generic
+  Flowmini runtime. The bridge reconstructs call identity and inputs from the
+  execution plan and invokes the compiled Flowmini artifact; broader region
+  scheduling, resource alias proofs, failure cancellation, and TinyVM
+  execution remain future work.
+- Verification after artifact-preservation hardening: root CTest `96/96`,
+  focused Flowparallel `11/11`, focused Flowmini `13/13`, and Debug
+  ASan/UBSan CTest `96/96` (leak checks disabled). Categorized Flowmini
+  evidence remains `91/140` with 49 known gaps.

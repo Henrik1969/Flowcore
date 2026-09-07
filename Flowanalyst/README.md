@@ -43,7 +43,12 @@ semantic meaning backward into Flowmini.
 It also emits `effect_facts`. The first proven effect is `pure` for function
 bodies consisting only of return expressions over literals, parameters, and
 pure unary/binary operators. Calls, mutation, control-state constructs,
-external effects, and unsupported forms remain `unknown`.
+external effects, and unsupported forms remain `unknown`. For call pairs in the
+same scope it emits `parallel_candidates` only when pure-callee, disjoint-input
+and distinct-output evidence is present. Those candidates carry proof fields
+and remain runtime-deferred. Other pairs are retained in `parallel_rejections`
+with a serial fallback reason; missing effect, mutation, alias, or resource
+evidence is never treated as permission to parallelize.
 
 The independent consumer boundary is specified in
 [`docs/flowanalyst/v0.1-consumer-contract.md`](../docs/flowanalyst/v0.1-consumer-contract.md).
