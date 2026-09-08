@@ -1111,3 +1111,36 @@ later instruction reopens them.
   embedded NUL, missing-file behavior, deterministic output, stdin regression,
   and structural provider/effect evidence. Root CTest is `101/101`; categorized
   evidence remains `96/145` with 49 known gaps.
+
+## 2026-09-08 substrate warehouse scouting checkpoint
+
+- Performed a read-only inventory of the Flowcore checkout, the sibling
+  development realm, and locally installed discovery/toolchain metadata. No
+  implementation or host package state was changed. Unrelated Flowselection
+  work remains unstaged.
+- The internal warehouse includes Flowcontracts, Flowmini, Flowanalyst,
+  Flowbind, Flowparallel, Flowlower, Flowinspect, Flowterminal,
+  Flowpkgprojector, Flowkernel, TinyVM, SymbolTable, TokenTree, FlowLFS and
+  Frankencore core components. The surrounding realm adds ConfigResolve 1.1.0,
+  EnvVar 0.3.8, ArgsLib 0.1.0, TextLib 0.1.0, AstLib 0.1.0-dev and AiLib 0.2.0;
+  VectorLib remains an empty/unclassified incubating directory.
+- Local observations recorded 15,416 C headers, 8,532 shared objects, 1,472
+  static archives, 294 CMake package/config files and 321 pkg-config packages.
+  Installed ecosystems include GCC/Clang, LLVM/Clang headers, Qt5/Qt6,
+  OpenBLAS/OpenCL, Rust/Cargo (817 cached Cargo manifests), Python (179
+  distribution records), and OpenJDK (16 local JARs). Go, .NET, Zig, Mojo and
+  Kotlin toolchains were absent and are explicitly marked not inspected.
+- The carrier-pressure map is led by buffer-plus-length/byte collections,
+  opaque handle create/use/release, and verified aggregate layout. Callbacks,
+  variadics, C++ templates/classes and managed-runtime objects are materially
+  harder and remain deferred without an application grievance.
+- `pkg-config`, CMake exports, Cargo metadata, Python distribution metadata and
+  JAR manifests are useful discovery inputs but cannot authorize Flow semantics.
+  ELF SONAME/symbol/dependency inspection likewise cannot establish ownership,
+  effects, failures or concurrency. Existing Flowbind/flowbind-gen coverage is
+  a useful scalar/string/enum/pointer/opaque-handle base and should grow from
+  measured provider experiments.
+- Durable outputs are [`docs/substrate/SUBSTRATE-WAREHOUSE-SCOUT-2026-09.md`](../substrate/SUBSTRATE-WAREHOUSE-SCOUT-2026-09.md)
+  and [`docs/substrate/substrate-warehouse-inventory.json`](../substrate/substrate-warehouse-inventory.json).
+  Recommended next step is a bounded libm experiment, followed by one zlib or
+  SQLite carrier experiment; no broad binding implementation is justified yet.
