@@ -16,10 +16,7 @@ There is already a substantial warehouse. The Flowcore checkout contains
 versioned contract, frontend, analysis, binding, lowering, parallel, terminal,
 package-projection, kernel, inspection, and language components. The surrounding
 development realm adds mature C++ bricks for configuration, environment,
-arguments, text, AST structure, AI providers, and symbol facts. The host has
-15,416 C headers, 8,532 shared objects, 1,472 static archives, 294 CMake package
-files, and 321 pkg-config packages (**OBSERVED**, counts from the 2026-09-08
-scan). LLVM/Clang, Qt 5/6, OpenBLAS, OpenCL, SQLite, zlib, curl, OpenSSL,
+arguments, text, AST structure, AI providers, and symbol facts. The host has a broad installed C/C++ and runtime warehouse (**OBSERVED**; exact host inventory details are intentionally omitted). LLVM/Clang, Qt 5/6, OpenBLAS, OpenCL, SQLite, zlib, curl, OpenSSL,
 libxml2, libarchive, Wayland, PipeWire runtime, PulseAudio, and ncurses are
 present.
 
@@ -74,7 +71,7 @@ single replacement runtime.
 
 ### Header/interface culture
 
-The system has 15,416 C headers (**OBSERVED**). Representative public headers
+The system has a broad C header tree (**OBSERVED**; exact count withheld). Representative public headers
 show a stable pattern:
 
 * scalar typedefs, enums, macros and status codes are common;
@@ -96,20 +93,14 @@ These are **OBSERVED** interface patterns, not Flow permissions.
 
 ### Discovery and linking
 
-`pkg-config` 1.8.1 lists 321 packages. Selected records include zlib 1.3,
-SQLite 3.45.1, libcurl 8.5.0, OpenSSL 3.0.13, libxml2 2.9.14, libarchive 3.7.2,
-libffi 3.4.6, libpng 1.6.43, libjpeg 2.1.5, liblzma 5.4.5, Wayland 1.23.1,
-ncurses 6.4.20240113, OpenBLAS 0.3.26, Qt6 6.4.2, GLib 2.80.0 and PulseAudio
-16.1. A `.pc` file supplies include directories, link flags, dependencies and
+`pkg-config` exposes representative records for zlib, SQLite, libcurl, OpenSSL, libxml2, libarchive, libffi, image codecs, liblzma, Wayland, ncurses, OpenBLAS, Qt, GLib and PulseAudio (**OBSERVED**; exact package versions and counts are intentionally omitted). A `.pc` file supplies include directories, link flags, dependencies and
 version; it does not supply Flow effects, ownership or concurrency authority.
 
-`ldconfig -p` confirms representative SONAMEs such as `libz.so.1`,
-`libsqlite3.so.0`, `libcurl.so.4`, `libssl.so.3`, `libxml2.so.2`,
-`libarchive.so.13`, `libwayland-client.so.0`, `libpipewire-0.3.so.0`,
-`libasound.so.2` and `libncurses.so.6`. Shared objects expose architecture,
-SONAME, dependencies and exported symbols through ELF tools. `readelf` on the
-selected objects showed x86-64 ELF and expected dependency graphs; `nm` showed
-versioned and named symbols. **UNKNOWN from binaries:** parameter types,
+`ldconfig -p` confirms representative SONAMEs for the selected system
+libraries. Shared objects expose target metadata, SONAME, dependencies and
+exported symbols through ELF tools. `readelf` on selected objects showed the
+expected dependency graphs; `nm` showed versioned and named symbols. **UNKNOWN
+from binaries:** parameter types,
 ownership, effects, resource aliasing, failure policy and thread safety.
 
 ## 3. Native C++ warehouse
@@ -119,7 +110,7 @@ Qt5/Qt6, OpenBLAS and the project’s own C++ bricks. Boost, Eigen, fmt, spdlog
 and OpenCV headers were not found in the sampled standard include paths
 (**NOT PRESENT in this local sample**), so no claims are made about those
 libraries. The installed CMake surface
-contains 294 package/config/target files (**OBSERVED**), including LLVM/Clang,
+contains a broad set of package/config/target files (**OBSERVED**), including LLVM/Clang,
 Qt5/Qt6, OpenBLAS, PulseAudio and Catch2. CMake imported targets can express
 target names, include directories, transitive link dependencies, compile
 definitions and configuration/version constraints; this is richer discovery
@@ -148,9 +139,7 @@ C++ templates or classes would turn compiler configuration into Flow semantics.
 
 ### Rust
 
-Rust 1.91.1 and Cargo 1.91.1 are installed. The local registry contains 817
-`Cargo.toml` packages (**OBSERVED**), including serde, tokio, rayon, anyhow,
-thiserror, clap and bindgen. Cargo manifests/locks expose package identity,
+Rust and Cargo are installed, with a populated local registry (**OBSERVED**), including serde, tokio, rayon, anyhow, thiserror, clap and bindgen. Cargo manifests/locks expose package identity,
 versions, features and dependency graphs more richly than ELF, while ownership,
 traits and error types are encoded in Rust source/types. A Rust-native API has no
 stable general ABI; an exported C ABI or explicit provider contract is the safe
@@ -158,7 +147,7 @@ Flow boundary (**INFERRED** from Rust’s ABI model and current Flow policy).
 
 ### Python
 
-Python 3.12.3 is installed with 179 distribution records. Examples include
+Python is installed with a populated distribution environment (**OBSERVED**). Examples include
 requests 2.31.0, cryptography 41.0.7, lxml 5.2.1, Pillow 10.2.0, NumPy 1.26.4
 and pytest 7.4.4. `dist-info`/`egg-info` supplies versions, licenses and
 dependencies; imports and optional native extension modules are discoverable.
@@ -168,7 +157,7 @@ library (**INFERRED**).
 
 ### JVM
 
-OpenJDK 21.0.12 is installed with 16 local JARs, including ANTLR runtimes,
+OpenJDK is installed with local JARs, including ANTLR runtimes,
 ICU4J, PDFBox and JSON-P. `MANIFEST.MF` records implementation/specification
 versions and package exports where supplied. A JVM provider is a runtime bridge
 with class/module/dependency metadata, not a native library binding.

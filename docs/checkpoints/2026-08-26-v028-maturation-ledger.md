@@ -1124,12 +1124,12 @@ later instruction reopens them.
   Frankencore core components. The surrounding realm adds ConfigResolve 1.1.0,
   EnvVar 0.3.8, ArgsLib 0.1.0, TextLib 0.1.0, AstLib 0.1.0-dev and AiLib 0.2.0;
   VectorLib remains an empty/unclassified incubating directory.
-- Local observations recorded 15,416 C headers, 8,532 shared objects, 1,472
-  static archives, 294 CMake package/config files and 321 pkg-config packages.
-  Installed ecosystems include GCC/Clang, LLVM/Clang headers, Qt5/Qt6,
-  OpenBLAS/OpenCL, Rust/Cargo (817 cached Cargo manifests), Python (179
-  distribution records), and OpenJDK (16 local JARs). Go, .NET, Zig, Mojo and
-  Kotlin toolchains were absent and are explicitly marked not inspected.
+- Local observations confirmed a broad C/C++/runtime warehouse and package
+  metadata. Installed ecosystems include GCC/Clang, LLVM/Clang headers,
+  Qt5/Qt6, OpenBLAS/OpenCL, Rust/Cargo, Python, and OpenJDK. Go, .NET, Zig,
+  Mojo and Kotlin toolchains were absent and are explicitly marked not
+  inspected. Exact host counts and tool versions are intentionally omitted from
+  the published checkpoint.
 - The carrier-pressure map is led by buffer-plus-length/byte collections,
   opaque handle create/use/release, and verified aggregate layout. Callbacks,
   variadics, C++ templates/classes and managed-runtime objects are materially
