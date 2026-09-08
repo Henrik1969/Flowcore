@@ -122,7 +122,7 @@ struct AbiStructDef {
     std::vector<AbiStructFieldDef> fields;
 };
 
-enum class ExprKind { LiteralInt, LiteralBool, LiteralString, Identifier, StdinInt, StdinBytes, ListIndex, ArrayIndex, FieldAccess, ListLength, FunctionCall, VariantConstruct, UnaryNot, Binary };
+enum class ExprKind { LiteralInt, LiteralBool, LiteralString, Identifier, StdinInt, StdinBytes, ArgsIndex, FileBytes, ListIndex, ArrayIndex, FieldAccess, ListLength, FunctionCall, VariantConstruct, UnaryNot, Binary };
 struct Expr {
     ExprKind kind = ExprKind::Identifier;
     int literal = 0;
@@ -701,6 +701,13 @@ private:
                         }
                     }
                     expect(TokenKind::RightParen, "expected ')' after qualified function call arguments");
+                    if (expr.ident == "file.bytes") {
+                        if (expr.args.size() != 1) { fail(peek(), "file.bytes expects exactly one path argument"); }
+                        Expr fileExpr;
+                        fileExpr.kind = ExprKind::FileBytes;
+                        fileExpr.args = std::move(expr.args);
+                        return fileExpr;
+                    }
                     return expr;
                 }
                 expr.kind = ExprKind::FieldAccess;
@@ -729,7 +736,7 @@ private:
                 Expr expr;
                 expr.ident = std::move(id);
                 if (indices.size() == 1) {
-                    expr.kind = ExprKind::ListIndex;
+                    expr.kind = (expr.ident == "args") ? ExprKind::ArgsIndex : ExprKind::ListIndex;
                     expr.left = std::make_unique<Expr>(std::move(indices.front()));
                 } else {
                     expr.kind = ExprKind::ArrayIndex;
@@ -775,7 +782,7 @@ private:
             return expr;
         }
         Expr left = parseValueExpr();
-        if (check(TokenKind::Greater) || check(TokenKind::Less) || check(TokenKind::EqualEqual)) {
+        if (check(TokenKind::Greater) || check(TokenKind::Less) || check(TokenKind::GreaterEqual) || check(TokenKind::LessEqual) || check(TokenKind::EqualEqual) || check(TokenKind::BangEqual)) {
             const TokenKind op = peek().kind; ++pos_;
             Expr right = parseValueExpr();
             Expr expr; expr.kind = ExprKind::Binary; expr.op = op; expr.left = std::make_unique<Expr>(std::move(left)); expr.right = std::make_unique<Expr>(std::move(right)); return expr;
@@ -817,7 +824,10 @@ private:
             case TokenKind::Percent: return "int.mod";
             case TokenKind::Greater: return "int.gt";
             case TokenKind::Less: return "int.lt";
+            case TokenKind::GreaterEqual: return "int.gte";
+            case TokenKind::LessEqual: return "int.lte";
             case TokenKind::EqualEqual: return "int.eq";
+            case TokenKind::BangEqual: return "int.neq";
             default: break;
         }
         throw flow::DiagnosticError{"lowerer", "unsupported operator in flowmini v11 frontend"};
@@ -827,7 +837,8 @@ private:
         if (expr.kind == ExprKind::LiteralString) { return "c_string"; }
         if (expr.kind == ExprKind::LiteralBool) { return "Bool"; }
         if (expr.kind == ExprKind::LiteralInt || expr.kind == ExprKind::StdinInt || expr.kind == ExprKind::ListLength) { return "int"; }
-        if (expr.kind == ExprKind::StdinBytes) { return "list<int>"; }
+        if (expr.kind == ExprKind::StdinBytes || expr.kind == ExprKind::FileBytes) { return "list<int>"; }
+        if (expr.kind == ExprKind::ArgsIndex) { return "c_string"; }
         if (expr.kind == ExprKind::Identifier) {
             const Symbol* sym = lookup(expr.ident);
             if (sym == nullptr) { throw flow::DiagnosticError{"lowerer", "use of undeclared identifier '" + expr.ident + "'"}; }
@@ -843,6 +854,12 @@ private:
                 return "int";
             }
             throw flow::DiagnosticError{"lowerer", "indexed access requires list<int> or array<int>, got " + sym->type + " for '" + expr.ident + "'"};
+        }
+        if (expr.kind == ExprKind::ArgsIndex) {
+            if (!expr.left || expr.left->kind != ExprKind::LiteralInt || expr.left->literal < 0) {
+                throw flow::DiagnosticError{"lowerer", "args index must be a non-negative integer literal"};
+            }
+            return "c_string";
         }
         if (expr.kind == ExprKind::FieldAccess) {
             return fieldAccessType(expr.ident, expr.fields);
@@ -1092,6 +1109,37 @@ private:
             addPolicy(stdinId, "out", path);
             if (step != nullptr) { appendStep(*step, Step{false, false, {stdinId, "out"}, {stdinId, "out"}}); }
             return path;
+        }
+        if (expr.kind == ExprKind::ArgsIndex) {
+            const std::string argsId = generatedId("args");
+            const std::string getId = generatedId("args_get");
+            const std::string out = targetHint.empty() ? generatedId("arg") : targetHint;
+            addNode("producer", argsId, "process.args");
+            addPolicy(argsId, "out", "args");
+            addNode("node", getId, "list.get");
+            addPolicy(getId, "list", "args");
+            addPolicy(getId, "index_const", expr.left->literal);
+            addPolicy(getId, "out", out);
+            addWire({argsId, "out"}, {getId, "in"});
+            if (step != nullptr) { appendStep(*step, Step{false, false, {argsId, "out"}, {getId, "out"}}); }
+            return out;
+        }
+        if (expr.kind == ExprKind::FileBytes) {
+            if (expr.args.size() != 1 || exprType(expr.args.front()) != "c_string") {
+                throw flow::DiagnosticError{"lowerer", "file.bytes requires one string path"};
+            }
+            Step pathStep;
+            const std::string pathValue = lowerExprToPath(expr.args.front(), generatedId("file_path"), &pathStep);
+            const std::string out = targetHint.empty() ? generatedId("file_bytes") : targetHint;
+            const std::string nodeId = generatedId("file_bytes");
+            addNode("node", nodeId, "file.bytes");
+            addPolicy(nodeId, "path", pathValue);
+            addPolicy(nodeId, "out", out);
+            Step combined;
+            appendStep(combined, pathStep);
+            appendStep(combined, Step{false, false, {nodeId, "in"}, {nodeId, "out"}});
+            if (step != nullptr) { appendStep(*step, combined); }
+            return out;
         }
 
         if (expr.kind == ExprKind::UnaryNot) {
@@ -1926,6 +1974,15 @@ private:
             addNode("producer", stdinId, "stdin.bytes");
             addPolicy(stdinId, "out", path);
             return Step{false, false, {stdinId, "out"}, {stdinId, "out"}};
+        }
+        if (integerList && check(TokenKind::Identifier) && peek().text == "file" && lookahead(1).kind == TokenKind::Dot) {
+            Expr initializer = parseValueExpr();
+            expect(TokenKind::RightParen, "expected ')' after list initializer");
+            if (initializer.kind != ExprKind::FileBytes) { fail(peek(), "list<int> provider initializer requires file.bytes(path)"); }
+            declareSymbol(idToken, id, "list<int>");
+            Step step;
+            static_cast<void>(lowerExprToPath(initializer, lookup(id)->path, &step));
+            return step;
         }
         expect(TokenKind::LeftBracket, "list<int> initializer must start with '['");
         std::ostringstream values;

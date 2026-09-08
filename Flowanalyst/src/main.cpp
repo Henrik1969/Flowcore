@@ -299,9 +299,9 @@ int run(const Json& bundle, int lowering_plan_version) {
     auto is_builtin = [&](const std::string& value) { for (const auto& item : builtin) if (item == value) return true; return false; };
     const std::vector<std::string> abi_types = {"c_int", "c_long", "c_ulong", "c_size_t", "c_string", "c_pointer"};
     auto is_abi_type = [&](const std::string& value) { for (const auto& item : abi_types) if (item == value) return true; return false; };
-    const std::vector<std::string> intrinsic_types = {"stdin.text", "stdin.bytes", "start.record"};
+    const std::vector<std::string> intrinsic_types = {"stdin.text", "stdin.bytes", "process.args", "file.bytes", "start.record"};
     auto is_intrinsic_type = [&](const std::string& value) { for (const auto& item : intrinsic_types) if (item == value) return true; return false; };
-    const std::vector<std::string> intrinsic_roots = {"stdin", "start"};
+    const std::vector<std::string> intrinsic_roots = {"stdin", "start", "args", "file"};
     const std::vector<std::string> intrinsic_functions = {"length"};
     std::map<std::string, int> type_symbols;
     for (const auto& [id, symbol] : symbols) { auto kind = text(field(*symbol, "kind")); if (kind == "Type" || kind == "Struct" || kind == "Contract") type_symbols[text(field(*symbol, "name"))] = id; }
@@ -519,6 +519,9 @@ int run(const Json& bundle, int lowering_plan_version) {
         if (kind == "integer_literal") return "int";
         if (kind == "bool_literal") return "Bool";
         if (kind == "string_literal") return "string";
+        if (kind == "index") {
+            return text(field(*expression, "text"), "") == "args" ? "string" : std::string{};
+        }
         if (kind == "identifier") {
             const auto found = resolved_expression_symbols.find(expression_id);
             return found != resolved_expression_symbols.end() && symbol_types.count(found->second) ? symbol_types.at(found->second) : std::string{};
@@ -539,6 +542,7 @@ int run(const Json& bundle, int lowering_plan_version) {
             return {};
         }
         if (kind == "call") {
+            if (text(field(*expression, "text"), "") == "file.bytes") return "list<int>";
             const int base = integer(field(field(*expression, "payload"), "base"));
             if (expressions.count(base) && text(field(*expressions.at(base), "kind")) == "field_access") {
                 const auto* base_payload = field(*expressions.at(base), "payload");
@@ -721,13 +725,22 @@ int run(const Json& bundle, int lowering_plan_version) {
         const int base = integer(field(payload, "base"));
         const Resolution* base_resolution = nullptr;
         for (const auto& resolution : resolutions) if (resolution.expression == base) { base_resolution = &resolution; break; }
-        if (!base_resolution) continue;
+        if (!base_resolution && text(field(*expression, "text"), "") != "file.bytes") continue;
         CallSite site;
         site.expression = expression_id;
-        site.statement = base_resolution->statement;
-        site.scope = base_resolution->scope;
-        site.callee_symbol = base_resolution->symbol;
-        site.callee = text(field(*expression, "text"), base_resolution->name);
+        site.statement = base_resolution ? base_resolution->statement : -1;
+        site.scope = base_resolution ? base_resolution->scope : -1;
+        site.callee_symbol = base_resolution ? base_resolution->symbol : -1;
+        site.callee = text(field(*expression, "text"), "file.bytes");
+        if (!base_resolution && site.callee == "file.bytes") {
+            const auto context = expression_context.count(expression_id) ? expression_context[expression_id] : std::pair<int, int>{-1, -1};
+            site.statement = context.first;
+            site.scope = context.second;
+            site.external = true;
+            site.provider_contract = "flowcore.filesystem";
+            site.provider_symbol = "file.bytes";
+            site.effect = "filesystem.read";
+        }
         site.pure = pure_symbols.count(site.callee_symbol) && pure_symbols[site.callee_symbol];
         for (const auto& argument : list(field(payload, "arguments"))) { const int argument_id = integer(&argument); site.arguments.push_back(argument_id); collect_reads(argument_id, site.reads); }
         if (statements.count(site.statement)) {
@@ -775,7 +788,7 @@ int run(const Json& bundle, int lowering_plan_version) {
                 break;
             }
             site.pure = site.effect == "pure" && site.resources.empty();
-        } else {
+        } else if (!site.external) {
             site.effect = site.pure ? "pure" : "unknown";
         }
         call_sites.push_back(std::move(site));
@@ -853,6 +866,15 @@ int run(const Json& bundle, int lowering_plan_version) {
         operation.produced_resource = site.produced_resource;
         operation.kind = "call";
         operation.arguments = site.arguments;
+        if (site.callee == "file.bytes") {
+            operation.kind = "external_call";
+            operation.contract = "flowcore.filesystem";
+            operation.symbol = "file.bytes";
+            operation.effect = "filesystem.read";
+            operation.effect_class = "filesystem.read";
+            operation.parameter_types = "string";
+            operation.return_type = "list<int>";
+        }
         std::string leaf = site.callee;
         const auto separator = leaf.rfind('.');
         if (separator != std::string::npos) leaf = leaf.substr(separator + 1);
@@ -1755,6 +1777,10 @@ int run(const Json& bundle, int lowering_plan_version) {
                   << ",\"arguments\":[";
         for (std::size_t argument = 0; argument < site.arguments.size(); ++argument) { if (argument) std::cout << ','; std::cout << site.arguments[argument]; }
         std::cout << "]";
+        if (site.external) {
+            std::cout << ",\"provider_contract\":" << quote(site.provider_contract)
+                      << ",\"provider_symbol\":" << quote(site.provider_symbol);
+        }
         if (site.write_symbol >= 0) std::cout << ",\"result_symbol_id\":" << site.write_symbol;
         std::cout << ",\"purity\":" << (site.pure ? "\"pure\"" : "\"effectful\"")
                   << ",\"effect_class\":" << quote(site.effect);

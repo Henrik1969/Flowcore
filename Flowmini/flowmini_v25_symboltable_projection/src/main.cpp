@@ -670,11 +670,13 @@ int main(int argc, char** argv) {
             }
 
 
-            if (!sourcePath.empty()) {
-                throw flow::DiagnosticError{"cli", "unexpected extra argument: " + arg};
+            if (sourcePath.empty()) {
+                sourcePath = arg;
+            } else {
+                // Positional arguments after the source belong to the
+                // Flowmini application's governed `args` provider.
+                ctx.applicationArgs.push_back(arg);
             }
-
-            sourcePath = arg;
         }
 
         if (sourcePath.empty()) {

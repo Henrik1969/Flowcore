@@ -366,6 +366,44 @@ public:
     }
 };
 
+class ProcessArgsNode final : public ConfiguredNode {
+public:
+    using ConfiguredNode::ConfiguredNode;
+
+    std::vector<Route> run(MiniEnvelope env) override {
+        if (env.ctx == nullptr) {
+            throw flow::DiagnosticError{"process.args", "missing pipeline context"};
+        }
+        RecordPayload record;
+        List args;
+        for (const auto& arg : env.ctx->applicationArgs) args.emplace_back(arg);
+        setPathList(record, getPolicyString(config_, "out", "args"), std::move(args), "process.args");
+        env.payload = std::move(record);
+        return {Route{"out", std::move(env)}};
+    }
+};
+
+class FileBytesNode final : public ConfiguredNode {
+public:
+    using ConfiguredNode::ConfiguredNode;
+
+    std::vector<Route> run(MiniEnvelope env) override {
+        auto& record = requirePayload<RecordPayload>(env, "file.bytes");
+        const std::string pathKey = getPolicyString(config_, "path", "");
+        const std::string path = pathKey.empty() ? std::string{} : getPathAbiString(record, pathKey, "file.bytes");
+        if (path.empty()) throw flow::DiagnosticError{"file.bytes", "missing file path"};
+        std::ifstream input(path, std::ios::binary);
+        if (!input) throw flow::DiagnosticError{"file.bytes", "could not open file: " + path};
+        List bytes;
+        for (std::istreambuf_iterator<char> it{input}, end; it != end; ++it) {
+            bytes.emplace_back(static_cast<int>(static_cast<unsigned char>(*it)));
+        }
+        if (input.bad()) throw flow::DiagnosticError{"file.bytes", "read failed for file: " + path};
+        setPathList(record, getPolicyString(config_, "out", "bytes"), std::move(bytes), "file.bytes");
+        return {Route{"out", std::move(env)}};
+    }
+};
+
 class FakePagerInputNode final : public ConfiguredNode {
 public:
     using ConfiguredNode::ConfiguredNode;
@@ -864,7 +902,7 @@ private:
 
 class IntCompareNode final : public ConfiguredNode {
 public:
-    enum class Op { Eq, Lt, Gt };
+    enum class Op { Eq, Neq, Lt, Lte, Gt, Gte };
 
     IntCompareNode(NodeConfig config, Op op, std::string stage)
         : ConfiguredNode(std::move(config)), op_(op), stage_(std::move(stage)) {}
@@ -878,8 +916,11 @@ public:
         bool result = false;
         switch (op_) {
             case Op::Eq: result = (lhs == rhs); break;
+            case Op::Neq: result = (lhs != rhs); break;
             case Op::Lt: result = (lhs < rhs); break;
+            case Op::Lte: result = (lhs <= rhs); break;
             case Op::Gt: result = (lhs > rhs); break;
+            case Op::Gte: result = (lhs >= rhs); break;
         }
 
         setPathBool(record, out, result, stage_);
@@ -1361,6 +1402,10 @@ AtomRegistry makeCoreAtomRegistry() {
         [](NodeConfig) { return std::make_unique<StdinTextNode>(); });
     registry.registerAtom(AtomContract{"stdin.bytes", {{"in", "Unit"}}, {{"out", "Record"}}, {"stdin.read"}},
         [](NodeConfig config) { return std::make_unique<StdinBytesNode>(std::move(config)); });
+    registry.registerAtom(AtomContract{"process.args", {{"in", "Unit"}}, {{"out", "Record"}}, {"process.args"}},
+        [](NodeConfig config) { return std::make_unique<ProcessArgsNode>(std::move(config)); });
+    registry.registerAtom(AtomContract{"file.bytes", {{"in", "Record"}}, {{"out", "Record"}}, {"filesystem.read"}},
+        [](NodeConfig config) { return std::make_unique<FileBytesNode>(std::move(config)); });
 
     registry.registerAtom(AtomContract{"pager.input.fake", {{"in", "Unit"}}, {{"out", "Record"}}, {"pager.input.fake"}},
         [](NodeConfig config) { return std::make_unique<FakePagerInputNode>(std::move(config)); });
@@ -1441,10 +1486,16 @@ AtomRegistry makeCoreAtomRegistry() {
 
     registry.registerAtom(AtomContract{"int.eq", {{"in", "Record"}}, {{"out", "Record"}}, {}},
         [](NodeConfig config) { return std::make_unique<IntCompareNode>(std::move(config), IntCompareNode::Op::Eq, "int.eq"); });
+    registry.registerAtom(AtomContract{"int.neq", {{"in", "Record"}}, {{"out", "Record"}}, {}},
+        [](NodeConfig config) { return std::make_unique<IntCompareNode>(std::move(config), IntCompareNode::Op::Neq, "int.neq"); });
     registry.registerAtom(AtomContract{"int.lt", {{"in", "Record"}}, {{"out", "Record"}}, {}},
         [](NodeConfig config) { return std::make_unique<IntCompareNode>(std::move(config), IntCompareNode::Op::Lt, "int.lt"); });
+    registry.registerAtom(AtomContract{"int.lte", {{"in", "Record"}}, {{"out", "Record"}}, {}},
+        [](NodeConfig config) { return std::make_unique<IntCompareNode>(std::move(config), IntCompareNode::Op::Lte, "int.lte"); });
     registry.registerAtom(AtomContract{"int.gt", {{"in", "Record"}}, {{"out", "Record"}}, {}},
         [](NodeConfig config) { return std::make_unique<IntCompareNode>(std::move(config), IntCompareNode::Op::Gt, "int.gt"); });
+    registry.registerAtom(AtomContract{"int.gte", {{"in", "Record"}}, {{"out", "Record"}}, {}},
+        [](NodeConfig config) { return std::make_unique<IntCompareNode>(std::move(config), IntCompareNode::Op::Gte, "int.gte"); });
 
     registry.registerAtom(AtomContract{"bool.not", {{"in", "Record"}}, {{"out", "Record"}}, {}},
         [](NodeConfig config) { return std::make_unique<BoolNotNode>(std::move(config)); });

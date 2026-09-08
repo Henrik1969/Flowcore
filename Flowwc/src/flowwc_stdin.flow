@@ -1,7 +1,7 @@
 program flowwc
 
 main(args : list<string>) {
-    bytes : list<int>(file.bytes(args[0]))
+    bytes : list<int>(stdin.bytes())
     index : int(0)
     count : int(length(bytes))
     lines : int(0)

@@ -1092,3 +1092,22 @@ later instruction reopens them.
   No native counter or flowwc-specific compiler dispatch was retained.
 - Path-based `flowwc file.txt`, multi-file aggregation, typed per-file Result,
   and automatic parallelism remain blocked or deferred behind that evidence.
+
+## 2026-09-08 flowwc safe provider carrier checkpoint
+
+- Added the shared `file.bytes(args[0])` provider operation. `process.args`
+  exposes positional application inputs; the filesystem atom reads binary data
+  and materializes the existing safe `list<int>` carrier. Native code stops at
+  open/read/materialize/close; all counting and output policy remain in
+  Flowmini.
+- Structural Flowanalyst artifacts and runtime graph execution share the
+  provider contract: `flowcore.filesystem`, `file.bytes`, result `list<int>`,
+  effect `filesystem.read`. Missing files fail explicitly and are never
+  represented as an empty result. The original stdin implementation remains
+  covered by `flowwc_stdin.flow`.
+- Confirmed and repaired the bounded `<=` lowering inconsistency by admitting
+  the comparison in the parser and adding the corresponding comparison atom.
+- Focused path tests cover empty, ASCII, whitespace, UTF-8, no-final-newline,
+  embedded NUL, missing-file behavior, deterministic output, stdin regression,
+  and structural provider/effect evidence. Root CTest is `101/101`; categorized
+  evidence remains `96/145` with 49 known gaps.

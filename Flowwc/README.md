@@ -1,16 +1,21 @@
 # flowwc
 
-`flowwc.flow` is the first Flowmini application pressure probe for a
-word-count-like utility. The counting state machine is written in Flowmini:
-it consumes `stdin.bytes()`, counts newline-delimited lines, counts maximal
-non-whitespace byte sequences as words, and reports the consumed byte count.
+`flowwc.flow` is a real Flowmini application. Its line, word, and byte
+counting state machine runs in Flowmini; the filesystem provider only
+materializes a safe `list<int>` value from a path.
 
-Run it through the hosted Flowmini runtime with:
+Run a file-path invocation with:
 
 ```bash
-flowmini Flowwc/src/flowwc.flow < file.txt
+flowmini Flowwc/src/flowwc.flow file.txt
 ```
 
-The stdin provider is a mechanism boundary; counting and application policy
-remain in this Flowmini source. Path-based file input is recorded in the
-pressure ledger before adding a broader provider/carrier contract.
+The application also keeps a stdin regression source:
+
+```bash
+flowmini Flowwc/src/flowwc_stdin.flow < file.txt
+```
+
+Words are maximal non-whitespace byte sequences. Bytes are the exact number
+of bytes consumed from the provider, so UTF-8 input contributes one count per
+encoded byte.

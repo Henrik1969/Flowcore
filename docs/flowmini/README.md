@@ -14,7 +14,7 @@ historical directory name)
 Current baseline:
 
 ```text
-root CTest: PASS (100/100)
+root CTest: PASS (101/101)
 AST golden tests: 28 PASS
 Symbol projection tests: 14 PASS
 focused Flowmini CTest: 16/16
@@ -47,9 +47,11 @@ The read-only [`flowinspect`](../../Flowinspect/README.md) developer tool
 consumes versioned Flowcore artifacts and records its application pressure in
 the [pressure ledger](flowinspect-pressure-ledger.md).
 
-The [`flowwc`](../../Flowwc/README.md) probe keeps byte counting and word/line
-state in Flowmini. Its current hosted interface is stdin-based; the path and
-multi-file boundary is recorded in the [flowwc pressure ledger](flowwc-pressure-ledger.md).
+The [`flowwc`](../../Flowwc/README.md) application keeps byte counting and
+word/line state in Flowmini. `file.bytes(args[0])` materializes a safe `list<int>`
+through the filesystem provider; the original stdin implementation remains
+covered by `flowwc_stdin.flow`. The multi-file boundary is recorded in the
+[flowwc pressure ledger](flowwc-pressure-ledger.md).
 
 Documents in this directory:
 

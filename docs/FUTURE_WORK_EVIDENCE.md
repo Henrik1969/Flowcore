@@ -464,3 +464,16 @@ deferred application pressure are recorded in
 This investigation did not justify a Flowmini-native JSON parser, a new Result
 carrier, directory mode, or a scheduler extension. Those remain evidence-led
 questions rather than planned features.
+
+## Flowwc safe provider carrier resolution
+
+The first Flowmini application pressure probe exposed and then resolved a P0
+boundary: the stdin provider already produced `list<int>`, while path-based
+file I/O exposed only pointer-oriented ABI operations. `file.bytes(args[0])`
+now uses the same safe `list<int>` carrier after provider-side binary
+materialization. `process.args` supplies application paths, and Flowanalyst
+retains `flowcore.filesystem` / `filesystem.read` provenance. Missing paths fail
+explicitly. The counting policy remains in Flowmini; no native flowwc logic or
+unsafe source mechanism was introduced. Remaining application pressure is
+typed per-file results and multi-file aggregation, recorded in
+[`docs/flowmini/flowwc-pressure-ledger.md`](flowmini/flowwc-pressure-ledger.md).

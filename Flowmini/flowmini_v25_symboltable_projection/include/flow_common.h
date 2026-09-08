@@ -70,6 +70,7 @@ private:
 struct PipelineContext {
     PolicyBag policies;
     std::vector<Diagnostic> diagnostics;
+    std::vector<std::string> applicationArgs;
 };
 
 struct ByteBuffer {
