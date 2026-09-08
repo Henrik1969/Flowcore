@@ -3238,6 +3238,7 @@ namespace flowmini::ast {
                     variantDecl.name = tokens[i].text;
                     ++i;
                 }
+                i = parse_type_parameters(tokens, i, variantDecl.type_parameters);
                 if (i < tokens.size() && tokens[i].kind == flowmini::TokenKind::LeftBrace) {
                     ++i;
                     while (i < tokens.size() && !is_end_token(tokens[i]) &&

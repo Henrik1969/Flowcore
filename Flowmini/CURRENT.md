@@ -3,7 +3,7 @@
 Current checkout status:
 
 ```text
-Flowmini v0.31 restrained canonical generics slice
+Flowmini v0.32 generic variants and typed outcomes slice
 implementation directory: flowmini_v25_symboltable_projection
 ```
 
@@ -14,11 +14,11 @@ The structural frontend and normal runtime are separate paths; see the
 ## Verified status
 
 ```text
-root CTest:                         PASS (94/94)
+root CTest:                         PASS (99/99)
 AST golden tests:                   PASS (28)
 symbol projection tests:            PASS (14)
-Flowmini focused CTest:             PASS (15/15)
-categorized flowmini_suite:         91/140 (49 known parser/ABI/profile gaps)
+Flowmini focused CTest:             PASS (16/16)
+categorized flowmini_suite:         96/145 (49 known parser/ABI/profile gaps)
 variant payload lowering:           IMPLEMENTED/TESTED (LLVM i32 carrier; enum payload)
 compile-time constants:            IMPLEMENTED/TESTED (bounded deterministic expressions)
 canonical guard lowering:           IMPLEMENTED/TESTED (LLVM backend)
@@ -26,10 +26,11 @@ std.math v0:                        IMPLEMENTED/TESTED (pure integer helpers)
 Flowbind C generator:               EXPERIMENTAL/TESTED (Clang C subset, partial artifacts)
 mature program probes:              IMPLEMENTED/TESTED (flowstats, flowconfig)
 variant carrier experiment:         IMPLEMENTED/TESTED (target-neutral identity; one-slot LLVM carrier)
-user-defined generics:              EXPERIMENTAL/TESTED (identity<T>, Pair<A,B> artifacts; concrete LLVM forwarding)
+user-defined generics:              EXPERIMENTAL/TESTED (identity<T>, Pair<A,B>, generic variants; concrete LLVM carriers)
+generic Result/Either variants:     IMPLEMENTED/TESTED (ordered substitution; integer/enum payloads through LLVM)
 multi-field/record/nested variants: NOT SUPPORTED — BACKEND LIMITATION (explicit lowering diagnostic)
 TinyVM variant payload lowering:    NOT SUPPORTED — BACKEND LIMITATION
-ASan/UBSan CTest:                   PASS (94/94; leak checks disabled)
+ASan/UBSan CTest:                   PASS (99/99; leak checks disabled)
 ```
 
 The structural chain publishes TokenTree/AST, symbol and fact projections for
@@ -75,7 +76,7 @@ one independently tested language boundary at a time.
 ```text
 canonical parser/semantic convergence
 target selection and multitarget artifact emission
-  generic collection carriers, generic variants, and broader standard library
+  generic collection carriers and broader standard library
 text/io/fs/time/net APIs and generated binding declarations
 multi-field variant carrier layouts and TinyVM parity
 ownership, resource, effect, and concurrency semantics

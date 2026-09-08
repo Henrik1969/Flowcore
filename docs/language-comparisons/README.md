@@ -11,7 +11,7 @@ Status labels in every document are **IMPLEMENTED**, **TESTED**, **DESIGNED**,
 **PLANNED**, **EXPERIMENTAL**, **SPECULATIVE**, **NOT SUPPORTED**, and
 **UNKNOWN**. For absent features, use **NOT SUPPORTED — MISSING**,
 **NOT SUPPORTED — DEFERRED**, or **NOT SUPPORTED — INTENTIONALLY EXCLUDED**.
-Flowmini claims are limited to the v0.31 checkout and linked probes. External
+Flowmini claims are limited to the v0.32 checkout and linked probes. External
 claims point to current language documentation.
 
 | Comparison | Languages | Main decision pressure |

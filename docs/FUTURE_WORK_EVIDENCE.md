@@ -1,6 +1,6 @@
 # Flowmini future work evidence
 
-This ledger records work exposed by inspecting the v0.31 language chain. It is
+This ledger records work exposed by inspecting the v0.32 language chain. It is
 not a wish list. “Do nothing” or “use a provider” is retained where the
 architecture cost of a new mechanism is not justified.
 
@@ -21,8 +21,8 @@ architecture cost of a new mechanism is not justified.
   Flowanalyst producer and the UTF-8 flow probe now validates it successfully.
 - **Evidence reporting:** `tools/report-flowmini-test-status.sh` emits a
   versioned JSON and Markdown projection of root CTest, focused CTest, and the
-  categorized suite. The current report is 93/93 root, 14/14 focused, and
-  91/140 categorized (49 known gaps). Tests remain authoritative.
+  categorized suite. The current report is 99/99 root, 16/16 focused, and
+  96/145 categorized (49 known gaps). Tests remain authoritative.
 - **Sanitizer verification:** a fresh Debug AddressSanitizer/UndefinedBehavior
   Sanitizer configure and build passed 93/93 tests with leak checks disabled.
   The new Flowmini variant carrier and backend artifact gates pass under
@@ -60,6 +60,13 @@ architecture cost of a new mechanism is not justified.
   `ParseResult`-style variant, payload extraction, match routing, and a guard;
   its LLVM artifact executes successfully. Repeated concrete result shapes are
   now generic-pressure evidence, but no generic syntax was introduced.
+- **Generic sum types:** generic variants now preserve declaration ownership,
+  ordered substitutions, deterministic concrete instance identity, member
+  discriminants, and concrete payload contracts. `Result<T,E>` and neutral
+  `Either<A,B>` constructions pass the LLVM carrier gate; `std/result.flow`
+  imports through the ordinary unit path. Invalid undeclared payload types,
+  duplicate parameters, and substituted payload mismatches are rejected before
+  lowering. Result remains library data rather than a compiler primitive.
 
 ## Findings
 
@@ -276,10 +283,13 @@ The producer fix is now covered by the passing regression gate.
   substitution. This is the minimum foundation for later collection and result
   abstractions.
 - **Current status:** IMPLEMENTED/TESTED for explicit generic functions,
-  simple inference, and generic record declaration/application artifacts;
-  generic record construction/layout and generic variants remain deferred.
+  simple inference, generic record declaration/application artifacts, and
+  generic variant declaration/instantiation through the concrete LLVM carrier;
+  generic record construction/layout and generic collection carriers remain
+  deferred.
 - **Possible direction:** gather pressure from real collection and provider
-  programs before adding constraints, generic variants, or broader inference.
+  programs before adding constraints, generic collection carriers, or broader
+  inference. Keep generic variants concrete before backend lowering.
 - **Estimated scope/risk:** medium compiler/schema work; high if expanded into
   value-level metaprogramming or a global constraint solver.
 - **Dependencies:** canonical parser ownership, concrete carrier lowering, and
@@ -333,6 +343,83 @@ The producer fix is now covered by the passing regression gate.
   and linked/dynamic parity where the provider can observe cleanup.
 - **Priority rationale:** useful immediately for honesty; stronger enforcement
   is not justified by current evidence.
+
+### LANGUAGE/COMPILER — generic sum types and typed outcomes
+
+- **Finding:** repeated concrete result variants justified a generic variant
+  composition slice, but not a compiler-owned Result mechanism.
+- **Evidence:** `flowmini_generic_variants` preserves `Result<T,E>`, `Either<A,B>`,
+  and `Option<T>` declarations; records ordered substitutions and deterministic
+  concrete instances; constructs `Result<int,ParseError>` and `Either<int,Bool>`;
+  matches/extracts a concrete payload; imports `std/result.flow`; executes the
+  LLVM lowering; and rejects undeclared payload types, duplicate parameters,
+  and substituted payload mismatches.
+- **Why it matters:** reusable typed outcomes now compose from existing generic
+  and variant machinery without making `Result` a privileged compiler type.
+- **Status:** IMPLEMENTED/TESTED for the canonical structural path and the
+  existing one-slot integer/enum LLVM carrier. Runtime compatibility parsing,
+  generic-qualified member spelling, cross-function variant returns, payloadless
+  construction, wider record/nested/resource layouts, and TinyVM remain
+  NOT SUPPORTED — DEFERRED/BACKEND LIMITATION.
+- **Possible direction:** mature module/package resolution and collection
+  carriers before adding Result helpers, implicit propagation, constraints, or
+  broad payload boxing.
+- **Estimated scope/risk:** low/medium additive semantic metadata now; high for
+  widening carriers or introducing ownership through outcome types.
+- **Dependencies:** parser convergence, concrete carrier contracts, module
+  resolution, and resource semantics.
+- **Suggested verification/gate:** preserve declaration owner, parameter order,
+  substitution, instance identity, member discriminant, payload type, and
+  provider effect/resource provenance in every future generic sum type.
+- **Priority rationale:** the composition works; remaining friction is module
+  ergonomics and carrier breadth, not a missing Result primitive.
+
+### ANALYSIS/FLOWPARALLEL — Result must not launder effects
+
+- **Finding:** a Result return type is orthogonal to the effect of the operation
+  that produced it.
+- **Evidence:** generic variant lowering classifies the concrete value carrier
+  from its declaration and substitution; Flowanalyst's call effect/resource
+  evidence is derived from the callee/provider contract rather than return-type
+  spelling. The generic variant gate contains no Result-specific purity path.
+- **Why it matters:** wrapping an external read or resource operation in
+  `Result<T,E>` must not create a false parallel candidate.
+- **Status:** semantic rule documented and preserved; a dedicated provider
+  wrapper returning a Result remains a follow-up because current cross-function
+  variant return carriers are not admitted.
+- **Possible direction:** add the negative Flowparallel gate when concrete
+  provider-result return lowering is available; retain serial fallback for
+  unknown effects/resources.
+- **Estimated scope/risk:** medium integration work; no new effect system is
+  justified yet.
+- **Dependencies:** callable variant return lowering and provider wrapper
+  contracts.
+- **Suggested verification/gate:** compare pure and provider-bound producers
+  with identical `Result` return types and assert distinct effect/proof status.
+- **Priority rationale:** correctness invariant is clear; implementation should
+  wait for the concrete carrier boundary rather than add special cases.
+
+### LANGUAGE — outcome ergonomics and module pressure
+
+- **Finding:** `Result<T,E>` can be imported as an ordinary unit, but its current
+  construction requires the concrete type annotation to establish the instance
+  and the member spelling remains `Result.ok`.
+- **Evidence:** `result_import_probe.flow` passes through the existing import
+  expansion and semantic chain; `Result<int,ParseError>.ok` is not admitted by
+  the current expression grammar.
+- **Why it matters:** explicit typed outcomes are usable, while concise member
+  syntax and helper operations have not yet earned language changes.
+- **Status:** import IMPLEMENTED/TESTED; ergonomic helpers and propagation syntax
+  NOT SUPPORTED — DEFERRED.
+- **Possible direction:** gather real repetition from mature Result programs;
+  prefer library helpers or module-resolution improvements before adding syntax.
+- **Estimated scope/risk:** low for library helpers, high for implicit control-flow
+  operators because they affect provenance and guard composition.
+- **Dependencies:** mature application probes and package/module semantics.
+- **Suggested verification/gate:** every helper must preserve explicit outcome,
+  guard, effect, and provenance facts.
+- **Priority rationale:** current architecture is semantically sufficient; do not
+  pay syntax cost without measured repetition.
 
 ## Lessons from other languages
 

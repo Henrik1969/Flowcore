@@ -18,10 +18,11 @@ team onboarding. Flowmini is only a stronger candidate when that explicit
 artifact/evidence boundary is the primary problem. Calling Java/Kotlin/C# or
 Swift through a provider is preferable to rebuilding their ecosystems.
 
-This comparison exposes missing generics, exceptions/typed errors, runtime
-services, IDE debugging, package management, and platform libraries in
-Flowmini. It also warns against adding a managed runtime without a demonstrated
-Flowcore problem. Sources: [Java SE 24 specifications](https://docs.oracle.com/en/java/javase/24/docs/specs/index.html),
+This comparison exposes Flowmini's deliberately restrained generics (including
+generic variants but no constraints or broad inference), explicit typed
+outcomes without exceptions, runtime services, IDE debugging, package
+management, and platform libraries. It also warns against adding a managed
+runtime without a demonstrated Flowcore problem. Sources: [Java SE 24 specifications](https://docs.oracle.com/en/java/javase/24/docs/specs/index.html),
 [C# documentation](https://learn.microsoft.com/en-us/dotnet/csharp/),
 [Kotlin documentation](https://kotlinlang.org/docs/home.html), and
 [Swift book](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/).

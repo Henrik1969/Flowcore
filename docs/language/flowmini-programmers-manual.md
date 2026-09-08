@@ -181,12 +181,52 @@ record declarations and concrete applications such as `Pair<int, Bool>` are
 validated and preserved in artifacts; general record construction/layout is
 still limited by the existing record backend.
 
-Generic constraints, value-level generics, specialization syntax, generic
-variants (`Result<T,E>`), and generic collection carriers are **NOT SUPPORTED —
-DEFERRED**. Compile-time constants remain a separate value-level facility.
+Generic constraints, value-level generics, specialization syntax, and generic
+collection carriers are **NOT SUPPORTED — DEFERRED**. Compile-time constants
+remain a separate value-level facility. Generic variants are now an
+**IMPLEMENTED / TESTED** structural slice; see the next section.
 The runtime compatibility parser is an explicitly named legacy path and does
 not yet execute generic syntax; use `--dump-frontend-bundle` followed by the
 semantic/lowering stages for the tested generic path.
+
+### Generic variants and `std/result`
+
+Generic variants reuse the same owned type-parameter and substitution model as
+generic functions and records:
+
+```flow
+variant Result<T, E> {
+    ok(value : T)
+    error(reason : E)
+}
+
+enum ParseError { invalid }
+
+main {
+    result : Result<int,ParseError>(Result.ok(42))
+}
+```
+
+The declaration owns `T` and `E` in order. The concrete annotation supplies
+`T -> int` and `E -> ParseError`; Flowanalyst retains both the generic origin
+and the resolved member payload types. Construction and matching use the
+existing variant model, including deterministic zero-based member
+discriminants, and resolve to concrete payload carriers before LLVM lowering.
+The tested member spelling is `Result.ok` with the concrete instance supplied
+by the declaration; `Result<int,ParseError>.ok` is not admitted yet.
+
+`Result<T,E>` is library data, not a compiler primitive. The ordinary unit
+[`std/result.flow`](../../Flowmini/flowmini_v25_symboltable_projection/std/result.flow) declares it alongside the
+bounded `Option<T>` shape. A neutral `Either<A,B>` construction is part of the
+generic-variant gate so this capability is not special-cased for Result.
+
+Result values do not erase effects or resources. A provider call that returns a
+Result remains provider-bound and effectful in semantic facts, while `guard`
+continues to represent a separate required-condition flow operation. This
+slice adds no exceptions, implicit propagation, ownership checking, or generic
+constraints. Integer and enum payloads execute through LLVM; wider record,
+nested, resource-handle, payloadless, and TinyVM cases remain explicitly
+limited by the current carrier/backend contract.
 
 ## Control flow, constants, and variants
 

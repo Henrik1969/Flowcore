@@ -228,6 +228,12 @@ private:
             op.default_block=integer(field(item,"default_block_id"),"default_block_id"); op.join_block=integer(field(item,"join_block_id"),"join_block_id");
             op.selector_type=text(field(item,"selector_type")); op.selector_kind=text(field(item,"selector_kind"));
             op.variant_type=text(field(item,"variant_type")); op.variant_member=text(field(item,"variant_member"));
+            for (const auto& concrete : {op.variant_type, op.selector_type}) {
+                const auto open = concrete.find('<');
+                if (open == std::string::npos) continue;
+                const auto base = concrete.substr(0, open);
+                if (variant_llvm_types_.count(base) != 0) variant_llvm_types_[concrete] = variant_llvm_types_.at(base);
+            }
             op.variant_discriminant=integer(field(item,"variant_discriminant"),"variant_discriminant");
             if (const auto* payload_types = field(item,"payload_types")) for (const auto& payload_type : array(payload_types,"payload_types")) op.payload_types.push_back(text(&payload_type));
             op.generic_owner=text(field(item,"generic_owner")); op.generic_return_type=text(field(item,"generic_return_type")); op.instantiation_id=text(field(item,"instantiation_id"));
@@ -344,8 +350,9 @@ private:
         }
     }
     void emit_declarations(std::ostringstream& out) const {
+        std::set<std::string> emitted_variant_types;
         for (const auto& [name, type] : variant_llvm_types_)
-            out << type << " = type {i32, i32}\n";
+            if (emitted_variant_types.insert(type).second) out << type << " = type {i32, i32}\n";
         for (const auto& p:providers_) {
             if (!c_symbol(p.symbol) || llvm_type(p.result).empty()) throw std::runtime_error("unsupported structured provider ABI");
             out << "declare "<<llvm_type(p.result)<<" @"<<p.symbol<<"("; const auto params=carriers(p.parameters);

@@ -1028,3 +1028,34 @@ later instruction reopens them.
   Flowparallel `13/13`, focused Flowmini `15/15`, and Debug ASan/UBSan CTest
   `98/98` with leak checks disabled. The categorized Flowmini report is
   `93/142` with 49 known gaps.
+
+## 2026-09-08 Generic sum types and typed outcomes checkpoint
+
+- Extended the canonical structural variant declaration with owned, ordered
+  type parameters. Flowanalyst preserves the generic owner, parameter order,
+  member payload expressions, and duplicate-parameter diagnostics.
+- Added ordered substitution for concrete variant instances. `Result<int,ParseError>`
+  and `Either<int,Bool>` retain their generic origin, deterministic instance
+  arguments, zero-based declaration-order discriminants, and substituted
+  payload types before lowering. LLVM continues to receive the existing
+  concrete one-slot carrier; no generic type reaches the backend.
+- Added `std/result.flow` as an ordinary importable unit containing generic
+  `Result<T,E>` and the bounded `Option<T>` declaration. The compiler has no
+  Result/Ok/Err special case. `result_import_probe.flow` proves import expansion
+  through Flowanalyst.
+- Added `flowmini_generic_variants`, covering AST parameters, semantic
+  substitutions, construction of both Result members and a neutral Either
+  member, generic match payload extraction, LLVM execution, deterministic
+  carrier metadata, and explicit rejection of undeclared payload types,
+  duplicate parameters, and substituted payload mismatches.
+- Corrected a Flowanalyst diagnostic-timing defect exposed by the new gate:
+  late generic match checks could set the process exit code after the report
+  had already serialized `status: ok`. Generic-compatible base labels now
+  compare against concrete instances, so valid reports and exit status agree.
+- Generic-qualified member syntax, cross-function variant returns, payloadless
+  construction, wider record/nested/resource layouts, and TinyVM lowering remain
+  explicitly deferred or backend-limited. No exceptions, implicit propagation,
+  constraints, ownership, or unsafe source mechanism was introduced.
+- Fresh verification: root CTest `99/99`, focused Flowmini CTest `16/16`,
+  focused generic-variant gate passing, and ASan/UBSan CTest `99/99` with leak
+  checks disabled. Categorized evidence is `96/145` with 49 known gaps.

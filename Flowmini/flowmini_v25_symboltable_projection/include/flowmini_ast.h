@@ -390,6 +390,7 @@ struct VariantMember {
 };
 struct VariantDecl {
     std::string name;
+    std::vector<TypeParameter> type_parameters;
     std::vector<VariantMember> members;
     SourceLocation location;
 };

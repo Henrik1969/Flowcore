@@ -1,0 +1,12 @@
+program bad_generic_variant_payload
+
+variant Result<T, E> {
+    ok(value : T)
+    error(reason : E)
+}
+
+enum ParseError { invalid }
+
+main {
+    result : Result<int,ParseError>(Result.ok(true))
+}

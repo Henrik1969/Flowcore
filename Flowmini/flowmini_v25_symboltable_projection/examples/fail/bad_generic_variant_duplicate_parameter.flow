@@ -1,0 +1,9 @@
+program bad_generic_variant_duplicate_parameter
+
+variant Broken<T, T> {
+    value(payload : T)
+}
+
+main {
+    1 -> return
+}

@@ -40,6 +40,14 @@ entrypoint shape. It emits analysis regions and a Boolean dependency matrix.
 More checks will be added as explicit semantic contracts, without moving
 semantic meaning backward into Flowmini.
 
+Generic variant declarations are represented in `lowering_plan.generic_variants`.
+Instantiated operations preserve the generic owner, ordered type arguments,
+substitution map, deterministic instance identity, member discriminant, and
+concrete payload type before backend lowering. The current gate exercises
+`Result<T,E>` and neutral `Either<A,B>` without compiler knowledge of either
+name; unresolved payload types, duplicate parameters, and substituted payload
+mismatches are rejected as semantic diagnostics.
+
 It also emits `effect_facts`. The first proven effect is `pure` for function
 bodies consisting only of return expressions over literals, parameters, and
 pure unary/binary operators. Declared pure provider calls with value-only

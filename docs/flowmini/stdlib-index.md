@@ -6,6 +6,7 @@ test or verified probe.
 | Unit | Status | Current surface | Evidence |
 | --- | --- | --- | --- |
 | `std/math.flow` | IMPLEMENTED / TESTED | `identity`, `add`, `abs`, `square`, `cube`, `factorial`, `min`, `max`, `clamp` over `int` | `flowmini_stdlib_math` |
+| `std/result.flow` | IMPLEMENTED / TESTED | generic `Result<T,E>` declaration and bounded `Option<T>` declaration; concrete integer/enum construction and matching are tested | `flowmini_generic_variants` |
 | `std/numbers.flow` | EXPERIMENTAL | refined integer aliases and invariants | AST/runtime fixtures |
 | `std/abi/libc.flow` | EXPERIMENTAL | declared C ABI/provider examples | provider contract tests |
 | `std/file_io.flow`, `std/memory.flow`, `std/kernel.flow` | EXPERIMENTAL | provider-facing declarations | provider/kernel probes |

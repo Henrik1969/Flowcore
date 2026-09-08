@@ -1,0 +1,11 @@
+unit std_result
+
+variant Result<T, E> {
+    ok(value : T)
+    error(reason : E)
+}
+
+variant Option<T> {
+    some(value : T)
+    none
+}

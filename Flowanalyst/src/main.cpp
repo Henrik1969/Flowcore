@@ -73,7 +73,7 @@ struct GenericSignature { int symbol = -1, declaration = -1; std::string name, r
 struct ResourceUse { int argument = -1, symbol = -1; std::string type, identity, alias_status, access, ownership, lifetime, opaque; };
 struct CallSite { int expression = -1, statement = -1, scope = -1, callee_symbol = -1, write_symbol = -1; std::string callee, effect = "unknown", provider_contract, provider_symbol; bool pure = false, external = false, produces_resource = false; std::set<int> reads; std::string writes; std::vector<int> arguments; std::vector<ResourceUse> resources; ResourceUse produced_resource; std::vector<int> independent_with; };
 struct ParallelRejection { int left = -1, right = -1; std::string reason, left_effect, right_effect; std::vector<ResourceUse> left_resources, right_resources; };
-struct LoweringOperation { int expression = -1, statement = -1, scope = -1, block = -1, function_symbol = -1, then_block = -1, else_block = -1, body_block = -1, failure_block = -1, default_block = -1, join_block = -1, callee_symbol = -1, result_symbol = -1, variant_discriminant = -1; std::string callee, kind, contract, library, convention, symbol, effect, effect_class, parameter_types, return_type, selector_type, selector_kind, compile_time_value, variant_type, variant_member, generic_owner, generic_return_type, instantiation_id; std::vector<int> arguments, match_values, match_highs, match_blocks; std::vector<std::string> match_label_types, match_label_members, variant_payload_types, generic_type_arguments; std::vector<std::pair<std::string, std::string>> generic_substitutions; std::vector<ResourceUse> resources; ResourceUse produced_resource; bool produces_resource = false; std::vector<std::vector<VariantPayloadBinding>> match_payload_bindings; };
+struct LoweringOperation { int expression = -1, statement = -1, scope = -1, block = -1, function_symbol = -1, then_block = -1, else_block = -1, body_block = -1, failure_block = -1, default_block = -1, join_block = -1, callee_symbol = -1, result_symbol = -1, variant_discriminant = -1; std::string callee, kind, contract, library, convention, symbol, effect, effect_class, parameter_types, return_type, selector_type, selector_kind, compile_time_value, variant_type, variant_member, variant_generic_owner, variant_instance_id, generic_owner, generic_return_type, instantiation_id; std::vector<int> arguments, match_values, match_highs, match_blocks; std::vector<std::string> match_label_types, match_label_members, variant_payload_types, variant_type_arguments, generic_type_arguments; std::vector<std::pair<std::string, std::string>> variant_substitutions, generic_substitutions; std::vector<ResourceUse> resources; ResourceUse produced_resource; bool produces_resource = false; std::vector<std::vector<VariantPayloadBinding>> match_payload_bindings; };
 struct Callable { int symbol = -1, scope = -1, body_block = -1; bool entry = false; std::string name, return_type, availability; std::vector<std::pair<int, std::string>> parameters; };
 struct Resolution { int expression = -1, statement = -1, scope = -1, symbol = -1; std::string name; };
 
@@ -119,6 +119,8 @@ int run(const Json& bundle, int lowering_plan_version) {
     std::map<std::string, std::map<std::string, int>> enum_members;
     std::map<std::string, std::map<std::string, int>> variant_members;
     std::map<std::string, std::map<std::string, std::vector<std::pair<std::string, std::string>>>> variant_payloads;
+    std::map<std::string, std::vector<std::string>> generic_variant_parameters;
+    std::map<std::string, std::size_t> generic_variant_arities;
     std::map<std::string, std::size_t> generic_record_arities;
     std::set<std::string> generic_parameter_names;
     std::vector<std::pair<int, std::string>> duplicate_generic_parameters;
@@ -133,6 +135,17 @@ int run(const Json& bundle, int lowering_plan_version) {
         if (kind == "variant") {
             const auto type = text(field(*declaration, "name"));
             variant_types.insert(type);
+            const auto parameters = list(field(*declaration, "type_parameters"));
+            if (!parameters.empty()) {
+                generic_variant_arities[type] = parameters.size();
+                std::set<std::string> seen;
+                for (const auto& parameter : parameters) {
+                    const auto name = text(field(parameter, "name"));
+                    if (!seen.insert(name).second) duplicate_generic_parameters.emplace_back(identity, name);
+                    generic_variant_parameters[type].push_back(name);
+                    generic_parameter_names.insert(name);
+                }
+            }
             int tag = 0;
             for (const auto& member : list(field(*declaration, "members"))) {
                 const auto member_name = text(field(member, "name"));
@@ -294,17 +307,58 @@ int run(const Json& bundle, int lowering_plan_version) {
     for (const auto& [id, symbol] : symbols) { auto kind = text(field(*symbol, "kind")); if (kind == "Type" || kind == "Struct" || kind == "Contract") type_symbols[text(field(*symbol, "name"))] = id; }
     const std::vector<std::string> generic_constructors = {"list", "array", "optional", "collection.list", "result.Result"};
     std::function<bool(const std::string&)> is_resolved_type = [&](const std::string& raw_value) {
-        const auto value = trim_copy(raw_value); if (is_builtin(value) || is_abi_type(value) || is_intrinsic_type(value) || type_symbols.count(value) != 0 || generic_parameter_names.count(value) != 0) return true;
+        const auto value = trim_copy(raw_value); if (is_builtin(value) || is_abi_type(value) || is_intrinsic_type(value) || type_symbols.count(value) != 0 || enum_types.count(value) != 0 || variant_types.count(value) != 0 || generic_parameter_names.count(value) != 0) return true;
         std::string core = value; const auto shape = value.find("["); if (shape != std::string::npos) { if (!numeric_extents(value.substr(shape)) || shape == 0) return false; core = value.substr(0, shape); }
         const auto open = core.find('<'); if (open == std::string::npos || core.back() != '>') return false;
         const auto constructor = core.substr(0, open); bool known = false; for (const auto& candidate : generic_constructors) if (constructor == candidate) known = true;
         const auto arguments = split_generic_arguments(core.substr(open + 1, core.size() - open - 2));
         if (generic_record_arities.count(constructor) != 0) known = arguments.size() == generic_record_arities.at(constructor);
+        if (generic_variant_arities.count(constructor) != 0) known = arguments.size() == generic_variant_arities.at(constructor);
         if (!known) return false;
         if (arguments.empty()) return false;
         for (const auto& argument : arguments) if (!is_resolved_type(argument)) return false;
         return true;
     };
+    auto split_type_instance = [&](const std::string& raw) {
+        std::pair<std::string, std::vector<std::string>> result{trim_copy(raw), {}};
+        const auto open = raw.find('<');
+        if (open == std::string::npos || raw.back() != '>') return result;
+        result.first = trim_copy(raw.substr(0, open));
+        result.second = split_generic_arguments(raw.substr(open + 1, raw.size() - open - 2));
+        return result;
+    };
+    auto variant_substitution = [&](const std::string& concrete_type, const std::string& fallback_type) {
+        const auto instance = split_type_instance(concrete_type.empty() ? fallback_type : concrete_type);
+        std::map<std::string, std::string> substitutions;
+        const auto parameters = generic_variant_parameters.find(instance.first);
+        if (parameters != generic_variant_parameters.end() && parameters->second.size() == instance.second.size())
+            for (std::size_t index = 0; index < instance.second.size(); ++index)
+                substitutions[parameters->second[index]] = instance.second[index];
+        return std::make_pair(instance.first, substitutions);
+    };
+    auto variant_instance_id = [&](const std::string& owner, const std::vector<std::string>& arguments) {
+        std::string result = owner + "<";
+        for (std::size_t index = 0; index < arguments.size(); ++index) {
+            if (index) result += ",";
+            result += trim_copy(arguments[index]);
+        }
+        return result + ">";
+    };
+    for (const auto& [declaration_id, declaration] : declarations) {
+        if (text(field(*declaration, "kind")) != "variant") continue;
+        std::set<std::string> owned_parameters;
+        for (const auto& parameter : list(field(*declaration, "type_parameters")))
+            owned_parameters.insert(text(field(parameter, "name")));
+        for (const auto& member : list(field(*declaration, "members"))) {
+            for (const auto& payload : list(field(member, "fields"))) {
+                const auto payload_type = text(field(payload, "type"));
+                if (!owned_parameters.count(payload_type) && !is_resolved_type(payload_type))
+                    add_diagnostic("FLOWANALYST_GENERIC_VARIANT_UNKNOWN_TYPE",
+                                   "generic variant payload type '" + payload_type + "' cannot be resolved",
+                                   -1, "declaration:" + std::to_string(declaration_id));
+            }
+        }
+    }
     std::map<int, int> declaration_scopes, block_scopes, statement_scopes;
     for (const auto& [scope_id, scope] : scopes) {
         for (const auto& origin : list(field(bundle, "scope_origins"))) if (integer(field(origin, "scope_id")) == scope_id) {
@@ -895,12 +949,28 @@ int run(const Json& bundle, int lowering_plan_version) {
                 const auto variant_member = text(field(member_payload, "field"));
                 if (variant_members.count(variant_type) && variant_members.at(variant_type).count(variant_member)) {
                     operation.kind = "variant_construct";
-                    operation.variant_type = variant_type;
+                    const auto concrete_type = symbol_types.count(result_symbol) ? symbol_types.at(result_symbol) : variant_type;
+                    const auto instance = variant_substitution(concrete_type, variant_type);
+                    operation.variant_type = concrete_type.empty() ? variant_type : concrete_type;
+                    operation.variant_generic_owner = instance.first == variant_type && generic_variant_parameters.count(variant_type) ? variant_type : std::string{};
+                    if (!operation.variant_generic_owner.empty()) {
+                        operation.variant_type_arguments = split_type_instance(operation.variant_type).second;
+                        operation.variant_instance_id = variant_instance_id(operation.variant_generic_owner, operation.variant_type_arguments);
+                        if (operation.variant_type_arguments.size() != generic_variant_arities.at(variant_type))
+                            add_diagnostic("FLOWANALYST_GENERIC_VARIANT_ARITY", "generic variant instance has the wrong number of type arguments", result_symbol, "statement:" + std::to_string(statement_id));
+                        for (const auto& argument : operation.variant_type_arguments)
+                            if (!is_resolved_type(argument))
+                                add_diagnostic("FLOWANALYST_GENERIC_VARIANT_UNKNOWN_TYPE", "generic variant type argument '" + argument + "' cannot be resolved", result_symbol, "statement:" + std::to_string(statement_id));
+                        for (const auto& parameter : generic_variant_parameters.at(variant_type)) {
+                            const auto found = instance.second.find(parameter);
+                            if (found != instance.second.end()) operation.variant_substitutions.emplace_back(parameter, found->second);
+                        }
+                    }
                     operation.variant_member = variant_member;
                     operation.variant_discriminant = variant_members.at(variant_type).at(variant_member);
                     for (const auto& [field_name, field_type] : variant_payloads.at(variant_type).at(variant_member)) {
                         static_cast<void>(field_name);
-                        operation.variant_payload_types.push_back(field_type);
+                        operation.variant_payload_types.push_back(substitute_type(field_type, instance.second));
                     }
                     const auto arguments = list(field(call_payload, "arguments"));
                     operation.arguments.clear();
@@ -981,8 +1051,19 @@ int run(const Json& bundle, int lowering_plan_version) {
         operation.join_block = operation.block;
         const int selector_symbol = resolved_expression_symbols.count(operation.expression) ? resolved_expression_symbols.at(operation.expression) : -1;
         operation.selector_type = symbol_types.count(selector_symbol) ? symbol_types.at(selector_symbol) : std::string{};
+        const auto selector_instance = split_type_instance(operation.selector_type);
         operation.selector_kind = operation.selector_type == "int" || operation.selector_type.rfind("c_", 0) == 0 ? "integer" :
-            (enum_types.count(operation.selector_type) ? "enum" : (variant_types.count(operation.selector_type) ? "variant" : "named"));
+            (enum_types.count(operation.selector_type) ? "enum" : (variant_types.count(operation.selector_type) || variant_types.count(selector_instance.first) ? "variant" : "named"));
+        if (operation.selector_kind == "variant" && generic_variant_parameters.count(selector_instance.first)) {
+            operation.variant_generic_owner = selector_instance.first;
+            operation.variant_type_arguments = selector_instance.second;
+            operation.variant_instance_id = variant_instance_id(operation.variant_generic_owner, operation.variant_type_arguments);
+            const auto& parameters = generic_variant_parameters.at(selector_instance.first);
+            if (parameters.size() != selector_instance.second.size())
+                add_diagnostic("FLOWANALYST_GENERIC_VARIANT_ARITY", "generic variant instance has the wrong number of type arguments", selector_symbol, "statement:" + std::to_string(statement_id));
+            for (std::size_t index = 0; index < parameters.size() && index < selector_instance.second.size(); ++index)
+                operation.variant_substitutions.emplace_back(parameters[index], selector_instance.second[index]);
+        }
         operation.kind = "match";
         if (operation.expression >= 0) operation.arguments.push_back(operation.expression);
         for (const auto& arm : list(field(payload, "cases"))) {
@@ -1003,7 +1084,9 @@ int run(const Json& bundle, int lowering_plan_version) {
                     if (!symbols.count(candidate_id)) continue;
                     const auto binding = fact_value(*symbols.at(candidate_id), "variant_payload_binding");
                     if (binding.rfind(prefix, 0) == 0) {
-                        bindings.push_back({candidate_id, text(field(*symbols.at(candidate_id), "name")), symbol_types.count(candidate_id) ? symbol_types.at(candidate_id) : std::string{}});
+                        const auto declared = symbol_types.count(candidate_id) ? symbol_types.at(candidate_id) : std::string{};
+                        bindings.push_back({candidate_id, text(field(*symbols.at(candidate_id), "name")),
+                                            substitute_type(declared, variant_substitution(operation.selector_type, label_type).second)});
                     }
                 }
                 std::sort(bindings.begin(), bindings.end(), [](const auto& left, const auto& right) { return left.name < right.name; });
@@ -1184,6 +1267,37 @@ int run(const Json& bundle, int lowering_plan_version) {
             std::cout << "]}";
         }
         std::cout << "]";
+        std::cout << ",\"generic_variants\":[";
+        bool emitted_generic_variant = false;
+        for (const auto& [declaration_id, declaration] : declarations) {
+            if (text(field(*declaration, "kind")) != "variant") continue;
+            const auto parameters = list(field(*declaration, "type_parameters"));
+            if (parameters.empty()) continue;
+            if (emitted_generic_variant) std::cout << ',';
+            emitted_generic_variant = true;
+            std::cout << "{\"name\":" << quote(text(field(*declaration, "name")))
+                      << ",\"declaration_id\":" << declaration_id << ",\"type_parameters\":[";
+            for (std::size_t index = 0; index < parameters.size(); ++index) {
+                if (index) std::cout << ',';
+                std::cout << quote(text(field(parameters[index], "name")));
+            }
+            std::cout << "],\"members\":[";
+            const auto members = list(field(*declaration, "members"));
+            for (std::size_t member_index = 0; member_index < members.size(); ++member_index) {
+                if (member_index) std::cout << ',';
+                const auto& member = members[member_index];
+                std::cout << "{\"name\":" << quote(text(field(member, "name")))
+                          << ",\"discriminant\":" << member_index << ",\"payload_types\":[";
+                const auto fields = list(field(member, "fields"));
+                for (std::size_t field_index = 0; field_index < fields.size(); ++field_index) {
+                    if (field_index) std::cout << ',';
+                    std::cout << quote(text(field(fields[field_index], "type")));
+                }
+                std::cout << "]}";
+            }
+            std::cout << "]}";
+        }
+        std::cout << "]";
     }
     std::cout << ",\"operations\":[";
     std::map<int, std::string> generic_expression_types;
@@ -1233,11 +1347,12 @@ int run(const Json& bundle, int lowering_plan_version) {
                 ? text(field(field(*expressions.at(base), "payload"), "name")) : std::string{};
             const int base_symbol = resolved_expression_symbols.count(base) ? resolved_expression_symbols.at(base) : -1;
             const auto base_type = symbol_types.count(base_symbol) ? symbol_types.at(base_symbol) : std::string{};
-            if (variant_payloads.count(base_type)) {
+            const auto base_instance = split_type_instance(base_type);
+            if (variant_payloads.count(base_instance.first)) {
                 std::string payload_type;
                 std::string payload_member;
                 int discriminant = -1;
-                for (const auto& [member_name, fields] : variant_payloads.at(base_type)) {
+                for (const auto& [member_name, fields] : variant_payloads.at(base_instance.first)) {
                     for (const auto& [field_name, field_type] : fields) {
                         if (field_name == member) {
                             if (!payload_type.empty()) {
@@ -1245,9 +1360,9 @@ int run(const Json& bundle, int lowering_plan_version) {
                                                "variant payload field '" + member + "' is ambiguous for type '" + base_type + "'",
                                                base_symbol, "expression:" + std::to_string(expression_id));
                             }
-                            payload_type = field_type;
+                            payload_type = substitute_type(field_type, variant_substitution(base_type, base_instance.first).second);
                             payload_member = member_name;
-                            discriminant = variant_members.at(base_type).at(member_name);
+                            discriminant = variant_members.at(base_instance.first).at(member_name);
                         }
                     }
                 }
@@ -1379,6 +1494,22 @@ int run(const Json& bundle, int lowering_plan_version) {
                 std::cout << quote(operation.variant_payload_types[index]);
             }
             std::cout << "]";
+            if (!operation.variant_generic_owner.empty()) {
+                std::cout << ",\"generic_owner\":" << quote(operation.variant_generic_owner)
+                          << ",\"instance_id\":" << quote(operation.variant_instance_id)
+                          << ",\"type_arguments\":[";
+                for (std::size_t index = 0; index < operation.variant_type_arguments.size(); ++index) {
+                    if (index) std::cout << ',';
+                    std::cout << quote(operation.variant_type_arguments[index]);
+                }
+                std::cout << "],\"substitutions\":[";
+                for (std::size_t index = 0; index < operation.variant_substitutions.size(); ++index) {
+                    if (index) std::cout << ',';
+                    std::cout << "{\"parameter\":" << quote(operation.variant_substitutions[index].first)
+                              << ",\"type\":" << quote(operation.variant_substitutions[index].second) << "}";
+                }
+                std::cout << "]";
+            }
         }
         if (operation.kind == "generic_call") {
             std::cout << ",\"generic_owner\":" << quote(operation.generic_owner)
@@ -1404,7 +1535,24 @@ int run(const Json& bundle, int lowering_plan_version) {
         if (operation.kind == "match") {
             std::cout << ",\"selector_type\":" << quote(operation.selector_type)
                       << ",\"selector_kind\":" << quote(operation.selector_kind) << ",\"default_block_id\":" << operation.default_block
-                      << ",\"join_block_id\":" << operation.join_block << ",\"cases\":[";
+                      << ",\"join_block_id\":" << operation.join_block;
+            if (!operation.variant_generic_owner.empty()) {
+                std::cout << ",\"variant_generic_owner\":" << quote(operation.variant_generic_owner)
+                          << ",\"variant_instance_id\":" << quote(operation.variant_instance_id)
+                          << ",\"variant_type_arguments\":[";
+                for (std::size_t index = 0; index < operation.variant_type_arguments.size(); ++index) {
+                    if (index) std::cout << ',';
+                    std::cout << quote(operation.variant_type_arguments[index]);
+                }
+                std::cout << "],\"variant_substitutions\":[";
+                for (std::size_t index = 0; index < operation.variant_substitutions.size(); ++index) {
+                    if (index) std::cout << ',';
+                    std::cout << "{\"parameter\":" << quote(operation.variant_substitutions[index].first)
+                              << ",\"type\":" << quote(operation.variant_substitutions[index].second) << "}";
+                }
+                std::cout << "]";
+            }
+            std::cout << ",\"cases\":[";
             for (std::size_t arm = 0; arm < operation.match_values.size(); ++arm) {
                 if (arm) std::cout << ',';
                 std::cout << "{\"value\":" << operation.match_values[arm]
@@ -1495,8 +1643,9 @@ int run(const Json& bundle, int lowering_plan_version) {
         const int selector = integer(field(payload, "selector_expression"));
         const int selector_symbol = resolved_expression_symbols.count(selector) ? resolved_expression_symbols.at(selector) : -1;
         const auto selector_type = symbol_types.count(selector_symbol) ? symbol_types.at(selector_symbol) : std::string{};
+        const auto selector_instance = split_type_instance(selector_type);
         const std::string selector_kind = selector_type == "int" || selector_type.rfind("c_", 0) == 0 ? "integer" :
-            (enum_types.count(selector_type) ? "enum" : (variant_types.count(selector_type) ? "variant" : (selector_type.empty() ? "unknown" : "named")));
+            (enum_types.count(selector_type) ? "enum" : (variant_types.count(selector_type) || variant_types.count(selector_instance.first) ? "variant" : (selector_type.empty() ? "unknown" : "named")));
         if (!first_match) std::cout << ',';
         first_match = false;
         std::cout << "{\"kind\":\"match\",\"statement_id\":" << statement_id
@@ -1514,7 +1663,16 @@ int run(const Json& bundle, int lowering_plan_version) {
                       << ",\"body_block_id\":" << integer(field(arm, "block"));
             if (const auto* label = field(arm, "label_type")) {
                 const auto label_type = text(label);
-                if (!selector_type.empty() && label_type != selector_type)
+                const auto label_instance = split_type_instance(label_type);
+                const auto selector_instance = split_type_instance(selector_type);
+                const bool same_generic_owner =
+                    ((label_instance.second.empty() && selector_instance.first == label_type && generic_variant_parameters.count(label_type)) ||
+                     (!label_instance.second.empty() && selector_instance.first == label_instance.first &&
+                      selector_instance.second.size() == label_instance.second.size()));
+                const bool generic_base_label = label_instance.second.empty() && selector_instance.first == label_type && generic_variant_parameters.count(label_type);
+                const bool label_compatible = label_type == selector_type || generic_base_label ||
+                    (same_generic_owner && !label_instance.second.empty() && label_instance.second == selector_instance.second);
+                if (!selector_type.empty() && !label_compatible)
                     add_diagnostic("FLOWANALYST_MATCH_LABEL_TYPE", "match label type '" + label_type + "' does not match selector type '" + selector_type + "'", selector_symbol, "statement:" + std::to_string(statement_id));
                 if (selector_kind == "integer")
                     add_diagnostic("FLOWANALYST_MATCH_LABEL_ON_INTEGER", "integer match selector cannot use named member label", selector_symbol, "statement:" + std::to_string(statement_id));
@@ -1550,7 +1708,16 @@ int run(const Json& bundle, int lowering_plan_version) {
     for (const auto& [variant_type, members] : variant_payloads) {
         if (!first_variant) std::cout << ',';
         first_variant = false;
-        std::cout << "{\"variant_type\":" << quote(variant_type) << ",\"members\":[";
+        std::cout << "{\"variant_type\":" << quote(variant_type);
+        if (generic_variant_parameters.count(variant_type)) {
+            std::cout << ",\"generic\":true,\"type_parameters\":[";
+            for (std::size_t index = 0; index < generic_variant_parameters.at(variant_type).size(); ++index) {
+                if (index) std::cout << ',';
+                std::cout << quote(generic_variant_parameters.at(variant_type)[index]);
+            }
+            std::cout << "]";
+        }
+        std::cout << ",\"members\":[";
         bool first_member = true;
         for (const auto& [member_name, fields] : members) {
             if (!first_member) std::cout << ',';

@@ -945,6 +945,12 @@ struct ProjectTopLevelDecl {
                                         AstOriginRole::RecordScope,
                                         decl.location,
                                         declarationId));
+        for (std::size_t index = 0; index < decl.type_parameters.size(); ++index) {
+            add_string_fact(table, typeSymbol,
+                            symboltable::FactoidKind::Custom,
+                            "generic_type_parameter_" + std::to_string(index),
+                            decl.type_parameters[index].name);
+        }
         std::set<std::string> seenFields;
         for (const auto& member : decl.members) {
             const auto memberSymbol = table.insertSymbol(moduleScope, member.name, symboltable::SymbolKind::Variable);

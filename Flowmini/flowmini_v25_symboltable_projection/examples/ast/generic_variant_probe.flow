@@ -1,0 +1,36 @@
+program generic_variant_probe
+
+variant Result<T, E> {
+    ok(value : T)
+    error(reason : E)
+}
+
+variant Either<A, B> {
+    left(value : A)
+    right(value : B)
+}
+
+variant Option<T> {
+    some(value : T)
+    none
+}
+
+enum ParseError { invalid }
+
+main {
+    result : Result<int,ParseError>(Result.ok(42))
+    failed : Result<int,ParseError>(Result.error(ParseError.invalid))
+    choice : Either<int,Bool>(Either.left(3))
+    marker : int(0)
+    when result {
+        case Result.ok {
+            value -> marker
+        }
+        default {
+            -1 -> marker
+        }
+    }
+    guard marker > 0 else {
+        99 -> marker
+    }
+}

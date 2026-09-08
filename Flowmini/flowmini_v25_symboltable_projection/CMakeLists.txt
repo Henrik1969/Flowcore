@@ -303,6 +303,16 @@ add_test(NAME flowmini_generics
         ${CMAKE_CURRENT_SOURCE_DIR}/tools/run-flowmini-generic-tests.sh
 )
 
+add_test(NAME flowmini_generic_variants
+        COMMAND ${CMAKE_COMMAND} -E env
+        FLOWMINI_BIN=$<TARGET_FILE:flowmini>
+        FLOWANALYST_BIN=$<TARGET_FILE:flowanalyst>
+        FLOWOPTIMIZE_BIN=$<TARGET_FILE:flowoptimize>
+        FLOWPREPARE_BIN=$<TARGET_FILE:flowprepare>
+        FLOWLOWER_BIN=$<TARGET_FILE:flowlower>
+        ${CMAKE_CURRENT_SOURCE_DIR}/tools/run-flowmini-generic-variant-tests.sh
+)
+
 add_test(NAME flowmini_parser_differential
         COMMAND ${CMAKE_COMMAND} -E env
         FLOWMINI_BIN=$<TARGET_FILE:flowmini>

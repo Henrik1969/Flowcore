@@ -1112,6 +1112,14 @@ namespace flowmini::ast {
                 dump_indent(out, indent + 2);
                 out << "\"name\": ";
                 dump_json_string(out, variantDecl->name);
+                out << ", \"type_parameters\": [";
+                for (std::size_t i = 0; i < variantDecl->type_parameters.size(); ++i) {
+                    if (i > 0) { out << ", "; }
+                    out << "{\"name\": ";
+                    dump_json_string(out, variantDecl->type_parameters[i].name);
+                    out << "}";
+                }
+                out << "]";
                 out << ", \"members\": [";
                 for (std::size_t i = 0; i < variantDecl->members.size(); ++i) {
                     if (i > 0) { out << ", "; }

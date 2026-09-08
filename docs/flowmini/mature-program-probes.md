@@ -9,6 +9,7 @@ remain deterministic and do not imply that the missing facilities are solved.
 | `examples/apps/flowconfig/flowconfig.flow` | enum declaration, `when`, guard, constant declaration, branch output | `flowmini_mature_programs`; production branch outputs `20` | configuration parsing and file/CLI APIs are not yet standard units |
 | `examples/flowcat/flowcat.flow` | external C provider, file descriptor lifecycle, capability policy | `flowcat_flowcore_pipeline` | provider contracts expose effects, but resource cleanup is descriptive |
 | `examples/bootstrap/variant_result_probe.flow` | concrete result variant, payload extraction, match routing, guard continuation | `flowmini_variant_backend`; LLVM + `lli` return 0 | repeated concrete `*Result` variants provide evidence for later generics; wider payload layouts still need a carrier contract |
+| `flowmini_v25_symboltable_projection/examples/ast/generic_variant_probe.flow` | generic `Result<T,E>` and neutral `Either<A,B>` construction, substitution, matching, guards, and deterministic artifacts | `flowmini_generic_variants`; LLVM + `lli` return 0; imported `std/result.flow` also passes | concise generic-qualified member syntax, cross-function variant returns, payloadless construction, and wider carriers remain future work |
 
 The attempted generic collection helper is recorded in
 [`FUTURE_WORK_EVIDENCE.md`](../FUTURE_WORK_EVIDENCE.md): an imported

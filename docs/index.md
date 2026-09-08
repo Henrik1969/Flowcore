@@ -24,7 +24,7 @@ This is the soul of Flowcore.
 
 ## Foundational architecture
 
-- [Current v0.31 language-maturation status](checkpoints/2026-08-26-v028-maturation-ledger.md)
+- [Current v0.32 generic-variant status](language/generic-variants-and-results-v1.md)
 
 - [Flowcore core promise](architecture/flowcore-core-promise.md)
 - [Transformation and revision architecture](architecture/compiler-transformation-revision-model.md)
@@ -54,10 +54,10 @@ See:
 Current checkpoint:
 
 ```text
-Flowcore v0.31 restrained canonical generics slice
+Flowcore v0.32 generic variants and typed outcomes slice
  AST golden tests: 28
  Symbol projection tests: 14
- Root CTest: PASS (94/94) in the current build
- Flowmini categorized fixture suite: 91/140 (49 known parser/ABI/profile gaps)
+ Root CTest: PASS (99/99) in the current build
+ Flowmini categorized fixture suite: 96/145 (49 known parser/ABI/profile gaps)
  flowvalidate / identity mutation gates: CTest green
 ```
