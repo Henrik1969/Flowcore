@@ -450,3 +450,17 @@ IDE, or duplicate standard library is justified by current repository evidence.
 Use existing implementations behind explicit providers until a concrete
 failure, benchmark, or required acceptance program demonstrates that the
 architectural cost is lower than the problem cost.
+
+## Flowinspect application evidence
+
+The first durable artifact consumer is implemented in `Flowinspect/`. It uses
+the shared `flowcontracts` parser/validators and therefore keeps artifact facts
+authoritative. The tool currently inspects five versioned artifact families,
+rejects unsupported versions and malformed input explicitly, and emits stable
+summaries for real Flowanalyst and Flowparallel captures. Detailed findings and
+deferred application pressure are recorded in
+[`docs/flowmini/flowinspect-pressure-ledger.md`](flowmini/flowinspect-pressure-ledger.md).
+
+This investigation did not justify a Flowmini-native JSON parser, a new Result
+carrier, directory mode, or a scheduler extension. Those remain evidence-led
+questions rather than planned features.

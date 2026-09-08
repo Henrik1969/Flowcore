@@ -14,7 +14,7 @@ historical directory name)
 Current baseline:
 
 ```text
-root CTest: PASS (99/99)
+root CTest: PASS (100/100)
 AST golden tests: 28 PASS
 Symbol projection tests: 14 PASS
 focused Flowmini CTest: 16/16
@@ -42,6 +42,10 @@ The C binding generator is an EXPERIMENTAL Clang-backed subset with explicit
 partial results. Mature runtime probes and the verified standard-library
 surface are documented in the [probe report](mature-program-probes.md) and
 [stdlib index](stdlib-index.md).
+
+The read-only [`flowinspect`](../../Flowinspect/README.md) developer tool
+consumes versioned Flowcore artifacts and records its application pressure in
+the [pressure ledger](flowinspect-pressure-ledger.md).
 
 Documents in this directory:
 

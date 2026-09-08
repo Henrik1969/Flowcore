@@ -1059,3 +1059,22 @@ later instruction reopens them.
 - Fresh verification: root CTest `99/99`, focused Flowmini CTest `16/16`,
   focused generic-variant gate passing, and ASan/UBSan CTest `99/99` with leak
   checks disabled. Categorized evidence is `96/145` with 49 known gaps.
+
+## 2026-09-08 flowinspect application-pressure checkpoint
+
+- Added the read-only `flowinspect` consumer over the shared Flowcontracts
+  parser and validators. It identifies and summarizes semantic reports,
+  execution plans, optimization reports, lowering plans, and frontend bundles
+  without inferring authority from text projections.
+- Added explicit format/version dispatch, malformed-input diagnostics, stable
+  exit statuses, deterministic rejection grouping, stdin support, and a focused
+  CLI gate that captures real Flowanalyst/Flowparallel artifacts.
+- The application-pressure result is deliberately narrow: a C++ consumer is
+  proportional because strict JSON and artifact contracts already exist. No
+  Flowmini JSON parser, new Result carrier, directory scheduler, or speculative
+  language feature was added. Deferred pressure is recorded in
+  `docs/flowmini/flowinspect-pressure-ledger.md`.
+- Fresh verification: root CTest `100/100`, focused `flowinspect_cli` `1/1`,
+  focused Flowmini `16/16`, and Debug ASan/UBSan CTest `100/100` with leak
+  checks disabled. Categorized evidence remains `96/145` with 49 known gaps;
+  `git diff --check` passes.
