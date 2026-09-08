@@ -293,6 +293,22 @@ unsupported carriers as `partial`; it does not parse C++ or execute foreign
 calls. The real-library probe covers installed libm, zlib, sqlite3, and libcurl
 headers.
 
+### Safe provider byte values
+
+The hosted filesystem capability exposes a path-based byte operation:
+
+```flow
+bytes : list<int>(file.bytes(args[0]))
+```
+
+`process.args` supplies positional application strings. `file.bytes` opens and
+reads the path in the provider, materializes the bytes as the ordinary safe
+`list<int>` carrier, and closes its native resources before returning. The
+operation is effectful (`filesystem.read`) and its provider identity remains in
+the semantic artifact; materialization does not make the call pure. Missing or
+unreadable paths produce an explicit diagnostic. Flowmini source never receives
+a native pointer. `Flowwc/src/flowwc.flow` is the maintained example.
+
 ## Flowcore model in programmer terms
 
 Think of a program as:
