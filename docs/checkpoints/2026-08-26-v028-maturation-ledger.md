@@ -1144,3 +1144,16 @@ later instruction reopens them.
   and [`docs/substrate/substrate-warehouse-inventory.json`](../substrate/substrate-warehouse-inventory.json).
   Recommended next step is a bounded libm experiment, followed by one zlib or
   SQLite carrier experiment; no broad binding implementation is justified yet.
+
+## 2026-09-08 provider carrier expedition activated
+
+- Registered `docs/tasks/provider-carrier-expedition-autonomous.md` as the
+  active reusable-chain mission and updated the repository agent policy to use
+  it. The expedition is deliberately staged around three representative
+  interface families: safe buffer-plus-length materialization, opaque resource
+  lifecycle, and one verified aggregate ABI layout.
+- This checkpoint changes task authority and evidence workflow only. It does
+  not modify compiler/provider behavior, install host packages, or publish
+  machine-specific inventory. The first unfinished gate is `PC-00`: re-read
+  the redacted scouting evidence and inspect current Flowbind/provider/carrier
+  contracts before selecting experiments.

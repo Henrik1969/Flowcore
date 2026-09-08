@@ -3,8 +3,10 @@
 ## Autonomous reusable-chain work
 
 The active autonomous mission is defined by
-`docs/tasks/tinyvm-cross-target-bootstrap.md`. Read it completely before making
-task changes. Treat it as the authoritative objective and definition of done.
+`docs/tasks/provider-carrier-expedition-autonomous.md`. Read it completely
+before making task changes. Treat it as the authoritative objective and
+definition of done. The completed TinyVM bootstrap remains binding background
+architecture and evidence.
 
 ### Continuation contract
 
