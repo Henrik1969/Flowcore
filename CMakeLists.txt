@@ -13,6 +13,7 @@ add_subdirectory(Flowterminal ${CMAKE_CURRENT_BINARY_DIR}/flowterminal)
 add_subdirectory(subprojects/TinyVM ${CMAKE_CURRENT_BINARY_DIR}/tinyvm)
 add_subdirectory(Flowmini/flowmini_v25_symboltable_projection
     ${CMAKE_CURRENT_BINARY_DIR}/flowmini)
+add_subdirectory(Flowwc ${CMAKE_CURRENT_BINARY_DIR}/flowwc)
 add_subdirectory(Flowanalyst ${CMAKE_CURRENT_BINARY_DIR}/flowanalyst)
 add_subdirectory(Flowbind ${CMAKE_CURRENT_BINARY_DIR}/flowbind)
 add_subdirectory(Flowoptimize ${CMAKE_CURRENT_BINARY_DIR}/flowoptimize)

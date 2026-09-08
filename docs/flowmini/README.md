@@ -47,6 +47,10 @@ The read-only [`flowinspect`](../../Flowinspect/README.md) developer tool
 consumes versioned Flowcore artifacts and records its application pressure in
 the [pressure ledger](flowinspect-pressure-ledger.md).
 
+The [`flowwc`](../../Flowwc/README.md) probe keeps byte counting and word/line
+state in Flowmini. Its current hosted interface is stdin-based; the path and
+multi-file boundary is recorded in the [flowwc pressure ledger](flowwc-pressure-ledger.md).
+
 Documents in this directory:
 
 - [Roadmap](roadmap.md)

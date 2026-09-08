@@ -1,0 +1,35 @@
+program flowwc
+
+main(args : list<string>) {
+    bytes : list<int>(stdin.bytes())
+    index : int(0)
+    count : int(length(bytes))
+    lines : int(0)
+    words : int(0)
+    in_word : int(0)
+    current : int(0)
+    one : int(1)
+    zero : int(0)
+    newline : int(10)
+    whitespace_end : int(33)
+
+    while index < count {
+        bytes[index] -> current
+        if current == newline {
+            lines + one -> lines
+        }
+        if current < whitespace_end {
+            zero -> in_word
+        } else {
+            if in_word == zero {
+                words + one -> words
+            }
+            one -> in_word
+        }
+        index + one -> index
+    }
+
+    print lines
+    print words
+    print count
+}

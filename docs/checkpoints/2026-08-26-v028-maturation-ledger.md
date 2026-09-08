@@ -1078,3 +1078,17 @@ later instruction reopens them.
   focused Flowmini `16/16`, and Debug ASan/UBSan CTest `100/100` with leak
   checks disabled. Categorized evidence remains `96/145` with 49 known gaps;
   `git diff --check` passes.
+
+## 2026-09-08 flowwc Flowmini application-pressure checkpoint
+
+- Added `Flowwc/src/flowwc.flow`, keeping byte traversal, line/word state,
+  aggregation, and output entirely in Flowmini. The application uses the
+  existing `stdin.bytes()` capability and defines a word as a maximal
+  non-whitespace byte sequence; bytes are provider bytes consumed.
+- Added focused empty, boundary, whitespace, UTF-8, no-final-newline, and
+  deterministic-output tests. The first path-input attempt was recorded as
+  `FW-P001`, then reverted when it exposed an incomplete shared dynamic
+  argument/file-to-list contract across the structural and runtime parsers.
+  No native counter or flowwc-specific compiler dispatch was retained.
+- Path-based `flowwc file.txt`, multi-file aggregation, typed per-file Result,
+  and automatic parallelism remain blocked or deferred behind that evidence.
