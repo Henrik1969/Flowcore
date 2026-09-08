@@ -50,10 +50,12 @@ observable results. This is an execution gate, not a source-level thread
 feature.
 
 Flowanalyst's `parallel_rejections` records pairs that remain serial because
-of unknown/effectful callees, conflicting outputs, read-after-write
+of unknown effects, external effects, conflicting outputs, read-after-write
 dependencies, different scopes, or missing disjoint-input proof. Resource and
 opaque-provider relationships remain conservative until explicit alias
-evidence exists.
+evidence exists. Resource-bearing ABI arguments are carried with symbol-derived
+identity, access, ownership, lifetime, and unknown-concurrency metadata, so
+same-resource conflicts are rejected before runtime policy is consulted.
 
 The optional `flowparallel_cuda` provider currently probes the CUDA driver and
 emits a linear-algebra workload contract for matrix multiplication. It includes

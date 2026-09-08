@@ -15,7 +15,7 @@ check_serial_fallback() {
   jq -e '.status == "ready" and .dependency_analysis.parallel_candidates == 0 and (.parallel_candidates | length) == 0 and any(.parallel_rejections[]?; .fallback == "serial")' "${tmpdir}/${name}.plan.json" >/dev/null
 }
 
-check_serial_fallback "${root}/Flowmini/flowmini_v25_symboltable_projection/examples/bootstrap/shared_scalar_classifier.flow" "unknown-or-effectful-callee" unknown
+check_serial_fallback "${root}/Flowmini/flowmini_v25_symboltable_projection/examples/bootstrap/shared_scalar_classifier.flow" "unknown-effect" unknown
 check_serial_fallback "${root}/Flowmini/flowmini_v25_symboltable_projection/examples/ast/parallel_conflicting_output.flow" "conflicting-output" conflicting
 check_serial_fallback "${root}/Flowmini/flowmini_v25_symboltable_projection/examples/ast/parallel_dependent.flow" "read-after-write-dependency" dependent
 

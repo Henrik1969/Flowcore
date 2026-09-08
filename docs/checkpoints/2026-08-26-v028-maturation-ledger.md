@@ -999,3 +999,32 @@ later instruction reopens them.
   focused Flowparallel `11/11`, focused Flowmini `13/13`, and Debug
   ASan/UBSan CTest `96/96` (leak checks disabled). Categorized Flowmini
   evidence remains `91/140` with 49 known gaps.
+
+## 2026-09-08 Flowparallel resource/effect maturation checkpoint
+
+- Flowanalyst now connects provider ABI metadata to call-site evidence. Resource
+  arguments preserve symbol-derived identity, access, ownership, lifetime,
+  opacity, alias status, and explicit unknown concurrency; provider-created
+  result resources preserve cleanup identity.
+- Declared pure provider calls with value-only arguments can join the existing
+  pure proof path. Effectful, unknown, or resource-bearing calls remain
+  conservative and produce structured rejection reasons including
+  `resource-read-write-conflict`, `resource-write-write-conflict`,
+  `resource-alias-unknown`, and `provider-concurrency-unknown`.
+- Added `parallel_resource_probe.flow`, combining independent `square`/`cube`
+  computations and the existing `identity<int>` generic call with
+  `open`/`sendfile`/`close` provider operations. Flowanalyst records three pure
+  candidates; the bounded bridge executes the two scalar candidates, rejects
+  the repeated mutable offset resource, and produces equal serial/thread-pool
+  results `[9,64]` after Flowbind authorization and LLVM lowering.
+- Added resource evidence and mixed-execution gates. No source-level
+  concurrency syntax, unsafe mechanism, new scheduler, or CUDA path was
+  introduced.
+- Resource alias analysis remains intentionally bounded: different symbols are
+  not assumed distinct for conflicting effects, provider concurrent-read
+  guarantees are not inferred, and effectful provider execution is outside the
+  scalar Flowmini invocation bridge. These remain explicit follow-up work.
+- Verification for this checkpoint: normal root CTest `98/98`, focused
+  Flowparallel `13/13`, focused Flowmini `15/15`, and Debug ASan/UBSan CTest
+  `98/98` with leak checks disabled. The categorized Flowmini report is
+  `93/142` with 49 known gaps.

@@ -16,7 +16,7 @@ trap 'rm -rf "${tmpdir}"' EXIT
 "${flowmini}" --dump-frontend-bundle "${fixture}" | "${analyst}" --lowering-plan-version 2 > "${tmpdir}/semantic.json"
 jq -e '.status == "ok" and ([.parallel_candidates[]? | select(.proof_status == "proven" and .evidence.dependency_independent == true and .evidence.effect_compatible == true and .evidence.mutation_conflict == false and (.provenance.ast_path | startswith("/statement_pool/")))] | length) == 2' "${tmpdir}/semantic.json" >/dev/null
 "${parallel}" "${tmpdir}/semantic.json" > "${tmpdir}/execution-plan.json"
-jq -e '.status == "ready" and .dependency_analysis.parallel_candidates == 2 and ([.parallel_candidates[]? | select(.proof_status == "proven" and .provenance.source != null and .evidence.resource_compatibility == "unknown-resources-not-present")] | length) == 2' "${tmpdir}/execution-plan.json" >/dev/null
+jq -e '.status == "ready" and .dependency_analysis.parallel_candidates == 2 and ([.parallel_candidates[]? | select(.proof_status == "proven" and .provenance.source != null and .evidence.resource_compatibility == "not-applicable")] | length) == 2' "${tmpdir}/execution-plan.json" >/dev/null
 serial_selection="$(${cpu} --plan "${tmpdir}/execution-plan.json" --observed-speedup 0.1 --workers 2)"
 parallel_selection="$(${cpu} --plan "${tmpdir}/execution-plan.json" --observed-speedup 2.0 --workers 2)"
 printf '%s\n' "${serial_selection}" | jq -e '.decision == "serial" and .provider == "cpu.serial"' >/dev/null

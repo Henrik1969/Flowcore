@@ -1,0 +1,38 @@
+import "../../std/abi/file_io.flow"
+
+program parallel_resource_probe
+
+fn square(n : int) -> int {
+    return n * n
+}
+
+fn cube(n : int) -> int {
+    return n * n * n
+}
+
+fn identity<T>(value : T) : T {
+    value -> return
+}
+
+main {
+    left_input : int(3)
+    right_input : int(4)
+    left : int(square(left_input))
+    right : int(cube(right_input))
+    marker : int(identity<int>(5))
+
+    flags : c_int(0)
+    output_fd : c_int(1)
+    input_fd : c_int(-1)
+    offset : c_pointer(0)
+    offset_b : c_pointer(0)
+    capacity : c_size_t(16)
+    count : c_long(0)
+    path : c_string("parallel-resource-input.txt")
+
+    open(path, flags) -> input_fd
+    sendfile(output_fd, input_fd, offset, capacity) -> count
+    sendfile(output_fd, input_fd, offset, capacity) -> count
+    sendfile(output_fd, input_fd, offset_b, capacity) -> count
+    close(input_fd) -> count
+}

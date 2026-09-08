@@ -42,13 +42,18 @@ semantic meaning backward into Flowmini.
 
 It also emits `effect_facts`. The first proven effect is `pure` for function
 bodies consisting only of return expressions over literals, parameters, and
-pure unary/binary operators. Calls, mutation, control-state constructs,
-external effects, and unsupported forms remain `unknown`. For call pairs in the
-same scope it emits `parallel_candidates` only when pure-callee, disjoint-input
-and distinct-output evidence is present. Those candidates carry proof fields
-and remain runtime-deferred. Other pairs are retained in `parallel_rejections`
-with a serial fallback reason; missing effect, mutation, alias, or resource
-evidence is never treated as permission to parallelize.
+pure unary/binary operators. Declared pure provider calls with value-only
+arguments may also be proven pure. Calls, mutation, control-state constructs,
+external effects, and unsupported forms remain `unknown`. Resource-bearing ABI
+arguments carry symbol-derived identities, access/ownership/lifetime metadata,
+and an explicit unknown concurrency status. For call pairs in the same scope
+it emits `parallel_candidates` only when pure-callee, disjoint-input and
+distinct-output evidence is present. Those candidates carry proof fields and
+remain runtime-deferred. Other pairs are retained in `parallel_rejections`
+with a serial fallback reason such as `resource-read-write-conflict`,
+`resource-alias-unknown`, or `provider-concurrency-unknown`; missing effect,
+mutation, alias, or resource evidence is never treated as permission to
+parallelize.
 
 The independent consumer boundary is specified in
 [`docs/flowanalyst/v0.1-consumer-contract.md`](../docs/flowanalyst/v0.1-consumer-contract.md).

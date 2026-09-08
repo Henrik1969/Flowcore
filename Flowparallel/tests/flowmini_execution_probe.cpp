@@ -44,12 +44,14 @@ int main(int argc, char** argv) {
         std::vector<Call> calls;
         for (const auto& item : array(field(*lowering_value, "operations"), "lowering_plan.operations")) {
             const auto kind = text(field(item, "kind"));
-            if (kind == "value_definition") {
-                const auto* result = field(item, "result_symbol_id");
-                const auto operands = array(field(item, "operands"), "operation.operands");
-                if (result && !operands.empty() && text(field(operands.front(), "kind")) == "integer_literal")
-                    values[number(result, "result_symbol_id")] = std::stoi(text(field(operands.front(), "value")));
-            }
+            if (kind != "value_definition") continue;
+            const auto* result = field(item, "result_symbol_id");
+            const auto operands = array(field(item, "operands"), "operation.operands");
+            if (result && !operands.empty() && text(field(operands.front(), "kind")) == "integer_literal")
+                values[number(result, "result_symbol_id")] = std::stoi(text(field(operands.front(), "value")));
+        }
+        for (const auto& item : array(field(*lowering_value, "operations"), "lowering_plan.operations")) {
+            const auto kind = text(field(item, "kind"));
             if (kind != "call") continue;
             const int expression = number(field(item, "expression_id"), "operation.expression_id");
             if (std::find(candidate_expressions.begin(), candidate_expressions.end(), expression) == candidate_expressions.end()) continue;

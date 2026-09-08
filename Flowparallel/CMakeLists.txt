@@ -96,6 +96,23 @@ add_test(NAME flowparallel_flowmini_reconnection
         FLOWMINI_BIN=$<TARGET_FILE:flowmini>
         FLOWANALYST_BIN=$<TARGET_FILE:flowanalyst>
         ${CMAKE_CURRENT_SOURCE_DIR}/tests/run-flowmini-reconnection-tests.sh)
+add_test(NAME flowparallel_flowmini_resources
+    COMMAND ${CMAKE_COMMAND} -E env
+        FLOWMINI_BIN=$<TARGET_FILE:flowmini>
+        FLOWANALYST_BIN=$<TARGET_FILE:flowanalyst>
+        FLOWPARALLEL_BIN=$<TARGET_FILE:flowparallel>
+        ${CMAKE_CURRENT_SOURCE_DIR}/tests/run-flowmini-resource-tests.sh)
+add_test(NAME flowparallel_flowmini_resource_execution
+    COMMAND ${CMAKE_COMMAND} -E env
+        FLOWPARALLEL_FLOWMINI_PROBE_BIN=$<TARGET_FILE:flowparallel_flowmini_probe>
+        FLOWMINI_BIN=$<TARGET_FILE:flowmini>
+        FLOWANALYST_BIN=$<TARGET_FILE:flowanalyst>
+        FLOWPARALLEL_BIN=$<TARGET_FILE:flowparallel>
+        FLOWOPTIMIZE_BIN=$<TARGET_FILE:flowoptimize>
+        FLOWPREPARE_BIN=$<TARGET_FILE:flowprepare>
+        FLOWLOWER_BIN=$<TARGET_FILE:flowlower>
+        FLOWBIND_BIN=$<TARGET_FILE:flowbind>
+        ${CMAKE_CURRENT_SOURCE_DIR}/tests/run-flowmini-resource-execution-tests.sh)
 add_test(NAME flowparallel_cuda_provider
     COMMAND ${CMAKE_COMMAND} -E env
         FLOWPARALLEL_CUDA_BIN=$<TARGET_FILE:flowparallel_cuda>

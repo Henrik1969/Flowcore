@@ -81,3 +81,95 @@ The reconnection slice is green at the current repository boundary:
 
 Broader region scheduling, resource alias proof, backend-neutral cancellation,
 and TinyVM execution of current Flowmini regions remain explicitly unresolved.
+
+## Resource and effect maturation
+
+### FP-RE01 — resource identity propagation
+
+**Finding:** ABI type contracts already described access, ownership, lifetime,
+and opacity, but Flowanalyst previously discarded the identity of the argument
+value carrying a resource.
+
+**Evidence:** `parallel_resource_probe.flow` passes one `c_pointer` symbol to
+two `sendfile` operations. The semantic report now emits `resource_uses` with
+`resource_kind`, `resource_identity`, `alias_status`, access, ownership,
+lifetime, opacity, and `concurrency` fields; lowering operations carry the same
+metadata.
+
+**Decision:** Use the smallest identity available today: `symbol:<id>` for an
+resolved argument symbol and `unknown` otherwise. This is evidence, not a
+general pointer-alias proof.
+
+**Status:** IMPLEMENTED and TESTED by the resource evidence and mixed execution
+gates. Provider-created result resources retain their cleanup contract and
+symbol-derived identity where a result symbol exists.
+
+### FP-RE02 — minimal effects
+
+**Finding:** Parallel reasoning needs to distinguish pure calls from provider
+effects without creating a new effect language.
+
+**Decision:** Preserve the provider's declared effect and add the derived
+`effect_class` vocabulary used by the planner: `pure`, `unknown`, or the
+provider effect spelling such as `io`. Declared pure calls with value-only
+arguments may be proven pure; resource-bearing calls remain non-pure unless a
+future provider contract supplies stronger concurrency evidence.
+
+**Status:** IMPLEMENTED and TESTED. Unknown and external effects fall back to
+serial with explicit reasons.
+
+### FP-RE03/FP-RE04 — alias and conflict rules
+
+**Decision:** Equal resolved resource identities are `same`; unresolved or
+different resource identities are not assumed distinct and therefore remain
+`unknown` for conflicting effects. Resource read/write and write/write pairs
+are rejected. Read/read pairs with no explicit provider concurrency contract
+are rejected as `provider-concurrency-unknown`.
+
+**Status:** IMPLEMENTED and TESTED for same-resource write/write, unknown
+provider concurrency, and ordinary dependency/output conflicts. Arbitrary
+foreign-pointer alias analysis and a universal ownership system remain
+NOT SUPPORTED — DEFERRED.
+
+### FP-RE05/FP-RE06 — mixed workload
+
+`parallel_resource_probe.flow` combines two independent pure computations and
+the existing generic `identity<int>` call with `open`/`sendfile`/`close`
+provider operations. Flowanalyst records three pure candidates (`square`,
+`cube`, and `identity<int>`); the bounded execution bridge exercises the first
+two compiled scalar calls. Flowparallel rejects the repeated mutable offset
+resource and keeps provider work serial. The compiled pure calls execute
+through both CPU providers with identical results `[9,64]`; effectful provider
+execution remains outside the bounded invocation bridge, so no side effect is
+claimed to have run in the probe.
+
+### FP-RE07 — provider-resource boundary
+
+The existing ABI metadata and Flowbind authorization are reused. Resource
+contracts expose cleanup and lifecycle obligations, but the provider does not
+yet declare concurrent-read compatibility or a cross-symbol alias proof.
+Consequently an opaque SQLite/terminal/device handle remains serial by default.
+This is the intended conservative result until a real provider contract and
+test establish a stronger guarantee.
+
+### FP-RE08/FP-RE09 — failure and profitability
+
+The CPU executor retains the first observed failing task index and error text,
+does not promise rollback, and completes already-running work according to its
+existing executor behavior. The existing failure-propagation gate remains the
+correctness check; deterministic cancellation is NOT SUPPORTED — DEFERRED.
+Runtime selection continues to choose serial or thread-pool from capability,
+policy, and observed speedup independently of compile-time legality.
+
+### FP-RE10 — next-stage recommendation
+
+The evidence supports **broader Flowparallel scheduling** only after resource
+contracts can state compatible concurrent access. The next bounded experiment
+should add a provider-owned distinct-resource/concurrent-read contract, rather
+than adding source concurrency syntax or a generalized effect system.
+
+The completed resource checkpoint verifies normal root CTest `98/98`, focused
+Flowparallel tests `13/13`, focused Flowmini tests `15/15`, and Debug
+ASan/UBSan CTest `98/98` with leak checks disabled. The categorized Flowmini
+inventory is `93/142` with 49 known gaps; the two additional entries are the
+resource evidence and resource execution probes.

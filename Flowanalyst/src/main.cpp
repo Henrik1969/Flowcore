@@ -70,9 +70,10 @@ struct Region { std::string id, kind, status; std::vector<std::string> prerequis
 struct EffectFact { int declaration = -1, symbol = -1; std::string name, effect, certainty, reason; };
 struct VariantPayloadBinding { int symbol = -1; std::string name, type; };
 struct GenericSignature { int symbol = -1, declaration = -1; std::string name, return_type; std::vector<std::string> parameters, value_parameters, parameter_types; bool forward_first_argument = false; };
-struct CallSite { int expression = -1, statement = -1, scope = -1, callee_symbol = -1, write_symbol = -1; std::string callee; bool pure = false; std::set<int> reads; std::string writes; std::vector<int> arguments; std::vector<int> independent_with; };
-struct ParallelRejection { int left = -1, right = -1; std::string reason; };
-struct LoweringOperation { int expression = -1, statement = -1, scope = -1, block = -1, function_symbol = -1, then_block = -1, else_block = -1, body_block = -1, failure_block = -1, default_block = -1, join_block = -1, callee_symbol = -1, result_symbol = -1, variant_discriminant = -1; std::string callee, kind, contract, library, convention, symbol, effect, parameter_types, return_type, selector_type, selector_kind, compile_time_value, variant_type, variant_member, generic_owner, generic_return_type, instantiation_id; std::vector<int> arguments, match_values, match_highs, match_blocks; std::vector<std::string> match_label_types, match_label_members, variant_payload_types, generic_type_arguments; std::vector<std::pair<std::string, std::string>> generic_substitutions; std::vector<std::vector<VariantPayloadBinding>> match_payload_bindings; };
+struct ResourceUse { int argument = -1, symbol = -1; std::string type, identity, alias_status, access, ownership, lifetime, opaque; };
+struct CallSite { int expression = -1, statement = -1, scope = -1, callee_symbol = -1, write_symbol = -1; std::string callee, effect = "unknown", provider_contract, provider_symbol; bool pure = false, external = false, produces_resource = false; std::set<int> reads; std::string writes; std::vector<int> arguments; std::vector<ResourceUse> resources; ResourceUse produced_resource; std::vector<int> independent_with; };
+struct ParallelRejection { int left = -1, right = -1; std::string reason, left_effect, right_effect; std::vector<ResourceUse> left_resources, right_resources; };
+struct LoweringOperation { int expression = -1, statement = -1, scope = -1, block = -1, function_symbol = -1, then_block = -1, else_block = -1, body_block = -1, failure_block = -1, default_block = -1, join_block = -1, callee_symbol = -1, result_symbol = -1, variant_discriminant = -1; std::string callee, kind, contract, library, convention, symbol, effect, effect_class, parameter_types, return_type, selector_type, selector_kind, compile_time_value, variant_type, variant_member, generic_owner, generic_return_type, instantiation_id; std::vector<int> arguments, match_values, match_highs, match_blocks; std::vector<std::string> match_label_types, match_label_members, variant_payload_types, generic_type_arguments; std::vector<std::pair<std::string, std::string>> generic_substitutions; std::vector<ResourceUse> resources; ResourceUse produced_resource; bool produces_resource = false; std::vector<std::vector<VariantPayloadBinding>> match_payload_bindings; };
 struct Callable { int symbol = -1, scope = -1, body_block = -1; bool entry = false; std::string name, return_type, availability; std::vector<std::pair<int, std::string>> parameters; };
 struct Resolution { int expression = -1, statement = -1, scope = -1, symbol = -1; std::string name; };
 
@@ -649,6 +650,16 @@ int run(const Json& bundle, int lowering_plan_version) {
         }
         return -1;
     };
+    auto binding_for_call = [&](const CallSite& site) -> const BindingRequirement* {
+        std::string leaf = site.callee;
+        const auto separator = leaf.rfind('.');
+        if (separator != std::string::npos) leaf = leaf.substr(separator + 1);
+        const bool qualified = site.callee.find('.') != std::string::npos;
+        for (const auto& requirement : binding_requirements) {
+            if (qualified ? requirement.source_symbol == site.callee_symbol : requirement.symbol == leaf) return &requirement;
+        }
+        return nullptr;
+    };
     std::vector<CallSite> call_sites;
     for (const auto& [expression_id, expression] : expressions) {
         if (text(field(*expression, "kind")) != "call") continue;
@@ -670,15 +681,78 @@ int run(const Json& bundle, int lowering_plan_version) {
             const auto* statement_payload = field(*statement, "payload");
             site.writes = text(field(*statement, "name"));
             if (site.writes.empty()) site.writes = text(field(field(statement_payload, "target"), "name"));
-            if (!site.writes.empty()) site.write_symbol = visible_symbol(site.scope, site.writes);
+        if (!site.writes.empty()) site.write_symbol = visible_symbol(site.scope, site.writes);
+        }
+        if (const auto* requirement = binding_for_call(site)) {
+            site.external = true;
+            site.provider_contract = requirement->contract;
+            site.provider_symbol = requirement->symbol;
+            site.effect = requirement->effect.empty() ? "unknown" : requirement->effect;
+            const auto parameter_types = split_generic_arguments(requirement->parameter_types);
+            for (std::size_t index = 0; index < parameter_types.size() && index < site.arguments.size(); ++index) {
+                const auto type_name = parameter_types[index];
+                const AbiTypeContract* contract = nullptr;
+                for (const auto& candidate : abi_type_contracts)
+                    if (candidate.contract == requirement->contract && candidate.name == type_name) { contract = &candidate; break; }
+                if (!contract) continue;
+                const int argument_expression = site.arguments[index];
+                const int argument_symbol = resolved_expression_symbols.count(argument_expression) ? resolved_expression_symbols.at(argument_expression) : -1;
+                const bool resource_carrier = contract->opaque == "true" || contract->ownership == "external" || contract->access == "read_write" || contract->access == "write" || contract->lifetime == "external";
+                if (!resource_carrier) continue;
+                ResourceUse use;
+                use.argument = static_cast<int>(index);
+                use.symbol = argument_symbol;
+                use.type = type_name;
+                use.identity = argument_symbol >= 0 ? "symbol:" + std::to_string(argument_symbol) : "unknown";
+                use.alias_status = argument_symbol >= 0 ? "symbol-derived" : "unknown";
+                use.access = contract->access;
+                use.ownership = contract->ownership;
+                use.lifetime = contract->lifetime;
+                use.opaque = contract->opaque;
+                site.resources.push_back(std::move(use));
+            }
+            for (const auto& candidate : abi_type_contracts) {
+                if (candidate.contract != requirement->contract || candidate.name != requirement->return_type || candidate.cleanup.empty()) continue;
+                site.produces_resource = true;
+                site.produced_resource = {-1, site.write_symbol, candidate.name,
+                                          site.write_symbol >= 0 ? "symbol:" + std::to_string(site.write_symbol) : "unknown",
+                                          site.write_symbol >= 0 ? "symbol-derived" : "unknown", candidate.access,
+                                          candidate.ownership, candidate.lifetime, candidate.opaque};
+                break;
+            }
+            site.pure = site.effect == "pure" && site.resources.empty();
+        } else {
+            site.effect = site.pure ? "pure" : "unknown";
         }
         call_sites.push_back(std::move(site));
     }
     std::vector<ParallelRejection> parallel_rejections;
     for (std::size_t left = 0; left < call_sites.size(); ++left) for (std::size_t right = left + 1; right < call_sites.size(); ++right) {
         auto& first = call_sites[left]; auto& second = call_sites[right];
-        auto reject = [&](std::string reason) { parallel_rejections.push_back({first.expression, second.expression, std::move(reason)}); };
-        if (!first.pure || !second.pure) { reject("unknown-or-effectful-callee"); continue; }
+        auto reject = [&](std::string reason) { parallel_rejections.push_back({first.expression, second.expression, std::move(reason), first.effect, second.effect, first.resources, second.resources}); };
+        if (!first.pure || !second.pure) {
+            const bool resource_pair = !first.resources.empty() || !second.resources.empty();
+            if (resource_pair) {
+                const bool same_resource = std::any_of(first.resources.begin(), first.resources.end(), [&](const auto& lhs) {
+                    return std::any_of(second.resources.begin(), second.resources.end(), [&](const auto& rhs) {
+                        return lhs.identity != "unknown" && lhs.identity == rhs.identity;
+                    });
+                });
+                const bool unknown_alias = std::any_of(first.resources.begin(), first.resources.end(), [](const auto& use) { return use.identity == "unknown"; }) ||
+                    std::any_of(second.resources.begin(), second.resources.end(), [](const auto& use) { return use.identity == "unknown"; }) ||
+                    (!first.resources.empty() && !second.resources.empty() && !same_resource);
+                const bool write = std::any_of(first.resources.begin(), first.resources.end(), [](const auto& use) { return use.access == "write" || use.access == "read_write"; }) ||
+                    std::any_of(second.resources.begin(), second.resources.end(), [](const auto& use) { return use.access == "write" || use.access == "read_write"; });
+                if (write && unknown_alias) reject("resource-alias-unknown");
+                else if (write && same_resource) {
+                    const bool both_write = std::all_of(first.resources.begin(), first.resources.end(), [](const auto& use) { return use.access == "write" || use.access == "read_write"; }) &&
+                        std::all_of(second.resources.begin(), second.resources.end(), [](const auto& use) { return use.access == "write" || use.access == "read_write"; });
+                    reject(both_write ? "resource-write-write-conflict" : "resource-read-write-conflict");
+                } else reject("provider-concurrency-unknown");
+            } else if (first.effect == "unknown" || second.effect == "unknown") reject("unknown-effect");
+            else reject("external-effect");
+            continue;
+        }
         if (first.scope != second.scope) { reject("different-scope"); continue; }
         if (first.statement == second.statement) { reject("same-statement"); continue; }
         bool shared_read = false;
@@ -719,6 +793,10 @@ int run(const Json& bundle, int lowering_plan_version) {
         operation.callee_symbol = site.callee_symbol;
         operation.result_symbol = site.write_symbol;
         operation.callee = site.callee;
+        operation.effect_class = site.effect;
+        operation.resources = site.resources;
+        operation.produces_resource = site.produces_resource;
+        operation.produced_resource = site.produced_resource;
         operation.kind = "call";
         operation.arguments = site.arguments;
         std::string leaf = site.callee;
@@ -1358,7 +1436,8 @@ int run(const Json& bundle, int lowering_plan_version) {
                       << ",\"symbol\":" << quote(operation.symbol)
                       << ",\"effect\":" << quote(operation.effect)
                       << ",\"parameter_types\":" << quote(operation.parameter_types)
-                      << ",\"return_type\":" << quote(operation.return_type) << "}";
+                      << ",\"return_type\":" << quote(operation.return_type) << "}"
+                      << ",\"effect_class\":" << quote(operation.effect_class.empty() ? operation.effect : operation.effect_class);
             std::cout << ",\"effect_contract\":{\"external\":" << quote(operation.effect)
                       << ",\"determinism\":" << quote(operation.effect == "pure" ? "deterministic" : "unspecified")
                       << ",\"certainty\":\"declared\"}";
@@ -1377,7 +1456,15 @@ int run(const Json& bundle, int lowering_plan_version) {
                           << ",\"access\":" << quote(contract ? contract->access : "value")
                           << ",\"lifetime\":" << quote(contract ? contract->lifetime : "value")
                           << ",\"nullable\":" << quote(contract ? contract->nullable : "not_applicable")
-                          << ",\"opaque\":" << quote(contract ? contract->opaque : "false") << "}";
+                          << ",\"opaque\":" << quote(contract ? contract->opaque : "false");
+                for (const auto& use : operation.resources) if (use.argument == static_cast<int>(parameter)) {
+                    std::cout << ",\"resource_identity\":" << quote(use.identity)
+                              << ",\"alias_status\":" << quote(use.alias_status)
+                              << ",\"resource_kind\":" << quote(use.type)
+                              << ",\"concurrency\":\"unknown\"";
+                    break;
+                }
+                std::cout << "}";
             }
             std::cout << "]";
             for (const auto& type : abi_type_contracts) {
@@ -1388,7 +1475,14 @@ int run(const Json& bundle, int lowering_plan_version) {
                           << ",\"lifetime\":" << quote(type.lifetime)
                           << ",\"nullable\":" << quote(type.nullable)
                           << ",\"opaque\":" << quote(type.opaque)
-                          << ",\"cleanup_capability\":" << quote(type.cleanup) << "}";
+                          << ",\"cleanup_capability\":" << quote(type.cleanup);
+                if (operation.produces_resource) {
+                    std::cout << ",\"resource_identity\":" << quote(operation.produced_resource.identity)
+                              << ",\"alias_status\":" << quote(operation.produced_resource.alias_status)
+                              << ",\"resource_kind\":" << quote(operation.produced_resource.type)
+                              << ",\"concurrency\":\"unknown\"";
+                }
+                std::cout << "}";
             }
         }
         std::cout << "}";
@@ -1495,14 +1589,45 @@ int run(const Json& bundle, int lowering_plan_version) {
         for (std::size_t argument = 0; argument < site.arguments.size(); ++argument) { if (argument) std::cout << ','; std::cout << site.arguments[argument]; }
         std::cout << "]";
         if (site.write_symbol >= 0) std::cout << ",\"result_symbol_id\":" << site.write_symbol;
-        std::cout << ",\"purity\":" << (site.pure ? "\"pure\"" : "\"effectful\"") << "}";
+        std::cout << ",\"purity\":" << (site.pure ? "\"pure\"" : "\"effectful\"")
+                  << ",\"effect_class\":" << quote(site.effect);
+        if (!site.resources.empty()) {
+            std::cout << ",\"resource_uses\":[";
+            for (std::size_t resource = 0; resource < site.resources.size(); ++resource) {
+                if (resource) std::cout << ',';
+                const auto& use = site.resources[resource];
+                std::cout << "{\"argument\":" << use.argument
+                          << ",\"symbol_id\":" << use.symbol
+                          << ",\"resource_identity\":" << quote(use.identity)
+                          << ",\"alias_status\":" << quote(use.alias_status)
+                          << ",\"resource_kind\":" << quote(use.type)
+                          << ",\"access\":" << quote(use.access)
+                          << ",\"ownership\":" << quote(use.ownership)
+                          << ",\"lifetime\":" << quote(use.lifetime)
+                          << ",\"opaque\":" << quote(use.opaque)
+                          << ",\"concurrency\":\"unknown\"}";
+            }
+            std::cout << "]";
+        }
+        if (site.produces_resource) {
+            const auto& resource = site.produced_resource;
+            std::cout << ",\"result_resource\":{\"resource_identity\":" << quote(resource.identity)
+                      << ",\"alias_status\":" << quote(resource.alias_status)
+                      << ",\"resource_kind\":" << quote(resource.type)
+                      << ",\"access\":" << quote(resource.access)
+                      << ",\"ownership\":" << quote(resource.ownership)
+                      << ",\"lifetime\":" << quote(resource.lifetime)
+                      << ",\"opaque\":" << quote(resource.opaque) << "}";
+        }
+        std::cout << "}";
     }
     std::cout << "],\n  \"parallel_candidates\": [";
     bool first_candidate = true;
     for (const auto& site : call_sites) if (!site.independent_with.empty()) {
         if (!first_candidate) std::cout << ',';
         first_candidate = false;
-        std::cout << "{\"call_expression\":" << site.expression << ",\"statement_id\":" << site.statement << ",\"callee\":" << quote(site.callee) << ",\"proof\":\"pure-callee-disjoint-inputs\",\"proof_status\":\"proven\",\"status\":\"deferred\",\"provenance\":{\"source\":" << quote(text(field(field(bundle, "source"), "path"))) << ",\"ast_path\":\"/statement_pool/" << site.statement << "\"},\"evidence\":{\"dependency_independent\":true,\"effect_compatible\":true,\"mutation_conflict\":false,\"resource_compatibility\":\"unknown-resources-not-present\",\"input_symbols\":[";
+        const auto resource_compatibility = site.external ? "value-only" : "not-applicable";
+        std::cout << "{\"call_expression\":" << site.expression << ",\"statement_id\":" << site.statement << ",\"callee\":" << quote(site.callee) << ",\"proof\":\"pure-callee-disjoint-inputs\",\"proof_status\":\"proven\",\"status\":\"deferred\",\"provenance\":{\"source\":" << quote(text(field(field(bundle, "source"), "path"))) << ",\"ast_path\":\"/statement_pool/" << site.statement << "\"},\"evidence\":{\"dependency_independent\":true,\"effect_compatible\":true,\"mutation_conflict\":false,\"resource_compatibility\":" << quote(resource_compatibility) << ",\"alias_status\":\"not-applicable\",\"provider_contract\":" << quote(site.external ? site.provider_contract : "internal") << ",\"input_symbols\":[";
         bool first_read = true;
         for (const auto symbol : site.reads) { if (!first_read) std::cout << ','; first_read = false; std::cout << symbol; }
         std::cout << "],\"output_symbol\":" << site.write_symbol << "},\"independent_with\":[";
@@ -1513,7 +1638,14 @@ int run(const Json& bundle, int lowering_plan_version) {
     for (std::size_t index = 0; index < parallel_rejections.size(); ++index) {
         if (index) std::cout << ',';
         const auto& rejection = parallel_rejections[index];
-        std::cout << "{\"left_call_expression\":" << rejection.left << ",\"right_call_expression\":" << rejection.right << ",\"reason\":" << quote(rejection.reason) << ",\"proof_status\":\"not-proven\",\"fallback\":\"serial\",\"provenance\":{\"source\":" << quote(text(field(field(bundle, "source"), "path"))) << "}}";
+        const bool resource_reason = rejection.reason.rfind("resource-", 0) == 0 || rejection.reason == "provider-concurrency-unknown";
+        const bool conflict_reason = rejection.reason == "conflicting-output" || rejection.reason == "read-after-write-dependency" || rejection.reason == "resource-read-write-conflict" || rejection.reason == "resource-write-write-conflict" || rejection.reason == "resource-alias-unknown";
+        std::cout << "{\"left_call_expression\":" << rejection.left << ",\"right_call_expression\":" << rejection.right << ",\"reason\":" << quote(rejection.reason) << ",\"proof_status\":\"not-proven\",\"fallback\":\"serial\",\"evidence\":{\"dependency_independent\":false,\"effect_compatible\":" << (rejection.left_effect == "pure" && rejection.right_effect == "pure" ? "true" : "false")
+                  << ",\"mutation_conflict\":" << (conflict_reason ? "true" : "false")
+                  << ",\"resource_compatibility\":" << quote(resource_reason ? (conflict_reason ? "conflict-or-alias" : "unknown") : "not-applicable")
+                  << ",\"alias_status\":" << quote(resource_reason ? "unknown" : "not-applicable")
+                  << ",\"left_effect\":" << quote(rejection.left_effect)
+                  << ",\"right_effect\":" << quote(rejection.right_effect) << "},\"provenance\":{\"source\":" << quote(text(field(field(bundle, "source"), "path"))) << "}}";
     }
     std::cout << "],\n  \"facts\": [{\"kind\":\"semantic_summary\",\"scopes\":" << scopes.size() << ",\"symbols\":" << symbols.size() << ",\"resolved_types\":" << resolved_types << ",\"unresolved_types\":" << unresolved_types << ",\"refined_types\":" << refined_types << ",\"resolved_names\":" << resolutions.size() << ",\"targets\":" << targets.size() << ",\"regions\":" << regions.size() << "}],\n  \"resolved_names\": [";
     bool first_resolution = true; for (const auto& resolution : resolutions) if (resolution.symbol >= 0) { if (!first_resolution) std::cout << ','; first_resolution = false; std::cout << "{\"expression_id\":" << resolution.expression << ",\"statement_id\":" << resolution.statement << ",\"name\":" << quote(resolution.name) << ",\"symbol_id\":" << resolution.symbol << ",\"scope_id\":" << resolution.scope << "}"; }
