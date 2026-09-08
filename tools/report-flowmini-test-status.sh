@@ -23,10 +23,10 @@ run_capture categorized env FLOWMINI_ROOT="${flowmini_root}" FLOWMINI_BUILD_DIR=
   "${root}/tools/run-flowmini-test-suite.sh"
 set -e
 
-python3 - "${tmpdir}" "${out_json}" "${out_md}" "${root_build}" "${flowmini_build}" <<'PY'
+python3 - "${tmpdir}" "${out_json}" "${out_md}" "${root_build}" "${flowmini_build}" "${flowmini_root}" <<'PY'
 import json, re, sys
 from pathlib import Path
-tmp, out_json, out_md, root_build, flowmini_build = map(Path, sys.argv[1:])
+tmp, out_json, out_md, root_build, flowmini_build, flowmini_root = map(Path, sys.argv[1:])
 
 def read(name): return (tmp / f'{name}.log').read_text(errors='replace')
 def rc(name): return int((tmp / f'{name}.rc').read_text())
