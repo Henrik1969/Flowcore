@@ -551,7 +551,7 @@ namespace {
     void printUsage(std::ostream& out) {
         out
             << "Usage:\n"
-            << "  flowmini [--runtime-compat] [--trace true|false] [--emit-flowir <file|->] [--dump-token-tree <file|->] [--dump-token-tree-bridge [json|simple]] [--dump-ast] [--dump-frontend-bundle] [--dump-ast-symbols <file|->] [--dump-symbols <file|->] <program.flow|module.flowir> < input\n\n"
+            << "  flowmini [--runtime-compat] [--trace true|false] [--emit-flowir <file|->] [--dump-token-tree <file|->] [--dump-token-tree-bridge [json|simple]] [--dump-ast] [--dump-frontend-bundle] [--dump-ast-symbols <file|->] [--dump-symbols <file|->] <program.flow|module.flowir> [application-args...] < input\n\n"
             << "Human .flow sugar examples:\n"
             << "  program demo\n"
             << "  stdin : stdin.text()\n"
