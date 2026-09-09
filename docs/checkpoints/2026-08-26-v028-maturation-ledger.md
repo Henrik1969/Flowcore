@@ -1157,3 +1157,35 @@ later instruction reopens them.
   machine-specific inventory. The first unfinished gate is `PC-00`: re-read
   the redacted scouting evidence and inspect current Flowbind/provider/carrier
   contracts before selecting experiments.
+
+## 2026-09-09 provider carrier expedition PC-00 baseline
+
+- Reconfirmed the redacted warehouse inventory against current Flowbind,
+  `flowbind-gen`, Flowmini safe-byte, Flowanalyst effect/resource, and
+  Flowparallel contracts. Existing `list<int>` materialization and provider
+  provenance are the first carrier hypothesis; no new carrier or authority
+  path is justified at baseline.
+- Existing libm control evidence is sufficient to mark `PC-01` as
+  `CONTROL ALREADY SATISFIED`. The next experiment is a bounded zlib
+  buffer-plus-length slice, with SQLite lifecycle and one aggregate ABI slice
+  gated behind it. Published evidence remains host-neutral.
+
+## 2026-09-09 provider carrier expedition carrier evidence
+
+- The bounded zlib probe generated a deterministic partial C-binding artifact,
+  but `compress`, `compress2`, and `uncompress` require pointer-plus-length
+  carriers that current Flowbind cannot safely execute. This is an explicit
+  `NOT SUPPORTED — MISSING` boundary, not permission to expose pointers.
+- The SQLite probe preserves an explicit opaque `sqlite3_handle` cleanup
+  contract (`sqlite3_open` -> `sqlite3_close`) and supported scalar/string
+  observations. Generic runtime lifecycle execution remains deferred because
+  the current provider call path does not yet materialize this resource safely.
+- Existing `Point` provider-manifest gates verify aggregate size, alignment,
+  ordered fields, offsets, and hostile mismatch rejection; aggregate call
+  lowering remains explicitly blocked. Focused regenerated gates passed:
+  `flowbind_provider`, `flowcore_stdlib_boundary`,
+  `native_binding_generation`, `flowanalyst_pipeline`, and
+  `flowparallel_pipeline` (`5/5`).
+- The evidence-backed next action is a general safe buffer-plus-length
+  provider contract. No broad binding framework, ownership system, or
+  specimen-specific compiler path was added.
