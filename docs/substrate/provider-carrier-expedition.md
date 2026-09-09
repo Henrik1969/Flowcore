@@ -130,3 +130,12 @@ The evidence favors one general safe buffer contract first: it recurs across
 compression, archives, networking, codecs, and database blobs. Opaque resource
 metadata is the next reusable contract, while callbacks, variadics, templates,
 and arbitrary aggregates remain outside this expedition.
+
+## Verification checkpoint — 2026-09-09
+
+The rebuilt configured tree passed root CTest `101/101`. The focused provider
+and semantic gates passed `5/5`: `flowbind_provider`,
+`flowcore_stdlib_boundary`, `native_binding_generation`,
+`flowanalyst_pipeline`, and `flowparallel_pipeline`. No source behavior was
+changed by the expedition checkpoint; the next unfinished implementation gate
+remains PC-02.

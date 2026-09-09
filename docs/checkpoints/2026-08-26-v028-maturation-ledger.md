@@ -1189,3 +1189,7 @@ later instruction reopens them.
 - The evidence-backed next action is a general safe buffer-plus-length
   provider contract. No broad binding framework, ownership system, or
   specimen-specific compiler path was added.
+- After rebuilding the configured tree, root CTest passed `101/101`; the
+  provider/semantic focused subset passed `5/5`. The expedition remains
+  `CONTINUE` at `PC-02`; ASan/UBSan and categorized-suite completion belong to
+  later implementation checkpoints.
