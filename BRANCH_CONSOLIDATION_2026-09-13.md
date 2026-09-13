@@ -504,4 +504,33 @@ v29. PR #4 remains open from v25 and covers Flowmini frontend/provenance work,
 so v25 was intentionally retained. The local safety refs listed above retain
 recoverable pre-consolidation tips. The final report revision remains separate
 from `75940bf`; that earlier report is preserved as historical intermediate
-evidence.
+evidence. 
+
+## CMake path remediation addendum
+
+After consolidation, the previously observed embedded-superbuild path defect
+was repaired in commit `2d8ef2d5eba48e9e453338a278e017fe13433829`.
+`Flowmini/flowmini_v25_symboltable_projection/CMakeLists.txt` now uses
+`CMAKE_CURRENT_SOURCE_DIR` and `CMAKE_CURRENT_BINARY_DIR` for subproject-local
+scripts, working directories, and the legacy ABI-provider staging path. The
+provider source is selected with `$<TARGET_FILE:flowmini_testabi>` so its
+location remains correct in both standalone and root-superbuild layouts.
+
+Post-remediation evidence:
+
+```text
+root flowmini_ast_golden_tests:       PASS (28)
+root flowmini_symbol_projection_tests: PASS (14)
+root flowmini_frontend_bundle_tests:  PASS (8 golden, 1 isolated, 19 negative)
+fresh root build:                     PASS (146/146)
+fresh root CTest:                     PASS (81/81)
+```
+
+The `flowmini_suite` target now reaches the correct runner and ABI provider,
+but its legacy default compatibility mode still attempts to interpret the
+current native-chain pass fixtures. That produces 79/128 checks with 49
+expected native-only programs refused by the compatibility interpreter. The
+documented current native/support gate remains green at 91 native pass
+programs plus 53/53 categorized negative/support checks. This is a distinct
+test-mode wiring issue, not the repaired path defect, and no language behavior
+was changed.
