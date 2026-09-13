@@ -480,8 +480,28 @@ outside the scope of this consolidation and were not modified.
 
 ### Final promotion and retirement status
 
-The following fields are completed in the post-promotion revision of this
-report: final local `main` SHA, final `origin/main` SHA, normal push result,
-and remote branch deletion results. The report revision containing this
-addendum is intentionally separate from `75940bf`; that earlier commit remains
-historical intermediate evidence.
+The verified language-state promotion advanced `main` normally from
+`75940bf7d14220e61c5279e650d98485b91a94be` to
+`cdb2582dce65c9ed4625b1a1387a749f39b416aa`. Local and remote `main` matched at
+that verification point, and the update used no force operation. The final
+report revision is a subsequent documentation-only commit on top of that
+verified state; the final handoff records its resulting tip SHA.
+
+Remote retirement completed safely:
+
+```text
+deleted: v23-token-tree-parser-bridge
+deleted: v24-explicit-ast
+deleted: v29-language-maturation
+kept:    v25-symboltable-projection (open GitHub PR #4 depends on it)
+kept:    master (historical seed; untouched)
+kept:    flowlfs-v0.1-alive (experimental FlowLFS line; untouched)
+kept:    main (authoritative Flowmini line)
+```
+
+GitHub reported `main` unprotected. No open pull requests use v23, v24, or
+v29. PR #4 remains open from v25 and covers Flowmini frontend/provenance work,
+so v25 was intentionally retained. The local safety refs listed above retain
+recoverable pre-consolidation tips. The final report revision remains separate
+from `75940bf`; that earlier report is preserved as historical intermediate
+evidence.
