@@ -96,10 +96,10 @@ add_dependencies(flowmini flowmini_testabi)
 
 add_custom_target(flowmini_prepare_test_dependencies
         COMMAND ${CMAKE_COMMAND} -E make_directory
-        ${CMAKE_SOURCE_DIR}/build
+        ${CMAKE_CURRENT_SOURCE_DIR}/build
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        ${CMAKE_BINARY_DIR}/libflowmini_testabi.so
-        ${CMAKE_SOURCE_DIR}/build/libflowmini_testabi.so
+        $<TARGET_FILE:flowmini_testabi>
+        ${CMAKE_CURRENT_SOURCE_DIR}/build/libflowmini_testabi.so
         DEPENDS flowmini_testabi
         COMMENT "Preparing Flowmini ABI test dependency"
         VERBATIM
@@ -116,15 +116,15 @@ add_custom_target(flowmini_prepare_test_dependencies
 add_custom_target(flowmini_suite
         COMMAND
         ${CMAKE_COMMAND} -E env
-        FLOWMINI_ROOT=${CMAKE_SOURCE_DIR}
-        FLOWMINI_BUILD_DIR=${CMAKE_BINARY_DIR}
+        FLOWMINI_ROOT=${CMAKE_CURRENT_SOURCE_DIR}
+        FLOWMINI_BUILD_DIR=${CMAKE_CURRENT_BINARY_DIR}
         FLOWMINI_NO_BUILD=1
         FLOWMINI_JOBS=20
-        ${CMAKE_SOURCE_DIR}/../../tools/run-flowmini-test-suite.sh
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../tools/run-flowmini-test-suite.sh
         DEPENDS
         flowmini
         flowmini_prepare_test_dependencies
-        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
         COMMENT "Running Flowmini categorized test suite"
         VERBATIM
 )
@@ -136,7 +136,7 @@ add_custom_target(flowmini_dump_token_tree_simple
         simple
         examples/pass/fn_demo.flow
         DEPENDS flowmini
-        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
         COMMENT "Dumping Flowmini TokenTree bridge simple view"
         VERBATIM
 )
@@ -148,7 +148,7 @@ add_custom_target(flowmini_dump_token_tree_json
         json
         examples/pass/fn_demo.flow
         DEPENDS flowmini
-        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
         COMMENT "Dumping Flowmini TokenTree bridge JSON view"
         VERBATIM
 )
@@ -159,7 +159,7 @@ add_custom_target(flowmini_dump_ast
         --dump-ast
         examples/pass/fn_demo.flow
         DEPENDS flowmini
-        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
         COMMENT "Dumping Flowmini AST JSON view"
         VERBATIM
 )
@@ -171,7 +171,7 @@ add_custom_target(flowmini_dump_ast_symbols
         -
         examples/ast/type_reference_probe.flow
     DEPENDS flowmini
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     COMMENT "Dumping Flowmini AST SymbolTable projection"
     VERBATIM
 )
@@ -182,7 +182,7 @@ add_custom_target(flowmini_dump_frontend_bundle
         --dump-frontend-bundle
         examples/ast/type_reference_probe.flow
     DEPENDS flowmini
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     COMMENT "Dumping Flowmini frontend bundle JSON"
     VERBATIM
 )
@@ -190,11 +190,11 @@ add_custom_target(flowmini_dump_frontend_bundle
 add_custom_target(flowmini_symbol_projection_tests
     COMMAND
         ${CMAKE_COMMAND} -E env
-        FLOWMINI_ROOT=${CMAKE_SOURCE_DIR}
+        FLOWMINI_ROOT=${CMAKE_CURRENT_SOURCE_DIR}
         FLOWMINI_BIN=$<TARGET_FILE:flowmini>
-        ${CMAKE_SOURCE_DIR}/tools/run-flowmini-symbol-projection-tests.sh
+        ${CMAKE_CURRENT_SOURCE_DIR}/tools/run-flowmini-symbol-projection-tests.sh
     DEPENDS flowmini
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     COMMENT "Running Flowmini AST SymbolTable projection golden tests"
     VERBATIM
 )
@@ -202,11 +202,11 @@ add_custom_target(flowmini_symbol_projection_tests
 add_custom_target(flowmini_frontend_bundle_tests
     COMMAND
         ${CMAKE_COMMAND} -E env
-        FLOWMINI_ROOT=${CMAKE_SOURCE_DIR}
+        FLOWMINI_ROOT=${CMAKE_CURRENT_SOURCE_DIR}
         FLOWMINI_BIN=$<TARGET_FILE:flowmini>
-        ${CMAKE_SOURCE_DIR}/tools/run-flowmini-frontend-bundle-tests.sh
+        ${CMAKE_CURRENT_SOURCE_DIR}/tools/run-flowmini-frontend-bundle-tests.sh
     DEPENDS flowmini
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     COMMENT "Running independent Flowmini frontend bundle consumer tests"
     VERBATIM
 )
@@ -215,9 +215,9 @@ add_custom_target(flowmini_ast_golden_tests
     COMMAND
         ${CMAKE_COMMAND} -E env
         FLOWMINI_BIN=$<TARGET_FILE:flowmini>
-        ${CMAKE_SOURCE_DIR}/tools/run-flowmini-ast-golden-tests.sh
+        ${CMAKE_CURRENT_SOURCE_DIR}/tools/run-flowmini-ast-golden-tests.sh
     DEPENDS flowmini
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     COMMENT "Running Flowmini AST golden regression tests"
     VERBATIM
 )
