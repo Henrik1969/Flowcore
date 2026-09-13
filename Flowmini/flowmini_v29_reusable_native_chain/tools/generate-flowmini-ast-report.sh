@@ -16,14 +16,14 @@ set -euo pipefail
 # Location:
 #   This script is version-local and is expected to live at:
 #
-#       Flowmini/flowmini_v25_symboltable_projection/tools/generate-flowmini-ast-report.sh
+#       Flowmini/flowmini_v29_reusable_native_chain/tools/generate-flowmini-ast-report.sh
 #
 # Usage:
-#   cd ~/Projekter/scratchpad/flow_Policy_envelope_pattern/Flowmini/flowmini_v25_symboltable_projection
+#   cd ~/Projekter/scratchpad/flow_Policy_envelope_pattern/Flowmini/flowmini_v29_reusable_native_chain
 #   tools/generate-flowmini-ast-report.sh
 #
 # Optional env:
-#   FLOWMINI_ROOT=/path/to/Flowmini/flowmini_v25_symboltable_projection
+#   FLOWMINI_ROOT=/path/to/Flowmini/flowmini_v29_reusable_native_chain
 #   REPO_ROOT=/path/to/repo/root
 #   BUILD_DIR=/path/to/build-dir
 #   JOBS=20

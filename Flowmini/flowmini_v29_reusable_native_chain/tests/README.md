@@ -22,9 +22,9 @@ tests/expected/diagnostics/<test-name>.contains
 ```
 
 The expectation set originated in `flowmini_v22_unit_kinds` with stdin value
-`5` and was extended through the closed v0.24 checkpoint. Active v0.25 retains
-the 78/78 categorized-suite baseline while its structural projection gates
-mature independently.
+`5` and was extended through the closed v0.24 checkpoint. The active v0.29
+line retains that categorized-suite contract while its structural projection
+and downstream language-chain gates mature independently.
 
 Useful commands:
 

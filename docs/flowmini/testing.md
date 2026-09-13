@@ -25,7 +25,7 @@ examples/docs/*
 ## Runner
 
 ```bash
-cd Flowmini/flowmini_v25_symboltable_projection
+cd Flowmini/flowmini_v29_reusable_native_chain
 ../../tools/run-flowmini-test-suite.sh \
     --root . \
     --build-dir cmake-build-debug \
@@ -51,6 +51,16 @@ Frontend bundle tests:      8 golden / 1 isolated / 19 negative
 downstream sibling CTest:   PASS
 flowcat ELF example:        PASS
 ```
+
+## Current categorized-suite note
+
+On 2026-09-13, the CMake `flowmini_suite` categorized runner exposed a
+pre-existing compatibility gap in the published `main` tree: an untouched
+pre-rename checkout passed 78 of 128 examples, while the renamed v0.29 tree
+passed 79 of 128. The failures are concentrated in legacy ABI/profile examples
+that the current parser rejects; this is not presented as a passing gate here.
+The authoritative root CTest suite and the focused AST, SymbolTable, and
+frontend-bundle gates remain green as recorded above.
 
 These normal gates form the Flowmini Tier 2 integration baseline. Before
 declaring a greater architectural border closed, run and record the additional
@@ -88,7 +98,7 @@ The raw-frontend checkpoint evidence is recorded in the
 export boundary has a separate
 [frontend-border Firetest report](v0.24-frontend-border-firetest-report.md).
 
-The active v0.25 structural-origin contract and its negative attack surface are
+The historical v0.25 structural-origin contract and its negative attack surface are
 documented in the [origin maturity audit](v0.25-origin-maturity-audit.md).
 
 ## Current build-isolation limitation

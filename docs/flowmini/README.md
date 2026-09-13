@@ -5,9 +5,9 @@ Flowmini is the executable prototype/lab language used to explore Flowcore ideas
 Current active version:
 
 ```text
-Flowmini v0.27 namespaced provider language-chain slice
+Flowmini v0.29 reusable native language chain
 
-Implementation base: `Flowmini/flowmini_v25_symboltable_projection`
+Implementation base: `Flowmini/flowmini_v29_reusable_native_chain`
 ```
 
 Current baseline:
@@ -27,7 +27,7 @@ TokenTree remembers what the source looked like.
 AST states what the source means.
 ```
 
-The v0.24 frontend-export border is closed. The active v0.27 line makes its
+The v0.24 frontend-export border is closed. The active v0.29 line makes its
 factual SymbolTable projection consumable by Flowanalyst, Flowbind,
 Flowoptimize, and Flowlower, with `flowcat` proving a native ELF artifact.
 
@@ -43,12 +43,12 @@ Documents in this directory:
 - [Testing](testing.md)
 - [v0.24 frontend checkpoint Firetest report](v0.24-firetest-report.md)
 - [v0.24 frontend-border Firetest report](v0.24-frontend-border-firetest-report.md)
-- [v0.26 language-chain status](../checkpoints/2026-08-19-language-chain-status.md)
+- [v0.26 language-chain status](../checkpoints/2026-08-19-language-chain-status.md) (historical)
 - [Project-wide verification gates and Firetest policy](../development/verification-gates.md)
 
 Implementation-base note:
 
-- [SymbolTable projection status](../../Flowmini/flowmini_v25_symboltable_projection/docs/v0.25-symboltable-projection-status.md)
+- [SymbolTable projection status](../../Flowmini/flowmini_v29_reusable_native_chain/docs/v0.25-symboltable-projection-status.md)
 
 Closed v0.24 implementation notes:
 
@@ -63,6 +63,6 @@ Project-wide architecture:
 Current chain and application example:
 
 - [Parameterized main](v0.25-parameterized-main.md)
-- [Flowcat application](../../Flowmini/flowmini_v25_symboltable_projection/examples/apps/flowcat/README.md)
+- [Flowcat application](../../Flowmini/flowmini_v29_reusable_native_chain/examples/apps/flowcat/README.md)
 - [Named targets](../language/named-targets.md)
 - [Target artifact model](../language/target-artifact-model.md)

@@ -75,7 +75,7 @@ disposable.
 The active implementation must be easy to find:
 
 ```text
-Flowmini/flowmini_v25_symboltable_projection
+Flowmini/flowmini_v29_reusable_native_chain
 ```
 
 `Flowmini/flowmini_v24_explicit_ast/` remains beside it intentionally as the

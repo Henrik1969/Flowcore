@@ -21,9 +21,9 @@ Flowmini internals.
 From the Flowcore repository:
 
 ```sh
-./Flowmini/flowmini_v25_symboltable_projection/cmake-build-debug/flowmini \
+./Flowmini/flowmini_v29_reusable_native_chain/cmake-build-debug/flowmini \
   --dump-frontend-bundle \
-  Flowmini/flowmini_v25_symboltable_projection/examples/ast/target_projection_probe.flow \
+  Flowmini/flowmini_v29_reusable_native_chain/examples/ast/target_projection_probe.flow \
   | Flowanalyst/build/flowanalyst
 ```
 

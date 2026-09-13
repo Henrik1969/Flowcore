@@ -13,9 +13,9 @@ stages are intentionally preserved as implementation checkpoints.
 - First real I/O capability slice: `flowcat_file_main` reads argv-supplied
   files through policy-authorized `open`/`read`/`write`/`close` bindings.
 
-- Active milestone: Flowcore v0.26 language-chain vertical slice
-- Implementation base: `Flowmini/flowmini_v25_symboltable_projection`
-- Active branch retained for continuity: `v25-symboltable-projection`
+- Active milestone: Flowcore v0.29 reusable native language chain
+- Implementation base: `Flowmini/flowmini_v29_reusable_native_chain`
+- Active branch: `main`
 - Current integration baseline: AST 28/28, SymbolTable projection 14/14,
   frontend bundle eight goldens plus one isolated run and nineteen negative
   attacks, downstream CTest green, and native `flowcat` ELF execution

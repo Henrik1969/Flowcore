@@ -9,8 +9,11 @@ It is not the final Flowcore language. It is the laboratory where syntax, AST st
 The current active implementation is:
 
 ```text
-Flowmini/flowmini_v25_symboltable_projection
+Flowmini/flowmini_v29_reusable_native_chain
 ```
+
+Git authority is `main`; numbered branch names in historical records are not
+active development targets.
 
 Current stage theme:
 
@@ -26,6 +29,12 @@ pager semantics in Flow. See the [verified ledger](../docs/checkpoints/2026-08-2
 ## Current status
 
 Flowmini is experimental and unfinished, but the current chain is executable.
+
+The authoritative root CTest and focused AST, SymbolTable, and frontend-bundle
+gates are green. The separate categorized `flowmini_suite` currently exposes a
+known compatibility gap in legacy ABI/profile examples (79/128 on this
+v0.29-normalized tree); that result is retained as an explicit limitation, not
+reported as a pass.
 
 ```text
 lexer/token groundwork             usable
@@ -57,7 +66,7 @@ record literals
 Expressions use typed payloads and recursively owned child IDs. Parenthesized
 grouping, operator precedence, associativity, prefix operators, and nested
 postfix call/index/field forms are regression-guarded. The v0.24 raw
-frontend/export border is closed; v0.26 now uses the strengthened projection coverage,
+frontend/export border is closed; v0.29 now uses the strengthened projection coverage,
 factual metadata, cross-links, provenance, and bundle stability.
 
 ## Why does this look ordinary?
@@ -79,14 +88,14 @@ source text
     -> executable system projection
 ```
 
-Flowmini v0.26 is focused on the verified language-chain slice.
+Flowmini v0.29 is focused on the verified language-chain slice.
 
 ## Build quickstart
 
-From the active v0.26 implementation base:
+From the active v0.29 implementation base:
 
 ```bash
-cd Flowmini/flowmini_v25_symboltable_projection
+cd Flowmini/flowmini_v29_reusable_native_chain
 
 cmake -S . -B cmake-build-debug
 cmake --build cmake-build-debug -j20
@@ -94,7 +103,7 @@ cmake --build cmake-build-debug -j20
 
 Adjust `-j20` to match your machine.
 
-The canonical v26 scope is this implementation directory and its CMake targets.
+The canonical v0.29 scope is this implementation directory and its CMake targets.
 Repository-root build trees are legacy/noncanonical for the active branch.
 
 ## Test quickstart
@@ -152,22 +161,22 @@ Always inspect the diff before committing updated goldens.
 ## Important paths
 
 ```text
-flowmini_v25_symboltable_projection/include/
+flowmini_v29_reusable_native_chain/include/
     public headers
 
-flowmini_v25_symboltable_projection/src/
+flowmini_v29_reusable_native_chain/src/
     implementation
 
-flowmini_v25_symboltable_projection/examples/ast/
+flowmini_v29_reusable_native_chain/examples/ast/
     AST-focused source examples
 
-flowmini_v25_symboltable_projection/tests/expected/ast/
+flowmini_v29_reusable_native_chain/tests/expected/ast/
     golden AST JSON outputs
 
-flowmini_v25_symboltable_projection/tools/
+flowmini_v29_reusable_native_chain/tools/
     maintained helper scripts
 
-flowmini_v25_symboltable_projection/docs/
+flowmini_v29_reusable_native_chain/docs/
     status notes and implementation documentation
 ```
 
@@ -180,7 +189,7 @@ They are useful historical material, but they are not the active implementation 
 Current active development should happen in:
 
 ```text
-Flowmini/flowmini_v25_symboltable_projection
+Flowmini/flowmini_v29_reusable_native_chain
 ```
 
 ## Design direction
@@ -198,7 +207,7 @@ TokenTree remembers what the source looked like.
 AST states what the source means.
 ```
 
-The current v0.26 work makes the SymbolTable projection a trustworthy input for
+The current v0.29 work makes the SymbolTable projection a trustworthy input for
 independent tools and carries selected programs through the complete language
 chain.
 
@@ -210,7 +219,7 @@ Recommended reading order:
 docs/language/flowmini-programmers-manual.md
 Flowmini/README.md
 Flowmini/CURRENT.md
-Flowmini/flowmini_v25_symboltable_projection/docs/v0.25-symboltable-projection-status.md
+Flowmini/flowmini_v29_reusable_native_chain/docs/v0.25-symboltable-projection-status.md
 docs/flowmini/v0.24-accepted-language-coverage.md
 docs/flowmini/v0.24-type-policy.md
 Flowmini/flowmini_v24_explicit_ast/docs/v0.24-c5-statement-payload-sitrep.md

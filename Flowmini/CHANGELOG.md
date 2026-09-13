@@ -1,6 +1,11 @@
 # Flowmini Changelog
 
-## v27_namespaced_provider_chain — active
+## v29_reusable_native_chain — active
+
+- Promoted the reusable native language chain to the active v0.29 milestone.
+- Made `main` and `flowmini_v29_reusable_native_chain` the current authority.
+
+## v27_namespaced_provider_chain — historical
 
 - Promoted the language-chain slice to the active v0.27 milestone.
 - Added explicit namespace aliases for imports and qualified ABI calls such as
@@ -20,8 +25,8 @@
 - Packaged the reproducible `flowcat` application example with policy, reports,
   LLVM, expected output, and preserved inspection builds.
 
-The implementation directory remains `flowmini_v25_symboltable_projection` for
-continuity; the v25 projection milestone is now historical.
+The v25 projection directory and branch names are historical; the active
+implementation now lives at `flowmini_v29_reusable_native_chain` on `main`.
 
 ## v25_symboltable_projection — historical
 

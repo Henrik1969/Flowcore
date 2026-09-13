@@ -11,7 +11,7 @@ Flowcore v0.29 reusable native language chain
 Active implementation path:
 
 ```text
-Flowmini/flowmini_v25_symboltable_projection
+Flowmini/flowmini_v29_reusable_native_chain
 ```
 
 This repository is not a finished language or runtime. It is a design and implementation workspace for testing language structure, AST modeling, diagnostics, staged execution, contracts, graph-shaped execution ideas, and tooling architecture.
@@ -98,7 +98,7 @@ Syntax sugar is acceptable only when direction, endpoints, contracts, payload mo
 Flowmini/
     executable Flowmini prototype language
 
-Flowmini/flowmini_v25_symboltable_projection/
+Flowmini/flowmini_v29_reusable_native_chain/
     current active implementation line
 
 subprojects/TokenTree/
@@ -135,7 +135,7 @@ provider contracts, and Frankencore conformance probes.
 Individual sibling builds remain valid for focused development:
 
 ```bash
-cd Flowmini/flowmini_v25_symboltable_projection
+cd Flowmini/flowmini_v29_reusable_native_chain
 
 cmake -S . -B cmake-build-debug
 cmake --build cmake-build-debug -j20
@@ -150,7 +150,7 @@ tests are visible to CMake, Ninja, and IDEs.
 ## Test quickstart
 
 ```bash
-cd Flowmini/flowmini_v25_symboltable_projection
+cd Flowmini/flowmini_v29_reusable_native_chain
 
 cmake --build cmake-build-debug --target flowmini_ast_golden_tests
 cmake --build cmake-build-debug --target flowmini_suite
@@ -194,7 +194,7 @@ providers. The C++ pager algorithm has been removed. See the
 Flowmini/README.md
 docs/checkpoints/2026-08-26-v0.28-typed-artifact-contracts.md
 Flowmini/CURRENT.md
-Flowmini/flowmini_v25_symboltable_projection/docs/v0.25-symboltable-projection-status.md
+Flowmini/flowmini_v29_reusable_native_chain/docs/v0.25-symboltable-projection-status.md
 docs/flowmini/v0.25-origin-maturity-audit.md
 docs/flowmini/v0.25-frontend-bundle.md
 Flowmini/flowmini_v24_explicit_ast/docs/v0.24-shallow-expression-ast-sitrep.md (historical checkpoint)

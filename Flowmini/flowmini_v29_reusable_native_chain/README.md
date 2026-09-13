@@ -1,18 +1,19 @@
-# Flowmini v0.25 — SymbolTable Projection Maturation
+# Flowmini v0.29 — Reusable Native Language Chain
 
-This is the active Flowmini implementation line on branch:
+This is the active Flowmini implementation line on `main`:
 
 ```text
-v25-symboltable-projection
+main
 ```
 
-It inherits the tagged `flowmini-v0.24-frontend-border` implementation. v0.24
-proved that an independent process can consume the exported raw AST and
-SymbolTable without linking Flowmini internals or reparsing source.
+It inherits the tagged `flowmini-v0.24-frontend-border` implementation and the
+historical v0.25 projection milestone. The current v0.29 line carries that
+frontend boundary through semantic analysis, capability binding, lowering, and
+native execution.
 
 ## Purpose
 
-v0.25 matures that structural projection boundary:
+The historical v0.25 milestone matured that structural projection boundary:
 
 - broaden and harden AST-to-SymbolTable projection coverage;
 - preserve factual metadata and source provenance;
@@ -21,10 +22,12 @@ v0.25 matures that structural projection boundary:
 - harden the versioned frontend bundle contract;
 - prepare a trustworthy input boundary for later semantic analysis.
 
-v0.25 does not perform semantic type resolution, alias normalization, contract
-satisfaction, Graph IR construction, or runtime lowering.
+The current v0.29 line extends beyond that projection boundary with semantic
+analysis, capability binding, Graph IR/lowering boundaries, and native runtime
+proofs. The historical projection contract remains the documented input
+boundary.
 
-The authoritative line status is
+The historical projection status is documented in
 [v0.25 SymbolTable projection status](docs/v0.25-symboltable-projection-status.md).
 
 ## Build

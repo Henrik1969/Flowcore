@@ -1,7 +1,7 @@
 #!/bin/sh
 set -eu
 root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
-example="$root/Flowmini/flowmini_v25_symboltable_projection/examples/apps/flow_less"
+example="$root/Flowmini/flowmini_v29_reusable_native_chain/examples/apps/flow_less"
 tmpdir=$(mktemp -d)
 trap 'rm -rf "$tmpdir"' EXIT
 "$example/build-flow-less.sh" "$tmpdir/app" >/dev/null

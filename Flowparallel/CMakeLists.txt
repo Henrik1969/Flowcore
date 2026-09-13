@@ -100,7 +100,7 @@ add_test(NAME flowparallel_graph_reference
         FLOWPARALLEL_GRAPH_REFERENCE_BIN=$<TARGET_FILE:flowparallel_graph_reference>
         FLOWMINI_BIN=$<TARGET_FILE:flowmini>
         FLOWANALYST_BIN=$<TARGET_FILE:flowanalyst>
-        FLOW_GRAPH_FIXTURE=${CMAKE_CURRENT_SOURCE_DIR}/../Flowmini/flowmini_v25_symboltable_projection/examples/ast/parallel_independence_probe.flow
+        FLOW_GRAPH_FIXTURE=${CMAKE_CURRENT_SOURCE_DIR}/../Flowmini/flowmini_v29_reusable_native_chain/examples/ast/parallel_independence_probe.flow
         ${CMAKE_CURRENT_SOURCE_DIR}/tests/run-graph-reference-tests.sh)
 add_test(NAME flowparallel_graph_planner
     COMMAND ${CMAKE_COMMAND} -E env

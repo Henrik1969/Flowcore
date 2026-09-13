@@ -1,6 +1,6 @@
 # Flowmini AST Examples
 
-Status: active v0.25 structural frontend examples
+Status: active v0.29 structural frontend examples
 
 This directory contains Flowmini source files used to stabilize the explicit
 AST and mature its factual SymbolTable projection.

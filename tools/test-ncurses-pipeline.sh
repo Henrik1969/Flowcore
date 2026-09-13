@@ -8,7 +8,7 @@ parallel=${FLOWPARALLEL_BIN:?FLOWPARALLEL_BIN is required}
 optimizer=${FLOWOPTIMIZE_BIN:?FLOWOPTIMIZE_BIN is required}
 bind=${FLOWBIND_BIN:?FLOWBIND_BIN is required}
 lower=${FLOWLOWER_BIN:?FLOWLOWER_BIN is required}
-fixture="$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass/abi_ncurses_main.flow"
+fixture="$root/Flowmini/flowmini_v29_reusable_native_chain/examples/pass/abi_ncurses_main.flow"
 tmpdir=$(mktemp -d)
 trap 'rm -rf "$tmpdir"' EXIT
 
