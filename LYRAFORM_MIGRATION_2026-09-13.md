@@ -18,7 +18,7 @@ effective date: 2026-09-13
 ```text
 starting main SHA: 8b5f838fcd5b4add1094e462f23990f468c16d8e
 migration branch SHA: 8495635c06612cd8d5ae0cce361f8a1845ff1f1d
-final main SHA: 8495635c06612cd8d5ae0cce361f8a1845ff1f1d (verified migration checkpoint)
+final main SHA: 6b5680201ef4af10de351fc4ee8efac27b9949ff (last full verification checkpoint)
 old active path: Flowmini/flowmini_v29_reusable_native_chain
 new active path: Lyraform/compiler
 Flowmini disposition: historical prototype/bootstrap lineage retained
@@ -57,7 +57,7 @@ post-rename CTest: 81/81 PASS (36.32 seconds)
 final fresh-clone configure/build: PASS (146 targets, /tmp/lyraform-final-build)
 final fresh-clone CTest: 81/81 PASS (35.27 seconds)
 final fresh-clone Igor doctor/build/test: PASS / PASS / 81/81 PASS
-old GitHub URL redirect verified: YES (old and new SSH remotes resolve to main)
+old GitHub URL redirect verified: YES (HTTP and SSH old URL resolve to Lyraform)
 ```
 
 ## Scope protections
@@ -77,7 +77,7 @@ repository identity changed.
 
 ## Remaining known risks
 
-The report commit that records these final facts advances `main` beyond the
-verified migration checkpoint SHA above; its exact tip is available from
-`git rev-parse HEAD` and the final Codex report. This avoids rewriting the
-commit that was used for the fresh-clone verification.
+The subsequent current-identity documentation correction and final state
+marker advance `main` beyond the full-verification checkpoint above; the exact
+tip is available from `git rev-parse HEAD` and the final Codex report. These
+are documentation-only follow-up commits and do not alter the build graph.
