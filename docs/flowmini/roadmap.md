@@ -7,7 +7,7 @@ provisional until each milestone is activated.
 ## Current checkpoint
 
 ```text
-v29_reusable_native_chain (implementation base: flowmini_v29_reusable_native_chain)
+Lyraform v0.29 reusable native chain (implementation base: `Lyraform/compiler`)
 build: OK
 AST golden tests: 28 / 28
 Symbol projection tests: 14 / 14
@@ -54,8 +54,8 @@ boundary now used by the historical v26 language-chain milestone.
 
 Carried selected programs through semantic analysis, capability binding,
 optimization boundary, explicit target lowering, LLVM, and native execution.
-This milestone is now historical; the active implementation is v0.29 at
-`flowmini_v29_reusable_native_chain` on `main`.
+This milestone is now historical; the active implementation is Lyraform v0.29
+at `Lyraform/compiler` on `main`.
 
 The v0.29 line retains the complete AST and lossless structural SymbolTable
 projection as a mature frontend border with stable cross-links, scope coverage,

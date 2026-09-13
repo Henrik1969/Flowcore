@@ -40,9 +40,10 @@ source files
 
 The important architectural boundaries are documented before their full
 implementations exist so the current default path does not accidentally become
-the permanent definition of Flowcore.
+the permanent definition of Lyraform. Flowcore remains the historical project
+name in dated architecture records.
 
-Current active implementation is a verified v0.28 typed artifact-contract
+Current active implementation is a verified Lyraform v0.29 typed artifact-contract
 language-chain slice. It
 inherits the closed v0.24 raw frontend/export border, establishes semantic
 analysis and policy-binding consumers, preserves an optimization boundary, and

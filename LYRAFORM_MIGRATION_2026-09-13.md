@@ -17,8 +17,8 @@ effective date: 2026-09-13
 
 ```text
 starting main SHA: 8b5f838fcd5b4add1094e462f23990f468c16d8e
-migration branch SHA: TBD
-final main SHA: TBD
+migration branch SHA: 8495635c06612cd8d5ae0cce361f8a1845ff1f1d
+final main SHA: 8495635c06612cd8d5ae0cce361f8a1845ff1f1d (verified migration checkpoint)
 old active path: Flowmini/flowmini_v29_reusable_native_chain
 new active path: Lyraform/compiler
 Flowmini disposition: historical prototype/bootstrap lineage retained
@@ -50,13 +50,14 @@ Source extensions are unchanged.
 ## Verification record
 
 ```text
-pre-rename clean configure/build: PASS
-pre-rename CTest: 81/81 PASS
-post-rename clean configure/build: TBD
-post-rename CTest: TBD
-final fresh-clone configure/build: TBD
-final fresh-clone CTest: TBD
-old GitHub URL redirect verified: TBD
+pre-rename clean configure/build: PASS (146 targets, /tmp/flowcore-pre-rename-build)
+pre-rename CTest: 81/81 PASS (35.74 seconds)
+post-rename clean configure/build: PASS (146 targets, /tmp/lyraform-build)
+post-rename CTest: 81/81 PASS (36.32 seconds)
+final fresh-clone configure/build: PASS (146 targets, /tmp/lyraform-final-build)
+final fresh-clone CTest: 81/81 PASS (35.27 seconds)
+final fresh-clone Igor doctor/build/test: PASS / PASS / 81/81 PASS
+old GitHub URL redirect verified: YES (old and new SSH remotes resolve to main)
 ```
 
 ## Scope protections
@@ -68,13 +69,15 @@ master touched: NO
 force used: NO
 ```
 
-The GitHub profile and FrankenCore current links will be recorded here after
-the corresponding external updates are verified. Historical links and records
-are not rewritten merely because the current repository identity changed.
+GitHub profile updated: YES (`Henrik1969` commit `31693a8`)
+FrankenCore current links updated: YES (`FrankenCore` commit `b2da2f5`)
+Lyraform repository description updated: YES
+Historical links and records were not rewritten merely because the current
+repository identity changed.
 
 ## Remaining known risks
 
-The GitHub repository rename requires valid GitHub account authority. The
-local SSH clone credential is sufficient for Git transport, but the configured
-`gh` account token is currently invalid; repository/profile updates remain
-unverified until that authority is available.
+The report commit that records these final facts advances `main` beyond the
+verified migration checkpoint SHA above; its exact tip is available from
+`git rev-parse HEAD` and the final Codex report. This avoids rewriting the
+commit that was used for the fresh-clone verification.

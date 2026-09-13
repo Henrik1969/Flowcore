@@ -242,7 +242,7 @@ print_dashboard() {
     echo "Git:"
     short_git_status | sed 's/^/    /'
     echo
-    echo "Current Flowmini:"
+    echo "Current Lyraform compiler:"
     if [[ -f "$TOP/Lyraform/CURRENT.md" ]]; then
         sed -n '1,34p' "$TOP/Lyraform/CURRENT.md" | sed 's/^/    /'
     else

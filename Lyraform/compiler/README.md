@@ -1,6 +1,6 @@
-# Flowmini v0.29 — Reusable Native Language Chain
+# Lyraform v0.29 compiler — Reusable Native Language Chain
 
-This is the active Flowmini implementation line on `main`:
+This is the active Lyraform implementation line on `main`:
 
 ```text
 main

@@ -33,6 +33,6 @@ The earlier v0.24 implementation remains available at
 FlowLFS experiment and the historical `master` branch are not part of this
 migration and are not merged, rewritten, or deleted.
 
-This document is part of the project history. The final migration commit SHA
-and repository rename evidence are recorded in
+This document is part of the project history. The migration checkpoint and
+repository rename evidence are recorded in
 `LYRAFORM_MIGRATION_2026-09-13.md`.
