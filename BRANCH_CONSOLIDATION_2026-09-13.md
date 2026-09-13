@@ -504,7 +504,7 @@ v29. PR #4 remains open from v25 and covers Flowmini frontend/provenance work,
 so v25 was intentionally retained. The local safety refs listed above retain
 recoverable pre-consolidation tips. The final report revision remains separate
 from `75940bf`; that earlier report is preserved as historical intermediate
-evidence. 
+evidence.
 
 ## CMake path remediation addendum
 
