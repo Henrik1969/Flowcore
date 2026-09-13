@@ -3,7 +3,7 @@
 Flowparallel is the conservative execution-plan sibling after Flowanalyst:
 
 ```text
-source -> Flowmini -> Flowanalyst -> Flowparallel -> Flowoptimize -> Flowlower
+Lyraform source -> Flowmini-compatible frontend -> Flowanalyst -> Flowparallel -> Flowoptimize -> Flowlower
 ```
 
 It consumes an accepted `flowanalyst.semantic_report` v1 and emits an

@@ -1,7 +1,8 @@
 # Flowcontracts
 
 Flowcontracts is the public, compiler-stage-independent artifact contract
-component introduced for Flowcore v0.28.
+component introduced during the Flowcore v0.28 lineage and retained as a
+Lyraform compiler-stage-independent contract surface.
 
 Current surfaces:
 

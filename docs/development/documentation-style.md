@@ -34,11 +34,13 @@ Do not put deep philosophy before the reader knows where they are.
 
 ## Define project names early
 
-- Flowcore is the broader language and system-architecture direction.
-- Flowmini is the executable prototype language used to test Flowcore ideas.
-- Flowcore v0.26 language-chain integration is the active stage. It preserves
-  the v0.25 structural-origin boundary while carrying selected programs through
-  semantic analysis, capability binding, LLVM lowering, and native execution.
+- Lyraform is the current language and system-architecture identity; it is the
+  continuation of the project historically called Flowcore.
+- Flowmini is the historical executable prototype and bootstrap lineage.
+- Lyraform v0.29 reusable native language chain is the active stage. It
+  preserves the inherited structural-origin boundary while carrying selected
+  programs through semantic analysis, capability binding, LLVM lowering, and
+  native execution.
 - Flowmini v0.24 explicit AST is the closed raw frontend/export checkpoint
   inherited by v0.25.
 - FrankenCore is the constitutional system and capability layer above the
@@ -63,7 +65,7 @@ gate counts to match a later version.
 Document prerequisite setup and use commands that can be copied:
 
 ```bash
-cd Flowmini/flowmini_v29_reusable_native_chain
+cd Lyraform/compiler
 cmake --build cmake-build-debug --target flowmini_ast_golden_tests
 cmake --build cmake-build-debug --target flowmini_symbol_projection_tests
 cmake --build cmake-build-debug --target flowmini_frontend_bundle_tests

@@ -3,7 +3,7 @@
 Flowoptimize is the sibling boundary after Flowparallel:
 
 ```text
-source -> Flowmini -> Flowanalyst -> Flowparallel -> Flowoptimize
+Lyraform source -> Flowmini-compatible frontend -> Flowanalyst -> Flowparallel -> Flowoptimize
 ```
 
 It currently establishes the optimization input/output boundary. It accepts an
@@ -41,7 +41,7 @@ provenance.
 Try the complete pipeline:
 
 ```sh
-Flowmini ... | Flowanalyst/build/flowanalyst | Flowoptimize/build/flowoptimize
+Lyraform frontend ... | Flowanalyst/build/flowanalyst | Flowoptimize/build/flowoptimize
 ```
 
 The future optimizer will consume the accepted semantic bundle, preserve

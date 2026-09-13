@@ -15,7 +15,7 @@ It distinguishes a successful semantic path from a deliberate semantic block.
 This prevents unfinished language areas from being mistaken for regressions.
 
 The companion `tools/run-flowcore-pass-corpus.sh` breadth gate runs every
-program in `Flowmini/.../examples/pass` through the same four boundaries. The
+program in `Lyraform/.../examples/pass` through the same four boundaries. The
 current corpus contains 43 programs, all of which pass semantic analysis,
 optimization, and the lowering report boundary. This does not claim that
 Flowlower emits target code for every program.

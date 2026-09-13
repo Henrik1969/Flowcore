@@ -7,8 +7,8 @@ optimizer=${FLOWOPTIMIZE_BIN:-$root/Flowoptimize/build/flowoptimize}
 analyst=${FLOWANALYST_BIN:-$root/Flowanalyst/build/flowanalyst}
 parallel=${FLOWPARALLEL_BIN:-$root/Flowparallel/build/flowparallel}
 bind=${FLOWBIND_BIN:-$root/Flowbind/build/flowbind}
-flowmini=${FLOWMINI_BIN:-$root/Flowmini/flowmini_v29_reusable_native_chain/cmake-build-debug/flowmini}
-fixture="$root/Flowmini/flowmini_v29_reusable_native_chain/examples/ast/call_expression_probe.flow"
+flowmini=${FLOWMINI_BIN:-$root/Lyraform/compiler/cmake-build-debug/flowmini}
+fixture="$root/Lyraform/compiler/examples/ast/call_expression_probe.flow"
 test -x "$flowmini"
 test -x "$parallel"
 test -x "$lowerer"
@@ -105,7 +105,7 @@ printf '%s\n' \
     'allow libc.so.6 write c io' \
     'allow libc.so.6 sendfile c io' \
     'allow libc.so.6 close c io' > "$policy"
-abs_source="$root/Flowmini/flowmini_v29_reusable_native_chain/examples/pass/abi_abs_main.flow"
+abs_source="$root/Lyraform/compiler/examples/pass/abi_abs_main.flow"
 "$flowmini" --dump-frontend-bundle "$abs_source" > "$tmpdir/abs.bundle.json"
 "$analyst" < "$tmpdir/abs.bundle.json" > "$tmpdir/abs.semantic.json"
 jq -e '.lowering_plan.format == "flowcore.lowering_plan"' "$tmpdir/abs.semantic.json" >/dev/null
@@ -121,7 +121,7 @@ abs_rc=$?
 set -e
 test "$abs_rc" -eq 42
 
-strlen_source="$root/Flowmini/flowmini_v29_reusable_native_chain/examples/pass/abi_strlen_main.flow"
+strlen_source="$root/Lyraform/compiler/examples/pass/abi_strlen_main.flow"
 "$flowmini" --dump-frontend-bundle "$strlen_source" > "$tmpdir/strlen.bundle.json"
 "$analyst" < "$tmpdir/strlen.bundle.json" > "$tmpdir/strlen.semantic.json"
 jq -e '.lowering_plan.format == "flowcore.lowering_plan"' "$tmpdir/strlen.semantic.json" >/dev/null
@@ -137,7 +137,7 @@ strlen_rc=$?
 set -e
 test "$strlen_rc" -eq 8
 
-licbinds_source="$root/Flowmini/flowmini_v29_reusable_native_chain/examples/pass/test_licbinds.flow"
+licbinds_source="$root/Lyraform/compiler/examples/pass/test_licbinds.flow"
 "$flowmini" --dump-frontend-bundle "$licbinds_source" > "$tmpdir/licbinds.bundle.json"
 "$analyst" < "$tmpdir/licbinds.bundle.json" > "$tmpdir/licbinds.semantic.json"
 "$bind" --policy "$policy" < "$tmpdir/licbinds.semantic.json" > "$tmpdir/licbinds.binding.json"
@@ -157,7 +157,7 @@ else
     grep -q 'main' "$tmpdir/licbinds.gdb.txt"
 fi
 
-kernel_getpid_source="$root/Flowmini/flowmini_v29_reusable_native_chain/examples/pass/abi_kernel_getpid_main.flow"
+kernel_getpid_source="$root/Lyraform/compiler/examples/pass/abi_kernel_getpid_main.flow"
 "$flowmini" --dump-frontend-bundle "$kernel_getpid_source" > "$tmpdir/kernel-getpid.bundle.json"
 "$analyst" < "$tmpdir/kernel-getpid.bundle.json" > "$tmpdir/kernel-getpid.semantic.json"
 grep -q '"symbol":"getpid"' "$tmpdir/kernel-getpid.semantic.json"
@@ -170,7 +170,7 @@ grep -q 'call i32 @getpid' "$tmpdir/kernel-getpid.ll"
 clang "$tmpdir/kernel-getpid.ll" -o "$tmpdir/kernel-getpid"
 "$tmpdir/kernel-getpid"
 
-kernel_getuid_source="$root/Flowmini/flowmini_v29_reusable_native_chain/examples/pass/abi_kernel_getuid_main.flow"
+kernel_getuid_source="$root/Lyraform/compiler/examples/pass/abi_kernel_getuid_main.flow"
 "$flowmini" --dump-frontend-bundle "$kernel_getuid_source" > "$tmpdir/kernel-getuid.bundle.json"
 "$analyst" < "$tmpdir/kernel-getuid.bundle.json" > "$tmpdir/kernel-getuid.semantic.json"
 "$bind" --policy "$policy" < "$tmpdir/kernel-getuid.semantic.json" > "$tmpdir/kernel-getuid.binding.json"
@@ -187,7 +187,7 @@ actual_uid=$?
 set -e
 test "$actual_uid" -eq $((expected_uid % 256))
 
-kernel_getgid_source="$root/Flowmini/flowmini_v29_reusable_native_chain/examples/pass/abi_kernel_getgid_main.flow"
+kernel_getgid_source="$root/Lyraform/compiler/examples/pass/abi_kernel_getgid_main.flow"
 "$flowmini" --dump-frontend-bundle "$kernel_getgid_source" > "$tmpdir/kernel-getgid.bundle.json"
 "$analyst" < "$tmpdir/kernel-getgid.bundle.json" > "$tmpdir/kernel-getgid.semantic.json"
 "$bind" --policy "$policy" < "$tmpdir/kernel-getgid.semantic.json" > "$tmpdir/kernel-getgid.binding.json"
@@ -204,7 +204,7 @@ actual_gid=$?
 set -e
 test "$actual_gid" -eq $((expected_gid % 256))
 
-kernel_geteuid_source="$root/Flowmini/flowmini_v29_reusable_native_chain/examples/pass/abi_kernel_geteuid_main.flow"
+kernel_geteuid_source="$root/Lyraform/compiler/examples/pass/abi_kernel_geteuid_main.flow"
 "$flowmini" --dump-frontend-bundle "$kernel_geteuid_source" > "$tmpdir/kernel-geteuid.bundle.json"
 "$analyst" < "$tmpdir/kernel-geteuid.bundle.json" > "$tmpdir/kernel-geteuid.semantic.json"
 "$bind" --policy "$policy" < "$tmpdir/kernel-geteuid.semantic.json" > "$tmpdir/kernel-geteuid.binding.json"
@@ -221,7 +221,7 @@ actual_euid=$?
 set -e
 test "$actual_euid" -eq $((expected_euid % 256))
 
-kernel_getegid_source="$root/Flowmini/flowmini_v29_reusable_native_chain/examples/pass/abi_kernel_getegid_main.flow"
+kernel_getegid_source="$root/Lyraform/compiler/examples/pass/abi_kernel_getegid_main.flow"
 "$flowmini" --dump-frontend-bundle "$kernel_getegid_source" > "$tmpdir/kernel-getegid.bundle.json"
 "$analyst" < "$tmpdir/kernel-getegid.bundle.json" > "$tmpdir/kernel-getegid.semantic.json"
 "$bind" --policy "$policy" < "$tmpdir/kernel-getegid.semantic.json" > "$tmpdir/kernel-getegid.binding.json"
@@ -238,7 +238,7 @@ actual_egid=$?
 set -e
 test "$actual_egid" -eq $((expected_egid % 256))
 
-kernel_getppid_source="$root/Flowmini/flowmini_v29_reusable_native_chain/examples/pass/abi_kernel_getppid_main.flow"
+kernel_getppid_source="$root/Lyraform/compiler/examples/pass/abi_kernel_getppid_main.flow"
 "$flowmini" --dump-frontend-bundle "$kernel_getppid_source" > "$tmpdir/kernel-getppid.bundle.json"
 "$analyst" < "$tmpdir/kernel-getppid.bundle.json" > "$tmpdir/kernel-getppid.semantic.json"
 "$bind" --policy "$policy" < "$tmpdir/kernel-getppid.semantic.json" > "$tmpdir/kernel-getppid.binding.json"
@@ -255,7 +255,7 @@ actual_ppid=$?
 set -e
 test "$actual_ppid" -eq $((expected_ppid % 256))
 
-kernel_getpgrp_source="$root/Flowmini/flowmini_v29_reusable_native_chain/examples/pass/abi_kernel_getpgrp_main.flow"
+kernel_getpgrp_source="$root/Lyraform/compiler/examples/pass/abi_kernel_getpgrp_main.flow"
 "$flowmini" --dump-frontend-bundle "$kernel_getpgrp_source" > "$tmpdir/kernel-getpgrp.bundle.json"
 "$analyst" < "$tmpdir/kernel-getpgrp.bundle.json" > "$tmpdir/kernel-getpgrp.semantic.json"
 "$bind" --policy "$policy" < "$tmpdir/kernel-getpgrp.semantic.json" > "$tmpdir/kernel-getpgrp.binding.json"
@@ -272,7 +272,7 @@ actual_pgrp=$?
 set -e
 test "$actual_pgrp" -eq $((expected_pgrp % 256))
 
-kernel_getpgid_source="$root/Flowmini/flowmini_v29_reusable_native_chain/examples/pass/abi_kernel_getpgid_main.flow"
+kernel_getpgid_source="$root/Lyraform/compiler/examples/pass/abi_kernel_getpgid_main.flow"
 "$flowmini" --dump-frontend-bundle "$kernel_getpgid_source" > "$tmpdir/kernel-getpgid.bundle.json"
 "$analyst" < "$tmpdir/kernel-getpgid.bundle.json" > "$tmpdir/kernel-getpgid.semantic.json"
 "$bind" --policy "$policy" < "$tmpdir/kernel-getpgid.semantic.json" > "$tmpdir/kernel-getpgid.binding.json"
@@ -289,7 +289,7 @@ actual_pgpid=$?
 set -e
 test "$actual_pgpid" -eq $((expected_pgpid % 256))
 
-kernel_getsid_source="$root/Flowmini/flowmini_v29_reusable_native_chain/examples/pass/abi_kernel_getsid_main.flow"
+kernel_getsid_source="$root/Lyraform/compiler/examples/pass/abi_kernel_getsid_main.flow"
 "$flowmini" --dump-frontend-bundle "$kernel_getsid_source" > "$tmpdir/kernel-getsid.bundle.json"
 "$analyst" < "$tmpdir/kernel-getsid.bundle.json" > "$tmpdir/kernel-getsid.semantic.json"
 "$bind" --policy "$policy" < "$tmpdir/kernel-getsid.semantic.json" > "$tmpdir/kernel-getsid.binding.json"
@@ -306,7 +306,7 @@ actual_sid=$?
 set -e
 test "$actual_sid" -eq $((expected_sid % 256))
 
-kernel_getpriority_source="$root/Flowmini/flowmini_v29_reusable_native_chain/examples/pass/abi_kernel_getpriority_main.flow"
+kernel_getpriority_source="$root/Lyraform/compiler/examples/pass/abi_kernel_getpriority_main.flow"
 "$flowmini" --dump-frontend-bundle "$kernel_getpriority_source" > "$tmpdir/kernel-getpriority.bundle.json"
 "$analyst" < "$tmpdir/kernel-getpriority.bundle.json" > "$tmpdir/kernel-getpriority.semantic.json"
 "$bind" --policy "$policy" < "$tmpdir/kernel-getpriority.semantic.json" > "$tmpdir/kernel-getpriority.binding.json"
@@ -324,7 +324,7 @@ set -e
 # Process exit status retains only the low eight bits, including negative nice values.
 test "$actual_priority" -eq "$((expected_priority & 255))"
 
-kernel_clock_source="$root/Flowmini/flowmini_v29_reusable_native_chain/examples/pass/abi_kernel_clock_main.flow"
+kernel_clock_source="$root/Lyraform/compiler/examples/pass/abi_kernel_clock_main.flow"
 "$flowmini" --dump-frontend-bundle "$kernel_clock_source" > "$tmpdir/kernel-clock.bundle.json"
 "$analyst" < "$tmpdir/kernel-clock.bundle.json" > "$tmpdir/kernel-clock.semantic.json"
 jq -e 'any(.lowering_plan.operations[]; .operands[0].kind == "writable_storage" and .operands[0].storage.bytes == 16)' "$tmpdir/kernel-clock.semantic.json" >/dev/null
@@ -345,7 +345,7 @@ if "$bind" --policy "$policy" < "$tmpdir/kernel-clock-invalid-storage.json" >/de
     exit 1
 fi
 
-kernel_random_source="$root/Flowmini/flowmini_v29_reusable_native_chain/examples/pass/abi_kernel_random_main.flow"
+kernel_random_source="$root/Lyraform/compiler/examples/pass/abi_kernel_random_main.flow"
 "$flowmini" --dump-frontend-bundle "$kernel_random_source" > "$tmpdir/kernel-random.bundle.json"
 "$analyst" < "$tmpdir/kernel-random.bundle.json" > "$tmpdir/kernel-random.semantic.json"
 "$bind" --policy "$policy" < "$tmpdir/kernel-random.semantic.json" > "$tmpdir/kernel-random.binding.json"
@@ -357,7 +357,7 @@ grep -q 'call i64 @getrandom' "$tmpdir/kernel-random.ll"
 clang "$tmpdir/kernel-random.ll" -o "$tmpdir/kernel-random"
 "$tmpdir/kernel-random"
 
-kernel_uname_source="$root/Flowmini/flowmini_v29_reusable_native_chain/examples/pass/abi_kernel_uname_main.flow"
+kernel_uname_source="$root/Lyraform/compiler/examples/pass/abi_kernel_uname_main.flow"
 "$flowmini" --dump-frontend-bundle "$kernel_uname_source" > "$tmpdir/kernel-uname.bundle.json"
 "$analyst" < "$tmpdir/kernel-uname.bundle.json" > "$tmpdir/kernel-uname.semantic.json"
 jq -e 'any(.lowering_plan.operations[]; .operands[0].kind == "writable_storage" and .operands[0].storage.bytes == 390)' "$tmpdir/kernel-uname.semantic.json" >/dev/null
@@ -371,7 +371,7 @@ grep -q 'alloca \[390 x i8\]' "$tmpdir/kernel-uname.ll"
 clang "$tmpdir/kernel-uname.ll" -o "$tmpdir/kernel-uname"
 "$tmpdir/kernel-uname"
 
-kernel_openat_source="$root/Flowmini/flowmini_v29_reusable_native_chain/examples/pass/abi_kernel_openat_main.flow"
+kernel_openat_source="$root/Lyraform/compiler/examples/pass/abi_kernel_openat_main.flow"
 "$flowmini" --dump-frontend-bundle "$kernel_openat_source" > "$tmpdir/kernel-openat.bundle.json"
 "$analyst" < "$tmpdir/kernel-openat.bundle.json" > "$tmpdir/kernel-openat.semantic.json"
 "$bind" --policy "$policy" < "$tmpdir/kernel-openat.semantic.json" > "$tmpdir/kernel-openat.binding.json"
@@ -383,7 +383,7 @@ grep -q 'call i32 @openat' "$tmpdir/kernel-openat.ll"
 clang "$tmpdir/kernel-openat.ll" -o "$tmpdir/kernel-openat"
 "$tmpdir/kernel-openat"
 
-kernel_read_source="$root/Flowmini/flowmini_v29_reusable_native_chain/examples/pass/abi_kernel_read_main.flow"
+kernel_read_source="$root/Lyraform/compiler/examples/pass/abi_kernel_read_main.flow"
 "$flowmini" --dump-frontend-bundle "$kernel_read_source" > "$tmpdir/kernel-read.bundle.json"
 "$analyst" < "$tmpdir/kernel-read.bundle.json" > "$tmpdir/kernel-read.semantic.json"
 "$bind" --policy "$policy" < "$tmpdir/kernel-read.semantic.json" > "$tmpdir/kernel-read.binding.json"
@@ -395,7 +395,7 @@ grep -q 'call i64 @read' "$tmpdir/kernel-read.ll"
 clang "$tmpdir/kernel-read.ll" -o "$tmpdir/kernel-read"
 "$tmpdir/kernel-read"
 
-kernel_write_source="$root/Flowmini/flowmini_v29_reusable_native_chain/examples/pass/abi_kernel_write_main.flow"
+kernel_write_source="$root/Lyraform/compiler/examples/pass/abi_kernel_write_main.flow"
 "$flowmini" --dump-frontend-bundle "$kernel_write_source" > "$tmpdir/kernel-write.bundle.json"
 "$analyst" < "$tmpdir/kernel-write.bundle.json" > "$tmpdir/kernel-write.semantic.json"
 "$bind" --policy "$policy" < "$tmpdir/kernel-write.semantic.json" > "$tmpdir/kernel-write.binding.json"
@@ -407,7 +407,7 @@ grep -q 'call i64 @write' "$tmpdir/kernel-write.ll"
 clang "$tmpdir/kernel-write.ll" -o "$tmpdir/kernel-write"
 "$tmpdir/kernel-write"
 
-kernel_lseek_source="$root/Flowmini/flowmini_v29_reusable_native_chain/examples/pass/abi_kernel_lseek_main.flow"
+kernel_lseek_source="$root/Lyraform/compiler/examples/pass/abi_kernel_lseek_main.flow"
 "$flowmini" --dump-frontend-bundle "$kernel_lseek_source" > "$tmpdir/kernel-lseek.bundle.json"
 "$analyst" < "$tmpdir/kernel-lseek.bundle.json" > "$tmpdir/kernel-lseek.semantic.json"
 "$bind" --policy "$policy" < "$tmpdir/kernel-lseek.semantic.json" > "$tmpdir/kernel-lseek.binding.json"
@@ -419,7 +419,7 @@ grep -q 'call i64 @lseek' "$tmpdir/kernel-lseek.ll"
 clang "$tmpdir/kernel-lseek.ll" -o "$tmpdir/kernel-lseek"
 "$tmpdir/kernel-lseek"
 
-kernel_unlinkat_source="$root/Flowmini/flowmini_v29_reusable_native_chain/examples/pass/abi_kernel_unlinkat_main.flow"
+kernel_unlinkat_source="$root/Lyraform/compiler/examples/pass/abi_kernel_unlinkat_main.flow"
 "$flowmini" --dump-frontend-bundle "$kernel_unlinkat_source" > "$tmpdir/kernel-unlinkat.bundle.json"
 "$analyst" < "$tmpdir/kernel-unlinkat.bundle.json" > "$tmpdir/kernel-unlinkat.semantic.json"
 "$bind" --policy "$policy" < "$tmpdir/kernel-unlinkat.semantic.json" > "$tmpdir/kernel-unlinkat.binding.json"
@@ -431,7 +431,7 @@ grep -q 'call i32 @unlinkat' "$tmpdir/kernel-unlinkat.ll"
 clang "$tmpdir/kernel-unlinkat.ll" -o "$tmpdir/kernel-unlinkat"
 "$tmpdir/kernel-unlinkat"
 
-rmdir_source="$root/Flowmini/flowmini_v29_reusable_native_chain/examples/pass/abi_kernel_rmdir_main.flow"
+rmdir_source="$root/Lyraform/compiler/examples/pass/abi_kernel_rmdir_main.flow"
 "$flowmini" --dump-frontend-bundle "$rmdir_source" > "$tmpdir/kernel-rmdir.bundle.json"
 "$analyst" < "$tmpdir/kernel-rmdir.bundle.json" > "$tmpdir/kernel-rmdir.semantic.json"
 "$bind" --policy "$policy" < "$tmpdir/kernel-rmdir.semantic.json" > "$tmpdir/kernel-rmdir.binding.json"
@@ -446,7 +446,7 @@ clang "$tmpdir/kernel-rmdir.ll" -o "$tmpdir/kernel-rmdir"
 "$tmpdir/kernel-rmdir"
 
 for kernel_name in fork socket listen unshare sethostname pipe2 waitpid socketpair bind poll accept4 connect gethostname; do
-    kernel_source="$root/Flowmini/flowmini_v29_reusable_native_chain/examples/pass/abi_kernel_${kernel_name}_main.flow"
+    kernel_source="$root/Lyraform/compiler/examples/pass/abi_kernel_${kernel_name}_main.flow"
     "$flowmini" --dump-frontend-bundle "$kernel_source" | "$analyst" > "$tmpdir/kernel-${kernel_name}.semantic.json"
     "$bind" --policy "$policy" < "$tmpdir/kernel-${kernel_name}.semantic.json" > "$tmpdir/kernel-${kernel_name}.binding.json"
     "$parallel" < "$tmpdir/kernel-${kernel_name}.semantic.json" | "$optimizer" > "$tmpdir/kernel-${kernel_name}.optimized.json"
@@ -456,7 +456,7 @@ for kernel_name in fork socket listen unshare sethostname pipe2 waitpid socketpa
     "$tmpdir/kernel-${kernel_name}"
 done
 
-flowcat_source="$root/Flowmini/flowmini_v29_reusable_native_chain/examples/apps/flowcat/flowcat.flow"
+flowcat_source="$root/Lyraform/compiler/examples/apps/flowcat/flowcat.flow"
 "$flowmini" --dump-frontend-bundle "$flowcat_source" > "$tmpdir/flowcat.bundle.json"
 "$analyst" < "$tmpdir/flowcat.bundle.json" > "$tmpdir/flowcat.semantic.json"
 jq -e '([.lowering_plan.operations[] | select(.kind == "loop")] | length) == 2 and any(.lowering_plan.operations[]; .kind == "assignment") and any(.lowering_plan.operations[]; .kind == "external_call" and .provider.symbol == "sendfile")' "$tmpdir/flowcat.semantic.json" >/dev/null
@@ -484,7 +484,7 @@ dd if=/dev/zero of="$tmpdir/large.bin" bs=1048576 count=2 status=none
 cmp -s "$tmpdir/large.bin" "$tmpdir/large.output"
 
 sed \
-    -e "s|\"../../../std/|\"$root/Flowmini/flowmini_v29_reusable_native_chain/std/|" \
+    -e "s|\"../../../std/|\"$root/Lyraform/compiler/std/|" \
     -e 's/^program flowcat$/program arbitrary_stream_copy/' \
     "$flowcat_source" > "$tmpdir/arbitrary-stream-copy.flow"
 "$flowmini" --dump-frontend-bundle "$tmpdir/arbitrary-stream-copy.flow" | "$analyst" > "$tmpdir/arbitrary-stream-copy.semantic.json"

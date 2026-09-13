@@ -1,0 +1,165 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+BUILD_DIR=${LYRAFORM_BUILD_DIR:-/tmp/lyraform-build}
+GENERATOR=${LYRAFORM_CMAKE_GENERATOR:-Ninja}
+QUIET=0
+
+say() {
+    if [[ "$QUIET" -eq 0 ]]; then
+        printf 'Igor: %s\n' "$*"
+    fi
+}
+
+die() {
+    printf 'Igor: error: %s\n' "$*" >&2
+    exit 1
+}
+
+usage() {
+    cat <<'EOF'
+Igor — Lyraform toolchain
+
+Usage:
+    igor [options] <command> [command-options]
+
+Options:
+    --build-dir DIR    use DIR for the CMake build (default: /tmp/lyraform-build)
+    --generator NAME   use the CMake generator (default: Ninja)
+    --quiet            suppress Igor status lines
+    -h, --help         show this help
+
+Commands:
+    build              configure when needed, then build the root graph
+    check              configure and list the discovered CTest graph
+    test               build and run the canonical CTest suite
+    run                build and run the compatibility flowmini executable
+    doctor             check local tool and repository readiness
+
+The underlying stage tools remain independently invocable. Igor is the
+human-facing driver; it does not replace the explicit compiler boundaries.
+EOF
+}
+
+configure() {
+    say "configuring Lyraform..."
+    cmake -S "$ROOT" -B "$BUILD_DIR" -G "$GENERATOR"
+}
+
+build() {
+    if [[ ! -f "$BUILD_DIR/CMakeCache.txt" ]]; then
+        configure
+    fi
+    say "building..."
+    cmake --build "$BUILD_DIR"
+}
+
+if [[ "$#" -eq 0 ]]; then
+    usage
+    exit 2
+fi
+
+while [[ "$#" -gt 0 ]]; do
+    case "$1" in
+        --build-dir)
+            [[ "$#" -ge 2 ]] || die "--build-dir requires a directory"
+            BUILD_DIR=$2
+            shift 2
+            ;;
+        --generator)
+            [[ "$#" -ge 2 ]] || die "--generator requires a CMake generator"
+            GENERATOR=$2
+            shift 2
+            ;;
+        --quiet)
+            QUIET=1
+            shift
+            ;;
+        -h|--help)
+            usage
+            exit 0
+            ;;
+        --)
+            shift
+            break
+            ;;
+        *)
+            break
+            ;;
+    esac
+done
+
+[[ "$#" -gt 0 ]] || { usage; exit 2; }
+command=$1
+shift
+
+case "$command" in
+    build)
+        [[ "$#" -eq 0 ]] || die "build does not accept positional arguments"
+        build
+        say "build complete"
+        ;;
+    check)
+        [[ "$#" -eq 0 ]] || die "check does not accept positional arguments"
+        configure
+        say "checking registered tests..."
+        ctest --test-dir "$BUILD_DIR" -N
+        say "check complete"
+        ;;
+    test)
+        [[ "$#" -eq 0 ]] || die "test does not accept positional arguments"
+        build
+        say "running the canonical test suite..."
+        ctest --test-dir "$BUILD_DIR" --output-on-failure
+        say "tests complete"
+        ;;
+    run)
+        [[ "$#" -gt 0 ]] || die "run requires a source or artifact path"
+        if [[ "$1" == "--" ]]; then
+            shift
+        fi
+        [[ "$#" -gt 0 ]] || die "run requires a source or artifact path"
+        build
+        executable="$BUILD_DIR/flowmini/flowmini"
+        [[ -x "$executable" ]] || die "built flowmini executable not found at $executable"
+        say "running $1..."
+        exec "$executable" "$@"
+        ;;
+    doctor)
+        [[ "$#" -eq 0 ]] || die "doctor does not accept positional arguments"
+        say "checking Lyraform toolchain readiness..."
+        failures=0
+        for tool in cmake ctest git; do
+            if command -v "$tool" >/dev/null 2>&1; then
+                printf '  %-10s %s\n' "$tool" "$(command -v "$tool")"
+            else
+                printf '  %-10s MISSING\n' "$tool"
+                failures=$((failures + 1))
+            fi
+        done
+        if command -v ninja >/dev/null 2>&1; then
+            printf '  %-10s %s\n' ninja "$(command -v ninja)"
+        elif [[ "$GENERATOR" == "Ninja" ]]; then
+            printf '  %-10s MISSING (required by generator %s)\n' ninja "$GENERATOR"
+            failures=$((failures + 1))
+        fi
+        for path in CMakeLists.txt Lyraform/compiler README.md REFERENCES.md; do
+            if [[ -e "$ROOT/$path" ]]; then
+                printf '  %-10s present\n' "$path"
+            else
+                printf '  %-10s MISSING\n' "$path"
+                failures=$((failures + 1))
+            fi
+        done
+        if [[ "$failures" -eq 0 ]]; then
+            say "doctor PASS"
+        else
+            say "doctor FAIL ($failures issue(s))"
+            exit 1
+        fi
+        ;;
+    *)
+        die "unknown command '$command' (use --help)"
+        ;;
+esac

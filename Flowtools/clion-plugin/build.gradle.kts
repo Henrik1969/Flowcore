@@ -3,7 +3,7 @@ plugins {
     kotlin("jvm") version "2.0.21"
 }
 
-group = "org.flowcore"
+group = "org.lyraform"
 version = "0.1.0"
 
 repositories {

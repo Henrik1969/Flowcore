@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Flowmini v24 AST report generator
+# Flowmini v25 AST report generator
 # ---------------------------------
 #
 # Purpose:
 #   Start from a blank slate:
-#       configure/build Flowmini v24
+#       configure/build Flowmini v25
 #       generate AST gallery inputs
 #       run --dump-ast over pass examples and gallery examples
 #       validate JSON
@@ -16,14 +16,14 @@ set -euo pipefail
 # Location:
 #   This script is version-local and is expected to live at:
 #
-#       Flowmini/flowmini_v24_explicit_ast/tools/generate-flowmini-ast-report.sh
+#       Lyraform/compiler/tools/generate-flowmini-ast-report.sh
 #
 # Usage:
-#   cd ~/Projekter/scratchpad/flow_Policy_envelope_pattern/Flowmini/flowmini_v24_explicit_ast
+#   cd ~/Projekter/scratchpad/flow_Policy_envelope_pattern/Lyraform/compiler
 #   tools/generate-flowmini-ast-report.sh
 #
 # Optional env:
-#   FLOWMINI_ROOT=/path/to/Flowmini/flowmini_v24_explicit_ast
+#   FLOWMINI_ROOT=/path/to/Lyraform/compiler
 #   REPO_ROOT=/path/to/repo/root
 #   BUILD_DIR=/path/to/build-dir
 #   JOBS=20
@@ -55,8 +55,8 @@ SUITE_LOG="$REPORT_DIR/flowmini_suite.log"
 BAD_JSON_LIST="$REPORT_DIR/bad-json.txt"
 
 DOCS_DIR="$REPO_ROOT/docs/sessions"
-REPORT_MD="$DOCS_DIR/flowmini-v24-ast-test-report-$STAMP.md"
-REPORT_MD_LATEST="$DOCS_DIR/flowmini-v24-ast-test-report-latest.md"
+REPORT_MD="$DOCS_DIR/flowmini-v25-ast-test-report-$STAMP.md"
+REPORT_MD_LATEST="$DOCS_DIR/flowmini-v25-ast-test-report-latest.md"
 
 if [[ ! -d "$FLOWMINI_ROOT" ]]; then
     echo "error: FLOWMINI_ROOT does not exist: $FLOWMINI_ROOT" >&2
@@ -337,7 +337,7 @@ summary = {
 summary_json.write_text(json.dumps(summary, indent=2) + "\n")
 
 lines = []
-lines.append("# Flowmini v24 AST Dump Summary")
+lines.append("# Flowmini v25 AST Dump Summary")
 lines.append("")
 lines.append("## Totals")
 lines.append("")
@@ -410,7 +410,7 @@ echo
 echo "== writing Markdown report =="
 
 cat > "$REPORT_MD" <<EOF
-# Flowmini v24 AST Test Report
+# Flowmini v25 AST Test Report
 
 Generated: $(date -Is)
 
@@ -425,7 +425,7 @@ Generated: $(date -Is)
 
 ## Purpose
 
-This report was generated from a blank slate by configuring/building Flowmini v24, running \`--dump-ast\` across pass examples and generated AST gallery inputs, validating JSON output, and running the Flowmini suite.
+This report was generated from a blank slate by configuring/building Flowmini v25, running \`--dump-ast\` across pass examples and generated AST gallery inputs, validating JSON output, and running the Flowmini suite.
 
 The purpose is to inspect current AST feature coverage and expose blanks/edge cases.
 
@@ -519,11 +519,11 @@ cat >> "$REPORT_MD" <<EOF
 ## Current Strategic Status
 
 \`\`\`text
-v24 Step 1: AST data structures exist                 PASS
-v24 Step 2: --dump-ast exists                         PASS
-v24 Step 3: source-unit header populated              PASS
-v24 Step 4: top-level fn/main declaration shells      PASS
-v24 Step 5A: function signatures                      TESTED / VERIFY SUMMARY
+v25 Step 1: AST data structures exist                 PASS
+v25 Step 2: --dump-ast exists                         PASS
+v25 Step 3: source-unit header populated              PASS
+v25 Step 4: top-level fn/main declaration shells      PASS
+v25 Step 5A: function signatures                      TESTED / VERIFY SUMMARY
 \`\`\`
 EOF
 

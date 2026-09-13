@@ -8,7 +8,7 @@ parallel=${FLOWPARALLEL_BIN:?FLOWPARALLEL_BIN is required}
 optimizer=${FLOWOPTIMIZE_BIN:?FLOWOPTIMIZE_BIN is required}
 bind=${FLOWBIND_BIN:?FLOWBIND_BIN is required}
 lower=${FLOWLOWER_BIN:?FLOWLOWER_BIN is required}
-source="$root/Flowmini/flowmini_v29_reusable_native_chain/examples/pass/profile_free_getpid.flow"
+source="$root/Lyraform/compiler/examples/pass/profile_free_getpid.flow"
 tmpdir=$(mktemp -d)
 trap 'rm -rf "$tmpdir"' EXIT
 
@@ -47,7 +47,7 @@ grep -Fq 'call i32 @getpgid(i32 0)' "$tmpdir/argument.ll"
 clang "$tmpdir/argument.ll" -o "$tmpdir/argument"
 "$tmpdir/argument"
 
-return_source="$root/Flowmini/flowmini_v29_reusable_native_chain/examples/pass/profile_free_return.flow"
+return_source="$root/Lyraform/compiler/examples/pass/profile_free_return.flow"
 "$flowmini" --dump-frontend-bundle "$return_source" > "$tmpdir/return.frontend.json"
 "$analyst" < "$tmpdir/return.frontend.json" > "$tmpdir/return.semantic.json"
 jq -e '.status == "ok" and .lowering_plan.operations[0].kind == "return_value" and .lowering_plan.operations[0].operands[0].value == "42"' "$tmpdir/return.semantic.json" >/dev/null
@@ -61,7 +61,7 @@ return_rc=$?
 set -e
 test "$return_rc" -eq 42
 
-expression_source="$root/Flowmini/flowmini_v29_reusable_native_chain/examples/pass/profile_free_expression.flow"
+expression_source="$root/Lyraform/compiler/examples/pass/profile_free_expression.flow"
 "$flowmini" --dump-frontend-bundle "$expression_source" | "$analyst" > "$tmpdir/expression.semantic.json"
 jq -e '.status == "ok" and .lowering_plan.operations[0].operands[0].kind == "binary" and .lowering_plan.operations[0].operands[0].operator == "+"' "$tmpdir/expression.semantic.json" >/dev/null
 "$parallel" < "$tmpdir/expression.semantic.json" | "$optimizer" > "$tmpdir/expression.optimized.json"
@@ -74,7 +74,7 @@ expression_rc=$?
 set -e
 test "$expression_rc" -eq 42
 
-local_source="$root/Flowmini/flowmini_v29_reusable_native_chain/examples/pass/profile_free_local_value.flow"
+local_source="$root/Lyraform/compiler/examples/pass/profile_free_local_value.flow"
 "$flowmini" --dump-frontend-bundle "$local_source" | "$analyst" > "$tmpdir/local.semantic.json"
 jq -e '.status == "ok" and any(.lowering_plan.operations[]; .kind == "value_definition") and any(.lowering_plan.operations[]; .kind == "return_value" and .operands[0].kind == "binary")' "$tmpdir/local.semantic.json" >/dev/null
 "$parallel" < "$tmpdir/local.semantic.json" | "$optimizer" > "$tmpdir/local.optimized.json"
@@ -87,7 +87,7 @@ local_rc=$?
 set -e
 test "$local_rc" -eq 42
 
-branch_source="$root/Flowmini/flowmini_v29_reusable_native_chain/examples/pass/profile_free_branch.flow"
+branch_source="$root/Lyraform/compiler/examples/pass/profile_free_branch.flow"
 "$flowmini" --dump-frontend-bundle "$branch_source" | "$analyst" > "$tmpdir/branch.semantic.json"
 jq -e '.status == "ok" and any(.lowering_plan.operations[]; .kind == "branch" and .operands[0].kind == "bool_literal")' "$tmpdir/branch.semantic.json" >/dev/null
 "$parallel" < "$tmpdir/branch.semantic.json" | "$optimizer" > "$tmpdir/branch.optimized.json"
@@ -100,7 +100,7 @@ branch_rc=$?
 set -e
 test "$branch_rc" -eq 42
 
-compare_source="$root/Flowmini/flowmini_v29_reusable_native_chain/examples/pass/profile_free_branch_compare.flow"
+compare_source="$root/Lyraform/compiler/examples/pass/profile_free_branch_compare.flow"
 "$flowmini" --dump-frontend-bundle "$compare_source" | "$analyst" > "$tmpdir/compare.semantic.json"
 jq -e '.status == "ok" and any(.lowering_plan.operations[]; .kind == "branch" and .operands[0].operator == ">")' "$tmpdir/compare.semantic.json" >/dev/null
 "$parallel" < "$tmpdir/compare.semantic.json" | "$optimizer" > "$tmpdir/compare.optimized.json"
@@ -113,7 +113,7 @@ compare_rc=$?
 set -e
 test "$compare_rc" -eq 42
 
-loop_source="$root/Flowmini/flowmini_v29_reusable_native_chain/examples/pass/profile_free_integer_loop.flow"
+loop_source="$root/Lyraform/compiler/examples/pass/profile_free_integer_loop.flow"
 "$flowmini" --dump-frontend-bundle "$loop_source" | "$analyst" > "$tmpdir/loop.semantic.json"
 jq -e '.status == "ok" and any(.lowering_plan.operations[]; .kind == "loop") and any(.lowering_plan.operations[]; .kind == "assignment")' "$tmpdir/loop.semantic.json" >/dev/null
 "$parallel" < "$tmpdir/loop.semantic.json" | "$optimizer" > "$tmpdir/loop.optimized.json"
@@ -133,7 +133,7 @@ if "$lower" --emit-llvm "$tmpdir/loop-without-mutation.ll" < "$tmpdir/loop-witho
     exit 1
 fi
 
-args_source="$root/Flowmini/flowmini_v29_reusable_native_chain/examples/pass/profile_free_args_length.flow"
+args_source="$root/Lyraform/compiler/examples/pass/profile_free_args_length.flow"
 "$flowmini" --dump-frontend-bundle "$args_source" | "$analyst" > "$tmpdir/args.semantic.json"
 jq -e '.status == "ok" and any(.lowering_plan.operations[]; .kind == "value_definition" and .operands[0].intrinsic == "list_length")' "$tmpdir/args.semantic.json" >/dev/null
 "$parallel" < "$tmpdir/args.semantic.json" | "$optimizer" > "$tmpdir/args.optimized.json"
@@ -150,7 +150,7 @@ set -e
 test "$args_with_value_rc" -eq 42
 test "$args_without_value_rc" -eq 7
 
-args_index_source="$root/Flowmini/flowmini_v29_reusable_native_chain/examples/pass/profile_free_args_index.flow"
+args_index_source="$root/Lyraform/compiler/examples/pass/profile_free_args_index.flow"
 printf '%s\n' 'allow libc.so.6 puts c io c_string c_int' > "$tmpdir/args-index.policy"
 "$flowmini" --dump-frontend-bundle "$args_index_source" | "$analyst" > "$tmpdir/args-index.semantic.json"
 jq -e '.status == "ok" and any(.lowering_plan.operations[]; .kind == "value_definition" and .operands[0].intrinsic == "list_index" and .operands[0].index.value == "1")' "$tmpdir/args-index.semantic.json" >/dev/null
@@ -168,7 +168,7 @@ args_index_missing_rc=$?
 set -e
 test "$args_index_missing_rc" -eq 64
 
-result_source="$root/Flowmini/flowmini_v29_reusable_native_chain/examples/pass/profile_free_external_result.flow"
+result_source="$root/Lyraform/compiler/examples/pass/profile_free_external_result.flow"
 printf '%s\n' 'allow libc.so.6 getppid c readonly - c_int' > "$tmpdir/result.policy"
 "$flowmini" --dump-frontend-bundle "$result_source" | "$analyst" > "$tmpdir/result.semantic.json"
 jq -e '.status == "ok" and any(.lowering_plan.operations[]; .kind == "external_call" and .provider.symbol == "getppid" and has("result_symbol_id")) and any(.lowering_plan.operations[]; .kind == "return_value" and .operands[0].kind == "binary" and .operands[0].left.kind == "identifier")' "$tmpdir/result.semantic.json" >/dev/null
@@ -195,7 +195,7 @@ set +e
 "$tmpdir/result"
 set -e
 
-external_branch_source="$root/Flowmini/flowmini_v29_reusable_native_chain/examples/pass/profile_free_external_branch.flow"
+external_branch_source="$root/Lyraform/compiler/examples/pass/profile_free_external_branch.flow"
 "$flowmini" --dump-frontend-bundle "$external_branch_source" | "$analyst" > "$tmpdir/external-branch.semantic.json"
 jq -e '.status == "ok" and any(.lowering_plan.operations[]; .kind == "external_call" and .provider.symbol == "getppid") and any(.lowering_plan.operations[]; .kind == "branch" and .operands[0].operator == ">")' "$tmpdir/external-branch.semantic.json" >/dev/null
 "$parallel" < "$tmpdir/external-branch.semantic.json" | "$optimizer" > "$tmpdir/external-branch.optimized.json"

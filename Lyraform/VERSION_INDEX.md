@@ -1,20 +1,21 @@
-# Flowmini Version Index
+# Lyraform version index
 
-Flowmini has gone through several numbered implementation stages.
+Lyraform continues the project formerly called Flowcore and Flowmini. The
+numbered Flowmini stages below are historical implementation checkpoints.
 
 Earlier stages are historical snapshots. They are useful for understanding development history, but they are not the active implementation line.
 
-Current active version:
+Current active lineage:
 
 ```text
-v29 — reusable native language chain
+Lyraform v0.29 — reusable native language chain
 ```
 
 ## Active version
 
 | Version | Directory | Main purpose |
 |---:|---|---|
-| v29 | `flowmini_v29_reusable_native_chain` | Reusable native language chain from frontend export through semantic analysis, capability binding, LLVM, and native ELF |
+| v29 | `Lyraform/compiler` | Reusable native language chain from frontend export through semantic analysis, capability binding, LLVM, and native ELF |
 
 ## Recent historical versions
 
@@ -55,7 +56,7 @@ Missing version numbers are historical gaps or discarded intermediate experiment
 Current active development should happen in:
 
 ```text
-Flowmini/flowmini_v29_reusable_native_chain
+Lyraform/compiler
 ```
 
 The v25-named directory is retained in the historical index for provenance;

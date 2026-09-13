@@ -4,9 +4,9 @@ set -eu
 root=$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)
 cpu=${FLOWPARALLEL_CPU_BIN:?FLOWPARALLEL_CPU_BIN is required}
 planner=${FLOWPARALLEL_BIN:?FLOWPARALLEL_BIN is required}
-flowmini=${FLOWMINI_BIN:-$root/Flowmini/flowmini_v29_reusable_native_chain/cmake-build-debug/flowmini}
+flowmini=${FLOWMINI_BIN:-$root/Lyraform/compiler/cmake-build-debug/flowmini}
 analyst=${FLOWANALYST_BIN:-$root/Flowanalyst/build/flowanalyst}
-fixture="$root/Flowmini/flowmini_v29_reusable_native_chain/examples/ast/parallel_independence_probe.flow"
+fixture="$root/Lyraform/compiler/examples/ast/parallel_independence_probe.flow"
 test -x "$cpu"
 test -x "$planner"
 test -x "$flowmini"

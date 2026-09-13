@@ -1,4 +1,5 @@
-# Flowcore CMake/Ninja integration for IDE projects.
+# Lyraform CMake/Ninja integration for IDE projects. The FLOWCORE_* cache names
+# remain compatibility identifiers for existing IDE projects.
 # Include this file from a project-specific CMakeLists.txt.
 
 set(FLOWCORE_CMAKE_DIR "${CMAKE_CURRENT_LIST_DIR}" CACHE INTERNAL "Flowcore CMake helper directory")
@@ -6,7 +7,7 @@ set(FLOWCORE_CMAKE_DIR "${CMAKE_CURRENT_LIST_DIR}" CACHE INTERNAL "Flowcore CMak
 set(FLOWCORE_ROOT "${CMAKE_CURRENT_LIST_DIR}/../.." CACHE PATH "Flowcore source root")
 # Preserve superbuild target expressions before initializing a standalone cache default.
 if(NOT DEFINED FLOWCORE_FLOWMINI)
-    set(FLOWCORE_FLOWMINI "${FLOWCORE_ROOT}/Flowmini/flowmini_v29_reusable_native_chain/cmake-build-debug/flowmini" CACHE FILEPATH "FlowMini executable")
+    set(FLOWCORE_FLOWMINI "${FLOWCORE_ROOT}/Lyraform/compiler/cmake-build-debug/flowmini" CACHE FILEPATH "FlowMini executable")
 endif()
 
 if(NOT DEFINED FLOWCORE_FLOWANALYST)

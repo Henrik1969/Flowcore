@@ -1,7 +1,7 @@
 # Flowtools
 
-Flowtools contains projections of the Flowcore capability chain for developer
-tools. It does not parse or compile Flowcore independently.
+Flowtools contains projections of the Lyraform capability chain for developer
+tools. It does not parse or compile Lyraform independently.
 
 ## CLion/CMake/Ninja project
 
@@ -13,7 +13,7 @@ Flowtools/examples/flowcat-clion/CMakeLists.txt
 
 Select Ninja as the CMake generator. The project exposes:
 
-- `flowcore_flowcat_analyze` — FlowMini, Flowanalyst, Flowbind, and
+- `flowcore_flowcat_analyze` — the Lyraform frontend, Flowanalyst, Flowbind, and
   Flowoptimize reports;
 - `flowcore_flowcat_lower` — authorized LLVM lowering and native ELF output;
 - `flowcat_run` — runs the generated application against sample files.
@@ -30,5 +30,5 @@ the stage executables. CLion can override them without changing source files.
 ## Plugin
 
 `clion-plugin/` contains the first IntelliJ Platform projection. It registers
-`.flow` files as Flowcore files and deliberately leaves semantic truth to
+`.flow` files as Lyraform files and deliberately leaves semantic truth to
 Flowanalyst. Build it with Gradle using the instructions in its README.

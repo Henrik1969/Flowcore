@@ -64,13 +64,13 @@ examples/
 This supports the external suite runner:
 
 ```bash
-$TOP/tools/run-flowmini-test-suite.sh --root Flowmini/flowmini_v22_unit_kinds
+$TOP/tools/run-flowmini-test-suite.sh --root Lyraform/flowmini_v22_unit_kinds
 ```
 
 or, with environment defaults:
 
 ```bash
-export FLOWMINI_ROOT="$TOP/Flowmini/flowmini_v22_unit_kinds"
+export FLOWMINI_ROOT="$TOP/Lyraform/flowmini_v22_unit_kinds"
 $TOP/tools/run-flowmini-test-suite.sh
 ```
 

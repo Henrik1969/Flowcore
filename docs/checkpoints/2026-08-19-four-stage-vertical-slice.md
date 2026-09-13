@@ -45,7 +45,7 @@ the IR to an ELF executable, and the executable exits successfully with code
 Build each sibling with CMake/Ninja, then run the complete trial pipeline:
 
 ```sh
-./Flowmini/flowmini_v25_symboltable_projection/cmake-build-debug/flowmini \
+./Lyraform/flowmini_v25_symboltable_projection/cmake-build-debug/flowmini \
   --dump-frontend-bundle \
   Flowlower/tests/empty_program_main.flow \
   | ./Flowanalyst/build/flowanalyst \

@@ -1,6 +1,7 @@
 # Flowlower
 
-Flowlower is the target-lowering sibling after Flowoptimize. `flowprepare`
+Flowlower is the target-lowering sibling in the Lyraform chain after
+Flowoptimize. `flowprepare`
 publishes the backend-neutral boundary first:
 
 ```text

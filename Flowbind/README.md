@@ -4,7 +4,7 @@ Flowbind is the first external-world boundary after Flowanalyst. It consumes a
 `flowanalyst.semantic_report` and verifies the report's declared external
 library and symbol requirements with the host dynamic loader.
 
-The v0.1 provider performs discovery only:
+The v0.1 provider performs discovery only at the Lyraform external boundary:
 
 ```text
 FlowMini → Flowanalyst → Flowbind

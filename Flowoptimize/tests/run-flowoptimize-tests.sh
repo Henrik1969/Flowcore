@@ -5,8 +5,8 @@ root=$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)
 optimizer=${FLOWOPTIMIZE_BIN:?FLOWOPTIMIZE_BIN is required}
 analyst=${FLOWANALYST_BIN:-$root/Flowanalyst/build/flowanalyst}
 parallel=${FLOWPARALLEL_BIN:-$root/Flowparallel/build/flowparallel}
-flowmini=${FLOWMINI_BIN:-$root/Flowmini/flowmini_v29_reusable_native_chain/cmake-build-debug/flowmini}
-fixture="$root/Flowmini/flowmini_v29_reusable_native_chain/examples/ast/call_expression_probe.flow"
+flowmini=${FLOWMINI_BIN:-$root/Lyraform/compiler/cmake-build-debug/flowmini}
+fixture="$root/Lyraform/compiler/examples/ast/call_expression_probe.flow"
 test -x "$flowmini"
 test -x "$parallel"
 test -x "$optimizer"

@@ -24,7 +24,7 @@ add_test(NAME flowvalidate_artifacts
         FLOWPARALLEL_BIN=$<TARGET_FILE:flowparallel>
         FLOWOPTIMIZE_BIN=$<TARGET_FILE:flowoptimize>
         FLOWLOWER_BIN=$<TARGET_FILE:flowlower>
-        FLOWVALIDATE_FIXTURE=${CMAKE_SOURCE_DIR}/Flowmini/flowmini_v29_reusable_native_chain/examples/ast/call_expression_probe.flow
+        FLOWVALIDATE_FIXTURE=${CMAKE_SOURCE_DIR}/Lyraform/compiler/examples/ast/call_expression_probe.flow
         ${CMAKE_CURRENT_SOURCE_DIR}/tests/run-flowvalidate-tests.sh)
 add_test(NAME flowcontracts_identity_preservation
     COMMAND ${CMAKE_COMMAND} -E env
@@ -34,5 +34,5 @@ add_test(NAME flowcontracts_identity_preservation
         FLOWPARALLEL_BIN=$<TARGET_FILE:flowparallel>
         FLOWOPTIMIZE_BIN=$<TARGET_FILE:flowoptimize>
         FLOWLOWER_BIN=$<TARGET_FILE:flowlower>
-        FLOW_IDENTITY_FIXTURE=${CMAKE_SOURCE_DIR}/Flowmini/flowmini_v29_reusable_native_chain/examples/apps/flowcat/flowcat.flow
+        FLOW_IDENTITY_FIXTURE=${CMAKE_SOURCE_DIR}/Lyraform/compiler/examples/apps/flowcat/flowcat.flow
         ${CMAKE_CURRENT_SOURCE_DIR}/tests/run-identity-preservation-tests.sh)

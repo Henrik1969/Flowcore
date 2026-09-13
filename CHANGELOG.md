@@ -1,7 +1,7 @@
 # Changelog
 
 This repository is a language-design and implementation lab. Numbered Flowmini
-stages are intentionally preserved as implementation checkpoints.
+stages are intentionally preserved as historical implementation checkpoints.
 
 ## Current checkpoint
 
@@ -13,8 +13,8 @@ stages are intentionally preserved as implementation checkpoints.
 - First real I/O capability slice: `flowcat_file_main` reads argv-supplied
   files through policy-authorized `open`/`read`/`write`/`close` bindings.
 
-- Active milestone: Flowcore v0.29 reusable native language chain
-- Implementation base: `Flowmini/flowmini_v29_reusable_native_chain`
+- Active milestone: Lyraform v0.29 reusable native language chain
+- Implementation base: `Lyraform/compiler`
 - Active branch: `main`
 - Current integration baseline: AST 28/28, SymbolTable projection 14/14,
   frontend bundle eight goldens plus one isolated run and nineteen negative
@@ -22,10 +22,10 @@ stages are intentionally preserved as implementation checkpoints.
 - Current bundle contract: `flowmini.frontend_bundle` version 2
 
 The detailed implementation history is maintained in
-[`Flowmini/CHANGELOG.md`](Flowmini/CHANGELOG.md), and the active/historical stage
-map is maintained in [`Flowmini/VERSION_INDEX.md`](Flowmini/VERSION_INDEX.md).
+[`Lyraform/CHANGELOG.md`](Lyraform/CHANGELOG.md), and the active/historical stage
+map is maintained in [`Lyraform/VERSION_INDEX.md`](Lyraform/VERSION_INDEX.md).
 
-## Flowcore v0.26 language-chain vertical slice
+## Historical Flowcore v0.26 language-chain vertical slice
 
 - Activated from the tagged `flowmini-v0.24-frontend-border` checkpoint.
 - Preserved v0.24 as a closed implementation line.
@@ -68,4 +68,4 @@ map is maintained in [`Flowmini/VERSION_INDEX.md`](Flowmini/VERSION_INDEX.md).
 ## Earlier Flowmini snapshots
 
 Earlier snapshots are preserved under `_archive/flowmini/previous-stages/` and
-indexed in `Flowmini/VERSION_INDEX.md`.
+indexed in `Lyraform/VERSION_INDEX.md`.

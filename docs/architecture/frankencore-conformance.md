@@ -27,7 +27,7 @@ experiments. It is not a production-readiness claim.
 - Repository root: `/home/henrik/Projekter/Udvikling/Flowcore`.
 - Canonical remote: `git@github.com:Henrik1969/Flowcore.git`.
 - Active branch at verification: `v25-symboltable-projection`.
-- Active implementation: `Flowmini/flowmini_v25_symboltable_projection/`.
+- Active implementation: `Lyraform/flowmini_v25_symboltable_projection/`.
 - Purpose: explore a language and system architecture in which source-level
   computation becomes typed, contract-governed, compiler-visible graph
   structure.
@@ -193,7 +193,7 @@ mechanism remains provisional and unimplemented.
 | ModuleSpec/FlowIR runtime representation | named compatibility execution target | future canonical Graph IR and explicit lowering boundary | current Flowmini runtime | a governed runtime/backend consumes Graph IR or a later lowered representation |
 | `build/libflowmini_testabi.so` | legacy test-provider path bridge | declared prerequisite/provider resolution | ABI examples and tests | consumers resolve the provider through a stable declared contract |
 | hard-coded `Point` ABI carrier path | focused compatibility probe | future general ABI type and call mechanism | ABI test path | general ABI lowering is specified and gated |
-| `Flowmini/flowmini_v24_explicit_ast/` | frozen historical implementation checkpoint | active v0.25 line | maintainers and historical comparison | preservation remains intentional; no deletion condition declared |
+| `Lyraform/flowmini_v24_explicit_ast/` | frozen historical implementation checkpoint | active v0.25 line | maintainers and historical comparison | preservation remains intentional; no deletion condition declared |
 | root superbuild references to `Handwritten_V1`, `flowcheck`, and `flowoptimize` | legacy build configuration | v0.25 directory CMake scope | historical/root workflows | explicit future root-build decision |
 
 Compatibility paths remain named and must not define the future canonical
@@ -204,7 +204,7 @@ model accidentally.
 | Path or artifact | Class | Authoritative? | Reproducible? | Retention or recovery policy |
 | --- | --- | --- | --- | --- |
 | tracked source, headers, schemas, tests, goldens, and architecture documents | source and governed evidence | yes, within their declared scope | from Git history | retain in repository history |
-| `Flowmini/flowmini_v25_symboltable_projection/cmake-build-debug/` and other build trees | build output | no | yes | local and ignored; recreate through CMake |
+| `Lyraform/flowmini_v25_symboltable_projection/cmake-build-debug/` and other build trees | build output | no | yes | local and ignored; recreate through CMake |
 | generated runtime/test files under active build or report paths | scratch/build output | no | normally yes | local and ignored unless promoted as governed evidence |
 | recorded Firetest reports in `docs/flowmini/` | test or checkpoint evidence | authoritative for the recorded run only | partly | retain with tested revision and limitations |
 | release tags and release-associated reports | release evidence | yes, for repository provenance | Git-reproducible metadata; environment only partly reproducible | durable repository history |

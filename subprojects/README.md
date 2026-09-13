@@ -1,6 +1,6 @@
 # Subprojects
 
-This directory contains reusable project islands used by Flowmini/Flowcore.
+This directory contains reusable project islands used by Lyraform/Flowcore.
 
 Current subprojects:
 

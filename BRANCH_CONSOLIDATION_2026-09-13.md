@@ -70,7 +70,7 @@ flowlfs-v0.1-alive (EXCLUDED; independent experimental line)
 **Key finding:** v23 introduces an important architectural document:
 
 ```
-Flowmini/Flowcore_type_system_foundation.md (410 lines)
+Lyraform/Flowcore_type_system_foundation.md (410 lines)
 ```
 
 **Document content evaluation:**
@@ -95,7 +95,7 @@ This document defines foundational type-system theory for Flowcore, including:
 
 **Path forward:**
 - ✅ Document already captured in v29 ancestry  
-- Confirmation: The v23 commit contains `Flowmini/Flowcore_type_system_foundation.md`
+- Confirmation: The v23 commit contains `Lyraform/Flowcore_type_system_foundation.md`
 - v29 should carry this forward as part of project architectural record
 - **No additional migration needed** — the document exists in the commit history and can be recovered by reference
 
@@ -359,7 +359,7 @@ de45340cdc1e090666bc0f46330af066a7d11081  Add Flowmini v23 TokenTree bridge dump
 The first commit contains the historical bridge implementation, tests, and
 fixtures. The second and third refine the observable bridge dump behavior and
 metadata; the third also adds
-`Flowmini/Flowcore_type_system_foundation.md`.
+`Lyraform/Flowcore_type_system_foundation.md`.
 
 The 410-line foundation note defines primitive atoms versus contract types and
 domain types, and records representation, storage, ownership, validity,
@@ -438,7 +438,7 @@ ctest --test-dir build --output-on-failure                     PASS (81/81)
 The dedicated Flowmini build and gates also passed:
 
 ```text
-cmake -S Flowmini/flowmini_v25_symboltable_projection \
+cmake -S Lyraform/flowmini_v25_symboltable_projection \
   -B /tmp/flowcore-flowmini-subbuild -G Ninja                  PASS
 cmake --build /tmp/flowcore-flowmini-subbuild -j4              PASS (34/34)
 flowmini_ast_golden_tests                                      PASS (28)
@@ -510,7 +510,7 @@ evidence.
 
 After consolidation, the previously observed embedded-superbuild path defect
 was repaired in commit `2d8ef2d5eba48e9e453338a278e017fe13433829`.
-`Flowmini/flowmini_v25_symboltable_projection/CMakeLists.txt` now uses
+`Lyraform/flowmini_v25_symboltable_projection/CMakeLists.txt` now uses
 `CMAKE_CURRENT_SOURCE_DIR` and `CMAKE_CURRENT_BINARY_DIR` for subproject-local
 scripts, working directories, and the legacy ABI-provider staging path. The
 provider source is selected with `$<TARGET_FILE:flowmini_testabi>` so its

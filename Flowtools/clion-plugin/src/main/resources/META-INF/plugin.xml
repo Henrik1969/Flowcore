@@ -1,18 +1,18 @@
 <idea-plugin>
-    <id>org.flowcore.language</id>
-    <name>Flowcore Language Support</name>
+    <id>org.lyraform.language</id>
+    <name>Lyraform Language Support</name>
     <vendor email="henriksorensen1969@gmail.com">Henrik Sørensen</vendor>
     <description><![CDATA[
-        Flowcore language recognition and CMake/Ninja project support.
-        Semantic truth remains provided by the Flowcore compiler stages.
+        Lyraform language recognition and CMake/Ninja project support.
+        Semantic truth remains provided by the Lyraform compiler stages.
     ]]></description>
     <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.modules.clion</depends>
     <extensions defaultExtensionNs="com.intellij">
-        <fileType name="Flowcore" language="Flowcore"
+        <fileType name="Lyraform" language="Lyraform"
                   implementationClass="org.flowcore.clion.FlowcoreFileType"
                   extensions="flow" />
-        <syntaxHighlighterFactory language="Flowcore"
+        <syntaxHighlighterFactory language="Lyraform"
                   implementationClass="org.flowcore.clion.FlowcoreSyntaxHighlighterFactory" />
     </extensions>
 </idea-plugin>

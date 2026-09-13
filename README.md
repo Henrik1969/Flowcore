@@ -1,218 +1,102 @@
-# Flowcore
+# Lyraform
 
-Flowcore is experimental language and system-architecture work.
+Lyraform is an experimental programming language and system-architecture
+project built around explicit contracts, compiler-visible graph structure,
+provider boundaries, provenance, and governed executable projections.
 
-The current active implementation is:
+Lyraform was previously developed under the name Flowcore. Flowmini names the
+historical prototype and bootstrap lineage; the current language and semantic
+model are Lyraform. The project remains experimental, unstable, and not
+production-ready.
 
-```text
-Flowcore v0.29 reusable native language chain
-```
-
-Active implementation path:
-
-```text
-Flowmini/flowmini_v29_reusable_native_chain
-```
-
-This repository is not a finished language or runtime. It is a design and implementation workspace for testing language structure, AST modeling, diagnostics, staged execution, contracts, graph-shaped execution ideas, and tooling architecture.
+The primary developer-facing toolchain command is `igor`.
 
 ## Current status
 
 ```text
-status: experimental
-production-ready: no
-active branch: main
-active prototype: Flowcore v0.29 reusable native language chain
-current milestone: reusable native source graphs and Flow-owned pager
+project:          Lyraform
+active branch:    main
+toolchain:        Igor
+status:           experimental / unstable / not production-ready
+current lineage:  v0.29 reusable native language chain
 ```
 
-Current known green gates:
+The current verified boundary includes source-driven scalar/control-flow
+lowering, exact generated ABI evidence, durable scalar graph activation,
+Flow-owned pager behavior, and governed LLVM/TinyVM backend boundaries. See the
+[current verification ledger](docs/checkpoints/2026-09-07-reusable-flow-chain-result.md)
+for exact evidence and scoped limitations.
+
+## Igor
 
 ```text
-normal CMake/Ninja build:      PASS
-AST golden tests:              PASS (28/28)
-Symbol projection tests:       PASS (14/14)
-frontend bundle:               PASS (8 golden, 1 isolated, 19 negative)
-downstream sibling CTest:      PASS
-independent flowvalidate:       PASS
-typed identity mutation gate:  PASS
-flowcat native ELF:            PASS
+igor --help
+igor doctor
+igor check
+igor build
+igor test
+igor run -- Lyraform/compiler/examples/pass/fn_demo.flow
 ```
 
-## What is Flowmini?
-
-Flowmini is the executable prototype language used to test and harden Flowcore ideas.
-
-It is not the final Flowcore language. It is the lab where syntax, AST structure, semantic rules, lowering ideas, diagnostics, and tooling are made visible before becoming larger Flowcore architecture.
-
-Start here:
-
-```text
-Flowmini/README.md
-```
-
-## Why does this look ordinary?
-
-At the surface, early Flowmini examples may look like a small conventional programming language.
-
-That is intentional.
-
-The current goal is not novelty syntax first. The current goal is to build a visible and testable language pipeline underneath ordinary-looking source code:
-
-```text
-source text
-    -> tokens
-    -> source structure
-    -> explicit AST
-    -> semantic facts
-    -> contracts/scopes
-    -> graph-shaped IR
-    -> executable system projection
-```
-
-The larger Flowcore direction is not merely "another syntax for functions and variables." The goal is a contract-governed, graph-shaped system model where programs can later be understood as nodes, ports, wires, policies, capabilities, and executable projections.
-
-## Core idea
-
-Flowcore explores programs as graphs of communicating work nodes.
-
-```text
-nodes do work
-ports expose node inputs and outputs
-wires connect ports
-wires are contracts, not values
-signals/payloads move through wires
-diagnostics and failure can flow alongside data
-scheduling should eventually be derivable from graph topology plus declared effects/resources
-```
-
-## Design rule
-
-> Sugar may remove typing, but must not remove meaning.
-
-Syntax sugar is acceptable only when direction, endpoints, contracts, payload movement, and failure paths remain semantically recoverable.
+`igor` is a small, inspectable driver around the existing CMake, compiler, and
+CTest entry points. The underlying stage binaries remain available for
+stage-specific work and compatibility. `igor check` validates the CMake
+configuration; `igor build` builds the canonical root graph; `igor test` runs
+the canonical tests; and `igor run` delegates to the current `flowmini`
+compatibility executable for a source or artifact path.
 
 ## Repository map
 
 ```text
-Flowmini/
-    executable Flowmini prototype language
+Lyraform/compiler/
+    current v0.29 compiler implementation
 
-Flowmini/flowmini_v29_reusable_native_chain/
-    current active implementation line
+Lyraform/flowmini_v24_explicit_ast/
+    preserved historical Flowmini v0.24 checkpoint
 
-subprojects/TokenTree/
-    structural token tree library experiment
+Flowanalyst/ Flowbind/ Flowparallel/ Flowoptimize/ Flowlower/
+    independent semantic, binding, planning, optimization, and lowering stages
 
-subprojects/SymbolTable/
-    symbol table library experiment
+Frankencore/
+    governance and constitutional architecture reference material
+
+subprojects/TinyVM/
+    independent governed backend experiment
 
 docs/
-    architecture, language, development, notes, and session documentation
-
-tools/
-    helper scripts and project tooling
-
-_archive/
-    intentionally preserved historical material
+    architecture, language, development, history, and verification records
 ```
 
-## Build quickstart
-
-The repository root now provides the canonical clean-tree superbuild for the
-current sibling chain and Frankencore reference tools:
+## Build and test without Igor
 
 ```bash
-cmake -S . -B /tmp/flowcore-build -G Ninja
-cmake --build /tmp/flowcore-build
-ctest --test-dir /tmp/flowcore-build --output-on-failure
+cmake -S . -B /tmp/lyraform-build -G Ninja
+cmake --build /tmp/lyraform-build
+ctest --test-dir /tmp/lyraform-build --output-on-failure
 ```
 
-The clean root build currently registers 81 CTest tests, including the larger
-integration corpus, pipeline matrix, pass corpus, sibling CTest suites, CUDA
-provider contracts, and Frankencore conformance probes.
+The clean root graph currently registers 81 CTest tests. Individual stage
+builds remain useful for focused development; the root graph is the canonical
+clean-checkout verification path.
 
-Individual sibling builds remain valid for focused development:
+## Intellectual provenance and acknowledgements
 
-```bash
-cd Flowmini/flowmini_v29_reusable_native_chain
+Lyraform builds on decades of published work in compiler construction, formal
+methods, graph-based computation, contract-based design, provenance,
+heterogeneous models of computation, and type/effect systems. See
+[REFERENCES.md](REFERENCES.md) for the project’s intellectual provenance and
+reading list, and [ACKNOWLEDGEMENTS.md](ACKNOWLEDGEMENTS.md) for software,
+tools, and implementation influences.
 
-cmake -S . -B cmake-build-debug
-cmake --build cmake-build-debug -j20
-```
+## Historical naming
 
-Adjust `-j20` to match your machine.
+The migration from Flowcore to Lyraform is documented in
+[docs/history/FLOWCORE_TO_LYRAFORM.md](docs/history/FLOWCORE_TO_LYRAFORM.md).
+Historical documents retain Flowcore, Flowmini, and version-era names when
+those names describe the state that existed at the time.
 
-The root superbuild does not replace the individual project contracts. It
-assembles them into one build graph so clean-tree dependencies and cross-stage
-tests are visible to CMake, Ninja, and IDEs.
+## License and disclaimer
 
-## Test quickstart
-
-```bash
-cd Flowmini/flowmini_v29_reusable_native_chain
-
-cmake --build cmake-build-debug --target flowmini_ast_golden_tests
-cmake --build cmake-build-debug --target flowmini_suite
-ctest --test-dir cmake-build-debug --output-on-failure
-```
-
-Historical standalone checkpoint (retained for provenance; the root suite below
-is authoritative):
-
-```text
-normal CMake/Ninja build:      PASS
-flowmini_ast_golden_tests:     PASS (28/28)
-flowmini_symbol_projection:    PASS (12/12)
-flowmini_frontend_bundle:      PASS (7 golden, 1 isolated, 19 negative)
-flowmini_suite:                PASS (78/78)
-CTest:                         PASS (2/2)
-```
-
-For the complete root build, the current result is (see the
-[maturation ledger](docs/checkpoints/2026-08-21-autonomous-maturation-ledger.md)):
-
-```text
-root CTest:                    PASS (81/81)
-integration corpus:            PASS (3/3)
-pipeline matrix:               PASS (7 accepted, 2 semantic-only, 1 blocked)
-pass corpus:                   PASS (91 programs)
-stdlib boundary:               PASS (6 ABI modules; libc/file I/O/memory/kernel ready at binding boundary)
-```
-
-The reusable native chain includes bounded scalar source graphs with explicitly
-selected startup providers, durable FIFO delivery and fresh native receiver
-frames. `flow_less` implements command interpretation, page bounds and rendering
-in Flow functions, with separately selected batch input, ncurses and output
-providers. The C++ pager algorithm has been removed. See the
-[activation decision](docs/architecture/source-graph-activation-decision.md) and
-[native graph boundary](docs/architecture/native-graph-provider-map.md).
-
-## Recommended reading
-
-```text
-Flowmini/README.md
-docs/checkpoints/2026-08-26-v0.28-typed-artifact-contracts.md
-Flowmini/CURRENT.md
-Flowmini/flowmini_v29_reusable_native_chain/docs/v0.25-symboltable-projection-status.md
-docs/flowmini/v0.25-origin-maturity-audit.md
-docs/flowmini/v0.25-frontend-bundle.md
-Flowmini/flowmini_v24_explicit_ast/docs/v0.24-shallow-expression-ast-sitrep.md (historical checkpoint)
-docs/development/project-hygiene.md
-```
-
-The current project boundary and its conformance to the FrankenCore
-architectural laws are recorded in the
-[Flowcore FrankenCore conformance declaration](docs/architecture/frankencore-conformance.md).
-
-## License
-
-This project is licensed under the MIT License. See `LICENSE`.
-
-## Disclaimer
-
-This project is provided "as is" without warranty.
-
-It is not intended for production, safety-critical, security-critical, financial, legal, medical, or operational use.
-
-See `DISCLAIMER.md`.
+This project remains under the existing MIT license. It is not intended for
+production, safety-critical, security-critical, financial, legal, medical, or
+operational use.

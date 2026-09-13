@@ -14,7 +14,7 @@
         "path": "/lib/x86_64-linux-gnu/libc.so.6",
         "architecture": "(libc6,x86-64)"
       },
-      "contract": "Flowmini/flowmini_v29_reusable_native_chain/std/abi/file_io.flow",
+      "contract": "Lyraform/compiler/std/abi/file_io.flow",
       "rationale": "Use the host C runtime for the already-defined Linux file I/O contract."
     },
     {
@@ -22,7 +22,7 @@
       "namespace": "flowcore.std.text",
       "capability": "text-operations",
       "strategy": "implement-flowcore",
-      "contract": "Flowmini/flowmini_v29_reusable_native_chain/std/text.flow",
+      "contract": "Lyraform/compiler/std/text.flow",
       "rationale": "Keep portable semantic text operations Flowcore-owned instead of inheriting host-specific behavior."
     },
     {

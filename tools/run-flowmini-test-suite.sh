@@ -99,7 +99,7 @@ Optional expectations:
 Typical lazy setup:
   export TOP="\$(pwd)"
   export FLOWLAB_TOP="\$TOP"
-  export FLOWMINI_ROOT="\$TOP/Flowmini/flowmini_v21_structural_bridge"
+  export FLOWMINI_ROOT="\$TOP/Lyraform/flowmini_v21_structural_bridge"
   export FLOWMINI_STDIN=5
 
 Then:

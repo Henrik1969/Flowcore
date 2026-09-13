@@ -26,7 +26,7 @@ status, but the distinction must remain explicit.
 
 ### Active implementation areas
 
-- `Flowmini/flowmini_v25_symboltable_projection` — active C++20 frontend,
+- `Lyraform/flowmini_v25_symboltable_projection` — active C++20 frontend,
   AST, SymbolTable projection, and frontend bundle.
 - `Flowanalyst` — independent semantic-report consumer.
 - `Flowbind` — policy-authorized `dlopen`/`dlsym` provider boundary.

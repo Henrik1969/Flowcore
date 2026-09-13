@@ -53,7 +53,7 @@ cmake --build /tmp/flowcore-final-clang -j3
 ctest --test-dir /tmp/flowcore-final-clang --output-on-failure -j3
 cmake --build /tmp/flowcore-reusable-current-sanitize -j3
 ASAN_OPTIONS=detect_leaks=0 LSAN_OPTIONS=detect_leaks=0 ctest --test-dir /tmp/flowcore-reusable-current-sanitize --output-on-failure -j3
-FLOWCORE_ROOT="$PWD" FLOWMINI_BIN=/tmp/flowcore-reusable-current/flowmini/flowmini FLOWANALYST_BIN=/tmp/flowcore-reusable-current/flowanalyst/flowanalyst FLOWPARALLEL_BIN=/tmp/flowcore-reusable-current/flowtools/flowparallel/flowparallel FLOWOPTIMIZE_BIN=/tmp/flowcore-reusable-current/flowoptimize/flowoptimize FLOWBIND_BIN=/tmp/flowcore-reusable-current/flowbind/flowbind FLOWLOWER_BIN=/tmp/flowcore-reusable-current/flowlower/flowlower bash tools/run-flowmini-test-suite.sh --root Flowmini/flowmini_v25_symboltable_projection --build-dir /tmp/flowcore-reusable-current/flowmini --no-build --native-pass-boundary --run-support --valgrind --timeout 60 --report /tmp/flowcore-final-categorized
+FLOWCORE_ROOT="$PWD" FLOWMINI_BIN=/tmp/flowcore-reusable-current/flowmini/flowmini FLOWANALYST_BIN=/tmp/flowcore-reusable-current/flowanalyst/flowanalyst FLOWPARALLEL_BIN=/tmp/flowcore-reusable-current/flowtools/flowparallel/flowparallel FLOWOPTIMIZE_BIN=/tmp/flowcore-reusable-current/flowoptimize/flowoptimize FLOWBIND_BIN=/tmp/flowcore-reusable-current/flowbind/flowbind FLOWLOWER_BIN=/tmp/flowcore-reusable-current/flowlower/flowlower bash tools/run-flowmini-test-suite.sh --root Lyraform/flowmini_v25_symboltable_projection --build-dir /tmp/flowcore-reusable-current/flowmini --no-build --native-pass-boundary --run-support --valgrind --timeout 60 --report /tmp/flowcore-final-categorized
 ```
 
 GCC 13.3.0: 81/81 (8.42 seconds). Clang 18.1.3: 81/81 (7.78 seconds).

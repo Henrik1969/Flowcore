@@ -31,7 +31,7 @@ native_status() {
 
 # Keep a negative result independent of the invoking process's nice value.
 cat > "$tmpdir/negative-provider-result.flow" <<EOF
-import "$root/Flowmini/flowmini_v29_reusable_native_chain/std/abi/libc.flow"
+import "$root/Lyraform/compiler/std/abi/libc.flow"
 program negative_provider_result
 main {
     input : c_long(-42)
@@ -48,7 +48,7 @@ for name in \
   abi_kernel_getsid_main abi_kernel_getpriority_main
 do
   echo "governed-provider parity fixture: $name"
-  source="$root/Flowmini/flowmini_v29_reusable_native_chain/examples/pass/$name.flow"
+  source="$root/Lyraform/compiler/examples/pass/$name.flow"
   if test "$name" = negative-provider-result; then
     source="$tmpdir/negative-provider-result.flow"
   fi

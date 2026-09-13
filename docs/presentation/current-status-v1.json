@@ -1,16 +1,16 @@
 {
   "schema": "flowcore.presentation-status/v1",
   "project": {
-    "name": "Flowcore",
-    "repository": "Henrik1969/Flowcore",
-    "summary": "Experimental graph-, contract-, and flow-oriented language and system-architecture project",
+    "name": "Lyraform",
+    "repository": "Henrik1969/Lyraform",
+    "summary": "Experimental graph-, contract-, and flow-oriented language and system-architecture project, formerly Flowcore",
     "maturity": "experimental",
     "production_ready": false
   },
   "source_state": {
     "as_of": "2026-09-07",
-    "branch": "v29-language-maturation",
-    "commit": "8c2b19d32c877c16d581fde14ed2f56598110e6a"
+    "branch": "main",
+    "commit": "8b5f838fcd5b4add1094e462f23990f468c16d8e"
   },
   "current_milestone": {
     "name": "Reusable native Flow compiler chain",
@@ -49,7 +49,7 @@
     "Flowmini is not self-hosted",
     "Stage 1 bootstrap has not begun",
     "FlowOpenOffice has not been ported",
-    "Flowcore is not production-ready",
+    "Lyraform is not production-ready",
     "Arbitrary target architectures are not implemented",
     "Safety certification is not claimed",
     "Native graph execution does not cover aggregate payloads or streaming",
@@ -75,8 +75,9 @@
   "presentation_policy": {
     "may_update": [
       "README.md",
-      "Flowmini/README.md",
+      "Lyraform/README.md",
       "docs/index.md",
+      "docs/presentation/current-status-v1.json",
       "GitHub repository description and topics when separately authorized"
     ],
     "must_not_update": [
@@ -85,7 +86,7 @@
       "schemas",
       "architecture decisions",
       "checkpoint or ledger evidence",
-      "this status manifest"
+      "generated build artifacts"
     ]
   }
 }

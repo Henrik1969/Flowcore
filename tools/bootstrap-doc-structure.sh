@@ -69,7 +69,7 @@ This repository is a language-design and implementation lab. The numbered folder
 
 ## Current checkpoint
 
-- Current Flowmini active version: `Flowmini/flowmini_v22_unit_kinds`
+- Current Flowmini active version: `Lyraform/flowmini_v22_unit_kinds`
 - Suite baseline: `75 / 75`
 - Source unit law introduced: `program` vs `unit`
 - Examples categorized into `pass/`, `fail/`, `support/`, and `docs/`
@@ -97,7 +97,7 @@ This repository is a language-design and implementation lab. The numbered folder
 
 ## Earlier Flowmini snapshots
 
-Earlier snapshots remain in place under `Flowmini/` and are indexed in `Flowmini/VERSION_INDEX.md`.
+Earlier snapshots remain in place under `Lyraform/` and are indexed in `Lyraform/VERSION_INDEX.md`.
 EOF
 
 write_file "docs/index.md" <<'EOF'
@@ -107,7 +107,7 @@ This repository is organized as a lab notebook with project islands.
 
 ## Main areas
 
-- [Flowmini](../Flowmini/README.md)
+- [Flowmini](../Lyraform/README.md)
 - [Subprojects](../subprojects/README.md)
 - [Pattern explored](../Pattern_explored/README.md)
 - [Architecture notes](architecture/README.md)
@@ -118,9 +118,9 @@ This repository is organized as a lab notebook with project islands.
 
 See:
 
-- [Flowmini current version](../Flowmini/CURRENT.md)
-- [Flowmini version index](../Flowmini/VERSION_INDEX.md)
-- [Flowmini changelog](../Flowmini/CHANGELOG.md)
+- [Flowmini current version](../Lyraform/CURRENT.md)
+- [Flowmini version index](../Lyraform/VERSION_INDEX.md)
+- [Flowmini changelog](../Lyraform/CHANGELOG.md)
 
 Current checkpoint:
 
@@ -183,7 +183,7 @@ Flowmini is the executable prototype/lab language used to explore Flowcore ideas
 Current active version:
 
 ```text
-Flowmini/flowmini_v22_unit_kinds
+Lyraform/flowmini_v22_unit_kinds
 ```
 
 Current baseline:
@@ -285,7 +285,7 @@ Useful environment:
 ```bash
 export TOP="/home/henrik/Projekter/scratchpad/flow_Policy_envelope_pattern"
 export FLOWLAB_TOP="$TOP"
-export FLOWMINI_ROOT="$TOP/Flowmini/flowmini_v22_unit_kinds"
+export FLOWMINI_ROOT="$TOP/Lyraform/flowmini_v22_unit_kinds"
 export FLOWMINI_STDIN=5
 ```
 
@@ -365,7 +365,7 @@ suite: 75 / 75
 - v23 TokenTree parser bridge
 EOF
 
-write_file "Flowmini/README.md" <<'EOF'
+write_file "Lyraform/README.md" <<'EOF'
 # Flowmini
 
 Flowmini is the executable prototype/lab language used to test Flowcore ideas.
@@ -385,7 +385,7 @@ See:
 - [CHANGELOG.md](CHANGELOG.md)
 EOF
 
-write_file "Flowmini/CURRENT.md" <<'EOF'
+write_file "Lyraform/CURRENT.md" <<'EOF'
 # Current Flowmini Version
 
 Current active version:
@@ -405,7 +405,7 @@ bad:   0
 Run the current suite:
 
 ```bash
-export FLOWMINI_ROOT="$TOP/Flowmini/flowmini_v22_unit_kinds"
+export FLOWMINI_ROOT="$TOP/Lyraform/flowmini_v22_unit_kinds"
 $TOP/tools/run-flowmini-test-suite.sh
 ```
 
@@ -417,7 +417,7 @@ unit    = defining/importable source unit
 ```
 EOF
 
-write_file "Flowmini/VERSION_INDEX.md" <<'EOF'
+write_file "Lyraform/VERSION_INDEX.md" <<'EOF'
 # Flowmini Version Index
 
 The numbered directories are standalone historical snapshots.
@@ -446,7 +446,7 @@ The numbered directories are standalone historical snapshots.
 Missing version numbers are historical gaps or discarded intermediate experiments.
 EOF
 
-write_file "Flowmini/CHANGELOG.md" <<'EOF'
+write_file "Lyraform/CHANGELOG.md" <<'EOF'
 # Flowmini Changelog
 
 ## v22_unit_kinds
@@ -500,7 +500,7 @@ EOF
 write_file "subprojects/README.md" <<'EOF'
 # Subprojects
 
-This directory contains reusable project islands used by Flowmini/Flowcore.
+This directory contains reusable project islands used by Lyraform/Flowcore.
 
 Current subprojects:
 

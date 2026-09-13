@@ -1,13 +1,14 @@
-# Flowmini Documentation
+# Flowmini lineage documentation
 
-Flowmini is the executable prototype/lab language used to explore Flowcore ideas.
+Flowmini is the historical executable prototype/lab language from which the
+current Lyraform compiler evolved.
 
 Current active version:
 
 ```text
-Flowmini v0.29 reusable native language chain
+Lyraform v0.29 reusable native language chain (Flowmini compatibility lineage)
 
-Implementation base: `Flowmini/flowmini_v29_reusable_native_chain`
+Implementation base: `Lyraform/compiler`
 ```
 
 Current baseline:
@@ -39,7 +40,7 @@ Documents in this directory:
 - [v0.24 frontend bundle contract](v0.24-frontend-bundle.md)
 - [v0.25 frontend bundle contract](v0.25-frontend-bundle.md)
 - [v0.25 structural-origin maturity audit](v0.25-origin-maturity-audit.md)
-- [C5 typed-statement sitrep](../../Flowmini/flowmini_v24_explicit_ast/docs/v0.24-c5-statement-payload-sitrep.md)
+- [C5 typed-statement sitrep](../../Lyraform/flowmini_v24_explicit_ast/docs/v0.24-c5-statement-payload-sitrep.md)
 - [Testing](testing.md)
 - [v0.24 frontend checkpoint Firetest report](v0.24-firetest-report.md)
 - [v0.24 frontend-border Firetest report](v0.24-frontend-border-firetest-report.md)
@@ -48,13 +49,13 @@ Documents in this directory:
 
 Implementation-base note:
 
-- [SymbolTable projection status](../../Flowmini/flowmini_v29_reusable_native_chain/docs/v0.25-symboltable-projection-status.md)
+- [SymbolTable projection status](../../Lyraform/compiler/docs/v0.25-symboltable-projection-status.md)
 
 Closed v0.24 implementation notes:
 
-- [Explicit AST status](../../Flowmini/flowmini_v24_explicit_ast/docs/v0.24-explicit-ast-status.md)
-- [Historical shallow-expression AST sitrep](../../Flowmini/flowmini_v24_explicit_ast/docs/v0.24-shallow-expression-ast-sitrep.md)
-- [Future transformation boundary](../../Flowmini/flowmini_v24_explicit_ast/docs/v0.24-future-transformation-boundary.md)
+- [Explicit AST status](../../Lyraform/flowmini_v24_explicit_ast/docs/v0.24-explicit-ast-status.md)
+- [Historical shallow-expression AST sitrep](../../Lyraform/flowmini_v24_explicit_ast/docs/v0.24-shallow-expression-ast-sitrep.md)
+- [Future transformation boundary](../../Lyraform/flowmini_v24_explicit_ast/docs/v0.24-future-transformation-boundary.md)
 
 Project-wide architecture:
 
@@ -63,6 +64,6 @@ Project-wide architecture:
 Current chain and application example:
 
 - [Parameterized main](v0.25-parameterized-main.md)
-- [Flowcat application](../../Flowmini/flowmini_v29_reusable_native_chain/examples/apps/flowcat/README.md)
+- [Flowcat application](../../Lyraform/compiler/examples/apps/flowcat/README.md)
 - [Named targets](../language/named-targets.md)
 - [Target artifact model](../language/target-artifact-model.md)

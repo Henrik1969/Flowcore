@@ -1,9 +1,9 @@
-# Flowmini Flowcore project build and control file
+# Lyraform compiler project build and control file
 # ------------------------------------------------
 
 cmake_minimum_required(VERSION 3.22)
 
-project(flowmini LANGUAGES C CXX)
+project(lyraform_compiler LANGUAGES C CXX)
 
 # We use CTest-compatible project structure.
 # Note: include(CTest) creates extra dashboard targets in some IDEs.

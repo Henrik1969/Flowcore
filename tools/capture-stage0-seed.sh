@@ -5,7 +5,7 @@ root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 cd "$root"
 
 tracked_digest=$(
-    git ls-files -z -- CMakeLists.txt Flowcontracts Flowmini/flowmini_v29_reusable_native_chain Flowanalyst Flowbind Flowoptimize Flowlower subprojects/TinyVM \
+    git ls-files -z -- CMakeLists.txt Flowcontracts Lyraform/compiler Flowanalyst Flowbind Flowoptimize Flowlower subprojects/TinyVM \
         | sort -z \
         | xargs -0 sha256sum \
         | sha256sum \

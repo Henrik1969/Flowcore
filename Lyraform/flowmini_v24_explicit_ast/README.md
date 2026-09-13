@@ -10,7 +10,7 @@ consumer, and the recorded Tier 3 border gate.
 Active development now happens in:
 
 ```text
-Flowmini/flowmini_v25_symboltable_projection
+Lyraform/flowmini_v25_symboltable_projection
 ```
 
 The authoritative v0.24 checkpoint description is
@@ -81,13 +81,13 @@ examples/
 This supports the external suite runner:
 
 ```bash
-$TOP/tools/run-flowmini-test-suite.sh --root Flowmini/flowmini_v24_explicit_ast
+$TOP/tools/run-flowmini-test-suite.sh --root Lyraform/flowmini_v24_explicit_ast
 ```
 
 or, with environment defaults:
 
 ```bash
-export FLOWMINI_ROOT="$TOP/Flowmini/flowmini_v24_explicit_ast"
+export FLOWMINI_ROOT="$TOP/Lyraform/flowmini_v24_explicit_ast"
 $TOP/tools/run-flowmini-test-suite.sh
 ```
 

@@ -3,26 +3,26 @@
 This repository is organized as a lab notebook with project islands.
 
 
-## Flowcore's core promise: 
+## Lyraform's core promise:
 
 > source-level architecture becomes compiler-visible graph structure.
 > The core philosophy is semantic clarity: meaning must be explicit, understandable, and checkable.
 > Syntax is subordinate to semantics.
 
-This is the soul of Flowcore.
+This is the soul of Lyraform.
 
 ## Main areas
 
-- [Flowmini](../Flowmini/README.md)
+- [Lyraform compiler](../Lyraform/README.md)
 - [Subprojects](../subprojects/README.md)
 - [Pattern explored](../Pattern_explored/README.md)
 - [Architecture notes](architecture/README.md)
-- [Flowmini docs](flowmini/README.md)
+- [Language lineage docs](flowmini/README.md)
 - [Session notes](sessions/)
 
 ## Foundational architecture
 
-- [Flowcore core promise](architecture/flowcore-core-promise.md)
+- [Lyraform/Flowcore core promise](architecture/flowcore-core-promise.md)
 - [Transformation and revision architecture](architecture/compiler-transformation-revision-model.md)
 - [Current reusable native chain and pager](checkpoints/2026-08-21-autonomous-maturation-ledger.md)
 - [Historical v0.28 typed artifact-contract status](checkpoints/2026-08-26-v0.28-typed-artifact-contracts.md)
@@ -40,18 +40,18 @@ This is the soul of Flowcore.
 - [Project hygiene](development/project-hygiene.md)
 - [Documentation style](development/documentation-style.md)
 
-## Current active Flowmini version
+## Current Lyraform version
 
 See:
 
-- [Flowmini current version](../Flowmini/CURRENT.md)
-- [Flowmini version index](../Flowmini/VERSION_INDEX.md)
-- [Flowmini changelog](../Flowmini/CHANGELOG.md)
+- [Lyraform current version](../Lyraform/CURRENT.md)
+- [Lyraform version index](../Lyraform/VERSION_INDEX.md)
+- [Lyraform changelog](../Lyraform/CHANGELOG.md)
 
 Current checkpoint:
 
 ```text
-Flowcore v0.29 reusable native language chain
+Lyraform v0.29 reusable native language chain
 GCC / Clang / ASan+UBSan root CTest: 81/81
 Native Flow-owned pager and graph activation laws: PASS
 Installed new-capability acceptance: exit 42, unchanged compiler binaries

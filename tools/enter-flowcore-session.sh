@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# enter-flowcore-session.sh
+# enter-flowcore-session.sh (compatibility name)
 #
-# Enter a Flowcore/Flowmini project session.
+# Enter a Lyraform project session. The script name and FLOWMINI_* variables
+# remain compatibility surfaces for existing developer workflows.
 #
 # Intended use:
 #   source tools/enter-flowcore-session.sh
@@ -32,7 +33,7 @@ Usage:
 
 Options:
   --top DIR          Project root. Default: parent of tools/
-  --flowmini DIR     Active Flowmini root. Default: discovered from Flowmini/CURRENT.md
+  --flowmini DIR     Active compiler root. Default: Lyraform/compiler
   --note             Create a dated session note under docs/sessions/
   --suite            Run the Flowmini suite after entering.
   --print-env        Print export commands and exit. Useful with eval.
@@ -78,16 +79,8 @@ TOP_RESOLVED="${TOP_ARG:-${TOP:-$DEFAULT_TOP}}"
 TOP_RESOLVED="$(resolve_abs "$TOP_RESOLVED")"
 
 discover_flowmini_from_current() {
-    local current_file="$TOP_RESOLVED/Flowmini/CURRENT.md"
-    local candidate=""
-
-    if [[ -f "$current_file" ]]; then
-        candidate="$(grep -Eo 'flowmini_v[0-9]+[A-Za-z0-9_ -]*' "$current_file" | head -n 1 || true)"
-        candidate="${candidate%% *}"
-    fi
-
-    if [[ -n "$candidate" && -d "$TOP_RESOLVED/Flowmini/$candidate" ]]; then
-        printf "%s/Flowmini/%s" "$TOP_RESOLVED" "$candidate"
+    if [[ -d "$TOP_RESOLVED/Lyraform/compiler" ]]; then
+        printf "%s/Lyraform/compiler" "$TOP_RESOLVED"
         return
     fi
 
@@ -96,12 +89,7 @@ discover_flowmini_from_current() {
         return
     fi
 
-    if [[ -d "$TOP_RESOLVED/Flowmini/flowmini_v22_unit_kinds" ]]; then
-        printf "%s/Flowmini/flowmini_v22_unit_kinds" "$TOP_RESOLVED"
-        return
-    fi
-
-    find "$TOP_RESOLVED/Flowmini" -maxdepth 1 -type d -name 'flowmini_v*' 2>/dev/null | sort -V | tail -n 1
+    find "$TOP_RESOLVED/Lyraform" -maxdepth 1 -type d -name 'flowmini_v*' 2>/dev/null | sort -V | tail -n 1
 }
 
 if [[ -n "$FLOWMINI_ARG" ]]; then
@@ -234,7 +222,7 @@ $TOP/tools/run-flowmini-test-suite.sh
 
 ## Related
 
-- [Flowmini current](../../Flowmini/CURRENT.md)
+- [Flowmini current](../../Lyraform/CURRENT.md)
 - [Flowmini roadmap](../flowmini/roadmap.md)
 - [Flowmini testing](../flowmini/testing.md)
 EOF
@@ -255,10 +243,10 @@ print_dashboard() {
     short_git_status | sed 's/^/    /'
     echo
     echo "Current Flowmini:"
-    if [[ -f "$TOP/Flowmini/CURRENT.md" ]]; then
-        sed -n '1,34p' "$TOP/Flowmini/CURRENT.md" | sed 's/^/    /'
+    if [[ -f "$TOP/Lyraform/CURRENT.md" ]]; then
+        sed -n '1,34p' "$TOP/Lyraform/CURRENT.md" | sed 's/^/    /'
     else
-        echo "    no Flowmini/CURRENT.md"
+        echo "    no Lyraform/CURRENT.md"
     fi
     echo
     echo "Useful commands:"

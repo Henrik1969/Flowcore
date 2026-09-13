@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.22)
-project(flowcore LANGUAGES C CXX)
+project(lyraform LANGUAGES C CXX)
 
 include(CTest)
 include(GNUInstallDirs)
@@ -8,7 +8,7 @@ include(GNUInstallDirs)
 # tests, and artifact contract; the root only supplies one clean build graph.
 add_subdirectory(Flowcontracts ${CMAKE_CURRENT_BINARY_DIR}/flowcontracts)
 add_subdirectory(subprojects/TinyVM ${CMAKE_CURRENT_BINARY_DIR}/tinyvm)
-add_subdirectory(Flowmini/flowmini_v29_reusable_native_chain
+add_subdirectory(Lyraform/compiler
     ${CMAKE_CURRENT_BINARY_DIR}/flowmini)
 add_subdirectory(Flowanalyst ${CMAKE_CURRENT_BINARY_DIR}/flowanalyst)
 add_subdirectory(Flowbind ${CMAKE_CURRENT_BINARY_DIR}/flowbind)
@@ -27,7 +27,7 @@ set(FLOWCORE_FLOWLOWER "$<TARGET_FILE:flowlower>")
 add_subdirectory(Flowtools ${CMAKE_CURRENT_BINARY_DIR}/flowtools)
 add_subdirectory(Flowlower ${CMAKE_CURRENT_BINARY_DIR}/flowlower)
 add_subdirectory(Flowkernel ${CMAKE_CURRENT_BINARY_DIR}/flowkernel)
-add_subdirectory(Flowmini/flowmini_v29_reusable_native_chain/examples/apps/flow_less
+add_subdirectory(Lyraform/compiler/examples/apps/flow_less
     ${CMAKE_CURRENT_BINARY_DIR}/flow_less_providers)
 
 
@@ -322,7 +322,7 @@ install(TARGETS
 )
 
 install(DIRECTORY
-    ${CMAKE_CURRENT_SOURCE_DIR}/Flowmini/flowmini_v29_reusable_native_chain/include/
+    ${CMAKE_CURRENT_SOURCE_DIR}/Lyraform/compiler/include/
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/flowcore/flowmini
     FILES_MATCHING PATTERN "*.h"
 )
@@ -334,7 +334,7 @@ install(DIRECTORY
 )
 
 install(DIRECTORY
-    ${CMAKE_CURRENT_SOURCE_DIR}/Flowmini/flowmini_v29_reusable_native_chain/subprojects/SymbolTable/SymbolTable_v1_1/include/
+    ${CMAKE_CURRENT_SOURCE_DIR}/Lyraform/compiler/subprojects/SymbolTable/SymbolTable_v1_1/include/
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/flowcore
     FILES_MATCHING PATTERN "*.hpp" PATTERN "*.h"
 )
@@ -352,21 +352,27 @@ install(DIRECTORY
 )
 
 install(DIRECTORY
-    ${CMAKE_CURRENT_SOURCE_DIR}/Flowmini/flowmini_v29_reusable_native_chain/std/
+    ${CMAKE_CURRENT_SOURCE_DIR}/Lyraform/compiler/std/
     DESTINATION ${CMAKE_INSTALL_DATADIR}/flowcore/std
     FILES_MATCHING PATTERN "*.flow"
 )
 
 install(FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/Flowmini/flowmini_v29_reusable_native_chain/examples/apps/flowcat/policy.conf
+    ${CMAKE_CURRENT_SOURCE_DIR}/Lyraform/compiler/examples/apps/flowcat/policy.conf
     DESTINATION ${CMAKE_INSTALL_DATADIR}/flowcore/examples/flowcat
 )
 
 install(PROGRAMS tools/generate-flow-bindings.sh
     DESTINATION ${CMAKE_INSTALL_BINDIR} RENAME generate-flow-bindings)
 
+install(PROGRAMS igor
+    DESTINATION ${CMAKE_INSTALL_BINDIR})
+
 install(FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/README.md
+    ${CMAKE_CURRENT_SOURCE_DIR}/REFERENCES.md
+    ${CMAKE_CURRENT_SOURCE_DIR}/ACKNOWLEDGEMENTS.md
+    ${CMAKE_CURRENT_SOURCE_DIR}/docs/history/FLOWCORE_TO_LYRAFORM.md
     ${CMAKE_CURRENT_SOURCE_DIR}/CHANGELOG.md
     ${CMAKE_CURRENT_SOURCE_DIR}/LICENSE.md
     ${CMAKE_CURRENT_SOURCE_DIR}/docs/flowmini/stdlib-capability-matrix.md

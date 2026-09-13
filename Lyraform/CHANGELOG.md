@@ -1,9 +1,9 @@
-# Flowmini Changelog
+# Lyraform compiler changelog
 
 ## v29_reusable_native_chain — active
 
 - Promoted the reusable native language chain to the active v0.29 milestone.
-- Made `main` and `flowmini_v29_reusable_native_chain` the current authority.
+- Made `main` and `Lyraform/compiler` the current authority.
 
 ## v27_namespaced_provider_chain — historical
 
@@ -26,7 +26,7 @@
   LLVM, expected output, and preserved inspection builds.
 
 The v25 projection directory and branch names are historical; the active
-implementation now lives at `flowmini_v29_reusable_native_chain` on `main`.
+implementation now lives at `Lyraform/compiler` on `main`.
 
 ## v25_symboltable_projection — historical
 

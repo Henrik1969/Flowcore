@@ -1,9 +1,10 @@
 # Flowanalyst
 
-Flowanalyst is the semantic-analysis sibling of Flowmini.
+Flowanalyst is the semantic-analysis sibling of the Lyraform compiler. It
+consumes the historical Flowmini-compatible frontend artifact.
 
 ```text
-source -> Flowmini -> flowmini.frontend_bundle -> Flowanalyst
+Lyraform source -> Flowmini-compatible frontend -> flowmini.frontend_bundle -> Flowanalyst
 ```
 
 It consumes the versioned Flowmini frontend bundle. It does not reparse source,
@@ -21,9 +22,9 @@ Flowmini internals.
 From the Flowcore repository:
 
 ```sh
-./Flowmini/flowmini_v29_reusable_native_chain/cmake-build-debug/flowmini \
+./Lyraform/compiler/cmake-build-debug/flowmini \
   --dump-frontend-bundle \
-  Flowmini/flowmini_v29_reusable_native_chain/examples/ast/target_projection_probe.flow \
+  Lyraform/compiler/examples/ast/target_projection_probe.flow \
   | Flowanalyst/build/flowanalyst
 ```
 

@@ -44,7 +44,7 @@ accidental nested directories
 ```
 
 The repository may track selected IDE files when they intentionally describe
-the development cockpit. For Flowmini, CLion exposes maintained CMake targets
+the development cockpit. For Lyraform, CLion exposes maintained CMake targets
 such as `flowmini`, `flowmini_suite`, `flowmini_ast_golden_tests`,
 `flowmini_symbol_projection_tests`, and `flowmini_frontend_bundle_tests`.
 Therefore `.idea/` is not automatically generated exhaust in this repository.
@@ -70,15 +70,15 @@ history. Use `_local_archive/` when it is useful locally but should not enter
 project history. Age or generated appearance alone does not make material
 disposable.
 
-## Flowmini active-stage policy
+## Lyraform active-stage policy
 
 The active implementation must be easy to find:
 
 ```text
-Flowmini/flowmini_v29_reusable_native_chain
+Lyraform/compiler
 ```
 
-`Flowmini/flowmini_v24_explicit_ast/` remains beside it intentionally as the
+`Lyraform/flowmini_v24_explicit_ast/` remains beside it intentionally as the
 closed raw frontend/export checkpoint inherited by v0.25. Earlier stages live
 under `_archive/flowmini/previous-stages/`. A preserved stage remains evidence,
 not active implementation authority.

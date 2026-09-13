@@ -25,7 +25,7 @@ examples/docs/*
 ## Runner
 
 ```bash
-cd Flowmini/flowmini_v29_reusable_native_chain
+cd Lyraform/compiler
 ../../tools/run-flowmini-test-suite.sh \
     --root . \
     --build-dir cmake-build-debug \

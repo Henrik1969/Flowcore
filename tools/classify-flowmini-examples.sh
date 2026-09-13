@@ -5,7 +5,7 @@ set -euo pipefail
 #
 # Intended to be run from a Flowmini version root, for example:
 #
-#   cd Flowmini/flowmini_v21_structural_bridge
+#   cd Lyraform/flowmini_v21_structural_bridge
 #   ../../tools/classify-flowmini-examples.sh --apply
 #
 # Default mode is dry-run. It prints the planned moves without changing files.
@@ -46,8 +46,8 @@ Options:
   --help           Show this help.
 
 Examples:
-  tools/classify-flowmini-examples.sh --root Flowmini/flowmini_v21_structural_bridge
-  tools/classify-flowmini-examples.sh --root Flowmini/flowmini_v21_structural_bridge --apply
+  tools/classify-flowmini-examples.sh --root Lyraform/flowmini_v21_structural_bridge
+  tools/classify-flowmini-examples.sh --root Lyraform/flowmini_v21_structural_bridge --apply
 USAGE
 }
 

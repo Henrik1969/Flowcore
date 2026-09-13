@@ -35,7 +35,7 @@ Flowcore source
   -> native ELF executable
 ```
 
-The [`flowcat` application example](../../Flowmini/flowmini_v25_symboltable_projection/examples/apps/flowcat/README.md)
+The [`flowcat` application example](../../Lyraform/flowmini_v25_symboltable_projection/examples/apps/flowcat/README.md)
 executes this chain and verifies its output.
 
 ## Implemented boundaries
@@ -108,7 +108,7 @@ accepted and 1 deliberately blocked semantic case, and the pass corpus carries
 is:
 
 ```sh
-Flowmini/flowmini_v25_symboltable_projection/examples/apps/flowcat/run-flowcat.sh
+Lyraform/flowmini_v25_symboltable_projection/examples/apps/flowcat/run-flowcat.sh
 ```
 
 Use `--keep-build` to preserve the bundle, reports, LLVM, and ELF binary for

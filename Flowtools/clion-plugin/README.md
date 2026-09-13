@@ -1,7 +1,7 @@
-# Flowcore CLion plugin
+# Lyraform CLion plugin
 
-This is the first CLion projection for Flowcore. It registers `.flow` files as
-Flowcore source files and leaves project orchestration to the repository's
+This is the first CLion projection for Lyraform. It registers `.flow` files as
+Lyraform source files and leaves project orchestration to the repository's
 CMake/Ninja integration.
 
 The plugin intentionally does not implement a second parser or semantic model.

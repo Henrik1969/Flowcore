@@ -2,12 +2,12 @@
 set -eu
 
 root=${FLOWCORE_ROOT:-$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)}
-flowmini=${FLOWMINI_BIN:-$root/Flowmini/flowmini_v29_reusable_native_chain/cmake-build-debug/flowmini}
+flowmini=${FLOWMINI_BIN:-$root/Lyraform/compiler/cmake-build-debug/flowmini}
 analyst=${FLOWANALYST_BIN:-$root/Flowanalyst/build/flowanalyst}
 parallel=${FLOWPARALLEL_BIN:-$root/Flowparallel/build/flowparallel}
 optimizer=${FLOWOPTIMIZE_BIN:-$root/Flowoptimize/build/flowoptimize}
 lowerer=${FLOWLOWER_BIN:-$root/Flowlower/build/flowlower}
-ast_root=$root/Flowmini/flowmini_v29_reusable_native_chain/examples/ast
+ast_root=$root/Lyraform/compiler/examples/ast
 tmpdir=$(mktemp -d)
 trap 'rm -rf "$tmpdir"' EXIT
 

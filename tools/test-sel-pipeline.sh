@@ -8,7 +8,7 @@ parallel=${FLOWPARALLEL_BIN:?FLOWPARALLEL_BIN is required}
 optimizer=${FLOWOPTIMIZE_BIN:?FLOWOPTIMIZE_BIN is required}
 bind=${FLOWBIND_BIN:?FLOWBIND_BIN is required}
 lower=${FLOWLOWER_BIN:?FLOWLOWER_BIN is required}
-fixture="$root/Flowmini/flowmini_v29_reusable_native_chain/examples/apps/sel/sel.flow"
+fixture="$root/Lyraform/compiler/examples/apps/sel/sel.flow"
 tmpdir=$(mktemp -d)
 trap 'rm -rf "$tmpdir"' EXIT
 
@@ -65,7 +65,7 @@ jq -e '.status == "ready" and (.symbols | index("wgetch")) != null and (.symbols
 # The backend recognizes the structured capability plan, not this fixture's
 # source-unit identity. An arbitrary program name must retain the same path.
 sed \
-    -e "s|\"../../../std/|\"$root/Flowmini/flowmini_v29_reusable_native_chain/std/|" \
+    -e "s|\"../../../std/|\"$root/Lyraform/compiler/std/|" \
     -e 's/^program sel$/program terminal_choice_probe/' \
     "$fixture" > "$tmpdir/renamed.flow"
 "$flowmini" --dump-frontend-bundle "$tmpdir/renamed.flow" |
@@ -80,7 +80,7 @@ grep -q 'generic structured lowering plan' "$tmpdir/renamed.ll"
 # The same capability set with a different source literal must produce different
 # behavior without selecting another backend path.
 sed \
-    -e "s|\"../../../std/|\"$root/Flowmini/flowmini_v29_reusable_native_chain/std/|" \
+    -e "s|\"../../../std/|\"$root/Lyraform/compiler/std/|" \
     -e 's/^program sel$/program terminal_choice_variant/' \
     -e 's/selected: alpha/selected: source-variant/' \
     "$fixture" > "$tmpdir/variant.flow"
@@ -94,7 +94,7 @@ grep -q 'source-variant' "$tmpdir/variant.ll"
 # Source operation order is preserved rather than reconstructed from the
 # capability set. Swapping two same-block terminal operations swaps their calls.
 sed \
-    -e "s|\"../../../std/|\"$root/Flowmini/flowmini_v29_reusable_native_chain/std/|" \
+    -e "s|\"../../../std/|\"$root/Lyraform/compiler/std/|" \
     -e 's/^program sel$/program terminal_order_variant/' \
     -e 's/curses.noecho()/curses.__order_placeholder__()/' \
     -e 's/curses.cbreak()/curses.noecho()/' \

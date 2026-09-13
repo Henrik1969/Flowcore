@@ -5,4 +5,4 @@ pluginManagement {
     }
 }
 
-rootProject.name = "flowcore-clion"
+rootProject.name = "lyraform-clion"
