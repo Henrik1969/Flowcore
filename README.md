@@ -21,7 +21,7 @@ This repository is not a finished language or runtime. It is a design and implem
 ```text
 status: experimental
 production-ready: no
-active branch: v29-language-maturation
+active branch: main
 active prototype: Flowcore v0.29 reusable native language chain
 current milestone: reusable native source graphs and Flow-owned pager
 ```
@@ -128,7 +128,7 @@ cmake --build /tmp/flowcore-build
 ctest --test-dir /tmp/flowcore-build --output-on-failure
 ```
 
-The clean root build currently registers 79 tests, including the larger
+The clean root build currently registers 81 CTest tests, including the larger
 integration corpus, pipeline matrix, pass corpus, sibling CTest suites, CUDA
 provider contracts, and Frankencore conformance probes.
 
@@ -157,7 +157,8 @@ cmake --build cmake-build-debug --target flowmini_suite
 ctest --test-dir cmake-build-debug --output-on-failure
 ```
 
-Historical standalone checkpoint (the root suite below is authoritative):
+Historical standalone checkpoint (retained for provenance; the root suite below
+is authoritative):
 
 ```text
 normal CMake/Ninja build:      PASS
