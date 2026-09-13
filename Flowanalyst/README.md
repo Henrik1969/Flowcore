@@ -19,7 +19,7 @@ Flowmini internals.
 
 ## Try it
 
-From the Flowcore repository:
+From the Lyraform repository:
 
 ```sh
 ./Lyraform/compiler/cmake-build-debug/flowmini \

@@ -1,6 +1,7 @@
 # Disclaimer
 
-Flowcore / Flowmini is an experimental language and runtime research project.
+Lyraform is an experimental language and runtime research project, previously
+developed under the names Flowcore and Flowmini.
 
 This repository contains prototypes, exploratory implementations, design notes,
 test harnesses, and evolving architecture experiments. Interfaces, syntax,
@@ -9,7 +10,7 @@ without notice.
 
 The project is not production-ready.
 
-Do not rely on Flowcore / Flowmini for safety-critical, security-critical,
+Do not rely on Lyraform for safety-critical, security-critical,
 financial, legal, medical, operational, or production workloads.
 
 The software is provided under the MIT License and is provided "as is", without
