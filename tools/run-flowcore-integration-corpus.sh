@@ -2,11 +2,11 @@
 set -eu
 
 root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
-flowmini=${FLOWMINI_BIN:-$root/Flowmini/flowmini_v25_symboltable_projection/cmake-build-debug/flowmini}
+flowmini=${FLOWMINI_BIN:-$root/Flowmini/flowmini_v29_reusable_native_chain/cmake-build-debug/flowmini}
 analyst=${FLOWANALYST_BIN:-$root/Flowanalyst/build/flowanalyst}
 parallel=${FLOWPARALLEL_BIN:-$root/Flowparallel/build/flowparallel}
 optimizer=${FLOWOPTIMIZE_BIN:-$root/Flowoptimize/build/flowoptimize}
-corpus=$root/Flowmini/flowmini_v25_symboltable_projection/examples/integration
+corpus=$root/Flowmini/flowmini_v29_reusable_native_chain/examples/integration
 test -x "$flowmini"; test -x "$analyst"; test -x "$parallel"; test -x "$optimizer"
 
 count=0

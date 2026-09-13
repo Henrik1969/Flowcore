@@ -22,7 +22,7 @@ active_cmake=(
     "$root/Flowoptimize/CMakeLists.txt"
     "$root/Flowlower/CMakeLists.txt"
     "$root/Flowkernel/CMakeLists.txt"
-    "$root/Flowmini/flowmini_v25_symboltable_projection/CMakeLists.txt"
+    "$root/Flowmini/flowmini_v29_reusable_native_chain/CMakeLists.txt"
 )
 
 echo "Frankencore architecture check"
@@ -41,7 +41,7 @@ semantic_dirs=(
     "$root/Flowbind/src"
     "$root/Flowoptimize/src"
     "$root/Flowlower/src"
-    "$root/Flowmini/flowmini_v25_symboltable_projection/src"
+    "$root/Flowmini/flowmini_v29_reusable_native_chain/src"
 )
 if rg -n '#include [<"](gtk|Qt|ncurses|wayland|X11|xcb)' "${semantic_dirs[@]}"; then
     debt=1

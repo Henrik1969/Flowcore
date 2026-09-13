@@ -4,8 +4,8 @@ project(flowcat_flowcore LANGUAGES NONE)
 include("${CMAKE_CURRENT_LIST_DIR}/../../cmake/FlowcoreProject.cmake")
 flowcore_project_tools()
 
-set(FLOWCORE_SOURCE "${CMAKE_CURRENT_LIST_DIR}/../../../Flowmini/flowmini_v25_symboltable_projection/examples/apps/flowcat/flowcat.flow" CACHE FILEPATH "Flow source file")
-set(FLOWCORE_POLICY "${CMAKE_CURRENT_LIST_DIR}/../../../Flowmini/flowmini_v25_symboltable_projection/examples/apps/flowcat/policy.conf" CACHE FILEPATH "Flowbind policy")
+set(FLOWCORE_SOURCE "${CMAKE_CURRENT_LIST_DIR}/../../../Flowmini/flowmini_v29_reusable_native_chain/examples/apps/flowcat/flowcat.flow" CACHE FILEPATH "Flow source file")
+set(FLOWCORE_POLICY "${CMAKE_CURRENT_LIST_DIR}/../../../Flowmini/flowmini_v29_reusable_native_chain/examples/apps/flowcat/policy.conf" CACHE FILEPATH "Flowbind policy")
 add_custom_target(flowcore_sources SOURCES "${FLOWCORE_SOURCE}" "${FLOWCORE_POLICY}")
 flowcore_pipeline(flowcat "${FLOWCORE_SOURCE}" "${FLOWCORE_POLICY}")
 

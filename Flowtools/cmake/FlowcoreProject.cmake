@@ -6,7 +6,7 @@ set(FLOWCORE_CMAKE_DIR "${CMAKE_CURRENT_LIST_DIR}" CACHE INTERNAL "Flowcore CMak
 set(FLOWCORE_ROOT "${CMAKE_CURRENT_LIST_DIR}/../.." CACHE PATH "Flowcore source root")
 # Preserve superbuild target expressions before initializing a standalone cache default.
 if(NOT DEFINED FLOWCORE_FLOWMINI)
-    set(FLOWCORE_FLOWMINI "${FLOWCORE_ROOT}/Flowmini/flowmini_v25_symboltable_projection/cmake-build-debug/flowmini" CACHE FILEPATH "FlowMini executable")
+    set(FLOWCORE_FLOWMINI "${FLOWCORE_ROOT}/Flowmini/flowmini_v29_reusable_native_chain/cmake-build-debug/flowmini" CACHE FILEPATH "FlowMini executable")
 endif()
 
 if(NOT DEFINED FLOWCORE_FLOWANALYST)

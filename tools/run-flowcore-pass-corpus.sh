@@ -2,13 +2,13 @@
 set -eu
 
 root=${FLOWCORE_ROOT:-$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)}
-flowmini=${FLOWMINI_BIN:-$root/Flowmini/flowmini_v25_symboltable_projection/cmake-build-debug/flowmini}
+flowmini=${FLOWMINI_BIN:-$root/Flowmini/flowmini_v29_reusable_native_chain/cmake-build-debug/flowmini}
 analyst=${FLOWANALYST_BIN:-$root/Flowanalyst/build/flowanalyst}
 parallel=${FLOWPARALLEL_BIN:-$root/Flowparallel/build/flowparallel}
 optimizer=${FLOWOPTIMIZE_BIN:-$root/Flowoptimize/build/flowoptimize}
 lowerer=${FLOWLOWER_BIN:-$root/Flowlower/build/flowlower}
 bind=${FLOWBIND_BIN:-$root/Flowbind/build/flowbind}
-pass_root=$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass
+pass_root=$root/Flowmini/flowmini_v29_reusable_native_chain/examples/pass
 tmpdir=$(mktemp -d)
 trap 'rm -rf "$tmpdir"' EXIT
 policy=$tmpdir/abi.policy

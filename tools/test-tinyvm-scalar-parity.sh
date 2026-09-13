@@ -20,7 +20,7 @@ for name in \
     profile_free_branch_compare profile_free_integer_loop profile_free_args_length
 do
     echo "parity fixture: $name"
-    source="$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass/$name.flow"
+    source="$root/Flowmini/flowmini_v29_reusable_native_chain/examples/pass/$name.flow"
     "$flowmini" --dump-frontend-bundle "$source" > "$tmpdir/$name.frontend.json"
     "$analyst" < "$tmpdir/$name.frontend.json" > "$tmpdir/$name.semantic.json"
     "$parallel" < "$tmpdir/$name.semantic.json" > "$tmpdir/$name.execution.json"

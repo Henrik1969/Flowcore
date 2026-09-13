@@ -3,9 +3,9 @@ set -eu
 
 root=$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)
 bin=${FLOWBIND_BIN:?FLOWBIND_BIN is required}
-flowmini=${FLOWMINI_BIN:-$root/Flowmini/flowmini_v25_symboltable_projection/cmake-build-debug/flowmini}
+flowmini=${FLOWMINI_BIN:-$root/Flowmini/flowmini_v29_reusable_native_chain/cmake-build-debug/flowmini}
 flowanalyst=${FLOWANALYST_BIN:-$root/Flowanalyst/build/flowanalyst}
-fixture=$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass/abi_libc_demo.flow
+fixture=$root/Flowmini/flowmini_v29_reusable_native_chain/examples/pass/abi_libc_demo.flow
 test -x "$flowmini"
 test -x "$flowanalyst"
 test -x "$bin"
@@ -50,7 +50,7 @@ set -e
 test "$wrong_signature_rc" -eq 2
 printf '%s\n' "$wrong_signature" | grep -q 'denied by capability policy'
 
-file_fixture=$root/Flowmini/flowmini_v25_symboltable_projection/examples/apps/flowcat/flowcat.flow
+file_fixture=$root/Flowmini/flowmini_v29_reusable_native_chain/examples/apps/flowcat/flowcat.flow
 file_semantic=$("$flowmini" --dump-frontend-bundle "$file_fixture" | "$flowanalyst")
 file_report=$(printf '%s\n' "$file_semantic" | "$bin" --policy "$policy")
 printf '%s\n' "$file_report" | jq -e '.status == "ready" and (.symbols | index("open")) != null and (.symbols | index("sendfile")) != null and (.symbols | index("close")) != null' >/dev/null

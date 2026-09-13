@@ -12,7 +12,7 @@ lower=${FLOWLOWER_BIN:?}
 tiny_lower=${FLOWTINYLOWER_BIN:?}
 tiny_validate=${FLOWTINYVALIDATE_BIN:?}
 tiny_run=${FLOWTINYRUN_BIN:?}
-source="$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass/fn_demo.flow"
+source="$root/Flowmini/flowmini_v29_reusable_native_chain/examples/pass/fn_demo.flow"
 tmpdir=$(mktemp -d)
 trap 'rm -rf "$tmpdir"' EXIT
 
@@ -41,7 +41,7 @@ do
     fi
 done
 
-classifier="$root/Flowmini/flowmini_v25_symboltable_projection/examples/bootstrap/shared_scalar_classifier.flow"
+classifier="$root/Flowmini/flowmini_v29_reusable_native_chain/examples/bootstrap/shared_scalar_classifier.flow"
 "$flowmini" --dump-frontend-bundle "$classifier" > "$tmpdir/classifier.frontend.json"
 "$analyst" --lowering-plan-version 2 < "$tmpdir/classifier.frontend.json" > "$tmpdir/classifier.semantic.json"
 "$parallel" < "$tmpdir/classifier.semantic.json" > "$tmpdir/classifier.execution.json"

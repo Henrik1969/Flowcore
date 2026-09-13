@@ -7,7 +7,7 @@ provisional until each milestone is activated.
 ## Current checkpoint
 
 ```text
-v26_language_chain (implementation base: v25_symboltable_projection)
+v29_reusable_native_chain (implementation base: flowmini_v29_reusable_native_chain)
 build: OK
 AST golden tests: 28 / 28
 Symbol projection tests: 14 / 14
@@ -48,18 +48,18 @@ This exit rule passed and was formally declared closed on 2026-08-16.
 ### Historical: v25_symboltable_projection
 
 Established the factual AST-to-SymbolTable projection and independent export
-boundary now used by the active v26 language-chain milestone.
+boundary now used by the historical v26 language-chain milestone.
 
-### Active: v26_language_chain
+### Historical: v26_language_chain
 
-Carry selected programs through semantic analysis, capability binding,
+Carried selected programs through semantic analysis, capability binding,
 optimization boundary, explicit target lowering, LLVM, and native execution.
-The implementation base remains `flowmini_v25_symboltable_projection` until a
-separate directory migration is justified.
+This milestone is now historical; the active implementation is v0.29 at
+`flowmini_v29_reusable_native_chain` on `main`.
 
-Advance to v0.26 only when the complete AST and lossless structural SymbolTable
-projection form a mature frontend border with stable cross-links, scope
-coverage, source locations, and unresolved declared type/contract facts.
+The v0.29 line retains the complete AST and lossless structural SymbolTable
+projection as a mature frontend border with stable cross-links, scope coverage,
+source locations, and unresolved declared type/contract facts.
 
 ### Provisional later label: v26_semantic_checker_split
 

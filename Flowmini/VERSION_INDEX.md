@@ -7,14 +7,14 @@ Earlier stages are historical snapshots. They are useful for understanding devel
 Current active version:
 
 ```text
-v27 — namespaced provider language-chain slice
+v29 — reusable native language chain
 ```
 
 ## Active version
 
 | Version | Directory | Main purpose |
 |---:|---|---|
-| v27 | `flowmini_v25_symboltable_projection` | Namespaced provider language chain from frontend export through semantic analysis, capability binding, LLVM, and native ELF |
+| v29 | `flowmini_v29_reusable_native_chain` | Reusable native language chain from frontend export through semantic analysis, capability binding, LLVM, and native ELF |
 
 ## Recent historical versions
 
@@ -55,10 +55,10 @@ Missing version numbers are historical gaps or discarded intermediate experiment
 Current active development should happen in:
 
 ```text
-Flowmini/flowmini_v25_symboltable_projection
+Flowmini/flowmini_v29_reusable_native_chain
 ```
 
-The directory name is retained for continuity while the active milestone is
-v26. A future layout migration will be a separate, explicit change.
+The v25-named directory is retained in the historical index for provenance;
+the active v0.29 implementation has an explicit current directory name.
 
 Older versions should not be mistaken for the active implementation.

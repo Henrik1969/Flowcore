@@ -3,7 +3,13 @@
 Current active implementation:
 
 ```text
-flowmini_v25_symboltable_projection
+flowmini_v29_reusable_native_chain
+```
+
+Git authority:
+
+```text
+main
 ```
 
 Current milestone:
@@ -30,7 +36,7 @@ recorded in the [maturation ledger](../docs/checkpoints/2026-08-21-autonomous-ma
 unchanged tools, and native graph/pager execution. Historical frontend milestones
 below describe how the current implementation was reached.
 
-The active v0.26 line inherits the closed, observable, regression-guarded v0.24 expression
+The active v0.29 line inherits the closed, observable, regression-guarded v0.24 expression
 and type-reference graph plus arena-owned declaration/statement/block
 structure. C5 is now
 complete: every statement kind is selected by its typed payload, conditional
@@ -61,7 +67,7 @@ than receiving unnecessary global IDs.
 ## Run the current build
 
 ```bash
-cd Flowmini/flowmini_v25_symboltable_projection
+cd Flowmini/flowmini_v29_reusable_native_chain
 
 cmake -S . -B cmake-build-debug
 cmake --build cmake-build-debug -j20
@@ -69,14 +75,14 @@ cmake --build cmake-build-debug -j20
 
 Adjust `-j20` to match your machine.
 
-This directory is the canonical v26 build and test scope. Repository-root build
+This directory is the canonical v0.29 build and test scope. Repository-root build
 trees and their legacy superbuild test registrations are noncanonical for this
 branch.
 
 ## Run the current tests
 
 ```bash
-cd Flowmini/flowmini_v25_symboltable_projection
+cd Flowmini/flowmini_v29_reusable_native_chain
 
 cmake --build cmake-build-debug --target flowmini_ast_golden_tests
 cmake --build cmake-build-debug --target flowmini_suite
@@ -102,7 +108,7 @@ AST states what the source means.
 
 ## Architecture checkpoint for future lowering
 
-The closed v0.24 AST/export boundary is the inherited base for the v0.26
+The closed v0.24 AST/export boundary is the inherited base for the v0.29
 SymbolTable projection line and future Flowcore transformation pipeline.
 
 Current work should preserve semantic meaning and source provenance without
@@ -122,7 +128,7 @@ Flowmini/flowmini_v24_explicit_ast/docs/v0.24-future-transformation-boundary.md
 
 ## Current important language rule
 
-Active v0.26 supports the inherited root form and the structural named-target
+Active v0.29 supports the inherited root form and the structural named-target
 form. Flowanalyst checks target entrypoint completeness; artifact selection and
 target-specific lowering remain downstream build work:
 

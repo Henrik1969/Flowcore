@@ -63,7 +63,7 @@ gate counts to match a later version.
 Document prerequisite setup and use commands that can be copied:
 
 ```bash
-cd Flowmini/flowmini_v25_symboltable_projection
+cd Flowmini/flowmini_v29_reusable_native_chain
 cmake --build cmake-build-debug --target flowmini_ast_golden_tests
 cmake --build cmake-build-debug --target flowmini_symbol_projection_tests
 cmake --build cmake-build-debug --target flowmini_frontend_bundle_tests

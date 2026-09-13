@@ -7,7 +7,7 @@ flowanalyst=${FLOWANALYST_BIN:?FLOWANALYST_BIN is required}
 flowbind=${FLOWBIND_BIN:?FLOWBIND_BIN is required}
 testabi_layout=${FLOWTESTABI_LAYOUT_BIN:?FLOWTESTABI_LAYOUT_BIN is required}
 
-abi_dir="$root/Flowmini/flowmini_v25_symboltable_projection/std/abi"
+abi_dir="$root/Flowmini/flowmini_v29_reusable_native_chain/std/abi"
 policy=$(mktemp)
 tmpdir=$(mktemp -d)
 trap 'rm -f "$policy"; rm -rf "$tmpdir"' EXIT
@@ -87,7 +87,7 @@ jq -e '
     [.types[0].fields[].offset] == [0, 4]
 ' "$tmpdir/testabi.layout.json" >/dev/null
 
-libc_fixture="$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass/abi_libc_demo.flow"
+libc_fixture="$root/Flowmini/flowmini_v29_reusable_native_chain/examples/pass/abi_libc_demo.flow"
 "$flowmini" --dump-frontend-bundle "$libc_fixture" |
     "$flowanalyst" |
     "$flowbind" --policy "$policy" > "$tmpdir/libc.binding.json"
@@ -97,7 +97,7 @@ jq -e '
     all(.capabilities[]; .status == "authorized" and .library == "libc.so.6")
 ' "$tmpdir/libc.binding.json" >/dev/null
 
-flowcat_fixture="$root/Flowmini/flowmini_v25_symboltable_projection/examples/apps/flowcat/flowcat.flow"
+flowcat_fixture="$root/Flowmini/flowmini_v29_reusable_native_chain/examples/apps/flowcat/flowcat.flow"
 "$flowmini" --dump-frontend-bundle "$flowcat_fixture" |
     "$flowanalyst" |
     "$flowbind" --policy "$policy" > "$tmpdir/flowcat.binding.json"
@@ -106,7 +106,7 @@ jq -e '
     ([.capabilities[].symbol] | sort) == ["close", "open", "sendfile"]
 ' "$tmpdir/flowcat.binding.json" >/dev/null
 
-memory_fixture="$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass/abi_memory_demo.flow"
+memory_fixture="$root/Flowmini/flowmini_v29_reusable_native_chain/examples/pass/abi_memory_demo.flow"
 "$flowmini" --dump-frontend-bundle "$memory_fixture" |
     "$flowanalyst" |
     "$flowbind" --policy "$policy" > "$tmpdir/memory.binding.json"
@@ -116,7 +116,7 @@ jq -e '
     all(.capabilities[]; .library == "libc.so.6" and .status == "authorized")
 ' "$tmpdir/memory.binding.json" >/dev/null
 
-kernel_fixture="$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass/abi_kernel_capability_probe.flow"
+kernel_fixture="$root/Flowmini/flowmini_v29_reusable_native_chain/examples/pass/abi_kernel_capability_probe.flow"
 "$flowmini" --dump-frontend-bundle "$kernel_fixture" |
     "$flowanalyst" |
     "$flowbind" --policy "$policy" > "$tmpdir/kernel.binding.json"
@@ -130,7 +130,7 @@ jq -e '
     ]
 ' "$tmpdir/kernel.binding.json" >/dev/null
 
-testabi_fixture="$root/Flowmini/flowmini_v25_symboltable_projection/examples/pass/abi_struct_demo.flow"
+testabi_fixture="$root/Flowmini/flowmini_v29_reusable_native_chain/examples/pass/abi_struct_demo.flow"
 "$flowmini" --dump-frontend-bundle "$testabi_fixture" | "$flowanalyst" > "$tmpdir/testabi.semantic.json"
 set +e
 "$flowbind" --policy "$policy" --abi-manifest "$tmpdir/testabi.layout.json" < "$tmpdir/testabi.semantic.json" > "$tmpdir/testabi.binding.json"
