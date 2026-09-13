@@ -313,3 +313,175 @@ This document contains:
 **Next: Await Henrik approval for Phase 5-9 execution**
 
 ---
+
+## Continuation Addendum — Flowmini-only consolidation
+
+This addendum records the continuation after the report above became the
+intentional unique documentation commit on `main`. Commit `75940bf` was
+preserved exactly and joined to the v29-derived line with an ordinary merge;
+it was not cherry-picked, reset, amended, or discarded.
+
+### Remote tips at continuation start
+
+```text
+origin/main                         75940bf7d14220e61c5279e650d98485b91a94be
+origin/v23-token-tree-parser-bridge de45340cdc1e090666bc0f46330af066a7d11081
+origin/v24-explicit-ast             d98eb13dede9bd6b4cf9e99b8de2edfd8ba6a86d
+origin/v25-symboltable-projection   1a4b027459795fd3c9a35a944e71732084b67e40
+origin/v29-language-maturation      598e04ea55e1bb0aa62371fb11c113c565c65ec4
+origin/master                        95d1d592714c301fd954901a1bf208a6622f5d63
+```
+
+The original FlowLFS/Flowselection checkout was not used. The isolated
+worktree was `/tmp/flowcore-flowmini-consolidation` on temporary branch
+`codex/flowmini-main-consolidation`.
+
+### Actual ancestry evidence
+
+| Pair / branch | Merge base with v29 | branch-only commits | v29-only commits | Classification |
+|---|---|---:|---:|---|
+| `origin/main` | `21e7f85f83682e3ee150ad36bb7d6f5f08f2f211` | 1 | 228 | diverged by intentional report commit; reconciled by merge |
+| `origin/v23-token-tree-parser-bridge` | `21e7f85f83682e3ee150ad36bb7d6f5f08f2f211` | 3 | 228 | historical Flowmini bridge line |
+| `origin/v24-explicit-ast` | `d98eb13dede9bd6b4cf9e99b8de2edfd8ba6a86d` | 0 | 148 | fully absorbed; strict ancestor of v29 |
+| `origin/v25-symboltable-projection` | `7182fbf2fb7a4ad3f4ca251f1e06ce6abd8ecdbd` | 1 | 18 | one non-Flowmini divergence; intentionally excluded |
+| `origin/master` | none | 2 | 238 | unrelated historical seed; untouched |
+
+### v23 disposition
+
+The three commits unique to v23 are:
+
+```text
+2348f709934e8f62081852590fec930b6e92cf23  Start Flowmini v23 TokenTree parser bridge
+cb9c01528b3b0d0a169cd0647bb19c48e7189e5f  Add Flowmini v23 TokenTree bridge dump modes
+de45340cdc1e090666bc0f46330af066a7d11081  Add Flowmini v23 TokenTree bridge dump modes
+```
+
+The first commit contains the historical bridge implementation, tests, and
+fixtures. The second and third refine the observable bridge dump behavior and
+metadata; the third also adds
+`Flowmini/Flowcore_type_system_foundation.md`.
+
+The 410-line foundation note defines primitive atoms versus contract types and
+domain types, and records representation, storage, ownership, validity,
+lifetime, mutation, encoding, operations, ABI, lowering, graph-contract, and
+algebraic-law concerns. The current v0.24 type policy already carries these
+principles through lossless type references, explicit ABI clauses, structural
+origins, semantic reports, and later lowering artifacts. It deliberately
+narrowed the v23 illustrative primitive-width list: `int256`, `int512`,
+`uint256`, `uint512`, `float256`, and `float512` are not current canonical
+identities. The current policy and its implementation gates take precedence.
+
+The v23 bridge implementation is superseded by the v0.24 explicit AST and
+v0.25 structural projection line. No old implementation or test fixture was
+resurrected. A provenance-aware reconciliation section was added to
+`docs/flowmini/v0.24-type-policy.md` in commit `fdafc55`.
+
+### v24 disposition
+
+`git merge-base --is-ancestor origin/v24-explicit-ast
+origin/v29-language-maturation` succeeded. There are zero commits unique to
+v24 relative to v29. v24 is fully absorbed and requires no migration.
+
+### v25 disposition
+
+The sole unique commit is:
+
+```text
+1a4b027459795fd3c9a35a944e71732084b67e40 Establish FlowLFS sane baseline
+```
+
+Its 24 changed paths are under `subprojects/FlowLFS/`, except for
+`subprojects/README.md`, whose only changes add the `TinyVM` and `FlowLFS`
+project index entries. No Flowmini language, compiler, AST, or language
+architecture material is unique to v25. The commit is therefore excluded from
+the language line. FlowLFS remains preserved on its independent experimental
+branch and was not merged, moved, or modified.
+
+### Provenance merge
+
+```text
+old main SHA:       75940bf7d14220e61c5279e650d98485b91a94be
+v29 SHA:            598e04ea55e1bb0aa62371fb11c113c565c65ec4
+merge SHA:          9d00dd17de78d71909f3dc0f7a06115d7fd68efa
+conflicts:          NO
+origin/main -> HEAD: YES
+v29 -> HEAD:          YES
+```
+
+The merge commit message is `Merge main consolidation evidence into Flowmini
+promotion line`. It preserves `75940bf` as an intact first-parent-side
+ancestor and keeps v29 as the language-development parent.
+
+### Safety references
+
+```text
+safety/pre-consolidation-main  75940bf7d14220e61c5279e650d98485b91a94be
+safety/pre-consolidation-v23   de45340cdc1e090666bc0f46330af066a7d11081
+safety/pre-consolidation-v24   d98eb13dede9bd6b4cf9e99b8de2edfd8ba6a86d
+safety/pre-consolidation-v25   1a4b027459795fd3c9a35a944e71732084b67e40
+safety/pre-consolidation-v29   598e04ea55e1bb0aa62371fb11c113c565c65ec4
+safety/consolidation-merge     fdafc55a5fa9fbb76c834ccbd6142eba5bfc4981
+```
+
+These are local recoverable refs and were not pushed.
+
+### Verification evidence
+
+On the v29-derived consolidation line, after documentation reconciliation:
+
+```text
+cmake -S . -B build -G Ninja                                  PASS
+cmake --build build -j4                                       PASS (146/146)
+ctest --test-dir build --output-on-failure                     PASS (81/81)
+```
+
+The dedicated Flowmini build and gates also passed:
+
+```text
+cmake -S Flowmini/flowmini_v25_symboltable_projection \
+  -B /tmp/flowcore-flowmini-subbuild -G Ninja                  PASS
+cmake --build /tmp/flowcore-flowmini-subbuild -j4              PASS (34/34)
+flowmini_ast_golden_tests                                      PASS (28)
+flowmini_symbol_projection_tests                               PASS (14)
+flowmini_frontend_bundle_tests                                 PASS (8 golden, 1 isolated, 19 negative)
+run-flowmini-test-suite.sh --native-pass-boundary --run-support PASS (91 native pass programs; 53/53 checks)
+```
+
+The independent sanitizer gate was run from a clean build:
+
+```text
+cmake -S . -B /tmp/flowcore-flowmini-asan -G Ninja \
+  -DCMAKE_C_FLAGS='-fsanitize=address,undefined -fno-omit-frame-pointer' \
+  -DCMAKE_CXX_FLAGS='-fsanitize=address,undefined -fno-omit-frame-pointer' \
+  -DCMAKE_EXE_LINKER_FLAGS='-fsanitize=address,undefined' \
+  -DCMAKE_SHARED_LINKER_FLAGS='-fsanitize=address,undefined'             PASS
+cmake --build /tmp/flowcore-flowmini-asan -j4                               PASS (146/146)
+ASAN_OPTIONS=detect_leaks=0 LSAN_OPTIONS=detect_leaks=0 \
+  ctest --test-dir /tmp/flowcore-flowmini-asan --output-on-failure          PASS (81/81)
+```
+
+Leak detection was disabled as documented by the project because the external
+provider test environment owns a compatibility shared-library path. No
+sanitizer test failed.
+
+The root superbuild's four Flowmini custom targets use root-relative paths for
+subproject-local runner scripts and fail immediately with `No such file or
+directory` when invoked from the root build. The same four targets passed from
+the clean dedicated Flowmini subproject build above. This pre-existing CMake
+path defect was not changed because it is outside this consolidation mission;
+root CTest and the direct canonical Flowmini gates are the recorded evidence.
+
+The required scope statement is explicit:
+
+```text
+FlowLFS, Flowselection, and other experimental/meta-project work were
+outside the scope of this consolidation and were not modified.
+```
+
+### Final promotion and retirement status
+
+The following fields are completed in the post-promotion revision of this
+report: final local `main` SHA, final `origin/main` SHA, normal push result,
+and remote branch deletion results. The report revision containing this
+addendum is intentionally separate from `75940bf`; that earlier commit remains
+historical intermediate evidence.
